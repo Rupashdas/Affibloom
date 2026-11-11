@@ -7,7 +7,8 @@
     "env:stop": "wp-env stop",
     "wp": "wp-env run cli wp",
     "test:e2e": "playwright test",
-    "reset-local": "bash tools/reset-local.sh"
+    "reset-local": "bash tools/reset-local.sh",
+    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/affibloom vendor/bin/phpunit -c phpunit-integration.xml.dist"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",

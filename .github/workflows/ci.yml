@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.1', tools: composer }
+      - run: composer install --no-progress
+      - run: composer lint
+      - run: composer analyse
+
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ '8.1', '8.3', '8.4' ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '${{ matrix.php }}', tools: composer, coverage: none }
+      - run: composer install --no-progress
+      - run: composer test:unit
+
+  integration-and-e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # wp-env names the plugin folder after the checkout folder; the repository is
+        # "Affibloom", but WordPress and the tests expect wp-content/plugins/affibloom.
+        working-directory: affibloom
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: affibloom }
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.1', tools: composer }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm, cache-dependency-path: affibloom/package-lock.json }
+      - run: composer install --no-progress
+      - run: npm ci
+      - run: npx wp-env start
+      - run: npm run test:integration
+      - run: npx playwright install --with-deps chromium
+      # Every E2E test so far is @local, so CI may find none; that is not a failure.
+      - run: npx playwright test --grep-invert @local --pass-with-no-tests
+        env:
+          WP_BASE_URL: http://localhost:8888 # Task 2 (adapted) defaults Playwright to the Local site.
+          WP_USER: admin
+          WP_PASSWORD: password
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-report, path: affibloom/playwright-report }
