@@ -1,0 +1,3 @@
+# Keep LF everywhere, as .editorconfig and WPCS expect; Windows checkouts would otherwise
+# get CRLF, which breaks the bash scripts in tools/.
+* text=auto eol=lf
