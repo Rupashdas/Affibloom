@@ -1,0 +1,13 @@
+{
+  "name": "affibloom",
+  "private": true,
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "wp": "wp-env run cli wp"
+  },
+  "devDependencies": {
+    "@wordpress/env": "^10.0.0"
+  }
+}

@@ -1,0 +1,9 @@
+/vendor/
+/node_modules/
+/build/
+/.local/
+/test-results/
+/playwright-report/
+/tests/E2E/.auth/
+.wp-env.override.json
+.phpunit.result.cache

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<ruleset name="Affibloom">
+	<description>WordPress Coding Standards for Affibloom.</description>
+
+	<file>affibloom.php</file>
+	<file>src</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<config name="testVersion" value="8.1-"/>
+	<config name="minimum_wp_version" value="6.5"/>
+
+	<rule ref="WordPress">
+		<!-- PSR-4 file names (Plugin.php), not class-plugin.php. -->
+		<exclude name="WordPress.Files.FileName"/>
+		<!-- @param list<string> and similar PHPStan types are more exact than the PHP type "array". -->
+		<exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
+	</rule>
+
+	<!-- Domain and Application exceptions carry codes, never shown to users; the Interface layer escapes what it prints. -->
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>src/Domain/*</exclude-pattern>
+		<exclude-pattern>src/Application/*</exclude-pattern>
+	</rule>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="affibloom"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="affibloom"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>
