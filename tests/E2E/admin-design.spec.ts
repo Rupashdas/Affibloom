@@ -125,6 +125,14 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	const rail = page.locator( '.affibloom-split__rail' );
 	expect( Math.round( ( await rail.boundingBox() )!.width ) ).toBe( 380 );
 	await expect( page.locator( '.affibloom-split__main .affibloom-split__toolbar .affibloom-segment' ) ).toBeVisible();
+	// Lasso's two rail tabs, Layout & spacing open first; the density chips sit at its top.
+	await expect( rail.getByRole( 'tab' ) ).toHaveText( [ 'Layout & spacing', 'Colors & labels' ] );
+	await expect( rail.getByRole( 'tab', { name: 'Layout & spacing' } ) ).toHaveAttribute( 'aria-selected', 'true' );
+	await expect( rail.locator( '.affibloom-chip-option' ) ).toHaveText( [ 'Compact', 'Balanced', 'Spacious' ] );
+	const balanced = rail.locator( '.affibloom-chip-option' ).filter( { hasText: 'Balanced' } );
+	expect( await css( balanced, 'border-top-color' ) ).toBe( BRAND_600 ); // the stored preset, in our brand colour
+
+	await rail.getByRole( 'tab', { name: 'Colors & labels' } ).click();
 	await expect( rail.getByRole( 'tab', { name: 'Colors & labels' } ) ).toHaveAttribute( 'aria-selected', 'true' );
 
 	// Lasso 370's field order (docs/features/F16/requirements.md), label left and control right.

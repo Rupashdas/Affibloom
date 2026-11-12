@@ -9,10 +9,12 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Display;
 
+use Affibloom\Domain\Display\Density;
 use Affibloom\Domain\Display\DisplayConfig;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplaySettingsRepository;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Display\Elements;
 use Affibloom\Domain\Display\Palette;
 use Affibloom\Domain\Display\Theme;
 
@@ -52,7 +54,8 @@ final class DisplaySettingsService {
 	}
 
 	/**
-	 * Saves one display type's theme, colours and labels. An invalid value keeps the one it had.
+	 * Saves one display type's theme, colours and labels, elements and density. An invalid value keeps the one
+	 * it had.
 	 *
 	 * @param DisplayType          $type  The display type being edited.
 	 * @param array<string, mixed> $input Raw, unslashed form values.
@@ -98,9 +101,63 @@ final class DisplaySettingsService {
 			$palette = $palette->with( $key, $text );
 		}
 
-		$this->repository->save( $settings->with_config( $type, $config->with_palette( $palette ) ) );
+		$config = $config->with_palette( $palette );
+
+		// An unticked checkbox sends nothing, so the form marks that its element toggles were on it.
+		if ( ! empty( $input['elements_present'] ) ) {
+			$config = $config->with_elements( $this->elements_from( $input['elements'] ?? array() ) );
+		}
+
+		if ( isset( $input['density'] ) && is_array( $input['density'] ) ) {
+			$config = $config->with_density( $this->density_from( $config->density(), $input['density'] ) );
+		}
+
+		$this->repository->save( $settings->with_config( $type, $config ) );
 
 		return $refused;
+	}
+
+	/**
+	 * The element flags from the ticked checkboxes: a ticked one is shown, everything else is hidden.
+	 *
+	 * @param mixed $raw The submitted `elements` array.
+	 */
+	private function elements_from( mixed $raw ): Elements {
+		$ticked   = is_array( $raw ) ? $raw : array();
+		$elements = Elements::defaults();
+		foreach ( Elements::KEYS as $key ) {
+			$elements = $elements->with( $key, ! empty( $ticked[ $key ] ) );
+		}
+
+		return $elements;
+	}
+
+	/**
+	 * The density from the preset chips and the steppers, as Lasso treats them: start from the chosen preset (or
+	 * from the preset the editor's edits started from, or else from the current values), and apply only the
+	 * values that differ from it. Each of those is an edit, so it is clamped and the preset becomes custom;
+	 * untouched values stay as they are, so a preset value above a stepper's range (spacious image height 320)
+	 * survives a save.
+	 *
+	 * @param Density              $current The stored density.
+	 * @param array<string, mixed> $raw     The submitted `density` array: `preset` (a checked chip), `base` (the
+	 *                                      preset a stepper edit started from) and `values`.
+	 */
+	private function density_from( Density $current, array $raw ): Density {
+		$name = isset( $raw['preset'] ) && is_string( $raw['preset'] ) ? $raw['preset'] : '';
+		if ( ! isset( Density::PRESETS[ $name ] ) ) {
+			$name = isset( $raw['base'] ) && is_string( $raw['base'] ) ? $raw['base'] : '';
+		}
+		$density = isset( Density::PRESETS[ $name ] ) ? Density::preset( $name ) : $current;
+		$values  = isset( $raw['values'] ) && is_array( $raw['values'] ) ? $raw['values'] : array();
+
+		foreach ( $density->values() as $key => $value ) {
+			if ( isset( $values[ $key ] ) && is_numeric( $values[ $key ] ) && (int) $values[ $key ] !== $value ) {
+				$density = $density->with_value( $key, (int) $values[ $key ] );
+			}
+		}
+
+		return $density;
 	}
 
 	/**

@@ -434,6 +434,125 @@
 	color: var(--affibloom-ink-900);
 }
 
+/* Rail panels: both show without the script; with it, only the open tab's panel */
+.affibloom-split__rail.has-tabs .affibloom-rail-panel:not(.is-active) { display: none; }
+.affibloom-rail-hint { margin: 0 0 10px; color: var(--affibloom-ink-600); font-size: 12px; line-height: 16px; }
+
+/* Density: preset chips with a bar glyph, then the hint for the current preset */
+.affibloom-density { margin: 0 0 14px; padding: 0; border: 0; }
+.affibloom-density__label { margin-bottom: 4px; padding: 0; color: var(--affibloom-ink-900); font-weight: 600; }
+.affibloom-density__hint { margin: 8px 0 0; }
+.affibloom-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.affibloom-chip-option { position: relative; display: block; cursor: pointer; }
+.affibloom-admin .affibloom-chip-option input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+.affibloom-chip-option__name,
+.affibloom-chip-option__bars { pointer-events: none; }
+.affibloom-chip-option {
+	padding: 10px 8px 8px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	text-align: center;
+	transition: border-color var(--affibloom-ease), background var(--affibloom-ease);
+}
+.affibloom-chip-option:has(input:checked) { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); }
+.affibloom-chip-option:has(input:focus-visible) { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+.affibloom-chip-option__name { display: block; margin-top: 6px; color: var(--affibloom-ink-900); font-size: 12px; font-weight: 600; }
+.affibloom-chip-option__bars { display: flex; flex-direction: column; align-items: center; }
+.affibloom-chip-option__bars span { display: block; width: 28px; height: 3px; border-radius: 2px; background: var(--affibloom-ink-400); }
+.affibloom-chip-option__bars--compact span + span { margin-top: 2px; }
+.affibloom-chip-option__bars--balanced span + span { margin-top: 4px; }
+.affibloom-chip-option__bars--spacious span + span { margin-top: 6px; }
+.affibloom-chip-option:has(input:checked) .affibloom-chip-option__bars span { background: var(--affibloom-brand-600); }
+
+/* Accordions: the title on the left, a summary on the right, as Lasso's rail has them */
+.affibloom-accordion { border-top: 1px solid var(--affibloom-line); }
+.affibloom-accordion__toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 0;
+	color: var(--affibloom-ink-900);
+	font-weight: 600;
+	list-style: none;
+	cursor: pointer;
+}
+.affibloom-accordion__toggle::-webkit-details-marker { display: none; }
+.affibloom-accordion__toggle::after {
+	content: "";
+	width: 7px;
+	height: 7px;
+	margin-left: 4px;
+	border-right: 1.6px solid var(--affibloom-ink-600);
+	border-bottom: 1.6px solid var(--affibloom-ink-600);
+	transform: rotate(45deg) translateY(-2px);
+	transition: transform var(--affibloom-ease);
+}
+.affibloom-accordion[open] > .affibloom-accordion__toggle::after { transform: rotate(-135deg) translateY(-2px); }
+.affibloom-accordion__summary { margin-left: auto; color: var(--affibloom-ink-600); font-weight: 400; }
+.affibloom-accordion__body { padding-bottom: 12px; }
+
+/* An element row: the switch on the left and its name on the right, as in Lasso's Elements panel */
+.affibloom-toggle-row { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+.affibloom-toggle-row__label { color: var(--affibloom-ink-900); }
+
+/* Steppers and line clamps */
+.affibloom-stepper-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-height: 34px;
+	margin: 0 0 6px;
+	padding: 0;
+	border: 0;
+}
+.affibloom-stepper-row__label { float: left; padding: 0; color: var(--affibloom-ink-900); }
+.affibloom-stepper,
+.affibloom-clamp {
+	display: inline-flex;
+	align-items: center;
+	overflow: hidden;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+}
+.affibloom-stepper__button {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--affibloom-ink-700);
+	font-size: 16px;
+	line-height: 30px;
+	cursor: pointer;
+}
+.affibloom-stepper__button:hover { background: var(--affibloom-subtle); color: var(--affibloom-brand-600); }
+.affibloom-stepper__value { min-width: 34px; color: var(--affibloom-ink-900); font-variant-numeric: tabular-nums; font-weight: 600; text-align: center; }
+.affibloom-clamp__option { position: relative; display: block; }
+.affibloom-admin .affibloom-clamp__option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.affibloom-clamp__option span {
+	display: block;
+	min-width: 32px;
+	padding: 0 8px;
+	color: var(--affibloom-ink-700);
+	line-height: 30px;
+	text-align: center;
+	pointer-events: none;
+}
+.affibloom-clamp__option + .affibloom-clamp__option span { border-left: 1px solid var(--affibloom-control-line); }
+.affibloom-clamp__option:has(input:checked) span { background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); font-weight: 600; }
+.affibloom-clamp__option:has(input:focus-visible) { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
+
 /* A rail row: the label on the left, its control on the right, as Lasso has them */
 .affibloom-row {
 	display: flex;

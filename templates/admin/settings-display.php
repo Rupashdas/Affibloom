@@ -6,11 +6,11 @@
  * toolbar on the left and the settings rail on the right, holding the theme row, the section tabs and the
  * label-left / control-right rows. Only the colours and the typography are Affibloom's.
  *
- * This task fills the Colors & labels panel; Tasks 10B, 10C and 10E add the Layout & spacing panel and the
+ * The rail has Lasso's two tabs, Layout & spacing first. Task 10C adds the Layout accordion, Task 10E the
  * site-wide behaviour, and Task 10D the preview itself.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, action: string, notice: string} $view
+ * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, action: string, notice: string, panel: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +18,11 @@ defined( 'ABSPATH' ) || exit;
 use Affibloom\Domain\Display\Theme;
 
 $config      = $view['config'];
+$panel       = $view['panel'];
+$panels      = array(
+	'layout' => __( 'Layout & spacing', 'affibloom' ),
+	'colors' => __( 'Colors & labels', 'affibloom' ),
+);
 $palette     = $config->palette();
 $type_key    = $view['type']->key();
 $type_labels = array(
@@ -67,7 +72,7 @@ $fields = array(
 								<nav class="affibloom-segment" aria-label="<?php esc_attr_e( 'Display type', 'affibloom' ); ?>">
 									<?php foreach ( $view['types'] as $display_type ) : ?>
 										<a class="affibloom-segment__item<?php echo $display_type->key() === $type_key ? ' is-active' : ''; ?>"
-											href="<?php echo esc_url( admin_url( 'admin.php?page=affibloom-settings&tab=display&type=' . $display_type->key() ) ); ?>"
+											href="<?php echo esc_url( admin_url( 'admin.php?page=affibloom-settings&tab=display&type=' . $display_type->key() . '&panel=' . $panel ) ); ?>"
 											<?php echo $display_type->key() === $type_key ? 'aria-current="page"' : ''; ?>>
 											<?php echo esc_html( $type_labels[ $display_type->key() ] ); ?>
 										</a>
@@ -111,15 +116,28 @@ $fields = array(
 									</select>
 								</div>
 
-								<div class="affibloom-rail-tabs" role="tablist">
-									<button type="button" class="affibloom-rail-tabs__tab is-active" role="tab" aria-selected="true" data-tab-panel="colors">
-										<?php esc_html_e( 'Colors & labels', 'affibloom' ); ?>
-									</button>
+								<input type="hidden" name="panel" value="<?php echo esc_attr( $panel ); ?>" data-rail-panel-field>
+								<div class="affibloom-rail-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Display settings', 'affibloom' ); ?>">
+									<?php foreach ( $panels as $panel_key => $panel_label ) : ?>
+										<button type="button" class="affibloom-rail-tabs__tab<?php echo $panel === $panel_key ? ' is-active' : ''; ?>" role="tab"
+											id="affibloom-tab-<?php echo esc_attr( $panel_key ); ?>" aria-controls="affibloom-panel-<?php echo esc_attr( $panel_key ); ?>"
+											aria-selected="<?php echo $panel === $panel_key ? 'true' : 'false'; ?>"
+											<?php echo $panel === $panel_key ? '' : 'tabindex="-1"'; ?> data-rail-tab="<?php echo esc_attr( $panel_key ); ?>">
+											<?php echo esc_html( $panel_label ); ?>
+										</button>
+									<?php endforeach; ?>
 								</div>
 							</div>
 
 							<div class="affibloom-split__rail-scroll">
-								<div class="affibloom-rail-panel is-active" role="tabpanel">
+								<div class="affibloom-rail-panel<?php echo 'layout' === $panel ? ' is-active' : ''; ?>" role="tabpanel"
+									id="affibloom-panel-layout" aria-labelledby="affibloom-tab-layout" data-rail-panel="layout">
+									<?php $this->render( 'admin/partials/display-layout-panel', array( 'config' => $config ) ); ?>
+								</div>
+
+								<div class="affibloom-rail-panel<?php echo 'colors' === $panel ? ' is-active' : ''; ?>" role="tabpanel"
+									id="affibloom-panel-colors" aria-labelledby="affibloom-tab-colors" data-rail-panel="colors">
+									<p class="affibloom-rail-hint"><?php esc_html_e( 'Colors and button labels apply to the selected display type (Single, Grid, or List).', 'affibloom' ); ?></p>
 									<?php
 									foreach ( $fields as [ $key, $field_type, $label, $help ] ) :
 										$field_id = 'affibloom-display-' . $key;

@@ -56,6 +56,7 @@ final class DisplayController implements Module {
 					'page'             => SettingsScreen::SLUG,
 					'tab'              => 'display',
 					'type'             => $type->key(),
+					'panel'            => isset( $_POST['panel'] ) && 'colors' === $_POST['panel'] ? 'colors' : 'layout',
 					'affibloom_notice' => $refused ? 'partly-saved' : 'saved',
 				),
 				admin_url( 'admin.php' )

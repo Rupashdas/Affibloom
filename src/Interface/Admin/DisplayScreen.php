@@ -40,6 +40,9 @@ final class DisplayScreen {
 		$raw  = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( $_GET['type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to display only.
 		$type = DisplayType::from( $raw );
 
+		// The rail tab to open: Lasso opens Layout & spacing; after a save, the tab the editor was on.
+		$panel = isset( $_GET['panel'] ) && 'colors' === $_GET['panel'] ? 'colors' : 'layout'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to display only.
+
 		$this->template->render(
 			'admin/settings-display',
 			array(
@@ -50,6 +53,7 @@ final class DisplayScreen {
 				'config' => $this->display->config( $type ),
 				'action' => DisplayController::ACTION,
 				'notice' => $this->notice->message(),
+				'panel'  => $panel,
 			)
 		);
 	}

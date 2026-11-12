@@ -72,7 +72,7 @@ final class DisplaySettings {
 	/**
 	 * Every configuration, for storage.
 	 *
-	 * @return array<string, array{theme: string, palette: array<string, string>}>
+	 * @return array<string, array{theme: string, palette: array<string, string>, elements: array<string, bool>, density: array{preset: string, values: array<string, int>}}>
 	 */
 	public function to_array(): array {
 		$stored = array();

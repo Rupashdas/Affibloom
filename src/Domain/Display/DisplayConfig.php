@@ -1,6 +1,6 @@
 <?php
 /**
- * How one display type looks: its theme and its colours and labels.
+ * How one display type looks: theme, colours and labels, which elements it shows, and its density.
  *
  * @package Affibloom
  */
@@ -12,27 +12,31 @@ namespace Affibloom\Domain\Display;
 /**
  * How one display type looks.
  *
- * Tasks 10B and 10C add the element visibility, the density and the layout; each arrives with the screen that
- * edits it, so nothing is stored before something reads it.
+ * Task 10C adds the layout; it arrives with the controls that edit it, so nothing is stored before something
+ * reads it.
  */
 final class DisplayConfig {
 
 	/**
 	 * Use defaults() or from_array().
 	 *
-	 * @param Theme   $theme   The box theme.
-	 * @param Palette $palette The colours and labels.
+	 * @param Theme    $theme    The box theme.
+	 * @param Palette  $palette  The colours and labels.
+	 * @param Elements $elements Which parts of the box are shown.
+	 * @param Density  $density  Spacing, type sizes and image height.
 	 */
 	private function __construct(
 		private readonly Theme $theme,
-		private readonly Palette $palette
+		private readonly Palette $palette,
+		private readonly Elements $elements,
+		private readonly Density $density
 	) {}
 
 	/**
 	 * A configuration with Lasso's defaults.
 	 */
 	public static function defaults(): self {
-		return new self( Theme::fallback(), Palette::defaults() );
+		return new self( Theme::fallback(), Palette::defaults(), Elements::defaults(), Density::preset( 'balanced' ) );
 	}
 
 	/**
@@ -41,10 +45,12 @@ final class DisplayConfig {
 	 * @param array<string, mixed> $stored Stored configuration.
 	 */
 	public static function from_array( array $stored ): self {
-		$theme   = isset( $stored['theme'] ) && is_string( $stored['theme'] ) ? Theme::from( $stored['theme'] ) : Theme::fallback();
-		$palette = isset( $stored['palette'] ) && is_array( $stored['palette'] ) ? Palette::from_array( $stored['palette'] ) : Palette::defaults();
-
-		return new self( $theme, $palette );
+		return new self(
+			isset( $stored['theme'] ) && is_string( $stored['theme'] ) ? Theme::from( $stored['theme'] ) : Theme::fallback(),
+			isset( $stored['palette'] ) && is_array( $stored['palette'] ) ? Palette::from_array( $stored['palette'] ) : Palette::defaults(),
+			isset( $stored['elements'] ) && is_array( $stored['elements'] ) ? Elements::from_array( $stored['elements'] ) : Elements::defaults(),
+			isset( $stored['density'] ) && is_array( $stored['density'] ) ? Density::from_array( $stored['density'] ) : Density::preset( 'balanced' )
+		);
 	}
 
 	/**
@@ -62,12 +68,26 @@ final class DisplayConfig {
 	}
 
 	/**
+	 * Which parts of the box are shown.
+	 */
+	public function elements(): Elements {
+		return $this->elements;
+	}
+
+	/**
+	 * Spacing, type sizes and image height.
+	 */
+	public function density(): Density {
+		return $this->density;
+	}
+
+	/**
 	 * A copy with another theme.
 	 *
 	 * @param Theme $theme The new theme.
 	 */
 	public function with_theme( Theme $theme ): self {
-		return new self( $theme, $this->palette );
+		return new self( $theme, $this->palette, $this->elements, $this->density );
 	}
 
 	/**
@@ -76,18 +96,38 @@ final class DisplayConfig {
 	 * @param Palette $palette The new palette.
 	 */
 	public function with_palette( Palette $palette ): self {
-		return new self( $this->theme, $palette );
+		return new self( $this->theme, $palette, $this->elements, $this->density );
+	}
+
+	/**
+	 * A copy with other element visibility.
+	 *
+	 * @param Elements $elements The new flags.
+	 */
+	public function with_elements( Elements $elements ): self {
+		return new self( $this->theme, $this->palette, $elements, $this->density );
+	}
+
+	/**
+	 * A copy with another density.
+	 *
+	 * @param Density $density The new density.
+	 */
+	public function with_density( Density $density ): self {
+		return new self( $this->theme, $this->palette, $this->elements, $density );
 	}
 
 	/**
 	 * The configuration, for storage.
 	 *
-	 * @return array{theme: string, palette: array<string, string>}
+	 * @return array{theme: string, palette: array<string, string>, elements: array<string, bool>, density: array{preset: string, values: array<string, int>}}
 	 */
 	public function to_array(): array {
 		return array(
-			'theme'   => $this->theme->name(),
-			'palette' => $this->palette->to_array(),
+			'theme'    => $this->theme->name(),
+			'palette'  => $this->palette->to_array(),
+			'elements' => $this->elements->to_array(),
+			'density'  => $this->density->to_array(),
 		);
 	}
 }
