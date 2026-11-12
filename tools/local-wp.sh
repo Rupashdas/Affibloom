@@ -10,8 +10,16 @@ LOCAL_SITE_ID="${LOCAL_SITE_ID:-XMaGBQZ-W}"
 LOCAL_PHP_DIR="${LOCAL_PHP_DIR:-$LOCAL_DATA/lightning-services/php-8.2.29+0/bin/win64}"
 LOCAL_MYSQL_DIR="${LOCAL_MYSQL_DIR:-$LOCAL_DATA/lightning-services/mysql-8.4.0+2/bin/win64/bin}"
 LOCAL_WP_CLI="${LOCAL_WP_CLI:-/c/Program Files (x86)/Local/resources/extraResources/bin/wp-cli/wp-cli.phar}"
-# The site's MySQL port, from Local's run/<site id>/conf/mysql/my.cnf.
-LOCAL_MYSQL_PORT="${LOCAL_MYSQL_PORT:-10005}"
+# The site's MySQL port, read from Local's run/<site id>/conf/mysql/my.cnf on every run:
+# Local can give the site a new port when it restarts (10005 became 10006 on 2026-11-12).
+if [ -z "${LOCAL_MYSQL_PORT:-}" ]; then
+	LOCAL_MYSQL_CNF="$LOCAL_DATA/run/$LOCAL_SITE_ID/conf/mysql/my.cnf"
+	LOCAL_MYSQL_PORT="$(sed -nE 's/^[[:space:]]*port[[:space:]]*=[[:space:]]*([0-9]+).*/\1/p' "$LOCAL_MYSQL_CNF" 2>/dev/null | head -n 1 || true)"
+	if [ -z "$LOCAL_MYSQL_PORT" ]; then
+		echo "local-wp.sh: no MySQL port in $LOCAL_MYSQL_CNF. Is the site set up in Local?" >&2
+		exit 1
+	fi
+fi
 
 # The WordPress root is four levels up from this file: wp-content/plugins/affibloom/tools.
 SITE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
