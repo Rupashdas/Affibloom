@@ -41,8 +41,8 @@ final class AdminAssets implements Module {
 			return;
 		}
 		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array(), $this->version );
-		// Help tips and Save-when-changed, shared by the settings screens.
-		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array(), $this->version, true );
+		// Help tips, Save-when-changed, modals and "Add A New Link". wp-api-fetch carries the REST root and nonce in wp-admin.
+		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
 
 		// Each settings tab's own controls.
 		$tab     = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to load only.

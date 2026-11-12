@@ -1,6 +1,6 @@
 <?php
 /**
- * The toast message after a settings save.
+ * The toast message after a redirect (?affibloom_notice=…).
  *
  * @package Affibloom
  */
@@ -10,9 +10,10 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 /**
- * The toast message after a settings save. Shared by the Settings tabs and the Display screen.
+ * The toast message after a redirect (?affibloom_notice=…). Shared by the Settings tabs, the Display screen and the
+ * Dashboard.
  */
-final class SettingsNotice {
+final class Notice {
 
 	/**
 	 * The message for the notice code in the query, or '' when there is none.
@@ -24,6 +25,7 @@ final class SettingsNotice {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
+			'link-added'   => __( 'Link added.', 'affibloom' ),
 			default        => '',
 		};
 	}

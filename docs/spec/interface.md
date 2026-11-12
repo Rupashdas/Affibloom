@@ -42,11 +42,13 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 
 | Element | Lasso shows | Label | id / selector | Note |
 |---|---|---|---|---|
-| Dialog | `Add A New Link`, `Enter the affiliate link you would like to track.` | `Add A New Link` | `#affibloom-add-modal[role=dialog]` | |
-| Tabs | `URL`, `Marketplace` | — | — | Marketplace excluded, so no tabs. |
-| Field | textarea, placeholder `https://www.example.com/affiliate-id`, no visible label | `URL` (visually hidden) | `#affibloom-add-urls` | Hint below: `Enter each new link on a separate line (Shift + Enter)`. |
+| Opener | `Add New Link` split button in the header, on every screen | `Add New Link` | `.affibloom-header__action[data-affibloom-open]` | Task 11A. Icon only at 782px and below; the label stays for screen readers. The caret's "Bulk add links" comes with 11C, "Marketplace" with C1 (F18 D5). |
+| Dialog | `Add A New Link`, `Enter the affiliate link you would like to track.` | `Add A New Link` | `#affibloom-add-modal [role=dialog]` | |
+| Tabs | `URL`, `Marketplace` | — | — | Marketplace rebuilt as an Amazon search with C1 (F18 D5); until then no tabs. |
+| Field | single text input; textarea in bulk mode; placeholder `https://www.example.com/affiliate-id`, no visible label | `URL` (visually hidden) | `#affibloom-add-url` | Error below it, `#affibloom-add-error`. The hint `Enter each new link on a separate line (Shift + Enter)` and the textarea come with Task 11C. |
 | Submit | `Add Link` | `Add Link` | `#affibloom-add-submit` | |
-| Duplicate | `This Product Already Exists` (in Lasso, the repoint panel of the product page's save dialog) | `This Product Already Exists` | `.affibloom-duplicate` | Affibloom shows it in the Add modal (F2 AC4). Lasso's repoint ("change all Locations to that link?") is not built. See section 7 for `Allow duplicate destinations`. |
+| Messages | `URL is incorrect.` (empty box) | same; `This is not a valid link.` for what is not an http(s) address | `#affibloom-add-error` | F18 D1. |
+| Duplicate | the existing product's page with `This product already exists. Please update the Primary URL or add a new link.` | same | — | Task 11B (F18 D2: follow Lasso, with the `check_duplicate_link` setting). |
 
 ### Product page
 
@@ -119,7 +121,7 @@ Capabilities (`src/Interface/Admin/Capabilities.php`, decision 1): `PRODUCTS` = 
 
 | Method | Path | Capability | Purpose |
 |---|---|---|---|
-| POST | `/products` `{ urls: string[1–50] }` | `PRODUCTS` | Add A New Link. 201 `{ created, duplicates, invalid }` |
+| POST | `/products` `{ url: string }` | `PRODUCTS` | Add A New Link, one link (Task 11A). 201 `{ id, name, url, redirect_to }`; 422 `affibloom_invalid_field` with `data.fields.url`. Bulk add (ten links, in the background) gets its own route in Task 11C |
 | GET | `/products?search=` | `INSERT_BOXES` | block picker (20 newest matches) |
 | GET | `/products/{id}` | `INSERT_BOXES` | block sidebar |
 | PATCH | `/products/{id}[?preview=1]` | `PRODUCTS` | product page, quick edit. 422 `data.fields`, 404 |

@@ -20,13 +20,14 @@ final class DashboardScreen {
 	 * Builds the screen.
 	 *
 	 * @param Template $template Template renderer.
+	 * @param Notice   $notice   The toast after a redirect, e.g. after "Add A New Link".
 	 */
-	public function __construct( private Template $template ) {}
+	public function __construct( private Template $template, private Notice $notice ) {}
 
 	/**
 	 * Prints the page. WordPress has already checked the capability.
 	 */
 	public function render(): void {
-		$this->template->render( 'admin/dashboard' );
+		$this->template->render( 'admin/dashboard', array( 'notice' => $this->notice->message() ) );
 	}
 }

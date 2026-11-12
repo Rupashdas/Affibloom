@@ -1,6 +1,8 @@
 <?php
 /**
- * The Affibloom header: logo mark, wordmark and the plugin's navigation (docs/ui/design-system.md, Aurora).
+ * The Affibloom header: logo mark, wordmark, the plugin's navigation and, on the right, "Add New Link", which
+ * Lasso puts in its header on every screen (docs/ui/design-system.md, Aurora; F18 entry point 1). The modal it
+ * opens is printed after the header.
  *
  * @package Affibloom
  * @var array{current: string} $view
@@ -14,6 +16,7 @@ $header_tabs = array(
 if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::SETTINGS ) ) {
 	$header_tabs['settings'] = array( __( 'Settings', 'affibloom' ), admin_url( 'admin.php?page=affibloom-settings' ), 'settings' );
 }
+$header_can_add = current_user_can( \Affibloom\Interface\Admin\Capabilities::PRODUCTS );
 ?>
 <header class="affibloom-header">
 	<div class="affibloom-header__brand">
@@ -40,4 +43,14 @@ if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::SETTINGS ) ) {
 			</a>
 		<?php endforeach; ?>
 	</nav>
+	<?php if ( $header_can_add ) : ?>
+		<button type="button" class="affibloom-header__action" data-affibloom-open="affibloom-add-modal" aria-haspopup="dialog">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+			<span class="affibloom-header__action-label"><?php esc_html_e( 'Add New Link', 'affibloom' ); ?></span>
+		</button>
+	<?php endif; ?>
 </header>
+<?php
+if ( $header_can_add ) {
+	$this->render( 'admin/partials/add-modal' );
+}

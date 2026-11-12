@@ -25,13 +25,13 @@ final class DisplayScreen {
 	 * @param Template               $template Template renderer.
 	 * @param DisplaySettingsService $display  Display use cases.
 	 * @param SettingsService        $settings The site-wide display settings (disclosure, Show Price, Custom CSS).
-	 * @param SettingsNotice         $notice   The toast after a save.
+	 * @param Notice                 $notice   The toast after a save.
 	 */
 	public function __construct(
 		private Template $template,
 		private DisplaySettingsService $display,
 		private SettingsService $settings,
-		private SettingsNotice $notice
+		private Notice $notice
 	) {}
 
 	/**

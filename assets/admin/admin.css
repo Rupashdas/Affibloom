@@ -116,6 +116,24 @@
 	background: var(--affibloom-on-navy-active);
 	color: var(--affibloom-white);
 }
+/* The screen's main action, right of the navigation: a white button with navy text (design system, "Layout") */
+.affibloom-admin .affibloom-header__action {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 38px;
+	margin-left: auto;
+	padding: 0 16px;
+	border: 0;
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	color: var(--affibloom-navy-900);
+	font: 600 14px/20px var(--affibloom-font);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color var(--affibloom-ease);
+}
+.affibloom-admin .affibloom-header__action:hover { background: var(--affibloom-brand-50); }
 
 /* 3. Band: the gradient with the title, the subtitle and section tabs */
 .affibloom-band {
@@ -842,6 +860,58 @@
 	100% { opacity: 0; transform: translateY(8px); visibility: hidden; }
 }
 
+/* Modal (design system, "Modal"): 560px, 16px radius, toast shadow, navy backdrop; head, body and foot like a card */
+.affibloom-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100001;
+	display: grid;
+	place-items: center;
+	padding: 16px;
+}
+.affibloom-modal__backdrop { position: absolute; inset: 0; background: rgba(11, 42, 91, 0.45); }
+.affibloom-modal__panel {
+	position: relative;
+	width: 100%;
+	max-width: 560px;
+	max-height: calc(100vh - 32px);
+	overflow: auto;
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-toast);
+}
+.affibloom-modal__head { position: relative; padding: 24px 56px 0 24px; }
+.affibloom-admin .affibloom-modal__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 700 18px/26px var(--affibloom-font); }
+.affibloom-modal__intro { margin: 4px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-modal__close {
+	position: absolute;
+	top: 18px;
+	right: 18px;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-nav);
+	background: none;
+	color: var(--affibloom-ink-600);
+	cursor: pointer;
+}
+.affibloom-modal__close:hover { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+.affibloom-modal__body { padding: 20px 24px 24px; }
+.affibloom-modal__foot {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	padding: 16px 24px;
+	border-top: 1px solid var(--affibloom-line);
+	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
+	background: var(--affibloom-subtle);
+}
+/* The page behind an open modal does not scroll. */
+body.affibloom-has-modal { overflow: hidden; }
+
 /* 10. Smaller screens (wp-admin breakpoints) */
 @media (max-width: 960px) {
 	.affibloom-header,
@@ -858,11 +928,14 @@
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
 	.affibloom-header { gap: 16px; }
-	.affibloom-header__tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.affibloom-header__tab-label,
+	.affibloom-header__action-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.affibloom-admin .affibloom-header__action { padding: 0 10px; }
 	.affibloom-setting { flex-wrap: wrap; }
 	.affibloom-setting .affibloom-toggle { margin-left: 56px; }
 	.affibloom-card__foot .affibloom-button { width: 100%; }
 	.affibloom-grid { grid-template-columns: 1fr; }
+	.affibloom-modal__foot .affibloom-button { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

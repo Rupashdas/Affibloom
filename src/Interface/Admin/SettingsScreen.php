@@ -25,13 +25,13 @@ final class SettingsScreen {
 	 * @param Template        $template Template renderer.
 	 * @param SettingsService $settings Settings use cases.
 	 * @param DisplayScreen   $display  The Display tab, which has its own model and screen.
-	 * @param SettingsNotice  $notice   The toast after a save.
+	 * @param Notice          $notice   The toast after a save.
 	 */
 	public function __construct(
 		private Template $template,
 		private SettingsService $settings,
 		private DisplayScreen $display,
-		private SettingsNotice $notice
+		private Notice $notice
 	) {}
 
 	/**

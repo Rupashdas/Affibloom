@@ -22,6 +22,7 @@ $icon_paths = array(
 	'phone'    => '<path d="M6.5 2.5h7v15h-7zM9.2 15h1.6"/>',
 	'plus'     => '<path d="M10 4v12M4 10h12"/>',
 	'check'    => '<path d="M5 10.5 8.5 14 15 6.5"/>',
+	'close'    => '<path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/>',
 );
 
 if ( ! isset( $icon_paths[ $view['name'] ] ) ) {

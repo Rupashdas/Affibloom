@@ -4,7 +4,7 @@
  * are added by the tasks that provide their numbers (13, 31, 34).
  *
  * @package Affibloom
- * @var array<string, mixed> $view
+ * @var array{notice: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,4 +27,5 @@ defined( 'ABSPATH' ) || exit;
 			</div>
 		</div>
 	</div>
+	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 </div>
