@@ -134,6 +134,14 @@ repaired if it is an Amazon error title, the response carries `is_duplicate: tru
 **Conflict with an earlier decision.** Task 6 decision 2 says Affibloom has "no duplicate setting, the same
 link is always refused". Lasso has the setting, and refusing is not what it does. Decision needed (D2).
 
+**Where each part is built** (after D2, 2026-11-13): the comparison with the setting **on** (the default and the
+live value) — published products only, ignoring case, one trailing slash and `&amp;` (`Lasso_DB::get_url_details_by_url`)
+— is Task 11B. The setting **off** (final destination without its query string, with Lasso's exceptions) is built
+with the General settings pass, together with its toggle, which is its only way to be switched off. Lasso's other
+lookup branches belong to their subsystems: the site's own cloaked `/<prefix>/<slug>` links (redirects and
+cloaking), the auto-monetize table (auto-monetization), lasso.to short links (Lasso's cloud). Re-titling an Amazon
+"Sorry!" product on a match is Task 12's.
+
 ## 6. Title, image and product data at creation
 
 | Case | What Lasso does |
