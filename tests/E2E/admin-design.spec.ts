@@ -64,11 +64,13 @@ async function expectShell( page: Page, title: string ) {
 	expect( firstCard.y ).toBeLessThan( bandBox.y + bandBox.height );
 
 	// One centred column, as Lasso's: the content is at most 1080px wide, centred under the band, and the title
-	// lines up with the content's left edge.
-	expect( firstCard.width ).toBeLessThanOrEqual( 1080 );
-	expect( Math.abs( ( firstCard.x + firstCard.width / 2 ) - ( bandBox.x + bandBox.width / 2 ) ) ).toBeLessThanOrEqual( 1 );
+	// lines up with the content's left edge. The column is the body's first element (a card, or a form holding
+	// cards side by side), not the first card, which on the two-column Amazon tab is only the left one.
+	const column = await box( page.locator( '.affibloom-page__body > *' ).first() );
+	expect( column.width ).toBeLessThanOrEqual( 1080 );
+	expect( Math.abs( ( column.x + column.width / 2 ) - ( bandBox.x + bandBox.width / 2 ) ) ).toBeLessThanOrEqual( 1 );
 	const titleBox = await box( h1 );
-	expect( Math.abs( titleBox.x - firstCard.x ) ).toBeLessThanOrEqual( 1 );
+	expect( Math.abs( titleBox.x - column.x ) ).toBeLessThanOrEqual( 1 );
 }
 
 test( 'the Dashboard uses the Affibloom design system', async ( { page } ) => {
@@ -165,7 +167,8 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 
 	// A colour keeps its stored value as text, with a colour picker beside it showing that colour. The text
 	// field is what gets saved, so a CSS keyword such as "black" is never rewritten to hex behind the editor.
-	await expect( page.getByLabel( 'Badge', { exact: true } ) ).toHaveValue( '#000000' );
+	// "Badge" is also an element switch in Elements, so the field is found as the text box it is.
+	await expect( page.getByRole( 'textbox', { name: 'Badge', exact: true } ) ).toHaveValue( '#000000' );
 	const picker = page.locator( '[data-affibloom-swatch="affibloom-display-main"]' );
 	await expect( picker ).toHaveAttribute( 'type', 'color' );
 	await expect( picker ).toHaveValue( '#000000' );
