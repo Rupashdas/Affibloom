@@ -124,7 +124,13 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	// Lasso's structure (ADR-8 amended 2026-11-13): the preview on the left, a 380px settings rail on the right.
 	const rail = page.locator( '.affibloom-split__rail' );
 	expect( Math.round( ( await rail.boundingBox() )!.width ) ).toBe( 380 );
-	await expect( page.locator( '.affibloom-split__main .affibloom-split__toolbar .affibloom-segment' ) ).toBeVisible();
+	// Lasso's toolbar above the preview: the display type on the left, the device width on the right.
+	const toolbar = page.locator( '.affibloom-split__main .affibloom-split__toolbar' );
+	const typeSegment = toolbar.getByRole( 'navigation', { name: 'Display type' } );
+	const deviceSegment = toolbar.getByRole( 'group', { name: 'Preview device width' } );
+	await expect( typeSegment ).toBeVisible();
+	await expect( deviceSegment ).toBeVisible();
+	expect( ( await box( deviceSegment ) ).x ).toBeGreaterThan( ( await box( typeSegment ) ).x );
 	// Lasso's two rail tabs, Layout & spacing open first; the density chips sit at its top.
 	await expect( rail.getByRole( 'tab' ) ).toHaveText( [ 'Layout & spacing', 'Colors & labels' ] );
 	await expect( rail.getByRole( 'tab', { name: 'Layout & spacing' } ) ).toHaveAttribute( 'aria-selected', 'true' );
