@@ -1,278 +1,324 @@
-/* Affibloom admin UI kit. Colours, type and sizes follow Lasso's admin (docs/ui/tokens.md). */
+/*
+ * Affibloom admin UI kit.
+ * Every value comes from the approved design system, docs/ui/design-system.md (ADR-008).
+ * Rules that must outrank wp-admin's own (.wrap h1, input[type=checkbox]) are scoped under .affibloom-admin.
+ */
 
+/* 1. Tokens */
 .affibloom-admin {
-	--affibloom-purple: #5e36ca;
-	--affibloom-dark-purple: #40258a;
-	--affibloom-light-purple: #b09ae5;
-	--affibloom-tint: #f2effb;
-	--affibloom-green: #22baa0;
-	--affibloom-dark-green: #1b8f7b;
-	--affibloom-red: #e06470;
-	--affibloom-text: #555;
-	--affibloom-muted: #aaa;
-	--affibloom-border: #e2e2e2;
-	--affibloom-input-border: #ced4da;
-	--affibloom-page: #f7f7fc;
+	--affibloom-brand-50: #eef4fc;
+	--affibloom-brand-500: #2f74d6;
+	--affibloom-brand-600: #1e5bb8;
+	--affibloom-brand-700: #174a96;
+	--affibloom-ink-900: #1e2330;
+	--affibloom-ink-700: #434a59;
+	--affibloom-ink-600: #5b6372;
+	--affibloom-ink-400: #8a93a3;
+	--affibloom-ink-200: #e4e7ec;
+	--affibloom-page: #f7f8fa;
 	--affibloom-white: #fff;
-	--affibloom-radius: 0.5rem;
-	--affibloom-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-	--affibloom-font: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	--affibloom-success-700: #067647;
 
-	margin: 0 0 0 -20px; /* full width inside wp-admin, as Lasso */
-	color: var(--affibloom-text);
-	font-family: var(--affibloom-font);
-	font-size: 1rem;
-	background: var(--affibloom-page);
+	--affibloom-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	--affibloom-text-title: 600 24px/32px var(--affibloom-font);
+	--affibloom-text-section: 600 16px/24px var(--affibloom-font);
+	--affibloom-text-body: 400 14px/20px var(--affibloom-font);
+	--affibloom-text-small: 400 13px/18px var(--affibloom-font);
+
+	--affibloom-space-1: 4px;
+	--affibloom-space-2: 8px;
+	--affibloom-space-4: 16px;
+	--affibloom-space-5: 20px;
+	--affibloom-space-6: 24px;
+	--affibloom-space-8: 32px;
+	--affibloom-space-10: 40px;
+
+	--affibloom-radius-sm: 6px;
+	--affibloom-radius-md: 10px;
+	--affibloom-radius-full: 999px;
+	--affibloom-shadow-overlay: 0 12px 32px rgba(16, 24, 40, 0.18);
+	--affibloom-ease: 150ms ease;
+
+	/* Full width inside wp-admin's content area. */
+	margin: 0 0 0 -20px;
 	min-height: calc(100vh - 32px);
+	background: var(--affibloom-page);
+	color: var(--affibloom-ink-900);
+	font: var(--affibloom-text-body);
 }
 
-/* Header bar: purple, at least 100px tall, centred white tabs (Lasso's .lasso-header) */
+/* Focus ring on every control */
+.affibloom-admin :focus-visible {
+	outline: 2px solid var(--affibloom-brand-600);
+	outline-offset: 2px;
+}
+
+/* 2. Header: white bar, logo and wordmark, tabs on the left */
 .affibloom-header {
 	display: flex;
 	align-items: center;
-	gap: 1.5rem;
-	min-height: 100px;
-	padding: 1rem 1.5rem;
+	gap: var(--affibloom-space-8);
+	height: 64px;
+	padding: 0 var(--affibloom-space-8);
 	box-sizing: border-box;
-	background: var(--affibloom-purple);
-	box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-	color: var(--affibloom-white);
+	border-bottom: 1px solid var(--affibloom-ink-200);
+	background: var(--affibloom-white);
 }
 .affibloom-header__brand {
 	display: flex;
 	flex: 0 0 auto;
 	align-items: center;
 	gap: 10px;
-	font-size: 26px;
-	font-weight: 800;
+	font: 600 18px/24px var(--affibloom-font);
 }
-.affibloom-header__logo {
+.affibloom-header__logo { display: block; width: 28px; height: 28px; }
+.affibloom-header__logo-petals { fill: var(--affibloom-brand-500); }
+.affibloom-header__logo-ring { fill: var(--affibloom-white); }
+.affibloom-header__logo-dot { fill: var(--affibloom-brand-700); }
+.affibloom-header__nav {
+	display: flex;
+	gap: var(--affibloom-space-6);
+	height: 100%;
+}
+.affibloom-header__tab {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding-top: 3px;
+	box-sizing: border-box;
+	border-bottom: 3px solid transparent;
+	color: var(--affibloom-ink-700);
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.affibloom-header__tab:hover,
+.affibloom-header__tab:focus { color: var(--affibloom-ink-900); }
+.affibloom-header__tab.is-active {
+	border-bottom-color: var(--affibloom-brand-600);
+	color: var(--affibloom-ink-900);
+}
+
+/* 3. Page and page head */
+.affibloom-page {
+	max-width: 1200px;
+	padding: var(--affibloom-space-8);
+}
+.affibloom-admin .affibloom-page__title {
+	margin: 0 0 var(--affibloom-space-4);
+	padding: 0;
+	color: var(--affibloom-ink-900);
+	font: var(--affibloom-text-title);
+}
+
+/* Page tabs (Settings sections, product page): an underline row below the title */
+.affibloom-tabs {
+	display: flex;
+	gap: var(--affibloom-space-6);
+	margin: 0 0 var(--affibloom-space-6);
+	border-bottom: 1px solid var(--affibloom-ink-200);
+}
+.affibloom-tabs__tab {
+	margin-bottom: -1px;
+	padding: var(--affibloom-space-2) 0 10px;
+	border-bottom: 3px solid transparent;
+	color: var(--affibloom-ink-700);
+	font-weight: 500;
+	text-decoration: none;
+}
+.affibloom-tabs__tab:hover,
+.affibloom-tabs__tab:focus { color: var(--affibloom-ink-900); }
+.affibloom-tabs__tab.is-active {
+	border-bottom-color: var(--affibloom-brand-600);
+	color: var(--affibloom-ink-900);
+}
+
+/* 4. Card: header, body, footer with the actions */
+.affibloom-card {
+	max-width: 760px;
+	border: 1px solid var(--affibloom-ink-200);
+	border-radius: var(--affibloom-radius-md);
+	background: var(--affibloom-white);
+}
+.affibloom-card__head { padding: var(--affibloom-space-5) var(--affibloom-space-6) var(--affibloom-space-1); }
+.affibloom-admin .affibloom-card__title {
+	margin: 0;
+	padding: 0;
+	color: var(--affibloom-ink-900);
+	font: var(--affibloom-text-section);
+}
+.affibloom-card__intro {
+	margin: 2px 0 0;
+	color: var(--affibloom-ink-600);
+	font: var(--affibloom-text-small);
+}
+.affibloom-card__body { padding: var(--affibloom-space-1) var(--affibloom-space-6); }
+.affibloom-card__foot {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--affibloom-space-2);
+	padding: var(--affibloom-space-4) var(--affibloom-space-6);
+	border-top: 1px solid var(--affibloom-ink-200);
+}
+
+/* Empty state */
+.affibloom-empty {
+	padding: var(--affibloom-space-10) var(--affibloom-space-6);
+	text-align: center;
+}
+.affibloom-empty__icon {
 	display: inline-grid;
 	place-items: center;
 	width: 40px;
 	height: 40px;
+	margin-bottom: 12px;
 	border-radius: 50%;
-	background: var(--affibloom-white);
-	color: var(--affibloom-purple);
-	font-size: 18px;
+	background: var(--affibloom-brand-50);
+	color: var(--affibloom-brand-600);
 }
-.affibloom-header__nav {
-	display: flex;
-	flex: 1 1 auto;
-	justify-content: center;
-	gap: 2rem;
-}
-.affibloom-header__tab {
-	padding: 0.5rem 0;
-	color: var(--affibloom-white);
-	font-size: 16px;
-	font-weight: 700;
-	text-decoration: none;
-	transition: text-shadow 0.25s ease;
-}
-.affibloom-header__tab:hover,
-.affibloom-header__tab:focus,
-.affibloom-header__tab.is-active {
-	color: var(--affibloom-white);
-	text-shadow: 0 0 10px var(--affibloom-white);
-}
+.affibloom-empty__icon svg { display: block; }
+.affibloom-empty__message { margin: 0; font-weight: 500; }
 
-/* Page: a centred column about 1,050px wide */
-.affibloom-page {
-	max-width: 1050px;
-	margin: 0 auto;
-	padding: 2.5rem 15px;
-}
-.affibloom-page__head {
+/* 5. Settings row: label and visible description on the left, control on the right (U3) */
+.affibloom-setting {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 1.5rem;
+	gap: var(--affibloom-space-6);
+	padding: var(--affibloom-space-4) 0;
+	border-top: 1px solid var(--affibloom-ink-200);
 }
-/* Scoped to .affibloom-admin so it outranks core's ".wrap h1" (23px, weight 400). */
-.affibloom-admin .affibloom-page__title {
-	margin: 0;
-	padding: 0;
-	color: var(--affibloom-text);
-	font-size: 2.5rem;
-	font-weight: 800;
-	line-height: 1.2;
+.affibloom-setting:first-child { border-top: 0; }
+.affibloom-setting__label {
+	display: block;
+	color: var(--affibloom-ink-900);
+	font-weight: 500;
 }
-
-/* Card */
-.affibloom-card {
-	padding: 20px;
-	border: 1px solid var(--affibloom-border);
-	border-radius: var(--affibloom-radius);
-	background: var(--affibloom-white);
-}
-.affibloom-empty {
-	color: var(--affibloom-muted);
-	text-align: center;
+.affibloom-setting__desc {
+	display: block;
+	margin-top: 2px;
+	color: var(--affibloom-ink-600);
+	font: var(--affibloom-text-small);
 }
 
-/* Visible focus everywhere in the kit; white on the purple header */
-.affibloom-admin :focus-visible {
-	outline: 2px solid var(--affibloom-purple);
-	outline-offset: 2px;
-}
-.affibloom-header :focus-visible {
-	outline-color: var(--affibloom-white);
-}
-
-/* Tabs beside the page title (Settings, product page): purple text, active one underlined */
-.affibloom-tabs { display: flex; gap: 1.25rem; }
-.affibloom-tabs__tab {
-	padding: 0.25rem 0;
-	border-bottom: 2px solid transparent;
-	color: var(--affibloom-purple);
-	font-weight: 700;
-	text-decoration: none;
-}
-.affibloom-tabs__tab:hover,
-.affibloom-tabs__tab:focus { color: var(--affibloom-dark-purple); }
-.affibloom-tabs__tab.is-active { border-bottom-color: var(--affibloom-purple); }
-
-/* Form sections and fields. Scoped titles outrank core's ".wrap h2". */
-.affibloom-section + .affibloom-section { margin-top: 2.5rem; }
-.affibloom-admin .affibloom-section__title {
-	margin: 0 0 0.5rem;
-	padding: 0;
-	color: var(--affibloom-text);
-	font-size: 1.75rem;
-	font-weight: 800;
-	line-height: 1.2;
-}
-.affibloom-section__intro { margin: 0 0 1rem; color: var(--affibloom-text); font-size: 1rem; }
-.affibloom-field { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; }
-.affibloom-form__actions { display: flex; justify-content: flex-end; margin-top: 2rem; }
-
-/* Buttons (Lasso's .btn) */
-.affibloom-button {
+/* 6. Toggle: 36 x 20 track; the real checkbox lies over it, so a click or tap hits it */
+.affibloom-toggle {
+	position: relative;
 	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 0.75rem 1.5rem;
-	border: 0;
-	border-radius: var(--affibloom-radius);
-	box-shadow: var(--affibloom-shadow);
-	font: 800 1rem/1.4 var(--affibloom-font);
-	cursor: pointer;
-	text-decoration: none;
-	transition: box-shadow 0.25s ease, transform 0.25s ease;
+	flex: 0 0 auto;
 }
-.affibloom-button:hover { box-shadow: none; transform: translateY(3px); }
-.affibloom-button--primary,
-.affibloom-button--primary:hover,
-.affibloom-button--primary:focus { background: var(--affibloom-green); color: var(--affibloom-white); }
-
-/* Toggle switch (Lasso's .toggle: 50 x 25, 17px knob). The real checkbox lies over the track, so a
-   click or tap on the switch hits it; the selector outranks core's input[type=checkbox] sizes. */
-.affibloom-toggle { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 .affibloom-admin .affibloom-toggle__input {
 	position: absolute;
-	top: 50%;
+	top: 0;
 	left: 0;
 	z-index: 1;
-	width: 50px;
-	height: 25px;
-	margin: -12.5px 0 0;
+	width: 36px;
+	height: 20px;
+	margin: 0;
 	opacity: 0;
 	cursor: pointer;
 }
 .affibloom-toggle__track {
 	position: relative;
-	flex: 0 0 auto;
-	width: 50px;
-	height: 25px;
-	border-radius: 25px;
-	background: var(--affibloom-border);
-	transition: background 0.4s;
+	width: 36px;
+	height: 20px;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-ink-400);
+	transition: background var(--affibloom-ease);
 }
 .affibloom-toggle__track::after {
 	content: "";
 	position: absolute;
-	bottom: 4px;
-	left: 4px;
-	width: 17px;
-	height: 17px;
-	border-radius: 50%;
-	background: var(--affibloom-white);
-	box-shadow: 0 2.5px 5px rgba(0, 0, 0, 0.1);
-	transition: transform 0.25s ease;
-}
-.affibloom-toggle__input:checked + .affibloom-toggle__track { background: var(--affibloom-green); }
-.affibloom-toggle__input:checked + .affibloom-toggle__track::after { transform: translateX(25px); }
-.affibloom-toggle__input:focus-visible + .affibloom-toggle__track { outline: 2px solid var(--affibloom-purple); outline-offset: 2px; }
-.affibloom-toggle__label { color: var(--affibloom-text); }
-
-/* Help tip (Lasso's info icon and purple tooltip, here also on keyboard focus: U3) */
-.affibloom-help { position: relative; display: inline-flex; }
-.affibloom-help__button {
-	display: inline-grid;
-	place-items: center;
+	top: 2px;
+	left: 2px;
 	width: 16px;
 	height: 16px;
-	padding: 0;
-	border: 1.5px solid var(--affibloom-light-purple);
 	border-radius: 50%;
-	background: none;
-	color: var(--affibloom-light-purple);
-	font: 700 10px/1 var(--affibloom-font);
-	cursor: pointer;
+	background: var(--affibloom-white);
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.2);
+	transition: transform var(--affibloom-ease);
 }
-.affibloom-help__tip {
-	position: absolute;
-	bottom: calc(100% + 10px);
-	left: 50%;
-	z-index: 1000;
-	width: 235px;
-	padding: 1rem;
-	border-radius: var(--affibloom-radius);
-	background: var(--affibloom-purple);
-	box-shadow: var(--affibloom-shadow);
-	color: var(--affibloom-white);
-	font-size: 0.8rem;
-	font-weight: 800;
-	line-height: 1.4;
-	text-align: center;
-	opacity: 0;
-	visibility: hidden;
-	transform: translateX(-50%);
-	transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-	pointer-events: none;
+.affibloom-toggle__input:checked + .affibloom-toggle__track { background: var(--affibloom-brand-600); }
+.affibloom-toggle__input:checked + .affibloom-toggle__track::after { transform: translateX(16px); }
+.affibloom-toggle__input:focus-visible + .affibloom-toggle__track {
+	outline: 2px solid var(--affibloom-brand-600);
+	outline-offset: 2px;
 }
-.affibloom-help__tip::after {
-	content: "";
-	position: absolute;
-	top: 100%;
-	left: 50%;
-	margin-left: -6px;
-	border: 6px solid transparent;
-	border-top-color: var(--affibloom-purple);
-}
-.affibloom-help:hover .affibloom-help__tip,
-.affibloom-help__button:focus + .affibloom-help__tip { opacity: 1; visibility: visible; }
 
-/* Toast */
+/* 7. Buttons */
+.affibloom-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	height: 36px;
+	padding: 0 var(--affibloom-space-4);
+	box-sizing: border-box;
+	border: 1px solid transparent;
+	border-radius: var(--affibloom-radius-sm);
+	font: 500 14px/20px var(--affibloom-font);
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color var(--affibloom-ease);
+}
+.affibloom-button--primary,
+.affibloom-button--primary:focus {
+	background: var(--affibloom-brand-600);
+	color: var(--affibloom-white);
+}
+.affibloom-button--primary:hover,
+.affibloom-button--primary:active {
+	background: var(--affibloom-brand-700);
+	color: var(--affibloom-white);
+}
+.affibloom-button:disabled,
+.affibloom-button[aria-disabled="true"] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* 8. Toast: white card with a status bar and icon, bottom right, slides in, gone after 4 s */
 .affibloom-toast {
 	position: fixed;
-	right: 24px;
-	bottom: 24px;
+	right: var(--affibloom-space-6);
+	bottom: var(--affibloom-space-6);
 	z-index: 100000;
-	padding: 14px 20px;
-	border-radius: var(--affibloom-radius);
-	background: var(--affibloom-green);
-	box-shadow: var(--affibloom-shadow);
-	color: var(--affibloom-white);
-	font-weight: 700;
-	animation: affibloom-toast 4s forwards;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: 360px;
+	padding: 12px var(--affibloom-space-4);
+	border: 1px solid var(--affibloom-ink-200);
+	border-left: 4px solid var(--affibloom-success-700);
+	border-radius: var(--affibloom-radius-sm);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-overlay);
+	color: var(--affibloom-ink-900);
+	animation: affibloom-toast 4s ease forwards;
 }
+.affibloom-toast__icon { display: block; flex: 0 0 auto; }
+.affibloom-toast__icon-circle { fill: var(--affibloom-success-700); }
 @keyframes affibloom-toast {
-	0%, 85% { opacity: 1; transform: none; }
+	0% { opacity: 0; transform: translateY(8px); }
+	5%, 90% { opacity: 1; transform: none; }
 	100% { opacity: 0; transform: translateY(8px); visibility: hidden; }
 }
+
+/* 9. Smaller screens (wp-admin breakpoints) */
+@media (max-width: 960px) {
+	.affibloom-page { padding: var(--affibloom-space-5); }
+	.affibloom-header { padding: 0 var(--affibloom-space-5); }
+}
+@media (max-width: 782px) {
+	.affibloom-admin { margin-left: -10px; }
+	.affibloom-header { gap: var(--affibloom-space-4); }
+	.affibloom-header__nav { overflow-x: auto; }
+	.affibloom-setting { flex-direction: column; align-items: flex-start; gap: 12px; }
+	.affibloom-card__foot .affibloom-button { width: 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.affibloom-admin *,
+	.affibloom-admin *::after { transition: none; }
 	.affibloom-toast { animation: none; }
 }
