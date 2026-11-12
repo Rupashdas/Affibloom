@@ -7,3 +7,5 @@
 /tests/E2E/.auth/
 .wp-env.override.json
 .phpunit.result.cache
+# Full-page guide screenshots (287 MB); re-create with tools/baselines.config.ts (tools/README.md).
+/tests/fixtures/baselines/guides/
