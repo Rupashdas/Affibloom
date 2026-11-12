@@ -4,6 +4,7 @@
 
 	<file>affibloom.php</file>
 	<file>src</file>
+	<file>tools</file>
 
 	<arg name="extensions" value="php"/>
 	<arg name="colors"/>
