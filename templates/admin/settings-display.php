@@ -10,22 +10,29 @@
  * site-wide behaviour, and Task 10D the preview itself.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, columns: int, action: string, notice: string, panel: string} $view
+ * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, columns: int, action: string, reset: string, settings: \Affibloom\Domain\Settings\Settings, notice: string, panel: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Domain\Display\Theme;
 
-$config      = $view['config'];
-$panel       = $view['panel'];
-$panels      = array(
+$config   = $view['config'];
+$settings = $view['settings'];
+// The Disclosure element row writes the scope setting of the type being edited (requirements B5).
+$disclosure_key = array(
+	'single' => 'show_disclosure',
+	'grid'   => 'show_disclosure_grid',
+	'list'   => 'show_disclosure_list',
+)[ $view['type']->key() ];
+$panel          = $view['panel'];
+$panels         = array(
 	'layout' => __( 'Layout & spacing', 'affibloom' ),
 	'colors' => __( 'Colors & labels', 'affibloom' ),
 );
-$palette     = $config->palette();
-$type_key    = $view['type']->key();
-$type_labels = array(
+$palette        = $config->palette();
+$type_key       = $view['type']->key();
+$type_labels    = array(
 	'single' => __( 'Single', 'affibloom' ),
 	'grid'   => __( 'Grid', 'affibloom' ),
 	'list'   => __( 'List', 'affibloom' ),
@@ -148,9 +155,11 @@ $fields = array(
 									$this->render(
 										'admin/partials/display-layout-panel',
 										array(
-											'config'  => $config,
-											'type'    => $view['type'],
-											'columns' => $view['columns'],
+											'config'     => $config,
+											'type'       => $view['type'],
+											'columns'    => $view['columns'],
+											'disclosure' => $settings->bool( $disclosure_key ),
+											'mirror'     => 'affibloom-setting-' . $disclosure_key,
 										)
 									);
 									?>
@@ -159,6 +168,9 @@ $fields = array(
 								<div class="affibloom-rail-panel<?php echo 'colors' === $panel ? ' is-active' : ''; ?>" role="tabpanel"
 									id="affibloom-panel-colors" aria-labelledby="affibloom-tab-colors" data-rail-panel="colors">
 									<p class="affibloom-rail-hint"><?php esc_html_e( 'Colors and button labels apply to the selected display type (Single, Grid, or List).', 'affibloom' ); ?></p>
+									<details class="affibloom-accordion" data-accordion="colors" open>
+									<summary class="affibloom-accordion__toggle"><span><?php esc_html_e( 'Colors & labels', 'affibloom' ); ?></span></summary>
+									<div class="affibloom-accordion__body">
 									<?php
 									foreach ( $fields as [ $key, $field_type, $label, $help ] ) :
 										$field_id = 'affibloom-display-' . $key;
@@ -194,15 +206,31 @@ $fields = array(
 											</span>
 										</div>
 									<?php endforeach; ?>
+									</div>
+									</details>
+
+									<?php $this->render( 'admin/partials/display-behaviour-accordions', array( 'settings' => $settings ) ); ?>
 								</div>
+							</div>
+
+							<?php // Lasso keeps Reset and Save together at the foot of the rail (display.php 737-742). ?>
+							<div class="affibloom-rail-save">
+								<button type="submit" form="affibloom-display-reset" class="affibloom-button affibloom-button--secondary" data-reset-button hidden>
+									<?php esc_html_e( 'Reset Settings', 'affibloom' ); ?>
+								</button>
+								<button type="submit" id="affibloom-settings-save" class="affibloom-button affibloom-button--primary"><?php esc_html_e( 'Save Changes', 'affibloom' ); ?></button>
 							</div>
 						</aside>
 					</div>
-
-					<div class="affibloom-split__foot">
-						<button type="submit" id="affibloom-settings-save" class="affibloom-button affibloom-button--primary"><?php esc_html_e( 'Save Changes', 'affibloom' ); ?></button>
-					</div>
 				</div>
+			</form>
+
+			<?php // A form of its own: the reset button above submits it through its form attribute. ?>
+			<form id="affibloom-display-reset" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-reset-form
+				data-confirm="<?php esc_attr_e( 'Reset all display settings to factory defaults? This cannot be undone.', 'affibloom' ); ?>">
+				<input type="hidden" name="action" value="<?php echo esc_attr( $view['reset'] ); ?>">
+				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
+				<?php wp_nonce_field( $view['reset'], '_affibloom_reset_nonce', false ); ?>
 			</form>
 		</div>
 	</div>

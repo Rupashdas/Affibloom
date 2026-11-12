@@ -23,6 +23,7 @@ final class SettingsNotice {
 		return match ( $code ) {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
+			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
 			default        => '',
 		};
 	}

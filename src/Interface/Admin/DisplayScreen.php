@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Interface\Template;
 
@@ -23,11 +24,13 @@ final class DisplayScreen {
 	 *
 	 * @param Template               $template Template renderer.
 	 * @param DisplaySettingsService $display  Display use cases.
+	 * @param SettingsService        $settings The site-wide display settings (disclosure, Show Price, Custom CSS).
 	 * @param SettingsNotice         $notice   The toast after a save.
 	 */
 	public function __construct(
 		private Template $template,
 		private DisplaySettingsService $display,
+		private SettingsService $settings,
 		private SettingsNotice $notice
 	) {}
 
@@ -46,15 +49,17 @@ final class DisplayScreen {
 		$this->template->render(
 			'admin/settings-display',
 			array(
-				'tab'     => 'display',
-				'tabs'    => $tabs,
-				'type'    => $type,
-				'types'   => DisplayType::all(),
-				'config'  => $this->display->config( $type ),
-				'columns' => $this->display->current()->columns(),
-				'action'  => DisplayController::ACTION,
-				'notice'  => $this->notice->message(),
-				'panel'   => $panel,
+				'tab'      => 'display',
+				'tabs'     => $tabs,
+				'type'     => $type,
+				'types'    => DisplayType::all(),
+				'config'   => $this->display->config( $type ),
+				'columns'  => $this->display->current()->columns(),
+				'action'   => DisplayController::ACTION,
+				'reset'    => DisplayController::RESET_ACTION,
+				'settings' => $this->settings->current(),
+				'notice'   => $this->notice->message(),
+				'panel'    => $panel,
 			)
 		);
 	}

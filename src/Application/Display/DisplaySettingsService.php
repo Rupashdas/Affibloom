@@ -17,6 +17,7 @@ use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Elements;
 use Affibloom\Domain\Display\Layout;
 use Affibloom\Domain\Display\Palette;
+use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Domain\Display\Theme;
 
 /**
@@ -35,23 +36,42 @@ final class DisplaySettingsService {
 	 * Builds the service.
 	 *
 	 * @param DisplaySettingsRepository $repository Where the configurations are kept.
+	 * @param SettingsRepository        $settings   The site-wide settings, for Show Price (requirements B5a).
 	 */
-	public function __construct( private DisplaySettingsRepository $repository ) {}
+	public function __construct(
+		private DisplaySettingsRepository $repository,
+		private SettingsRepository $settings
+	) {}
 
 	/**
-	 * Every display type's configuration.
+	 * Every display type's configuration, as the screen and the box see it: Price that was never saved follows
+	 * Show Price (requirements B5a).
 	 */
 	public function current(): DisplaySettings {
-		return $this->repository->get();
+		$settings   = $this->repository->get();
+		$show_price = $this->settings->get()->bool( 'show_price' );
+		foreach ( DisplayType::all() as $type ) {
+			$config   = $settings->config( $type );
+			$settings = $settings->with_config( $type, $config->with_elements( $config->elements()->with_show_price( $show_price ) ) );
+		}
+
+		return $settings;
 	}
 
 	/**
-	 * One display type's configuration.
+	 * One display type's configuration, as current() describes it.
 	 *
 	 * @param DisplayType $type The display type.
 	 */
 	public function config( DisplayType $type ): DisplayConfig {
-		return $this->repository->get()->config( $type );
+		return $this->current()->config( $type );
+	}
+
+	/**
+	 * Every display type back to Lasso's factory defaults (Reset Settings).
+	 */
+	public function reset(): void {
+		$this->repository->save( DisplaySettings::defaults() );
 	}
 
 	/**

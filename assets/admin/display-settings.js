@@ -1,6 +1,7 @@
 /**
  * Settings → Display: the rail's tabs, the colour pickers, the density chips and steppers, the layout rows and
- * the phone layout behind the device toggle, and the summaries.
+ * the phone layout behind the device toggle, the summaries, the Disclosure mirror, Save enabled only after a
+ * change, and Reset Settings with Lasso's confirmation.
  *
  * Every control posts its own field, so the form saves without this script; the script keeps the controls in
  * step the way Lasso's does (admin/assets/js/settings.js): a preset chip fills the steppers, a stepper moves
@@ -190,6 +191,7 @@
 			} );
 			hint.textContent = hints.custom;
 			summarise();
+			changed( box );
 		};
 
 		chips.forEach( function ( chip ) {
@@ -387,6 +389,7 @@
 				phoneField( key ).disabled = true;
 			} );
 			show();
+			changed( box );
 		} );
 
 		// The radios carry the desktop layout to the server, so they show it again before the form is sent.
@@ -412,11 +415,100 @@
 		show();
 	}
 
+	/**
+	 * Lasso keeps Save Changes disabled until something on the screen changes. Steppers, chips and the phone
+	 * reset are clicks rather than input events, so they announce themselves with an `affibloom:change` event.
+	 *
+	 * @param {HTMLFormElement} form The Display form.
+	 */
+	function saveWhenChanged( form ) {
+		var save = document.getElementById( 'affibloom-settings-save' );
+		var enable = function () {
+			save.disabled = false;
+		};
+		if ( ! save ) {
+			return;
+		}
+
+		save.disabled = true;
+		form.addEventListener( 'input', enable );
+		form.addEventListener( 'change', enable );
+		form.addEventListener( 'affibloom:change', enable );
+	}
+
+	/**
+	 * Tells the form something changed that was not an input event.
+	 *
+	 * @param {HTMLElement} from Any element inside the form.
+	 */
+	function changed( from ) {
+		var form = from.closest( 'form' );
+		if ( form ) {
+			form.dispatchEvent( new Event( 'affibloom:change' ) );
+		}
+	}
+
+	/**
+	 * A switch that shows and changes another field: the Elements panel's Disclosure row mirrors the
+	 * Disclosure & behavior toggle for the type being edited (requirements B5).
+	 *
+	 * @param {HTMLInputElement} mirrorSwitch The mirroring switch.
+	 */
+	function mirror( mirrorSwitch ) {
+		var target = document.getElementById( mirrorSwitch.dataset.mirror );
+		if ( ! target ) {
+			return;
+		}
+
+		// Each side passes a change on only when the other differs, so the two never bounce events forever, and
+		// the Elements summary hears about a change made on the Disclosure & behavior side too.
+		var follow = function ( from, to ) {
+			from.addEventListener( 'change', function () {
+				if ( to.checked !== from.checked ) {
+					to.checked = from.checked;
+					to.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+				}
+			} );
+		};
+
+		mirrorSwitch.disabled = false;
+		follow( mirrorSwitch, target );
+		follow( target, mirrorSwitch );
+	}
+
+	/**
+	 * Reset Settings, with Lasso's confirmation. The button is shown only with this script, so a reset is never
+	 * sent without the question being asked.
+	 *
+	 * @param {HTMLFormElement} form The reset form.
+	 */
+	function resetSettings( form ) {
+		var button = document.querySelector( '[data-reset-button]' );
+		if ( button ) {
+			button.hidden = false;
+		}
+		form.addEventListener( 'submit', function ( event ) {
+			if ( ! window.confirm( form.dataset.confirm ) ) {
+				event.preventDefault();
+			}
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var rail = document.querySelector( '.affibloom-split__rail' );
 		var layout = document.querySelector( '[data-rail-panel="layout"]' );
 
+		var form = document.querySelector( 'form.affibloom-settings' );
+		var resetForm = document.querySelector( '[data-reset-form]' );
+
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-affibloom-swatch]' ), connect );
+		Array.prototype.forEach.call( document.querySelectorAll( '[data-mirror]' ), mirror );
+		if ( form ) {
+			saveWhenChanged( form );
+		}
+		if ( resetForm ) {
+			resetSettings( resetForm );
+		}
 		if ( rail ) {
 			tabs( rail );
 		}

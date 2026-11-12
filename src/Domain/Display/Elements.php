@@ -15,7 +15,10 @@ use InvalidArgumentException;
  * Which parts of a box one display type shows.
  *
  * Lasso's Elements panel has an eleventh row, Disclosure, which is not stored here: it reads and writes the
- * site-wide disclosure settings (show_disclosure, _grid, _list, _table; requirements B5), added in Task 10E.
+ * site-wide disclosure settings (show_disclosure, _grid, _list, _table; requirements B5).
+ *
+ * Price follows the site-wide Show Price setting until the Elements panel is saved with it (requirements B5a;
+ * Lasso's display.php fills a missing price from show_price). Until then it is not stored, so it keeps following.
  */
 final class Elements {
 
@@ -29,19 +32,21 @@ final class Elements {
 	/**
 	 * Use defaults() or from_array().
 	 *
-	 * @param array<string, bool> $flags One flag per key.
+	 * @param array<string, bool> $flags           One flag per key.
+	 * @param bool                $price_inherited Whether Price still follows Show Price.
 	 */
-	private function __construct( private readonly array $flags ) {}
+	private function __construct( private readonly array $flags, private readonly bool $price_inherited ) {}
 
 	/**
 	 * Every element shown, Lasso's default for every type (Helper::get_display_elements_defaults).
 	 */
 	public static function defaults(): self {
-		return new self( array_fill_keys( self::KEYS, true ) );
+		return new self( array_fill_keys( self::KEYS, true ), true );
 	}
 
 	/**
-	 * Reads stored flags. Only real booleans count; anything missing or malformed is shown.
+	 * Reads stored flags. Only real booleans count; anything missing or malformed is shown, except Price, which
+	 * then follows Show Price.
 	 *
 	 * @param array<string, mixed> $stored Stored flags.
 	 */
@@ -53,7 +58,20 @@ final class Elements {
 			}
 		}
 
-		return new self( $flags );
+		return new self( $flags, ! ( isset( $stored['price'] ) && is_bool( $stored['price'] ) ) );
+	}
+
+	/**
+	 * A copy where Price shows what Show Price says, when Price has not been saved yet.
+	 *
+	 * @param bool $show_price The site-wide Show Price setting.
+	 */
+	public function with_show_price( bool $show_price ): self {
+		if ( ! $this->price_inherited ) {
+			return $this;
+		}
+
+		return new self( array_merge( $this->flags, array( 'price' => $show_price ) ), true );
 	}
 
 	/**
@@ -82,7 +100,7 @@ final class Elements {
 			throw new InvalidArgumentException( "Unknown element: $key" );
 		}
 
-		return new self( array_merge( $this->flags, array( $key => $shown ) ) );
+		return new self( array_merge( $this->flags, array( $key => $shown ) ), $this->price_inherited && 'price' !== $key );
 	}
 
 	/**
@@ -93,11 +111,11 @@ final class Elements {
 	}
 
 	/**
-	 * The flags, for storage.
+	 * The flags, for storage. Price is left out while it follows Show Price, so it keeps following.
 	 *
 	 * @return array<string, bool>
 	 */
 	public function to_array(): array {
-		return $this->flags;
+		return $this->price_inherited ? array_diff_key( $this->flags, array( 'price' => true ) ) : $this->flags;
 	}
 }

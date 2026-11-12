@@ -7,7 +7,7 @@
  * Every control also works without JavaScript; the script only keeps the chips, steppers and summaries in step.
  *
  * @package Affibloom
- * @var array{config: \Affibloom\Domain\Display\DisplayConfig, type: \Affibloom\Domain\Display\DisplayType, columns: int} $view
+ * @var array{config: \Affibloom\Domain\Display\DisplayConfig, type: \Affibloom\Domain\Display\DisplayType, columns: int, disclosure: bool, mirror: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -105,12 +105,12 @@ $groups         = array(
 <details class="affibloom-accordion" data-accordion="elements">
 	<summary class="affibloom-accordion__toggle">
 		<span><?php esc_html_e( 'Elements', 'affibloom' ); ?></span>
-		<span class="affibloom-accordion__summary" data-elements-summary data-total="<?php echo esc_attr( (string) count( Elements::KEYS ) ); ?>"
+		<span class="affibloom-accordion__summary" data-elements-summary data-total="<?php echo esc_attr( (string) ( count( Elements::KEYS ) + 1 ) ); ?>"
 			<?php /* translators: 1: visible element count, 2: total element count. */ ?>
 			data-format="<?php echo esc_attr( __( '%1$d of %2$d visible', 'affibloom' ) ); ?>">
 			<?php
 			/* translators: 1: visible element count, 2: total element count. */
-			echo esc_html( sprintf( __( '%1$d of %2$d visible', 'affibloom' ), $elements->shown(), count( Elements::KEYS ) ) );
+			echo esc_html( sprintf( __( '%1$d of %2$d visible', 'affibloom' ), $elements->shown() + ( $view['disclosure'] ? 1 : 0 ), count( Elements::KEYS ) + 1 ) );
 			?>
 		</span>
 	</summary>
@@ -118,6 +118,21 @@ $groups         = array(
 		<input type="hidden" name="display[elements_present]" value="1">
 		<?php foreach ( Elements::KEYS as $element ) : ?>
 			<?php $element_id = 'affibloom-display-element-' . $element; ?>
+			<?php if ( 'timestamp' === $element ) : ?>
+				<?php
+				// Lasso's eleventh row, between Secondary button and Timestamp. It is not an element flag: it shows
+				// and changes the disclosure setting of this type, which the Disclosure & behavior toggle posts. The
+				// script switches it on and keeps the two in step; without the script it shows the value only.
+				?>
+				<div class="affibloom-toggle-row">
+					<span class="affibloom-toggle">
+						<input type="checkbox" class="affibloom-toggle__input" role="switch" id="affibloom-display-element-disclosure"
+							data-element data-mirror="<?php echo esc_attr( $view['mirror'] ); ?>" <?php checked( $view['disclosure'] ); ?> disabled>
+						<span class="affibloom-toggle__track" aria-hidden="true"></span>
+					</span>
+					<label class="affibloom-toggle-row__label" for="affibloom-display-element-disclosure"><?php esc_html_e( 'Disclosure', 'affibloom' ); ?></label>
+				</div>
+			<?php endif; ?>
 			<div class="affibloom-toggle-row">
 				<span class="affibloom-toggle">
 					<input type="checkbox" class="affibloom-toggle__input" role="switch" id="<?php echo esc_attr( $element_id ); ?>"

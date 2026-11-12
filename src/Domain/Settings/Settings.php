@@ -27,6 +27,16 @@ final class Settings {
 		// (Domain\Display\DisplaySettings), because Lasso keeps one set per display type.
 		'disclosure_text'         => 'We earn a commission if you make a purchase, at no additional cost to you.',
 		'link_from_display_title' => true,
+		// Lasso's factory defaults (admin/lasso-constant.php 171-176, 236-240).
+		'show_price'              => true,
+		'show_disclosure_grid'    => false,
+		'show_disclosure_list'    => true,
+		'show_disclosure_table'   => true,
+		'keep_site_stripe_ui'     => false,
+		'enable_brag_mode'        => false,
+		// Lasso's default is its own affiliate sign-up page; Affibloom starts empty (open decision, progress.md).
+		'brag_url'                => '',
+		'custom_css'              => '',
 		// Amazon.
 		'tracking_id'             => '',
 		'show_prime'              => true,

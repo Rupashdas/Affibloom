@@ -9,6 +9,9 @@ use Affibloom\Domain\Settings\SettingsRepository;
 final class SettingsServiceTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
+		\Brain\Monkey\Functions\when( 'esc_url_raw' )->alias(
+			static fn( $u ) => preg_match( '#^https?://#', (string) $u ) ? (string) $u : ''
+		);
 		\Brain\Monkey\Functions\when( 'sanitize_text_field' )->alias( static fn( $s ) => trim( strip_tags( (string) $s ) ) );
 	}
 
@@ -52,4 +55,33 @@ final class SettingsServiceTest extends TestCase {
 		self::assertSame( 'vbvault-20', $repo->get()->string( 'tracking_id' ) );
 	}
 
+	public function test_custom_css_keeps_the_rules_and_loses_any_markup(): void {
+		$repo = $this->repository();
+		( new SettingsService( $repo ) )->update_tab( 'display', array( 'custom_css' => ".box { color: red; }</style><script>alert(1)</script>" ) );
+
+		$css = $repo->get()->string( 'custom_css' );
+		self::assertStringContainsString( '.box { color: red; }', $css );
+		self::assertStringNotContainsString( '<', $css ); // Lasso's format_css allowlist: "</style>" can never be written
+	}
+
+	public function test_a_brag_url_must_be_a_link_or_empty(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+
+		self::assertSame( array(), array_intersect( array( 'brag_url' ), $service->update_tab( 'display', array( 'brag_url' => '' ) ) ) );
+		self::assertContains( 'brag_url', $service->update_tab( 'display', array( 'brag_url' => 'javascript:alert(1)' ) ) );
+	}
+
+	public function test_resetting_the_display_tab_restores_its_defaults_only(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+		$service->update_tab( 'display', array( 'show_price' => '', 'custom_css' => 'a{}' ) ); // show_price off
+		$service->update_tab( 'general', array( 'new_tab' => '' ) );                          // a General value
+
+		$service->reset_tab( 'display' );
+
+		self::assertTrue( $repo->get()->bool( 'show_price' ) );        // Lasso's default
+		self::assertSame( '', $repo->get()->string( 'custom_css' ) );
+		self::assertFalse( $repo->get()->bool( 'new_tab' ) );          // General untouched
+	}
 }

@@ -1,17 +1,34 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, wp } from '../utils';
+import { blockTrackers, setSettings, wp } from '../utils';
 
 // F16 Display system (docs/features/F16/requirements.md).
 test.describe( 'F16 Display system', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
-	// The screen is the only writer of this option, so removing it restores the defaults.
+	// Lasso's factory defaults for the site-wide Display settings (admin/lasso-constant.php).
+	const SITE_WIDE_DEFAULTS = {
+		disclosure_text: 'We earn a commission if you make a purchase, at no additional cost to you.',
+		show_price: true,
+		show_disclosure: true,
+		show_disclosure_grid: false,
+		show_disclosure_list: true,
+		show_disclosure_table: true,
+		link_from_display_title: true,
+		keep_site_stripe_ui: false,
+		enable_brag_mode: false,
+		brag_url: '',
+		custom_css: '',
+	};
+
+	// The display option is written only by this screen, so removing it restores the defaults; the site-wide keys
+	// go back to Lasso's.
 	test.afterAll( () => {
 		try {
 			wp( 'option', 'delete', 'affibloom_display' );
 		} catch {
 			// Nothing was saved.
 		}
+		setSettings( SITE_WIDE_DEFAULTS );
 	} );
 
 	const displayTab = ( type = '' ) =>
@@ -86,10 +103,10 @@ test.describe( 'F16 Display system', () => {
 		await page.goto( displayTab( 'single' ) );
 
 		await openAccordion( page, 'elements' );
-		await expect( page.locator( '[data-elements-summary]' ) ).toHaveText( '10 of 10 visible' );
+		await expect( page.locator( '[data-elements-summary]' ) ).toHaveText( '11 of 11 visible' ); // ten elements and Disclosure
 		await page.getByLabel( 'Price', { exact: true } ).uncheck();
 		await page.getByLabel( 'Timestamp', { exact: true } ).uncheck();
-		await expect( page.locator( '[data-elements-summary]' ) ).toHaveText( '8 of 10 visible' );
+		await expect( page.locator( '[data-elements-summary]' ) ).toHaveText( '9 of 11 visible' );
 
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 		const single = storedDisplay().single.elements;
@@ -154,6 +171,65 @@ test.describe( 'F16 Display system', () => {
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 		list = storedDisplay().list.layout;
 		expect( list.mobile ).toBeUndefined();
+	} );
+
+	const storedSettings = (): Record< string, any > => JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) );
+
+	test( 'AC9 the disclosure and behaviour settings save, and the Disclosure row follows its scope', async ( { page } ) => {
+		await page.goto( `${ displayTab( 'grid' ) }&panel=colors` );
+		await page.getByLabel( 'Disclosure text', { exact: true } ).fill( 'We may earn a commission.' );
+		await page.getByLabel( 'Disclosure in Grids', { exact: true } ).check();
+		await page.getByLabel( 'Disclosure in Lists & Tables', { exact: true } ).uncheck();
+		await page.getByLabel( 'Show Price', { exact: true } ).uncheck();
+
+		// The Elements panel's Disclosure row is the Grid scope while Grid is being edited.
+		await page.getByRole( 'tab', { name: 'Layout & spacing' } ).click();
+		await openAccordion( page, 'elements' );
+		await expect( page.getByLabel( 'Disclosure', { exact: true } ) ).toBeChecked();
+
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		const flat = storedSettings();
+		expect( flat.disclosure_text ).toBe( 'We may earn a commission.' );
+		expect( flat.show_disclosure_grid ).toBe( true );
+		expect( flat.show_disclosure_list ).toBe( false );
+		expect( flat.show_disclosure_table ).toBe( false ); // one toggle, both keys, as in Lasso
+		expect( flat.show_price ).toBe( false );
+	} );
+
+	test.fixme( 'AC9 the box prints the saved disclosure text', async () => {
+		// Needs the product box, which Phase 3 builds (Task 18x).
+	} );
+
+	test( 'AC10 Custom CSS is kept, and cannot carry markup', async ( { page } ) => {
+		await page.goto( `${ displayTab() }&panel=colors` );
+		await openAccordion( page, 'custom-css' );
+		await page.getByLabel( 'Custom CSS', { exact: true } ).fill( '.box { color: red; }</style><script>alert(1)</script>' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+
+		const css = storedSettings().custom_css as string;
+		expect( css ).toContain( '.box { color: red; }' );
+		expect( css ).not.toContain( '<' );
+	} );
+
+	test( 'AC11 Reset Settings asks first, then restores every default', async ( { page } ) => {
+		await page.goto( displayTab( 'single' ) );
+		await page.getByLabel( 'Theme' ).selectOption( 'Money' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		setSettings( { show_price: false } );
+
+		// Saying no leaves everything as it is.
+		page.once( 'dialog', ( dialog ) => dialog.dismiss() );
+		await page.getByRole( 'button', { name: 'Reset Settings' } ).click();
+		await expect( page.getByLabel( 'Theme' ) ).toHaveValue( 'Money' );
+
+		page.once( 'dialog', ( dialog ) => {
+			expect( dialog.message() ).toBe( 'Reset all display settings to factory defaults? This cannot be undone.' );
+			dialog.accept();
+		} );
+		await page.getByRole( 'button', { name: 'Reset Settings' } ).click();
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'reset to their defaults' );
+		await expect( page.getByLabel( 'Theme' ) ).toHaveValue( 'Cactus' );
+		expect( storedSettings().show_price ).toBe( true );
 	} );
 
 	test( 'AC8 a button label keeps its icon markup', async ( { page } ) => {

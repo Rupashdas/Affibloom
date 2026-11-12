@@ -86,7 +86,7 @@ final class Plugin {
 	 */
 	private function modules(): array {
 		$settings = new SettingsService( $this->settings_repository() );
-		$display  = new DisplaySettingsService( new OptionDisplaySettingsRepository() );
+		$display  = new DisplaySettingsService( new OptionDisplaySettingsRepository(), $this->settings_repository() );
 		$notice   = new SettingsNotice();
 
 		return array(
@@ -95,13 +95,13 @@ final class Plugin {
 				new SettingsScreen(
 					$this->template(),
 					$settings,
-					new DisplayScreen( $this->template(), $display, $notice ),
+					new DisplayScreen( $this->template(), $display, $settings, $notice ),
 					$notice
 				)
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),
-			new DisplayController( $display ),
+			new DisplayController( $display, $settings ),
 		);
 	}
 

@@ -535,7 +535,9 @@
 	transition: transform var(--affibloom-ease);
 }
 .affibloom-accordion[open] > .affibloom-accordion__toggle::after { transform: rotate(-135deg) translateY(-2px); }
-.affibloom-accordion__summary { margin-left: auto; color: var(--affibloom-ink-600); font-weight: 400; }
+/* The title takes the free space, so the summary (when there is one) and the chevron always sit on the right. */
+.affibloom-accordion__toggle > span:first-child { margin-right: auto; }
+.affibloom-accordion__summary { color: var(--affibloom-ink-600); font-weight: 400; }
 .affibloom-accordion__body { padding-bottom: 12px; }
 
 /* An element row: the switch on the left and its name on the right, as in Lasso's Elements panel */
@@ -605,14 +607,20 @@
 .affibloom-row__label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .affibloom-row__control { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 164px; }
 .affibloom-row__control .affibloom-input { flex: 1; min-width: 0; height: 34px; min-height: 34px; }
-.affibloom-split__foot {
+/* Reset and Save at the foot of the rail, as Lasso has them (Reset left, Save right) */
+.affibloom-rail-save {
 	display: flex;
+	flex: none;
+	align-items: center;
 	justify-content: flex-end;
 	gap: 10px;
-	padding: 16px 20px;
+	padding: 14px 20px;
 	border-top: 1px solid var(--affibloom-line);
 	background: var(--affibloom-subtle);
 }
+.affibloom-rail-save [data-reset-button] { margin-right: auto; }
+.affibloom-admin .affibloom-input--code { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; font-size: 12px; }
+.affibloom-field--spaced { margin-top: 12px; }
 
 /* The colour picker beside a colour value (the text field is what gets saved) */
 .affibloom-admin input[type="color"].affibloom-swatch {
@@ -703,6 +711,15 @@
 	background-image: linear-gradient(180deg, var(--affibloom-brand-600), var(--affibloom-brand-600));
 	color: var(--affibloom-white);
 }
+/* Secondary button (design system): white, control-line border, ink text */
+.affibloom-button--secondary,
+.affibloom-button--secondary:focus {
+	border: 1px solid var(--affibloom-control-line);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-900);
+}
+.affibloom-button--secondary:hover { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+
 .affibloom-button:disabled,
 .affibloom-button[aria-disabled="true"] {
 	opacity: 0.5;

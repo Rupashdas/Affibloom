@@ -8,6 +8,8 @@ use Affibloom\Domain\Display\DisplayConfig;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplaySettingsRepository;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Settings\Settings;
+use Affibloom\Domain\Settings\SettingsRepository;
 
 final class DisplaySettingsServiceTest extends TestCase {
 	protected function setUp(): void {
@@ -15,6 +17,27 @@ final class DisplaySettingsServiceTest extends TestCase {
 		\Brain\Monkey\Functions\when( 'sanitize_hex_color' )->alias(
 			static fn( $c ) => preg_match( '/^#([A-Fa-f0-9]{3}){1,2}$/', (string) $c ) ? (string) $c : null
 		);
+	}
+
+	/**
+	 * The service, with site-wide settings where Show Price is as given.
+	 */
+	private function service( DisplaySettingsRepository $repo, bool $show_price = true ): DisplaySettingsService {
+		$flat = new class() implements SettingsRepository {
+			public Settings $stored;
+			public function __construct() {
+				$this->stored = Settings::from_array( array() );
+			}
+			public function get(): Settings {
+				return $this->stored;
+			}
+			public function save( Settings $settings ): void {
+				$this->stored = $settings;
+			}
+		};
+		$flat->stored = $flat->stored->with( array( 'show_price' => $show_price ) );
+
+		return new DisplaySettingsService( $repo, $flat );
 	}
 
 	private function repository(): DisplaySettingsRepository {
@@ -34,7 +57,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_it_saves_one_type_and_leaves_the_others(): void {
 		$repo    = $this->repository();
-		$refused = ( new DisplaySettingsService( $repo ) )->update_type(
+		$refused = ( $this->service( $repo ) )->update_type(
 			DisplayType::single(),
 			array(
 				'theme'   => 'Llama',
@@ -50,7 +73,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_a_css_keyword_is_kept_and_nonsense_is_refused(): void {
 		$repo    = $this->repository();
-		$refused = ( new DisplaySettingsService( $repo ) )->update_type(
+		$refused = ( $this->service( $repo ) )->update_type(
 			DisplayType::grid(),
 			array( 'palette' => array( 'title' => 'White', 'background' => '#nothex', 'button' => '' ) )
 		);
@@ -68,7 +91,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 			->andReturn( $label );
 
 		$repo = $this->repository();
-		( new DisplaySettingsService( $repo ) )->update_type(
+		( $this->service( $repo ) )->update_type(
 			DisplayType::list(),
 			array( 'palette' => array( 'primary_button_text' => $label ) )
 		);
@@ -78,7 +101,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_an_unticked_element_is_hidden_when_the_elements_were_on_the_form(): void {
 		$repo = $this->repository();
-		( new DisplaySettingsService( $repo ) )->update_type(
+		( $this->service( $repo ) )->update_type(
 			DisplayType::single(),
 			array(
 				'elements_present' => '1',
@@ -94,14 +117,14 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_elements_are_left_alone_when_the_form_did_not_carry_them(): void {
 		$repo = $this->repository();
-		( new DisplaySettingsService( $repo ) )->update_type( DisplayType::single(), array( 'theme' => 'Lab' ) );
+		( $this->service( $repo ) )->update_type( DisplayType::single(), array( 'theme' => 'Lab' ) );
 
 		self::assertSame( 10, $repo->get()->config( DisplayType::single() )->elements()->shown() );
 	}
 
 	public function test_choosing_a_preset_stores_the_preset(): void {
 		$repo = $this->repository();
-		( new DisplaySettingsService( $repo ) )->update_type(
+		( $this->service( $repo ) )->update_type(
 			DisplayType::grid(),
 			array( 'density' => array( 'preset' => 'compact', 'values' => Density::PRESETS['compact'] ) )
 		);
@@ -118,7 +141,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 		$values        = Density::PRESETS['spacious'];
 		$values['gap'] = 99; // edited, and over the maximum of 48
-		( new DisplaySettingsService( $repo ) )->update_type(
+		( $this->service( $repo ) )->update_type(
 			DisplayType::single(),
 			array( 'density' => array( 'preset' => 'spacious', 'values' => $values ) )
 		);
@@ -135,7 +158,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 		$repo   = $this->repository();
 		$values = Density::PRESETS['spacious'];
 		$values['gap'] = 30;
-		( new DisplaySettingsService( $repo ) )->update_type(
+		( $this->service( $repo ) )->update_type(
 			DisplayType::list(),
 			array( 'density' => array( 'base' => 'spacious', 'values' => $values ) )
 		);
@@ -148,7 +171,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_it_saves_the_desktop_layout_with_lassos_coercion(): void {
 		$repo = $this->repository();
-		( new DisplaySettingsService( $repo ) )->update_type(
+		( $this->service( $repo ) )->update_type(
 			DisplayType::single(),
 			array(
 				'layout' => array(
@@ -169,7 +192,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_the_posted_phone_overrides_replace_the_stored_ones(): void {
 		$repo    = $this->repository();
-		$service = new DisplaySettingsService( $repo );
+		$service = $this->service( $repo );
 		$service->update_type(
 			DisplayType::list(),
 			array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'center', 'ctaWidth' => 'full' ) ) )
@@ -184,7 +207,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_use_desktop_layout_clears_the_phone_overrides(): void {
 		$repo    = $this->repository();
-		$service = new DisplaySettingsService( $repo );
+		$service = $this->service( $repo );
 		$service->update_type( DisplayType::single(), array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'center' ) ) ) );
 		$service->update_type( DisplayType::single(), array( 'layout' => array( 'phone_present' => '1' ) ) ); // nothing posted: cleared
 
@@ -193,7 +216,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_the_phone_overrides_are_left_alone_when_the_form_did_not_carry_them(): void {
 		$repo    = $this->repository();
-		$service = new DisplaySettingsService( $repo );
+		$service = $this->service( $repo );
 		$service->update_type( DisplayType::single(), array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'center' ) ) ) );
 		$service->update_type( DisplayType::single(), array( 'theme' => 'Lab' ) );
 
@@ -202,11 +225,29 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 	public function test_the_column_count_is_site_wide_and_clamped(): void {
 		$repo    = $this->repository();
-		$service = new DisplaySettingsService( $repo );
+		$service = $this->service( $repo );
 		$service->update_type( DisplayType::grid(), array( 'columns' => '2' ) );
 		self::assertSame( 2, $repo->get()->columns() );
 
 		$service->update_type( DisplayType::grid(), array( 'columns' => '7' ) );
+		self::assertSame( 3, $repo->get()->columns() );
+	}
+
+	public function test_price_that_was_never_saved_follows_show_price(): void {
+		$repo = $this->repository();
+
+		self::assertFalse( $this->service( $repo, false )->config( DisplayType::grid() )->elements()->visible( 'price' ) );
+		self::assertTrue( $this->service( $repo, true )->config( DisplayType::grid() )->elements()->visible( 'price' ) );
+	}
+
+	public function test_reset_returns_every_type_to_the_defaults(): void {
+		$repo    = $this->repository();
+		$service = $this->service( $repo );
+		$service->update_type( DisplayType::single(), array( 'theme' => 'Lab', 'columns' => '1' ) );
+
+		$service->reset();
+
+		self::assertSame( 'Cactus', $repo->get()->config( DisplayType::single() )->theme()->name() );
 		self::assertSame( 3, $repo->get()->columns() );
 	}
 }

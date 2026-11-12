@@ -38,4 +38,16 @@ final class ElementsTest extends TestCase {
 		$this->expectException( \InvalidArgumentException::class );
 		Elements::defaults()->with( 'disclosure', false ); // stored in the site-wide settings instead (B5)
 	}
+
+	public function test_price_follows_show_price_until_it_is_saved(): void {
+		$inherited = Elements::from_array( array( 'badge' => true ) ); // no price stored
+
+		self::assertFalse( $inherited->with_show_price( false )->visible( 'price' ) );
+		self::assertTrue( $inherited->with_show_price( true )->visible( 'price' ) );
+		self::assertArrayNotHasKey( 'price', $inherited->with_show_price( false )->to_array() ); // keeps inheriting
+
+		$saved = $inherited->with( 'price', true );
+		self::assertTrue( $saved->with_show_price( false )->visible( 'price' ) ); // the saved value wins
+		self::assertTrue( $saved->to_array()['price'] );
+	}
 }
