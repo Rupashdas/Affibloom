@@ -74,14 +74,15 @@ final class ProductsController implements Module {
 	}
 
 	/**
-	 * POST /products: "Add A New Link" with one link.
+	 * POST /products: "Add A New Link" with one link. A link the site already has makes no product: 200 with
+	 * "duplicate", as Lasso sends the editor to the existing one.
 	 *
 	 * @param WP_REST_Request $request Request with "url".
 	 * @phpstan-param WP_REST_Request<array{url: string}> $request
 	 */
 	public function create( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		try {
-			$product = $this->products->create_from_url( (string) $request['url'] );
+			$added = $this->products->create_from_url( (string) $request['url'] );
 		} catch ( InvalidField $error ) {
 			$message = Messages::for_reason( $error->reason );
 			return new WP_Error(
@@ -94,10 +95,18 @@ final class ProductsController implements Module {
 			);
 		}
 
-		$data = $this->product_resource->summary( $product );
-		// Lasso opens the new product's page; that page is Task 14, so until then the Dashboard says it was added.
-		$data['redirect_to'] = add_query_arg( 'affibloom_notice', 'link-added', admin_url( 'admin.php?page=' . AdminMenu::SLUG ) );
+		$data = $this->product_resource->summary( $added->product );
+		if ( $added->already_existed ) {
+			$data['duplicate'] = true;
+		}
+		// Lasso opens the product's page (with a warning for a duplicate); that page is Task 14, so until then the
+		// Dashboard says what happened.
+		$data['redirect_to'] = add_query_arg(
+			'affibloom_notice',
+			$added->already_existed ? 'duplicate' : 'link-added',
+			admin_url( 'admin.php?page=' . AdminMenu::SLUG )
+		);
 
-		return new WP_REST_Response( array( 'data' => $data ), 201 );
+		return new WP_REST_Response( array( 'data' => $data ), $added->already_existed ? 200 : 201 );
 	}
 }

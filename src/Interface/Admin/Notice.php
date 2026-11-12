@@ -26,7 +26,18 @@ final class Notice {
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
 			'link-added'   => __( 'Link added.', 'affibloom' ),
+			// Lasso's warning when "Add A New Link" finds a product with the same link.
+			'duplicate'    => __( 'This product already exists. Please update the Primary URL or add a new link.', 'affibloom' ),
 			default        => '',
 		};
+	}
+
+	/**
+	 * How the toast presents the message: "info" when nothing was done, else "success".
+	 */
+	public function kind(): string {
+		$code = isset( $_GET['affibloom_notice'] ) ? sanitize_key( wp_unslash( $_GET['affibloom_notice'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+
+		return 'duplicate' === $code ? 'info' : 'success';
 	}
 }

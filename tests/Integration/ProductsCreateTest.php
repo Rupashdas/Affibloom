@@ -30,6 +30,27 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertStringContainsString( 'affibloom_notice=link-added', $data['redirect_to'] );
 	}
 
+	public function test_a_bare_domain_is_stored_with_https(): void {
+		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
+	}
+
+	public function test_the_same_link_again_returns_the_existing_product(): void {
+		$first  = $this->post( 'https://www.example.com/a' )->get_data()['data']['id'];
+		$second = $this->post( 'HTTPS://WWW.Example.com/A/' );
+
+		self::assertSame( 200, $second->get_status() );
+		self::assertTrue( $second->get_data()['data']['duplicate'] );
+		self::assertSame( $first, $second->get_data()['data']['id'] );
+		self::assertStringContainsString( 'affibloom_notice=duplicate', $second->get_data()['data']['redirect_to'] );
+	}
+
+	public function test_a_trashed_product_is_not_a_match(): void {
+		$first = $this->post( 'https://www.example.com/b' )->get_data()['data']['id'];
+		wp_trash_post( $first );
+
+		self::assertSame( 201, $this->post( 'https://www.example.com/b' )->get_status() );
+	}
+
 	public function test_an_empty_box_is_refused_with_lassos_words(): void {
 		$response = $this->post( '  ' );
 

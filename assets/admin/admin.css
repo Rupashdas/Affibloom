@@ -854,6 +854,9 @@
 	color: var(--affibloom-toast-tick);
 }
 .affibloom-toast__icon .affibloom-icon { width: 16px; height: 16px; stroke-width: 2.2; }
+/* Information, when nothing was done: an "i" on brand-300 (navy-900 on it 6.3:1; the circle on the ink-900 card 7.2:1) */
+.affibloom-toast--info .affibloom-toast__icon { background: var(--affibloom-brand-300); color: var(--affibloom-navy-900); }
+.affibloom-toast--info { max-width: 420px; }
 @keyframes affibloom-toast {
 	0% { opacity: 0; transform: translateY(8px); }
 	5%, 90% { opacity: 1; transform: none; }

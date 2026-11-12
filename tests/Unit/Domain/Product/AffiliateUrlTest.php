@@ -27,19 +27,61 @@ final class AffiliateUrlTest extends TestCase {
 	}
 
 	/**
-	 * Task 11B adds Lasso's repair, which accepts "mizunousa.com/wave"; until then it is refused.
+	 * What is still not an http(s) address after Lasso's repair (F18, decision D1).
 	 *
 	 * @return array<string, array{string}>
 	 */
 	public static function not_links(): array {
 		return array(
 			'words'          => array( 'not a link' ),
-			'no scheme'      => array( 'mizunousa.com/wave' ),
 			'ftp'            => array( 'ftp://x.com/a' ),
 			'javascript'     => array( 'javascript:alert(1)' ),
 			'no host'        => array( 'https://' ),
 			'space in host'  => array( 'https://exa mple.com/' ),
+			// Lasso turns a host ending in .html into a relative path, which is not a link.
+			'html file'      => array( 'example.html' ),
+			'shortcode'      => array( '[lasso id="1"]' ),
+			'mailto'         => array( 'mailto:shop@example.com' ),
 		);
+	}
+
+	/**
+	 * Lasso_Helper::add_https(): repaired, then kept.
+	 *
+	 * @dataProvider repairs
+	 */
+	public function test_lasso_repairs_what_it_is_given( string $input, string $stored ): void {
+		self::assertSame( $stored, AffiliateUrl::from_string( $input )->value() );
+	}
+
+	/**
+	 * @return array<string, array{string, string}>
+	 */
+	public static function repairs(): array {
+		return array(
+			'bare domain'         => array( 'mizunousa.com/wave', 'https://mizunousa.com/wave' ),
+			'leading slashes'     => array( '//shop.example.org/x', 'https://shop.example.org/x' ),
+			'doubled scheme'      => array( 'https://https://www.example.net/x', 'https://www.example.net/x' ),
+			'http then https'     => array( 'http://https://www.example.net/x', 'https://www.example.net/x' ),
+			'triple slash'        => array( 'https:///www.example.net/x', 'https://www.example.net/x' ),
+			'stray bracket'       => array( ']https://www.example.net/x', 'https://www.example.net/x' ),
+			'quoted shortcode'    => array( '[gift_item link=&quot;https://www.example.net/x', 'https://www.example.net/x' ),
+			// Lasso would put https:// in front of a capitalised scheme; Affibloom reads the scheme without case.
+			'capitalised scheme'  => array( 'HTTPS://WWW.Example.com/X', 'HTTPS://WWW.Example.com/X' ),
+			'plain http kept'     => array( 'http://example.com/x', 'http://example.com/x' ),
+		);
+	}
+
+	/**
+	 * Lasso finds a product by its link ignoring case (MySQL's collation), one trailing slash, and &amp;.
+	 */
+	public function test_the_duplicate_key_ignores_case_a_trailing_slash_and_amp(): void {
+		$key = AffiliateUrl::from_string( 'https://www.example.com/a?x=1&y=2' )->key();
+
+		self::assertSame( 'https://www.example.com/a?x=1&y=2', $key );
+		self::assertSame( $key, AffiliateUrl::from_string( 'HTTPS://WWW.Example.com/A?x=1&y=2/' )->key() );
+		self::assertSame( $key, AffiliateUrl::from_string( 'https://www.example.com/a?x=1&amp;y=2' )->key() );
+		self::assertSame( $key, AffiliateUrl::from_string( 'www.example.com/a?x=1&y=2' )->key() );
 	}
 
 	/**

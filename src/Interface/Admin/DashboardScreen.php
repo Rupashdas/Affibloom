@@ -28,6 +28,12 @@ final class DashboardScreen {
 	 * Prints the page. WordPress has already checked the capability.
 	 */
 	public function render(): void {
-		$this->template->render( 'admin/dashboard', array( 'notice' => $this->notice->message() ) );
+		$this->template->render(
+			'admin/dashboard',
+			array(
+				'notice'      => $this->notice->message(),
+				'notice_kind' => $this->notice->kind(),
+			)
+		);
 	}
 }

@@ -123,7 +123,7 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 | **Text field** | 38px tall, 1px control-line border, 10px radius; focus: brand-600 border and focus ring; error: danger-700 border and message below, linked with `aria-describedby`. |
 | **Table** | inside a card; header row on subtle with the table-header type; rows with 12px padding and `line` dividers; the name 600 with the URL below in ink-600; 40px rounded thumbnails. |
 | **Status pill** | full round, 12px/600, tint background with the status-700 text and an icon (`OK`, `Broken`). |
-| **Toast** | ink-900 card, white text, 12px radius, toast shadow, a 24px toast-icon circle with a dark tick; bottom right; `role="status"`. |
+| **Toast** | ink-900 card, white text, 12px radius, toast shadow, a 24px toast-icon circle with a dark tick; bottom right; `role="status"`. **Info** variant (nothing was done, e.g. a link the site already has; Task 11B): the circle in brand-300 with a navy-900 "i" (6.3:1; the circle on ink-900 7.2:1), up to 420px wide. |
 | **Modal** | 560px, 16px radius, toast shadow, backdrop `rgba(11,42,91,.45)`; header, body, footer like cards; focus trapped and returned; Escape closes. |
 | **Empty state** | inside a card: a 40px icon chip, a one-line message (600) and, where there is one, the primary action. |
 | **Icons** | 20×20 outline set drawn for Affibloom (stroke 1.6, round caps), inline SVG from one partial; never Lasso's icons. |

@@ -20,4 +20,11 @@ interface ProductRepository {
 	 * @param Product $product Product to store.
 	 */
 	public function save( Product $product ): Product;
+
+	/**
+	 * The published product whose link has this key, or null. Drafts and trashed products are not matches.
+	 *
+	 * @param string $key From AffiliateUrl::key().
+	 */
+	public function find_by_url_key( string $key ): ?Product;
 }
