@@ -54,6 +54,9 @@ Associates terms.
 ## Risks
 
 - The account may not qualify for API access; the feature then has no effect until it does.
-- Amazon changes or retires APIs (PA-API 5 to Creators API); keep the catalogue behind its interface.
+- Amazon changes or retires APIs; keep the catalogue behind its interface. Confirmed 2026-11-12: Lasso's settings still
+  hold Product Advertising API 5.0 keys from an older Lasso, and one test request with them returned 403
+  `AccessDenied`, "Product Advertising API is deprecated. Please migrate to Creators API". C1 uses the Creators API
+  only, and the migration (Task 26) does not import those keys.
 - The secret is stored in `wp_options` in plain text, as Lasso stores it. Keep it out of REST responses, the
   CSV export and logs.
