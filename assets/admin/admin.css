@@ -298,7 +298,7 @@
 	grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 	gap: 20px 32px;
 }
-.affibloom-field { position: relative; display: flex; flex-direction: column; gap: 6px; }
+.affibloom-field { display: flex; flex-direction: column; gap: 6px; }
 .affibloom-field__head { display: flex; align-items: center; gap: 6px; }
 .affibloom-label {
 	color: var(--affibloom-ink-900);
@@ -444,6 +444,7 @@
 	display: flex;
 	flex: 0 0 380px;
 	flex-direction: column;
+	box-sizing: border-box; /* 380px with the border, as Lasso's (Bootstrap is border-box) */
 	width: 380px;
 	min-height: 0;
 	border-left: 1px solid var(--affibloom-line);
@@ -638,9 +639,13 @@
 .affibloom-admin input[type="color"].affibloom-swatch::-moz-color-swatch { border: 0; border-radius: 6px; }
 .affibloom-admin .affibloom-select { padding-right: 32px; line-height: 32px; }
 
-/* Help tip: an 18px "?" whose text shows on hover and on keyboard focus */
-/* The tip is placed against the field, not the button, so it can never reach past the column. */
-.affibloom-help { display: inline-flex; }
+/*
+ * Help tip (design system): an 18px "?" whose text shows on hover and on keyboard focus. With the script, the tip
+ * floats against the viewport above the button (below it when there is no room), the way Lasso's rail does it,
+ * so no scrolling or clipped container can hide it, and Escape closes it. Without the script, plain hover and
+ * focus show it next to the button. A hidden tip takes no space, so it can never widen the page.
+ */
+.affibloom-help { position: relative; display: inline-flex; }
 .affibloom-help__button {
 	display: grid;
 	place-items: center;
@@ -655,17 +660,19 @@
 	cursor: help;
 	transition: color var(--affibloom-ease), border-color var(--affibloom-ease);
 }
-.affibloom-help__button:hover {
+.affibloom-help__button:hover,
+.affibloom-help.is-open .affibloom-help__button {
 	border-color: var(--affibloom-brand-600);
 	color: var(--affibloom-brand-600);
 }
 .affibloom-help__text {
 	position: absolute;
 	bottom: calc(100% + 8px);
-	left: 0;
-	z-index: 10;
+	left: -8px;
+	z-index: 100000;
+	display: none;
 	width: max-content;
-	max-width: min(280px, 100%);
+	max-width: 280px;
 	padding: 8px 10px;
 	border-radius: 8px;
 	background: var(--affibloom-ink-900);
@@ -674,15 +681,13 @@
 	font-size: 13px;
 	font-weight: 400;
 	line-height: 18px;
-	visibility: hidden;
-	opacity: 0;
-	transition: opacity var(--affibloom-ease);
+	text-align: left;
+	white-space: normal;
 }
-.affibloom-help__button:hover + .affibloom-help__text,
-.affibloom-help__button:focus + .affibloom-help__text {
-	visibility: visible;
-	opacity: 1;
-}
+.affibloom-help:not(.is-floating) .affibloom-help__button:hover + .affibloom-help__text,
+.affibloom-help:not(.is-floating) .affibloom-help__button:focus + .affibloom-help__text,
+.affibloom-help.is-open .affibloom-help__text { display: block; }
+.affibloom-help.is-open .affibloom-help__text { position: fixed; bottom: auto; }
 
 /* 8. Buttons */
 .affibloom-button {
