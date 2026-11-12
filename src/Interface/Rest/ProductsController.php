@@ -84,15 +84,7 @@ final class ProductsController implements Module {
 		try {
 			$added = $this->products->create_from_url( (string) $request['url'] );
 		} catch ( InvalidField $error ) {
-			$message = Messages::for_reason( $error->reason );
-			return new WP_Error(
-				'affibloom_invalid_field',
-				$message,
-				array(
-					'status' => 422,
-					'fields' => array( $error->field => $message ),
-				)
-			);
+			return FieldError::from( $error );
 		}
 
 		$data = $this->product_resource->summary( $added->product );

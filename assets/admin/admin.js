@@ -87,10 +87,12 @@
 		form.addEventListener( 'affibloom:change', enable );
 	}
 
+
 	/**
 	 * Modals (design system, "Modal"): `[data-affibloom-open="<id>"]` opens one, `[data-affibloom-close]`, Escape or
-	 * the backdrop closes it. While it is open, Tab stays inside it; on closing, the focus goes back to the opener
-	 * and the modal hears an `affibloom:close` event so it can reset itself.
+	 * the backdrop closes it. While it is open, Tab stays inside it; on closing, the focus goes back to the opener.
+	 * The modal hears `affibloom:open` (with the opener's `data-affibloom-mode`, if any) and `affibloom:close`, so it
+	 * can set itself up and reset itself.
 	 */
 	var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), textarea:not([disabled]), select:not([disabled])';
 	var openModal = null;
@@ -98,13 +100,15 @@
 
 	function showModal( modal, trigger ) {
 		var first = modal.querySelector( '.affibloom-modal__body input, .affibloom-modal__body textarea' ) || modal.querySelector( FOCUSABLE );
-		opener = trigger;
+		// A menu item closes its menu, so the focus goes back to the button that opened the menu.
+		opener = trigger.closest( '.affibloom-menu' ) ? document.querySelector( '[aria-controls="' + trigger.closest( '.affibloom-menu' ).id + '"]' ) : trigger;
 		openModal = modal;
 		modal.hidden = false;
 		document.body.classList.add( 'affibloom-has-modal' );
 		if ( first ) {
 			first.focus();
 		}
+		modal.dispatchEvent( new CustomEvent( 'affibloom:open', { detail: { mode: trigger.getAttribute( 'data-affibloom-mode' ) || 'single' } } ) );
 	}
 
 	function hideModal() {
@@ -139,10 +143,31 @@
 		}
 	}
 
+	/**
+	 * Menus (design system, "Menu"): a button with `aria-controls` and `aria-expanded` shows the menu card under it;
+	 * choosing an item, Escape or a click elsewhere closes it.
+	 */
+	var openMenu = null;
+
+	function setMenu( toggle, open ) {
+		var menu = document.getElementById( toggle.getAttribute( 'aria-controls' ) );
+		menu.hidden = ! open;
+		toggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		openMenu = open ? toggle : null;
+	}
+
 	document.addEventListener( 'click', function ( event ) {
+		var toggle = event.target.closest( '[aria-controls][aria-expanded]' );
+		var controlled = toggle ? document.getElementById( toggle.getAttribute( 'aria-controls' ) ) : null;
 		var trigger = event.target.closest( '[data-affibloom-open]' );
 		var modal = trigger ? document.getElementById( trigger.getAttribute( 'data-affibloom-open' ) ) : null;
-		if ( modal ) {
+
+		if ( openMenu && openMenu !== toggle ) {
+			setMenu( openMenu, false );
+		}
+		if ( controlled && controlled.classList.contains( 'affibloom-menu' ) ) {
+			setMenu( toggle, 'false' === toggle.getAttribute( 'aria-expanded' ) );
+		} else if ( modal ) {
 			event.preventDefault();
 			showModal( modal, trigger );
 		} else if ( openModal && event.target.closest( '[data-affibloom-close]' ) ) {
@@ -151,6 +176,12 @@
 	} );
 
 	document.addEventListener( 'keydown', function ( event ) {
+		if ( openMenu && 'Escape' === event.key ) {
+			var toggle = openMenu;
+			setMenu( toggle, false );
+			toggle.focus();
+			return;
+		}
 		if ( ! openModal ) {
 			return;
 		}
@@ -163,54 +194,182 @@
 	} );
 
 	/**
-	 * "Add A New Link", single-link mode (F18, Task 11A). As in Lasso: Enter or Add Link submits; an empty box is
-	 * refused here without a request ("URL is incorrect."); while the request runs, the field and button are
-	 * disabled; typing clears the message. On success the browser goes where the server says.
+	 * "Add A New Link" (F18), Lasso's two modes in one dialog.
+	 *
+	 * Single (Task 11A): Enter or Add Link submits; an empty box is refused without a request ("URL is incorrect.");
+	 * while the request runs the field and button are disabled; typing clears the message; on success the browser goes
+	 * where the server says.
+	 *
+	 * Bulk (Task 11C): Shift + Enter in the field, or the header menu's "Bulk add links", swaps the field for a
+	 * textarea; Shift + Enter there swaps back with the first link. The counter shows how many of the ten remain; on
+	 * leaving the textarea its links show as a numbered list with a pencil to edit them. Add Link asks first, starts a
+	 * background run and follows it every 3 seconds until it is done, then goes where the server says. A run already
+	 * going locks the textarea and offers Reload, as in Lasso.
 	 *
 	 * @param {HTMLFormElement} form The `.affibloom-add-form`.
 	 */
 	function addLink( form ) {
+		var modal = form.closest( '.affibloom-modal' );
 		var field = form.querySelector( '#affibloom-add-url' );
+		var lines = form.querySelector( '#affibloom-add-urls' );
+		var preview = form.querySelector( '.affibloom-add-form__preview' );
+		var previewList = form.querySelector( '.affibloom-add-form__preview-list' );
+		var edit = form.querySelector( '.affibloom-add-form__edit' );
+		var count = form.querySelector( '#affibloom-add-count' );
+		var progress = form.querySelector( '.affibloom-progress' );
+		var bar = form.querySelector( '.affibloom-progress__bar' );
+		var hint = form.querySelector( '#affibloom-add-hint' );
 		var error = form.querySelector( '#affibloom-add-error' );
+		var title = modal.querySelector( '#affibloom-add-title' );
+		var intro = modal.querySelector( '#affibloom-add-intro' );
 		var submit = form.querySelector( '#affibloom-add-submit' );
+		var reload = form.querySelector( '.affibloom-add-form__reload' );
 		var label = submit.querySelector( '.affibloom-add-form__label' );
 		var idleLabel = label.textContent;
+		var idlePlaceholder = lines.getAttribute( 'placeholder' );
+		var limit = parseInt( form.getAttribute( 'data-limit' ), 10 );
+		var text = function ( name ) {
+			return form.getAttribute( 'data-' + name );
+		};
+		var bulk = false;
+		var polling = null;
+
+		var control = function () {
+			return bulk ? lines : field;
+		};
+		var nonBlank = function () {
+			return lines.value.split( /\r?\n/ ).map( function ( line ) {
+				return line.trim();
+			} ).filter( Boolean );
+		};
 
 		var showError = function ( message ) {
 			error.textContent = message;
 			error.hidden = false;
-			field.classList.add( 'is-invalid' );
-			field.setAttribute( 'aria-invalid', 'true' );
+			control().classList.add( 'is-invalid' );
+			control().setAttribute( 'aria-invalid', 'true' );
 		};
 		var clearError = function () {
 			error.textContent = '';
 			error.hidden = true;
-			field.classList.remove( 'is-invalid' );
-			field.removeAttribute( 'aria-invalid' );
+			[ field, lines ].forEach( function ( input ) {
+				input.classList.remove( 'is-invalid' );
+				input.removeAttribute( 'aria-invalid' );
+			} );
 		};
 		var busy = function ( isBusy ) {
-			field.disabled = isBusy;
+			control().disabled = isBusy;
 			submit.disabled = isBusy;
-			label.textContent = isBusy ? form.getAttribute( 'data-label-busy' ) : idleLabel;
+			label.textContent = isBusy ? text( 'label-busy' ) : idleLabel;
 		};
 
-		field.addEventListener( 'input', clearError );
+		var updateCount = function () {
+			count.textContent = text( 'label-remaining' ).replace( '%d', String( Math.max( 0, limit - nonBlank().length ) ) );
+		};
+		var showLines = function () {
+			preview.hidden = true;
+			lines.hidden = false;
+			count.hidden = false;
+		};
+		var showPreview = function () {
+			previewList.replaceChildren();
+			nonBlank().slice( 0, limit ).forEach( function ( link ) {
+				var item = document.createElement( 'li' );
+				item.textContent = link;
+				previewList.append( item );
+			} );
+			lines.hidden = true;
+			count.hidden = true;
+			preview.hidden = false;
+		};
+		var setProgress = function ( percent ) {
+			// Lasso starts the bar at 3% and never shows less than 5% while it runs.
+			bar.style.width = percent + '%';
+			progress.setAttribute( 'aria-valuenow', String( percent ) );
+		};
+		var stopPolling = function () {
+			window.clearInterval( polling );
+			polling = null;
+		};
 
-		form.closest( '.affibloom-modal' ).addEventListener( 'affibloom:close', function () {
-			field.value = '';
-			clearError();
+		var lockRunning = function () {
+			stopPolling();
+			showLines();
 			busy( false );
-		} );
+			lines.disabled = true;
+			lines.rows = 2;
+			lines.value = '';
+			lines.setAttribute( 'placeholder', text( 'message-running' ) );
+			count.hidden = true;
+			progress.hidden = true;
+			submit.hidden = true;
+			reload.hidden = false;
+		};
+		var unlock = function () {
+			lines.disabled = false;
+			lines.rows = 7;
+			lines.setAttribute( 'placeholder', idlePlaceholder );
+			submit.hidden = false;
+			reload.hidden = true;
+		};
 
-		form.addEventListener( 'submit', function ( event ) {
-			event.preventDefault();
+		var enterBulk = function () {
+			if ( bulk ) {
+				return;
+			}
+			bulk = true;
 			clearError();
+			lines.value = '' !== lines.value.trim() ? lines.value : field.value;
+			field.hidden = true;
+			hint.hidden = true;
+			title.textContent = text( 'title-bulk' );
+			intro.textContent = text( 'intro-bulk' );
+			showLines();
+			updateCount();
+			lines.focus();
+			wp.apiFetch( { path: '/affibloom/v1/products/bulk' } ).then( function ( response ) {
+				if ( bulk && response.data.running ) {
+					lockRunning();
+				}
+			} ).catch( function () {} );
+		};
+		var leaveBulk = function () {
+			if ( ! bulk ) {
+				return;
+			}
+			bulk = false;
+			stopPolling();
+			clearError();
+			unlock();
+			field.value = nonBlank()[ 0 ] || '';
+			lines.hidden = true;
+			preview.hidden = true;
+			count.hidden = true;
+			progress.hidden = true;
+			field.hidden = false;
+			hint.hidden = false;
+			title.textContent = text( 'title-single' );
+			intro.textContent = text( 'intro-single' );
+		};
+
+		var follow = function () {
+			polling = window.setInterval( function () {
+				wp.apiFetch( { path: '/affibloom/v1/products/bulk' } ).then( function ( response ) {
+					setProgress( Math.max( 5, response.data.percent ) );
+					if ( ! response.data.running ) {
+						stopPolling();
+						window.location.assign( response.data.redirect_to );
+					}
+				} ).catch( function () {} );
+			}, 3000 );
+		};
+
+		var addOne = function () {
 			if ( '' === field.value.trim() ) {
-				showError( form.getAttribute( 'data-message-empty' ) );
+				showError( text( 'message-empty' ) );
 				field.focus();
 				return;
 			}
-
 			busy( true );
 			wp.apiFetch( { path: '/affibloom/v1/products', method: 'POST', data: { url: field.value } } )
 				.then( function ( response ) {
@@ -219,9 +378,96 @@
 				.catch( function ( failure ) {
 					var fields = failure && failure.data && failure.data.fields;
 					busy( false );
-					showError( ( fields && fields.url ) || ( failure && failure.message ) || form.getAttribute( 'data-message-failed' ) );
+					showError( ( fields && fields.url ) || ( failure && failure.message ) || text( 'message-failed' ) );
 					field.focus();
 				} );
+		};
+
+		var addMany = function () {
+			var urls = nonBlank().slice( 0, limit );
+			if ( ! urls.length ) {
+				showLines();
+				showError( text( 'message-empty' ) );
+				lines.focus();
+				return;
+			}
+			if ( ! window.confirm( text( 'confirm-bulk' ) ) ) {
+				return;
+			}
+			busy( true );
+			edit.hidden = true;
+			progress.hidden = false;
+			setProgress( 3 );
+			wp.apiFetch( { path: '/affibloom/v1/products/bulk', method: 'POST', data: { urls: urls } } )
+				.then( follow )
+				.catch( function ( failure ) {
+					var fields = failure && failure.data && failure.data.fields;
+					edit.hidden = false;
+					progress.hidden = true;
+					if ( failure && 'affibloom_bulk_running' === failure.code ) {
+						lockRunning();
+						return;
+					}
+					busy( false );
+					showLines();
+					showError( ( fields && fields.urls ) || ( failure && failure.message ) || text( 'message-failed' ) );
+					lines.focus();
+				} );
+		};
+
+		field.addEventListener( 'input', clearError );
+		lines.addEventListener( 'input', function () {
+			clearError();
+			updateCount();
+		} );
+		field.addEventListener( 'keydown', function ( event ) {
+			if ( 'Enter' === event.key && event.shiftKey ) {
+				event.preventDefault();
+				enterBulk();
+			}
+		} );
+		lines.addEventListener( 'keydown', function ( event ) {
+			if ( 'Enter' === event.key && event.shiftKey ) {
+				event.preventDefault();
+				leaveBulk();
+				field.focus();
+			}
+		} );
+		lines.addEventListener( 'blur', function () {
+			if ( bulk && ! lines.disabled && '' !== lines.value.trim() ) {
+				showPreview();
+			}
+		} );
+		edit.addEventListener( 'click', function () {
+			showLines();
+			lines.focus();
+		} );
+		reload.addEventListener( 'click', function () {
+			window.location.reload();
+		} );
+
+		modal.addEventListener( 'affibloom:open', function ( event ) {
+			if ( 'bulk' === event.detail.mode ) {
+				enterBulk();
+			}
+		} );
+		modal.addEventListener( 'affibloom:close', function () {
+			leaveBulk();
+			field.value = '';
+			lines.value = '';
+			edit.hidden = false;
+			clearError();
+			busy( false );
+		} );
+
+		form.addEventListener( 'submit', function ( event ) {
+			event.preventDefault();
+			clearError();
+			if ( bulk ) {
+				addMany();
+			} else {
+				addOne();
+			}
 		} );
 	}
 

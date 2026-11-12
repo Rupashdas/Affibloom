@@ -116,16 +116,22 @@
 	background: var(--affibloom-on-navy-active);
 	color: var(--affibloom-white);
 }
-/* The screen's main action, right of the navigation: a white button with navy text (design system, "Layout") */
-.affibloom-admin .affibloom-header__action {
+/* The screen's main action, right of the navigation: a white split button with navy text (design system, "Layout"):
+   the main part and a caret that opens the menu of other ways to add */
+.affibloom-header__add {
+	position: relative;
+	display: flex;
+	margin-left: auto;
+}
+.affibloom-admin .affibloom-header__action,
+.affibloom-admin .affibloom-header__caret {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 	height: 38px;
-	margin-left: auto;
 	padding: 0 16px;
 	border: 0;
-	border-radius: var(--affibloom-radius-control);
+	border-radius: var(--affibloom-radius-control) 0 0 var(--affibloom-radius-control);
 	background: var(--affibloom-white);
 	color: var(--affibloom-navy-900);
 	font: 600 14px/20px var(--affibloom-font);
@@ -133,7 +139,47 @@
 	cursor: pointer;
 	transition: background-color var(--affibloom-ease);
 }
-.affibloom-admin .affibloom-header__action:hover { background: var(--affibloom-brand-50); }
+.affibloom-admin .affibloom-header__caret {
+	padding: 0 9px;
+	border-left: 1px solid var(--affibloom-control-line);
+	border-radius: 0 var(--affibloom-radius-control) var(--affibloom-radius-control) 0;
+}
+.affibloom-admin .affibloom-header__action:hover,
+.affibloom-admin .affibloom-header__caret:hover,
+.affibloom-admin .affibloom-header__caret[aria-expanded="true"] { background: var(--affibloom-brand-50); }
+
+/* Menu (design system, "Menu"): a white card under its button, items with an icon chip, a title and a description */
+.affibloom-menu {
+	position: absolute;
+	top: calc(100% + 8px);
+	right: 0;
+	z-index: 100000;
+	width: 300px;
+	max-width: calc(100vw - 32px);
+	padding: 8px;
+	box-sizing: border-box;
+	border-radius: var(--affibloom-radius-chip);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+}
+.affibloom-menu__item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	padding: 8px;
+	border: 0;
+	border-radius: var(--affibloom-radius-nav);
+	background: none;
+	color: var(--affibloom-ink-900);
+	font: 400 14px/20px var(--affibloom-font);
+	text-align: left;
+	cursor: pointer;
+}
+.affibloom-menu__item:hover { background: var(--affibloom-subtle); }
+.affibloom-menu__text { display: flex; flex-direction: column; }
+.affibloom-menu__title { font-weight: 600; }
+.affibloom-menu__desc { color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
 
 /* 3. Band: the gradient with the title, the subtitle and section tabs */
 .affibloom-band {
@@ -912,6 +958,54 @@
 	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
 	background: var(--affibloom-subtle);
 }
+/* "Add A New Link": hint, bulk textarea, counter, preview of the links, progress */
+.affibloom-add-form__hint,
+.affibloom-add-form__count { margin: 8px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-add-form__count { text-align: right; }
+.affibloom-admin .affibloom-add-form__lines { white-space: pre; overflow-x: auto; }
+.affibloom-add-form__preview {
+	position: relative;
+	max-height: 182px;
+	overflow: auto;
+	padding: 9px 44px 9px 12px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+}
+.affibloom-add-form__preview-list { margin: 0 0 0 20px; font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+.affibloom-add-form__edit {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-nav);
+	background: none;
+	color: var(--affibloom-brand-600);
+	cursor: pointer;
+}
+.affibloom-add-form__edit:hover { background: var(--affibloom-brand-50); }
+
+/* Progress bar (design system, "Progress bar"): 8px track, brand gradient fill */
+.affibloom-progress {
+	height: 8px;
+	margin-top: 12px;
+	overflow: hidden;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-segment-bg);
+}
+.affibloom-progress__bar {
+	display: block;
+	width: 0;
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, var(--affibloom-brand-500), var(--affibloom-brand-600));
+	transition: width 300ms ease;
+}
+
 /* The page behind an open modal does not scroll. */
 body.affibloom-has-modal { overflow: hidden; }
 
@@ -934,6 +1028,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-header__tab-label,
 	.affibloom-header__action-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 	.affibloom-admin .affibloom-header__action { padding: 0 10px; }
+	.affibloom-admin .affibloom-header__caret { padding: 0 7px; }
 	.affibloom-setting { flex-wrap: wrap; }
 	.affibloom-setting .affibloom-toggle { margin-left: 56px; }
 	.affibloom-card__foot .affibloom-button { width: 100%; }

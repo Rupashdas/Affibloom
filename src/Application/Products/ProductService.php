@@ -13,6 +13,7 @@ use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductRepository;
+use RuntimeException;
 
 /**
  * Product use cases.
@@ -32,7 +33,8 @@ final class ProductService {
 	 * is named after the link's site, as Lasso names it before its cloud answers (Lasso_Helper::get_title_by_url).
 	 *
 	 * @param string $input What was pasted.
-	 * @throws InvalidField When the input is empty or not a link.
+	 * @throws InvalidField      When the input is empty or not a link.
+	 * @throws RuntimeException When the product cannot be stored.
 	 */
 	public function create_from_url( string $input ): AddedLink {
 		$url = AffiliateUrl::from_string( $input );

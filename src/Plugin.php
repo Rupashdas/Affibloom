@@ -10,12 +10,16 @@ declare( strict_types=1 );
 namespace Affibloom;
 
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
+use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
+use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
@@ -24,6 +28,7 @@ use Affibloom\Interface\Admin\DisplayScreen;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
+use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Template;
@@ -93,6 +98,8 @@ final class Plugin {
 		$settings = new SettingsService( $this->settings_repository() );
 		$display  = new DisplaySettingsService( new OptionDisplaySettingsRepository(), $this->settings_repository() );
 		$notice   = new Notice();
+		$products = new ProductService( new PostTypeProductRepository() );
+		$bulk     = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 
 		return array(
 			new ProductPostType(),
@@ -108,7 +115,9 @@ final class Plugin {
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),
 			new DisplayController( $display, $settings ),
-			new ProductsController( new ProductService( new PostTypeProductRepository() ), new ProductResource() ),
+			new ProductsController( $products, new ProductResource() ),
+			new BulkAddController( $bulk ),
+			new BulkAddCron( $bulk ),
 		);
 	}
 

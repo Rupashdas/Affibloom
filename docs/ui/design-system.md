@@ -87,7 +87,7 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 - **Header:** navy-900 bar, 60px. Left: the logo mark (five petals in brand-300 around a navy ring and a white dot,
   28px) and the wordmark in white. Then the navigation (Dashboard, Settings), each an icon plus label in on-navy text,
   8px radius; the current one white text on `rgba(255,255,255,.12)`. Right: the screen's main action as a white button
-  with navy text (`Add New Link`, from Task 11).
+  with navy text (`Add New Link`, from Task 11A), split as in Lasso: its caret opens a Menu of other ways to add (Task 11C).
 - **Band:** under the header, full width, `linear-gradient(120deg, navy-900, brand-600)`, padding 28px 32px 72px. It
   holds the page title, the subtitle (U10) and, on screens with sections, the section tabs (segmented control on the
   band: inactive on-band text on `rgba(255,255,255,.12)`, active white segment with ink-900 text).
@@ -125,6 +125,8 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 | **Status pill** | full round, 12px/600, tint background with the status-700 text and an icon (`OK`, `Broken`). |
 | **Toast** | ink-900 card, white text, 12px radius, toast shadow, a 24px toast-icon circle with a dark tick; bottom right; `role="status"`. **Info** variant (nothing was done, e.g. a link the site already has; Task 11B): the circle in brand-300 with a navy-900 "i" (6.3:1; the circle on ink-900 7.2:1), up to 420px wide. |
 | **Modal** | 560px, 16px radius, toast shadow, backdrop `rgba(11,42,91,.45)`; header, body, footer like cards; focus trapped and returned; Escape closes. |
+| **Menu** | a white card under its button (12px radius, card shadow, 8px padding, 300px wide, at most the screen less 32px); items 8px padded with an 8px radius, a 40px icon chip, a 600 title and a 13px ink-600 description, subtle background on hover. The button has `aria-expanded` and `aria-controls`; choosing an item, Escape or a click elsewhere closes it (Task 11C). |
+| **Progress bar** | 8px track in `#E6ECF6`, full round; the fill a `brand-500` to `brand-600` gradient that widens over 300 ms; `role="progressbar"` with `aria-valuenow` (Task 11C). |
 | **Empty state** | inside a card: a 40px icon chip, a one-line message (600) and, where there is one, the primary action. |
 | **Icons** | 20×20 outline set drawn for Affibloom (stroke 1.6, round caps), inline SVG from one partial; never Lasso's icons. |
 

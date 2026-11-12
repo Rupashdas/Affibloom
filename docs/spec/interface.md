@@ -42,10 +42,14 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 
 | Element | Lasso shows | Label | id / selector | Note |
 |---|---|---|---|---|
-| Opener | `Add New Link` split button in the header, on every screen | `Add New Link` | `.affibloom-header__action[data-affibloom-open]` | Task 11A. Icon only at 782px and below; the label stays for screen readers. The caret's "Bulk add links" comes with 11C, "Marketplace" with C1 (F18 D5). |
+| Opener | `Add New Link` split button in the header, on every screen | `Add New Link` | `.affibloom-header__action[data-affibloom-open]` | Task 11A. Icon only at 782px and below; the label stays for screen readers. |
+| Caret and menu | caret, title `More ways to add links`; menu card: `Bulk add links` / `Import many URLs at once`, `Marketplace` / `Discover products to add as links` | same | `.affibloom-header__caret`, `#affibloom-add-menu`, `[data-affibloom-mode=bulk]` | Task 11C. Marketplace comes with C1 (F18 D5). |
 | Dialog | `Add A New Link`, `Enter the affiliate link you would like to track.` | `Add A New Link` | `#affibloom-add-modal [role=dialog]` | |
 | Tabs | `URL`, `Marketplace` | — | — | Marketplace rebuilt as an Amazon search with C1 (F18 D5); until then no tabs. |
-| Field | single text input; textarea in bulk mode; placeholder `https://www.example.com/affiliate-id`, no visible label | `URL` (visually hidden) | `#affibloom-add-url` | Error below it, `#affibloom-add-error`. The hint `Enter each new link on a separate line (Shift + Enter)` and the textarea come with Task 11C. |
+| Field | single text input; placeholder `https://www.example.com/affiliate-id`, no visible label | `URL` (visually hidden) | `#affibloom-add-url` | Error below it, `#affibloom-add-error`; hint `Enter each new link on a separate line (Shift + Enter)`, `#affibloom-add-hint`. |
+| Bulk field | textarea, 7 rows, no wrapping; title `Bulk Add Links`, subtitle `Enter one URL per line (up to 10). Links are created in the background—you can leave this page while they process.` | `Links, one per line` (visually hidden) | `#affibloom-add-urls` | Task 11C. Shift + Enter in either field switches. |
+| Counter, preview | `Remaining links: N`; on leaving the textarea, a numbered list with a pencil | same; the pencil `Edit the links` | `#affibloom-add-count`, `.affibloom-add-form__preview` | |
+| Progress, running | confirm `Add these links in the background? You can stay on the dashboard while they are created.`; progress bar; while a run is going: textarea disabled, `Your bulk add is still processing. Try again in a few minutes.`, `Reload` | same | `.affibloom-progress[role=progressbar]`, `.affibloom-add-form__reload` | The Dashboard then says `Bulk add finished.` until Task 13 lists the products. |
 | Submit | `Add Link` | `Add Link` | `#affibloom-add-submit` | |
 | Messages | `URL is incorrect.` (empty box) | same; `This is not a valid link.` for what is not an http(s) address | `#affibloom-add-error` | F18 D1. |
 | Duplicate | the existing product's page with `This product already exists. Please update the Primary URL or add a new link.` | same | — | Task 11B (F18 D2: follow Lasso, with the `check_duplicate_link` setting). |
@@ -121,7 +125,9 @@ Capabilities (`src/Interface/Admin/Capabilities.php`, decision 1): `PRODUCTS` = 
 
 | Method | Path | Capability | Purpose |
 |---|---|---|---|
-| POST | `/products` `{ url: string }` | `PRODUCTS` | Add A New Link, one link (Task 11A). 201 `{ id, name, url, redirect_to }`; 422 `affibloom_invalid_field` with `data.fields.url`. Bulk add (ten links, in the background) gets its own route in Task 11C |
+| POST | `/products` `{ url: string }` | `PRODUCTS` | Add A New Link, one link (Task 11A). 201 `{ id, name, url, redirect_to }`; 422 `affibloom_invalid_field` with `data.fields.url`. |
+| POST | `/products/bulk` `{ urls: string[] }` | `PRODUCTS` | Bulk add (Task 11C): the first ten non-blank lines, added in the background. 202 `{ total }`; 409 `affibloom_bulk_running`; 422 `affibloom_invalid_field` with `data.fields.urls` |
+| GET | `/products/bulk` | `PRODUCTS` | the run's progress: `{ running, percent, redirect_to }`; also wakes a waiting run |
 | GET | `/products?search=` | `INSERT_BOXES` | block picker (20 newest matches) |
 | GET | `/products/{id}` | `INSERT_BOXES` | block sidebar |
 | PATCH | `/products/{id}[?preview=1]` | `PRODUCTS` | product page, quick edit. 422 `data.fields`, 404 |

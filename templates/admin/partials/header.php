@@ -44,10 +44,27 @@ $header_can_add = current_user_can( \Affibloom\Interface\Admin\Capabilities::PRO
 		<?php endforeach; ?>
 	</nav>
 	<?php if ( $header_can_add ) : ?>
-		<button type="button" class="affibloom-header__action" data-affibloom-open="affibloom-add-modal" aria-haspopup="dialog">
-			<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
-			<span class="affibloom-header__action-label"><?php esc_html_e( 'Add New Link', 'affibloom' ); ?></span>
-		</button>
+		<?php // Lasso's split button: the main part opens the single-link dialog, the caret lists the other ways to add. ?>
+		<div class="affibloom-header__add">
+			<button type="button" class="affibloom-header__action" data-affibloom-open="affibloom-add-modal" aria-haspopup="dialog">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+				<span class="affibloom-header__action-label"><?php esc_html_e( 'Add New Link', 'affibloom' ); ?></span>
+			</button>
+			<button type="button" class="affibloom-header__caret" aria-expanded="false" aria-controls="affibloom-add-menu"
+				aria-label="<?php esc_attr_e( 'More ways to add links', 'affibloom' ); ?>" title="<?php esc_attr_e( 'More ways to add links', 'affibloom' ); ?>">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'chevron-down' ) ); ?>
+			</button>
+			<?php // Lasso's Marketplace item comes with C1 (F18 decision D5). ?>
+			<div id="affibloom-add-menu" class="affibloom-menu" hidden>
+				<button type="button" class="affibloom-menu__item" data-affibloom-open="affibloom-add-modal" data-affibloom-mode="bulk" aria-haspopup="dialog">
+					<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'layers' ) ); ?></span>
+					<span class="affibloom-menu__text">
+						<span class="affibloom-menu__title"><?php esc_html_e( 'Bulk add links', 'affibloom' ); ?></span>
+						<span class="affibloom-menu__desc"><?php esc_html_e( 'Import many URLs at once', 'affibloom' ); ?></span>
+					</span>
+				</button>
+			</div>
+		</div>
 	<?php endif; ?>
 </header>
 <?php

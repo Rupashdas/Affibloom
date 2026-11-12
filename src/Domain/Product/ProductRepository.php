@@ -18,6 +18,7 @@ interface ProductRepository {
 	 * Stores a new product; returns it with its ID.
 	 *
 	 * @param Product $product Product to store.
+	 * @throws \RuntimeException When the storage refuses it.
 	 */
 	public function save( Product $product ): Product;
 

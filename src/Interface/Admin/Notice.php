@@ -28,6 +28,8 @@ final class Notice {
 			'link-added'   => __( 'Link added.', 'affibloom' ),
 			// Lasso's warning when "Add A New Link" finds a product with the same link.
 			'duplicate'    => __( 'This product already exists. Please update the Primary URL or add a new link.', 'affibloom' ),
+			// Until Task 13 lists the products, the Dashboard says a bulk add finished (Lasso only reloads it).
+			'bulk-added'   => __( 'Bulk add finished.', 'affibloom' ),
 			default        => '',
 		};
 	}

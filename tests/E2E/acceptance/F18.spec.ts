@@ -70,6 +70,76 @@ test.describe( 'F18 Adding links', () => {
 		expect( productsWithLink( variant ) ).toHaveLength( 0 );
 	} );
 
+	/** The dialog, whatever its title says (it changes in bulk mode). */
+	const dialogOf = ( page: Page ) => page.locator( '#affibloom-add-modal [role="dialog"]' );
+
+	async function openBulk( page: Page ) {
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.getByRole( 'button', { name: 'More ways to add links' } ).click();
+		await page.getByRole( 'button', { name: /^Bulk add links/ } ).click();
+		return dialogOf( page );
+	}
+
+	test( 'AC6 Shift + Enter turns the field into the bulk textarea, and the counter falls', async ( { page } ) => {
+		const first = `https://www.example.com/${ unique( 'f18-ac6a' ) }`;
+		const dialog = await openAdd( page );
+		await dialog.getByLabel( 'URL' ).fill( first );
+		await dialog.getByLabel( 'URL' ).press( 'Shift+Enter' );
+
+		const box = dialogOf( page ).getByLabel( 'Links, one per line' );
+		await expect( box ).toBeFocused();
+		await expect( box ).toHaveValue( first );
+		await expect( dialogOf( page ).getByRole( 'heading', { name: 'Bulk Add Links' } ) ).toBeVisible();
+		await expect( dialogOf( page ).getByText( 'Remaining links: 9' ) ).toBeVisible();
+
+		await box.press( 'End' );
+		await box.press( 'Enter' );
+		await box.type( `https://www.example.com/${ unique( 'f18-ac6b' ) }` );
+		await expect( dialogOf( page ).getByText( 'Remaining links: 8' ) ).toBeVisible();
+
+		// Shift + Enter again: back to one link, the first.
+		await box.press( 'Shift+Enter' );
+		await expect( dialogOf( page ).getByLabel( 'URL' ) ).toHaveValue( first );
+		await expect( dialogOf( page ).getByRole( 'heading', { name: 'Add A New Link' } ) ).toBeVisible();
+	} );
+
+	test( 'AC7 AC8 ten links are added in the background with a progress bar; an eleventh is ignored', async ( { page } ) => {
+		test.setTimeout( 120_000 ); // WordPress spawns cron at most once a minute.
+		const run = unique( 'f18-ac7' );
+		const links = Array.from( { length: 11 }, ( _, i ) => `https://www.example.com/${ run }-${ i + 1 }` );
+
+		const dialog = await openBulk( page );
+		await expect( dialog.getByLabel( 'Links, one per line' ) ).toBeFocused();
+		await dialog.getByLabel( 'Links, one per line' ).fill( links.join( '\n' ) );
+		await expect( dialog.getByText( 'Remaining links: 0' ) ).toBeVisible();
+
+		page.once( 'dialog', ( confirm ) => confirm.accept() );
+		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
+		await expect( dialog.getByRole( 'progressbar' ) ).toBeVisible();
+
+		// Until Task 13 shows the list, the Dashboard says the run finished.
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Bulk add finished.', { timeout: 100_000 } );
+		for ( const link of links.slice( 0, 10 ) ) {
+			expect( productsWithLink( link ) ).toHaveLength( 1 );
+		}
+		expect( productsWithLink( links[ 10 ] ) ).toHaveLength( 0 );
+	} );
+
+	test( 'AC9 while a run is going, bulk mode is locked with a Reload button', async ( { page } ) => {
+		await page.route( '**/affibloom/v1/products/bulk**', ( route ) =>
+			'GET' === route.request().method()
+				? route.fulfill( { json: { data: { running: true, percent: 40, redirect_to: '/wp-admin/admin.php?page=affibloom' } } } )
+				: route.continue()
+		);
+
+		const dialog = await openBulk( page );
+		const box = dialog.getByLabel( 'Links, one per line' );
+		await expect( box ).toBeDisabled();
+		await expect( box ).toHaveAttribute( 'placeholder', 'Your bulk add is still processing. Try again in a few minutes.' );
+		await expect( dialog.getByRole( 'button', { name: 'Reload' } ) ).toBeVisible();
+		await expect( dialog.getByRole( 'button', { name: 'Add Link' } ) ).toBeHidden();
+	} );
+
 	test( 'AC5 an empty box is refused in the modal and nothing is sent', async ( { page } ) => {
 		const dialog = await openAdd( page );
 		let requests = 0;

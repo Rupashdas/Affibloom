@@ -24,6 +24,8 @@ final class Messages {
 			// Lasso's words for an empty "Add A New Link" box.
 			'empty'       => __( 'URL is incorrect.', 'affibloom' ),
 			'invalid_url' => __( 'This is not a valid link.', 'affibloom' ),
+			// Lasso's words while a bulk add is still going.
+			'bulk_running' => __( 'Your bulk add is still processing. Try again in a few minutes.', 'affibloom' ),
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}
