@@ -1,6 +1,6 @@
 # F5 Box design: analysis
 
-Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 **Tasks:** 18, 22 (19–21 add the second button, per-box text and rating).
 
@@ -26,8 +26,8 @@ Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
 
 ## Risks
 
-- Font and image rendering differences: tolerance `maxDiffPixelRatio` 0.01.
-- Icon `<span>`s must survive cleaning and printing (docs/spec/interface.md, section 7, question 5).
+- Font and image rendering differences: tolerance `maxDiffPixelRatio` 0.01 (decision 9).
+- Icon `<span>`s are printed through a `span[class]` allowlist (decision 5).
 - LiteSpeed's CSS optimisation must not drop the new stylesheet.
 
 ## Security

@@ -1,6 +1,6 @@
 # F3 Other merchant links: requirements
 
-Status: Proposed (gate 1; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 1), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 ## User stories
 

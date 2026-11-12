@@ -1,7 +1,8 @@
 # C2 Automatic affiliate link detection: requirements
 
-Status: In scope (the user's decision, 2026-11-12: Lasso supports it, so it is included). Gate 4 approval of its
-task is still needed, including the choice between Lasso's automatic creation and the "ask first" variant (U8).
+Status: In scope (the user's decision, 2026-11-12: Lasso supports it, so it is included). Decided 2026-11-12:
+automatic creation, as in Lasso (U8 rejected); the networks the site uses, Impact and Post Affiliate Pro (decision 8).
+Gate 4 approval of its task is still needed.
 
 ## User stories
 

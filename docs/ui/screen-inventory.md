@@ -9,16 +9,16 @@ its register item or the spec change in `docs/spec/interface.md`). Screens: the 
 
 - **Unsaved changes (U7):** Lasso already warns, on the product page and on Settings (browser prompt, plus
   its own `#unsaved-changes` dialog when a link is clicked). Building it is parity, not an improvement.
-- **Tooltips by keyboard (U3):** no. The CSS shows them on `:hover` and `:focus`, but the elements carrying
+- **Tooltips by keyboard (U3, approved):** no. The CSS shows them on `:hover` and `:focus`, but the elements carrying
   them are `<label>`s and `<a>`s without `href` and without `tabindex`, so they never take focus. Touch and
   screen readers miss them too.
-- **Toast:** `Yee haw! Your <name> saved.` (`admin/views/notifications/save-success.php`). U6 would change it.
+- **Toast:** `Yee haw! Your <name> saved.` (`admin/views/notifications/save-success.php`). U6 (approved) makes it `Product saved.`
 - **Confirmations:** `Delete This Link?` / `If deleted, you won't be able to get it back.` / `Cancel`,
   `Delete`. In use: `Hold Up` / `This URL has active links and/or displays. Deleting this link will: …
   This can't be undone. Do you want to proceed?` / `Keep This Link`, `Delete This Link`.
 - **Dashboard page size:** 10 rows, with a per-page selector (`10 per page`, `1-10 of 263`).
-- **Permissions:** `lasso_permission` is `Administrator` (Settings → General → Permissions). The plan assumed
-  Editors; see `interface.md` section 7, question 1.
+- **Permissions:** `lasso_permission` is `Administrator` (Settings → General → Permissions). Decided: products and
+  settings for Administrators only (`docs/decisions/task-6-decisions.md`, decision 1).
 - **Version:** production runs Lasso 370; the plan and the source were 369. 370 adds the product page's
   Share kit and Variants tab and turns Display settings into a visual editor.
 
@@ -41,7 +41,7 @@ its register item or the spec change in `docs/spec/interface.md`). Screens: the 
 |---|---|---|
 | Banner `Bulk Amazon sync · 3 Amazon links are ready to sync product data` | — | Left out (Amazon data sync; client point 1) |
 | Title `Dashboard` + `Learn` | — | Kept; `Learn` left out (Lasso docs) |
-| Red counter (broken) | `See broken URLs` | Kept (F11); U2 adds a text label |
+| Red counter (broken) | `See broken URLs` | Kept (F11), with the visible text `Broken links (n)` (U2, approved) |
 | Orange counter (out of stock) | `See out-of-stock products` | Left out (no Amazon data refresh) |
 | Green counter (opportunities) | `See opportunities` | Left out (opportunities) |
 | Search `Search all 263 links…` + `Ctrl+Shift+L` | — | Kept; shortcut left out |
@@ -108,8 +108,8 @@ its register item or the spec change in `docs/spec/interface.md`). Screens: the 
 | Rows: post title, URL, `(n locations)`, `Expand to view each location` | — | Kept |
 | `1-5 of 5` | — | Kept |
 
-Note: the list includes `sweet new post` (`?p=9492`, 3 locations), which looks like an unpublished test post.
-The usage index (Task 35) should state whether drafts count.
+Note: the list includes `sweet new post` (`?p=9492`, a draft, 3 locations). Decided: drafts, pending, scheduled and
+private posts count as locations, as in Lasso (decision 6).
 
 ## Settings → General (`settings-general-1…3.jpg`)
 
@@ -126,7 +126,7 @@ The usage index (Task 35) should state whether drafts count.
 | `Custom Link Detection` | Additional locations where Lasso will discovering links. | Left out |
 | `Performance` (CPU mode) | Lasso will wait until your CPU drops below this level to continue with its updates. | Left out |
 | `Link Defaults`: `New Window / Tab`, `NoFollow / NoIndex`, `Sponsored`, `Show Disclosure` | as on the product page; Show Disclosure: When enabled, this link will show the disclosure. | Kept (F9) |
-| `Allow duplicate destinations` | Allows you to have links from different networks to the same product. | Kept |
+| `Allow duplicate destinations` | Allows you to have links from different networks to the same product. | Left out: Affibloom always behaves as Lasso does with it on, the live value (decision 2) |
 | `Link Cloaking` | Toggle on to brand your link with your domain … | Left out (cloaking) |
 | `Detect Opportunities` | When off, Link Opportunities won't show for affected links … | Left out |
 | `Auto-Detect Affiliate Links` (on) | Add all detected affiliate links to your dashboard as individual products. | Kept (C2) |

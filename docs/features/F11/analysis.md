@@ -1,6 +1,6 @@
 # F11 Broken-link alerts: analysis
 
-Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 **Tasks:** 30–32.
 
@@ -20,6 +20,7 @@ Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
 ## Facts from Phase 1
 
 - Lasso checks about 200 links nightly; the live Dashboard shows 3 broken links (2026-11-12).
+- The filter shows the visible text "Broken links (n)" (U2 approved); no "Re-check now" (U4 rejected).
 
 ## Risks
 

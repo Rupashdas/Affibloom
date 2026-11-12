@@ -1,6 +1,6 @@
 # F4 Product box block: analysis
 
-Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 **Tasks:** 23, 24.
 
@@ -23,7 +23,7 @@ Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
 
 ## Risks
 
-- U1 would skip the display-type step.
+- U1 (approved): no display-type step, since Single is the only type built.
 - A product deleted after insertion renders nothing on the front end.
 
 ## Security

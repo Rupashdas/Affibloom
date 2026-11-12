@@ -1,6 +1,6 @@
 # F8 Star rating: analysis
 
-Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 **Tasks:** 21.
 

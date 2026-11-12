@@ -20,10 +20,13 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Header tabs | Dashboard, Opportunities, Tables, Groups, Analytics, Marketplace | `Dashboard`, `Settings` | `.affibloom-header nav a` | Other tabs belong to excluded features. Lasso reaches Settings from the WordPress menu. |
 | Add button | `Add New Link` (split; the caret opens Bulk Add Links) | `Add New Link` | `#affibloom-add-new` | The Add modal takes one link per line, which covers bulk adding. |
 | Search | placeholder `Search all 263 links…`, hint `Ctrl+Shift+L` | `Search` (visually hidden), placeholder `Search all <n> links…` | `#affibloom-search` (`name="s"`) | Keyboard shortcut not built. |
-| Broken filter | red icon + count, tooltip `See broken URLs` | `See broken URLs` | `a.affibloom-filter-broken` | U2 would add a visible text label. |
+| Broken filter | red icon + count, tooltip `See broken URLs` | `Broken links (<n>)` (visible text; the tooltip stays) | `a.affibloom-filter-broken` | **Changed** (U2, approved). |
 | Other counters | `See out-of-stock products`, `See opportunities` | — | — | Left out: no Amazon data refresh; Opportunities excluded. |
 | Columns | Image, Link Name, Groups, Alert, Locations, Clicks, Actions | Image, Link Name, Alert, Locations, Clicks, Actions | `thead th` | Groups left out: `lasso-cat` has 1 term and 0 assignments on the site. |
 | Row | — | — | `tr[data-product-id]` | |
+| Alert cell | green tick, or a red icon for a broken link | `Broken link` on the red icon | `td.affibloom-alert`, `.affibloom-alert-broken` | |
+| Locations cell | count | — | `td.affibloom-locations` | |
+| Clicks cell | count | — | `td.affibloom-clicks` | |
 | Row action: quick edit | button `Edit` (title `Quick Edit`), edits the row in place | `Edit` (title `Quick Edit`) | `button.affibloom-quick-edit` | **Changed** from `Quick edit`. |
 | Row action: shortcode | button `Shortcode` (copies `[lasso …]`) | — | — | Left out: Affibloom has no shortcode of its own; boxes are placed with the block. |
 | Row action: delete | not on the row (see the product page) | — | — | **Changed**: the plan's row `Delete` moves to the product page, as in Lasso (Task 17). |
@@ -63,15 +66,15 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Price | `Price` + toggle | — | — | Left out (price is not shown on the site). |
 | Description | `Description` (rich text: bold, italic, underline, strike, link, list, colour, highlight, clear) | same | `#affibloom_description` | |
 | Disclosure text | `Disclosure` | `Disclosure` | `#affibloom-disclosure` | **Changed** from `Disclosure Text`. |
-| Sponsored | `Sponsored` toggle | `Sponsored` | `#affibloom-sponsored` | **Added**: in Lasso and in the product meta (`_affibloom_sponsored`), but missing from the plan's form and `ProductInput`. Tasks 14–15, gate 4. |
+| Sponsored | `Sponsored` toggle | `Sponsored` | `#affibloom-sponsored` | **Added** (decision 3): in Lasso, in the feature plan (F9) and in the product meta. Tasks 14–15. |
 | Show disclosure | `Show Disclosure` | same | `#affibloom-show-disclosure` | |
 | Opportunities, upgrades | `Detect Opportunities`, `Commission Upgrades` | — | — | Excluded. |
 | Prime | not on Lasso's page (Lasso takes it from its Amazon data) | `Show Prime Logo` | `#affibloom-prime` | Kept from the plan: without an Amazon data fetch (client point 1) the editor sets it. |
 | Save | `Save Changes` | same | `#affibloom-save` | `Learn About This Page` left out. |
-| Delete | `Delete This Link` | same | `#affibloom-delete` | **Changed**: here, not on the Dashboard row. |
+| Delete | `Delete This Link` | same | `#affibloom-delete` | **Changed** (decision 4): here, not on the Dashboard row, as in Lasso. |
 | Delete dialog | `Delete This Link?` / `If deleted, you won't be able to get it back.` / `Cancel`, `Delete` | same | `#affibloom-delete-modal[role=dialog]` | |
 | In use | Lasso: `Hold Up` … `This can't be undone. Do you want to proceed?` and allows it | refused: 409 `affibloom_in_use` | — | Deliberately safer than Lasso (F12 AC3). |
-| Toast | `Yee haw! Your <name> saved.` | same | `.affibloom-toast` | U6 would change the wording. |
+| Toast | `Yee haw! Your <name> saved.` | `Product saved.` | `.affibloom-toast` | **Changed** (U6, approved): wording only. |
 | Out-of-stock notice | `This product may be out of stock.` | — | — | Left out (no Amazon data refresh). |
 | Unsaved changes | browser prompt + in-page `#unsaved-changes` dialog | same behaviour | — | Lasso already does this, so U7 is parity, not an improvement. |
 
@@ -89,7 +92,7 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Element | Lasso shows | Label | id / selector | Note |
 |---|---|---|---|---|
 | Tabs | `General`, `Display`, `Amazon` | same | `.affibloom-tabs a` | |
-| General | `Link Defaults`: `New Window / Tab`, `NoFollow / NoIndex`, `Sponsored`, `Show Disclosure`, `Allow duplicate destinations`, `Link Cloaking`, `Detect Opportunities`, `Auto-Detect Affiliate Links` | the first five, and `Auto-Detect Affiliate Links` (C2) | `#affibloom-setting-<key>` | Cloaking and Opportunities excluded. |
+| General | `Link Defaults`: `New Window / Tab`, `NoFollow / NoIndex`, `Sponsored`, `Show Disclosure`, `Allow duplicate destinations`, `Link Cloaking`, `Detect Opportunities`, `Auto-Detect Affiliate Links` | `New Window / Tab`, `NoFollow / NoIndex`, `Sponsored`, `Show Disclosure`, `Auto-Detect Affiliate Links` (C2) | `#affibloom-setting-<key>` | `Allow duplicate destinations` left out (decision 2: Affibloom always behaves as Lasso does with it on, the live value). Cloaking and Opportunities excluded. |
 | General | `Google Analytics`: ID, `Click Tracking`, `Pageview`, `IP Anonymization` | `Click Tracking` (C3) | `#affibloom-setting-ga_click_tracking` | No ID field: the site's own GA tag receives the events. Pageview and IP anonymisation belong to that tag. |
 | Display (Lasso 370: visual editor) | `Colors & labels`: `Badge`, `Title`, `Background`, `Button + Badge Text`, `Primary button text`, `Primary button color`, `Secondary button text`, `Secondary button color`; `Disclosure & behavior`: `Disclosure text`, `Link from Display Title` | the same labels | `#affibloom-setting-<key>` | Lasso 369, which the plan used, has a plain form. The layout editor, Pros/Cons, Price, Grids/Lists and Brag mode are left out. |
 | Amazon | `Tracking ID for This Site`; `Show Prime Logo In Displays` | same | `#affibloom-setting-tracking_id`, `#affibloom-setting-show_prime` | |
@@ -101,9 +104,12 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Element | Lasso shows | Label | id / selector | Note |
 |---|---|---|---|---|
 | Block | `Lasso` | `Product box` | `affibloom/product-box` | |
-| Modal | `Choose a Display Type`: Single, Grid, List, Table, Button, Image, Gallery, AI Text; then search `Search URLs` and `Add` | `Choose a Display Type` → `Single`, then `Search URLs`, `Add` | `.affibloom-block-modal` | **Changed** from `Search products`. Only Single is built; U1 would skip the first step. Not captured live (it writes a draft on production). |
+| Modal | `Choose a Display Type`: Single, Grid, List, Table, Button, Image, Gallery, AI Text; then search `Search URLs` and `Add` | opens straight to `Search URLs`, then `Add` | `.affibloom-block-modal` | **Changed** (U1, approved): Single is the only type built. Not captured live (it writes a draft on production). |
 
 ## 2. REST routes (`/wp-json/affibloom/v1`)
+
+Capabilities (`src/Interface/Admin/Capabilities.php`, decision 1): `PRODUCTS` = `manage_options`, `SETTINGS` =
+`manage_options`, `INSERT_BOXES` = `edit_posts`.
 
 | Method | Path | Capability | Purpose |
 |---|---|---|---|
@@ -150,7 +156,7 @@ Success responses are `{ "data": … }`. Errors are a `WP_Error` with an `affibl
 | General | `nofollow` | on | on |
 | General | `sponsored` | off | off |
 | General | `show_disclosure` | on | on |
-| General | `allow_duplicates` | off | **on** (`Allow duplicate destinations`, key `check_duplicate_link`; see section 7) |
+| General | (no `allow_duplicates`) | — | Lasso's `check_duplicate_link` is on; Affibloom's fixed behaviour matches it (decision 2) |
 | General | `delete_data_on_uninstall` | off (Task 38) | — |
 | Display | `primary_button_text` | `Buy Now` | `<span class="amazon-icon"></span> Buy Now` |
 | Display | `secondary_button_text` | `Learn More` | `<span class="pricetag-icon"></span> Check Price` |
@@ -174,22 +180,15 @@ Key names for C1–C3 are proposals; each task confirms them when it is written 
 
 - Action `affibloom_legacy_box_failed( string $why, array $atts )`: a `[lasso]` box could not be rendered.
 
-## 7. Questions this check raised (for approval)
+## 7. Questions this check raised: decided
 
-1. **Who may manage products.** Lasso's `Permissions` setting on the live site is `Administrator`. The plan
-   assumed Editors (`edit_others_posts`) and says to match Lasso if it differs, which would make
-   `Capabilities::PRODUCTS` `manage_options`. Confirm before Task 8.
-2. **Duplicate links.** The live site has `Allow duplicate destinations` on (stored as `check_duplicate_link`).
-   In Lasso that allows "links from different networks to the same product": two links whose final URL
-   differs only in its parameters may both exist; the same link is still refused (`class-lasso-affiliate-link.php`
-   lines 765–770). The plan's `allow_duplicates` must keep that meaning when Task 26 imports the value, or the
-   difference must be approved. F2 AC4 (the same ASIN twice is refused) holds either way.
-3. **Sponsored per product** is added to the Details form (above). Confirm at gate 4 for Tasks 14–15.
-4. **Delete on the product page**, not the Dashboard row (above). Confirm at gate 4 for Task 17.
-5. **Icon markup in button and badge text.** The site's texts carry icons, for example
-   `<span class="amazon-icon"></span> Buy Now` (Display defaults) and `<span class="medal-icon"></span> Best
-   Overall` (badges), styled by the site's Additional CSS, not by Lasso. The plan cleans these fields with
-   `sanitize_text_field` (Task 15's `ProductInput`, Task 10's settings), which strips the `<span>`, so the
-   Amazon icon would vanish from every button (see `baselines/variants/second-button-desktop.png`). Proposed:
-   button texts, badge and the two Display button texts accept `<span class="…">` only (`wp_kses` with an
-   allowlist), and the box prints them through the same allowlist. Affects Tasks 10, 15, 18, 20 and 26.
+All decided on 2026-11-12; reasons and sources in `docs/decisions/task-6-decisions.md`.
+
+1. **Who may manage products:** Administrators. `Capabilities::PRODUCTS` and `SETTINGS` are `manage_options`;
+   `INSERT_BOXES` stays `edit_posts`, as Lasso's block search requires.
+2. **Duplicate links:** no setting. The same link (same key) is always refused; different links are always
+   allowed, which is Lasso's behaviour with `Allow duplicate destinations` on, as on the live site.
+3. **Sponsored per product:** added to the Details form (Tasks 14–15).
+4. **Delete:** on the product page, as in Lasso (Task 17). A product in use is still refused.
+5. **Icon markup:** button texts, badge and the Display button texts accept `<span class="…">` only, and the box
+   prints them through the same allowlist (Tasks 10, 15, 18, 20, 26).

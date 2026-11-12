@@ -1,6 +1,6 @@
 # F9 Link settings: analysis
 
-Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 **Tasks:** 9, 10, 15 (rendering in 18 and 19).
 
@@ -22,7 +22,7 @@ Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
 
 ## Risks
 
-- Per-product Sponsored (docs/spec/interface.md, section 7, question 3); the meaning of duplicates (question 2); icons in Display button texts (question 5).
+- Decided: per-product Sponsored added (3); no `allow_duplicates` setting (2); icons kept in the Display button texts (5). `Capabilities::SETTINGS` = `manage_options` (1).
 
 ## Security
 

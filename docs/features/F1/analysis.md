@@ -1,6 +1,6 @@
 # F1 Product library: analysis
 
-Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
+Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`.
 
 **Tasks:** 8, 11, 13, 14, 15, 16, 17.
 
@@ -8,7 +8,7 @@ Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
 
 - ADR-001 (post type), ADR-007 (PHP-rendered screens).
 - F9: new products take the site's link defaults.
-- `Capabilities::PRODUCTS`: Lasso allows Administrators only (docs/spec/interface.md, section 7, question 1).
+- `Capabilities::PRODUCTS` = `manage_options`: Administrators only, as Lasso on the live site (decision 1).
 
 ## Data touched
 
@@ -29,10 +29,8 @@ Status: Proposed (gate 2; approved with Task 6). Date: 2026-11-12.
 
 ## Risks
 
-- The plan's Details form lacks Lasso's per-product `Sponsored` toggle (docs/spec/interface.md, section 7, question 3).
-- Delete moves from the Dashboard row to the product page (docs/spec/interface.md, section 7, question 4).
-- Button and badge texts carry icon `<span>`s that `sanitize_text_field` would strip (docs/spec/interface.md, section 7, question 5).
-- "Allow duplicate destinations" has a narrower meaning in Lasso (docs/spec/interface.md, section 7, question 2).
+- Decided (`docs/decisions/task-6-decisions.md`): `Sponsored` added to the Details form (3); delete on the product page (4); icon `<span>`s kept in button and badge text (5); no duplicate setting, the same link is always refused (2). Tasks 9–17 apply them.
+- The toast reads "Product saved." (U6).
 
 ## Security
 

@@ -38,8 +38,8 @@ excluded.
   imported from Lasso (on) in Task 26.
 - **Detection:** on `save_post` for published posts and pages, read the links in the content. The usage indexer
   (Task 35) already parses them, so C2 follows it and reuses that parsing (extracted on its second use). Match
-  each link against network patterns: Impact and Post Affiliate Pro first (the two in use), then the common
-  networks in Lasso's list. Lasso's Impact pattern is loose (`[\d\w]+\.\w+(\/(\w{4,12}))|(\/c\/(\d+)\/(\d+)\/(\d+))`);
+  each link against the two networks the site uses, Impact and Post Affiliate Pro (decision 8 in
+  `docs/decisions/task-6-decisions.md`); the patterns sit in one list, so another network is one entry plus its test. Lasso's Impact pattern is loose (`[\d\w]+\.\w+(\/(\w{4,12}))|(\/c\/(\d+)\/(\d+)\/(\d+))`);
   Affibloom matches on known host names (`*.sjv.io`, `goto.walmart.com`, `*.pxf.io` …) plus the path, so it
   does not catch ordinary links.
 - **Creation:** for each link with no product yet (`_affibloom_url_key`), create an `other` product with the site's
@@ -52,12 +52,11 @@ excluded.
 
 **Placed after:** Task 35 (usage index). **Touches:** Task 9 (General settings), Task 26 (setting import).
 
-## Choice to make at gate 4
+## Decided: automatic, as in Lasso
 
-Lasso creates the products **without asking**. The earlier plan outline (when C2 was optional) proposed a safer
-variant: list the detected links on the post's edit screen and let the editor create them with one click. This
-analysis follows Lasso, as the roadmap's parity rule asks; the "ask first" variant is proposed as register item
-**U8** for the user to approve or reject.
+Lasso creates the products **without asking**. The "ask first" variant (register item U8: list the detected links on
+the post's edit screen and let the editor create them) was **rejected** on 2026-11-12: on the live site all 16 detected
+links became products the site uses, and the post content is never changed either way.
 
 ## Risks
 
