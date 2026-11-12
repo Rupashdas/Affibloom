@@ -67,50 +67,6 @@ $settings = $view['settings'];
 						</div>
 					</div>
 				<?php endif; ?>
-
-				<?php if ( 'amazon' === $view['tab'] ) : ?>
-					<div class="affibloom-card">
-						<div class="affibloom-card__head">
-							<h2 class="affibloom-card__title"><?php esc_html_e( 'Amazon Associates Accounts', 'affibloom' ); ?></h2>
-							<p class="affibloom-card__intro"><?php esc_html_e( 'The tracking ID added to every Amazon link on this site.', 'affibloom' ); ?></p>
-						</div>
-						<div class="affibloom-card__body affibloom-card__body--fields">
-							<div class="affibloom-field affibloom-field--text">
-								<div class="affibloom-field__head">
-									<label class="affibloom-label" for="affibloom-setting-tracking_id"><?php esc_html_e( 'Tracking ID for This Site', 'affibloom' ); ?></label>
-								</div>
-								<input type="text" class="affibloom-input" id="affibloom-setting-tracking_id" name="settings[tracking_id]"
-									value="<?php echo esc_attr( $settings->string( 'tracking_id' ) ); ?>"
-									placeholder="tracking-20" pattern="[A-Za-z0-9][A-Za-z0-9\-]{0,62}-[0-9]{2}">
-							</div>
-						</div>
-					</div>
-
-					<div class="affibloom-card">
-						<div class="affibloom-card__head">
-							<h2 class="affibloom-card__title"><?php esc_html_e( 'Amazon Preferences', 'affibloom' ); ?></h2>
-							<p class="affibloom-card__intro"><?php esc_html_e( 'What Amazon products show in the box.', 'affibloom' ); ?></p>
-						</div>
-						<div class="affibloom-card__body">
-							<?php
-							$this->render(
-								'admin/partials/toggle',
-								array(
-									'id'      => 'affibloom-setting-show_prime',
-									'name'    => 'settings[show_prime]',
-									'label'   => __( 'Show Prime Logo In Displays', 'affibloom' ),
-									'checked' => $settings->bool( 'show_prime' ),
-									'help'    => __( 'Show the blue Prime logo beside the price for all eligible Amazon products in your Displays.', 'affibloom' ),
-									'icon'    => 'star',
-								)
-							);
-							?>
-						</div>
-						<div class="affibloom-card__foot">
-							<button type="submit" id="affibloom-settings-save" class="affibloom-button affibloom-button--primary"><?php esc_html_e( 'Save Changes', 'affibloom' ); ?></button>
-						</div>
-					</div>
-				<?php endif; ?>
 			</form>
 		</div>
 	</div>

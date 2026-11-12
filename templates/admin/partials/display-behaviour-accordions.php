@@ -25,33 +25,6 @@ $toggles  = array(
 	'link_from_display_title' => array( __( 'Link from Display Title', 'affibloom' ), __( 'When enabled, your Display titles will be your clickable link. Toggle this off to have Display titles only appear as text.', 'affibloom' ) ),
 	'keep_site_stripe_ui'     => array( __( 'Keep Site Stripe UI', 'affibloom' ), __( 'When enabled, Amazon SiteStripe-style displays use the SiteStripe iframe layout on the front end.', 'affibloom' ) ),
 );
-$toggle = static function ( $template, string $key, string $label, string $help ) use ( $settings ): void {
-	$field_id  = 'affibloom-setting-' . $key;
-	$described = '' === $help ? '' : 'aria-describedby="' . esc_attr( $field_id . '-help' ) . '"';
-	?>
-	<div class="affibloom-toggle-row">
-		<span class="affibloom-toggle">
-			<input type="checkbox" class="affibloom-toggle__input" role="switch" id="<?php echo esc_attr( $field_id ); ?>"
-				name="settings[<?php echo esc_attr( $key ); ?>]" value="1" <?php echo $described; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr above. ?>
-				<?php checked( $settings->bool( $key ) ); ?>>
-			<span class="affibloom-toggle__track" aria-hidden="true"></span>
-		</span>
-		<label class="affibloom-toggle-row__label" for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $label ); ?></label>
-		<?php
-		if ( '' !== $help ) {
-			$template->render(
-				'admin/partials/help',
-				array(
-					'id'    => $field_id . '-help',
-					'text'  => $help,
-					'label' => $label,
-				)
-			);
-		}
-		?>
-	</div>
-	<?php
-};
 ?>
 <details class="affibloom-accordion" data-accordion="behaviour" open>
 	<summary class="affibloom-accordion__toggle"><span><?php esc_html_e( 'Disclosure & behavior', 'affibloom' ); ?></span></summary>
@@ -76,7 +49,16 @@ $toggle = static function ( $template, string $key, string $label, string $help 
 
 		<?php
 		foreach ( $toggles as $key => [ $label, $help ] ) {
-			$toggle( $this, $key, $label, $help );
+			$this->render(
+				'admin/partials/switch-row',
+				array(
+					'id'      => 'affibloom-setting-' . $key,
+					'name'    => 'settings[' . $key . ']',
+					'label'   => $label,
+					'checked' => $settings->bool( $key ),
+					'help'    => $help,
+				)
+			);
 		}
 		?>
 
@@ -98,7 +80,18 @@ $toggle = static function ( $template, string $key, string $label, string $help 
 				value="<?php echo esc_attr( $settings->string( 'brag_url' ) ); ?>" placeholder="<?php esc_attr_e( 'Your affiliate URL', 'affibloom' ); ?>"
 				aria-describedby="affibloom-setting-brag_url-help">
 		</div>
-		<?php $toggle( $this, 'enable_brag_mode', __( 'Enable Brag Mode', 'affibloom' ), '' ); // Lasso shows no help text here. ?>
+		<?php
+		// Lasso shows no help text here.
+		$this->render(
+			'admin/partials/switch-row',
+			array(
+				'id'      => 'affibloom-setting-enable_brag_mode',
+				'name'    => 'settings[enable_brag_mode]',
+				'label'   => __( 'Enable Brag Mode', 'affibloom' ),
+				'checked' => $settings->bool( 'enable_brag_mode' ),
+			)
+		);
+		?>
 	</div>
 </details>
 

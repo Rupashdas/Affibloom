@@ -49,14 +49,17 @@ final class SettingsScreen {
 			return;
 		}
 
+		$refused = isset( $_GET['refused'] ) ? array_map( 'sanitize_key', explode( ',', sanitize_text_field( wp_unslash( $_GET['refused'] ) ) ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+
 		$this->template->render(
-			'admin/settings',
+			'amazon' === $tab ? 'admin/settings-amazon' : 'admin/settings',
 			array(
 				'tab'      => $tab,
 				'tabs'     => $tabs,
 				'settings' => $this->settings->current(),
 				'action'   => SettingsController::ACTION,
 				'notice'   => $this->notice->message(),
+				'refused'  => $refused,
 			)
 		);
 	}

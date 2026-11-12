@@ -67,7 +67,7 @@ $fields = array(
 		?>
 
 		<div class="affibloom-page__body">
-			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed>
 				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
 				<?php wp_nonce_field( $view['action'] ); ?>

@@ -20,6 +20,7 @@
 	--affibloom-control-line: #d5dce8;
 	--affibloom-segment-bg: #e6ecf6;
 	--affibloom-ink-700: #3d4a63;
+	--affibloom-danger-700: #a1203a;
 	--affibloom-page: #f3f6fb;
 	--affibloom-subtle: #fafbfe;
 	--affibloom-white: #fff;
@@ -640,6 +641,81 @@
 .affibloom-admin .affibloom-select { padding-right: 32px; line-height: 32px; }
 
 /*
+ * 7c. Two columns of cards, as Lasso's Amazon tab (the user, 2026-11-13): each column a stack of cards, the form's
+ * Save at the bottom right. Stacks below 992px, Lasso's breakpoint.
+ */
+.affibloom-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.affibloom-columns__column { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.affibloom-form-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+.affibloom-columns .affibloom-card__body--fields > .affibloom-toggle-row + .affibloom-toggle-row { margin-top: 4px; }
+.affibloom-field + .affibloom-toggle-row { margin-top: 12px; }
+.affibloom-admin .affibloom-input--number { width: 64px; flex: none; padding: 0 8px; }
+
+/* Text field error (design system): danger border, the message below, linked with aria-describedby */
+.affibloom-admin .affibloom-input.is-invalid,
+.affibloom-tags:has(.affibloom-tags__input.is-invalid) { border-color: var(--affibloom-danger-700); }
+.affibloom-field__error { margin: 4px 0 0; color: var(--affibloom-danger-700); font-size: 13px; line-height: 18px; }
+.affibloom-field__hint { margin: 4px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+
+/* The whitelist as removable tags, as Lasso's tag list */
+.affibloom-tags {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	min-height: 38px;
+	padding: 4px 8px;
+	box-sizing: border-box;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	cursor: text;
+}
+.affibloom-tags:focus-within { border-color: var(--affibloom-brand-600); }
+.affibloom-tags.is-disabled { background: var(--affibloom-subtle); cursor: not-allowed; opacity: 0.6; }
+.affibloom-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 4px 2px 10px;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-brand-600);
+	color: var(--affibloom-white);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 22px;
+}
+.affibloom-tag__remove,
+.affibloom-tags__clear {
+	display: inline-grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-full);
+	background: rgba(255, 255, 255, 0.2);
+	color: inherit;
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+}
+.affibloom-tags__clear { margin-left: auto; background: none; color: var(--affibloom-ink-600); }
+.affibloom-admin .affibloom-tags__input {
+	flex: 1;
+	min-width: 120px;
+	min-height: 28px;
+	margin: 0;
+	padding: 0 4px;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: var(--affibloom-ink-900);
+	font: 400 14px/20px var(--affibloom-font);
+}
+.affibloom-admin .affibloom-tags__input:focus { outline: none; box-shadow: none; }
+
+/*
  * Help tip (design system): an 18px "?" whose text shows on hover and on keyboard focus. With the script, the tip
  * floats against the viewport above the button (below it when there is no room), the way Lasso's rail does it,
  * so no scrolling or clipped container can hide it, and Escape closes it. Without the script, plain hover and
@@ -774,6 +850,7 @@
 }
 /* Lasso stacks the rail above the preview below 992px; the same point here. */
 @media (max-width: 991px) {
+	.affibloom-columns { grid-template-columns: 1fr; }
 	.affibloom-split__body { flex-direction: column; }
 	.affibloom-split__rail { order: -1; width: 100%; flex: none; border-left: 0; border-bottom: 1px solid var(--affibloom-line); }
 	.affibloom-split { min-height: 0; }

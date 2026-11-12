@@ -52,16 +52,17 @@ final class SettingsController implements Module {
 
 		$refused = $this->settings->update_tab( $tab, $input );
 
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'             => SettingsScreen::SLUG,
-					'tab'              => $tab,
-					'affibloom_notice' => $refused ? 'partly-saved' : 'saved',
-				),
-				admin_url( 'admin.php' )
-			)
+		$query = array(
+			'page'             => SettingsScreen::SLUG,
+			'tab'              => $tab,
+			'affibloom_notice' => $refused ? 'partly-saved' : 'saved',
 		);
+		if ( $refused ) {
+			// The fields that kept their old value, so the screen can mark them.
+			$query['refused'] = implode( ',', $refused );
+		}
+
+		wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php' ) ) );
 		exit;
 	}
 }

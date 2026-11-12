@@ -174,13 +174,18 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	await expect( help ).toBeVisible();
 	expect( await css( help, 'background-color' ) ).toBe( INK_900 );
 
-	// Amazon: its own two sections, the tracking ID field and the Prime switch.
+	// Amazon: Lasso's two columns of cards (the user, 2026-11-13), switches left of their labels.
 	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
 	await expectShell( page, 'Settings' );
-	await expect( page.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Amazon Associates Accounts', 'Amazon Preferences' ] );
+	await expect( page.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Amazon Associates Accounts', 'Auto-Monetize Amazon Links', 'Amazon Preferences' ] );
+	const columns = page.locator( '.affibloom-columns__column' );
+	await expect( columns ).toHaveCount( 2 );
+	const [ left, right ] = [ await box( columns.nth( 0 ) ), await box( columns.nth( 1 ) ) ];
+	expect( right.x ).toBeGreaterThan( left.x + left.width - 1 ); // side by side
 	const tracking = page.getByLabel( 'Tracking ID for This Site' );
 	expect( await css( tracking, 'height' ) ).toBe( '38px' );
-	const prime = page.locator( '.affibloom-setting' ).filter( { has: page.getByLabel( 'Show Prime Logo In Displays' ) } );
-	await expect( prime.locator( '.affibloom-chip svg' ) ).toHaveCount( 1 );
+	const prime = page.locator( '.affibloom-toggle-row' ).filter( { has: page.getByLabel( 'Show Prime Logo In Displays' ) } );
+	const [ switchBox, labelBox ] = [ await box( prime.locator( '.affibloom-toggle' ) ), await box( prime.locator( 'label' ) ) ];
+	expect( switchBox.x ).toBeLessThan( labelBox.x ); // the switch sits left of its label, as in Lasso
 	await expect( page.getByRole( 'button', { name: 'Save Changes' } ) ).toBeVisible();
 } );

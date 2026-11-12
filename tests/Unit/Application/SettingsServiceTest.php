@@ -84,4 +84,72 @@ final class SettingsServiceTest extends TestCase {
 		self::assertSame( '', $repo->get()->string( 'custom_css' ) );
 		self::assertFalse( $repo->get()->bool( 'new_tab' ) );          // General untouched
 	}
+
+	public function test_tracking_ids_follow_lassos_rule(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+
+		foreach ( array( 'vbvault-20', 'my_tag.us-21', 'tag-123', '' ) as $valid ) {
+			self::assertSame( array(), array_intersect( array( 'tracking_id' ), $service->update_tab( 'amazon', array( 'tracking_id' => $valid ) ) ), $valid );
+		}
+		foreach ( array( 'vbvault', 'tag-1', 'tag-1234', 'bad tag-20' ) as $invalid ) {
+			self::assertContains( 'tracking_id', $service->update_tab( 'amazon', array( 'tracking_id' => $invalid ) ), $invalid );
+		}
+	}
+
+	public function test_the_whitelist_is_a_sorted_set_and_refuses_an_invalid_id(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+
+		$service->update_tab( 'amazon', array( 'tracking_id_whitelist' => 'b-20 a-20  b-20' ) );
+		self::assertSame( array( 'a-20', 'b-20' ), $repo->get()->list( 'tracking_id_whitelist' ) );
+
+		self::assertContains( 'tracking_id_whitelist', $service->update_tab( 'amazon', array( 'tracking_id_whitelist' => 'a-20 nope' ) ) );
+		self::assertSame( array( 'a-20', 'b-20' ), $repo->get()->list( 'tracking_id_whitelist' ) ); // kept
+	}
+
+	public function test_a_removed_whitelist_id_is_added_to_the_blacklist(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+		$service->update_tab( 'amazon', array( 'tracking_id_whitelist' => 'a-20 b-20 c-20' ) );
+
+		$service->update_tab( 'amazon', array( 'tracking_id_whitelist' => 'b-20' ) );
+		$service->update_tab( 'amazon', array( 'tracking_id_whitelist' => '' ) );
+
+		self::assertSame( array( 'a-20', 'b-20', 'c-20' ), $repo->get()->list( 'tracking_id_blacklist' ) );
+	}
+
+	public function test_out_of_stock_days_take_zero_to_thirty(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+
+		$service->update_tab( 'amazon', array( 'days_before_out_of_stock_alerts' => '7' ) );
+		self::assertSame( 7, $repo->get()->int( 'days_before_out_of_stock_alerts' ) );
+		self::assertContains( 'days_before_out_of_stock_alerts', $service->update_tab( 'amazon', array( 'days_before_out_of_stock_alerts' => '31' ) ) );
+		self::assertSame( 7, $repo->get()->int( 'days_before_out_of_stock_alerts' ) );
+	}
+
+	public function test_the_amazon_defaults_are_lassos(): void {
+		$settings = $this->repository()->get();
+
+		self::assertTrue( $settings->bool( 'multiple_tracking_ids' ) );
+		self::assertFalse( $settings->bool( 'auto_monetize_amazon' ) );
+		self::assertTrue( $settings->bool( 'update_pricing_daily' ) );
+		self::assertTrue( $settings->bool( 'commission_upgrades' ) );
+		self::assertFalse( $settings->bool( 'scan_sitestripe_in_post_content' ) );
+		self::assertSame( array(), $settings->list( 'tracking_id_whitelist' ) );
+	}
+
+	public function test_a_field_that_was_not_posted_keeps_its_value(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+		$service->update_tab( 'amazon', array( 'tracking_id_whitelist' => 'a-20' ) );
+
+		// Allow Multiple Tracking IDs off: the browser does not post the disabled whitelist.
+		$refused = $service->update_tab( 'amazon', array( 'multiple_tracking_ids' => '' ) );
+
+		self::assertSame( array(), $refused );
+		self::assertSame( array( 'a-20' ), $repo->get()->list( 'tracking_id_whitelist' ) );
+		self::assertFalse( $repo->get()->bool( 'multiple_tracking_ids' ) );
+	}
 }

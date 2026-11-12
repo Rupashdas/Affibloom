@@ -41,11 +41,17 @@ final class AdminAssets implements Module {
 			return;
 		}
 		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array(), $this->version );
+		// Help tips and Save-when-changed, shared by the settings screens.
+		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array(), $this->version, true );
 
-		// The colour pickers on Settings → Display; no other screen has them yet.
-		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to load only.
-		if ( 'display' === $tab ) {
-			wp_enqueue_script( 'affibloom-display-settings', $this->plugin_url . 'assets/admin/display-settings.js', array(), $this->version, true );
+		// Each settings tab's own controls.
+		$tab     = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to load only.
+		$scripts = array(
+			'display' => 'display-settings',
+			'amazon'  => 'amazon-settings',
+		);
+		if ( isset( $scripts[ $tab ] ) ) {
+			wp_enqueue_script( 'affibloom-' . $scripts[ $tab ], $this->plugin_url . 'assets/admin/' . $scripts[ $tab ] . '.js', array(), $this->version, true );
 		}
 	}
 }
