@@ -17,6 +17,10 @@ export default defineConfig( {
 	expect: {
 		toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' },
 	},
+	// Screenshots compare with Lasso's baselines (Task 5): toHaveScreenshot( [ 'variants', 'amazon-desktop.png' ] )
+	// reads tests/fixtures/baselines/variants/amazon-desktop.png. Never run --update-snapshots: it would
+	// overwrite Lasso's baselines with Affibloom's output.
+	snapshotPathTemplate: '{testDir}/fixtures/baselines/{arg}{ext}',
 	projects: [
 		{ name: 'desktop', use: { ...devices[ 'Desktop Chrome' ], viewport: { width: 1280, height: 900 } } },
 	],
