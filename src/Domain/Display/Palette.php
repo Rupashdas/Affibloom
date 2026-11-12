@@ -35,19 +35,23 @@ final class Palette {
 	public const TEXT_KEYS = array( 'primary_button_text', 'secondary_button_text', 'badge_text' );
 
 	/**
-	 * Lasso's defaults for every type (admin/lasso-constant.php 184-224).
+	 * Lasso's defaults for every type (admin/lasso-constant.php 184-224), as hex.
+	 *
+	 * Lasso writes the first four as the CSS keywords "black" and "white"; Affibloom stores the same colours as
+	 * hex, so the colour picker and the stored value always agree (the user, 2026-11-13). Keywords are still
+	 * accepted when they are typed or migrated from Lasso, so no existing value is lost.
 	 *
 	 * @var array<string, string>
 	 */
 	public const DEFAULTS = array(
-		'main'                  => 'black',
-		'title'                 => 'black',
-		'background'            => 'white',
-		'button'                => '#22BAA0',
-		'secondary_button'      => '#22BAA0',
-		'button_text'           => 'white',
-		'pros'                  => '#22BAA0',
-		'cons'                  => '#E06470',
+		'main'                  => '#000000',
+		'title'                 => '#000000',
+		'background'            => '#ffffff',
+		'button'                => '#22baa0',
+		'secondary_button'      => '#22baa0',
+		'button_text'           => '#ffffff',
+		'pros'                  => '#22baa0',
+		'cons'                  => '#e06470',
 		'primary_button_text'   => 'Buy Now',
 		'secondary_button_text' => 'Our Review',
 		'badge_text'            => '',

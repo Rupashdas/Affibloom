@@ -107,8 +107,10 @@ Badge (`main`), Title, Background, Button + Badge Text, Pros, Cons, Primary butt
 Secondary button text, Secondary button color. **Lasso's defaults** for every type
 (`admin/lasso-constant.php` 184-224): `main` `black`, `title` `black`, `background` `white`, `button` `#22BAA0`,
 `secondary_button` `#22BAA0`, `button_text` `white`, `pros` `#22BAA0`, `cons` `#E06470`,
-`primary_button_text` `Buy Now`, `secondary_button_text` `Our Review`, `badge_text` empty — note the colour
-defaults are CSS keywords, not hex (edge case 7). Colour fields are text inputs with a picker and a placeholder;
+`primary_button_text` `Buy Now`, `secondary_button_text` `Our Review`, `badge_text` empty. Lasso writes the
+first four as the CSS keywords `black` and `white`; **Affibloom stores the same colours as hex** (the user,
+2026-11-13), so the picker and the stored value always agree. Keywords stay valid input and migrate
+unchanged (edge case 7). Colour fields are text inputs with a picker and a placeholder;
 the two button texts accept the site's icon markup (`<span class="…">`, decision 5). A `badge_text` default is
 stored in the same bucket. Hint: "Colors and button labels apply to the selected display type."
 

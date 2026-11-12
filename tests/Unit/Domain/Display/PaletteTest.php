@@ -5,10 +5,10 @@ use PHPUnit\Framework\TestCase;
 use Affibloom\Domain\Display\Palette;
 
 final class PaletteTest extends TestCase {
-	public function test_the_defaults_are_lassos(): void {
+	public function test_the_defaults_are_lassos_colours_as_hex(): void {
 		$palette = Palette::defaults();
-		self::assertSame( 'black', $palette->value( 'main' ) );
-		self::assertSame( '#E06470', $palette->value( 'cons' ) );
+		self::assertSame( '#000000', $palette->value( 'main' ) );   // Lasso writes "black"
+		self::assertSame( '#e06470', $palette->value( 'cons' ) );
 		self::assertSame( 'Our Review', $palette->value( 'secondary_button_text' ) );
 	}
 
@@ -22,7 +22,7 @@ final class PaletteTest extends TestCase {
 		);
 
 		self::assertSame( '#000000', $palette->value( 'main' ) );
-		self::assertSame( 'black', $palette->value( 'title' ) ); // the default, not the array
+		self::assertSame( '#000000', $palette->value( 'title' ) ); // the default, not the array
 		self::assertArrayNotHasKey( 'unknown', $palette->to_array() );
 	}
 

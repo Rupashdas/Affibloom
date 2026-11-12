@@ -151,7 +151,7 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 
 	// A colour keeps its stored value as text, with a colour picker beside it showing that colour. The text
 	// field is what gets saved, so a CSS keyword such as "black" is never rewritten to hex behind the editor.
-	await expect( page.getByLabel( 'Badge', { exact: true } ) ).toHaveValue( 'black' );
+	await expect( page.getByLabel( 'Badge', { exact: true } ) ).toHaveValue( '#000000' );
 	const picker = page.locator( '[data-affibloom-swatch="affibloom-display-main"]' );
 	await expect( picker ).toHaveAttribute( 'type', 'color' );
 	await expect( picker ).toHaveValue( '#000000' );

@@ -55,7 +55,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 
 		self::assertSame( array( 'background', 'button' ), $refused );
 		self::assertSame( 'white', $repo->get()->config( DisplayType::grid() )->palette()->value( 'title' ) );
-		self::assertSame( 'white', $repo->get()->config( DisplayType::grid() )->palette()->value( 'background' ) ); // kept its default
+		self::assertSame( '#ffffff', $repo->get()->config( DisplayType::grid() )->palette()->value( 'background' ) ); // kept its default
 	}
 
 	public function test_a_label_goes_through_the_icon_allowlist(): void {
