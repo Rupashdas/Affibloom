@@ -11,6 +11,9 @@ defined( 'ABSPATH' ) || exit;
 $header_tabs = array(
 	'dashboard' => array( __( 'Dashboard', 'affibloom' ), admin_url( 'admin.php?page=affibloom' ) ),
 );
+if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::SETTINGS ) ) {
+	$header_tabs['settings'] = array( __( 'Settings', 'affibloom' ), admin_url( 'admin.php?page=affibloom-settings' ) );
+}
 ?>
 <header class="affibloom-header">
 	<div class="affibloom-header__brand">

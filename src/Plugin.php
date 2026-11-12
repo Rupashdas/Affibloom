@@ -9,9 +9,13 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
+use Affibloom\Interface\Admin\SettingsController;
+use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
 
@@ -33,6 +37,13 @@ final class Plugin {
 	 * @var Template|null
 	 */
 	private ?Template $template = null;
+
+	/**
+	 * Settings storage, shared by every reader in a request.
+	 *
+	 * @var OptionSettingsRepository|null
+	 */
+	private ?OptionSettingsRepository $settings_repository = null;
 
 	/**
 	 * Use Plugin::boot().
@@ -69,10 +80,24 @@ final class Plugin {
 	 * @return list<Module>
 	 */
 	private function modules(): array {
+		$settings = new SettingsService( $this->settings_repository() );
+
 		return array(
-			new AdminMenu( new DashboardScreen( $this->template() ) ),
+			new AdminMenu(
+				new DashboardScreen( $this->template() ),
+				new SettingsScreen( $this->template(), $settings )
+			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+			new SettingsController( $settings ),
 		);
+	}
+
+	/**
+	 * The settings repository.
+	 */
+	private function settings_repository(): OptionSettingsRepository {
+		$this->settings_repository ??= new OptionSettingsRepository();
+		return $this->settings_repository;
 	}
 
 	/**

@@ -22,8 +22,9 @@ final class AdminMenu implements Module {
 	 * Builds the menu.
 	 *
 	 * @param DashboardScreen $dashboard The Dashboard screen.
+	 * @param SettingsScreen  $settings  The Settings screen.
 	 */
-	public function __construct( private DashboardScreen $dashboard ) {}
+	public function __construct( private DashboardScreen $dashboard, private SettingsScreen $settings ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -52,6 +53,14 @@ final class AdminMenu implements Module {
 			Capabilities::PRODUCTS,
 			self::SLUG,
 			array( $this->dashboard, 'render' )
+		);
+		add_submenu_page(
+			self::SLUG,
+			__( 'Settings', 'affibloom' ),
+			__( 'Settings', 'affibloom' ),
+			Capabilities::SETTINGS,
+			SettingsScreen::SLUG,
+			array( $this->settings, 'render' )
 		);
 	}
 }

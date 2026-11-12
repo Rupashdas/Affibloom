@@ -16,4 +16,7 @@ final class Capabilities {
 
 	/** Add, edit and delete products; see the Dashboard. Administrators, as Lasso's Permissions on the site (decision 1). */
 	public const PRODUCTS = 'manage_options';
+
+	/** Change site-wide settings. Administrators. */
+	public const SETTINGS = 'manage_options';
 }
