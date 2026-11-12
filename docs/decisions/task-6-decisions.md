@@ -21,6 +21,12 @@ change.
 
 ### 2. Duplicate links: no setting; the same link is always refused
 
+> **Withdrawn 2026-11-13 by the user** (F18 decision D2, under the full-Lasso scope rule, `progress.md` deviation 24).
+> Lasso does not refuse a repeated link: it opens the existing product with "This product already exists. Please
+> update the Primary URL or add a new link.", and `check_duplicate_link` (live: on) is kept with both of its
+> comparison modes. Task 11B builds it; Task 26 imports the setting. The text below is the record of the earlier
+> decision.
+
 - **Evidence.** The plan's `allow_duplicates` turns the duplicate check off, so the identical link could be added
   twice. Lasso never allows that. Its `Allow duplicate destinations` (stored as `check_duplicate_link`, on live)
   only permits *different* links that lead to the same product ("links from different networks to the same
