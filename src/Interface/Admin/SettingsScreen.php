@@ -24,8 +24,15 @@ final class SettingsScreen {
 	 *
 	 * @param Template        $template Template renderer.
 	 * @param SettingsService $settings Settings use cases.
+	 * @param DisplayScreen   $display  The Display tab, which has its own model and screen.
+	 * @param SettingsNotice  $notice   The toast after a save.
 	 */
-	public function __construct( private Template $template, private SettingsService $settings ) {}
+	public function __construct(
+		private Template $template,
+		private SettingsService $settings,
+		private DisplayScreen $display,
+		private SettingsNotice $notice
+	) {}
 
 	/**
 	 * Prints the current tab.
@@ -37,6 +44,11 @@ final class SettingsScreen {
 			$tab = 'general';
 		}
 
+		if ( 'display' === $tab ) {
+			$this->display->render( $tabs );
+			return;
+		}
+
 		$this->template->render(
 			'admin/settings',
 			array(
@@ -44,21 +56,8 @@ final class SettingsScreen {
 				'tabs'     => $tabs,
 				'settings' => $this->settings->current(),
 				'action'   => SettingsController::ACTION,
-				'notice'   => $this->notice(),
+				'notice'   => $this->notice->message(),
 			)
 		);
-	}
-
-	/**
-	 * The toast message after a save, or '' when there is none.
-	 */
-	private function notice(): string {
-		$code = isset( $_GET['affibloom_notice'] ) ? sanitize_key( wp_unslash( $_GET['affibloom_notice'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
-
-		return match ( $code ) {
-			'saved'        => __( 'Settings saved.', 'affibloom' ),
-			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
-			default        => '',
-		};
 	}
 }

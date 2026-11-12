@@ -27,6 +27,14 @@ final class SettingsService {
 			'sponsored'       => 'bool',
 			'show_disclosure' => 'bool',
 		),
+		'display' => array(
+			'disclosure_text'         => 'text',
+			'link_from_display_title' => 'bool',
+		),
+		'amazon'  => array(
+			'tracking_id' => 'amazon_tag',
+			'show_prime'  => 'bool',
+		),
 	);
 
 	/**
@@ -66,29 +74,36 @@ final class SettingsService {
 		}
 
 		$changes = array();
+		$refused = array();
 		foreach ( self::FIELDS[ $tab ] as $key => $type ) {
-			$changes[ $key ] = $this->clean( $type, $input[ $key ] ?? null );
+			$value = $this->clean( $type, $input[ $key ] ?? null );
+			if ( null === $value ) {
+				$refused[] = $key;
+				continue;
+			}
+			$changes[ $key ] = $value;
 		}
 
 		$this->repository->save( $this->repository->get()->with( $changes ) );
 
-		// Every field so far is a checkbox, which cannot hold an invalid value. Task 10's text, colour and
-		// tag cleaners can refuse a value; it collects the refused keys here.
-		return array();
+		return $refused;
 	}
 
 	/**
-	 * Cleans one value.
+	 * Cleans one value. Null means the value is refused and the old one stays.
 	 *
 	 * @param string $type Field type from FIELDS.
 	 * @param mixed  $raw  Raw value; a checkbox that is not ticked is absent (null).
 	 * @throws LogicException For a type without a cleaner.
 	 */
-	private function clean( string $type, mixed $raw ): bool {
+	private function clean( string $type, mixed $raw ): bool|string|null {
 		return match ( $type ) {
 			// A ticked checkbox sends "1"; an unticked one sends nothing. true/"true"/"on" cover other callers (Task 26).
-			'bool'  => in_array( $raw, array( true, 1, '1', 'on', 'true', 'yes' ), true ),
-			default => throw new LogicException( "No cleaner for type $type." ),
+			'bool'       => in_array( $raw, array( true, 1, '1', 'on', 'true', 'yes' ), true ),
+			'text'       => is_string( $raw ) && strlen( trim( $raw ) ) <= 500 ? sanitize_text_field( $raw ) : null,
+			// Associates tags look like "name-20"; the two digits vary by marketplace. Empty means "not set yet".
+			'amazon_tag' => is_string( $raw ) && preg_match( '/^(|[A-Za-z0-9][A-Za-z0-9-]{0,62}-\d{2})$/', trim( $raw ) ) ? trim( $raw ) : null,
+			default      => throw new LogicException( "No cleaner for type $type." ),
 		};
 	}
 }

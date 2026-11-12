@@ -17,6 +17,9 @@
 	--affibloom-ink-600: #5b6880;
 	--affibloom-ink-400: #8a93a3;
 	--affibloom-line: #edf1f7;
+	--affibloom-control-line: #d5dce8;
+	--affibloom-segment-bg: #e6ecf6;
+	--affibloom-ink-700: #3d4a63;
 	--affibloom-page: #f3f6fb;
 	--affibloom-subtle: #fafbfe;
 	--affibloom-white: #fff;
@@ -284,7 +287,237 @@
 	outline-offset: 2px;
 }
 
-/* 7. Buttons */
+/* 7. Form fields: text, textarea and colour, each with its help tip (design system, "Text field", "Help tip") */
+.affibloom-settings .affibloom-card + .affibloom-card { margin-top: 20px; }
+.affibloom-card__body--fields { padding: 16px 24px 20px; }
+.affibloom-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+	gap: 20px 32px;
+}
+.affibloom-field { position: relative; display: flex; flex-direction: column; gap: 6px; }
+.affibloom-field__head { display: flex; align-items: center; gap: 6px; }
+.affibloom-label {
+	color: var(--affibloom-ink-900);
+	font-weight: 600;
+}
+.affibloom-admin .affibloom-input {
+	width: 100%;
+	height: 38px;
+	/* wp-admin's forms.css gives text inputs min-height: 40px, which would beat the design's 38px. */
+	min-height: 38px;
+	margin: 0;
+	padding: 0 12px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	box-shadow: none;
+	color: var(--affibloom-ink-900);
+	font: 400 14px/20px var(--affibloom-font);
+}
+.affibloom-admin .affibloom-input--area {
+	height: auto;
+	min-height: 0;
+	padding: 9px 12px;
+	resize: vertical;
+}
+.affibloom-admin .affibloom-input:focus {
+	border-color: var(--affibloom-brand-600);
+	box-shadow: none;
+}
+.affibloom-admin .affibloom-color {
+	width: 72px;
+	height: 38px;
+	padding: 3px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	cursor: pointer;
+}
+.affibloom-field + .affibloom-setting { margin-top: 16px; }
+
+/* Segmented tabs on a light page (design system, "Segmented tabs"): the display type chooser */
+.affibloom-segment {
+	display: inline-flex;
+	gap: 2px;
+	padding: 4px;
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-segment-bg);
+}
+.affibloom-segment__item {
+	padding: 5px 14px;
+	border-radius: var(--affibloom-radius-segment);
+	color: var(--affibloom-ink-700);
+	font-weight: 600;
+	text-decoration: none;
+	transition: background var(--affibloom-ease), color var(--affibloom-ease);
+}
+.affibloom-segment__item:hover,
+.affibloom-segment__item:focus { color: var(--affibloom-ink-900); }
+.affibloom-segment__item.is-active {
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-segment);
+	color: var(--affibloom-ink-900);
+}
+
+/*
+ * 7b. The Display screen: Lasso's structure (the user, 2026-11-13, amending ADR-8) in Affibloom's colours and
+ * type. A split card holds the preview with its toolbar on the left and a 380px settings rail on the right.
+ */
+.affibloom-split {
+	display: flex;
+	flex-direction: column;
+	min-height: calc(100vh - 280px);
+	overflow: hidden;
+}
+.affibloom-split__body { display: flex; flex: 1; min-height: 0; }
+.affibloom-split__main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.affibloom-split__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	min-height: 52px;
+	padding: 8px 20px;
+	border-bottom: 1px solid var(--affibloom-line);
+}
+.affibloom-split__preview {
+	flex: 1;
+	padding: 24px 20px 32px;
+	background: var(--affibloom-page);
+	overflow: auto;
+}
+.affibloom-split__stage { display: flex; justify-content: center; }
+.affibloom-split__frame {
+	flex-shrink: 0;
+	width: 100%;
+	max-width: 1280px;
+	transition: max-width 0.2s ease;
+}
+.affibloom-split__frame .affibloom-empty {
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-600);
+}
+.affibloom-split__frame .affibloom-chip { margin: 0 auto 12px; }
+
+/* The settings rail */
+.affibloom-split__rail {
+	display: flex;
+	flex: 0 0 380px;
+	flex-direction: column;
+	width: 380px;
+	min-height: 0;
+	border-left: 1px solid var(--affibloom-line);
+	background: var(--affibloom-white);
+}
+.affibloom-split__rail-head { flex: none; padding: 14px 20px 0; border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-split__rail-scroll { flex: 1; padding: 14px 20px 20px; overflow: auto; }
+/* The rail is dense, so it uses the design system's small scale instead of the 14px body size. */
+.affibloom-split__rail { font-size: 13px; line-height: 18px; }
+.affibloom-split__rail .affibloom-label { font-size: 13px; }
+.affibloom-admin .affibloom-split__rail .affibloom-input { font-size: 13px; }
+.affibloom-theme-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.affibloom-theme-row .affibloom-select { width: 160px; margin-left: auto; }
+.affibloom-rail-tabs { display: flex; gap: 20px; }
+.affibloom-rail-tabs__tab {
+	padding: 0 0 10px;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background: none;
+	color: var(--affibloom-ink-600);
+	font: 600 13px/18px var(--affibloom-font);
+	cursor: pointer;
+}
+.affibloom-rail-tabs__tab.is-active {
+	border-bottom-color: var(--affibloom-brand-600);
+	color: var(--affibloom-ink-900);
+}
+
+/* A rail row: the label on the left, its control on the right, as Lasso has them */
+.affibloom-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-height: 34px;
+	margin-bottom: 8px;
+}
+.affibloom-row__label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.affibloom-row__control { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 164px; }
+.affibloom-row__control .affibloom-input { flex: 1; min-width: 0; height: 34px; min-height: 34px; }
+.affibloom-split__foot {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 16px 20px;
+	border-top: 1px solid var(--affibloom-line);
+	background: var(--affibloom-subtle);
+}
+
+/* The colour picker beside a colour value (the text field is what gets saved) */
+.affibloom-admin input[type="color"].affibloom-swatch {
+	flex: 0 0 auto;
+	width: 30px;
+	height: 30px;
+	padding: 2px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	cursor: pointer;
+}
+.affibloom-admin input[type="color"].affibloom-swatch::-webkit-color-swatch-wrapper { padding: 0; }
+.affibloom-admin input[type="color"].affibloom-swatch::-webkit-color-swatch { border: 0; border-radius: 6px; }
+.affibloom-admin input[type="color"].affibloom-swatch::-moz-color-swatch { border: 0; border-radius: 6px; }
+.affibloom-admin .affibloom-select { padding-right: 32px; line-height: 32px; }
+
+/* Help tip: an 18px "?" whose text shows on hover and on keyboard focus */
+/* The tip is placed against the field, not the button, so it can never reach past the column. */
+.affibloom-help { display: inline-flex; }
+.affibloom-help__button {
+	display: grid;
+	place-items: center;
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-600);
+	font: 600 11px/1 var(--affibloom-font);
+	cursor: help;
+	transition: color var(--affibloom-ease), border-color var(--affibloom-ease);
+}
+.affibloom-help__button:hover {
+	border-color: var(--affibloom-brand-600);
+	color: var(--affibloom-brand-600);
+}
+.affibloom-help__text {
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 0;
+	z-index: 10;
+	width: max-content;
+	max-width: min(280px, 100%);
+	padding: 8px 10px;
+	border-radius: 8px;
+	background: var(--affibloom-ink-900);
+	box-shadow: var(--affibloom-shadow-segment);
+	color: var(--affibloom-white);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 18px;
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity var(--affibloom-ease);
+}
+.affibloom-help__button:hover + .affibloom-help__text,
+.affibloom-help__button:focus + .affibloom-help__text {
+	visibility: visible;
+	opacity: 1;
+}
+
+/* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;
 	align-items: center;
@@ -317,7 +550,7 @@
 	cursor: not-allowed;
 }
 
-/* 8. Toast: dark card with a check, bottom right, slides in, gone after 4 s */
+/* 9. Toast: dark card with a check, bottom right, slides in, gone after 4 s */
 .affibloom-toast {
 	position: fixed;
 	right: 24px;
@@ -352,11 +585,17 @@
 	100% { opacity: 0; transform: translateY(8px); visibility: hidden; }
 }
 
-/* 9. Smaller screens (wp-admin breakpoints) */
+/* 10. Smaller screens (wp-admin breakpoints) */
 @media (max-width: 960px) {
 	.affibloom-header,
 	.affibloom-band { padding-right: 20px; padding-left: 20px; }
 	.affibloom-page__body { padding-right: 20px; padding-left: 20px; }
+}
+/* Lasso stacks the rail above the preview below 992px; the same point here. */
+@media (max-width: 991px) {
+	.affibloom-split__body { flex-direction: column; }
+	.affibloom-split__rail { order: -1; width: 100%; flex: none; border-left: 0; border-bottom: 1px solid var(--affibloom-line); }
+	.affibloom-split { min-height: 0; }
 }
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
@@ -365,6 +604,7 @@
 	.affibloom-setting { flex-wrap: wrap; }
 	.affibloom-setting .affibloom-toggle { margin-left: 56px; }
 	.affibloom-card__foot .affibloom-button { width: 100%; }
+	.affibloom-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -10,6 +10,15 @@ box is **not** covered: it keeps the site's box design (ADR-006).
 (`docs/spec/interface.md`). **What is ours:** everything visual below, plus two content additions the user approved
 with Aurora: overview tiles on the Dashboard (U9) and a one-line subtitle under each page title (U10).
 
+## 0. Amendment, 2026-11-13: Lasso's structure on the Display screen
+
+The user narrowed ADR-8 for **Settings → Display**: its columns, layout and the presentation of the settings and
+the preview follow **Lasso exactly** (split card, preview with its toolbar on the left, a 380px settings rail on
+the right holding the theme row, underline tabs, accordions and label-left / control-right rows). **Only the
+colour scheme and the typography below are Affibloom's.** Where this document and Lasso's structure disagree on
+that screen, the structure wins and the tokens still apply. The other admin screens keep the Aurora layout until
+the user says otherwise.
+
 ## 1. Principles
 
 1. **Rich but calm.** One strong moment per screen (the gradient band); everything else is white cards on a cool grey

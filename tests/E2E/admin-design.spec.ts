@@ -7,6 +7,8 @@ const INK_400 = 'rgb(138, 147, 163)'; // #8A93A3
 const PAGE = 'rgb(243, 246, 251)'; // #F3F6FB
 const WHITE = 'rgb(255, 255, 255)';
 const ON_NAVY_ACTIVE = 'rgba(255, 255, 255, 0.12)';
+const CONTROL_LINE = 'rgb(213, 220, 232)'; // #D5DCE8
+const INK_900 = 'rgb(20, 33, 61)'; // #14213D
 
 const css = ( locator: Locator, property: string ) =>
 	locator.evaluate( ( el, prop ) => getComputedStyle( el ).getPropertyValue( prop ), property );
@@ -106,4 +108,71 @@ test( 'Settings uses the Affibloom design system', async ( { page } ) => {
 	await tabTo( page, sponsored );
 	expect( await css( track( 'Sponsored' ), 'outline-style' ) ).toBe( 'solid' );
 	expect( await css( track( 'Sponsored' ), 'outline-color' ) ).toBe( BRAND_600 );
+} );
+
+test( 'the Display and Amazon tabs use the design system', async ( { page } ) => {
+	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=display' );
+	await expectShell( page, 'Settings' );
+
+	// Display is the current section; the display type is a segmented control on the light page.
+	const tabs = page.getByRole( 'navigation', { name: 'Settings sections' } );
+	await expect( tabs.getByRole( 'link', { name: 'Display' } ) ).toHaveAttribute( 'aria-current', 'page' );
+	const types = page.getByRole( 'navigation', { name: 'Display type' } );
+	await expect( types.getByRole( 'link' ) ).toHaveText( [ 'Single', 'Grid', 'List' ] );
+	expect( await css( types.getByRole( 'link', { name: 'Single' } ), 'background-color' ) ).toBe( WHITE );
+
+	// Lasso's structure (ADR-8 amended 2026-11-13): the preview on the left, a 380px settings rail on the right.
+	const rail = page.locator( '.affibloom-split__rail' );
+	expect( Math.round( ( await rail.boundingBox() )!.width ) ).toBe( 380 );
+	await expect( page.locator( '.affibloom-split__main .affibloom-split__toolbar .affibloom-segment' ) ).toBeVisible();
+	await expect( rail.getByRole( 'tab', { name: 'Colors & labels' } ) ).toHaveAttribute( 'aria-selected', 'true' );
+
+	// Lasso 370's field order (docs/features/F16/requirements.md), label left and control right.
+	await expect( rail.locator( '.affibloom-row .affibloom-label' ) ).toHaveText( [
+		'Badge',
+		'Title',
+		'Background',
+		'Button + Badge Text',
+		'Pros',
+		'Cons',
+		'Primary button text',
+		'Primary button color',
+		'Secondary button text',
+		'Secondary button color',
+	] );
+
+	// Text field in the rail: Lasso's 34px control height, our radius, border and focus colour.
+	const primary = page.getByLabel( 'Primary button text', { exact: true } );
+	expect( await css( primary, 'height' ) ).toBe( '34px' );
+	expect( await css( primary, 'border-radius' ) ).toBe( '10px' );
+	expect( await css( primary, 'border-top-color' ) ).toBe( CONTROL_LINE );
+	await primary.click(); // a click, not focus(): :focus needs the window itself to be focused
+	expect( await css( primary, 'border-top-color' ) ).toBe( BRAND_600 );
+
+	// A colour keeps its stored value as text, with a colour picker beside it showing that colour. The text
+	// field is what gets saved, so a CSS keyword such as "black" is never rewritten to hex behind the editor.
+	await expect( page.getByLabel( 'Badge', { exact: true } ) ).toHaveValue( 'black' );
+	const picker = page.locator( '[data-affibloom-swatch="affibloom-display-main"]' );
+	await expect( picker ).toHaveAttribute( 'type', 'color' );
+	await expect( picker ).toHaveValue( '#000000' );
+	await expect( picker ).toHaveAttribute( 'aria-label', 'Pick a colour for Badge' );
+
+	// Help tip: a "?" button reached with Tab, whose text describes the field and appears on focus.
+	const help = page.locator( '#affibloom-display-primary_button_text-help' );
+	expect( await primary.getAttribute( 'aria-describedby' ) ).toBe( 'affibloom-display-primary_button_text-help' );
+	await expect( help ).toHaveText( 'If you leave your display button text blank, this is what it will default to.' );
+	await expect( help ).toBeHidden();
+	await tabTo( page, page.getByRole( 'button', { name: 'Help for Primary button text' } ) );
+	await expect( help ).toBeVisible();
+	expect( await css( help, 'background-color' ) ).toBe( INK_900 );
+
+	// Amazon: its own two sections, the tracking ID field and the Prime switch.
+	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
+	await expectShell( page, 'Settings' );
+	await expect( page.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Amazon Associates Accounts', 'Amazon Preferences' ] );
+	const tracking = page.getByLabel( 'Tracking ID for This Site' );
+	expect( await css( tracking, 'height' ) ).toBe( '38px' );
+	const prime = page.locator( '.affibloom-setting' ).filter( { has: page.getByLabel( 'Show Prime Logo In Displays' ) } );
+	await expect( prime.locator( '.affibloom-chip svg' ) ).toHaveCount( 1 );
+	await expect( page.getByRole( 'button', { name: 'Save Changes' } ) ).toBeVisible();
 } );

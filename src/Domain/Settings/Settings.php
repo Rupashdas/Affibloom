@@ -18,10 +18,18 @@ final class Settings {
 
 	/** Defaults for a fresh install. Task 26 imports the site's real values from Lasso. */
 	public const DEFAULTS = array(
-		'new_tab'         => true,
-		'nofollow'        => true,
-		'sponsored'       => false,
-		'show_disclosure' => true,
+		// General.
+		'new_tab'                 => true,
+		'nofollow'                => true,
+		'sponsored'               => false,
+		'show_disclosure'         => true,
+		// Display, site-wide. The per-type theme, colours and labels live in the display model
+		// (Domain\Display\DisplaySettings), because Lasso keeps one set per display type.
+		'disclosure_text'         => 'We earn a commission if you make a purchase, at no additional cost to you.',
+		'link_from_display_title' => true,
+		// Amazon.
+		'tracking_id'             => '',
+		'show_prime'              => true,
 	);
 
 	/**
@@ -47,6 +55,15 @@ final class Settings {
 	 */
 	public function bool( string $key ): bool {
 		return (bool) $this->value( $key );
+	}
+
+	/**
+	 * A text setting.
+	 *
+	 * @param string $key Setting key.
+	 */
+	public function string( string $key ): string {
+		return (string) $this->value( $key );
 	}
 
 	/**

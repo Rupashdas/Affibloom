@@ -9,12 +9,17 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
+use Affibloom\Interface\Admin\DisplayController;
+use Affibloom\Interface\Admin\DisplayScreen;
 use Affibloom\Interface\Admin\SettingsController;
+use Affibloom\Interface\Admin\SettingsNotice;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
@@ -81,14 +86,22 @@ final class Plugin {
 	 */
 	private function modules(): array {
 		$settings = new SettingsService( $this->settings_repository() );
+		$display  = new DisplaySettingsService( new OptionDisplaySettingsRepository() );
+		$notice   = new SettingsNotice();
 
 		return array(
 			new AdminMenu(
 				new DashboardScreen( $this->template() ),
-				new SettingsScreen( $this->template(), $settings )
+				new SettingsScreen(
+					$this->template(),
+					$settings,
+					new DisplayScreen( $this->template(), $display, $notice ),
+					$notice
+				)
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),
+			new DisplayController( $display ),
 		);
 	}
 

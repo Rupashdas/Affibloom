@@ -41,5 +41,11 @@ final class AdminAssets implements Module {
 			return;
 		}
 		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array(), $this->version );
+
+		// The colour pickers on Settings → Display; no other screen has them yet.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to load only.
+		if ( 'display' === $tab ) {
+			wp_enqueue_script( 'affibloom-display-settings', $this->plugin_url . 'assets/admin/display-settings.js', array(), $this->version, true );
+		}
 	}
 }
