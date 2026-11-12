@@ -6,3 +6,6 @@
  */
 
 require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
+
+// affibloom.php defines this before Plugin::boot(); the unit suite does not load affibloom.php.
+define( 'AFFIBLOOM_VERSION', '0.0.0-test' );

@@ -42,6 +42,16 @@ properties named `--affibloom-*` in `assets/admin/admin.css`.
 | `--affibloom-radius-round` | `50%` (avatars, counters) |
 | `--affibloom-shadow` | `0 3px 6px rgba(0, 0, 0, 0.2)` (raised buttons, modal) |
 
+## Header bar
+
+From `.lasso-header` / `.lasso-header-nav` (`lasso-dashboard.css`, Lasso 369), built in Task 8:
+`--affibloom-purple` background, at least 100px tall, padding `1rem 1.5rem`, shadow `0 0.5rem 1rem rgba(0, 0, 0, 0.15)`;
+tabs centred, 16px, weight 700, white, `2rem` apart; the active and hovered tab get a white glow
+(`text-shadow: 0 0 10px #fff`). Checked on Local at 1920px: 100px tall, `rgb(94, 54, 202)`.
+
+WordPress core's `.wrap h1` (23px, weight 400) outranks a single class, so page-title rules are scoped under
+`.affibloom-admin`.
+
 ## Spacing and layout
 
 - Content column about 1,050 px wide, centred under the purple header bar (measured at 1920 px).

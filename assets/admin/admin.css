@@ -1,0 +1,121 @@
+/* Affibloom admin UI kit. Colours, type and sizes follow Lasso's admin (docs/ui/tokens.md). */
+
+.affibloom-admin {
+	--affibloom-purple: #5e36ca;
+	--affibloom-dark-purple: #40258a;
+	--affibloom-tint: #f2effb;
+	--affibloom-green: #22baa0;
+	--affibloom-dark-green: #1b8f7b;
+	--affibloom-red: #e06470;
+	--affibloom-text: #555;
+	--affibloom-muted: #aaa;
+	--affibloom-border: #e2e2e2;
+	--affibloom-input-border: #ced4da;
+	--affibloom-page: #f7f7fc;
+	--affibloom-white: #fff;
+	--affibloom-radius: 0.5rem;
+	--affibloom-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+	--affibloom-font: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+
+	margin: 0 0 0 -20px; /* full width inside wp-admin, as Lasso */
+	color: var(--affibloom-text);
+	font-family: var(--affibloom-font);
+	font-size: 1rem;
+	background: var(--affibloom-page);
+	min-height: calc(100vh - 32px);
+}
+
+/* Header bar: purple, at least 100px tall, centred white tabs (Lasso's .lasso-header) */
+.affibloom-header {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	min-height: 100px;
+	padding: 1rem 1.5rem;
+	box-sizing: border-box;
+	background: var(--affibloom-purple);
+	box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+	color: var(--affibloom-white);
+}
+.affibloom-header__brand {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 10px;
+	font-size: 26px;
+	font-weight: 800;
+}
+.affibloom-header__logo {
+	display: inline-grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: var(--affibloom-white);
+	color: var(--affibloom-purple);
+	font-size: 18px;
+}
+.affibloom-header__nav {
+	display: flex;
+	flex: 1 1 auto;
+	justify-content: center;
+	gap: 2rem;
+}
+.affibloom-header__tab {
+	padding: 0.5rem 0;
+	color: var(--affibloom-white);
+	font-size: 16px;
+	font-weight: 700;
+	text-decoration: none;
+	transition: text-shadow 0.25s ease;
+}
+.affibloom-header__tab:hover,
+.affibloom-header__tab:focus,
+.affibloom-header__tab.is-active {
+	color: var(--affibloom-white);
+	text-shadow: 0 0 10px var(--affibloom-white);
+}
+
+/* Page: a centred column about 1,050px wide */
+.affibloom-page {
+	max-width: 1050px;
+	margin: 0 auto;
+	padding: 2.5rem 15px;
+}
+.affibloom-page__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 1.5rem;
+}
+/* Scoped to .affibloom-admin so it outranks core's ".wrap h1" (23px, weight 400). */
+.affibloom-admin .affibloom-page__title {
+	margin: 0;
+	padding: 0;
+	color: var(--affibloom-text);
+	font-size: 2.5rem;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+/* Card */
+.affibloom-card {
+	padding: 20px;
+	border: 1px solid var(--affibloom-border);
+	border-radius: var(--affibloom-radius);
+	background: var(--affibloom-white);
+}
+.affibloom-empty {
+	color: var(--affibloom-muted);
+	text-align: center;
+}
+
+/* Visible focus everywhere in the kit; white on the purple header */
+.affibloom-admin :focus-visible {
+	outline: 2px solid var(--affibloom-purple);
+	outline-offset: 2px;
+}
+.affibloom-header :focus-visible {
+	outline-color: var(--affibloom-white);
+}

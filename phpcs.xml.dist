@@ -4,6 +4,7 @@
 
 	<file>affibloom.php</file>
 	<file>src</file>
+	<file>templates</file>
 	<file>tools</file>
 
 	<arg name="extensions" value="php"/>
@@ -26,6 +27,11 @@
 		<exclude-pattern>src/Application/*</exclude-pattern>
 	</rule>
 	<rule ref="PHPCompatibilityWP"/>
+	<!-- PHP 8.0+ reads a namespaced name as one token, so Affibloom\Interface\… is valid (the plugin needs 8.1).
+	     PHPCompatibility 9.3.5, the latest stable release, predates that rule and still reports the keyword. -->
+	<rule ref="PHPCompatibility.Keywords.ForbiddenNames.interfaceFound">
+		<exclude-pattern>src/Interface/*</exclude-pattern>
+	</rule>
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
@@ -41,5 +47,10 @@
 				<element value="affibloom"/>
 			</property>
 		</properties>
+	</rule>
+
+	<!-- Template variables are local to Template::render(), not globals. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>templates/*</exclude-pattern>
 	</rule>
 </ruleset>

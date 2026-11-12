@@ -9,6 +9,12 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Interface\Admin\AdminAssets;
+use Affibloom\Interface\Admin\AdminMenu;
+use Affibloom\Interface\Admin\DashboardScreen;
+use Affibloom\Interface\Template;
+use Affibloom\Module;
+
 /**
  * Starts the plugin once WordPress has loaded it.
  */
@@ -20,6 +26,13 @@ final class Plugin {
 	 * @var string
 	 */
 	private string $file;
+
+	/**
+	 * Shared template renderer, built on first use.
+	 *
+	 * @var Template|null
+	 */
+	private ?Template $template = null;
 
 	/**
 	 * Use Plugin::boot().
@@ -44,6 +57,30 @@ final class Plugin {
 	 */
 	private function register(): void {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
+
+		foreach ( $this->modules() as $module ) {
+			$module->register();
+		}
+	}
+
+	/**
+	 * Everything that hooks into WordPress, with its collaborators.
+	 *
+	 * @return list<Module>
+	 */
+	private function modules(): array {
+		return array(
+			new AdminMenu( new DashboardScreen( $this->template() ) ),
+			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+		);
+	}
+
+	/**
+	 * The template renderer for templates/.
+	 */
+	private function template(): Template {
+		$this->template ??= new Template( dirname( $this->file ) . '/templates' );
+		return $this->template;
 	}
 
 	/**
