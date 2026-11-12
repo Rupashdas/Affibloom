@@ -28,7 +28,7 @@ Status: Approved with Task 6 (gate 2), 2026-11-12. Decisions: `docs/decisions/ta
 
 - Short links need an outgoing request, which the Local copy blocks (`WP_HTTP_BLOCK_EXTERNAL`); tests stub it.
 - Amazon hosts outside the US keep their host.
-- C1 later fills name, image and Prime from Amazon's API.
+- No request to Amazon for product data (decision 11): Lasso's data is migrated, new products get the slug name and an Amazon Image link field; C1 fills name, image and Prime once the client sends Creators API credentials.
 
 ## Security
 

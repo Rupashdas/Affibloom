@@ -61,7 +61,7 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Groups | `Groups` | — | — | Left out (unused). |
 | Rating | custom-field card `Primary Rating`: show toggle, number, stars; `Add Custom Field` | `Primary Rating` | `#affibloom-rating` | **Changed** from `Rating`. Other custom fields left out. |
 | Display Theme | `Display Theme` (`Default (Lab)`) | — | — | Left out: one theme in use. |
-| Image | Amazon: `Amazon Image` + `Refresh`; others and quick edit: `Update Image` | `Update Image` | `#affibloom-image-button`, `#affibloom-image-url` | Refresh from Amazon depends on client point 1. |
+| Image | Amazon: `Amazon Image` (an editable image link) + `Refresh`; others and quick edit: `Update Image` | Amazon products: `Amazon Image` link field; every product: `Update Image` | `#affibloom-image-url` (text, visible for Amazon products), `#affibloom-image-button` | **Decided** (decision 11): the editor can paste the image link from Amazon. `Refresh` only with task C1. |
 | Badge | `Badge Text` | same | `#affibloom-badge` | |
 | Price | `Price` + toggle | — | — | Left out (price is not shown on the site). |
 | Description | `Description` (rich text: bold, italic, underline, strike, link, list, colour, highlight, clear) | same | `#affibloom_description` | |

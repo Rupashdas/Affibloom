@@ -35,8 +35,10 @@ it. The only legitimate source is **Amazon's Creators API**. Reading Amazon's pa
 Associates terms.
 
 - **Prerequisite (the client):** Creators API credentials for the `vbvault-20` Associates account. Amazon
-  decides which accounts qualify. Without credentials the feature stays dormant and adding works as in F1/F2
-  (the editor types the name and picks the image).
+  decides which accounts qualify. Without credentials the feature stays dormant and Affibloom works without it
+  (decision 11 in `docs/decisions/task-6-decisions.md`): existing products keep the data Lasso fetched, new Amazon
+  products get a starting name from the link's slug and an editable Amazon Image link field. C1 is an upgrade, not a
+  launch requirement.
 - **Settings → Amazon:** Lasso's `Amazon Product Data API` section: locale, `Credential ID`, `Secret` (password
   field, never returned by REST or exported), `Partner tag`, `Version`, `Validate`.
 - **Application:** an `AmazonCatalog` interface. **Infrastructure:** `CreatorsApiCatalog`: client-credentials
@@ -44,9 +46,12 @@ Associates terms.
   eligibility; results cached 24 hours; time-outs and Amazon's rate limit respected.
 - **On adding an Amazon link:** name, `image_url` and `prime` come from the catalogue when it answers; otherwise
   the current fallback applies. **Product page:** `Refresh` beside the image, as in Lasso.
-- **Amazon's rules:** read the Associates Program Policies and the Creators API terms before coding: how long
-  product data may be shown before it is refreshed, and how images must be served. Images stay hot-linked from
-  Amazon (`m.media-amazon.com`), as today.
+- **Amazon's rules** (Associates Program Policies, read 2026-11-12): "You will not store or cache Product Advertising
+  Content consisting of an image, but you may store a link to Product Advertising Content consisting of an image for up
+  to 24 hours"; other Product Advertising Content may be cached "for up to 24 hours", then refreshed by a new API call.
+  So C1 refreshes every product that shows API data at least daily (a cron batch, like the link check), images stay
+  hot-linked from Amazon (`m.media-amazon.com`), and a refresh never overwrites a name or image the editor set by hand.
+  Read the Creators API terms again when the task is written.
 - **Tests:** recorded API responses as fixtures; never live calls in tests.
 
 **Placed after:** Task 12 (Amazon links). **Touches:** Tasks 10 (Amazon settings), 12, 14 (image control).

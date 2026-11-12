@@ -37,6 +37,15 @@ test.describe( 'F2 Amazon links', () => {
 		expect( await add( page, `https://www.amazon.com/dp/${ a }?tag=someone-20&th=1` ) ).toBe( `https://www.amazon.com/dp/${ a }?tag=vbvault-20` );
 	} );
 
+	// Decision 11: a starting name from the link itself, with no request to Amazon.
+	test( 'AC5 a link with a product slug gives the product a starting name from it', async ( { page } ) => {
+		await add( page, `https://www.amazon.com/Mizuno-Wave-Momentum-3/dp/${ asin() }?tag=vbvault-20` );
+		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'Mizuno Wave Momentum 3' );
+
+		await add( page, asin() );
+		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'Amazon' );
+	} );
+
 	test( 'AC4 the same ASIN twice is refused', async ( { page } ) => {
 		const a = asin();
 		await add( page, a );

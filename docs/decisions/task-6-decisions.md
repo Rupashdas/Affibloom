@@ -95,6 +95,26 @@ change.
 - **Evidence.** `lasso-cat` has 1 term and 0 assignments on the site (Task 6 check). The roadmap brings Groups back
   only if the site uses them.
 
+### 11. Amazon product data without the client's credentials (decided by the user, 2026-11-12)
+
+- **Evidence.** With its Creators API fields empty, Lasso sends each product link to its own licensed cloud service
+  (`https://lasso.link/link/status/`, the "Broken Link Service"), which loads the Amazon page and returns title, image and
+  price; an hourly cloud → site sync refreshes them. No Amazon API or shared credentials are involved. The old PA-API 5.0
+  keys still stored by Lasso return 403 "deprecated". Amazon's Associates Program Policies: the license "does not
+  include … any use of data mining, robots, or similar data gathering and extraction tools"; product content is obtained
+  "by making calls to Creators API or PA API"; API images may be kept only as links, "for up to 24 hours", and other API
+  content refreshed within 24 hours. (Full write-up: `affibloom-docs/reports/2026-11-12-lasso-amazon-product-data.md`.)
+- **Decision.** No page reading, scraping service or Lasso cloud. Instead:
+  1. **Existing products** keep the titles and images Lasso already fetched: the migration copies them (Task 26, ADR-2).
+  2. **New Amazon products** get editor help with no request to Amazon: a starting name from the link's slug
+     (`amazon.com/Mizuno-Wave-Momentum-3/dp/…` → "Mizuno Wave Momentum 3"; "Amazon" when the link has none, as Lasso),
+     and an editable **Amazon Image** link field (Lasso's label) beside "Update Image". The product URL under the name is
+     the link to Amazon.
+  3. **C1 (Creators API) is an upgrade, not a launch requirement.** When the client sends credentials, C1 fills name,
+     image and Prime automatically and follows Amazon's 24-hour rules (image links and other API data refreshed daily).
+- **Changes:** Task 12 (starting name, F2 AC5), Task 14 (Amazon Image field), Task 26 (unchanged: copies Lasso's data),
+  task C1 (24-hour refresh).
+
 ## UI/UX improvements register (U1–U8)
 
 | ID | Decision | Reason |

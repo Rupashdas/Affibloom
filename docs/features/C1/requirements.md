@@ -1,7 +1,7 @@
 # C1 Amazon product data on adding: requirements
 
-Status: In scope (the user's decision, 2026-11-12: Lasso supports it, so it is included). Gate 4 approval of its
-task is still needed before work starts.
+Status: In scope as an **upgrade** (the user, 2026-11-12): it needs the client's Creators API credentials and is not a
+launch requirement; without it Affibloom works as decision 11 describes. Gate 4 approval of its task is still needed.
 
 ## User stories
 
@@ -19,3 +19,5 @@ task is still needed before work starts.
 - **AC3** `Validate` reports whether the credentials work, without saving anything else.
 - **AC4** `Refresh` on the product page updates the image and Prime flag from Amazon and keeps the editor's name.
 - **AC5** The secret never appears in a REST response, the CSV export or the page source.
+- **AC6** Data taken from the API is refreshed at least every 24 hours, and an image from the API is kept only as a link;
+  a name or image the editor set by hand is never overwritten by a refresh.

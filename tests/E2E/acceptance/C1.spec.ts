@@ -32,6 +32,8 @@ test.describe( 'C1 Amazon product data', () => {
 
 	test.fixme( 'AC4 Refresh updates the image and Prime from Amazon and keeps the name (needs the recorded-response stub from task C1)', () => {} );
 
+	test.fixme( 'AC6 API data is refreshed within 24 hours and an editor\'s own name or image is kept (needs the recorded-response stub from task C1)', () => {} );
+
 	test( 'AC5 the secret never appears in the page source', async ( { page } ) => {
 		setSettings( { amazon_api_secret: 'ACCEPTANCE-SECRET-C1' } );
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );

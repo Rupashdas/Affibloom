@@ -10,12 +10,14 @@ gate 4 before work starts.
 
 | Point | Decision | Task | How the live site uses it (2026-11-12) |
 |---|---|---|---|
-| 1. Fetch the title and image of new Amazon products | Yes | C1, after Task 12 | On, through Lasso's cloud (`lasso.link`); Creators API credentials are empty. Affibloom uses Amazon's Creators API, so it needs the client's credentials. |
+| 1. Fetch the title and image of new Amazon products | Yes, as an upgrade once credentials arrive; not needed for launch (decision 11) | C1, after Task 12 | On, through Lasso's cloud (`lasso.link`); Creators API credentials are empty. Affibloom uses Amazon's Creators API, so it needs the client's credentials. |
 | 2. Detect affiliate links automatically | Yes, automatic as in Lasso (U8 rejected); the two networks the site uses (decision 8) | C2, after Task 35 | On; 16 links detected since 2024, all turned into products. |
 | 3. Send clicks to Google Analytics | Yes, with Lasso's event names | C3, after Task 33 | On; Lasso's own ID `371244810` is not a GA4 ID, but its events most likely reach the site's GA4 tag `G-K7T3M99G7Q`. |
 
 **For the client to do:**
-- C1: apply for Amazon Creators API credentials for the `vbvault-20` account, and send them when granted.
+- C1 (when convenient, not before launch): confirm 10+ qualifying sales in the last 30 days, create Creators API
+  credentials for the `vbvault-20` account with a Full-access user, and send Credential ID, Secret and Version through a
+  secure channel. Until then Affibloom uses Lasso's migrated data and the editor helpers (decision 11).
 - C3: in GA4 (Reports → Engagement → Events), check whether `Lasso Display Primary Click` appears, and say whether
   any report or conversion uses these event names.
 
