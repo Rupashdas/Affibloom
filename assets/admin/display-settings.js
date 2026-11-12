@@ -1,5 +1,6 @@
 /**
- * Settings → Display: the rail's tabs, the colour pickers, the density chips and steppers, and the summaries.
+ * Settings → Display: the rail's tabs, the colour pickers, the density chips and steppers, the layout rows and
+ * the phone layout behind the device toggle, and the summaries.
  *
  * Every control posts its own field, so the form saves without this script; the script keeps the controls in
  * step the way Lasso's does (admin/assets/js/settings.js): a preset chip fills the steppers, a stepper moves
@@ -216,7 +217,7 @@
 			} );
 		} );
 
-		panel.querySelectorAll( '.affibloom-clamp input' ).forEach( function ( radio ) {
+		panel.querySelectorAll( '.affibloom-options input[data-density-field]' ).forEach( function ( radio ) {
 			radio.addEventListener( 'change', customise );
 		} );
 	}
@@ -243,6 +244,174 @@
 		} );
 	}
 
+	/**
+	 * An image position in the vocabulary of an orientation (Lasso's coerce_display_layout_image_position).
+	 *
+	 * @param {string} position    left, right, top or bottom.
+	 * @param {string} orientation side-by-side or stacked.
+	 * @return {string} The position the orientation allows.
+	 */
+	function coerce( position, orientation ) {
+		if ( 'side-by-side' === orientation ) {
+			return 'top' === position || 'left' === position ? 'left' : 'right';
+		}
+		return 'right' === position || 'bottom' === position ? 'bottom' : 'top';
+	}
+
+	/**
+	 * The Layout accordion: desktop edits go into the radios, which the form posts; with the device toggle on
+	 * Mobile, the same rows show and edit the phone layout, whose overrides go into the hidden phone fields.
+	 * Phones start from desktop with the buttons centred (Lasso's get_display_layout_mobile_base).
+	 *
+	 * @param {HTMLElement}  panel  The Layout & spacing panel.
+	 * @param {?HTMLElement} toggle The toolbar's device toggle.
+	 */
+	function layoutRows( panel, toggle ) {
+		var box = panel.querySelector( '[data-layout]' );
+		if ( ! box ) {
+			return;
+		}
+
+		var PHONE_KEYS = [ 'orientation', 'imagePosition', 'align', 'buttonAlign', 'ctaWidth', 'imageFit' ];
+		var KEYS = PHONE_KEYS.concat( [ 'mobileOverflow' ] );
+		var isGrid = '1' === box.dataset.grid;
+		var isList = '1' === box.dataset.list;
+		var form = box.closest( 'form' );
+		var note = box.querySelector( '[data-phone-note]' );
+		var noteText = box.querySelector( '[data-phone-note-text]' );
+		var reset = box.querySelector( '[data-phone-reset]' );
+		var summary = panel.querySelector( '[data-layout-summary]' );
+		var mode = 'desktop';
+		var desktop = { orientation: box.dataset.desktopOrientation };
+
+		var radios = function ( key ) {
+			return Array.prototype.slice.call( box.querySelectorAll( 'input[data-layout-field="' + key + '"]' ) );
+		};
+		var phoneField = function ( key ) {
+			return box.querySelector( '[data-phone-field="' + key + '"]' );
+		};
+		var overrides = function () {
+			var set = {};
+			PHONE_KEYS.forEach( function ( key ) {
+				var field = phoneField( key );
+				if ( field && ! field.disabled ) {
+					set[ key ] = field.value;
+				}
+			} );
+			return set;
+		};
+		var phoneLayout = function () {
+			var values = {};
+			PHONE_KEYS.forEach( function ( key ) {
+				values[ key ] = desktop[ key ];
+			} );
+			values.buttonAlign = 'center';
+			if ( isGrid ) {
+				values.orientation = 'stacked';
+			}
+			Object.assign( values, overrides() );
+			values.imagePosition = coerce( values.imagePosition, values.orientation );
+			return values;
+		};
+
+		KEYS.forEach( function ( key ) {
+			radios( key ).forEach( function ( radio ) {
+				if ( radio.checked ) {
+					desktop[ key ] = radio.value;
+				}
+			} );
+		} );
+
+		// Shows a layout in the rows: the options checked, the image-position pair, and the rows and phone note
+		// that belong to the current device.
+		var show = function () {
+			var values = 'mobile' === mode ? Object.assign( {}, desktop, phoneLayout() ) : desktop;
+			var columns = box.querySelector( 'input[data-columns]:checked' );
+			var overflow = box.querySelector( '[data-layout-row="mobileOverflow"]' );
+			var custom = Object.keys( overrides() ).length > 0;
+			var parts = [];
+
+			KEYS.forEach( function ( key ) {
+				radios( key ).forEach( function ( radio ) {
+					radio.checked = radio.value === values[ key ];
+				} );
+			} );
+			box.querySelectorAll( '[data-layout-row="imagePosition"] [data-orientation]' ).forEach( function ( option ) {
+				option.hidden = option.dataset.orientation !== values.orientation;
+			} );
+			if ( overflow ) {
+				overflow.hidden = ! ( 'mobile' === mode && isList );
+			}
+
+			note.hidden = 'mobile' !== mode;
+			reset.hidden = ! custom;
+			noteText.textContent = custom ? noteText.dataset.custom : noteText.dataset.inherit;
+
+			if ( isGrid && columns ) {
+				parts.push( format( summary.dataset.columnsFormat, [ parseInt( columns.value, 10 ) ] ) );
+			}
+			parts.push( 'side-by-side' === values.orientation ? summary.dataset.side : summary.dataset.stacked );
+			parts.push( summary.dataset.imageFormat.replace( '%s', values.imagePosition ) );
+			summary.textContent = parts.join( ' · ' );
+		};
+
+		box.addEventListener( 'change', function ( event ) {
+			var key = event.target.dataset.layoutField;
+			var field;
+			var position;
+			if ( ! key ) {
+				show(); // the column count only changes the summary
+				return;
+			}
+
+			if ( 'mobile' === mode && PHONE_KEYS.indexOf( key ) !== -1 ) {
+				field = phoneField( key );
+				field.disabled = false;
+				field.value = event.target.value;
+				if ( 'orientation' === key ) {
+					position = phoneField( 'imagePosition' );
+					position.value = coerce( position.disabled ? phoneLayout().imagePosition : position.value, event.target.value );
+					position.disabled = false;
+				}
+			} else {
+				desktop[ key ] = event.target.value;
+				if ( 'orientation' === key ) {
+					desktop.imagePosition = coerce( desktop.imagePosition, desktop.orientation );
+				}
+			}
+			show();
+		} );
+
+		reset.addEventListener( 'click', function () {
+			PHONE_KEYS.forEach( function ( key ) {
+				phoneField( key ).disabled = true;
+			} );
+			show();
+		} );
+
+		// The radios carry the desktop layout to the server, so they show it again before the form is sent.
+		form.addEventListener( 'submit', function () {
+			mode = 'desktop';
+			show();
+		} );
+
+		if ( toggle ) {
+			toggle.hidden = false;
+			toggle.querySelectorAll( '[data-device]' ).forEach( function ( button ) {
+				button.addEventListener( 'click', function () {
+					mode = button.dataset.device;
+					toggle.querySelectorAll( '[data-device]' ).forEach( function ( other ) {
+						other.classList.toggle( 'is-active', other === button );
+						other.setAttribute( 'aria-pressed', other === button ? 'true' : 'false' );
+					} );
+					show();
+				} );
+			} );
+		}
+
+		show();
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var rail = document.querySelector( '.affibloom-split__rail' );
 		var layout = document.querySelector( '[data-rail-panel="layout"]' );
@@ -254,6 +423,7 @@
 		if ( layout ) {
 			density( layout );
 			elements( layout );
+			layoutRows( layout, document.querySelector( '[data-device-toggle]' ) );
 		}
 	} );
 } )();

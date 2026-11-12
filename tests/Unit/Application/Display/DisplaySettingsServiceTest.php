@@ -113,7 +113,7 @@ final class DisplaySettingsServiceTest extends TestCase {
 		$repo = $this->repository();
 		$repo->stored = $repo->stored->with_config(
 			DisplayType::single(),
-			DisplayConfig::defaults()->with_density( Density::preset( 'spacious' ) )
+			DisplayConfig::defaults( DisplayType::single() )->with_density( Density::preset( 'spacious' ) )
 		);
 
 		$values        = Density::PRESETS['spacious'];
@@ -144,5 +144,69 @@ final class DisplaySettingsServiceTest extends TestCase {
 		self::assertSame( 'custom', $density->preset_name() );
 		self::assertSame( 30, $density->value( 'gap' ) );
 		self::assertSame( 320, $density->value( 'imageHeight' ) );
+	}
+
+	public function test_it_saves_the_desktop_layout_with_lassos_coercion(): void {
+		$repo = $this->repository();
+		( new DisplaySettingsService( $repo ) )->update_type(
+			DisplayType::single(),
+			array(
+				'layout' => array(
+					'desktop' => array(
+						'orientation'   => 'stacked',
+						'imagePosition' => 'left', // not a stacked position: becomes top
+						'ctaWidth'      => 'full',
+					),
+				),
+			)
+		);
+		$layout = $repo->get()->config( DisplayType::single() )->layout();
+
+		self::assertSame( 'stacked', $layout->value( 'orientation' ) );
+		self::assertSame( 'top', $layout->value( 'imagePosition' ) );
+		self::assertSame( 'full', $layout->value( 'ctaWidth' ) );
+	}
+
+	public function test_the_posted_phone_overrides_replace_the_stored_ones(): void {
+		$repo    = $this->repository();
+		$service = new DisplaySettingsService( $repo );
+		$service->update_type(
+			DisplayType::list(),
+			array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'center', 'ctaWidth' => 'full' ) ) )
+		);
+		$service->update_type(
+			DisplayType::list(),
+			array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'right' ) ) )
+		);
+
+		self::assertSame( array( 'align' => 'right' ), $repo->get()->config( DisplayType::list() )->layout()->phone() );
+	}
+
+	public function test_use_desktop_layout_clears_the_phone_overrides(): void {
+		$repo    = $this->repository();
+		$service = new DisplaySettingsService( $repo );
+		$service->update_type( DisplayType::single(), array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'center' ) ) ) );
+		$service->update_type( DisplayType::single(), array( 'layout' => array( 'phone_present' => '1' ) ) ); // nothing posted: cleared
+
+		self::assertSame( array(), $repo->get()->config( DisplayType::single() )->layout()->phone() );
+	}
+
+	public function test_the_phone_overrides_are_left_alone_when_the_form_did_not_carry_them(): void {
+		$repo    = $this->repository();
+		$service = new DisplaySettingsService( $repo );
+		$service->update_type( DisplayType::single(), array( 'layout' => array( 'phone_present' => '1', 'phone' => array( 'align' => 'center' ) ) ) );
+		$service->update_type( DisplayType::single(), array( 'theme' => 'Lab' ) );
+
+		self::assertSame( array( 'align' => 'center' ), $repo->get()->config( DisplayType::single() )->layout()->phone() );
+	}
+
+	public function test_the_column_count_is_site_wide_and_clamped(): void {
+		$repo    = $this->repository();
+		$service = new DisplaySettingsService( $repo );
+		$service->update_type( DisplayType::grid(), array( 'columns' => '2' ) );
+		self::assertSame( 2, $repo->get()->columns() );
+
+		$service->update_type( DisplayType::grid(), array( 'columns' => '7' ) );
+		self::assertSame( 3, $repo->get()->columns() );
 	}
 }

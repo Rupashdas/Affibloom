@@ -10,7 +10,7 @@
  * site-wide behaviour, and Task 10D the preview itself.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, action: string, notice: string, panel: string} $view
+ * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, columns: int, action: string, notice: string, panel: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -78,6 +78,18 @@ $fields = array(
 										</a>
 									<?php endforeach; ?>
 								</nav>
+
+								<?php // Lasso's device segment. It edits the phone layout now, and sizes the preview from Task 10D. ?>
+								<div class="affibloom-segment affibloom-segment--icons" role="group" aria-label="<?php esc_attr_e( 'Preview device width', 'affibloom' ); ?>" data-device-toggle hidden>
+									<button type="button" class="affibloom-segment__item is-active" data-device="desktop" aria-pressed="true" title="<?php esc_attr_e( 'Desktop (1280px)', 'affibloom' ); ?>">
+										<?php $this->render( 'admin/partials/icon', array( 'name' => 'desktop' ) ); ?>
+										<span class="screen-reader-text"><?php esc_html_e( 'Desktop (1280px)', 'affibloom' ); ?></span>
+									</button>
+									<button type="button" class="affibloom-segment__item" data-device="mobile" aria-pressed="false" title="<?php esc_attr_e( 'Mobile (390px)', 'affibloom' ); ?>">
+										<?php $this->render( 'admin/partials/icon', array( 'name' => 'phone' ) ); ?>
+										<span class="screen-reader-text"><?php esc_html_e( 'Mobile (390px)', 'affibloom' ); ?></span>
+									</button>
+								</div>
 							</div>
 
 							<div class="affibloom-split__preview">
@@ -132,7 +144,16 @@ $fields = array(
 							<div class="affibloom-split__rail-scroll">
 								<div class="affibloom-rail-panel<?php echo 'layout' === $panel ? ' is-active' : ''; ?>" role="tabpanel"
 									id="affibloom-panel-layout" aria-labelledby="affibloom-tab-layout" data-rail-panel="layout">
-									<?php $this->render( 'admin/partials/display-layout-panel', array( 'config' => $config ) ); ?>
+									<?php
+									$this->render(
+										'admin/partials/display-layout-panel',
+										array(
+											'config'  => $config,
+											'type'    => $view['type'],
+											'columns' => $view['columns'],
+										)
+									);
+									?>
 								</div>
 
 								<div class="affibloom-rail-panel<?php echo 'colors' === $panel ? ' is-active' : ''; ?>" role="tabpanel"

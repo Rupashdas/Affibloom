@@ -11,7 +11,7 @@ final class DisplaySettingsTest extends TestCase {
 	public function test_each_type_keeps_its_own_configuration(): void {
 		$settings = DisplaySettings::defaults()->with_config(
 			DisplayType::single(),
-			DisplayConfig::defaults()->with_theme( Theme::from( 'Llama' ) )
+			DisplayConfig::defaults( DisplayType::single() )->with_theme( Theme::from( 'Llama' ) )
 		);
 
 		self::assertSame( 'Llama', $settings->config( DisplayType::single() )->theme()->name() );
@@ -34,7 +34,7 @@ final class DisplaySettingsTest extends TestCase {
 	public function test_it_survives_a_round_trip_through_storage(): void {
 		$before = DisplaySettings::defaults()->with_config(
 			DisplayType::list(),
-			DisplayConfig::defaults()->with_palette( DisplayConfig::defaults()->palette()->with( 'main', '#123456' ) )
+			DisplayConfig::defaults( DisplayType::list() )->with_palette( DisplayConfig::defaults( DisplayType::list() )->palette()->with( 'main', '#123456' ) )
 		);
 
 		$after = DisplaySettings::from_array( $before->to_array() );

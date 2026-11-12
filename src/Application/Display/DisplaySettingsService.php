@@ -15,6 +15,7 @@ use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplaySettingsRepository;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Elements;
+use Affibloom\Domain\Display\Layout;
 use Affibloom\Domain\Display\Palette;
 use Affibloom\Domain\Display\Theme;
 
@@ -54,8 +55,8 @@ final class DisplaySettingsService {
 	}
 
 	/**
-	 * Saves one display type's theme, colours and labels, elements and density. An invalid value keeps the one
-	 * it had.
+	 * Saves one display type's theme, colours and labels, elements, density and layout, and the grid's column
+	 * count. An invalid colour or label keeps the one it had.
 	 *
 	 * @param DisplayType          $type  The display type being edited.
 	 * @param array<string, mixed> $input Raw, unslashed form values.
@@ -112,9 +113,49 @@ final class DisplaySettingsService {
 			$config = $config->with_density( $this->density_from( $config->density(), $input['density'] ) );
 		}
 
-		$this->repository->save( $settings->with_config( $type, $config ) );
+		if ( isset( $input['layout'] ) && is_array( $input['layout'] ) ) {
+			$config = $config->with_layout( $this->layout_from( $config->layout(), $input['layout'] ) );
+		}
+
+		$settings = $settings->with_config( $type, $config );
+
+		// Site-wide: Lasso shows the control on the Grid type only and keeps one count for every grid.
+		if ( isset( $input['columns'] ) && is_numeric( $input['columns'] ) ) {
+			$settings = $settings->with_columns( (int) $input['columns'] );
+		}
+
+		$this->repository->save( $settings );
 
 		return $refused;
+	}
+
+	/**
+	 * The layout from the rail: each desktop value through Layout's rules, and, when the form carried the phone
+	 * layout, exactly the phone overrides it posted (none posted means "Use desktop layout").
+	 *
+	 * @param Layout               $current The stored layout.
+	 * @param array<string, mixed> $raw     The submitted `layout` array: `desktop`, `phone` and `phone_present`.
+	 */
+	private function layout_from( Layout $current, array $raw ): Layout {
+		$layout  = $current;
+		$desktop = isset( $raw['desktop'] ) && is_array( $raw['desktop'] ) ? $raw['desktop'] : array();
+		foreach ( array_keys( Layout::OPTIONS ) as $key ) {
+			if ( isset( $desktop[ $key ] ) && is_string( $desktop[ $key ] ) ) {
+				$layout = $layout->with( $key, $desktop[ $key ] );
+			}
+		}
+
+		if ( ! empty( $raw['phone_present'] ) ) {
+			$layout = $layout->clear_phone();
+			$phone  = isset( $raw['phone'] ) && is_array( $raw['phone'] ) ? $raw['phone'] : array();
+			foreach ( Layout::PHONE_KEYS as $key ) {
+				if ( isset( $phone[ $key ] ) && is_string( $phone[ $key ] ) ) {
+					$layout = $layout->with_phone( $key, $phone[ $key ] );
+				}
+			}
+		}
+
+		return $layout;
 	}
 
 	/**

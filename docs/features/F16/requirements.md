@@ -97,7 +97,13 @@ Live site, Single: price off, proscons off, timestamp off; the rest on.
 
 **Phone override:** when the preview is at mobile width, layout edits write a phone-only layout. Only six keys
 may differ: `orientation`, `imagePosition`, `align`, `buttonAlign`, `ctaWidth`, `imageFit` (not
-`mobileOverflow`, not `columns`). A key that was never touched follows desktop. The panel shows "Same as
+`mobileOverflow`, not `columns`). A key that was never touched follows the **phone base**, which is desktop's
+six keys with two exceptions (`Helper::get_display_layout_mobile_base`): **Button alignment is `center`** on
+phones whatever desktop says, and Grid is `stacked`. Grid has no orientation override. An image-position
+override is stored in the vocabulary of the phone orientation (coerced as B2). The phone layout the front end
+uses is the base plus the overrides, with image position coerced once more
+(`Helper::get_display_layout_mobile_for_type`). Lasso's help text ("Settings you haven't changed here follow
+desktop") skips the Button alignment exception; Affibloom keeps the behaviour and the help text both. The panel shows "Same as
 desktop" or "Custom mobile layout" with a **Use desktop layout** reset, and the help text: "Changes here apply
 to phones only and desktop edits won't change them. Settings you haven't changed here follow desktop."
 
@@ -160,6 +166,10 @@ type, set where a display is created — the type segment only chooses which buc
   phone layout.
 - **B4 — touching a stepper sets the preset to `custom`** and keeps the edited numbers.
 - **B5 — the Disclosure element toggle writes the matching scope setting** (single / grid / list+table).
+- **B5a — the Price element's default follows Show Price.** In Lasso's Display view the single type's `price`
+  element defaults to the site-wide `show_price` setting (`display.php` 189), and the "is the layout customised"
+  check skips that inherited value unless `display_elements` was actually saved (B1). Task 10E builds Show Price
+  and must keep both.
 - **B6 — control visibility** follows 2.4: Columns for Grid only, orientation hidden for Grid, mobile overflow
   only for List at mobile preview width.
 - **B7 — a legacy scalar `theme_name`** (one theme for everything) is read as the same theme in all three
@@ -187,6 +197,16 @@ type, set where a display is created — the type segment only chooses which buc
 7. Colour fields accept any CSS colour string in Lasso (the live grid/list buckets hold `black` / `white`, not
    hex), so the stored value is not always a hex colour.
 8. The density `imageHeight` applies per type; a theme may ignore it (2-box themes draw the image differently).
+9. **Grid's orientation is pinned to `stacked` on the server** (`Helper::canonicalize_display_layout`), and its
+   image position is coerced to match, whatever was stored or posted.
+10. Lasso's server validates only `orientation`, `imagePosition` and `buttonAlign` in the desktop layout and lets
+    any string through for `align`, `ctaWidth`, `mobileOverflow` and `imageFit`; the phone overrides validate all
+    six. Affibloom validates every key in both (an unknown value falls back to the type's default), since an
+    unknown value has no meaning to the box.
+11. **Legacy flat layout** (keys at the top level instead of per type, from older Lasso versions) applies to
+    Single and List, and Grid takes its defaults; when it is Lasso's old factory default (1 column, side by side,
+    image right, align left) the column count becomes 3. Migration (Task 26) must apply this rule.
+12. `columns` is clamped to 1-3 on the server; anything else becomes the nearest bound (default 3).
 
 ## 5. Acceptance criteria
 

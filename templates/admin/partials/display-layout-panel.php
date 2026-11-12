@@ -3,11 +3,11 @@
  * The rail's "Layout & spacing" panel: density presets, elements, spacing, typography and image height.
  *
  * Lasso's structure and wording (admin/views/settings/display.php 349-584): the density chips with their hint,
- * then accordions with a summary on the right. Task 10C adds the Layout accordion between Elements and Spacing.
+ * then accordions with a summary on the right: Elements, Layout, Spacing, Typography and Image.
  * Every control also works without JavaScript; the script only keeps the chips, steppers and summaries in step.
  *
  * @package Affibloom
- * @var array{config: \Affibloom\Domain\Display\DisplayConfig} $view
+ * @var array{config: \Affibloom\Domain\Display\DisplayConfig, type: \Affibloom\Domain\Display\DisplayType, columns: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -130,6 +130,17 @@ $groups         = array(
 	</div>
 </details>
 
+<?php
+$this->render(
+	'admin/partials/display-layout-accordion',
+	array(
+		'layout'  => $view['config']->layout(),
+		'type'    => $view['type'],
+		'columns' => $view['columns'],
+	)
+);
+?>
+
 <?php foreach ( $groups as $group_key => $group ) : ?>
 	<details class="affibloom-accordion" data-accordion="<?php echo esc_attr( $group_key ); ?>">
 		<summary class="affibloom-accordion__toggle">
@@ -146,9 +157,9 @@ $groups         = array(
 				<?php if ( in_array( $field, Density::LINE_KEYS, true ) ) : ?>
 					<fieldset class="affibloom-stepper-row">
 						<legend class="affibloom-stepper-row__label"><?php echo esc_html( $control_label ); ?></legend>
-						<div class="affibloom-clamp">
+						<div class="affibloom-options">
 							<?php foreach ( Density::LINE_OPTIONS as $option ) : ?>
-								<label class="affibloom-clamp__option">
+								<label class="affibloom-options__option">
 									<input type="radio" name="display[density][values][<?php echo esc_attr( $field ); ?>]" value="<?php echo esc_attr( (string) $option ); ?>"
 										data-density-field="<?php echo esc_attr( $field ); ?>" <?php checked( $value, $option ); ?>>
 									<span><?php echo esc_html( 0 === $option ? __( 'All', 'affibloom' ) : (string) $option ); ?></span>

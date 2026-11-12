@@ -46,14 +46,15 @@ final class DisplayScreen {
 		$this->template->render(
 			'admin/settings-display',
 			array(
-				'tab'    => 'display',
-				'tabs'   => $tabs,
-				'type'   => $type,
-				'types'  => DisplayType::all(),
-				'config' => $this->display->config( $type ),
-				'action' => DisplayController::ACTION,
-				'notice' => $this->notice->message(),
-				'panel'  => $panel,
+				'tab'     => 'display',
+				'tabs'    => $tabs,
+				'type'    => $type,
+				'types'   => DisplayType::all(),
+				'config'  => $this->display->config( $type ),
+				'columns' => $this->display->current()->columns(),
+				'action'  => DisplayController::ACTION,
+				'notice'  => $this->notice->message(),
+				'panel'   => $panel,
 			)
 		);
 	}

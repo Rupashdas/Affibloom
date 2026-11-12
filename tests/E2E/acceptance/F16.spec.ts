@@ -98,6 +98,64 @@ test.describe( 'F16 Display system', () => {
 		expect( single.badge ).toBe( true );
 	} );
 
+	// A Layout row and one of its options, by the text Lasso shows.
+	const layoutOption = ( page: Page, row: string, option: string ) =>
+		page.locator( `[data-layout-row="${ row }"]` ).getByText( option, { exact: true } );
+	const layoutChecked = ( page: Page, row: string ) => page.locator( `[data-layout-row="${ row }"] input:checked` );
+
+	test( 'AC6 the layout rows change the layout, and image position follows the orientation', async ( { page } ) => {
+		await page.goto( displayTab( 'single' ) );
+
+		// Single's default is side by side with the image on the right; stacked offers top and bottom instead.
+		await expect( layoutOption( page, 'imagePosition', 'Top' ) ).toBeHidden();
+		await layoutOption( page, 'orientation', 'Stacked' ).click();
+		await expect( layoutOption( page, 'imagePosition', 'Left' ) ).toBeHidden();
+		await expect( layoutChecked( page, 'imagePosition' ) ).toHaveValue( 'bottom' ); // right -> bottom
+		await expect( page.locator( '[data-layout-summary]' ) ).toHaveText( 'stacked · image bottom' );
+		await layoutOption( page, 'ctaWidth', 'Full width' ).click();
+
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		const single = storedDisplay().single.layout;
+		expect( single.orientation ).toBe( 'stacked' );
+		expect( single.imagePosition ).toBe( 'bottom' );
+		expect( single.ctaWidth ).toBe( 'full' );
+
+		// Grid: no Card layout row (always stacked), and its own Columns row, whose count is site-wide.
+		await page.goto( displayTab( 'grid' ) );
+		await expect( page.locator( '[data-layout-row="orientation"]' ) ).toHaveCount( 0 );
+		await layoutOption( page, 'columns', '2' ).click();
+		await expect( page.locator( '[data-layout-summary]' ) ).toHaveText( '2 col · stacked · image top' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		expect( storedDisplay().columns ).toBe( 2 );
+	} );
+
+	test( 'AC7 a phone layout applies to phones only, and Use desktop layout clears it', async ( { page } ) => {
+		await page.goto( displayTab( 'list' ) );
+		await expect( page.locator( '[data-layout-row="mobileOverflow"]' ) ).toBeHidden(); // List, but desktop
+
+		await page.getByRole( 'button', { name: 'Mobile (390px)' } ).click();
+		await expect( page.locator( '[data-phone-note-text]' ) ).toHaveText( 'Same as desktop' );
+		await expect( layoutChecked( page, 'buttonAlign' ) ).toHaveValue( 'center' ); // phones centre the buttons
+		await expect( page.locator( '[data-layout-row="mobileOverflow"]' ) ).toBeVisible();
+
+		await layoutOption( page, 'align', 'Center' ).click();
+		await expect( page.locator( '[data-phone-note-text]' ) ).toHaveText( 'Custom mobile layout' );
+		await page.getByRole( 'button', { name: 'Desktop (1280px)' } ).click();
+		await expect( layoutChecked( page, 'align' ) ).toHaveValue( 'left' ); // desktop untouched
+
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		let list = storedDisplay().list.layout;
+		expect( list.align ).toBe( 'left' );
+		expect( list.mobile ).toEqual( { align: 'center' } );
+
+		await page.getByRole( 'button', { name: 'Mobile (390px)' } ).click();
+		await page.getByRole( 'button', { name: 'Use desktop layout' } ).click();
+		await expect( page.locator( '[data-phone-note-text]' ) ).toHaveText( 'Same as desktop' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		list = storedDisplay().list.layout;
+		expect( list.mobile ).toBeUndefined();
+	} );
+
 	test( 'AC8 a button label keeps its icon markup', async ( { page } ) => {
 		const label = '<span class="amazon-icon"></span> Buy Now';
 		await page.goto( displayTab( 'list' ) );
