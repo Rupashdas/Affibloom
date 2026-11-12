@@ -1,6 +1,7 @@
 <?php
 /**
- * Dashboard screen.
+ * Dashboard screen: the band with the title and subtitle (U10), then the products card. The overview tiles (U9)
+ * are added by the tasks that provide their numbers (13, 31, 34).
  *
  * @package Affibloom
  * @var array<string, mixed> $view
@@ -12,13 +13,18 @@ defined( 'ABSPATH' ) || exit;
 	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
 
 	<div class="affibloom-page">
-		<h1 class="affibloom-page__title"><?php esc_html_e( 'Dashboard', 'affibloom' ); ?></h1>
+		<div class="affibloom-band">
+			<div class="affibloom-band__inner">
+				<h1 class="affibloom-page__title"><?php esc_html_e( 'Dashboard', 'affibloom' ); ?></h1>
+				<p class="affibloom-page__subtitle"><?php esc_html_e( 'Your affiliate products, their links and where they are used.', 'affibloom' ); ?></p>
+			</div>
+		</div>
 
-		<div class="affibloom-card affibloom-empty">
-			<span class="affibloom-empty__icon" aria-hidden="true">
-				<svg width="18" height="18" viewBox="0 0 18 18" focusable="false"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-			</span>
-			<p class="affibloom-empty__message"><?php esc_html_e( 'No products yet.', 'affibloom' ); ?></p>
+		<div class="affibloom-page__body">
+			<div class="affibloom-card affibloom-empty">
+				<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?></span>
+				<p class="affibloom-empty__message"><?php esc_html_e( 'No products yet.', 'affibloom' ); ?></p>
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,207 +1,244 @@
 /*
- * Affibloom admin UI kit.
+ * Affibloom admin UI kit, Aurora.
  * Every value comes from the approved design system, docs/ui/design-system.md (ADR-008).
  * Rules that must outrank wp-admin's own (.wrap h1, input[type=checkbox]) are scoped under .affibloom-admin.
  */
 
 /* 1. Tokens */
 .affibloom-admin {
-	--affibloom-brand-50: #eef4fc;
-	--affibloom-brand-500: #2f74d6;
+	--affibloom-navy-900: #0b2a5b;
 	--affibloom-brand-600: #1e5bb8;
-	--affibloom-brand-700: #174a96;
-	--affibloom-ink-900: #1e2330;
-	--affibloom-ink-700: #434a59;
-	--affibloom-ink-600: #5b6372;
+	--affibloom-brand-500: #2563c9;
+	--affibloom-brand-300: #7fb0f5;
+	--affibloom-brand-50: #eaf1fc;
+	--affibloom-on-navy: #c9d8f0;
+	--affibloom-on-band: #d6e2f5;
+	--affibloom-ink-900: #14213d;
+	--affibloom-ink-600: #5b6880;
 	--affibloom-ink-400: #8a93a3;
-	--affibloom-ink-200: #e4e7ec;
-	--affibloom-page: #f7f8fa;
+	--affibloom-line: #edf1f7;
+	--affibloom-page: #f3f6fb;
+	--affibloom-subtle: #fafbfe;
 	--affibloom-white: #fff;
-	--affibloom-success-700: #067647;
+	--affibloom-toast-icon: #22c55e;
+	--affibloom-toast-tick: #06210f;
+	--affibloom-on-navy-active: rgba(255, 255, 255, 0.12);
 
 	--affibloom-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-	--affibloom-text-title: 600 24px/32px var(--affibloom-font);
-	--affibloom-text-section: 600 16px/24px var(--affibloom-font);
-	--affibloom-text-body: 400 14px/20px var(--affibloom-font);
-	--affibloom-text-small: 400 13px/18px var(--affibloom-font);
 
-	--affibloom-space-1: 4px;
-	--affibloom-space-2: 8px;
-	--affibloom-space-4: 16px;
-	--affibloom-space-5: 20px;
-	--affibloom-space-6: 24px;
-	--affibloom-space-8: 32px;
-	--affibloom-space-10: 40px;
-
-	--affibloom-radius-sm: 6px;
-	--affibloom-radius-md: 10px;
+	--affibloom-radius-card: 16px;
+	--affibloom-radius-chip: 12px;
+	--affibloom-radius-control: 10px;
+	--affibloom-radius-segment: 7px;
+	--affibloom-radius-nav: 8px;
 	--affibloom-radius-full: 999px;
-	--affibloom-shadow-overlay: 0 12px 32px rgba(16, 24, 40, 0.18);
+
+	--affibloom-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
+	--affibloom-shadow-toast: 0 12px 32px rgba(16, 24, 40, 0.25);
+	--affibloom-shadow-segment: 0 1px 3px rgba(16, 24, 40, 0.12);
 	--affibloom-ease: 150ms ease;
+	--affibloom-content-width: 1080px;
 
 	/* Full width inside wp-admin's content area. */
 	margin: 0 0 0 -20px;
 	min-height: calc(100vh - 32px);
 	background: var(--affibloom-page);
 	color: var(--affibloom-ink-900);
-	font: var(--affibloom-text-body);
+	font: 400 14px/20px var(--affibloom-font);
 }
 
-/* Focus ring on every control */
+/* Focus ring: blue on light surfaces, white on the navy header and the band */
 .affibloom-admin :focus-visible {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;
 }
+.affibloom-header :focus-visible,
+.affibloom-band :focus-visible { outline-color: var(--affibloom-white); }
 
-/* 2. Header: white bar, logo and wordmark, tabs on the left */
+/* Icons: 20 x 20 outline set, drawn at 18px */
+.affibloom-icon {
+	display: block;
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* 2. Header: navy bar, logo, icon-plus-label navigation */
 .affibloom-header {
 	display: flex;
 	align-items: center;
-	gap: var(--affibloom-space-8);
-	height: 64px;
-	padding: 0 var(--affibloom-space-8);
+	gap: 28px;
+	height: 60px;
+	padding: 0 32px;
 	box-sizing: border-box;
-	border-bottom: 1px solid var(--affibloom-ink-200);
-	background: var(--affibloom-white);
+	background: var(--affibloom-navy-900);
+	color: var(--affibloom-white);
 }
 .affibloom-header__brand {
 	display: flex;
 	flex: 0 0 auto;
 	align-items: center;
 	gap: 10px;
-	font: 600 18px/24px var(--affibloom-font);
+	font: 700 17px/24px var(--affibloom-font);
 }
 .affibloom-header__logo { display: block; width: 28px; height: 28px; }
-.affibloom-header__logo-petals { fill: var(--affibloom-brand-500); }
-.affibloom-header__logo-ring { fill: var(--affibloom-white); }
-.affibloom-header__logo-dot { fill: var(--affibloom-brand-700); }
-.affibloom-header__nav {
-	display: flex;
-	gap: var(--affibloom-space-6);
-	height: 100%;
-}
+.affibloom-header__logo-petals { fill: var(--affibloom-brand-300); }
+.affibloom-header__logo-ring { fill: var(--affibloom-navy-900); }
+.affibloom-header__logo-dot { fill: var(--affibloom-white); }
+.affibloom-header__nav { display: flex; gap: 6px; }
 .affibloom-header__tab {
 	display: flex;
 	align-items: center;
-	height: 100%;
-	padding-top: 3px;
-	box-sizing: border-box;
-	border-bottom: 3px solid transparent;
-	color: var(--affibloom-ink-700);
+	gap: 8px;
+	padding: 7px 12px;
+	border-radius: var(--affibloom-radius-nav);
+	color: var(--affibloom-on-navy);
 	font-weight: 500;
 	text-decoration: none;
 	white-space: nowrap;
+	transition: background-color var(--affibloom-ease), color var(--affibloom-ease);
 }
 .affibloom-header__tab:hover,
-.affibloom-header__tab:focus { color: var(--affibloom-ink-900); }
+.affibloom-header__tab:focus { color: var(--affibloom-white); }
 .affibloom-header__tab.is-active {
-	border-bottom-color: var(--affibloom-brand-600);
-	color: var(--affibloom-ink-900);
+	background: var(--affibloom-on-navy-active);
+	color: var(--affibloom-white);
 }
 
-/* 3. Page and page head */
-.affibloom-page {
-	max-width: 1200px;
-	padding: var(--affibloom-space-8);
+/* 3. Band: the gradient with the title, the subtitle and section tabs */
+.affibloom-band {
+	padding: 28px 32px 72px;
+	background: linear-gradient(120deg, var(--affibloom-navy-900) 0%, var(--affibloom-brand-600) 100%);
+	color: var(--affibloom-white);
+}
+/* The band's content sits in the same centred column as the body below it. */
+.affibloom-band__inner {
+	max-width: var(--affibloom-content-width);
+	margin: 0 auto;
 }
 .affibloom-admin .affibloom-page__title {
-	margin: 0 0 var(--affibloom-space-4);
+	margin: 0;
 	padding: 0;
-	color: var(--affibloom-ink-900);
-	font: var(--affibloom-text-title);
+	color: var(--affibloom-white);
+	font: 700 30px/38px var(--affibloom-font);
+}
+.affibloom-page__subtitle {
+	margin: 4px 0 0;
+	color: var(--affibloom-on-band);
+	font-size: 14px;
+	line-height: 20px;
 }
 
-/* Page tabs (Settings sections, product page): an underline row below the title */
+/* Section tabs: a segmented control on the band */
 .affibloom-tabs {
-	display: flex;
-	gap: var(--affibloom-space-6);
-	margin: 0 0 var(--affibloom-space-6);
-	border-bottom: 1px solid var(--affibloom-ink-200);
+	display: inline-flex;
+	gap: 4px;
+	margin-top: 20px;
+	padding: 4px;
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-on-navy-active);
 }
 .affibloom-tabs__tab {
-	margin-bottom: -1px;
-	padding: var(--affibloom-space-2) 0 10px;
-	border-bottom: 3px solid transparent;
-	color: var(--affibloom-ink-700);
-	font-weight: 500;
+	padding: 7px 16px;
+	border-radius: var(--affibloom-radius-segment);
+	color: var(--affibloom-on-band);
+	font-weight: 600;
 	text-decoration: none;
 }
 .affibloom-tabs__tab:hover,
-.affibloom-tabs__tab:focus { color: var(--affibloom-ink-900); }
+.affibloom-tabs__tab:focus { color: var(--affibloom-white); }
 .affibloom-tabs__tab.is-active {
-	border-bottom-color: var(--affibloom-brand-600);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-segment);
 	color: var(--affibloom-ink-900);
 }
 
-/* 4. Card: header, body, footer with the actions */
-.affibloom-card {
-	max-width: 760px;
-	border: 1px solid var(--affibloom-ink-200);
-	border-radius: var(--affibloom-radius-md);
-	background: var(--affibloom-white);
+/* 4. Body: one centred column, as Lasso's; content floats 48px up over the band */
+.affibloom-page__body {
+	max-width: var(--affibloom-content-width);
+	margin: -48px auto 0;
+	padding: 0 32px 32px;
 }
-.affibloom-card__head { padding: var(--affibloom-space-5) var(--affibloom-space-6) var(--affibloom-space-1); }
+
+/* Card */
+.affibloom-card {
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+}
+.affibloom-card__head { padding: 22px 24px 6px; }
 .affibloom-admin .affibloom-card__title {
 	margin: 0;
 	padding: 0;
 	color: var(--affibloom-ink-900);
-	font: var(--affibloom-text-section);
+	font: 700 18px/26px var(--affibloom-font);
 }
 .affibloom-card__intro {
 	margin: 2px 0 0;
 	color: var(--affibloom-ink-600);
-	font: var(--affibloom-text-small);
+	font-size: 13px;
+	line-height: 18px;
 }
-.affibloom-card__body { padding: var(--affibloom-space-1) var(--affibloom-space-6); }
+.affibloom-card__body { padding: 4px 24px; }
 .affibloom-card__foot {
 	display: flex;
 	justify-content: flex-end;
-	gap: var(--affibloom-space-2);
-	padding: var(--affibloom-space-4) var(--affibloom-space-6);
-	border-top: 1px solid var(--affibloom-ink-200);
+	gap: 10px;
+	padding: 16px 24px;
+	border-top: 1px solid var(--affibloom-line);
+	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
+	background: var(--affibloom-subtle);
+}
+
+/* Icon chip */
+.affibloom-chip {
+	display: inline-grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	border-radius: var(--affibloom-radius-chip);
+	background: var(--affibloom-brand-50);
+	color: var(--affibloom-brand-600);
 }
 
 /* Empty state */
 .affibloom-empty {
-	padding: var(--affibloom-space-10) var(--affibloom-space-6);
+	padding: 40px 24px;
 	text-align: center;
 }
-.affibloom-empty__icon {
-	display: inline-grid;
-	place-items: center;
-	width: 40px;
-	height: 40px;
-	margin-bottom: 12px;
-	border-radius: 50%;
-	background: var(--affibloom-brand-50);
-	color: var(--affibloom-brand-600);
-}
-.affibloom-empty__icon svg { display: block; }
-.affibloom-empty__message { margin: 0; font-weight: 500; }
+.affibloom-empty .affibloom-chip { margin-bottom: 12px; }
+.affibloom-empty__message { margin: 0; font-weight: 600; }
 
-/* 5. Settings row: label and visible description on the left, control on the right (U3) */
+/* 5. Settings row: icon chip, label with its visible description (U3), switch on the right */
 .affibloom-setting {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: var(--affibloom-space-6);
-	padding: var(--affibloom-space-4) 0;
-	border-top: 1px solid var(--affibloom-ink-200);
+	gap: 16px;
+	padding: 16px 0;
+	border-top: 1px solid var(--affibloom-line);
 }
 .affibloom-setting:first-child { border-top: 0; }
+.affibloom-setting__text { flex: 1; min-width: 0; }
 .affibloom-setting__label {
 	display: block;
 	color: var(--affibloom-ink-900);
-	font-weight: 500;
+	font-weight: 600;
 }
 .affibloom-setting__desc {
 	display: block;
 	margin-top: 2px;
 	color: var(--affibloom-ink-600);
-	font: var(--affibloom-text-small);
+	font-size: 13px;
+	line-height: 18px;
 }
 
-/* 6. Toggle: 36 x 20 track; the real checkbox lies over it, so a click or tap hits it */
+/* 6. Toggle: 44 x 24; the real checkbox lies over the track, so a click or tap hits it */
 .affibloom-toggle {
 	position: relative;
 	display: inline-flex;
@@ -212,34 +249,36 @@
 	top: 0;
 	left: 0;
 	z-index: 1;
-	width: 36px;
-	height: 20px;
+	width: 44px;
+	height: 24px;
 	margin: 0;
 	opacity: 0;
 	cursor: pointer;
 }
 .affibloom-toggle__track {
 	position: relative;
-	width: 36px;
-	height: 20px;
+	width: 44px;
+	height: 24px;
 	border-radius: var(--affibloom-radius-full);
-	background: var(--affibloom-ink-400);
-	transition: background var(--affibloom-ease);
+	background-color: var(--affibloom-ink-400);
+	transition: background-color var(--affibloom-ease);
 }
 .affibloom-toggle__track::after {
 	content: "";
 	position: absolute;
-	top: 2px;
-	left: 2px;
-	width: 16px;
-	height: 16px;
+	top: 3px;
+	left: 3px;
+	width: 18px;
+	height: 18px;
 	border-radius: 50%;
 	background: var(--affibloom-white);
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.2);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 	transition: transform var(--affibloom-ease);
 }
-.affibloom-toggle__input:checked + .affibloom-toggle__track { background: var(--affibloom-brand-600); }
-.affibloom-toggle__input:checked + .affibloom-toggle__track::after { transform: translateX(16px); }
+.affibloom-toggle__input:checked + .affibloom-toggle__track {
+	background-image: linear-gradient(120deg, var(--affibloom-brand-600), var(--affibloom-brand-500));
+}
+.affibloom-toggle__input:checked + .affibloom-toggle__track::after { transform: translateX(20px); }
 .affibloom-toggle__input:focus-visible + .affibloom-toggle__track {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;
@@ -251,24 +290,25 @@
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	height: 36px;
-	padding: 0 var(--affibloom-space-4);
+	height: 38px;
+	padding: 0 18px;
 	box-sizing: border-box;
 	border: 1px solid transparent;
-	border-radius: var(--affibloom-radius-sm);
-	font: 500 14px/20px var(--affibloom-font);
+	border-radius: var(--affibloom-radius-control);
+	font: 600 14px/20px var(--affibloom-font);
 	text-decoration: none;
+	white-space: nowrap;
 	cursor: pointer;
-	transition: background-color var(--affibloom-ease);
 }
 .affibloom-button--primary,
 .affibloom-button--primary:focus {
-	background: var(--affibloom-brand-600);
+	background-image: linear-gradient(180deg, var(--affibloom-brand-500), var(--affibloom-brand-600));
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 	color: var(--affibloom-white);
 }
 .affibloom-button--primary:hover,
 .affibloom-button--primary:active {
-	background: var(--affibloom-brand-700);
+	background-image: linear-gradient(180deg, var(--affibloom-brand-600), var(--affibloom-brand-600));
 	color: var(--affibloom-white);
 }
 .affibloom-button:disabled,
@@ -277,27 +317,35 @@
 	cursor: not-allowed;
 }
 
-/* 8. Toast: white card with a status bar and icon, bottom right, slides in, gone after 4 s */
+/* 8. Toast: dark card with a check, bottom right, slides in, gone after 4 s */
 .affibloom-toast {
 	position: fixed;
-	right: var(--affibloom-space-6);
-	bottom: var(--affibloom-space-6);
+	right: 24px;
+	bottom: 24px;
 	z-index: 100000;
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	max-width: 360px;
-	padding: 12px var(--affibloom-space-4);
-	border: 1px solid var(--affibloom-ink-200);
-	border-left: 4px solid var(--affibloom-success-700);
-	border-radius: var(--affibloom-radius-sm);
-	background: var(--affibloom-white);
-	box-shadow: var(--affibloom-shadow-overlay);
-	color: var(--affibloom-ink-900);
+	padding: 12px 16px;
+	border-radius: var(--affibloom-radius-chip);
+	background: var(--affibloom-ink-900);
+	box-shadow: var(--affibloom-shadow-toast);
+	color: var(--affibloom-white);
+	font-weight: 600;
 	animation: affibloom-toast 4s ease forwards;
 }
-.affibloom-toast__icon { display: block; flex: 0 0 auto; }
-.affibloom-toast__icon-circle { fill: var(--affibloom-success-700); }
+.affibloom-toast__icon {
+	display: inline-grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: var(--affibloom-toast-icon);
+	color: var(--affibloom-toast-tick);
+}
+.affibloom-toast__icon .affibloom-icon { width: 16px; height: 16px; stroke-width: 2.2; }
 @keyframes affibloom-toast {
 	0% { opacity: 0; transform: translateY(8px); }
 	5%, 90% { opacity: 1; transform: none; }
@@ -306,14 +354,16 @@
 
 /* 9. Smaller screens (wp-admin breakpoints) */
 @media (max-width: 960px) {
-	.affibloom-page { padding: var(--affibloom-space-5); }
-	.affibloom-header { padding: 0 var(--affibloom-space-5); }
+	.affibloom-header,
+	.affibloom-band { padding-right: 20px; padding-left: 20px; }
+	.affibloom-page__body { padding-right: 20px; padding-left: 20px; }
 }
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
-	.affibloom-header { gap: var(--affibloom-space-4); }
-	.affibloom-header__nav { overflow-x: auto; }
-	.affibloom-setting { flex-direction: column; align-items: flex-start; gap: 12px; }
+	.affibloom-header { gap: 16px; }
+	.affibloom-header__tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.affibloom-setting { flex-wrap: wrap; }
+	.affibloom-setting .affibloom-toggle { margin-left: 56px; }
 	.affibloom-card__foot .affibloom-button { width: 100%; }
 }
 

@@ -39,3 +39,5 @@ Findings from the UI audit (roadmap 1.7, `docs/ui/screen-inventory.md`) are in t
 | U6 | Plain success wording | "Yee haw! Your … saved." | "Product saved." | Wording confirmed in `save-success.php` | **Approved** |
 | U7 | Warning on leaving with unsaved changes | — | — | **Lasso already warns** (product page and Settings) | Parity: built anyway, no decision needed |
 | U8 | Detected links offered before they are added (C2) | added as products without asking | notice on the post's edit screen: "Create products for these links" | Lasso created 16 products this way | **Rejected**: Lasso adds them automatically and the site uses all 16 |
+| U9 | Dashboard overview tiles | small icon counters beside the title | tiles: Products, Broken links, Clicks (30 days) | — | **Approved** by the user 2026-11-13 with the Aurora design; built by Tasks 13, 31 and 34 |
+| U10 | Page subtitles | title only | one line under each page title | — | **Approved** by the user 2026-11-13 with Aurora (no eyebrow line) |

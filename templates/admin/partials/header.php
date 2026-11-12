@@ -1,6 +1,6 @@
 <?php
 /**
- * The Affibloom header: logo mark, wordmark and the plugin's tabs (docs/ui/design-system.md).
+ * The Affibloom header: logo mark, wordmark and the plugin's navigation (docs/ui/design-system.md, Aurora).
  *
  * @package Affibloom
  * @var array{current: string} $view
@@ -9,10 +9,10 @@
 defined( 'ABSPATH' ) || exit;
 
 $header_tabs = array(
-	'dashboard' => array( __( 'Dashboard', 'affibloom' ), admin_url( 'admin.php?page=affibloom' ) ),
+	'dashboard' => array( __( 'Dashboard', 'affibloom' ), admin_url( 'admin.php?page=affibloom' ), 'home' ),
 );
 if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::SETTINGS ) ) {
-	$header_tabs['settings'] = array( __( 'Settings', 'affibloom' ), admin_url( 'admin.php?page=affibloom-settings' ) );
+	$header_tabs['settings'] = array( __( 'Settings', 'affibloom' ), admin_url( 'admin.php?page=affibloom-settings' ), 'settings' );
 }
 ?>
 <header class="affibloom-header">
@@ -31,11 +31,12 @@ if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::SETTINGS ) ) {
 		<span class="affibloom-header__name"><?php esc_html_e( 'Affibloom', 'affibloom' ); ?></span>
 	</div>
 	<nav class="affibloom-header__nav" aria-label="<?php esc_attr_e( 'Affibloom', 'affibloom' ); ?>">
-		<?php foreach ( $header_tabs as $key => [ $label, $url ] ) : ?>
+		<?php foreach ( $header_tabs as $key => [ $label, $url, $icon ] ) : ?>
 			<a class="affibloom-header__tab<?php echo $key === $view['current'] ? ' is-active' : ''; ?>"
 				href="<?php echo esc_url( $url ); ?>"
 				<?php echo $key === $view['current'] ? 'aria-current="page"' : ''; ?>>
-				<?php echo esc_html( $label ); ?>
+				<?php $this->render( 'admin/partials/icon', array( 'name' => $icon ) ); ?>
+				<span class="affibloom-header__tab-label"><?php echo esc_html( $label ); ?></span>
 			</a>
 		<?php endforeach; ?>
 	</nav>
