@@ -1,8 +1,13 @@
-# UI tokens
+# UI tokens (Lasso's admin, for reference)
+
+> **Reference only since 2026-11-12 (ADR-008).** Affibloom's admin has its own design system,
+> `docs/ui/design-system.md` (written and approved in plan Task 9A). The values below record Lasso's admin look;
+> they are not used for Affibloom's admin screens. Tasks 8 and 9 were built with them and are restyled in Task 9A.
+> The product box (Phase 3) is not affected: its measured values go in a "Product box" section of this file.
 
 Measured from Lasso's admin stylesheet (`admin/assets/css/lasso-dashboard.css`, Lasso 369) and checked
-against the live Lasso 370 screens in `tests/fixtures/baselines/admin/`. Task 8 turns these into CSS custom
-properties named `--affibloom-*` in `assets/admin/admin.css`.
+against the live Lasso 370 screens in `tests/fixtures/baselines/admin/`. Task 8 turned these into CSS custom
+properties named `--affibloom-*` in `assets/admin/admin.css` (until Task 9A).
 
 ## Colours
 

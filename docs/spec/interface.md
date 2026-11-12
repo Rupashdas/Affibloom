@@ -6,6 +6,10 @@ Date: 2026-11-12
 The names the tests (Task 7) and the code (Tasks 8–36) share: labels, ids and selectors, REST routes, WP-CLI
 commands, fields, settings and hooks.
 
+**Looks (ADR-008, 2026-11-12).** This spec fixes content, names and order, not looks. Admin screens keep the labels,
+help texts and order given here, in Affibloom's own design (`docs/ui/design-system.md`); where a row below says
+"same", it means the same label, field or step, not the same style as Lasso.
+
 **Sources.** Labels were checked against Lasso's live admin screens (production runs **Lasso 370**, captured
 2026-11-12 in `tests/fixtures/baselines/admin/*.jpg`) and, for text a screenshot cannot show (tooltips,
 dialogs, toasts, the block editor), against the Lasso 369 source in `D:\lasso\lasso`. Where the plan's

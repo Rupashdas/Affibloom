@@ -130,3 +130,8 @@ change.
 
 Approved items change these tasks: U1 Task 23 (and F4 AC1), U2 Task 31, U3 Tasks 8–17 (help text partial) and 37,
 U6 Tasks 11 and 15 (toast text).
+
+**Later decision (the user, 2026-11-12): ADR-008.** The admin gets Affibloom's own visual design instead of Lasso's
+look; Lasso's labels, help texts and workflow stay, and the product box is not affected. These Task 6 decisions are
+unchanged by it; where a reason above says "the same toast" or "Lasso's layout", read it as the same element and
+content in Affibloom's design.

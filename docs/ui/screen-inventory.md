@@ -5,6 +5,10 @@ Every element on Lasso's admin screens, with its help text (the hover tooltip, `
 its register item or the spec change in `docs/spec/interface.md`). Screens: the live Lasso 370 captures in
 `tests/fixtures/baselines/admin/` (2026-11-12, 1920 px wide, view only). Help text: Lasso 369 source.
 
+**Kept means the element, its label and help text, not its look (ADR-008, 2026-11-12).** Affibloom's admin uses its own
+design system (`docs/ui/design-system.md`); this inventory decides what is on each screen, in what order and with
+what words.
+
 ## Findings that answer Task 6's questions
 
 - **Unsaved changes (U7):** Lasso already warns, on the product page and on Settings (browser prompt, plus

@@ -23,7 +23,10 @@ gate 4 before work starts.
 
 ## UI/UX improvements register
 
-Each item is built exactly as Lasso has it unless approved. **Decided 2026-11-12**; reasons in `task-6-decisions.md`.
+Each item keeps Lasso's content and steps unless approved. **Decided 2026-11-12**; reasons in `task-6-decisions.md`.
+The register covers content and workflow only: since ADR-008 (the user, 2026-11-12) the admin's looks follow
+Affibloom's own design system (`docs/ui/design-system.md`), so "the same toast" or "the same filter" below means the
+same element and words, in Affibloom's style.
 Findings from the UI audit (roadmap 1.7, `docs/ui/screen-inventory.md`) are in the table.
 
 | ID | Change | Before (Lasso) | After (if approved) | Audit finding | Decision |
