@@ -109,9 +109,12 @@ follows the same shape as 10A–10F: each task ends at an entry point that has b
 |---|---|---|
 | **11A** | The product exists: the post type, `Product`, `AffiliateUrl`, `InvalidField`, the repository, `ProductService::create_from_urls()` for one URL, `POST /products`, and the modal in single-URL mode with its error line. No title lookup — the name is the domain | AC1, AC5, AC11 |
 | **11B** | Normalisation and duplicates: the `add_https` repair table, `url_key()`, `find_by_url_key()`, and whatever D1 and D2 decide (refusal messages, or the redirect and the "already exists" warning, and the setting if it is kept) | AC2, AC3, AC4 |
-| **11C** | Bulk add: Shift+Enter, the textarea, the counter, the preview and pencil, the confirm, the ten-link ceiling, and the queue or the synchronous run that D4 of section 3 decides, with the progress bar and the "already processing" state | AC6, AC7, AC8, AC9 |
-| **11D** | Naming: the `ProductNamer` behind D3 — the title and image for a new link, Amazon and other merchants, and the fallbacks | part of AC1 |
-| **11E** | The site's link defaults copied onto a new product at creation, as Lasso does, and the notice after the redirect | AC10 |
+| **11C** | Bulk add: Shift+Enter and the header menu, the textarea, the counter, the preview and pencil, the confirm, the ten-link ceiling, a WP-Cron background run (D3b) with the progress bar and the "still processing" state | AC6, AC7, AC8, AC9 |
+| **11D** | Naming (D3): `LinkResolver` — an embedded destination's site, else the page title after redirects, Lasso's placeholder titles and fallbacks, Amazon never requested, no image; the `keep_genius_formatting` rule | AC1 |
+| **11E** | The site's link defaults copied onto a new product at creation, as Lasso does | AC10 |
+
+The full task text, with Lasso's rules and what each task creates, is in the phase file
+(`phase-2-settings-and-product-library.md`, Tasks 11C–11E).
 
 Task 12 ("Adding an Amazon link or ASIN") stays as the plan has it and follows 11D, because it is the Amazon
 half of the same naming seam.
