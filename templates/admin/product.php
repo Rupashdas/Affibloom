@@ -276,6 +276,7 @@ $soon_tabs   = array(
 	</div>
 	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
+	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php // The toast's JS twin (Task 15A): product-save.js fills a copy with its message; the error one has a cross. ?>
 	<template id="affibloom-toast-template">

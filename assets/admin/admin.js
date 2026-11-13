@@ -125,6 +125,10 @@
 		}
 	}
 
+	// For a page script that opens a modal itself rather than from a [data-affibloom-open] button: the product page's
+	// "Unsaved Changes" (Task 15D), opened by the link that was clicked.
+	window.affibloomModal = { show: showModal, hide: hideModal };
+
 	function trapTab( event ) {
 		var items = Array.prototype.filter.call( openModal.querySelectorAll( FOCUSABLE ), function ( item ) {
 			return null !== item.offsetParent;

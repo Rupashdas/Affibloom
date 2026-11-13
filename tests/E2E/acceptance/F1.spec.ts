@@ -180,6 +180,58 @@ test.describe( 'F1 Product library', () => {
 		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_repointed_to' ) ).toBe( String( other ) );
 	} );
 
+	// Task 15D (requirements 5 B8, 9 S16; U7 parity).
+	test( 'AC16 leaving with unsaved edits asks first; after a save nothing asks', async ( { page } ) => {
+		const name = unique( 'F1 AC16' );
+		const id = createProduct( { name } );
+		const productPage = `/wp-admin/admin.php?page=affibloom-product&id=${ id }`;
+		const settingsLink = page.locator( '.affibloom-header__nav a', { hasText: 'Settings' } );
+		const ask = page.getByRole( 'dialog', { name: 'Unsaved Changes' } );
+		await page.goto( productPage );
+
+		// Nothing changed: the link just goes.
+		await settingsLink.click();
+		await page.waitForURL( /page=affibloom-settings/ );
+
+		// × stays on the page with the edit.
+		await page.goto( productPage );
+		await page.locator( '#affibloom-name' ).fill( `${ name } edited` );
+		await settingsLink.click();
+		await expect( ask ).toContainText( 'You have unsaved changes that will be lost if you leave this page. What would you like to do?' );
+		await ask.getByRole( 'button', { name: 'Close' } ).click();
+		await expect( ask ).toBeHidden();
+		await expect( page ).toHaveURL( /page=affibloom-product/ );
+		await expect( page.locator( '#affibloom-name' ) ).toHaveValue( `${ name } edited` );
+
+		// Leave Without Saving goes, and nothing is stored.
+		await settingsLink.click();
+		await ask.getByRole( 'button', { name: 'Leave Without Saving' } ).click();
+		await page.waitForURL( /page=affibloom-settings/ );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+
+		// Save Changes saves, then goes.
+		await page.goto( productPage );
+		await page.locator( '#affibloom-name' ).fill( `${ name } saved` );
+		await settingsLink.click();
+		await ask.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await page.waitForURL( /page=affibloom-settings/ );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( `${ name } saved` );
+
+		// Reloading with an edit gets the browser's own question; after a save, a link just goes.
+		await page.goto( productPage );
+		await page.locator( '#affibloom-badge-words' ).fill( 'Top Pick' );
+		const asked = new Promise< string >( ( resolve ) => page.once( 'dialog', ( dialog ) => {
+			resolve( dialog.type() );
+			void dialog.dismiss();
+		} ) );
+		void page.reload().catch( () => undefined );
+		expect( await asked ).toBe( 'beforeunload' );
+		await page.getByRole( 'button', { name: 'Save Changes', exact: true } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+		await settingsLink.click();
+		await page.waitForURL( /page=affibloom-settings/ );
+	} );
+
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {
 		const name = unique( 'F1 AC3' );
 		const id = createProduct( { name } );

@@ -12,6 +12,11 @@
  * with the toast, because the Amazon-only rows differ (Task 15B, D18). A Primary URL another product already has is
  * not saved: the dialog turns into Lasso's "This Product Already Exists", whose Confirm retires this product in favour
  * of that one and opens its page (Task 15C, S10, D14); Cancel (or Escape) closes it and keeps the typed link.
+ *
+ * Unsaved changes (Task 15D, B8, S16; U7 parity): the form's state is kept as a snapshot when the page has loaded and
+ * after each save. A click on a link that would leave the page while it differs opens Lasso's "Unsaved Changes" (Leave
+ * Without Saving goes; Save Changes saves, then goes; × stays), and reloading or closing the tab gets the browser's
+ * own question. Custom field rows save themselves (D3), so they are not in the snapshot.
  */
 ( function () {
 	'use strict';
@@ -102,6 +107,10 @@
 		var cancel = repoint.querySelector( '[data-repoint-cancel]' );
 		var confirm = repoint.querySelector( '[data-repoint-confirm]' );
 		var offer = null;
+		var unsaved = document.querySelector( '[data-unsaved-modal]' );
+		var baseline = null;
+		var leaving = false;
+		var afterSave = null;
 		var title = document.getElementById( 'affibloom-product-title' );
 		var linkLine = document.querySelector( '.affibloom-product-url' );
 		var rich = [ richField( form, 'description', 'affibloom_description' ), richField( form, 'price', 'affibloom_price' ) ].filter( Boolean );
@@ -161,6 +170,21 @@
 				}
 			} );
 			return data;
+		};
+
+		// The form as it would be sent; equal to the baseline means nothing to lose.
+		var snapshot = function () {
+			return JSON.stringify( collect() );
+		};
+		var keepBaseline = function () {
+			baseline = snapshot();
+		};
+		var hasChanges = function () {
+			return null !== baseline && snapshot() !== baseline;
+		};
+		var go = function ( href ) {
+			leaving = true;
+			window.location.assign( href );
 		};
 
 		var clearErrors = function () {
@@ -286,7 +310,7 @@
 			confirm.disabled = true;
 			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId + '/repoint', method: 'POST', data: offer } )
 				.then( function ( response ) {
-					window.location.assign( response.data.redirect_to );
+					go( response.data.redirect_to );
 				} )
 				.catch( function ( error ) {
 					cancel.disabled = false;
@@ -320,15 +344,21 @@
 						var reload = new URL( window.location.href );
 						reload.searchParams.delete( 'is_duplicate' );
 						reload.searchParams.set( 'affibloom_notice', 'product-saved' );
-						window.location.assign( reload.toString() );
+						go( afterSave || reload.toString() );
 						return;
 					}
 					closeDialog( function () {
 						showStored( response.data, sent );
+						keepBaseline();
 						toast( form.dataset.savedText, false );
+						// "Unsaved Changes" → Save Changes: once saved, go where the link led (Lasso's pending action).
+						if ( afterSave ) {
+							go( afterSave );
+						}
 					} );
 				} )
 				.catch( function ( error ) {
+					afterSave = null; // A refused or offered save stays on the page.
 					if ( error && 'affibloom_duplicate' === error.code && error.data && error.data.to ) {
 						showRepoint( error.data, sent.url );
 						return;
@@ -350,11 +380,55 @@
 					}, CLOSE_AFTER );
 				} );
 		} );
+
+		// The baseline is taken once the editors have loaded their content (Lasso takes it at once and on the next tick
+		// for the same reason): TinyMCE starts after DOMContentLoaded.
+		var loaded = function () {
+			keepBaseline();
+			window.setTimeout( keepBaseline, 0 );
+		};
+		if ( 'complete' === document.readyState ) {
+			loaded();
+		} else {
+			window.addEventListener( 'load', loaded );
+		}
+
+		window.addEventListener( 'beforeunload', function ( event ) {
+			if ( leaving || saving || ! hasChanges() ) {
+				return;
+			}
+			event.preventDefault();
+			event.returnValue = '';
+		} );
+
+		// A link that leaves the page: not "#…", "javascript:", a new tab, a modified click, or a link inside a dialog.
+		document.addEventListener( 'click', function ( event ) {
+			var link = event.target.closest( 'a[href]' );
+			if ( ! link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ) {
+				return;
+			}
+			var href = link.getAttribute( 'href' );
+			if ( '' === href || '#' === href.charAt( 0 ) || 0 === href.indexOf( 'javascript:' ) || '_blank' === link.target || link.closest( '.affibloom-modal' ) || ! hasChanges() ) {
+				return;
+			}
+			event.preventDefault();
+			unsaved.dataset.href = link.href;
+			window.affibloomModal.show( unsaved, link );
+		} );
+		unsaved.querySelector( '[data-unsaved-leave]' ).addEventListener( 'click', function () {
+			window.affibloomModal.hide();
+			go( unsaved.dataset.href );
+		} );
+		unsaved.querySelector( '[data-unsaved-save]' ).addEventListener( 'click', function () {
+			window.affibloomModal.hide();
+			afterSave = unsaved.dataset.href;
+			form.requestSubmit( save );
+		} );
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var form = document.getElementById( 'affibloom-product-form' );
-		if ( form && document.querySelector( '[data-save-modal]' ) ) {
+		if ( form && document.querySelector( '[data-save-modal]' ) && document.querySelector( '[data-unsaved-modal]' ) && window.affibloomModal ) {
 			productForm( form );
 		}
 	} );
