@@ -46,6 +46,8 @@ final class ProductService {
 	 * - with keep_genius_formatting off, a geni.us link is stored as its destination, which is then checked for a
 	 *   duplicate too;
 	 * - a new product takes the site's link defaults as they are now (Task 11E);
+	 * - an Amazon link with an ASIN is the published Amazon product with that ASIN on that store, if there is one
+	 *   (get_lasso_post_id_by_url's product-ID lookup, after the stored-link one; Task 12B);
 	 * - an Amazon product link is stored as Lasso stores it, typed Amazon with its ASIN and country (Task 12A).
 	 *
 	 * @param string $input What was pasted.
@@ -71,24 +73,30 @@ final class ProductService {
 			}
 		}
 
-		return new AddedLink( $this->products->save( $this->draft( $resolved->title, $url, $settings ) ), false );
+		$amazon = AmazonUrl::from( $url );
+		if ( null === $amazon || '' === $amazon->asin() ) {
+			return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
+		}
+
+		$existing = $this->products->find_amazon( $amazon->asin(), $amazon->country() );
+		if ( null !== $existing ) {
+			return new AddedLink( $existing, true );
+		}
+
+		return new AddedLink( $this->products->save( $this->amazon_draft( $resolved->title, $amazon, $settings ) ), false );
 	}
 
 	/**
-	 * The new product: an Amazon link with an ASIN monetized and typed (Lasso_Amazon_Api::get_amazon_product_url()
-	 * and save_lasso_url()'s Amazon fields), any other link as it is.
+	 * A new Amazon product: its link monetized (Lasso_Amazon_Api::get_amazon_product_url()) and typed with its ASIN
+	 * and store (save_lasso_url()'s Amazon fields).
 	 *
-	 * @param string       $name     Its name.
-	 * @param AffiliateUrl $url      The link to store.
-	 * @param Settings     $settings The site's settings, read once for this add.
+	 * @param string    $name     Its name.
+	 * @param AmazonUrl $amazon   Its link, which has an ASIN.
+	 * @param Settings  $settings The site's settings, read once for this add.
 	 */
-	private function draft( string $name, AffiliateUrl $url, Settings $settings ): Product {
-		$amazon = AmazonUrl::from( $url );
-		if ( null === $amazon || '' === $amazon->asin() ) {
-			return Product::draft( $name, $url, $settings );
-		}
-
+	private function amazon_draft( string $name, AmazonUrl $amazon, Settings $settings ): Product {
 		$stored = $amazon->monetized( TrackingIds::from_settings( $settings ), $settings->bool( 'shorten_amazon_links' ) );
+
 		return Product::draft( $name, $stored, $settings )->with(
 			array(
 				'type'           => ProductType::Amazon,

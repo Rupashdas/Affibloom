@@ -63,6 +63,50 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param string $key From AffiliateUrl::key().
 	 */
 	public function find_by_url_key( string $key ): ?Product {
+		return $this->find_one(
+			array(
+				array(
+					'key'   => '_affibloom_url_key',
+					'value' => $key,
+				),
+			)
+		);
+	}
+
+	/**
+	 * The published Amazon product with this ASIN on this store, or null. Lasso's query joins url_details on
+	 * product_id, country and product_type "amazon", published posts only; meta_value's collation compares the ASIN
+	 * without case, as Lasso's column does.
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 */
+	public function find_amazon( string $asin, string $country ): ?Product {
+		return $this->find_one(
+			array(
+				array(
+					'key'   => '_affibloom_type',
+					'value' => ProductType::Amazon->value,
+				),
+				array(
+					'key'   => '_affibloom_asin',
+					'value' => $asin,
+				),
+				array(
+					'key'   => '_affibloom_amazon_country',
+					'value' => $country,
+				),
+			)
+		);
+	}
+
+	/**
+	 * The published product whose meta matches every clause, lowest ID first, or null. Extracted on its second use
+	 * (Task 12B). One lookup per add over a few hundred products, so the meta query's cost does not matter.
+	 *
+	 * @param list<array{key: string, value: string}> $clauses Meta key and value pairs, all required.
+	 */
+	private function find_one( array $clauses ): ?Product {
 		$posts = get_posts(
 			array(
 				'post_type'        => ProductPostType::NAME,
@@ -72,8 +116,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'order'            => 'ASC',
 				'no_found_rows'    => true,
 				'suppress_filters' => true,
-				'meta_key'         => '_affibloom_url_key', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one lookup per add, a few hundred products.
-				'meta_value'       => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- as above.
+				'meta_query'       => array_merge( array( 'relation' => 'AND' ), $clauses ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- see above.
 			)
 		);
 

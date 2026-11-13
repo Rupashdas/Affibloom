@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, setSettings, wp } from '../utils';
 
-// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8. AC2 and AC5 arrive
-// with 12E, AC4 with 12B, AC6 with 12C, AC7 with 12D.
+// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8; 12B: AC4. AC2 and AC5
+// arrive with 12E, AC6 with 12C, AC7 with 12D.
 test.describe( 'F2 Amazon links', () => {
 	// The live site's Amazon settings (tests/fixtures/inventory/settings.json).
 	const live = { tracking_id: 'vbvault-20', multiple_tracking_ids: true, tracking_id_whitelist: [ 'vbvault-20' ], shorten_amazon_links: true };
@@ -20,14 +20,25 @@ test.describe( 'F2 Amazon links', () => {
 		return Number( id || 0 );
 	}
 
-	/** Adds a link through "Add A New Link" and returns the new product's stored fields. */
-	async function add( page: Page, input: string ) {
-		const before = newestProduct();
+	/** Pastes a link into "Add A New Link" and sends it. */
+	async function submit( page: Page, input: string ) {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
 		await dialog.getByLabel( 'URL' ).fill( input );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
+	}
+
+	/** IDs of the products stored with this ASIN. */
+	function productsWithAsin( a: string ): string[] {
+		const out = wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_asin', `--meta_value=${ a }`, '--field=ID' );
+		return out ? out.split( /\s+/ ) : [];
+	}
+
+	/** Adds a link through "Add A New Link" and returns the new product's stored fields. */
+	async function add( page: Page, input: string ) {
+		const before = newestProduct();
+		await submit( page, input );
 
 		// Until Task 14 builds the product page, the add ends on the Dashboard with a toast.
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
@@ -61,6 +72,21 @@ test.describe( 'F2 Amazon links', () => {
 		setSettings( { tracking_id_whitelist: [ 'other-21', 'vbvault-20' ] } );
 		const b = asin();
 		expect( ( await add( page, `https://www.amazon.com/dp/${ b }?tag=other-21` ) ).url ).toBe( `https://www.amazon.com/dp/${ b }?tag=other-21` );
+	} );
+
+	test( 'AC4 the same ASIN on the same store is the product that exists', async ( { page } ) => {
+		const a = asin();
+		await add( page, `https://www.amazon.com/dp/${ a }` );
+
+		await submit( page, `https://www.amazon.com/gp/product/${ a }?th=1` );
+		// Until Task 14 builds the product page, the warning is a Dashboard toast (Task 11B).
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
+		expect( productsWithAsin( a ) ).toHaveLength( 1 );
+
+		// Lasso matches the ASIN with its store: the same ASIN on amazon.co.uk is another product.
+		const uk = await add( page, `https://www.amazon.co.uk/dp/${ a }` );
+		expect( uk.country ).toBe( 'gb' );
+		expect( productsWithAsin( a ) ).toHaveLength( 2 );
 	} );
 
 	test( 'AC8 a protected attribution link is stored exactly as pasted', async ( { page } ) => {

@@ -54,6 +54,7 @@ export type ProductFields = Partial< {
 	url: string;
 	type: 'amazon' | 'other';
 	asin: string;
+	amazon_country: string;
 	button_text: string;
 	url2: string;
 	button_text2: string;
@@ -75,9 +76,12 @@ export type ProductFields = Partial< {
 export function createProduct( fields: ProductFields ): number {
 	const { name = 'Test product', ...meta } = fields;
 	const defaults = { url: 'https://www.example.com/item', type: 'other', new_tab: '1', nofollow: '1', sponsored: '0', show_disclosure: '1' };
-	const all: Record< string, string > = { ...defaults, ...meta };
+	// An Amazon product's store defaults to the site's (us), as Task 12A stores it.
+	const store = meta.type === 'amazon' ? { amazon_country: 'us' } : {};
+	const all: Record< string, string > = { ...defaults, ...store, ...meta };
 	const metaInput = Object.fromEntries( Object.entries( all ).map( ( [ k, v ] ) => [ `_affibloom_${ k }`, v ] ) );
-	metaInput._affibloom_url_key = all.type === 'amazon' ? `amazon:${ all.asin }` : all.url.toLowerCase().replace( /\/$/, '' );
+	// AffiliateUrl::key(): "&amp;" read as "&", trailing slashes dropped, lower case — for every product, Amazon's too.
+	metaInput._affibloom_url_key = all.url.replace( /&amp;/g, '&' ).replace( /\/+$/, '' ).toLowerCase();
 	return Number(
 		wp( 'post', 'create', '--post_type=affibloom_product', '--post_status=publish', `--post_title=${ name }`, `--meta_input=${ JSON.stringify( metaInput ) }`, '--porcelain' )
 	);

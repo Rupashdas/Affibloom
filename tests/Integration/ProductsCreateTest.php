@@ -53,6 +53,21 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 'us', get_post_meta( $data['id'], '_affibloom_amazon_country', true ) );
 	}
 
+	public function test_the_same_asin_on_the_same_store_is_the_product_that_exists(): void {
+		update_option( 'affibloom_settings', array( 'tracking_id' => 'vbvault-20' ) );
+		$first = $this->post( 'https://www.amazon.com/dp/B0C7654321' )->get_data()['data']['id'];
+
+		$again = $this->post( 'https://www.amazon.com/gp/product/b0c7654321?th=1' );
+		self::assertSame( 200, $again->get_status() );
+		self::assertSame( $first, $again->get_data()['data']['id'] );
+
+		$uk = $this->post( 'https://www.amazon.co.uk/dp/B0C7654321' )->get_data()['data']['id'];
+		self::assertNotSame( $first, $uk );
+
+		wp_trash_post( $first );
+		self::assertNotSame( $first, $this->post( 'https://www.amazon.com/gp/aw/d/B0C7654321' )->get_data()['data']['id'] );
+	}
+
 	public function test_a_bare_domain_is_stored_with_https(): void {
 		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
 	}

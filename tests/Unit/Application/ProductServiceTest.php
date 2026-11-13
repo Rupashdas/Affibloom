@@ -62,6 +62,38 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( array(), $this->fetcher->asked );
 	}
 
+	public function test_the_same_asin_in_another_form_is_the_product_that_exists_without_a_request(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$first   = $service->create_from_url( 'https://www.amazon.com/dp/B0C1234567' );
+
+		foreach ( array( 'https://www.amazon.com/gp/product/B0C1234567?th=1', 'https://www.amazon.com/Mizuno-Wave/dp/b0c1234567/ref=x', 'https://amazon.com/gp/aw/d/B0C1234567' ) as $form ) {
+			$added = $service->create_from_url( $form );
+
+			self::assertTrue( $added->already_existed, $form );
+			self::assertSame( $first->product->id, $added->product->id, $form );
+		}
+		self::assertCount( 1, $this->repo->saved );
+		self::assertSame( array(), $this->fetcher->asked );
+	}
+
+	public function test_the_same_asin_on_another_store_is_a_new_product(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$service->create_from_url( 'https://www.amazon.com/dp/B0C1234567' );
+
+		$added = $service->create_from_url( 'https://www.amazon.co.uk/dp/B0C1234567' );
+
+		self::assertFalse( $added->already_existed );
+		self::assertSame( 'gb', $added->product->amazon_country );
+		self::assertCount( 2, $this->repo->saved );
+	}
+
+	public function test_a_non_amazon_link_is_never_matched_by_asin(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$service->create_from_url( 'https://www.amazon.com/dp/B0C1234567' );
+
+		self::assertFalse( $service->create_from_url( 'https://www.example.com/dp/B0C1234567' )->already_existed );
+	}
+
 	public function test_shorten_amazon_links_off_keeps_the_whole_query(): void {
 		$settings = array( 'shorten_amazon_links' => false ) + self::LIVE_AMAZON;
 
