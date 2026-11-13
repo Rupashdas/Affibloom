@@ -1,13 +1,17 @@
 <?php
 /**
- * Dashboard screen: the band with the title and subtitle (U10), then the products card. The overview tiles (U9)
- * are added by the tasks that provide their numbers (13, 31, 34).
+ * Dashboard screen: the band with the title and subtitle (U10), the overview tiles (U9) and the products card.
+ * The structure inside the card is Lasso's (the user's gate 4 answer for F19, 2026-11-13): the table, then the
+ * pager in the card's footer. The broken-links and clicks tiles arrive with Tasks 31 and 34; the other columns
+ * with Tasks 14, 16, 31, 34 and 36.
  *
  * @package Affibloom
- * @var array{notice: string, notice_kind: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, notice: string, notice_kind: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
+
+$products = $view['products'];
 ?>
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
@@ -21,10 +25,36 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 
 		<div class="affibloom-page__body">
-			<div class="affibloom-card affibloom-empty">
-				<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?></span>
-				<p class="affibloom-empty__message"><?php esc_html_e( 'No products yet.', 'affibloom' ); ?></p>
+			<div class="affibloom-tiles">
+				<div class="affibloom-tile">
+					<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'link' ) ); ?></span>
+					<span class="affibloom-tile__number"><?php echo esc_html( number_format_i18n( $products->total ) ); ?></span>
+					<span class="affibloom-tile__label"><?php esc_html_e( 'Products', 'affibloom' ); ?></span>
+				</div>
 			</div>
+
+			<?php if ( 0 === $products->total ) : ?>
+				<div class="affibloom-card affibloom-empty">
+					<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?></span>
+					<p class="affibloom-empty__message"><?php esc_html_e( 'No products yet.', 'affibloom' ); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="affibloom-card affibloom-card--table">
+					<table class="affibloom-table">
+						<thead>
+							<tr>
+								<th scope="col" class="affibloom-col-name"><?php esc_html_e( 'Link Name', 'affibloom' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ( $products->items as $product ) : ?>
+								<?php $this->render( 'admin/partials/product-row', array( 'product' => $product ) ); ?>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+					<?php $this->render( 'admin/partials/pager', array( 'products' => $products ) ); ?>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
 	<?php

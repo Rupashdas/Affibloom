@@ -11,10 +11,12 @@ namespace Affibloom\Infrastructure\WordPress;
 
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
+use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use RuntimeException;
 use WP_Post;
+use WP_Query;
 
 /**
  * Products as affibloom_product posts with _affibloom_* meta (docs/spec/interface.md, section 4).
@@ -142,6 +144,60 @@ final class PostTypeProductRepository implements ProductRepository {
 		}
 
 		return $product->with( array( 'name' => $name ) );
+	}
+
+	/**
+	 * One page of the published products, most recently changed first (Lasso's Dashboard order).
+	 *
+	 * The total comes from its own query, as Lasso's does (Lasso_DB::get_dashboard_link_count), not from
+	 * WP_Query's found_posts: on MySQL 8.4 a page past the end makes SQL_CALC_FOUND_ROWS report 0, which would
+	 * turn page 99 of a full library into an empty one. Knowing the total first also lets a page past the end
+	 * show the last page, as Lasso's range does, instead of nothing.
+	 *
+	 * WP_Query primes the meta cache for the page, so building each product reads no further rows; the term
+	 * cache is left alone because no column on this screen shows a taxonomy.
+	 *
+	 * @param int $page     Page number, from 1.
+	 * @param int $per_page Products per page.
+	 */
+	public function page( int $page, int $per_page ): ProductPage {
+		$per_page = max( 1, $per_page );
+		$list     = array(
+			'post_type'              => ProductPostType::NAME,
+			'post_status'            => 'publish',
+			'orderby'                => 'modified',
+			'order'                  => 'DESC',
+			'ignore_sticky_posts'    => true,
+			'update_post_term_cache' => false,
+		);
+
+		$counter = new WP_Query(
+			$list + array(
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			)
+		);
+		$total   = (int) $counter->found_posts;
+		$pages   = max( 1, (int) ceil( $total / $per_page ) );
+		$wanted  = min( max( 1, $page ), $pages );
+
+		$items = array();
+		if ( $total > 0 ) {
+			$query = new WP_Query(
+				$list + array(
+					'posts_per_page' => $per_page,
+					'paged'          => $wanted,
+					'no_found_rows'  => true,
+				)
+			);
+			foreach ( $query->posts as $post ) {
+				if ( $post instanceof WP_Post ) {
+					$items[] = $this->hydrate( $post );
+				}
+			}
+		}
+
+		return new ProductPage( $items, $total, $wanted, $per_page );
 	}
 
 	/**

@@ -47,6 +47,15 @@ interface ProductRepository {
 	public function find_by_search_key( string $key ): ?Product;
 
 	/**
+	 * One page of the published products, most recently changed first, as Lasso orders its Dashboard
+	 * (Lasso_DB::get_dashboard_query_without_filter: ORDER BY p.post_modified DESC).
+	 *
+	 * @param int $page     Page number, from 1.
+	 * @param int $per_page Products per page.
+	 */
+	public function page( int $page, int $per_page ): ProductPage;
+
+	/**
 	 * Gives a stored product a new name; returns it renamed.
 	 *
 	 * @param Product $product A stored product.

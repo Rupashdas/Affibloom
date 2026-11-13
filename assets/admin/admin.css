@@ -829,6 +829,130 @@
 .affibloom-help.is-open .affibloom-help__text { display: block; }
 .affibloom-help.is-open .affibloom-help__text { position: fixed; bottom: auto; }
 
+/*
+ * 7d. The Dashboard list (Task 13A): the overview tiles (U9), the products table inside its card, and the pager
+ * in the card's footer. The arrangement is Lasso's (the user's gate 4 answer for F19, 2026-11-13); the colours,
+ * type and shapes are Aurora's (docs/ui/design-system.md, "Table", "Overview tile").
+ */
+.affibloom-tiles {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 20px;
+	margin-bottom: 20px;
+}
+.affibloom-tile {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto auto;
+	align-items: center;
+	gap: 0 14px;
+	padding: 18px 20px;
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+}
+.affibloom-tile .affibloom-chip { grid-row: 1 / span 2; }
+.affibloom-tile__number { color: var(--affibloom-ink-900); font: 700 26px/30px var(--affibloom-font); }
+.affibloom-tile__label { color: var(--affibloom-ink-600); font-size: 13px; }
+
+.affibloom-card--table { overflow: hidden; }
+/*
+ * Fixed layout so a long destination link is cut with an ellipsis instead of widening the table past the
+ * screen, as Lasso's row does with its title attribute. The columns Tasks 14, 31, 34 and 36 add take their
+ * widths here, as Lasso's grid gives them.
+ */
+.affibloom-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.affibloom-admin .affibloom-table th {
+	padding: 12px 24px;
+	border-bottom: 1px solid var(--affibloom-line);
+	background: var(--affibloom-subtle);
+	color: var(--affibloom-ink-600);
+	font: 700 12px/16px var(--affibloom-font);
+	text-align: left;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.affibloom-table td {
+	padding: 12px 24px;
+	border-bottom: 1px solid var(--affibloom-line);
+	vertical-align: middle;
+}
+.affibloom-table tbody tr:last-child td { border-bottom: 0; }
+.affibloom-table tbody tr:hover { background: var(--affibloom-brand-50); }
+.affibloom-row__name {
+	display: block;
+	overflow: hidden;
+	color: var(--affibloom-ink-900);
+	font: 600 14px/20px var(--affibloom-font);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.affibloom-admin .affibloom-row__url {
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	color: var(--affibloom-ink-600);
+	font-size: 12px;
+	line-height: 18px;
+	text-decoration: none;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.affibloom-admin .affibloom-row__url:hover { color: var(--affibloom-brand-600); text-decoration: underline; }
+
+/* Pager: the card's footer, the size and range left, the page links right (Lasso's lasso-dashboard-pager). */
+.affibloom-pager {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 24px;
+	border-top: 1px solid var(--affibloom-line);
+	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
+	background: var(--affibloom-subtle);
+}
+.affibloom-pager__size { display: flex; align-items: center; gap: 8px; }
+.affibloom-admin .affibloom-pager__size .affibloom-select { width: auto; height: 32px; min-height: 32px; line-height: 30px; }
+.affibloom-pager__per-page,
+.affibloom-pager__range { color: var(--affibloom-ink-600); font-size: 13px; }
+.affibloom-pager__sep { color: var(--affibloom-ink-400); }
+.affibloom-pagination { display: flex; align-items: center; gap: 4px; }
+.affibloom-admin .affibloom-pagination .page-numbers {
+	display: inline-grid;
+	place-items: center;
+	min-width: 32px;
+	height: 32px;
+	padding: 0 8px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-nav);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-700);
+	font: 600 13px/13px var(--affibloom-font);
+	text-decoration: none;
+}
+.affibloom-admin .affibloom-pagination .page-numbers:hover { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-pagination .page-numbers.current {
+	border-color: var(--affibloom-brand-600);
+	background: var(--affibloom-brand-600);
+	color: var(--affibloom-white);
+}
+.affibloom-admin .affibloom-pagination .page-numbers.dots { border-color: transparent; background: none; }
+.affibloom-admin .affibloom-pagination .prev::before,
+.affibloom-admin .affibloom-pagination .next::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-top: 2px solid currentcolor;
+	border-right: 2px solid currentcolor;
+}
+.affibloom-admin .affibloom-pagination .prev::before { transform: rotate(-135deg) translate(-2px, -2px); }
+.affibloom-admin .affibloom-pagination .next::before { transform: rotate(45deg) translate(-2px, -2px); }
+.affibloom-admin .affibloom-pagination a:focus-visible,
+.affibloom-admin .affibloom-pager__size select:focus-visible {
+	outline: 2px solid var(--affibloom-brand-600);
+	outline-offset: 2px;
+}
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;
@@ -1034,6 +1158,9 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-card__foot .affibloom-button { width: 100%; }
 	.affibloom-grid { grid-template-columns: 1fr; }
 	.affibloom-modal__foot .affibloom-button { width: 100%; }
+	.affibloom-pager { flex-direction: column; align-items: flex-start; }
+	.affibloom-table th,
+	.affibloom-table td { padding-right: 16px; padding-left: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

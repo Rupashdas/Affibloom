@@ -14,6 +14,7 @@ use Affibloom\Domain\Amazon\TrackingIds;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
+use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\Settings;
@@ -37,6 +38,22 @@ final class ProductService {
 		private LinkResolver $links,
 		private SettingsRepository $settings,
 	) {}
+
+	/** Products per Dashboard page on a fresh install: Lasso's default (Lasso_Helper::get_dashboard_page_size_options). */
+	public const PER_PAGE_DEFAULT = 10;
+
+	/** The page sizes an editor may choose, as Lasso offers them. */
+	public const PER_PAGE_OPTIONS = array( 10, 25, 50 );
+
+	/**
+	 * One page of the Dashboard list, most recently changed first.
+	 *
+	 * @param int $page     Page number, from 1.
+	 * @param int $per_page Products per page.
+	 */
+	public function list( int $page, int $per_page ): ProductPage {
+		return $this->products->page( $page, $per_page );
+	}
 
 	/**
 	 * "Add A New Link" with one link (Lasso_Affiliate_Link::lasso_add_a_new_link):

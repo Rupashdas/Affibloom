@@ -2,6 +2,7 @@
 namespace Affibloom\Tests\Unit\Fakes;
 
 use Affibloom\Domain\Product\Product;
+use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 
@@ -17,6 +18,18 @@ final class InMemoryProductRepository implements ProductRepository {
 		$stored        = $product->with( array( 'id' => 100 + count( $this->saved ) ) );
 		$this->saved[] = $stored;
 		return $stored;
+	}
+
+	/** Newest saved first, which is this fake's stand-in for "most recently changed". */
+	public function page( int $page, int $per_page ): ProductPage {
+		$all = array_reverse( $this->saved );
+
+		return new ProductPage(
+			array_values( array_slice( $all, ( max( 1, $page ) - 1 ) * $per_page, $per_page ) ),
+			count( $all ),
+			max( 1, $page ),
+			$per_page
+		);
 	}
 
 	public function find_by_url_key( string $key ): ?Product {
