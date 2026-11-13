@@ -5,6 +5,8 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
 **Gate 4 given by the user 2026-11-13** for Tasks 14A-14E, with D1 answered: Lasso's two cards in Aurora's shell.
 **Saving the page (Task 15) re-run the same way on 2026-11-13** (progress deviation 70): section 9, written from
 Lasso's save path. **Gate 4 given by the user 2026-11-13** for Tasks 15A-15D.
+**Dashboard quick edit (Task 16) re-run the same way on 2026-11-13** (progress deviation 76): section 10, written
+from Lasso's Dashboard row and script. Waiting for gate 4 (Tasks 16A-16C).
 
 ## 1. User stories and acceptance criteria
 
@@ -43,6 +45,19 @@ Lasso's save path. **Gate 4 given by the user 2026-11-13** for Tasks 15A-15D.
 - **AC16** With unsaved edits, a click on an admin link asks "Unsaved Changes": "Leave Without Saving" leaves,
   "Save Changes" saves and then leaves, × stays; reloading or closing the tab gets the browser's own question;
   after a save nothing asks. (15D, B8)
+- **AC17** A Dashboard row's **Edit** turns the row into Lasso's quick edit: Name, Primary Destination URL, Groups
+  ("Coming soon"), the link, and the Image frame with "Update Image"; **Cancel** brings the row back unchanged;
+  **Edit** on another row closes the first. (16A, Q1-Q4)
+- **AC18** In quick edit, a new name and an image from the media library, then **Save Changes**: "Updating Your Site",
+  then "Product saved."; the list (reloaded, the product first) shows the new name and image, and the product page
+  every other field as it was (the description byte for byte). An empty Name shows "Name and Primary Destination URL
+  are required." under it, saves nothing and leaves the row open. (16A, Q5-Q8)
+- **AC19** With unsaved quick-edit changes, a search, a page link, another row's Edit or an admin link asks "Unsaved
+  Changes" (Leave Without Saving / Save Changes / ×); closing the tab gets the browser's question; after Cancel or a
+  save nothing asks. (16B, Q9)
+- **AC20** A Primary URL another product has, saved from quick edit, opens "This Product Already Exists"; Cancel keeps
+  the row open with the typed link and saves nothing; Confirm opens the other product's page with "Success! Locations
+  now show this link." (16C, Q10, D21)
 
 `tests/E2E/acceptance/F1.spec.ts` holds AC1-AC4; each task adds its own before it is built.
 
@@ -263,3 +278,64 @@ Settled by the user's earlier rules:
   TinyMCE normalises some stored markup on opening); an Amazon product's read-only price never is.
 - **D20 `show_description` is not stored:** it is "the description is not empty" on every page save (S5), so the box
   reads that. Task 26 maps a Lasso record whose `show_description` is 0 to an empty description.
+
+## 10. Dashboard quick edit (Task 16 sweep, 2026-11-13)
+
+**Evidence, all read:** `admin/views/rows/url-row.php` (the row, its editing mode 12-67 and the Actions cell 174-177);
+`admin/assets/js/view-js.php` 150-1050 (`dashboard_quick_edit` state, `dashboard_get_row_seed`,
+`dashboard_has_unsaved_changes`, `dashboard_enter_quick_edit`, `dashboard_open_media_picker`,
+`dashboard_request_save`, `dashboard_show_unsaved_modal`, `run_page_action` and its 18 callers, the link and
+`beforeunload` guards, the copy-shortcode handler); `admin/views/dashboard/dashboard.php` 212-213 (the modals it
+includes); `admin/views/modals/url-save.php`, `unsaved-changes.php`; `Lasso_Affiliate_Link::save_lasso_url()` for a
+partial payload (1100-1140, 1336-1450, 1699-1800) and `check_error_and_response_ajax()` (1983-2021). Also read, and
+**not part of the Dashboard quick edit:** `admin/views/components/url-quick-detail.php` and its callers
+(`modals/url-add.php`, `display-add.php`, `link-monetize.php`, `url-opportunities.php`), a modal "quick detail" of a
+link opened while adding a display in the post editor and from Opportunities; it belongs to those areas (Q12).
+
+### What Lasso's quick edit does
+
+| # | Rule | Lasso | Source |
+|---|---|---|---|
+| Q1 | **Edit** (pencil, "Edit", title "Quick Edit") sits first in the Actions cell, beside **Shortcode** | `js-dashboard-quick-edit-trigger` | url-row.php 175 |
+| Q2 | **The row itself turns into a form** (`dashboard-row-editing-mode`; no select box, no other cells): left, **Name** (placeholder "Enter a URL Name"), **Primary Destination URL** (placeholder `https://www.example.com/affiliate-id`), **Groups** (select2, several, "Select a group", typing a new name adds one: `tags: true`), and the public link (opens in a new tab; a "Marketplace" label on Lasso's marketplace links); right, **Image**: a 120 px frame with the product's picture and, on hover, "Update Image" with a camera icon; under both, **Save Changes** and **Cancel** | | url-row.php 12-67; view-js.php 361-385, 908-922 |
+| Q3 | **Values as stored** when the row opens: name, destination, image link, attachment ID, groups | `dashboard_get_row_seed` | view-js.php 284-298 |
+| Q4 | **One row at a time:** Edit on another row closes the first (guarded by Q9); Edit on the open row does nothing; **Cancel** drops the edits and draws the row again, without asking | `dashboard_enter_quick_edit`, `js-dashboard-cancel-row` | 735-755, 885-893 |
+| Q5 | **The image comes only from the media library:** "Select an Image", images only, one, "Select Image"; the chosen picture shows in the frame and its attachment ID is kept. There is no image-link field | `dashboard_open_media_picker` | 757-786 |
+| Q6 | **The save is partial:** `lasso_save_lasso_url` with `thumbnail_id` and `settings[current_url, affiliate_name, affiliate_url, thumbnail, categories]` only. Every key not sent keeps its stored value (`$post_data[…] ?? $lasso_url->…`), the description explicitly ("Dashboard Quick edit … omit `affiliate_desc`; preserve stored meta"). The Primary URL goes through all of S7-S8; the image through S6 | | view-js.php 788-813; save_lasso_url 1336-1450, 1788-1796 |
+| Q7 | **Saving:** "Updating Your Site" with the moving bar and url-save.php's default line ("Just checking all the affected links and/or keywords on your site to make sure everything's updated."), closed 1 s after the answer; a second click while saving does nothing. **Success:** the row leaves edit mode, "Yee haw! Your link saved." (or the server's warning as an orange bar), and **the current page of the list is loaded again** with its sort, so the saved row moves to its new place. **Refusal or failure:** the server's message, else "Could not save changes. Please try again.", as the red bar; the row stays open with the edits | `dashboard_request_save`, `dashboard_refresh_current_page` | 788-863, 668-676 |
+| Q8 | **The only refusal is S2's:** an empty Name or Primary URL → "Name and Primary Destination URL are required." | | save_lasso_url 1133-1140 |
+| Q9 | **Unsaved changes:** the name, the link, the image, the attachment and the groups against the values when the row opened. With a change, these ask "Unsaved Changes" first (Leave Without Saving: drop the edits and go on; Save Changes: save, and go on only after a good save; ×: stay): Edit on another row, the search, page links and the page size, the sort, every filter, Reset, saved views, the alert tiles, bulk "Add to Group" (`run_page_action`, 18 callers); any link `a[href]` except `#`, `target="_blank"`, links inside the dialog and inside the open row; and `beforeunload` asks the browser's question, except right after "Leave Without Saving" | `run_page_action`, `dashboard_show_unsaved_modal`, the `a[href]` and `beforeunload` handlers | 163-165, 692-733, 927-934, 999-1021 |
+| Q10 | **A Primary URL another published product has:** the server answers with its repoint offer (`repoint_offer`, both records, `error` = ''), as for the product page (S10), and has saved nothing. **The Dashboard script does not read the offer:** it takes the answer as a success, says "Yee haw! Your link saved." and reloads the list, which still shows the old link. The Dashboard does include the dialog with its "This Product Already Exists" panel (dashboard.php 212) | | save_lasso_url 1261-1283, 1983-2015; view-js.php 822-833 |
+| Q11 | **A matching record that is not published** (S11): Lasso publishes it again and answers "This link is already exists. Please try again with a different URL.", which the Dashboard shows as the orange warning after "saving" | | save_lasso_url 1261-1290; view-js.php 827-829 |
+| Q12 | **Not the Dashboard's:** the "quick detail" modal of the post editor's display flow and of Opportunities (`url-quick-detail.php`: name, link, buttons, price, badge, image, preview) | | components/url-quick-detail.php |
+
+### Decisions (Claude, from Lasso and the records; none drops anything Lasso does or reverses a user decision)
+
+- **D21 The duplicate case shows Lasso's offer (Q10).** Lasso's server makes the repoint offer for quick edit too and
+  its Dashboard carries the dialog, but its script reports "Your link saved." for a save that stored nothing.
+  Affibloom's route already answers 409 with both products (15C); the Dashboard opens the same "This Product Already
+  Exists" panel, with 15C's Cancel and Confirm. Nothing Lasso does is lost; a message that says the opposite of what
+  happened is not copied. (16C)
+- **D22 The save dialog's line is "Just saving your URL changes"**, the product page's (S14): Lasso's Dashboard keeps
+  url-save.php's default, which describes the link and keyword scan (S9) that Affibloom does not run (D13).
+- **D23 Wording:** "Product saved." (U6, D10); the failure toast "Try again. For some reason your product didn't
+  save." or the server's message; refusals also under their field, Aurora's field error (D11).
+- **D24 Groups is a "Coming soon" placeholder** in the row (D4, as on the product page); the Groups area (completion
+  plan area 0) fills it here and on the product page, with Lasso's select (several, new names added).
+- **D25 The link under the fields is the destination**, opening in a new tab (D5, until link cloaking); the
+  Marketplace label is Lasso's cloud (deviation 52).
+- **D26 The editing row is printed by the server**, in each row's `<template>` (the list's rule since 13D: the script
+  builds no markup), with the stored values (Q3). After a good save the current list is loaded again (Q7), so the
+  product moves to the top of page 1 by F19's order, as in Lasso.
+- **D27 The fields are a form:** Enter in Name or Primary Destination URL saves, as on the product page (15A); Lasso's
+  inputs are not in a form, so Enter does nothing there. Escape does nothing (as Lasso). Focus moves to Name when the
+  row opens, back to the row's Edit after Cancel, and after a save to the saved row's Edit when it is on the page
+  (else to the list).
+- **D28 What is sent:** `name`, `url`, `image_url`, `image_id` (Q6 without Groups, D24); the PATCH route already leaves
+  every other field as stored (15A's partial input), which is Lasso's rule.
+- **D29 Back and Forward (Q9):** Lasso's list keeps no history entries; Affibloom's does (13D). With unsaved changes,
+  Back or Forward asks too; × (stay) puts the list's address back, Leave loads the list the address names.
+- **D30 A matching product in the trash (Q11) belongs to Task 17** (D15), as on the product page.
+- **D31 A product with no image** shows the list's no-image tile in the frame, with "Update Image".
+- **D32 The quick-detail modal (Q12)** belongs to the editor block (Phase 4, display add) and Opportunities (area 3);
+  each area's gates take it up. It is not part of Task 16.

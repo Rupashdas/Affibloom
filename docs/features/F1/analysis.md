@@ -2,9 +2,10 @@
 
 Status: gate 2 approved with Task 6 (2026-11-12); **the product page re-run 2026-11-13** with the requirements'
 sections 2-8. Gate 4 given by the user 2026-11-13. **Saving re-run 2026-11-13** with requirements section 9
-(section "Saving" below); gate 4 given 2026-11-13.
+(section "Saving" below); gate 4 given 2026-11-13. **Quick edit re-run 2026-11-13** with requirements section 10
+(section "Dashboard quick edit" below); waiting for gate 4.
 
-**Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, **15A-15D**, 16, 17.
+**Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, **15A-15D**, **16A-16C**, 17.
 
 ## Depends on
 
@@ -114,6 +115,53 @@ limit, as F29). A save racing a custom-field save (D3) touches other meta keys o
 uses `isDirty()` with a comparison against the loaded content as a fallback (14B's check of the five longest live
 descriptions). The repoint pointer is read by code that does not exist yet (Tasks 18, 27, 35); their phase files get
 the rule written in now.
+
+## Dashboard quick edit (Task 16, requirements section 10)
+
+```
+row [Edit] → dashboard.js: the row's <template data-quick-edit> (product-row.php) takes the row's place     (16A)
+     (one row at a time, Q4; the template's values are the product as stored when the list was drawn, Q3)
+  [Update Image] → wp.media ("Select an Image", images, one, "Select Image") → frame picture, image_url, image_id
+  [Save Changes] or Enter → save-modal.php's progress panel ("Just saving your URL changes", D22)
+  → wp.apiFetch PATCH /affibloom/v1/products/{id} { name, url, image_url, image_id }               (D28)
+  → ProductsController::update() → ProductService::update()       15A-15C, unchanged: partial input, S2, S6-S8
+  ← 200 → "Product saved." → load( the current list ) → DashboardController → product-list.php → product-row.php
+  ← 422 data.fields → Lasso's sentence under Name / Primary Destination URL, the failure toast, the row stays open
+  ← 404 or other → the failure toast with the server's message
+
+  with changes (snapshot of the four fields ≠ the values at opening)                                     (16B)
+  → another row's Edit, search, page links, page size, link type, Reset, pills, a[href], Back/Forward
+  → unsaved-modal.php: Leave Without Saving → drop and go on; Save Changes → 16A's save, go on after 200; × stay
+  → beforeunload → the browser's question
+
+  ← 409 affibloom_duplicate { from, to } → save-modal.php's repoint panel (15C)                          (16C)
+  → Confirm → POST /affibloom/v1/products/{id}/repoint → redirect_to the other product's page + affibloom_notice=repointed
+```
+
+**Layers.** No Application, Domain or Infrastructure change: the PATCH and repoint routes, `ProductInput`'s partial
+rule and `ProductResource::full()` are the product page's (15A-15C), so a quick edit stores exactly what the same
+values would store from the product page. Interface only:
+- `templates/admin/partials/product-row.php`: Edit becomes a real button (`aria-controls` the template's row); a
+  `<template data-quick-edit>` holding the editing row (`<tr class="affibloom-row--editing">`, one cell across every
+  column, a `<form>`), printed for each row with `esc_attr` values.
+- `templates/admin/dashboard.php`: the save dialog, the unsaved dialog and the JS toast template (their second page).
+- `assets/admin/admin.js`: **extracted on their second use** from `product-save.js` and `product.js`: the JS toast
+  (`affibloomToast( message, failed )`), the save dialog's progress panel (open, bar, close a second after the
+  answer) and its repoint panel, the media frame (`affibloomMedia.pick( then )`), the field-error helpers. The
+  product page keeps calling them; its tests (F1 AC2, AC13-AC16) stay green.
+- `assets/admin/dashboard.js`: the quick edit (open, cancel, save, focus), the guard (16B: one `guarded( action )`
+  that the list's controls call, as Lasso's `run_page_action`; the `a[href]`, `popstate` and `beforeunload`
+  handlers), the 409 panel (16C).
+- `AdminAssets`: `wp_enqueue_media()` on the Dashboard too.
+
+**Data written:** none new; the four fields through PATCH (post title, `_affibloom_url` and the keys S7-S8 move,
+`_affibloom_image_url`, `_affibloom_image_id`); the repoint as 15C.
+
+**Risks.** The list reload after a save (13D's `load()`) replaces the region, so the quick edit's state must live
+outside the rows (the open ID and the values at opening), as Lasso's `dashboard_quick_edit` does. A reload that
+answers while a row is open (a slow search started before Edit) would wipe the row: 16B's guard runs before any
+`load()`, and `load()` refuses to draw while a quick-edit save is in flight. `wp_enqueue_media()` adds the media
+scripts to the Dashboard (they load on the product page already).
 
 ## Layers
 
