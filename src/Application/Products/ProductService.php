@@ -173,12 +173,14 @@ final class ProductService {
 	 *   product's, which is none until C1 brings Amazon data, unless a media library image is set (S6);
 	 * - another shop's link: the Amazon keys go, as Lasso deletes amazon_product_id; name and image stay;
 	 * - a link another published product has, by the add flow's rules (Tasks 11B, 12B, 12C): DuplicateLink, and the
-	 *   page offers Lasso's repoint (Task 15C). The same ASIN on the same store is this product, never a duplicate.
+	 *   page offers Lasso's repoint (Task 15C). The same ASIN on the same store is this product, never a duplicate;
+	 * - a link a trashed or retired product has (Task 17D, S11): that product is published again and the save refused.
 	 *
 	 * @param Product      $changed The product with the form's other changes.
 	 * @param Product      $stored  The product as stored.
 	 * @param AffiliateUrl $typed   The Primary URL as typed.
-	 * @throws DuplicateLink When the link belongs to another published product.
+	 * @throws DuplicateLink    When the link belongs to another published product.
+	 * @throws ValidationFailed When it belongs to a deleted product, now published again.
 	 */
 	private function with_link( Product $changed, Product $stored, AffiliateUrl $typed ): Product {
 		$settings = $this->settings->get();
@@ -193,6 +195,10 @@ final class ProductService {
 			$other = $this->owner( $link );
 			if ( null !== $other && $other->id !== $stored->id ) {
 				throw new DuplicateLink( $other );
+			}
+			// A deleted product with the link (Task 17D; S11, D42): Lasso publishes it again and refuses the save.
+			if ( null === $other && null !== $this->revived( array( $link->typed, $link->destination, $link->stored ), $amazon ) ) {
+				throw new ValidationFailed( array( 'url' => 'already_exists' ) );
 			}
 		}
 		if ( null === $amazon ) {
@@ -267,6 +273,28 @@ final class ProductService {
 	}
 
 	/**
+	 * A trashed or retired product with one of these links, published again (Task 17D; F1 requirements 11, X9, D42), or
+	 * null when there is none. Lasso's lookup matches records of any status; Affibloom asks for deleted ones only after
+	 * the published lookups found nothing, so a published product with the link always wins.
+	 *
+	 * @param list<AffiliateUrl> $urls   The link as typed, where it leads, as it would be stored.
+	 * @param AmazonUrl|null     $amazon The link as an Amazon link, for the ASIN and search arms.
+	 * @throws RuntimeException When the product cannot be published again.
+	 */
+	private function revived( array $urls, ?AmazonUrl $amazon ): ?Product {
+		$keys    = array_map( static fn( AffiliateUrl $url ): string => $url->key(), $urls );
+		$asin    = null === $amazon ? '' : $amazon->asin();
+		$deleted = $this->products->find_deleted(
+			array_values( array_unique( $keys ) ),
+			$asin,
+			'' === $asin ? '' : $amazon->country(),
+			null === $amazon ? '' : $amazon->search_key()
+		);
+
+		return null === $deleted ? null : $this->products->revive( $deleted );
+	}
+
+	/**
 	 * "This Product Already Exists" → Confirm (Lasso's lasso_confirm_repoint_merge, F1 requirements 9 S10, D14): this
 	 * product is retired in favour of the one that has the link. Lasso's checks first, in its order: two different
 	 * products, this one still in the library, the other one too, and the link still that product's.
@@ -317,14 +345,17 @@ final class ProductService {
 	 * - a product that is found keeps its name, except for Lasso's "Sorry!" re-title (Task 12C);
 	 * - a bare ASIN is first made the default store's product link (Task 12E);
 	 * - a new Amazon product starts with a name from its link (decision 11, Task 12E);
-	 * - a new product takes the site's link defaults as they are now (Task 11E).
+	 * - a new product takes the site's link defaults as they are now (Task 11E);
+	 * - but when no published product has the link and a trashed or retired one does, that one is published again
+	 *   and answered as new (Task 17D; Lasso republishes the match and opens it without its "already exists" warning).
 	 *
 	 * @param string $input What was pasted.
 	 * @throws InvalidField      When the input is empty, or neither a link nor a bare ASIN.
 	 * @throws RuntimeException When the product cannot be stored.
 	 */
 	public function create_from_url( string $input ): AddedLink {
-		$url = $this->rules->typed( $input );
+		$url   = $this->rules->typed( $input );
+		$typed = $url;
 
 		$existing = $this->products->find_by_url_key( $url->key() );
 		if ( null !== $existing ) {
@@ -344,7 +375,8 @@ final class ProductService {
 
 		$amazon = AmazonUrl::from( $url );
 		if ( null === $amazon ) {
-			return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
+			$revived = $this->revived( array( $typed, $url ), null );
+			return new AddedLink( $revived ?? $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
 		}
 
 		$stored   = $this->rules->tagged( $amazon, $settings );
@@ -353,7 +385,8 @@ final class ProductService {
 			return $this->found( $existing, $url );
 		}
 
-		return new AddedLink( $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
+		$revived = $this->revived( array( $typed, $url, $stored ), $amazon );
+		return new AddedLink( $revived ?? $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
 	}
 
 	/**

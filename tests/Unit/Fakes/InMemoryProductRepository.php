@@ -17,6 +17,8 @@ final class InMemoryProductRepository implements ProductRepository {
 	/** @var list<Product> */
 	public array $saved = array();
 
+	private int $next_id = 100;
+
 	public function save( Product $product ): Product {
 		if ( null !== $product->id && null !== $this->get( $product->id ) ) {
 			// An update, as wp_update_post(): the same product, now the most recently changed (the end of the list).
@@ -24,7 +26,8 @@ final class InMemoryProductRepository implements ProductRepository {
 			$this->saved[] = $product;
 			return $product;
 		}
-		$stored        = $product->with( array( 'id' => 100 + count( $this->saved ) ) );
+		// IDs never repeat, as a post's: one that was trashed or deleted is not handed out again.
+		$stored        = $product->with( array( 'id' => $this->next_id++ ) );
 		$this->saved[] = $stored;
 		return $stored;
 	}
@@ -115,10 +118,41 @@ final class InMemoryProductRepository implements ProductRepository {
 	/** @var array<int, int> Retired product => the product it points to. */
 	public array $retired = array();
 
-	/** A retired product leaves the published list, as the trash takes it out of every query. */
+	/** A retired product leaves the published list, as its status takes it out of every published query. */
 	public function retire( Product $product, int $to ): void {
 		$this->retired[ (int) $product->id ] = $to;
+		$this->gone[ (int) $product->id ]    = $product;
 		$this->saved                         = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $product->id ) );
+	}
+
+	/** @var array<int, Product> Trashed and retired products, by ID: what find_deleted() can find and revive() brings back. */
+	public array $gone = array();
+
+	/** @param list<string> $url_keys */
+	public function find_deleted( array $url_keys, string $asin, string $country, string $search_key ): ?Product {
+		$newest = $this->gone;
+		krsort( $newest );
+		foreach ( array( 'url', 'amazon', 'search' ) as $arm ) {
+			foreach ( $newest as $product ) {
+				$match = match ( $arm ) {
+					'url'    => in_array( $product->url->key(), $url_keys, true ),
+					'amazon' => '' !== $asin && ProductType::Amazon === $product->type && 0 === strcasecmp( $product->asin, $asin ) && $product->amazon_country === $country,
+					'search' => '' !== $search_key && 0 === strcasecmp( $product->search_key, $search_key ),
+				};
+				if ( $match ) {
+					return $product;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Published again, the pointer gone, and the most recently changed (the end of the list). */
+	public function revive( Product $product ): Product {
+		$id = (int) $product->id;
+		unset( $this->gone[ $id ], $this->retired[ $id ] );
+		$this->saved[] = $product;
+		return $product;
 	}
 
 	/** @var list<int> Deleted product IDs, in order. */
@@ -142,11 +176,13 @@ final class InMemoryProductRepository implements ProductRepository {
 
 	/** A trashed product leaves the published list, as the trash takes it out of every query; refused as delete() is. */
 	public function trash( int $id ): bool {
-		if ( ! $this->deletes ) {
+		$product = $this->get( $id );
+		if ( ! $this->deletes || null === $product ) {
 			return false;
 		}
-		$this->trashed[] = $id;
-		$this->saved     = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $id ) );
+		$this->trashed[]   = $id;
+		$this->gone[ $id ] = $product;
+		$this->saved       = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $id ) );
 		return true;
 	}
 

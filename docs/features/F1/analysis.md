@@ -191,8 +191,8 @@ repoint Confirm → ProductRepository::retire( from, to )                       
 
 POST /products { url }, bulk add, PATCH /products/{id} with a new url                                     (17D)
   → the duplicate lookup finds no published product
-  → ProductRepository::find_deleted( url_key, asin, country, search_key )   trash or affibloom_retired, by the keys
-                                                       the three published lookups use
+  → ProductRepository::find_deleted( url_keys[], asin, country, search_key )   trash or affibloom_retired, by the keys
+                                                       the three published lookups use (typed, destination, stored)
   → add: ProductRepository::revive( product ) → status publish, _affibloom_repointed_to removed (D42)
          → answered as a new product (redirect_to as 14A: its page, or the Dashboard for Amazon)
   → save: revive, then ValidationFailed { url: already_exists } → 422 under Primary Destination URL (D42)

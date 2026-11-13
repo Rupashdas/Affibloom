@@ -32,6 +32,9 @@ final class Messages {
 			'repoint_url'      => __( 'Target URL is required.', 'affibloom' ),
 			'repoint_mismatch' => __( 'That URL no longer matches the selected link. Refresh and try again.', 'affibloom' ),
 			'invalid_url' => __( 'This is not a valid link.', 'affibloom' ),
+			// A Primary URL a deleted product had: that product is back, the save refused (Task 17D; Lasso's
+			// save_lasso_url 1284, its grammar fixed, F1 D42).
+			'already_exists' => __( 'This link already exists. Please try again with a different URL.', 'affibloom' ),
 			// Lasso's words while a bulk add is still going.
 			'bulk_running' => __( 'Your bulk add is still processing. Try again in a few minutes.', 'affibloom' ),
 			// Lasso's words for a saved view it refuses (Dashboard_Saved_Views::upsert).

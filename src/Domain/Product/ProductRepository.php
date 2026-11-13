@@ -128,4 +128,25 @@ interface ProductRepository {
 	 * @return bool False when the storage refused it.
 	 */
 	public function trash( int $id ): bool;
+
+	/**
+	 * The trashed or retired product a link belongs to, or null (Task 17D; Lasso's is_lasso_url_exist matches records of
+	 * any status). The arms are the published lookups' (a link's key, an Amazon ASIN on its store, an Amazon search key),
+	 * tried in that order; within an arm the newest product wins. An empty key or ASIN skips its arm.
+	 *
+	 * @param list<string> $url_keys   Keys from AffiliateUrl::key(): the link as typed, where it leads, as it is stored.
+	 * @param string       $asin       An Amazon link's ASIN, or ''.
+	 * @param string       $country    Its store's country code.
+	 * @param string       $search_key An Amazon search page's key, or ''.
+	 */
+	public function find_deleted( array $url_keys, string $asin, string $country, string $search_key ): ?Product;
+
+	/**
+	 * Publishes a trashed or retired product again, as Lasso's add flow does with wp_update_post( publish ); a retired
+	 * one loses its pointer, so its boxes show it again (F1 D42). It keeps everything else stored on it.
+	 *
+	 * @param Product $product A trashed or retired product.
+	 * @throws \RuntimeException When the storage refuses it.
+	 */
+	public function revive( Product $product ): Product;
 }

@@ -102,32 +102,38 @@ test.describe( 'F1 Product library', () => {
 				return '';
 			}
 		} )();
+		// Fresh ASINs and link on every run: since Task 17D a deleted product that still holds them comes back and refuses
+		// the save, so fixed values would make the test depend on what earlier runs left in the trash.
+		const asin = () => `B0${ Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase().padEnd( 8, 'X' ) }`;
+		const first = asin();
+		const second = asin();
+		const shop = `www.example.com/${ unique( 'f1-ac14' ) }`;
 		try {
 			setSettings( { tracking_id: 'vbvault-20', shorten_amazon_links: true, keep_title_when_url_replaced: true } );
 			const id = createProduct( {
 				name: 'Amazon',
 				type: 'amazon',
-				url: 'https://www.amazon.com/dp/B0F1AC14AA?tag=vbvault-20',
-				asin: 'B0F1AC14AA',
+				url: `https://www.amazon.com/dp/${ first }?tag=vbvault-20`,
+				asin: first,
 				image_url: 'https://www.example.com/f1-ac14.jpg',
 			} );
 			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 
 			// Another ASIN on a placeholder name: tagged, renamed from the link, the image cleared.
-			await page.locator( '#affibloom-url' ).fill( 'https://www.amazon.com/Mikasa-V200W-Volleyball/dp/B0F1AC14BB?tag=someone-20' );
+			await page.locator( '#affibloom-url' ).fill( `https://www.amazon.com/Mikasa-V200W-Volleyball/dp/${ second }?tag=someone-20` );
 			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
-			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( 'https://www.amazon.com/Mikasa-V200W-Volleyball/dp/B0F1AC14BB?tag=vbvault-20' );
+			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( `https://www.amazon.com/Mikasa-V200W-Volleyball/dp/${ second }?tag=vbvault-20` );
 			await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( 'Mikasa V200W Volleyball' );
 			await expect( page.locator( '#affibloom-image-url' ) ).toHaveValue( '' );
-			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_asin' ) ).toBe( 'B0F1AC14BB' );
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_asin' ) ).toBe( second );
 
 			// Another shop's link: the page reloads as a non-Amazon product, with the toast; the Amazon keys are gone.
-			await page.locator( '#affibloom-url' ).fill( 'www.example.com/f1-ac14' );
+			await page.locator( '#affibloom-url' ).fill( shop );
 			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 			await page.waitForURL( /affibloom_notice=product-saved/ );
 			await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Product saved.' );
-			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( 'https://www.example.com/f1-ac14' );
+			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( `https://${ shop }` );
 			await expect( page.locator( '#affibloom-permalink' ) ).toBeVisible();
 			await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( 'Mikasa V200W Volleyball' );
 			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_type' ) ).toBe( 'other' );
@@ -138,7 +144,7 @@ test.describe( 'F1 Product library', () => {
 			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 			await expect( page.locator( '#affibloom-url' ) ).toHaveAttribute( 'aria-invalid', 'true' );
 			await expect( page.getByText( 'Name and Primary Destination URL are required.' ) ).toBeVisible();
-			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_url' ) ).toBe( 'https://www.example.com/f1-ac14' );
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_url' ) ).toBe( `https://${ shop }` );
 		} finally {
 			if ( stored ) {
 				wp( 'option', 'update', 'affibloom_settings', stored, '--format=json' );
@@ -812,5 +818,48 @@ test.describe( 'F1 Product library', () => {
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ mine }` );
 		await expect( page ).toHaveURL( /page=affibloom(&|$)/ );
 		await expect( page.locator( `tr[data-product-id="${ mine }"]` ) ).toHaveCount( 0 );
+	} );
+
+	// Task 17D (requirements 11, X9, D42): Lasso's add and save lookups find a trashed or retired record and publish it
+	// again; adding opens it as a new product would be, saving another product with its link is refused (S11).
+	test( 'AC23 a deleted product comes back when its link is added again', async ( { page } ) => {
+		test.setTimeout( 120_000 ); // Three deletes and a dozen WP-CLI checks; about 45 s on Local.
+		const name = unique( 'F1 AC23 gone' );
+		const url = `https://www.example.com/${ unique( 'f1-ac23-gone' ) }`;
+		const gone = createProduct( { name, url, badge: 'Our Pick' } );
+		const mine = createProduct( { name: unique( 'F1 AC23 mine' ), url: `https://www.example.com/${ unique( 'f1-ac23-mine' ) }` } );
+		const status = ( id: number ) => wp( 'post', 'get', String( id ), '--field=post_status' );
+		const apiFetch = ( options: object ) => page.evaluate( ( o ) => ( window as unknown as { wp: { apiFetch: ( x: object ) => Promise< unknown > } } ).wp.apiFetch( o ), options );
+
+		// Deleted from the Dashboard (17B's route), then added again: the same product, its page, its fields.
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await apiFetch( { path: `/affibloom/v1/products?ids[]=${ gone }`, method: 'DELETE' } );
+		expect( status( gone ) ).toBe( 'trash' );
+		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
+		const add = page.getByRole( 'dialog', { name: 'Add A New Link' } );
+		await add.getByLabel( 'URL' ).fill( url );
+		await add.getByRole( 'button', { name: 'Add Link' } ).click();
+		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ gone }$` ) );
+		await expect( page.locator( '#affibloom-name' ) ).toHaveValue( name );
+		await expect( page.locator( '#affibloom-badge' ) ).toHaveValue( 'Our Pick' );
+		expect( status( gone ) ).toBe( 'publish' );
+
+		// Deleted again; another product saved with its link brings it back and is refused, unchanged.
+		await apiFetch( { path: `/affibloom/v1/products?ids[]=${ gone }`, method: 'DELETE' } );
+		const before = wp( 'post', 'meta', 'get', String( mine ), '_affibloom_url' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ mine }` );
+		await page.locator( '#affibloom-url' ).fill( url );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '#affibloom-url' ) ).toHaveAttribute( 'aria-invalid', 'true' );
+		await expect( page.getByText( 'This link already exists. Please try again with a different URL.' ) ).toBeVisible();
+		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_url' ) ).toBe( before );
+		expect( status( gone ) ).toBe( 'publish' );
+
+		// A retired product (17C) comes back without its pointer.
+		await apiFetch( { path: `/affibloom/v1/products/${ gone }/repoint`, method: 'POST', data: { to: mine, url: before } } );
+		expect( status( gone ) ).toBe( 'affibloom_retired' );
+		await apiFetch( { path: '/affibloom/v1/products', method: 'POST', data: { url } } );
+		expect( status( gone ) ).toBe( 'publish' );
+		expect( wp( 'post', 'meta', 'list', String( gone ), '--keys=_affibloom_repointed_to', '--format=count' ) ).toBe( '0' );
 	} );
 } );

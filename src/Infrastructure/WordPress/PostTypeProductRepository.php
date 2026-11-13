@@ -207,6 +207,92 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * A deleted product a link belongs to (Task 17D): the trash (the Dashboard's delete) or retired (the repoint), by the
+	 * published lookups' arms in their order.
+	 *
+	 * @param list<string> $url_keys   Keys from AffiliateUrl::key().
+	 * @param string       $asin       An Amazon link's ASIN, or ''.
+	 * @param string       $country    Its store's country code.
+	 * @param string       $search_key An Amazon search page's key, or ''.
+	 */
+	public function find_deleted( array $url_keys, string $asin, string $country, string $search_key ): ?Product {
+		$deleted = array( 'trash', ProductPostType::RETIRED );
+		$found   = null;
+		if ( array() !== $url_keys ) {
+			$found = $this->find_one(
+				array(
+					array(
+						'key'     => '_affibloom_url_key',
+						'value'   => array_values( array_unique( $url_keys ) ),
+						'compare' => 'IN',
+					),
+				),
+				$deleted
+			);
+		}
+		if ( null === $found && '' !== $asin ) {
+			$found = $this->find_one(
+				array(
+					array(
+						'key'   => '_affibloom_type',
+						'value' => ProductType::Amazon->value,
+					),
+					array(
+						'key'   => '_affibloom_asin',
+						'value' => $asin,
+					),
+					array(
+						'key'   => '_affibloom_amazon_country',
+						'value' => $country,
+					),
+				),
+				$deleted
+			);
+		}
+		if ( null === $found && '' !== $search_key ) {
+			$found = $this->find_one(
+				array(
+					array(
+						'key'   => '_affibloom_search_key',
+						'value' => $search_key,
+					),
+				),
+				$deleted
+			);
+		}
+
+		return $found;
+	}
+
+	/**
+	 * Publishes a deleted product again (Task 17D), as Lasso's add flow (wp_update_post with the publish status). The
+	 * trash gave its slug a __trashed suffix and kept the old one in _wp_desired_post_slug, as wp_untrash_post() reads it;
+	 * the slug is put back the same way. A retired product's pointer goes (F1 D42).
+	 *
+	 * @param Product $product A trashed or retired product.
+	 * @throws RuntimeException When WordPress refuses it.
+	 */
+	public function revive( Product $product ): Product {
+		$id      = (int) $product->id;
+		$changes = array(
+			'ID'          => $id,
+			'post_status' => 'publish',
+		);
+		$slug    = (string) get_post_meta( $id, '_wp_desired_post_slug', true );
+		if ( '' !== $slug ) {
+			$changes['post_name'] = $slug;
+		}
+		$result = wp_update_post( wp_slash( $changes ), true );
+		if ( is_wp_error( $result ) ) {
+			throw new RuntimeException( esc_html( $result->get_error_message() ) );
+		}
+		delete_post_meta( $id, '_wp_desired_post_slug' );
+		delete_post_meta( $id, '_affibloom_repointed_to' );
+
+		return $product;
+	}
+
+	/**
 	 * Gives a stored product a new name, as Lasso's re-title does (wp_update_post with the title).
 	 *
 	 * @param Product $product A stored product.
@@ -449,19 +535,21 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
-	 * The published product whose meta matches every clause, lowest ID first, or null. Extracted on its second use
-	 * (Task 12B). One lookup per add over a few hundred products, so the meta query's cost does not matter.
+	 * The product whose meta matches every clause, or null. Extracted on its second use (Task 12B). One lookup per add
+	 * over a few hundred products, so the meta query's cost does not matter. Published products: the lowest ID first;
+	 * trashed and retired ones (Task 17D): the newest first, as Lasso's inactive-record lookups order them.
 	 *
-	 * @param list<array{key: string, value: string}> $clauses Meta key and value pairs, all required.
+	 * @param list<array{key: string, value: string|list<string>, compare?: string}> $clauses  Meta conditions, all required.
+	 * @param list<string>                                                           $statuses Post statuses to look in.
 	 */
-	private function find_one( array $clauses ): ?Product {
+	private function find_one( array $clauses, array $statuses = array( 'publish' ) ): ?Product {
 		$posts = get_posts(
 			array(
 				'post_type'        => ProductPostType::NAME,
-				'post_status'      => 'publish',
+				'post_status'      => $statuses,
 				'posts_per_page'   => 1,
 				'orderby'          => 'ID',
-				'order'            => 'ASC',
+				'order'            => array( 'publish' ) === $statuses ? 'ASC' : 'DESC',
 				'no_found_rows'    => true,
 				'suppress_filters' => true,
 				'meta_query'       => array_merge( array( 'relation' => 'AND' ), $clauses ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- see above.
