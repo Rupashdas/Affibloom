@@ -13,6 +13,7 @@ use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductRepository;
+use Affibloom\Domain\Settings\SettingsRepository;
 use RuntimeException;
 
 /**
@@ -23,14 +24,23 @@ final class ProductService {
 	/**
 	 * Builds the service.
 	 *
-	 * @param ProductRepository $products Product storage.
+	 * @param ProductRepository  $products Product storage.
+	 * @param LinkResolver       $links    Where a new link leads and what to call it.
+	 * @param SettingsRepository $settings Site settings (keep_genius_formatting).
 	 */
-	public function __construct( private ProductRepository $products ) {}
+	public function __construct(
+		private ProductRepository $products,
+		private LinkResolver $links,
+		private SettingsRepository $settings,
+	) {}
 
 	/**
-	 * "Add A New Link" with one link. A published product with the same link is returned instead of a new one, as
-	 * Lasso's is_lasso_url_exist() does with check_duplicate_link on (its default and the live value). A new product
-	 * is named after the link's site, as Lasso names it before its cloud answers (Lasso_Helper::get_title_by_url).
+	 * "Add A New Link" with one link (Lasso_Affiliate_Link::lasso_add_a_new_link):
+	 * - a published product with the same link is returned instead of a new one (is_lasso_url_exist with
+	 *   check_duplicate_link on, its default and the live value), before any request is made;
+	 * - otherwise the link is resolved and the product named as Lasso names it (Task 11D);
+	 * - with keep_genius_formatting off, a geni.us link is stored as its destination, which is then checked for a
+	 *   duplicate too.
 	 *
 	 * @param string $input What was pasted.
 	 * @throws InvalidField      When the input is empty or not a link.
@@ -44,6 +54,16 @@ final class ProductService {
 			return new AddedLink( $existing, true );
 		}
 
-		return new AddedLink( $this->products->save( Product::draft( $url->site_name(), $url ) ), false );
+		$resolved = $this->links->resolve( $url );
+
+		if ( $url->is_geni_us() && $resolved->url !== $url->value() && ! $this->settings->get()->bool( 'keep_genius_formatting' ) ) {
+			$url      = AffiliateUrl::from_string( $resolved->url );
+			$existing = $this->products->find_by_url_key( $url->key() );
+			if ( null !== $existing ) {
+				return new AddedLink( $existing, true );
+			}
+		}
+
+		return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url ) ), false );
 	}
 }

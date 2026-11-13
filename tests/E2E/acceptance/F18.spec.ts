@@ -30,8 +30,8 @@ test.describe( 'F18 Adding links', () => {
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
 		const ids = productsWithLink( link );
 		expect( ids ).toHaveLength( 1 );
-		// Lasso's get_title_by_url(): the label before the suffix, capitalised.
-		expect( wp( 'post', 'get', ids[ 0 ], '--field=post_title' ) ).toBe( 'Pxf' );
+		// Lasso names an Impact link after the destination in its u= parameter, with no request (Task 11D).
+		expect( wp( 'post', 'get', ids[ 0 ], '--field=post_title' ) ).toBe( 'Mizunousa' );
 	} );
 
 	async function add( page: Page, link: string ) {

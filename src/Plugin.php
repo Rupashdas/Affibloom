@@ -11,8 +11,10 @@ namespace Affibloom;
 
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Products\BulkAddService;
+use Affibloom\Application\Products\LinkResolver;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
@@ -98,7 +100,7 @@ final class Plugin {
 		$settings = new SettingsService( $this->settings_repository() );
 		$display  = new DisplaySettingsService( new OptionDisplaySettingsRepository(), $this->settings_repository() );
 		$notice   = new Notice();
-		$products = new ProductService( new PostTypeProductRepository() );
+		$products = new ProductService( new PostTypeProductRepository(), new LinkResolver( new WpPageFetcher() ), $this->settings_repository() );
 		$bulk     = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 
 		return array(

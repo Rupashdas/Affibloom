@@ -23,7 +23,7 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 201, $response->get_status() );
 		$data = $response->get_data()['data'];
 		self::assertSame( $url, $data['url'] );
-		self::assertSame( 'Pxf', $data['name'] );
+		self::assertSame( 'Mizunousa', $data['name'] ); // the embedded destination's site (Task 11D)
 		self::assertSame( 'affibloom_product', get_post_type( $data['id'] ) );
 		self::assertSame( $url, get_post_meta( $data['id'], '_affibloom_url', true ) );
 		self::assertSame( 'other', get_post_meta( $data['id'], '_affibloom_type', true ) );

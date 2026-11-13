@@ -4,19 +4,21 @@ namespace Affibloom\Tests\Unit\Application;
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Products\BulkAddRunning;
 use Affibloom\Application\Products\BulkAddService;
+use Affibloom\Application\Products\LinkResolver;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\BulkRun;
 use Affibloom\Domain\Product\BulkRunRepository;
 use Affibloom\Domain\Product\Product;
-use Affibloom\Domain\Product\ProductRepository;
+use Affibloom\Tests\Unit\Fakes\FakePageFetcher;
+use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
 use PHPUnit\Framework\TestCase;
 
 final class BulkAddServiceTest extends TestCase {
 	private const NOW = 1_800_000_000.0;
 
-	/** @var ProductRepository&object{saved: list<Product>} */
-	private $products;
+	private InMemoryProductRepository $products;
 	/** @var BulkRunRepository&object{run: ?BulkRun} */
 	private $runs;
 	/** @var BackgroundJob&object{dispatched: int} */
@@ -25,24 +27,8 @@ final class BulkAddServiceTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		$this->products = new class() implements ProductRepository {
-			/** @var list<Product> */
-			public array $saved = array();
-			public function save( Product $product ): Product {
-				$stored        = $product->with( array( 'id' => 100 + count( $this->saved ) ) );
-				$this->saved[] = $stored;
-				return $stored;
-			}
-			public function find_by_url_key( string $key ): ?Product {
-				foreach ( $this->saved as $product ) {
-					if ( $product->url->key() === $key ) {
-						return $product;
-					}
-				}
-				return null;
-			}
-		};
-		$this->runs = new class() implements BulkRunRepository {
+		$this->products = new InMemoryProductRepository();
+		$this->runs     = new class() implements BulkRunRepository {
 			public ?BulkRun $run = null;
 			public function get(): ?BulkRun {
 				return $this->run;
@@ -59,8 +45,15 @@ final class BulkAddServiceTest extends TestCase {
 		};
 	}
 
+	/**
+	 * Adding one link, with no network: every page fetch has no answer.
+	 */
+	private function products(): ProductService {
+		return new ProductService( $this->products, new LinkResolver( new FakePageFetcher() ), new InMemorySettingsRepository() );
+	}
+
 	private function service(): BulkAddService {
-		return new BulkAddService( new ProductService( $this->products ), $this->runs, $this->job, fn(): float => $this->now );
+		return new BulkAddService( $this->products(), $this->runs, $this->job, fn(): float => $this->now );
 	}
 
 	public function test_starting_stores_the_run_and_wakes_the_background_job(): void {
@@ -115,7 +108,7 @@ final class BulkAddServiceTest extends TestCase {
 		$dispatched = $this->job->dispatched;
 		$clock      = array( self::NOW, self::NOW + 5, self::NOW + 21, self::NOW + 22 );
 		$service    = new BulkAddService(
-			new ProductService( $this->products ),
+			$this->products(),
 			$this->runs,
 			$this->job,
 			static function () use ( &$clock ): float {

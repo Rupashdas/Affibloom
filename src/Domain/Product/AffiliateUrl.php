@@ -34,6 +34,33 @@ final class AffiliateUrl {
 		'https:///',
 	);
 
+	/** Lasso_Amazon_Api::get_domains(): Amazon's stores, its short links and its embed host. */
+	private const AMAZON_HOSTS = array(
+		'amazon.com',
+		'amazon.ca',
+		'amazon.co.uk',
+		'amazon.com.au',
+		'amazon.com.br',
+		'amazon.com.mx',
+		'amazon.fr',
+		'amazon.de',
+		'amazon.it',
+		'amazon.in',
+		'amazon.es',
+		'amazon.cn',
+		'amazon.co.jp',
+		'amazon.nl',
+		'amazon.se',
+		'amazon.sg',
+		'amazon.com.tr',
+		'amazon.ae',
+		'amzn.com',
+		'amzn.to',
+		'amzlink.to',
+		'amazon-adsystem.com',
+		'smile.amazon.com',
+	);
+
 	/**
 	 * Use from_string().
 	 *
@@ -72,10 +99,11 @@ final class AffiliateUrl {
 	 * (a shortcode) are left alone. One improvement: Lasso looks only for a lower-case "http://" or "https://", so
 	 * "HTTPS://x.com" or "ftp://x.com" would become "https://HTTPS://x.com" or "https://ftp://x.com"; here a value
 	 * that already has a scheme, in any case, gets no prefix (and from_string() accepts only http and https).
+	 * Public on its second use: EmbeddedDestination repairs what it finds in a parameter, as Lasso does.
 	 *
 	 * @param string $url Trimmed input.
 	 */
-	private static function repair( string $url ): string {
+	public static function repair( string $url ): string {
 		$url = str_replace( self::BROKEN_PREFIXES, 'https://', $url );
 
 		$left_alone = '' === $url
@@ -112,12 +140,7 @@ final class AffiliateUrl {
 	 * is its own name (Lasso's would be empty, and a product needs a name).
 	 */
 	public function site_name(): string {
-		$host = strtolower( (string) parse_url( $this->value, PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
-		if ( str_starts_with( $host, 'www.' ) ) {
-			$host = substr( $host, 4 );
-		}
-
-		$labels = explode( '.', $host );
+		$labels = explode( '.', $this->host() );
 		$count  = count( $labels );
 		$name   = $count >= 2 ? $labels[ $count - 2 ] : $labels[0];
 		if ( $count >= 3 && 2 === strlen( $labels[ $count - 1 ] ) && in_array( $name, array( 'co', 'com', 'net', 'org', 'ac', 'gov', 'edu' ), true ) ) {
@@ -125,5 +148,30 @@ final class AffiliateUrl {
 		}
 
 		return ucwords( str_replace( '-', ' ', $name ) );
+	}
+
+	/**
+	 * Whether the link is Amazon's: its host, without "www.", is one of Lasso_Amazon_Api::get_domains(). Amazon's
+	 * pages are never requested (the Associates licence; overview, C1).
+	 */
+	public function is_amazon(): bool {
+		return in_array( $this->host(), self::AMAZON_HOSTS, true );
+	}
+
+	/**
+	 * Whether the link is a geni.us link: Lasso compares get_base_domain( $url, false ), the host without its first
+	 * label when it has more than two, with "geni.us".
+	 */
+	public function is_geni_us(): bool {
+		$host = $this->host();
+		return 'geni.us' === $host || str_ends_with( $host, '.geni.us' );
+	}
+
+	/**
+	 * Lower-case host without a leading "www.".
+	 */
+	private function host(): string {
+		$host = strtolower( (string) parse_url( $this->value, PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
+		return str_starts_with( $host, 'www.' ) ? substr( $host, 4 ) : $host;
 	}
 }
