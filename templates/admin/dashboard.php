@@ -6,7 +6,7 @@
  * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int, notice: string, notice_kind: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -91,13 +91,4 @@ $placeholder = sprintf(
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/view-delete-modal' ); ?>
-	<?php
-	$this->render(
-		'admin/partials/toast',
-		array(
-			'message' => $view['notice'],
-			'kind'    => $view['notice_kind'],
-		)
-	);
-	?>
 </div>

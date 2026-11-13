@@ -49,6 +49,15 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( $first->id, $top->id );
 	}
 
+	public function test_a_product_is_found_by_its_id_for_its_page(): void {
+		$service = $this->service();
+		$added   = $service->create_from_url( 'https://www.example.com/page' )->product;
+
+		self::assertSame( 'https://www.example.com/page', $service->get( (int) $added->id )?->url->value() );
+		self::assertNull( $service->get( 999 ) );
+		self::assertNull( $service->get( 0 ) );
+	}
+
 	public function test_a_link_becomes_one_saved_product_named_as_lasso_names_it(): void {
 		$link = 'https://mizuno.pxf.io/c/123/456/789?u=https%3A%2F%2Fmizunousa.com%2Fwave';
 

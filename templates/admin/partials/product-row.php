@@ -5,8 +5,8 @@
  * it a target of its own and a label.
  *
  * Placeholders until their tasks: Groups (the Groups area), Alert (Tasks 30-31), Locations (the content link
- * index and Task 36), Clicks (Tasks 33-34), Edit (Task 16), Shortcode (Task 18S). The name becomes a link to the
- * product page in Task 14, which builds that page.
+ * index and Task 36), Clicks (Tasks 33-34), Edit (Task 16), Shortcode (Task 18S). The name and the image open the
+ * product page (Task 14A), as Lasso's do; the link under the name opens the destination.
  *
  * @package Affibloom
  * @var array{product: \Affibloom\Domain\Product\Product} $view
@@ -14,7 +14,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$product = $view['product'];
+$product      = $view['product'];
+$product_page = \Affibloom\Interface\Admin\ProductScreen::url( (int) $product->id );
 /* translators: %s: product name. */
 $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
 ?>
@@ -24,16 +25,19 @@ $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
 			aria-label="<?php echo esc_attr( $select_label ); ?>">
 	</td>
 	<td class="affibloom-col-image">
-		<?php if ( '' !== $product->image_url ) : ?>
-			<img class="affibloom-thumb" src="<?php echo esc_url( $product->image_url ); ?>" alt="" width="40" height="40" loading="lazy" decoding="async">
-		<?php else : ?>
-			<span class="affibloom-thumb affibloom-thumb--none" title="<?php esc_attr_e( 'No image', 'affibloom' ); ?>">
-				<?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?>
-			</span>
-		<?php endif; ?>
+		<?php // A second way to the same page, so it is skipped by the keyboard and by screen readers. ?>
+		<a class="affibloom-thumb-link" href="<?php echo esc_url( $product_page ); ?>" tabindex="-1" aria-hidden="true">
+			<?php if ( '' !== $product->image_url ) : ?>
+				<img class="affibloom-thumb" src="<?php echo esc_url( $product->image_url ); ?>" alt="" width="40" height="40" loading="lazy" decoding="async">
+			<?php else : ?>
+				<span class="affibloom-thumb affibloom-thumb--none" title="<?php esc_attr_e( 'No image', 'affibloom' ); ?>">
+					<?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?>
+				</span>
+			<?php endif; ?>
+		</a>
 	</td>
 	<td class="affibloom-col-name">
-		<span class="affibloom-row__name" title="<?php echo esc_attr( $product->name ); ?>"><?php echo esc_html( $product->name ); ?></span>
+		<a class="affibloom-row__name" href="<?php echo esc_url( $product_page ); ?>" title="<?php echo esc_attr( $product->name ); ?>"><?php echo esc_html( $product->name ); ?></a>
 		<a class="affibloom-row__url" href="<?php echo esc_url( $product->url->value() ); ?>" target="_blank"
 			rel="noopener noreferrer" title="<?php echo esc_attr( $product->url->value() ); ?>"><?php echo esc_html( $product->url->value() ); ?></a>
 	</td>

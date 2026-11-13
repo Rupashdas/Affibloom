@@ -39,6 +39,17 @@ final class ProductTest extends TestCase {
 		self::assertFalse( $product->show_disclosure );
 	}
 
+	public function test_a_draft_has_no_secondary_button_and_lassos_defaults_for_its_toggles(): void {
+		$product = Product::draft( 'Example', $this->url(), Settings::from_array( array( 'new_tab' => false, 'nofollow' => false ) ) );
+
+		// Lasso's open_new_tab2 and enable_nofollow2 default to on and have no setting of their own on its screens.
+		self::assertSame( '', $product->url2 );
+		self::assertSame( '', $product->button_text );
+		self::assertSame( '', $product->button_text2 );
+		self::assertTrue( $product->new_tab2 );
+		self::assertTrue( $product->nofollow2 );
+	}
+
 	public function test_a_copy_keeps_the_defaults(): void {
 		$product = Product::draft( 'Example', $this->url(), Settings::from_array( array( 'sponsored' => true ) ) );
 

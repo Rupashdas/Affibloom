@@ -28,6 +28,7 @@ use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\PerPage;
+use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Admin\DisplayController;
 use Affibloom\Interface\Admin\DisplayScreen;
 use Affibloom\Interface\Admin\Notice;
@@ -112,7 +113,8 @@ final class Plugin {
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
-				new DashboardScreen( $this->template(), $notice, $products, $per_page, $views ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views ),
+				new ProductScreen( $this->template(), $products, $display ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,

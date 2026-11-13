@@ -25,14 +25,12 @@ final class DashboardScreen {
 	 * Builds the screen.
 	 *
 	 * @param Template         $template Template renderer.
-	 * @param Notice           $notice   The toast after a redirect, e.g. after "Add A New Link".
 	 * @param ProductService   $products The product library.
 	 * @param PerPage          $per_page How many products this editor sees at a time.
 	 * @param SavedViewService $views    This editor's saved views (Task 13E).
 	 */
 	public function __construct(
 		private Template $template,
-		private Notice $notice,
 		private ProductService $products,
 		private PerPage $per_page,
 		private SavedViewService $views,
@@ -56,14 +54,12 @@ final class DashboardScreen {
 		$this->template->render(
 			'admin/dashboard',
 			array(
-				'products'    => $this->products->list( $term, $link_kind, $page, $per_page ),
-				'term'        => $term->text(),
-				'link_kind'   => $link_kind,
-				'views'       => $this->views->list( get_current_user_id() ),
-				'url'         => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
-				'library'     => $this->products->count(),
-				'notice'      => $this->notice->message(),
-				'notice_kind' => $this->notice->kind(),
+				'products'  => $this->products->list( $term, $link_kind, $page, $per_page ),
+				'term'      => $term->text(),
+				'link_kind' => $link_kind,
+				'views'     => $this->views->list( get_current_user_id() ),
+				'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
+				'library'   => $this->products->count(),
 			)
 		);
 	}

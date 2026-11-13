@@ -10,8 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 /**
- * The toast message after a redirect (?affibloom_notice=…). Shared by the Settings tabs, the Display screen and the
- * Dashboard.
+ * The toast message after a redirect (?affibloom_notice=…). Shared by the Settings tabs and the Display screen.
  */
 final class Notice {
 
@@ -25,19 +24,7 @@ final class Notice {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
-			// Lasso's warning when "Add A New Link" finds a product with the same, non-Amazon link. Lasso shows it on the
-			// product's page (Task 14); until then the Dashboard does. A successful add has no message, as in Lasso.
-			'duplicate'    => __( 'This product already exists. Please update the Primary URL or add a new link.', 'affibloom' ),
 			default        => '',
 		};
-	}
-
-	/**
-	 * How the toast presents the message: "info" when nothing was done, else "success".
-	 */
-	public function kind(): string {
-		$code = isset( $_GET['affibloom_notice'] ) ? sanitize_key( wp_unslash( $_GET['affibloom_notice'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
-
-		return 'duplicate' === $code ? 'info' : 'success';
 	}
 }

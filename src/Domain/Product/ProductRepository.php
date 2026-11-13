@@ -23,6 +23,14 @@ interface ProductRepository {
 	public function save( Product $product ): Product;
 
 	/**
+	 * The published product with this ID, or null: a missing ID, another post type, a draft or a trashed product
+	 * (the product page, Task 14A).
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function get( int $id ): ?Product;
+
+	/**
 	 * The published product whose link has this key, or null. Drafts and trashed products are not matches.
 	 *
 	 * @param string $key From AffiliateUrl::key().

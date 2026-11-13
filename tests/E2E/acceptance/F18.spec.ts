@@ -13,8 +13,8 @@ test.describe( 'F18 Adding links', () => {
 	}
 
 	/**
-	 * How an add ends, as Lasso's does (url-add.php): the Dashboard reloads with no message and the product at the top
-	 * of the list. (Lasso opens a non-Amazon product's page instead; that page is Task 14.)
+	 * How a bulk add (or an Amazon add) ends, as Lasso's does (url-add.php): the Dashboard reloads with no message and
+	 * the product at the top of the list.
 	 *
 	 * @param page    The page.
 	 * @param shown   Text from the product's link, to find it in the top row.
@@ -23,6 +23,18 @@ test.describe( 'F18 Adding links', () => {
 	async function landed( page: Page, shown: string, timeout = 20_000 ) {
 		await expect( page.locator( '.affibloom-table tbody tr' ).first() ).toContainText( shown, { timeout } );
 		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 );
+	}
+
+	/**
+	 * How a single non-Amazon add ends, as Lasso's does (url-add.php): the product's own page (Task 14A), with no message.
+	 *
+	 * @param page  The page.
+	 * @param shown Text from the product's link, found in its Primary Destination URL field.
+	 */
+	async function opened( page: Page, shown: string ) {
+		await page.waitForURL( /page=affibloom-product&id=\d+/, { timeout: 20_000 } );
+		await expect( page.locator( '#affibloom-url' ) ).toHaveValue( new RegExp( shown ) );
+		await expect( page.locator( '.affibloom-notice' ) ).toHaveCount( 0 );
 	}
 
 	/** IDs of the products whose primary link is exactly this one. */
@@ -41,7 +53,7 @@ test.describe( 'F18 Adding links', () => {
 		await dialog.getByLabel( 'URL' ).fill( link );
 		await dialog.getByLabel( 'URL' ).press( 'Enter' );
 
-		await landed( page, sub );
+		await opened( page, sub );
 		const ids = productsWithLink( link );
 		expect( ids ).toHaveLength( 1 );
 		// Lasso names an Impact link after the destination in its u= parameter, with no request (Task 11D).
@@ -58,7 +70,7 @@ test.describe( 'F18 Adding links', () => {
 		const path = unique( 'f18-ac2' );
 		await add( page, `mizunousa.com/${ path }` );
 
-		await landed( page, path );
+		await opened( page, path );
 		expect( productsWithLink( `https://mizunousa.com/${ path }` ) ).toHaveLength( 1 );
 	} );
 
@@ -68,8 +80,9 @@ test.describe( 'F18 Adding links', () => {
 
 		await add( page, link );
 
-		// Until Task 14 builds the product page, the warning is a Dashboard toast.
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
+		// Lasso opens the existing product's page with its warning (Task 14A).
+		await page.waitForURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
+		await expect( page.locator( '.affibloom-notice' ) ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
 		expect( productsWithLink( link ) ).toHaveLength( 1 );
 	} );
 
@@ -80,7 +93,8 @@ test.describe( 'F18 Adding links', () => {
 
 		await add( page, variant );
 
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'This product already exists.' );
+		await page.waitForURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
+		await expect( page.locator( '.affibloom-notice' ) ).toContainText( 'This product already exists.' );
 		expect( productsWithLink( variant ) ).toHaveLength( 0 );
 	} );
 
@@ -170,7 +184,7 @@ test.describe( 'F18 Adding links', () => {
 			const dialog = await openAdd( page );
 			await dialog.getByLabel( 'URL' ).fill( link );
 			await dialog.getByLabel( 'URL' ).press( 'Enter' );
-			await landed( page, link.split( '/' ).pop() as string );
+			await opened( page, link.split( '/' ).pop() as string );
 
 			const [ id ] = productsWithLink( link );
 			expect( meta( id, 'nofollow' ) ).toBe( '0' );

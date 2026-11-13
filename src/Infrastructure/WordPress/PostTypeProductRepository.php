@@ -69,6 +69,21 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The published product with this ID, or null. Lasso fills its page only for a published record of its own type
+	 * (get_lasso_url: LASSO_POST_TYPE === $post_type && 'publish' === $post_status).
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function get( int $id ): ?Product {
+		$post = get_post( $id );
+		if ( ! $post instanceof WP_Post || ProductPostType::NAME !== $post->post_type || 'publish' !== $post->post_status ) {
+			return null;
+		}
+
+		return $this->hydrate( $post );
+	}
+
+	/**
 	 * The published product whose link has this key, or null.
 	 *
 	 * @param string $key From AffiliateUrl::key().
@@ -335,21 +350,28 @@ final class PostTypeProductRepository implements ProductRepository {
 	 */
 	private function hydrate( WP_Post $post ): Product {
 		$meta = static fn( string $key ): string => (string) get_post_meta( $post->ID, '_affibloom_' . $key, true );
+		// The secondary button's toggles: a product saved before Task 15 has none, and reads Lasso's new-record default (on).
+		$flag2 = static fn( string $key ): bool => '0' !== $meta( $key );
 
 		// A flag is on only when stored as "1", as Lasso reads its own (1 === intval( get_post_meta( … ) )).
 		return new Product(
-			$post->ID,
-			$post->post_title,
-			AffiliateUrl::from_string( $meta( 'url' ) ),
-			ProductType::tryFrom( $meta( 'type' ) ) ?? ProductType::Other,
-			'1' === $meta( 'new_tab' ),
-			'1' === $meta( 'nofollow' ),
-			'1' === $meta( 'sponsored' ),
-			'1' === $meta( 'show_disclosure' ),
-			$meta( 'asin' ),
-			$meta( 'amazon_country' ),
-			$meta( 'search_key' ),
-			$meta( 'image_url' ),
+			id: $post->ID,
+			name: $post->post_title,
+			url: AffiliateUrl::from_string( $meta( 'url' ) ),
+			type: ProductType::tryFrom( $meta( 'type' ) ) ?? ProductType::Other,
+			new_tab: '1' === $meta( 'new_tab' ),
+			nofollow: '1' === $meta( 'nofollow' ),
+			sponsored: '1' === $meta( 'sponsored' ),
+			show_disclosure: '1' === $meta( 'show_disclosure' ),
+			asin: $meta( 'asin' ),
+			amazon_country: $meta( 'amazon_country' ),
+			search_key: $meta( 'search_key' ),
+			image_url: $meta( 'image_url' ),
+			button_text: $meta( 'button_text' ),
+			url2: trim( $meta( 'url2' ) ), // Lasso trims second_btn_url when it reads it.
+			button_text2: $meta( 'button_text2' ),
+			new_tab2: $flag2( 'new_tab2' ),
+			nofollow2: $flag2( 'nofollow2' ),
 		);
 	}
 

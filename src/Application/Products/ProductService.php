@@ -67,6 +67,15 @@ final class ProductService {
 	}
 
 	/**
+	 * The published product with this ID, or null (the product page, Task 14A).
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function get( int $id ): ?Product {
+		return $id > 0 ? $this->products->get( $id ) : null;
+	}
+
+	/**
 	 * "Add A New Link" with one link (Lasso_Affiliate_Link::lasso_add_a_new_link):
 	 * - a published product with the same link is returned instead of a new one (is_lasso_url_exist with
 	 *   check_duplicate_link on, its default and the live value), before any request is made;

@@ -2,7 +2,7 @@
 
 Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) re-run under the full-scope rule on
 2026-11-13** (progress deviations 24 and 57): sections 2-8 below, written from Lasso 369's source and this copy's data.
-Waiting for the user's gate 4 on Tasks 14A-14E.
+**Gate 4 given by the user 2026-11-13** for Tasks 14A-14E, with D1 answered: Lasso's two cards in Aurora's shell.
 
 ## 1. User stories and acceptance criteria
 
@@ -123,8 +123,7 @@ Waiting for the user's gate 4 on Tasks 14A-14E.
 Settled from Lasso and the records (none drops anything Lasso does or reverses a user decision):
 
 - **D1 Layout.** Lasso's two cards (left: the link; right: preview and display fields) and its footer, in Aurora's
-  shell — **asked at gate 4** (deviation 25 leaves the other screens' layout open; the user chose this arrangement for
-  the Dashboard).
+  shell — **the user's answer at gate 4, 2026-11-13** (the arrangement they chose for the Dashboard).
 - **D2 A theme change, a new Primary URL and Apply do not save.** They update the preview and the fields; everything
   is stored by Save Changes, guarded by B8. Lasso's save-on-theme-change stores edits the editor has not asked to
   store, and its immediate Apply contradicts its own media-library pick, which waits for Save. Nothing Lasso stores is

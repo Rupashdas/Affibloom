@@ -27,8 +27,8 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 'affibloom_product', get_post_type( $data['id'] ) );
 		self::assertSame( $url, get_post_meta( $data['id'], '_affibloom_url', true ) );
 		self::assertSame( 'other', get_post_meta( $data['id'], '_affibloom_type', true ) );
-		// No message after an add, as Lasso's (url-add.php); the product page it opens is Task 14.
-		self::assertStringNotContainsString( 'affibloom_notice', $data['redirect_to'] );
+		// No message after an add, as Lasso's (url-add.php): a non-Amazon link opens its product's page (Task 14A).
+		self::assertStringEndsWith( 'admin.php?page=affibloom-product&id=' . $data['id'], $data['redirect_to'] );
 	}
 
 	public function test_a_new_product_takes_the_sites_link_defaults_at_that_moment(): void {
@@ -133,7 +133,7 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 200, $second->get_status() );
 		self::assertTrue( $second->get_data()['data']['duplicate'] );
 		self::assertSame( $first, $second->get_data()['data']['id'] );
-		self::assertStringContainsString( 'affibloom_notice=duplicate', $second->get_data()['data']['redirect_to'] );
+		self::assertStringEndsWith( 'page=affibloom-product&id=' . $first . '&is_duplicate=1', $second->get_data()['data']['redirect_to'] );
 	}
 
 	public function test_a_trashed_product_is_not_a_match(): void {

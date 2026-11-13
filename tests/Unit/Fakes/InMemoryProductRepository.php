@@ -48,6 +48,15 @@ final class InMemoryProductRepository implements ProductRepository {
 		);
 	}
 
+	public function get( int $id ): ?Product {
+		foreach ( $this->saved as $product ) {
+			if ( $product->id === $id ) {
+				return $product;
+			}
+		}
+		return null;
+	}
+
 	public function count(): int {
 		return count( $this->saved );
 	}

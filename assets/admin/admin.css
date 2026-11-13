@@ -21,6 +21,9 @@
 	--affibloom-segment-bg: #e6ecf6;
 	--affibloom-ink-700: #3d4a63;
 	--affibloom-danger-700: #a1203a;
+	/* Warning (the product page's notices, Task 14A): warning-700 on warning-50 6.2:1, on white 6.8:1. */
+	--affibloom-warning-700: #8a4b00;
+	--affibloom-warning-50: #fff4e0;
 	--affibloom-page: #f3f6fb;
 	--affibloom-subtle: #fafbfe;
 	--affibloom-white: #fff;
@@ -1265,6 +1268,112 @@
 	outline-offset: 2px;
 }
 
+/*
+ * 7e. The product page (Task 14A): Lasso's arrangement in Aurora's shell (the user's gate 4 answer, F1 D1). The
+ * band holds the name, the link under it and the four tabs; the body holds Lasso's two cards side by side (its
+ * col-lg-5 / col-lg-7) and its footer (Delete left, Save right). Labels sit above their fields and toggles left of
+ * their labels, as on Lasso's page.
+ */
+.affibloom-admin .affibloom-product__title { overflow-wrap: anywhere; }
+.affibloom-product-url {
+	display: block;
+	max-width: 100%;
+	margin-top: 6px;
+	overflow: hidden;
+	color: var(--affibloom-on-band);
+	font-size: 14px;
+	line-height: 20px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.affibloom-product-url:hover,
+.affibloom-product-url:focus { color: var(--affibloom-white); }
+/* A tab whose section comes later: readable, not a link, with its "Soon" chip. */
+.affibloom-tabs__tab.is-disabled {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--affibloom-on-band);
+	cursor: default;
+	opacity: 0.85;
+}
+.affibloom-tabs__tab.is-disabled:hover { color: var(--affibloom-on-band); }
+/* Four tabs do not fit a phone: the segment scrolls sideways inside the band instead of widening the page. */
+.affibloom-product-page .affibloom-tabs { max-width: 100%; overflow-x: auto; }
+.affibloom-product-page .affibloom-tabs__tab { flex: 0 0 auto; white-space: nowrap; }
+/* wp-admin caps a select's width; this one fills its column like the text fields. */
+.affibloom-admin select.affibloom-input { max-width: none; }
+.affibloom-product__form {
+	display: grid;
+	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+	gap: 24px;
+	align-items: start;
+}
+.affibloom-product__card { padding: var(--affibloom-space-card); }
+/* One column that may shrink below its content's width, so long links never push past the card's padding. */
+.affibloom-product__card--link { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.affibloom-product__card.affibloom-empty { padding: 72px var(--affibloom-space-card); }
+.affibloom-product__button { display: grid; gap: 12px; }
+.affibloom-product__pair {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+	gap: 16px;
+}
+.affibloom-product__toggles {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 8px 16px;
+}
+.affibloom-product__fields {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 20px;
+	border: 2px dashed var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-card);
+}
+.affibloom-admin .affibloom-input:disabled {
+	background: var(--affibloom-subtle);
+	color: var(--affibloom-ink-600);
+	cursor: not-allowed;
+}
+.affibloom-product__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: var(--affibloom-space-section);
+}
+/* Lasso's "Delete This Link": a red text button with a bin, not a filled button. */
+.affibloom-link-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 2px;
+	border: 0;
+	background: none;
+	font: 600 14px/20px var(--affibloom-font);
+	cursor: pointer;
+}
+.affibloom-link-button--danger { color: var(--affibloom-danger-700); }
+.affibloom-link-button[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+/* Notice (design system, "Notice"): a white card with a tinted icon chip, above the cards (Lasso's notifications). */
+.affibloom-notice {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 24px;
+	padding: 14px 20px;
+	border-left: 4px solid var(--affibloom-warning-700);
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+}
+.affibloom-notice__text { margin: 0; color: var(--affibloom-ink-900); font-weight: 600; }
+.affibloom-chip--warning { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;
@@ -1344,9 +1453,6 @@
 	color: var(--affibloom-toast-tick);
 }
 .affibloom-toast__icon .affibloom-icon { width: 16px; height: 16px; stroke-width: 2.2; }
-/* Information, when nothing was done: an "i" on brand-300 (navy-900 on it 6.3:1; the circle on the ink-900 card 7.2:1) */
-.affibloom-toast--info .affibloom-toast__icon { background: var(--affibloom-brand-300); color: var(--affibloom-navy-900); }
-.affibloom-toast--info { max-width: 420px; }
 @keyframes affibloom-toast {
 	0% { opacity: 0; transform: translateY(8px); }
 	5%, 90% { opacity: 1; transform: none; }
@@ -1465,6 +1571,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-split__body { flex-direction: column; }
 	.affibloom-split__rail { order: -1; width: 100%; flex: none; border-left: 0; border-bottom: 1px solid var(--affibloom-line); }
 	.affibloom-split { min-height: 0; }
+	.affibloom-product__form { grid-template-columns: 1fr; }
 }
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
@@ -1488,6 +1595,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-tile__number { font-size: 22px; line-height: 26px; }
 	.affibloom-table th,
 	.affibloom-table td { padding-right: 16px; padding-left: 16px; }
+	.affibloom-product__pair { grid-template-columns: 1fr; }
+	.affibloom-product__card { padding: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

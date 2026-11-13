@@ -49,6 +49,7 @@ the user says otherwise.
 | `--affibloom-white` | `#FFFFFF` | cards, white button on navy |
 | `--affibloom-success-700` / `-50` | `#0B6B3A` / `#E8F7EF` | OK, saved |
 | `--affibloom-danger-700` / `-50` | `#A1203A` / `#FDECEF` | broken links, errors, `Delete This Link` |
+| `--affibloom-warning-700` / `-50` | `#8A4B00` / `#FFF4E0` | notices that need the editor's attention (Task 14A: "This product already exists."); 6.2:1 on its tint, 6.8:1 on white |
 | `--affibloom-toast-icon` | `#22C55E` | the toast's check circle (with a `#06210F` tick) |
 
 **Contrast (computed, WCAG 2.2):** white on navy-900 14.0:1, on brand-600 6.5:1, on brand-500 5.7:1; on-navy on
@@ -129,7 +130,8 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 | **Text field** | 38px tall, 1px control-line border, 10px radius; focus: brand-600 border and focus ring; error: danger-700 border and message below, linked with `aria-describedby`. |
 | **Table** | inside a card; header row on subtle with the table-header type; rows with 12px padding and `line` dividers; the name 600 with the URL below in ink-600; 40px rounded thumbnails. |
 | **Status pill** | full round, 12px/600, tint background with the status-700 text and an icon (`OK`, `Broken`). |
-| **Toast** | ink-900 card, white text, 12px radius, toast shadow, a 24px toast-icon circle with a dark tick; bottom right; `role="status"`. **Info** variant (nothing was done, e.g. a link the site already has; Task 11B): the circle in brand-300 with a navy-900 "i" (6.3:1; the circle on ink-900 7.2:1), up to 420px wide. |
+| **Toast** | ink-900 card, white text, 12px radius, toast shadow, a 24px toast-icon circle with a dark tick; bottom right; `role="status"`. (Its "info" variant went with the Dashboard's duplicate toast in Task 14A: the warning now shows on the product's page, as Lasso's does.) |
+| **Notice** | above a page's cards, as Lasso's notifications: a white card (16px radius, card shadow) with a 4px warning-700 left edge, a 40px icon chip in warning-50 / warning-700, and the message (600, ink-900); `role="status"` (Task 14A). |
 | **Modal** | 560px, 16px radius, toast shadow, backdrop `rgba(11,42,91,.45)`; header, body, footer like cards; focus trapped and returned; Escape closes. |
 | **Menu** | a white card under its button (12px radius, card shadow, 8px padding, 300px wide, at most the screen less 32px); items 8px padded with an 8px radius, a 40px icon chip, a 600 title and a 13px ink-600 description, subtle background on hover. The button has `aria-expanded` and `aria-controls`; choosing an item, Escape or a click elsewhere closes it (Task 11C). |
 | **Progress bar** | 8px track in `#E6ECF6`, full round; the fill a `brand-500` to `brand-600` gradient that widens over 300 ms; `role="progressbar"` with `aria-valuenow` (Task 11C). |

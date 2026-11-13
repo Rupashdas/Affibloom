@@ -1,14 +1,14 @@
 # F1 Product library: analysis
 
 Status: gate 2 approved with Task 6 (2026-11-12); **the product page re-run 2026-11-13** with the requirements'
-sections 2-8. Waiting for the user's gate 4 on Tasks 14A-14E.
+sections 2-8. Gate 4 given by the user 2026-11-13.
 
 **Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, 15, 16, 17.
 
 ## Depends on
 
 - ADR-001 (post type), ADR-007 (PHP-rendered screens, JavaScript where Lasso uses it), ADR-008 as amended (Aurora's
-  colours and type; the layout is the gate 4 question D1).
+  colours and type; Lasso's two-card layout, the user's gate 4 answer D1).
 - F9: new products take the site's link defaults (11E).
 - F16: the Single type's theme names the "Default (…)" option; the Display palette's button texts are the
   placeholders. F17: the tracking ID and its rule (14D's notice).

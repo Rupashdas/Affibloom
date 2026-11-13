@@ -22,15 +22,21 @@ final class AdminMenu implements Module {
 	 * Builds the menu.
 	 *
 	 * @param DashboardScreen $dashboard The Dashboard screen.
+	 * @param ProductScreen   $product   The product page (Task 14A).
 	 * @param SettingsScreen  $settings  The Settings screen.
 	 */
-	public function __construct( private DashboardScreen $dashboard, private SettingsScreen $settings ) {}
+	public function __construct(
+		private DashboardScreen $dashboard,
+		private ProductScreen $product,
+		private SettingsScreen $settings,
+	) {}
 
 	/**
 	 * Hooks into WordPress.
 	 */
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'add_pages' ) );
+		add_action( 'admin_head', array( $this, 'hide_product_page' ) );
 	}
 
 	/**
@@ -54,6 +60,19 @@ final class AdminMenu implements Module {
 			self::SLUG,
 			array( $this->dashboard, 'render' )
 		);
+		// The product page is a submenu page, so WordPress checks the capability and keeps "Affibloom" highlighted;
+		// its guard runs on the load hook, before any output, so a missing product can still be redirected.
+		$product_hook = add_submenu_page(
+			self::SLUG,
+			__( 'Product', 'affibloom' ),
+			__( 'Product', 'affibloom' ),
+			Capabilities::PRODUCTS,
+			ProductScreen::SLUG,
+			array( $this->product, 'render' )
+		);
+		if ( false !== $product_hook ) {
+			add_action( 'load-' . $product_hook, array( $this->product, 'guard' ) );
+		}
 		add_submenu_page(
 			self::SLUG,
 			__( 'Settings', 'affibloom' ),
@@ -62,5 +81,13 @@ final class AdminMenu implements Module {
 			SettingsScreen::SLUG,
 			array( $this->settings, 'render' )
 		);
+	}
+
+	/**
+	 * The product page is reached from the Dashboard, never from the menu, as Lasso's link details page. Removed
+	 * after admin_menu, so the page stays registered (reachable, capability-checked) but is not listed.
+	 */
+	public function hide_product_page(): void {
+		remove_submenu_page( self::SLUG, ProductScreen::SLUG );
 	}
 }
