@@ -3,6 +3,8 @@
 Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) re-run under the full-scope rule on
 2026-11-13** (progress deviations 24 and 57): sections 2-8 below, written from Lasso 369's source and this copy's data.
 **Gate 4 given by the user 2026-11-13** for Tasks 14A-14E, with D1 answered: Lasso's two cards in Aurora's shell.
+**Saving the page (Task 15) re-run the same way on 2026-11-13** (progress deviation 70): section 9, written from
+Lasso's save path. Waiting for gate 4 on Tasks 15A-15D.
 
 ## 1. User stories and acceptance criteria
 
@@ -10,7 +12,9 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
   text from one record.
 
 - **AC1** A link added in "Add A New Link" becomes a product and its page opens.
-- **AC2** Fields saved on the Details tab persist and show a toast. (Task 15)
+- **AC2** Fields saved on the Details tab persist and show a toast: Save Changes shows "Updating Your Site", then
+  "Product saved." (U6); after a reload the name, every button (URL, text, toggles, order), theme, image, badge,
+  price and its toggle, description, disclosure and the switches are as saved. (15A)
 - **AC3** Dashboard search finds a product by name.
 - **AC4** A product not in use can be deleted. (Task 17)
 - **AC5** A product's page shows every Details field as stored, in Lasso's order and with Lasso's labels; an empty
@@ -27,6 +31,18 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
 - **AC12** On an Amazon product's page, when the site has no tracking ID, the link's tag is offered as the site's
   tracking ID (Yes saves it by the Amazon tab's rule and shows "Tracking ID Saved!"); a link without a tag offers
   "Set Amazon Tracking ID" instead; other products show nothing. (14D, B10)
+- **AC13** An empty Name is refused with "Name and Primary Destination URL are required." under the field and nothing
+  is saved; a button URL is never refused: `B0C7654321`-style Amazon links get the site's tag, a link without a scheme
+  gets `https://`. A description or price nobody touched is stored byte for byte as it was. (15A, S2-S6)
+- **AC14** A new Primary URL is stored by the add flow's rules: an Amazon link with another ASIN is retagged, its
+  type, ASIN and country follow, and a placeholder name ("Amazon", empty) becomes the new link's starting name; a
+  new link with the same ASIN keeps the editor's name and image. (15B, S7-S8)
+- **AC15** A Primary URL another product already uses opens "This Product Already Exists" with both links;
+  Cancel saves nothing; Confirm retires this product, opens the other one's page and shows "Success! Locations now
+  show this link."; a box of the retired product shows the other one (Phase 3). (15C, S10)
+- **AC16** With unsaved edits, a click on an admin link asks "Unsaved Changes": "Leave Without Saving" leaves,
+  "Save Changes" saves and then leaves, × stays; reloading or closing the tab gets the browser's own question;
+  after a save nothing asks. (15D, B8)
 
 `tests/E2E/acceptance/F1.spec.ts` holds AC1-AC4; each task adds its own before it is built.
 
@@ -150,8 +166,10 @@ Settled by the user's earlier rules:
 - **Left out, Lasso's cloud** (deviation 52, bucket C): Commission Upgrades (Brand Deals), Refresh through Lasso's
   cloud, the bulk Amazon sync notice, opportunity "flips", "Learn About This Page" and "Learn" (Lasso's help site),
   the Marketplace label.
-- **Not built, it edits post content** (deviation 52): Lasso's "repoint" offer on save and its force delete, which
-  rewrite posts. Tasks 15 and 17 take that up in their own sweeps.
+- ~~**Not built, it edits post content** (deviation 52): Lasso's "repoint" offer on save and its force delete, which
+  rewrite posts. Tasks 15 and 17 take that up in their own sweeps.~~ **Corrected by the Task 15 sweep (section 9):**
+  the repoint offer does not touch post content (`Lasso_Repoint_Merge::merge`: "Host post_content and shortcodes are
+  not rewritten"), so it is built (15C). What does rewrite posts on save is the link scan (S9). Force delete: Task 17.
 
 ## 7. Scope that needs a home
 
@@ -175,3 +193,73 @@ Settled by the user's earlier rules:
 5. A description written by Lasso's Quill editor (`<p><span style="color: rgb(0,0,0); …">`) opens unchanged.
 6. An Amazon search page (`_affibloom_search_key`) is Amazon: no Permalink, no cloaking; its image label is "Amazon
    Image".
+
+## 9. Saving the Details tab (Task 15 sweep, 2026-11-13)
+
+**Evidence, all read:** `pages/url-details/class-ajax.php` (`save_lasso_url`, `lasso_confirm_repoint_merge`);
+`Lasso_Affiliate_Link::save_lasso_url()` (`classes/class-lasso-affiliate-link.php` 1085-1897) with
+`check_error_and_response_ajax()`, `apply_product_title_and_thumbnail_from_product_row()`,
+`is_placeholder_link_title()`, `shares_same_amazon_asin()`, the `save_scalar_*` cleaners,
+`sanitize_price_html_for_storage()`; `Lasso_Amazon_Api::get_amazon_product_url()` (1468-1585) and
+`Lasso_DB::get_lasso_id_by_product_id_and_type()`; `classes/class-lasso-repoint-merge.php` `merge()`;
+`Lasso_Process_Scan_Link` and `Lasso_Cron::scan_link_in_post()`; the page script (`url-details.php` 1290-1990:
+`get_payload_to_save_url`, the save handler, the leave guard, the baseline); modals `url-save.php`,
+`unsaved-changes.php`; notifications `save-success.php`, `save-fail.php`; `lasso-helper.js` 661-715.
+
+### What a save does, in Lasso's order
+
+| # | Rule | Lasso | Source |
+|---|---|---|---|
+| S1 | One AJAX post of the whole form (`settings[…]`, `thumbnail_id`, `permalink`); the capability is `edit_post` on that record | `lasso_save_lasso_url` | class-ajax.php 47-63 |
+| S2 | **The only refusal:** an empty Name or Primary URL → "Name and Primary Destination URL are required." Nothing else is ever refused: no length limits, no URL check | `wp_send_json_error` | 1133-1140 |
+| S3 | Name, Disclosure, theme: `sanitize_text_field`. Button texts and Badge: `<span class>` only, `<script>`/`<style>` removed (icon markup). Button URL: `esc_url_raw`. Description: `wp_kses_post`, emoji encoded, Lasso's empty `<p><br></p>` → ''. Price: `<script>`/`<style>` removed, `rgb()`/`rgba()` colours → `#hex`, then `wp_kses` with Lasso's price tags (`p b strong i em u s span br` with `style`/`class`) | `save_scalar_*`, `sanitize_price_html_for_storage` | 3020, 3627-3723 |
+| S4 | **The secondary URL** (F29 D5): trimmed; a geni.us link becomes its destination unless "Keep geni.us formatting" is on; `https://` added; then `get_amazon_product_url( $url, true, false )`: an Amazon link always gets the site's tag rule (whitelist, shorten); short `amzn.to` links and protected links are left as typed | `second_btn_url` | 1152-1160, 1468-1585 |
+| S5 | `show_description` is stored as "the description is not empty" (quick edit, which sends none, keeps both) | `show_description` | 1367-1381 |
+| S6 | An image: an attachment chosen in the media library wins (`_thumbnail_id`, and its URL becomes the image link); otherwise the typed link is stored and any attachment is detached | `thumbnail_id` | 1788-1796 |
+| S7 | **The Primary URL:** trimmed; geni.us as S4; `https://`; an Amazon link through `get_amazon_product_url( $url, true, true )` (D12); its redirects followed (`get_redirect_final_target`); `smile.amazon` → `amazon`; type, ASIN and country recomputed from the final link | `affiliate_url` | 1142-1240, 1341-1346, 1478-1582 |
+| S8 | **Same ASIN and country as the record** → updated in place: an `amzn.to` link is kept as typed, name and image untouched. **Another ASIN** (or a link that turns Amazon): the name becomes the Amazon product's when "Keep title when URL replaced" is off or the name is a placeholder (`''`, "Amazon", "Add a Link Title", "Lasso", `add-a-link-title`); the image always becomes the product's (Lasso's default picture when it has none) | `shares_same_amazon_asin`, `apply_product_title_and_thumbnail_from_product_row` | 1242-1258, 1563-1570, 1944-1955, 2197-2210, 2493-2530 |
+| S9 | **After the save, a link scan rewrites posts:** when New Window, NoFollow (either button), Sponsored, Link Cloaking, the Primary URL or the slug changed, `Lasso_Process_Scan_Link` re-parses every post that links to the record and **writes its `post_content`** (`update_post_content`) | `scan_post_page` | 1798-1812; class-lasso-cron.php 4733-4790 |
+| S10 | **The Primary URL matches another published record** (the add flow's duplicate rules) → nothing is saved; the dialog turns into "This Product Already Exists": "You already use that link on your site. **Do you want to change all Locations to that link?**", Current Link → Existing Link (name, URL, View in a new tab), Cancel / Confirm. Confirm (`lasso_confirm_repoint_merge`) re-checks (both records Lasso's, this one still active, the other published, the URL still resolving to it), moves the link locations to the other record, stores `lasso_repointed_to_lasso_id` on this one and soft-deletes it; **posts are not rewritten** ("front-end resolves via meta"); then the other record's page opens with "Success! Locations now show this link." | `repoint_offer` | 1261-1303; class-lasso-repoint-merge.php 115-205; url-details.php 1354-1405, 2601-2608 |
+| S11 | The matching record is **not published** (soft-deleted): Lasso publishes it again and answers "This link is already exists. Please try again with a different URL." with that record's data, which the page then writes into this record's fields | | 1261-1290; url-details.php 1856-1880 |
+| S12 | A save re-checks the link's status when the URL changed or the record was last saved over an hour ago, and files a link issue; a failure answers "Saved but could not resolve the URL." | `check_issues` | 1305-1335, 1830-1842 |
+| S13 | Also on save: `lasso_final_url`, the domain and the opportunity flag in `url_details`; the history record (`Link_Updates`); the slug and its conflict warning ("Permalink … is being used by …"); Groups and their order; link locations' URL; the default image from Lasso's affiliate-program logos; "extend product" data for other marketplaces | | 1337-1351, 1583-1694, 1699-1828 |
+| S14 | **The page:** "Updating Your Site" with a moving bar and "Just saving your URL changes" ("Saving your changes." when only New Window or NoFollow changed; the other texts belong to keywords, left out by deviation 52); it closes 1 s after the answer. Then "**Yee haw!** Your link saved." or "**Try again.** For some reason your link didn't save." (or the server's message); a warning shows as an orange bar | | url-save.php; url-details.php 1311-1341, 1810-1990; save-success.php, save-fail.php |
+| S15 | **After a good save** the page writes back what was stored: heading, Name, Primary URL, Permalink, image, the public link, the second button's URL, the price; the baseline for unsaved changes is taken again | | url-details.php 1880-1944 |
+| S16 | **Unsaved changes** (B8): a snapshot of every field, switch and the description on load, after a preview refresh and after a save; a click on a link (not `#…`, `javascript:`, `_blank`, or inside the save, delete and unsaved dialogs) with changes opens "Unsaved Changes": "Leave Without Saving" goes, "Save Changes" saves and then goes, × stays; otherwise `beforeunload` asks, except while saving | | url-details.php 1420-1460, 1640-1720; unsaved-changes.php |
+
+### Decisions (Claude, from Lasso and the records; none drops anything Lasso does or reverses a user decision)
+
+- **D10 Success wording is "Product saved."** (U6, approved 2026-11-12). The failure keeps Lasso's words with
+  Affibloom's noun: "Try again. For some reason your product didn't save."
+- **D11 Refusals show under their field** (Aurora's field error) with Lasso's one sentence (S2), and the page also
+  shows the failure toast. Lasso shows a red bar; the words and the rule are Lasso's.
+- **D12 The site's tag rule applies on every save.** Lasso tags a *new* ASIN pasted on the page only on the second
+  save: its first pass returns the link as typed when no record has that ASIN yet
+  (`get_lasso_id_by_product_id_and_type`); the second save stores the tagged form. Affibloom stores that
+  second-save result at once, which is also the overview's rule ("every Amazon product link carries exactly one tag,
+  the site's").
+- **D13 Nothing Affibloom saves rewrites posts (S9)**, the user's rule (deviation 52). What the scan achieves, posts'
+  links following the product's attributes, comes from rendering instead: boxes are drawn from the product (Phase 3),
+  and text links in posts belong to the content link index (area 1, F21), which takes "a product's New Window,
+  NoFollow and Sponsored reach its text links at render time" into its gates.
+- **D14 The repoint offer is built (S10, 15C).** It edits no post. Affibloom stores `_affibloom_repointed_to` on the
+  retired product and moves it to the trash (Task 17's delete is the same move); everything that draws a product by
+  its ID follows the pointer: the box (Task 18), `[lasso]` (Task 27), Locations (Tasks 35-36, which also move the
+  index rows as Lasso moves its location rows).
+- **D15 A matching product in the trash (S11) belongs to Task 17**, which creates trashed products; until then none
+  exists. Lasso's writing of the other record's data into this record's fields is not copied (a later save would store
+  another product's values here); Task 17's sweep takes the restore-and-refuse rule for both add and save.
+- **D16 Owned elsewhere (S12, S13):** the status re-check → link health (F11, Task 32 adds it to the save); the
+  history record → the history area; the slug, its warning and Link Cloaking → area 7; Groups → the Groups area;
+  the opportunity flag → area 3; link locations → area 2. Left out by the cloud rule (deviation 52): the
+  affiliate-program logo and "extend product" data. Lasso's own Amazon product table is C1's.
+- **D17 Without Amazon data (C1 dormant), S8's "the product's name and image"** are what Affibloom has on adding:
+  the starting name (decision 11) and no image (the box's default picture). With C1 they come from the API.
+- **D18 After a save that changes the type** (Amazon ↔ other), the page reloads with the toast, because the
+  Amazon-only rows (Permalink, image label, price, cloaking, Prime) differ; Lasso swaps them on leaving the field,
+  which is the preview's job (14E).
+- **D19 What is sent:** every field except Permalink, Groups, Detect Opportunities and Link Cloaking (placeholders,
+  D4) and the custom fields (D3, their own routes). The description and the price are sent only when edited (14B:
+  TinyMCE normalises some stored markup on opening); an Amazon product's read-only price never is.
+- **D20 `show_description` is not stored:** it is "the description is not empty" on every page save (S5), so the box
+  reads that. Task 26 maps a Lasso record whose `show_description` is 0 to an empty description.

@@ -1,9 +1,10 @@
 # F1 Product library: analysis
 
 Status: gate 2 approved with Task 6 (2026-11-12); **the product page re-run 2026-11-13** with the requirements'
-sections 2-8. Gate 4 given by the user 2026-11-13.
+sections 2-8. Gate 4 given by the user 2026-11-13. **Saving re-run 2026-11-13** with requirements section 9
+(section "Saving" below); waiting for gate 4.
 
-**Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, 15, 16, 17.
+**Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, **15A-15D**, 16, 17.
 
 ## Depends on
 
@@ -58,6 +59,61 @@ POST admin-post.php?action=affibloom_tracking_id { tracking_id }  → the Amazon
 ```
 
 The Details form itself is saved by `PATCH /products/{id}` in Task 15.
+
+## Saving (Task 15, requirements section 9)
+
+```
+[Save Changes] or Enter in a field                                                        (15A)
+  → product-save.js: snapshot of the form (D19: description and price only when edited)
+       "Updating Your Site" dialog (S14) → wp.apiFetch PATCH /affibloom/v1/products/{id}
+  → ProductsController::update()        Capabilities::PRODUCTS; id absint; only known fields kept
+  → ProductService::update( id, input )
+       ProductRepository::get( id )     → ProductNotFound → 404 affibloom_not_found
+       ProductInput::changes( input )   → ValidationFailed { name: required } → 422 data.fields (S2, D11)
+            texts S3; buttons[] and primary_position; button URLs → LinkNormaliser::button() (S4)
+       ProductRepository::save( product->with( changes ) )   updates the post (ID set) and every meta key
+  ← 200 { data: ProductResource::full( product ) } → the page writes back (S15), "Product saved." (D10)
+
+  url sent and changed                                                                    (15B)
+       ProductInput → LinkNormaliser::primary( url )   the add flow's steps (11B, 11D, 12A-12E), D12
+       same ASIN + country → in place (S8); otherwise type/ASIN/country/search key from the new link,
+       name by keep_title_when_url_replaced and the placeholder list, image cleared (S8, D17)
+       the type changed → the response says reload: true (D18)
+
+  the new link belongs to another published product                                       (15C)
+       ProductService::update → DuplicateLink { other }  → 409 affibloom_duplicate { from, to } , nothing saved
+  → the dialog's "This Product Already Exists" panel → Confirm
+  → POST /affibloom/v1/products/{id}/repoint { to, url }
+  → ProductService::repoint( id, to, url )   Lasso's four checks (S10) → 422 with Lasso's message
+       ProductRepository::retire( from, to ): _affibloom_repointed_to = to, post to the trash
+  ← 200 { redirect_to: ProductScreen::url( to ) + repoint_merged=1 } → "Success! Locations now show this link."
+
+  leaving with changes                                                                    (15D)
+  → product-save.js: snapshot ≠ baseline → "Unsaved Changes" dialog, or beforeunload (S16)
+```
+
+**Layers.** Application: `ProductInput` (the field rules; Task 26 is its second caller), `LinkNormaliser` (S4 and
+S7, extracted from `ProductService::create_from_url()` on its second use), `ValidationFailed`, `ProductNotFound`,
+`DuplicateLink`, `ProductService::update()` and `repoint()`. Domain: `PriceHtml` (S3's colour rule, pure PHP) and
+`PlaceholderName` (S8's list). Infrastructure: `save()` updates when the product has an ID, writes every field and
+deletes the Amazon keys when the type is no longer Amazon (Lasso's `delete_post_meta( 'amazon_product_id' )`);
+`retire()`. Interface: the PATCH and repoint routes, `ProductResource::full()`, `Messages` for the reasons,
+`templates/admin/partials/{save-modal,unsaved-modal}.php`, `assets/admin/product-save.js` with the JS twin of the
+toast.
+
+**Data written** (Lasso's keys in brackets): post title (`post_title`), `_affibloom_url`, `_url_key`, `_type`,
+`_asin`, `_amazon_country`, `_search_key`, `_button_text` (`buy_btn_text`), `_new_tab`, `_nofollow`, `_buttons` and
+`_primary_position` (`second_btn_*`, F29), `_theme` (`custom_theme`), `_image_url` (`lasso_custom_thumbnail`),
+`_image_id` (`_thumbnail_id`), `_badge`, `_price`, `_show_price` (`''` = the site's), `_description`
+(`affiliate_desc`), `_disclosure` (`disclosure_text`), `_sponsored`, `_show_disclosure`, `_prime`; new in 15C:
+`_affibloom_repointed_to` (`lasso_repointed_to_lasso_id`). The post's modified date moves, so the Dashboard's order
+(F19) puts a saved product first, as Lasso's.
+
+**Risks.** A form with many buttons is one request: `buttons` is an array of at most the buttons on the page (no
+limit, as F29). A save racing a custom-field save (D3) touches other meta keys only. TinyMCE's "only when edited"
+uses `isDirty()` with a comparison against the loaded content as a fallback (14B's check of the five longest live
+descriptions). The repoint pointer is read by code that does not exist yet (Tasks 18, 27, 35); their phase files get
+the rule written in now.
 
 ## Layers
 
