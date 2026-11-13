@@ -44,6 +44,11 @@ final class AdminAssets implements Module {
 		// Help tips, Save-when-changed, modals and "Add A New Link". wp-api-fetch carries the REST root and nonce in wp-admin.
 		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
 
+		// The Dashboard's own script: selection (Task 13C), the list without reloads (13D), filters and views (13E).
+		if ( 'toplevel_page_' . AdminMenu::SLUG === $hook_suffix ) {
+			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'wp-api-fetch' ), $this->version, true );
+		}
+
 		// Each settings tab's own controls.
 		$tab     = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to load only.
 		$scripts = array(

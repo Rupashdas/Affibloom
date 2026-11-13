@@ -31,6 +31,8 @@ final class Product {
 	 * @param string       $asin            Amazon's product ID, as written in the link; '' for other links.
 	 * @param string       $amazon_country  The Amazon store's country code ("us", "gb", …); '' for other links.
 	 * @param string       $search_key      An Amazon search page's "<host>|<keywords>" (AmazonUrl::search_key()), or ''.
+	 * @param string       $image_url       The product's image, as a URL; '' when it has none. Read by the Dashboard's
+	 *                                      Image column (Task 13C); edited on the product page (Task 14).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -44,6 +46,7 @@ final class Product {
 		public readonly string $asin = '',
 		public readonly string $amazon_country = '',
 		public readonly string $search_key = '',
+		public readonly string $image_url = '',
 	) {}
 
 	/**

@@ -144,6 +144,30 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( rows( page ).first() ).toBeVisible();
 	} );
 
+	test( 'AC11 the table has every Lasso column, in Lasso order', async ( { page } ) => {
+		const image = 'https://m.media-amazon.com/images/I/313iww6kxdL._SL500_.jpg';
+		const id = createProduct( { name: unique( 'F19 AC11' ), image_url: image } );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10' );
+
+		const headers = page.locator( '.affibloom-table thead th' );
+		await expect( headers ).toHaveCount( 8 );
+		await expect( headers.nth( 0 ).getByRole( 'checkbox', { name: 'Select all on this page' } ) ).toBeVisible();
+		const names = [ 'Image', 'Link Name', 'Groups', 'Alert', 'Locations', 'Clicks', 'Actions' ];
+		for ( const [ i, name ] of names.entries() ) {
+			await expect( headers.nth( i + 1 ) ).toContainText( name );
+		}
+
+		const row = page.locator( `tr[data-product-id="${ id }"]` );
+		await expect( row.locator( 'img' ) ).toHaveAttribute( 'src', image );
+		await expect( row.getByRole( 'button', { name: 'Edit' } ) ).toBeDisabled();
+		await expect( row.getByRole( 'button', { name: 'Shortcode' } ) ).toBeDisabled();
+
+		// Lasso's selection bar appears with the first tick.
+		await row.getByRole( 'checkbox' ).check();
+		await expect( page.locator( '.affibloom-selection' ) ).toContainText( '1 selected' );
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )

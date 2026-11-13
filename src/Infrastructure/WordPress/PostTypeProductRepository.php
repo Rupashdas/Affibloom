@@ -324,6 +324,7 @@ final class PostTypeProductRepository implements ProductRepository {
 			$meta( 'asin' ),
 			$meta( 'amazon_country' ),
 			$meta( 'search_key' ),
+			$meta( 'image_url' ),
 		);
 	}
 

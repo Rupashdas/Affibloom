@@ -205,6 +205,30 @@
 	line-height: 20px;
 }
 
+/* A band with something on its right, as the Dashboard's search beside its title (Lasso's title row). */
+.affibloom-band__inner--split {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px 32px;
+}
+.affibloom-band__text { min-width: 0; }
+.affibloom-band__search { flex: 0 1 380px; min-width: 240px; }
+/* On the gradient the search is a white field with no border, as the header's white button is. */
+.affibloom-admin .affibloom-band__search .affibloom-search {
+	max-width: none;
+	height: 42px;
+	min-height: 42px;
+	border-color: transparent;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+}
+.affibloom-admin .affibloom-band__search .affibloom-search:focus {
+	border-color: var(--affibloom-white);
+	outline: 2px solid var(--affibloom-white);
+	outline-offset: 2px;
+}
+
 /* Section tabs: a segmented control on the band */
 .affibloom-tabs {
 	display: inline-flex;
@@ -830,44 +854,83 @@
 .affibloom-help.is-open .affibloom-help__text { position: fixed; bottom: auto; }
 
 /*
- * 7d. The Dashboard list (Task 13A): the overview tiles (U9), the products table inside its card, and the pager
- * in the card's footer. The arrangement is Lasso's (the user's gate 4 answer for F19, 2026-11-13); the colours,
- * type and shapes are Aurora's (docs/ui/design-system.md, "Table", "Overview tile").
+ * 7d. The Dashboard (Tasks 13A-13C): the overview tiles (U9), the toolbar, Lasso's selection bar, and the products
+ * table inside its card with the pager in the card's footer. The arrangement is Lasso's (the user's gate 4 answer
+ * for F19, 2026-11-13); the colours, type and shapes are Aurora's (docs/ui/design-system.md, "Table", "Overview
+ * tile", "Small button").
  */
 .affibloom-tiles {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-	gap: 20px;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
 	margin-bottom: 20px;
 }
 .affibloom-tile {
 	display: grid;
 	grid-template-columns: auto 1fr;
-	grid-template-rows: auto auto;
+	grid-template-rows: auto auto auto;
+	align-content: center;
 	align-items: center;
-	gap: 0 14px;
-	padding: 18px 20px;
+	gap: 0 12px;
+	min-width: 0;
+	padding: 16px 18px;
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
 }
-.affibloom-tile .affibloom-chip { grid-row: 1 / span 2; }
+.affibloom-tile .affibloom-chip { grid-row: 1 / span 3; }
 .affibloom-tile__number { color: var(--affibloom-ink-900); font: 700 26px/30px var(--affibloom-font); }
-.affibloom-tile__label { color: var(--affibloom-ink-600); font-size: 13px; }
+.affibloom-tile__label { overflow: hidden; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-tile__note { color: var(--affibloom-brand-600); font-size: 11px; font-weight: 600; line-height: 16px; }
+/* A tile whose number comes later: the chip and the dash step back, the label stays readable. */
+.affibloom-tile--soon .affibloom-chip { background: var(--affibloom-subtle); color: var(--affibloom-ink-400); }
+.affibloom-tile--soon .affibloom-tile__number { color: var(--affibloom-ink-400); }
 
-/* The search, on its own row above the table, as Lasso has it above its list (Task 13B). */
-.affibloom-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.affibloom-admin .affibloom-search { max-width: 360px; border-radius: var(--affibloom-radius-full); padding-left: 16px; }
+/*
+ * The toolbar under the tiles: the selection bar (or, with Task 13E, Lasso's saved-view bar) on the left and the
+ * Filters button on the right. It keeps a height of its own, so the selection bar appearing moves nothing.
+ */
+.affibloom-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 40px; margin-bottom: 12px; }
+.affibloom-admin .affibloom-search { border-radius: var(--affibloom-radius-full); padding-left: 16px; }
+
+/*
+ * Lasso's selection bar, shown with the first ticked row. It sits in the toolbar's left side, in the row the search
+ * already gives a height to, so appearing does not move the table under the pointer.
+ */
+.affibloom-selection {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin-right: auto;
+	padding: 3px 4px 3px 14px;
+	border: 1px solid var(--affibloom-brand-300);
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-brand-50);
+}
+.affibloom-selection[hidden] { display: none; }
+.affibloom-selection__count { margin-right: 6px; color: var(--affibloom-ink-900); font-size: 14px; }
+.affibloom-selection .affibloom-button--small { border-radius: var(--affibloom-radius-full); }
 
 .affibloom-card--table { overflow: hidden; }
 /*
- * Fixed layout so a long destination link is cut with an ellipsis instead of widening the table past the
- * screen, as Lasso's row does with its title attribute. The columns Tasks 14, 31, 34 and 36 add take their
- * widths here, as Lasso's grid gives them.
+ * Below the width where eight columns fit, the table scrolls inside its card; the page itself never does. It is
+ * positioned so the cells' screen-reader text (position: absolute in wp-admin) stays inside it: without that the
+ * hidden "Coming soon" spans escaped the scrolling box and widened the whole page on a phone.
  */
-.affibloom-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.affibloom-table-scroll { position: relative; overflow-x: auto; }
+/*
+ * Fixed layout so a long destination link is cut with an ellipsis instead of widening the table, as Lasso's row
+ * does with its title attribute. The widths follow Lasso's grid (1 / 4 / 2 / 1 / 1 / 1 / 2 of 12), with a
+ * column of its own for the select box, and the Link Name takes what is left.
+ */
+/* Widths include the padding (border-box), so they add up: the fixed columns take 668px and the name keeps
+   at least 240px before the table starts to scroll. */
+.affibloom-table { width: 100%; min-width: 908px; table-layout: fixed; border-collapse: collapse; }
+.affibloom-table th,
+.affibloom-table td { box-sizing: border-box; }
 .affibloom-admin .affibloom-table th {
-	padding: 12px 24px;
+	padding: 12px 16px;
 	border-bottom: 1px solid var(--affibloom-line);
 	background: var(--affibloom-subtle);
 	color: var(--affibloom-ink-600);
@@ -875,14 +938,75 @@
 	text-align: left;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
+	white-space: nowrap;
 }
 .affibloom-table td {
-	padding: 12px 24px;
+	padding: 12px 16px;
 	border-bottom: 1px solid var(--affibloom-line);
 	vertical-align: middle;
 }
 .affibloom-table tbody tr:last-child td { border-bottom: 0; }
-.affibloom-table tbody tr:hover { background: var(--affibloom-brand-50); }
+/* Hover is a hint, selection a state: they must not look alike. */
+.affibloom-table tbody tr:hover { background: var(--affibloom-subtle); }
+.affibloom-table tbody tr.is-selected { background: var(--affibloom-brand-50); }
+/* A header's label, with its "Soon" chip stacked under it so narrow columns stay readable. */
+.affibloom-th { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; vertical-align: middle; }
+.affibloom-admin .affibloom-table th { vertical-align: middle; }
+
+.affibloom-table .affibloom-col-select { width: 44px; padding-right: 0; }
+.affibloom-table .affibloom-col-image { width: 64px; padding-right: 8px; padding-left: 8px; text-align: center; }
+.affibloom-table .affibloom-col-groups { width: 120px; }
+.affibloom-table .affibloom-col-alert { width: 72px; padding-right: 8px; padding-left: 8px; text-align: center; }
+.affibloom-table .affibloom-col-locations { width: 96px; padding-right: 8px; padding-left: 8px; text-align: center; }
+.affibloom-table .affibloom-col-clicks { width: 72px; padding-right: 8px; padding-left: 8px; text-align: center; }
+.affibloom-table .affibloom-col-actions { width: 200px; padding-right: 12px; padding-left: 8px; text-align: center; }
+.affibloom-table th.affibloom-col-alert .affibloom-th,
+.affibloom-table th.affibloom-col-locations .affibloom-th,
+.affibloom-table th.affibloom-col-clicks .affibloom-th,
+.affibloom-table th.affibloom-col-image .affibloom-th,
+.affibloom-table th.affibloom-col-actions .affibloom-th { align-items: center; }
+
+/*
+ * The select box. wp-admin's forms.css removes the native box (appearance: none) and draws a white tick in
+ * ::before, expecting a coloured fill that it does not give here: a ticked box looked empty. So the box is drawn
+ * in full: brand-600 fill when ticked, wp-admin's tick on it, a bar when part of the page is selected.
+ */
+.affibloom-admin .affibloom-check {
+	display: inline-grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 16px;
+	min-width: 16px;
+	height: 16px;
+	margin: 0;
+	border: 1px solid var(--affibloom-ink-400);
+	border-radius: 4px;
+	background: var(--affibloom-white);
+	box-shadow: none;
+	vertical-align: middle;
+	cursor: pointer;
+}
+.affibloom-admin .affibloom-check:checked,
+.affibloom-admin .affibloom-check:indeterminate { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-check:checked::before { width: 16px; height: 16px; margin: 0; }
+.affibloom-admin .affibloom-check:indeterminate::before { content: ""; width: 8px; height: 2px; margin: 0; border-radius: 1px; background: var(--affibloom-white); }
+.affibloom-admin .affibloom-check:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+
+/* The product's image, 40px and rounded (design system, "Table"); a quiet tile when there is none. */
+.affibloom-thumb {
+	display: inline-grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 40px;
+	height: 40px;
+	border: 1px solid var(--affibloom-line);
+	border-radius: 8px;
+	background: var(--affibloom-white);
+	object-fit: contain;
+	vertical-align: middle;
+}
+.affibloom-thumb--none { background: var(--affibloom-subtle); color: var(--affibloom-ink-400); }
+
 .affibloom-row__name {
 	display: block;
 	overflow: hidden;
@@ -903,6 +1027,20 @@
 	white-space: nowrap;
 }
 .affibloom-admin .affibloom-row__url:hover { color: var(--affibloom-brand-600); text-decoration: underline; }
+.affibloom-row__actions { display: inline-flex; gap: 6px; }
+
+/* Placeholders (Task 13C): a "Soon" chip by a column's name, a muted dash in its cells. */
+.affibloom-soon {
+	display: inline-block;
+	padding: 1px 6px;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-brand-50);
+	color: var(--affibloom-brand-600);
+	font: 600 10px/14px var(--affibloom-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+.affibloom-soon-cell { color: var(--affibloom-ink-400); font-size: 14px; cursor: default; }
 
 /* Pager: the card's footer, the size and range left, the page links right (Lasso's lasso-dashboard-pager). */
 .affibloom-pager {
@@ -992,6 +1130,9 @@
 	color: var(--affibloom-ink-900);
 }
 .affibloom-button--secondary:hover { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+/* Small button (design system): 32px, for table rows and bars. */
+.affibloom-button--small { height: 32px; padding: 0 12px; border-radius: var(--affibloom-radius-nav); font-size: 13px; }
+.affibloom-button--small .affibloom-icon { width: 16px; height: 16px; }
 
 .affibloom-button:disabled,
 .affibloom-button[aria-disabled="true"] {
@@ -1163,6 +1304,11 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-grid { grid-template-columns: 1fr; }
 	.affibloom-modal__foot .affibloom-button { width: 100%; }
 	.affibloom-pager { flex-direction: column; align-items: flex-start; }
+	/* Two tiles a row on a phone, so the five do not fill the first screen on their own. */
+	.affibloom-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+	.affibloom-tile { padding: 12px 14px; }
+	.affibloom-tile .affibloom-chip { width: 32px; height: 32px; }
+	.affibloom-tile__number { font-size: 22px; line-height: 26px; }
 	.affibloom-table th,
 	.affibloom-table td { padding-right: 16px; padding-left: 16px; }
 }
