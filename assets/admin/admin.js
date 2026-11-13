@@ -399,6 +399,7 @@
 			if ( ! window.confirm( text( 'confirm-bulk' ) ) ) {
 				return;
 			}
+			showPreview();
 			busy( true );
 			edit.hidden = true;
 			progress.hidden = false;
@@ -440,6 +441,13 @@
 		lines.addEventListener( 'blur', function () {
 			if ( bulk && ! lines.disabled && '' !== lines.value.trim() ) {
 				showPreview();
+			}
+		} );
+		// Pressing Add Link would blur the textarea, whose preview is shorter, so the button would move away before the
+		// click lands. Keeping the focus until the click submits it (Lasso's mousedown workaround; deviation 77).
+		submit.addEventListener( 'mousedown', function ( event ) {
+			if ( document.activeElement === lines ) {
+				event.preventDefault();
 			}
 		} );
 		edit.addEventListener( 'click', function () {

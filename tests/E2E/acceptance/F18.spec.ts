@@ -130,6 +130,15 @@ test.describe( 'F18 Adding links', () => {
 		await expect( box ).toHaveValue( `${ first }\n${ second }\n${ third }` );
 		await expect( dialogOf( page ).getByText( 'Remaining links: 7' ) ).toBeVisible();
 		await expect( dialogOf( page ).getByRole( 'heading', { name: 'Bulk Add Links' } ) ).toBeVisible();
+
+		// One click on Add Link straight from the textarea reaches the confirm (deviation 77); cancelling adds nothing.
+		let asked = '';
+		page.once( 'dialog', ( confirm ) => {
+			asked = confirm.message();
+			return confirm.dismiss();
+		} );
+		await dialogOf( page ).getByRole( 'button', { name: 'Add Link' } ).click();
+		await expect.poll( () => asked ).toContain( 'Add these links in the background?' );
 	} );
 
 	test( 'AC7 AC8 ten links are added in the background with a progress bar; an eleventh is ignored', async ( { page } ) => {
