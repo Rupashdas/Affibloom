@@ -1,7 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, createProduct, unique, wp } from '../utils';
+import { blockTrackers, createProduct, setSettings, unique, wp } from '../utils';
 
-// F18 Adding links (docs/features/F18/requirements.md). Task 11A: the single-link modal; 11B: repair and duplicates.
+// F18 Adding links (docs/features/F18/requirements.md). Task 11A: the single-link modal; 11B: repair and duplicates;
+// 11C: bulk add; 11D: naming; 11E: the site's link defaults.
 test.describe( 'F18 Adding links', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
@@ -138,6 +139,42 @@ test.describe( 'F18 Adding links', () => {
 		await expect( box ).toHaveAttribute( 'placeholder', 'Your bulk add is still processing. Try again in a few minutes.' );
 		await expect( dialog.getByRole( 'button', { name: 'Reload' } ) ).toBeVisible();
 		await expect( dialog.getByRole( 'button', { name: 'Add Link' } ) ).toBeHidden();
+	} );
+
+	test( 'AC10 a new product takes the site\'s link defaults as they are when it is added', async ( { page } ) => {
+		const stored = ( () => {
+			try {
+				return wp( 'option', 'get', 'affibloom_settings', '--format=json' );
+			} catch {
+				return '';
+			}
+		} )();
+		const link = `https://www.example.com/${ unique( 'f18-ac10' ) }`;
+		const meta = ( id: string, key: string ) => wp( 'post', 'meta', 'get', id, `_affibloom_${ key }` );
+
+		try {
+			setSettings( { nofollow: false, sponsored: true } );
+			const dialog = await openAdd( page );
+			await dialog.getByLabel( 'URL' ).fill( link );
+			await dialog.getByLabel( 'URL' ).press( 'Enter' );
+			await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
+
+			const [ id ] = productsWithLink( link );
+			expect( meta( id, 'nofollow' ) ).toBe( '0' );
+			expect( meta( id, 'sponsored' ) ).toBe( '1' );
+			expect( meta( id, 'new_tab' ) ).toBe( '1' );
+			expect( meta( id, 'show_disclosure' ) ).toBe( '1' );
+
+			// A later change of the site default does not reach a product that exists.
+			setSettings( { nofollow: true } );
+			expect( meta( id, 'nofollow' ) ).toBe( '0' );
+		} finally {
+			if ( stored ) {
+				wp( 'option', 'update', 'affibloom_settings', stored, '--format=json' );
+			} else {
+				wp( 'option', 'delete', 'affibloom_settings' );
+			}
+		}
 	} );
 
 	test( 'AC5 an empty box is refused in the modal and nothing is sent', async ( { page } ) => {

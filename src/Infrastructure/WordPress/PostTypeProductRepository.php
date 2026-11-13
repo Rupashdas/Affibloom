@@ -33,9 +33,13 @@ final class PostTypeProductRepository implements ProductRepository {
 			'post_status' => 'publish',
 			'post_title'  => $product->name,
 			'meta_input'  => array(
-				'_affibloom_url'     => $product->url->value(),
-				'_affibloom_url_key' => $product->url->key(),
-				'_affibloom_type'    => $product->type->value,
+				'_affibloom_url'             => $product->url->value(),
+				'_affibloom_url_key'         => $product->url->key(),
+				'_affibloom_type'            => $product->type->value,
+				'_affibloom_new_tab'         => self::flag( $product->new_tab ),
+				'_affibloom_nofollow'        => self::flag( $product->nofollow ),
+				'_affibloom_sponsored'       => self::flag( $product->sponsored ),
+				'_affibloom_show_disclosure' => self::flag( $product->show_disclosure ),
 			),
 		);
 
@@ -77,11 +81,27 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param WP_Post $post A product post.
 	 */
 	private function hydrate( WP_Post $post ): Product {
+		$meta = static fn( string $key ): string => (string) get_post_meta( $post->ID, '_affibloom_' . $key, true );
+
+		// A flag is on only when stored as "1", as Lasso reads its own (1 === intval( get_post_meta( … ) )).
 		return new Product(
 			$post->ID,
 			$post->post_title,
-			AffiliateUrl::from_string( (string) get_post_meta( $post->ID, '_affibloom_url', true ) ),
-			ProductType::tryFrom( (string) get_post_meta( $post->ID, '_affibloom_type', true ) ) ?? ProductType::Other
+			AffiliateUrl::from_string( $meta( 'url' ) ),
+			ProductType::tryFrom( $meta( 'type' ) ) ?? ProductType::Other,
+			'1' === $meta( 'new_tab' ),
+			'1' === $meta( 'nofollow' ),
+			'1' === $meta( 'sponsored' ),
+			'1' === $meta( 'show_disclosure' ),
 		);
+	}
+
+	/**
+	 * A flag as stored: "1" or "0" (docs/spec/interface.md, section 4).
+	 *
+	 * @param bool $on The flag.
+	 */
+	private static function flag( bool $on ): string {
+		return $on ? '1' : '0';
 	}
 }

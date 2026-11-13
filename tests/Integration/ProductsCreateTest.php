@@ -30,6 +30,19 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertStringContainsString( 'affibloom_notice=link-added', $data['redirect_to'] );
 	}
 
+	public function test_a_new_product_takes_the_sites_link_defaults_at_that_moment(): void {
+		update_option( 'affibloom_settings', array( 'nofollow' => false, 'sponsored' => true ) );
+		$id = $this->post( 'https://www.example.com/defaults' )->get_data()['data']['id'];
+
+		self::assertSame( '0', get_post_meta( $id, '_affibloom_nofollow', true ) );
+		self::assertSame( '1', get_post_meta( $id, '_affibloom_sponsored', true ) );
+		self::assertSame( '1', get_post_meta( $id, '_affibloom_new_tab', true ) );
+		self::assertSame( '1', get_post_meta( $id, '_affibloom_show_disclosure', true ) );
+
+		update_option( 'affibloom_settings', array( 'nofollow' => true ) );
+		self::assertSame( '0', get_post_meta( $id, '_affibloom_nofollow', true ) );
+	}
+
 	public function test_a_bare_domain_is_stored_with_https(): void {
 		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
 	}

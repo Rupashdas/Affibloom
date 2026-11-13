@@ -47,6 +47,15 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( 'Knee Pads', $this->service()->create_from_url( 'https://shop.example/pads' )->product->name );
 	}
 
+	public function test_a_new_product_takes_the_stored_link_defaults(): void {
+		$added = $this->service( array( 'nofollow' => false, 'sponsored' => true ) )->create_from_url( 'https://www.example.com/d' );
+
+		self::assertFalse( $added->product->nofollow );
+		self::assertTrue( $added->product->sponsored );
+		self::assertTrue( $added->product->new_tab );
+		self::assertTrue( $added->product->show_disclosure );
+	}
+
 	public function test_a_link_it_already_has_returns_that_product_without_a_request(): void {
 		$service = $this->service();
 		$service->create_from_url( 'https://www.example.com/a' );

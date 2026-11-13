@@ -26,7 +26,7 @@ final class ProductService {
 	 *
 	 * @param ProductRepository  $products Product storage.
 	 * @param LinkResolver       $links    Where a new link leads and what to call it.
-	 * @param SettingsRepository $settings Site settings (keep_genius_formatting).
+	 * @param SettingsRepository $settings Site settings (keep_genius_formatting and the link defaults).
 	 */
 	public function __construct(
 		private ProductRepository $products,
@@ -40,7 +40,8 @@ final class ProductService {
 	 *   check_duplicate_link on, its default and the live value), before any request is made;
 	 * - otherwise the link is resolved and the product named as Lasso names it (Task 11D);
 	 * - with keep_genius_formatting off, a geni.us link is stored as its destination, which is then checked for a
-	 *   duplicate too.
+	 *   duplicate too;
+	 * - a new product takes the site's link defaults as they are now (Task 11E).
 	 *
 	 * @param string $input What was pasted.
 	 * @throws InvalidField      When the input is empty or not a link.
@@ -55,8 +56,9 @@ final class ProductService {
 		}
 
 		$resolved = $this->links->resolve( $url );
+		$settings = $this->settings->get();
 
-		if ( $url->is_geni_us() && $resolved->url !== $url->value() && ! $this->settings->get()->bool( 'keep_genius_formatting' ) ) {
+		if ( $url->is_geni_us() && $resolved->url !== $url->value() && ! $settings->bool( 'keep_genius_formatting' ) ) {
 			$url      = AffiliateUrl::from_string( $resolved->url );
 			$existing = $this->products->find_by_url_key( $url->key() );
 			if ( null !== $existing ) {
@@ -64,6 +66,6 @@ final class ProductService {
 			}
 		}
 
-		return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url ) ), false );
+		return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
 	}
 }
