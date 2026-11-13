@@ -10,7 +10,8 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 /**
- * The toast message after a redirect (?affibloom_notice=…). Shared by the Settings tabs and the Display screen.
+ * The toast message after a redirect (?affibloom_notice=…). Shared by the Settings tabs, the Display screen, the
+ * product page and the Dashboard.
  */
 final class Notice {
 
@@ -35,6 +36,8 @@ final class Notice {
 			'product-saved'    => __( 'Product saved.', 'affibloom' ),
 			// After "This Product Already Exists" → Confirm, on the kept product's page (Lasso's words, url-details.php 2602).
 			'repointed'        => __( 'Success! Locations now show this link.', 'affibloom' ),
+			// On the Dashboard after Delete This Link (Task 17A, F1 D37); Lasso's redirect says nothing.
+			'deleted'          => __( 'Product deleted.', 'affibloom' ),
 			default        => '',
 		};
 	}

@@ -28,12 +28,14 @@ final class DashboardScreen {
 	 * @param ProductService   $products The product library.
 	 * @param PerPage          $per_page How many products this editor sees at a time.
 	 * @param SavedViewService $views    This editor's saved views (Task 13E).
+	 * @param Notice           $notice   The toast after a redirect: "Product deleted." (Task 17A).
 	 */
 	public function __construct(
 		private Template $template,
 		private ProductService $products,
 		private PerPage $per_page,
 		private SavedViewService $views,
+		private Notice $notice,
 	) {}
 
 	/**
@@ -60,6 +62,7 @@ final class DashboardScreen {
 				'views'     => $this->views->list( get_current_user_id() ),
 				'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
 				'library'   => $this->products->count(),
+				'notice'    => $this->notice->message(),
 			)
 		);
 	}

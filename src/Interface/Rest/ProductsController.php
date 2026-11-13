@@ -22,6 +22,7 @@ use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Messages;
 use Affibloom\Module;
+use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -73,6 +74,7 @@ final class ProductsController implements Module {
 		);
 
 		// Save Changes on the product page (Task 15A). Only the fields sent change.
+		// Delete This Link on the product page (Task 17A): for good, as Lasso's lasso_delete_post.
 		register_rest_route(
 			self::NAMESPACE,
 			'/products/(?P<id>\d+)',
@@ -82,6 +84,11 @@ final class ProductsController implements Module {
 					'callback'            => array( $this, 'update' ),
 					'permission_callback' => array( $this, 'can_manage' ),
 					'args'                => $this->field_args(),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete' ),
+					'permission_callback' => array( $this, 'can_manage' ),
 				),
 			)
 		);
@@ -187,6 +194,33 @@ final class ProductsController implements Module {
 		}
 
 		return new WP_REST_Response( array( 'data' => $this->product_resource->full( $product ) ) );
+	}
+
+	/**
+	 * DELETE /products/{id}: deletes the product for good (F1 requirements 11, X3, D33, D39). Anything that is not a
+	 * published product is not found (Lasso answers "Invalid post." with 400; 404 is this API's word for it).
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response|WP_Error 200 { id, deleted: true }; 404 for no such product; 500 when WordPress refuses.
+	 */
+	public function delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$id = (int) $request['id'];
+		try {
+			$this->products->delete( $id );
+		} catch ( ProductNotFound $missing ) {
+			return new WP_Error( 'affibloom_not_found', __( 'This product does not exist.', 'affibloom' ), array( 'status' => 404 ) );
+		} catch ( RuntimeException $refused ) {
+			return new WP_Error( 'affibloom_not_deleted', __( 'Could not delete. Please try again.', 'affibloom' ), array( 'status' => 500 ) );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'id'      => $id,
+					'deleted' => true,
+				),
+			)
+		);
 	}
 
 	/**

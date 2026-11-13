@@ -6,7 +6,7 @@
  * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int, notice: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -97,5 +97,6 @@ $placeholder = sprintf(
 	<?php // Lasso's Dashboard carries the product page's two dialogs (dashboard.php 212-213) for its quick edit. ?>
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
+	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 </div>

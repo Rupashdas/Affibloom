@@ -80,6 +80,24 @@ final class ProductService {
 	}
 
 	/**
+	 * Delete This Link on the product page (Task 17A; F1 requirements 11, X3, D33): the product is deleted for good, as
+	 * Lasso's lasso_delete_post( id, true ). Only a published product can be deleted; whether it is in use is checked
+	 * from Task 36 on (D34, D35).
+	 *
+	 * @param int $id Product ID.
+	 * @throws ProductNotFound  When there is no published product with that ID.
+	 * @throws RuntimeException When the storage refuses the delete.
+	 */
+	public function delete( int $id ): void {
+		if ( null === $this->get( $id ) ) {
+			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
+		}
+		if ( ! $this->products->delete( $id ) ) {
+			throw new RuntimeException( 'Could not delete the product.' );
+		}
+	}
+
+	/**
 	 * Save Changes on the product page: the fields sent are cleaned by Lasso's rules (Task 15A) and a Primary URL by
 	 * the add flow's (Task 15B), then stored on the same product, all or nothing; a field not sent keeps its stored
 	 * value. Every refusal is reported together: an empty name, an empty Primary URL (Lasso's one sentence for both),

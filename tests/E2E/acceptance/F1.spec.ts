@@ -713,13 +713,33 @@ test.describe( 'F1 Product library', () => {
 	} );
 
 	// Delete is on the product page, as in Lasso (docs/spec/interface.md, section 7, question 4).
-	test( 'AC4 a product not in use can be deleted', async ( { page } ) => {
+	// Task 17A (requirements 11, X1-X3, D33, D37, D38): Lasso's product page deletes for good, then the Dashboard says so;
+	// unsaved edits do not make the browser ask once the delete is confirmed.
+	test( 'AC4 Delete This Link asks, then removes the product for good', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F1 AC4' ) } );
+		const asked: string[] = [];
+		page.on( 'dialog', ( browserDialog ) => {
+			asked.push( browserDialog.type() );
+			void browserDialog.accept();
+		} );
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
-		await page.getByRole( 'button', { name: 'Delete This Link' } ).click();
+		await page.locator( '#affibloom-name' ).fill( unique( 'F1 AC4 unsaved' ) );
+
+		const remove = page.getByRole( 'button', { name: 'Delete This Link' } );
+		await remove.click();
 		const dialog = page.getByRole( 'dialog', { name: 'Delete This Link?' } );
+		await expect( dialog ).toContainText( 'If deleted, you won\'t be able to get it back.' );
+		await dialog.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( dialog ).toBeHidden();
+		await expect( remove ).toBeFocused();
+		expect( wp( 'post', 'get', String( id ), '--field=post_status' ) ).toBe( 'publish' );
+
+		await remove.click();
 		await dialog.getByRole( 'button', { name: 'Delete', exact: true } ).click();
 		await page.waitForURL( /page=affibloom(&|$)/ );
-		expect( wp( 'post', 'get', String( id ), '--field=post_status' ) ).toBe( 'trash' );
+		await expect( page.locator( '.affibloom-toast' ).first() ).toContainText( 'Product deleted.' );
+		expect( asked ).toEqual( [] );
+		expect( () => wp( 'post', 'get', String( id ), '--field=ID' ) ).toThrow();
+		expect( wp( 'db', 'query', `SELECT COUNT(*) FROM wp_postmeta WHERE post_id = ${ id }`, '--skip-column-names' ).trim() ).toBe( '0' );
 	} );
 } );

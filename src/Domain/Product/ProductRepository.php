@@ -111,4 +111,12 @@ interface ProductRepository {
 	 * @throws \RuntimeException When the storage refuses it.
 	 */
 	public function retire( Product $product, int $to ): void;
+
+	/**
+	 * Deletes a stored product for good, with everything stored on it (the product page's delete, Task 17A).
+	 *
+	 * @param int $id A stored product's ID.
+	 * @return bool False when the storage refused it.
+	 */
+	public function delete( int $id ): bool;
 }

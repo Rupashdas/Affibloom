@@ -297,6 +297,50 @@
 			afterSave = unsaved.dataset.href;
 			form.requestSubmit( save );
 		} );
+
+		deleteProduct( form, go );
+	}
+
+	/**
+	 * Delete This Link (Task 17A; F1 requirements 11, X2-X3, D33, D37, D38): Lasso's "Delete This Link?" dialog, whose
+	 * Delete removes the product for good through DELETE /affibloom/v1/products/{id} and opens the Dashboard with
+	 * "Product deleted.". The page is left through go(), which quiets the leave guard: the editor has just agreed to
+	 * lose the product, edits and all. A failure closes the dialog and shows the server's message in the failure toast.
+	 *
+	 * @param {HTMLFormElement} form The product form.
+	 * @param {Function}        go   Leaves the page without the leave guard asking.
+	 */
+	function deleteProduct( form, go ) {
+		var modal = document.getElementById( 'affibloom-delete-modal' );
+		if ( ! modal ) {
+			return;
+		}
+		var confirm = modal.querySelector( '[data-delete-confirm]' );
+		var label = confirm.textContent;
+		var deleting = false;
+		var busy = function ( on ) {
+			deleting = on;
+			confirm.disabled = on;
+			confirm.textContent = on ? confirm.dataset.busyLabel : label;
+		};
+
+		confirm.addEventListener( 'click', function () {
+			if ( deleting ) {
+				return;
+			}
+			busy( true );
+			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId, method: 'DELETE' } )
+				.then( function () {
+					var dashboard = new URL( modal.dataset.dashboardUrl, window.location.href );
+					dashboard.searchParams.set( 'affibloom_notice', 'deleted' );
+					go( dashboard.toString() );
+				} )
+				.catch( function ( error ) {
+					busy( false );
+					window.affibloomModal.hide();
+					toast( error && error.message ? error.message : modal.dataset.failedText, true );
+				} );
+		} );
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {

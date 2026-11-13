@@ -131,7 +131,7 @@ final class Plugin {
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
-				new DashboardScreen( $this->template(), $products, $per_page, $views ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice ),
 				new SettingsScreen(
 					$this->template(),

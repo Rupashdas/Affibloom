@@ -8,7 +8,8 @@ Lasso's save path. **Gate 4 given by the user 2026-11-13** for Tasks 15A-15D.
 **Dashboard quick edit (Task 16) re-run the same way on 2026-11-13** (progress deviation 76): section 10, written
 from Lasso's Dashboard row and script. **Gate 4 given by the user 2026-11-13** for Tasks 16A-16C.
 **Deleting a product (Task 17) re-run the same way on 2026-11-13** (progress deviation 82): section 11, written from
-Lasso's delete paths; D33 and D34 are the user's answers. Gate 4 for Tasks 17A-17D: waiting.
+Lasso's delete paths; D33 and D34 are the user's answers. **Gate 4 given by the user 2026-11-13** for Tasks 17A-17D
+("Approve, start 17A").
 
 ## 1. User stories and acceptance criteria
 

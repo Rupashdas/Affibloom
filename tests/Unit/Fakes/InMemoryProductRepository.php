@@ -121,6 +121,22 @@ final class InMemoryProductRepository implements ProductRepository {
 		$this->saved                         = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $product->id ) );
 	}
 
+	/** @var list<int> Deleted product IDs, in order. */
+	public array $deleted = array();
+
+	/** When false, delete() refuses, as wp_delete_post() can. */
+	public bool $deletes = true;
+
+	/** A deleted product is gone, as wp_delete_post( id, true ) leaves nothing. */
+	public function delete( int $id ): bool {
+		if ( ! $this->deletes ) {
+			return false;
+		}
+		$this->deleted[] = $id;
+		$this->saved     = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $id ) );
+		return true;
+	}
+
 	/** Every saved product counts as published; the ASIN is compared without case, as MySQL's collation does. */
 	public function find_amazon( string $asin, string $country ): ?Product {
 		foreach ( $this->saved as $product ) {

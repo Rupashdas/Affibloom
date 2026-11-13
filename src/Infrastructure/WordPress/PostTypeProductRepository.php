@@ -252,6 +252,17 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The product page's delete (Task 17A), as Lasso's lasso_delete_post: wp_delete_post( id, true ) skips the trash and
+	 * removes the post with its meta and term relationships. WordPress answers false or null when it refuses.
+	 *
+	 * @param int $id A stored product's ID.
+	 * @return bool False when WordPress refused the delete.
+	 */
+	public function delete( int $id ): bool {
+		return (bool) wp_delete_post( $id, true );
+	}
+
+	/**
 	 * One page of the published products that match the search, most recently changed first (Lasso's Dashboard
 	 * order).
 	 *

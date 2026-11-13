@@ -262,7 +262,8 @@ $soon_tabs   = array(
 
 			<?php // Lasso's footer: Delete This Link on the left, Save Changes on the right ("Learn About This Page" is Lasso's help site). ?>
 			<div class="affibloom-product__footer">
-				<button type="button" class="affibloom-link-button affibloom-link-button--danger" id="affibloom-delete" aria-disabled="true" aria-describedby="affibloom-soon-note">
+				<?php // Task 17A: Lasso's url-delete dialog first; its Delete removes the product for good (F1 D33). ?>
+				<button type="button" class="affibloom-link-button affibloom-link-button--danger" id="affibloom-delete" data-affibloom-open="affibloom-delete-modal">
 					<?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?>
 					<span><?php esc_html_e( 'Delete This Link', 'affibloom' ); ?></span>
 				</button>
@@ -277,6 +278,7 @@ $soon_tabs   = array(
 	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
+	<?php $this->render( 'admin/partials/delete-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 </div>
