@@ -1091,24 +1091,66 @@
 .affibloom-row__actions { display: inline-flex; gap: 8px; }
 
 /*
- * The row's quick edit (Task 16A): Lasso's editing mode (url-row.php 12-67) in Aurora's fields. One cell across the
- * row, tinted brand-50 like a selected row; the fields left and the 120px image frame right (Lasso's 8 / 4 columns),
- * Save Changes and Cancel under both. The form stays at the left edge of the scrolling table (sticky), so on a narrow
- * screen it is in view without scrolling sideways. "Update Image" shows over the picture on hover and on focus.
+ * The row's quick edit (Task 16A): Lasso's editing mode (url-row.php 12-67, lasso-dashboard.css 1846-2000) in
+ * Affibloom's look. The row becomes a brand-50 band holding a white card; inside, the fields take the wider column and
+ * the image panel the narrower one (Lasso's 8 and 4 of 12), the frame stretching to the fields' height; Save Changes
+ * and Cancel sit right in the card's footer, under a divider. The table scrolls sideways on narrow screens, so the card
+ * is sized to the visible part of it (a container query on the scroll area) and stays at its left edge (sticky).
  */
+.affibloom-table-scroll { container-type: inline-size; }
 .affibloom-table tbody tr.affibloom-quick,
 .affibloom-table tbody tr.affibloom-quick:hover { background: var(--affibloom-brand-50); }
-.affibloom-table .affibloom-quick > td { padding: 24px; }
-.affibloom-quick__form {
+.affibloom-table .affibloom-quick > td { padding: 20px; }
+.affibloom-quick__card {
 	position: sticky;
-	left: 24px;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 168px;
-	gap: 20px 32px;
-	max-width: 920px;
+	left: 20px;
+	box-sizing: border-box;
+	width: calc(100cqi - 40px);
+	padding: 24px;
+	border: 1px solid rgba(30, 91, 184, 0.16);
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+	animation: affibloom-quick-in 160ms ease-out;
 }
-.affibloom-quick__fields { display: grid; gap: 16px; min-width: 0; }
-.affibloom-quick__soon { display: flex; align-items: center; min-height: 38px; }
+@keyframes affibloom-quick-in {
+	from { opacity: 0; transform: translateY(-4px); }
+}
+.affibloom-quick__main {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+	gap: 28px;
+	align-items: stretch;
+}
+.affibloom-quick__fields { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.affibloom-admin .affibloom-quick__label { color: var(--affibloom-ink-700); font-size: 13px; line-height: 18px; }
+
+/* Groups' place, until the Groups area: a field-sized, clearly inactive box with Lasso's placeholder. */
+.affibloom-quick__placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	box-sizing: border-box;
+	min-height: 38px;
+	padding: 0 12px;
+	border: 1px dashed var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-subtle);
+	color: var(--affibloom-ink-400);
+	font-size: 14px;
+	cursor: not-allowed;
+}
+
+.affibloom-quick__meta {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	margin: 0;
+	color: var(--affibloom-ink-600);
+}
+.affibloom-quick__meta .affibloom-icon { width: 16px; height: 16px; }
 .affibloom-admin .affibloom-quick__link {
 	overflow: hidden;
 	color: var(--affibloom-ink-600);
@@ -1119,25 +1161,45 @@
 	white-space: nowrap;
 }
 .affibloom-admin .affibloom-quick__link:hover { color: var(--affibloom-brand-600); text-decoration: underline; }
-.affibloom-quick__image { display: flex; flex-direction: column; gap: 6px; }
+
+/* The image panel: a subtle panel, its frame filling it, a hint under the frame. */
+.affibloom-quick__image {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 16px;
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-chip);
+	background: var(--affibloom-subtle);
+}
 .affibloom-admin .affibloom-quick__frame {
 	position: relative;
 	display: grid;
+	flex: 1 1 auto;
 	place-items: center;
 	box-sizing: border-box;
-	width: 120px;
-	height: 120px;
-	padding: 0;
+	width: 100%;
+	min-height: 200px;
+	margin: 0;
+	padding: 16px;
 	overflow: hidden;
-	border: 1px solid var(--affibloom-control-line);
+	border: 1px dashed var(--affibloom-control-line);
 	border-radius: var(--affibloom-radius-control);
 	background: var(--affibloom-white);
 	cursor: pointer;
 }
 .affibloom-admin .affibloom-quick__frame:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
-.affibloom-quick__picture { width: 100%; height: 100%; object-fit: contain; }
-.affibloom-quick__none { color: var(--affibloom-ink-400); }
-.affibloom-quick__none .affibloom-icon { width: 36px; height: 36px; }
+.affibloom-quick__picture { width: auto; max-width: 100%; height: auto; max-height: 180px; object-fit: contain; }
+.affibloom-quick__none {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	color: var(--affibloom-ink-400);
+	font: 600 13px/18px var(--affibloom-font);
+}
+.affibloom-quick__none .affibloom-icon { width: 32px; height: 32px; }
+/* "Update Image" over the whole frame, as Lasso's, in brand-600 (white text 5.6:1 on it). */
 .affibloom-quick__update {
 	position: absolute;
 	inset: 0;
@@ -1145,19 +1207,40 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
-	background: rgba(11, 42, 91, 0.72);
+	gap: 6px;
+	background: rgba(30, 91, 184, 0.92);
 	color: var(--affibloom-white);
 	font: 600 13px/18px var(--affibloom-font);
 	opacity: 0;
 	transition: opacity var(--affibloom-ease);
 }
+.affibloom-quick__update .affibloom-icon { width: 22px; height: 22px; }
 .affibloom-quick__frame:hover .affibloom-quick__update,
 .affibloom-quick__frame:focus-visible .affibloom-quick__update { opacity: 1; }
-/* The empty frame's picture would show through the overlay beside its own icon. */
+/* The empty frame's icon and words would show through the overlay. */
 .affibloom-quick__frame:hover .affibloom-quick__none,
 .affibloom-quick__frame:focus-visible .affibloom-quick__none { opacity: 0; }
-.affibloom-quick__actions { display: flex; grid-column: 1 / -1; gap: 8px; }
+.affibloom-quick__hint { margin: 0; color: var(--affibloom-ink-600); font-size: 12px; line-height: 16px; text-align: center; }
+
+.affibloom-quick__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--affibloom-line);
+}
+.affibloom-quick__actions .affibloom-button { min-width: 128px; justify-content: center; }
+
+/* Narrow: one column, a shorter frame, the buttons full width with Save Changes first (Lasso below 992px). */
+@container (max-width: 720px) {
+	.affibloom-table .affibloom-quick > td { padding: 16px; }
+	.affibloom-quick__card { left: 16px; width: calc(100cqi - 32px); padding: 18px; }
+	.affibloom-quick__main { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+	.affibloom-admin .affibloom-quick__frame { min-height: 160px; }
+	.affibloom-quick__actions { flex-direction: column; }
+	.affibloom-quick__actions .affibloom-button { width: 100%; }
+}
 
 /* Placeholders (Task 13C): a "Soon" chip by a column's name, a muted dash in its cells. */
 .affibloom-soon {
@@ -1922,9 +2005,6 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-product__pair { grid-template-columns: 1fr; }
 	.affibloom-product__switches { grid-template-columns: 1fr; }
 	.affibloom-product__card { padding: 20px; }
-	/* The quick edit stacks, and is as wide as the screen's part of the scrolling table. */
-	.affibloom-table .affibloom-quick > td { padding: 20px 16px; }
-	.affibloom-quick__form { left: 16px; grid-template-columns: minmax(0, 1fr); max-width: calc(100vw - 84px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1932,4 +2012,5 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-admin *,
 	.affibloom-admin *::after { transition: none; }
 	.affibloom-toast { animation: none; }
+	.affibloom-quick__card { animation: none; }
 }
