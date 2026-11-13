@@ -205,7 +205,8 @@
 	 * where the server says.
 	 *
 	 * Bulk (Task 11C): Shift + Enter in the field, or the header menu's "Bulk add links", swaps the field for a
-	 * textarea; Shift + Enter there swaps back with the first link. The counter shows how many of the ten remain; on
+	 * textarea with the caret on a new line; there Enter and Shift + Enter both start a new line, and closing the
+	 * dialog goes back to one link. The counter shows how many of the ten remain; on
 	 * leaving the textarea its links show as a numbered list with a pencil to edit them. Add Link asks first, starts a
 	 * background run and follows it every 3 seconds until it is done, then goes where the server says. A run already
 	 * going locks the textarea and offers Reload, as in Lasso.
@@ -424,17 +425,16 @@
 			clearError();
 			updateCount();
 		} );
+		// Shift + Enter in the field means "next link": the textarea opens with the caret on a new line. In the
+		// textarea it keeps the browser's own newline (Lasso swaps back to the field there; deviation 75).
 		field.addEventListener( 'keydown', function ( event ) {
 			if ( 'Enter' === event.key && event.shiftKey ) {
 				event.preventDefault();
 				enterBulk();
-			}
-		} );
-		lines.addEventListener( 'keydown', function ( event ) {
-			if ( 'Enter' === event.key && event.shiftKey ) {
-				event.preventDefault();
-				leaveBulk();
-				field.focus();
+				if ( bulk && ! lines.disabled && '' !== lines.value.trim() ) {
+					lines.value = lines.value.replace( /\s+$/, '' ) + '\n';
+					lines.setSelectionRange( lines.value.length, lines.value.length );
+				}
 			}
 		} );
 		lines.addEventListener( 'blur', function () {

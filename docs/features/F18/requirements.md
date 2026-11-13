@@ -40,7 +40,7 @@ dashboard list (Task 13) or the quick edit (Task 16).
 | 4 | "Add a Link" | the dashboard's empty state (`education/dashboard.php`) | the modal, URL tab |
 | 5 | The editor's own add control | the post editor (`$is_from_editor` branch, modal markup 130-215) | the same two tabs, **no** bulk mode |
 | 6 | `?flip_url=<url>&old_id=&old_url=` on the dashboard | Lasso Hub "flip an Amazon link" | the modal opens **and submits by itself** |
-| 7 | **Shift + Enter**, anywhere on the dashboard | a keyboard shortcut, no visible control | toggles the single input into the bulk textarea and back |
+| 7 | **Shift + Enter**, anywhere on the dashboard | a keyboard shortcut, no visible control | toggles the single input into the bulk textarea and back. **Affibloom (the user, 2026-11-13; deviation 75):** only the first half; in the textarea Shift + Enter starts a new line, as the hint promises |
 
 The split button is replaced by an "Update Account" link when the licence is not valid
 (`Lasso_License::get_license_status()`); that branch is Lasso's own business logic and has no Affibloom meaning.

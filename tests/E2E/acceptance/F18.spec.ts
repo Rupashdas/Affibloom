@@ -114,21 +114,22 @@ test.describe( 'F18 Adding links', () => {
 		await dialog.getByLabel( 'URL' ).fill( first );
 		await dialog.getByLabel( 'URL' ).press( 'Shift+Enter' );
 
+		const second = `https://www.example.com/${ unique( 'f18-ac6b' ) }`;
+		const third = `https://www.example.com/${ unique( 'f18-ac6c' ) }`;
 		const box = dialogOf( page ).getByLabel( 'Links, one per line' );
 		await expect( box ).toBeFocused();
-		await expect( box ).toHaveValue( first );
+		await expect( box ).toHaveValue( `${ first }\n` );
 		await expect( dialogOf( page ).getByRole( 'heading', { name: 'Bulk Add Links' } ) ).toBeVisible();
 		await expect( dialogOf( page ).getByText( 'Remaining links: 9' ) ).toBeVisible();
 
-		await box.press( 'End' );
-		await box.press( 'Enter' );
-		await box.type( `https://www.example.com/${ unique( 'f18-ac6b' ) }` );
+		// The caret is already on line 2; Shift + Enter there starts line 3 and stays in bulk mode (deviation 75).
+		await box.type( second );
 		await expect( dialogOf( page ).getByText( 'Remaining links: 8' ) ).toBeVisible();
-
-		// Shift + Enter again: back to one link, the first.
 		await box.press( 'Shift+Enter' );
-		await expect( dialogOf( page ).getByLabel( 'URL' ) ).toHaveValue( first );
-		await expect( dialogOf( page ).getByRole( 'heading', { name: 'Add A New Link' } ) ).toBeVisible();
+		await box.type( third );
+		await expect( box ).toHaveValue( `${ first }\n${ second }\n${ third }` );
+		await expect( dialogOf( page ).getByText( 'Remaining links: 7' ) ).toBeVisible();
+		await expect( dialogOf( page ).getByRole( 'heading', { name: 'Bulk Add Links' } ) ).toBeVisible();
 	} );
 
 	test( 'AC7 AC8 ten links are added in the background with a progress bar; an eleventh is ignored', async ( { page } ) => {
