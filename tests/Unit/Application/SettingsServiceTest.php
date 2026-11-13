@@ -55,6 +55,25 @@ final class SettingsServiceTest extends TestCase {
 		self::assertSame( 'vbvault-20', $repo->get()->string( 'tracking_id' ) );
 	}
 
+	/**
+	 * The product page's offer (Lasso's amazon-url-detected notice, Task 14D) sets the tracking ID alone, by the Amazon
+	 * tab's rule, leaving every other setting as it was.
+	 */
+	public function test_the_tracking_id_alone_is_set_by_the_amazon_tabs_rule(): void {
+		$repo = $this->repository();
+		$svc  = new SettingsService( $repo );
+		$svc->update_tab( 'amazon', array( 'shorten_amazon_links' => '1', 'multiple_tracking_ids' => '1' ) );
+
+		self::assertTrue( $svc->set_tracking_id( 'vbvault-20' ) );
+		self::assertSame( 'vbvault-20', $repo->get()->string( 'tracking_id' ) );
+		self::assertTrue( $repo->get()->bool( 'shorten_amazon_links' ) );
+		self::assertTrue( $repo->get()->bool( 'multiple_tracking_ids' ) );
+
+		self::assertFalse( $svc->set_tracking_id( 'not a tag' ) );
+		self::assertFalse( $svc->set_tracking_id( '' ) );
+		self::assertSame( 'vbvault-20', $repo->get()->string( 'tracking_id' ) );
+	}
+
 	public function test_custom_css_keeps_the_rules_and_loses_any_markup(): void {
 		$repo = $this->repository();
 		( new SettingsService( $repo ) )->update_tab( 'display', array( 'custom_css' => ".box { color: red; }</style><script>alert(1)</script>" ) );

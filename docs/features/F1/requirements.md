@@ -24,6 +24,9 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
 - **AC10** "Add Custom Field" → "Add from library" → Primary Rating adds the rating row; a value typed there and the
   row's toggles are still there after a reload; removing the row asks first. (14C)
 - **AC11** The Share kit copies the destination URL and the disclosure, and shows "Copied!". (14D)
+- **AC12** On an Amazon product's page, when the site has no tracking ID, the link's tag is offered as the site's
+  tracking ID (Yes saves it by the Amazon tab's rule and shows "Tracking ID Saved!"); a link without a tag offers
+  "Set Amazon Tracking ID" instead; other products show nothing. (14D, B10)
 
 `tests/E2E/acceptance/F1.spec.ts` holds AC1-AC4; each task adds its own before it is built.
 

@@ -1581,6 +1581,15 @@
 .affibloom-field-library__empty { padding: 24px 0; color: var(--affibloom-ink-600); text-align: center; }
 .affibloom-field-library__pager { display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--affibloom-ink-600); font-size: 13px; }
 
+/* 7k. The product page's Share kit and the tracking-ID offer (Task 14D). */
+.affibloom-share-kit { margin-bottom: var(--affibloom-space-section); padding: 24px var(--affibloom-space-card); }
+.affibloom-admin .affibloom-share-kit .affibloom-card__title { font-size: 16px; line-height: 22px; }
+.affibloom-share-kit__buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.affibloom-share-kit__buttons .affibloom-icon { width: 16px; height: 16px; }
+.affibloom-notice__text strong { font-weight: 800; }
+.affibloom-notice__actions { display: flex; flex: 0 0 auto; gap: 8px; margin-left: auto; }
+.affibloom-notice__actions form { margin: 0; }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;

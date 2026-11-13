@@ -41,6 +41,7 @@ use Affibloom\Interface\Admin\IconController;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
+use Affibloom\Interface\Admin\TrackingIdController;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
 use Affibloom\Interface\Rest\FieldsController;
@@ -127,7 +128,7 @@ final class Plugin {
 			new ProductPostType(),
 			new AdminMenu(
 				new DashboardScreen( $this->template(), $products, $per_page, $views ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -143,6 +144,7 @@ final class Plugin {
 			new DashboardController( $products, $per_page, $views, $this->template() ),
 			new BulkAddCron( $bulk ),
 			new IconController( $icons ),
+			new TrackingIdController( $settings ),
 			new FieldsController( $fields ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),

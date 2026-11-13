@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, createProduct, unique, wp } from '../utils';
+import { blockTrackers, createProduct, setSettings, unique, wp } from '../utils';
 
 // F1 Product library (docs/features/F1/requirements.md).
 test.describe( 'F1 Product library', () => {
@@ -206,6 +206,86 @@ test.describe( 'F1 Product library', () => {
 		await page.reload();
 		await expect( rating ).toHaveCount( 0 );
 		await expect( own ).toHaveCount( 1 );
+	} );
+
+	// Task 14D: Lasso's Share kit. The shareable URL is the destination until link cloaking exists (D5); the disclosure
+	// is the field's, else the site's text; the shortcode and the block wait for Task 18S and Phase 4.
+	test( 'AC11 the Share kit copies the destination and the disclosure', async ( { page } ) => {
+		// The Local site is plain http, where browsers give pages no clipboard API, so the page copies with the
+		// selection fallback (product.js). Record what either way copies.
+		await page.addInitScript( () => {
+			const record = ( text: string ) => ( ( window as unknown as { copied: string } ).copied = text );
+			const exec = document.execCommand.bind( document );
+			document.execCommand = ( command: string, ...rest: unknown[] ) => {
+				if ( 'copy' === command ) {
+					record( ( document.querySelector( 'body > textarea[readonly]' ) as HTMLTextAreaElement | null )?.value ?? '' );
+				}
+				return exec( command, ...( rest as [ boolean?, string? ] ) );
+			};
+			if ( navigator.clipboard ) {
+				navigator.clipboard.writeText = async ( text: string ) => {
+					record( text );
+				};
+			}
+		} );
+		const link = `https://www.example.com/${ unique( 'f1-ac11' ) }`;
+		const id = createProduct( { name: unique( 'F1 AC11' ), url: link, disclosure: 'We may earn a commission.' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		const kit = page.getByRole( 'region', { name: 'Share kit' } );
+		const clipboard = () => page.evaluate( () => ( window as unknown as { copied: string } ).copied );
+
+		await kit.getByRole( 'button', { name: 'Copy destination URL' } ).click();
+		await expect( kit.getByRole( 'button', { name: 'Copy destination URL' } ) ).toContainText( 'Copied!' );
+		expect( await clipboard() ).toBe( link );
+
+		await kit.getByRole( 'button', { name: 'Copy shareable URL' } ).click();
+		expect( await clipboard() ).toBe( link );
+
+		await kit.getByRole( 'button', { name: 'Copy disclosure' } ).click();
+		expect( await clipboard() ).toBe( 'We may earn a commission.' );
+		await page.locator( '#affibloom-disclosure' ).fill( '' );
+		await kit.getByRole( 'button', { name: 'Copy disclosure' } ).click();
+		expect( await clipboard() ).toBe( await page.locator( '#affibloom-disclosure' ).getAttribute( 'placeholder' ) );
+
+		await expect( kit.getByRole( 'button', { name: 'Copy shortcode' } ) ).toBeDisabled();
+		await expect( kit.getByRole( 'button', { name: 'Copy block' } ) ).toBeDisabled();
+	} );
+
+	// Task 14D: Lasso's amazon-url-detected notice, on an Amazon product when the site has no tracking ID.
+	test( 'AC12 an Amazon product offers its link\'s tag as the site\'s tracking ID when none is saved', async ( { page } ) => {
+		const stored = ( () => {
+			try {
+				return wp( 'option', 'get', 'affibloom_settings', '--format=json' );
+			} catch {
+				return '';
+			}
+		} )();
+		try {
+			setSettings( { tracking_id: '' } );
+			const tagged = createProduct( { name: unique( 'F1 AC12' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC12XY?tag=fonetwelve-20', asin: 'B0F1AC12XY' } );
+			const bare = createProduct( { name: unique( 'F1 AC12 bare' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC12XZ', asin: 'B0F1AC12XZ' } );
+			const other = createProduct( { name: unique( 'F1 AC12 other' ) } );
+
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ other }` );
+			await expect( page.getByText( 'Amazon Tracking ID saved' ) ).toHaveCount( 0 );
+
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ bare }` );
+			await expect( page.getByRole( 'link', { name: 'Set Amazon Tracking ID' } ) ).toHaveAttribute( 'href', /page=affibloom-settings&tab=amazon/ );
+
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ tagged }` );
+			const notice = page.locator( '.affibloom-notice', { hasText: 'Amazon Tracking ID saved' } );
+			await expect( notice ).toContainText( 'fonetwelve-20' );
+			await notice.getByRole( 'button', { name: 'Yes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Tracking ID Saved!' );
+			expect( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) ).tracking_id ).toBe( 'fonetwelve-20' );
+			await expect( page.locator( '.affibloom-notice', { hasText: 'Amazon Tracking ID saved' } ) ).toHaveCount( 0 );
+		} finally {
+			if ( stored ) {
+				wp( 'option', 'update', 'affibloom_settings', stored, '--format=json' );
+			} else {
+				wp( 'option', 'delete', 'affibloom_settings' );
+			}
+		}
 	} );
 
 	// Delete is on the product page, as in Lasso (docs/spec/interface.md, section 7, question 4).

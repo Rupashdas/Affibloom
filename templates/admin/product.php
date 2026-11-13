@@ -9,7 +9,7 @@
  * tabs (their areas), Save Changes (Task 15) and Delete This Link (Task 17).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -59,6 +59,13 @@ $soon_tabs   = array(
 					<p class="affibloom-notice__text"><?php esc_html_e( 'This product already exists. Please update the Primary URL or add a new link.', 'affibloom' ); ?></p>
 				</div>
 			<?php endif; ?>
+			<?php
+			if ( null !== $view['tracking'] ) {
+				$this->render( 'admin/partials/tracking-id-notice', $view['tracking'] );
+			}
+			// Lasso 370 opens its page with the Share kit (Task 14D).
+			$this->render( 'admin/partials/share-kit' );
+			?>
 
 			<?php // data-not-saved: Enter in a field must not send the form until Task 15 saves it (admin.js). ?>
 			<form id="affibloom-product-form" class="affibloom-product__form" data-product-id="<?php echo esc_attr( (string) $product->id ); ?>" data-not-saved novalidate>
@@ -264,4 +271,5 @@ $soon_tabs   = array(
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>
+	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 </div>

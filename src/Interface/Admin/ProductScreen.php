@@ -13,10 +13,12 @@ use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Fields\ProductFields;
+use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Interface\Template;
 
@@ -45,6 +47,7 @@ final class ProductScreen {
 	 * @param SettingsService        $settings The site's settings: the disclosure text and Show Price a product falls
 	 *                                         back to (Task 14B).
 	 * @param FieldsService          $fields   The product's custom fields and the field library (Task 14C).
+	 * @param Notice                 $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
 	 */
 	public function __construct(
 		private Template $template,
@@ -53,6 +56,7 @@ final class ProductScreen {
 		private IconChoices $icons,
 		private SettingsService $settings,
 		private FieldsService $fields,
+		private Notice $notice,
 	) {}
 
 	/**
@@ -82,6 +86,26 @@ final class ProductScreen {
 			wp_safe_redirect( admin_url( 'admin.php?page=' . AdminMenu::SLUG ) );
 			exit;
 		}
+	}
+
+	/**
+	 * Lasso's amazon-url-detected notice (Task 14D): on an Amazon product's page when the site has no tracking ID, the
+	 * link's tag to offer ('' when it has none, and the notice links to Settings → Amazon instead); null otherwise.
+	 *
+	 * @param string $site_tag The site's tracking ID.
+	 * @return array{tag: string, product: int, settings: string}|null
+	 */
+	private function tracking_offer( string $site_tag ): ?array {
+		if ( null === $this->product || ProductType::Amazon !== $this->product->type || '' !== $site_tag ) {
+			return null;
+		}
+		$amazon = AmazonUrl::from( $this->product->url );
+
+		return array(
+			'tag'      => null === $amazon ? '' : $amazon->tag(),
+			'product'  => (int) $this->product->id,
+			'settings' => admin_url( 'admin.php?page=' . SettingsScreen::SLUG . '&tab=amazon' ),
+		);
 	}
 
 	/**
@@ -123,6 +147,8 @@ final class ProductScreen {
 				'fields'       => $this->fields->fields( (int) $this->product->id ) ?? ProductFields::from_array( array() ),
 				'library'      => $this->fields->all(),
 				'types'        => FieldType::cases(),
+				'tracking'     => $this->tracking_offer( $site->string( 'tracking_id' ) ),
+				'notice'       => $this->notice->message(),
 			)
 		);
 	}

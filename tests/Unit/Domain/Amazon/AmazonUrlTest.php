@@ -28,6 +28,13 @@ final class AmazonUrlTest extends TestCase {
 		);
 	}
 
+	/** Lasso's get_amazon_tracking_id_by_url: the link's "tag" parameter, '' when it has none. */
+	public function test_the_links_tag_is_read_as_written(): void {
+		self::assertSame( 'vbvault-20', self::amazon( 'https://www.amazon.com/dp/B0CHK12B01?tag=vbvault-20&th=1' )->tag() );
+		self::assertSame( 'other-21', self::amazon( 'https://www.amazon.com/dp/B0CHK12B01?th=1&amp;tag=other-21' )->tag() );
+		self::assertSame( '', self::amazon( 'https://www.amazon.com/dp/B0CHK12B01' )->tag() );
+	}
+
 	public function test_only_amazon_links_are_amazon_urls(): void {
 		self::assertNull( AmazonUrl::from( AffiliateUrl::from_string( 'https://mizuno.pxf.io/c/1?u=x' ) ) );
 		self::assertNull( AmazonUrl::from( AffiliateUrl::from_string( 'https://www.amazonx.com/dp/B0C1234567' ) ) );

@@ -28,6 +28,9 @@ final class Notice {
 			'icon-removed' => __( 'Icon removed.', 'affibloom' ),
 			'icon-refused' => __( 'The icon was not added. Give it a name of 1 to 40 characters and choose an SVG, PNG or WebP image.', 'affibloom' ),
 			'icon-kept'    => __( "That icon comes from your site's CSS, so it stays.", 'affibloom' ),
+			// The product page's tracking-ID offer (Task 14D): Lasso's "Tracking ID Saved!", and why one was not.
+			'tracking-saved'   => __( 'Tracking ID Saved!', 'affibloom' ),
+			'tracking-refused' => __( 'That was not a valid Tracking ID, so it was not saved.', 'affibloom' ),
 			default        => '',
 		};
 	}

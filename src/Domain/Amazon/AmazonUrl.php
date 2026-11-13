@@ -130,6 +130,14 @@ final class AmazonUrl {
 	}
 
 	/**
+	 * The link's tracking ID, its "tag" parameter as written, or '' (Lasso_Amazon_Api::get_amazon_tracking_id_by_url).
+	 * Read by the product page's offer to save it as the site's tracking ID (Task 14D).
+	 */
+	public function tag(): string {
+		return self::text( self::query_of( str_replace( '&amp;', '&', $this->url->value() ) ), 'tag' );
+	}
+
+	/**
 	 * The store's country code ("us", "gb", …); "us" for any other Amazon host.
 	 */
 	public function country(): string {

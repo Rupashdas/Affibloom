@@ -132,6 +132,24 @@ final class SettingsService {
 	}
 
 	/**
+	 * Sets the tracking ID alone, by the Amazon tab's rule: the product page's offer to save a link's tag as the site's
+	 * (Lasso's amazon-url-detected notice, lasso_save_amazon_tracking_id; Task 14D). Every other setting stays as it
+	 * is, which update_tab( 'amazon', … ) would not do (an absent checkbox there means "off").
+	 *
+	 * @param string $id The tracking ID.
+	 * @return bool Whether it was valid and saved.
+	 */
+	public function set_tracking_id( string $id ): bool {
+		$id = trim( $id );
+		if ( '' === $id || ! self::is_tracking_id( $id ) ) {
+			return false;
+		}
+		$this->repository->save( $this->repository->get()->with( array( 'tracking_id' => $id ) ) );
+
+		return true;
+	}
+
+	/**
 	 * Puts every field of one tab back to its default, as Lasso's Reset Settings does for the Display tab. Keys
 	 * shared with another tab (show_disclosure is also on General) are reset with it, as in Lasso.
 	 *
