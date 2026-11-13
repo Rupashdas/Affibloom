@@ -100,4 +100,15 @@ interface ProductRepository {
 	 * @throws \RuntimeException When the storage refuses it.
 	 */
 	public function rename( Product $product, string $name ): Product;
+
+	/**
+	 * Retires a product in favour of another (the repoint, Task 15C): it remembers which product it now points to, so
+	 * what draws it by its ID can draw that one instead (Lasso's lasso_repointed_to_lasso_id), and leaves the library
+	 * for the trash. No post is touched.
+	 *
+	 * @param Product $product A stored product.
+	 * @param int     $to      The product it points to.
+	 * @throws \RuntimeException When the storage refuses it.
+	 */
+	public function retire( Product $product, int $to ): void;
 }

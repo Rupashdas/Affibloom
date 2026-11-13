@@ -75,7 +75,7 @@ final class LinkNormaliser {
 		$destination = $this->follows( $typed, $settings ) ? $this->destination( $typed ) : $typed;
 		$amazon      = AmazonUrl::from( $destination );
 
-		return new NormalizedLink( $typed, null === $amazon ? $destination : $this->tagged( $amazon, $settings ), $amazon );
+		return new NormalizedLink( $typed, $destination, null === $amazon ? $destination : $this->tagged( $amazon, $settings ), $amazon );
 	}
 
 	/**

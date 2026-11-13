@@ -25,6 +25,12 @@ final class Messages {
 			'empty'       => __( 'URL is incorrect.', 'affibloom' ),
 			// Lasso's one refusal when the product page is saved (save_lasso_url 1133-1140).
 			'required'    => __( 'Name and Primary Destination URL are required.', 'affibloom' ),
+			// Lasso_Repoint_Merge::merge()'s refusals (Task 15C).
+			'repoint_ids'      => __( 'Invalid link IDs for repoint.', 'affibloom' ),
+			'repoint_source'   => __( 'Source link is no longer active.', 'affibloom' ),
+			'repoint_target'   => __( 'Target link must be published. Refresh and pick an active link.', 'affibloom' ),
+			'repoint_url'      => __( 'Target URL is required.', 'affibloom' ),
+			'repoint_mismatch' => __( 'That URL no longer matches the selected link. Refresh and try again.', 'affibloom' ),
 			'invalid_url' => __( 'This is not a valid link.', 'affibloom' ),
 			// Lasso's words while a bulk add is still going.
 			'bulk_running' => __( 'Your bulk add is still processing. Try again in a few minutes.', 'affibloom' ),

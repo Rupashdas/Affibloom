@@ -1792,10 +1792,24 @@
 }
 
 /* "Updating Your Site" (Task 15A): Lasso's static dialog, a title, the bar and one line; no head, foot or close. */
-.affibloom-save-modal .affibloom-modal__panel { max-width: 440px; }
+/* The progress panel is narrow; "This Product Already Exists" (Task 15C) takes the modal's full 560px. */
+.affibloom-save-modal .affibloom-modal__panel:has(> [data-save-progress]:not([hidden])) { max-width: 440px; }
 .affibloom-save-modal .affibloom-modal__panel:focus { outline: none; }
 .affibloom-save-modal__body { text-align: center; }
 .affibloom-save-modal__body .affibloom-progress { margin: 16px 0; }
+.affibloom-repoint__title,
+.affibloom-repoint__intro,
+.affibloom-repoint__arrow { text-align: center; }
+.affibloom-repoint__arrow { margin: 8px 0; color: var(--affibloom-ink-700); font-size: 18px; }
+.affibloom-repoint__side {
+	padding: 12px 16px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-subtle);
+}
+.affibloom-repoint__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.affibloom-repoint__name { font-weight: 600; }
+.affibloom-repoint__url { color: var(--affibloom-ink-700); font-size: 13px; overflow-wrap: anywhere; }
 
 /* The page behind an open modal does not scroll. */
 body.affibloom-has-modal { overflow: hidden; }

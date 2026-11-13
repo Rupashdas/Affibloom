@@ -148,6 +148,38 @@ test.describe( 'F1 Product library', () => {
 		}
 	} );
 
+	// Task 15C (requirements 9, S10, D14). The box drawing the kept product for a retired ID is Phase 3's (Task 18).
+	test( 'AC15 a Primary URL another product has offers that product, and Confirm retires this one', async ( { page } ) => {
+		const mineName = unique( 'F1 AC15 mine' );
+		const otherName = unique( 'F1 AC15 other' );
+		const otherUrl = `https://www.example.com/${ unique( 'f1-ac15-other' ) }`;
+		const mine = createProduct( { name: mineName, url: `https://www.example.com/${ unique( 'f1-ac15-mine' ) }` } );
+		const other = createProduct( { name: otherName, url: otherUrl } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ mine }` );
+
+		// Cancel: nothing saved, the typed link stays in the field.
+		await page.locator( '#affibloom-url' ).fill( otherUrl );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		const offer = page.getByRole( 'dialog', { name: 'This Product Already Exists' } );
+		await expect( offer ).toContainText( 'Do you want to change all Locations to that link?' );
+		await expect( offer ).toContainText( mineName );
+		await expect( offer ).toContainText( otherName );
+		await expect( offer.getByRole( 'link', { name: 'View Existing Link' } ) ).toHaveAttribute( 'href', new RegExp( `id=${ other }$` ) );
+		await offer.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( offer ).toBeHidden();
+		await expect( page.locator( '#affibloom-url' ) ).toHaveValue( otherUrl );
+		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_url' ) ).not.toBe( otherUrl );
+		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'publish' );
+
+		// Confirm: this product is retired, pointing at the other, whose page opens with Lasso's words.
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await offer.getByRole( 'button', { name: 'Confirm' } ).click();
+		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ other }&affibloom_notice=repointed` ) );
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Success! Locations now show this link.' );
+		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'trash' );
+		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_repointed_to' ) ).toBe( String( other ) );
+	} );
+
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {
 		const name = unique( 'F1 AC3' );
 		const id = createProduct( { name } );

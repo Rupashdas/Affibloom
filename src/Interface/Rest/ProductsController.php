@@ -9,10 +9,13 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Products\DuplicateLink;
 use Affibloom\Application\Products\ProductNotFound;
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Application\Products\RepointRefused;
 use Affibloom\Application\Products\ValidationFailed;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\Capabilities;
@@ -82,6 +85,29 @@ final class ProductsController implements Module {
 				),
 			)
 		);
+
+		// "This Product Already Exists" → Confirm (Task 15C).
+		register_rest_route(
+			self::NAMESPACE,
+			'/products/(?P<id>\d+)/repoint',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'repoint' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+					'args'                => array(
+						'to'  => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+						'url' => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -135,6 +161,18 @@ final class ProductsController implements Module {
 			$product = $this->products->update( (int) $request['id'], $input );
 		} catch ( ProductNotFound $missing ) {
 			return new WP_Error( 'affibloom_not_found', __( 'This product does not exist.', 'affibloom' ), array( 'status' => 404 ) );
+		} catch ( DuplicateLink $duplicate ) {
+			// Lasso's repoint_offer: nothing saved; both products for the dialog (url-save.php's second panel).
+			$current = $this->products->get( (int) $request['id'] );
+			return new WP_Error(
+				'affibloom_duplicate',
+				__( 'This Product Already Exists', 'affibloom' ),
+				array(
+					'status' => 409,
+					'from'   => null === $current ? null : self::offer( $current ),
+					'to'     => self::offer( $duplicate->other ),
+				)
+			);
 		} catch ( ValidationFailed $refused ) {
 			$fields = array_map( array( Messages::class, 'for_reason' ), $refused->errors );
 
@@ -149,6 +187,39 @@ final class ProductsController implements Module {
 		}
 
 		return new WP_REST_Response( array( 'data' => $this->product_resource->full( $product ) ) );
+	}
+
+	/**
+	 * POST /products/{id}/repoint: retires this product in favour of the one that has the link, and says where to go.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response|WP_Error 200 with redirect_to; 400 with Lasso's message when the repoint no longer fits.
+	 */
+	public function repoint( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		try {
+			$kept = $this->products->repoint( (int) $request['id'], (int) $request['to'], (string) $request['url'] );
+		} catch ( RepointRefused $refused ) {
+			return new WP_Error( 'affibloom_repoint_refused', Messages::for_reason( $refused->reason ), array( 'status' => 400 ) );
+		}
+
+		return new WP_REST_Response(
+			array( 'data' => array( 'redirect_to' => add_query_arg( 'affibloom_notice', 'repointed', ProductScreen::url( (int) $kept->id ) ) ) )
+		);
+	}
+
+	/**
+	 * One side of "This Product Already Exists": its name, its link and its page (Lasso's repoint_from_* / repoint_to_*).
+	 *
+	 * @param Product $product A stored product.
+	 * @return array{id: int, name: string, url: string, page: string}
+	 */
+	private static function offer( Product $product ): array {
+		return array(
+			'id'   => (int) $product->id,
+			'name' => $product->name,
+			'url'  => $product->url->value(),
+			'page' => ProductScreen::url( (int) $product->id ),
+		);
 	}
 
 	/**

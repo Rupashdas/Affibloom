@@ -231,6 +231,27 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The repoint (Task 15C): the pointer first, as Lasso writes lasso_repointed_to_lasso_id before it soft-deletes, so a
+	 * product never sits in the trash without it; then the trash, Affibloom's delete (Task 17).
+	 *
+	 * @param Product $product A stored product.
+	 * @param int     $to      The product it points to.
+	 * @throws RuntimeException When WordPress refuses either step.
+	 */
+	public function retire( Product $product, int $to ): void {
+		$id      = (int) $product->id;
+		$pointer = (string) $to;
+		update_post_meta( $id, '_affibloom_repointed_to', $pointer );
+		$written = (string) get_post_meta( $id, '_affibloom_repointed_to', true );
+		if ( $written !== $pointer ) {
+			throw new RuntimeException( 'Could not save the repoint.' );
+		}
+		if ( ! wp_trash_post( $id ) ) {
+			throw new RuntimeException( 'Could not move the product to the trash.' );
+		}
+	}
+
+	/**
 	 * One page of the published products that match the search, most recently changed first (Lasso's Dashboard
 	 * order).
 	 *

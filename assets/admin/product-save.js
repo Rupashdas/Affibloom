@@ -9,7 +9,9 @@
  * shows what was stored (S15) and "Product saved." (U6); a refused field gets Lasso's sentence under it and the
  * failure toast. Not sent: Permalink, Groups, Detect Opportunities and Link Cloaking (placeholders, D4), the custom
  * fields (they save themselves, D3). A save that turns the product into an Amazon one, or the reverse, reloads the page
- * with the toast, because the Amazon-only rows differ (Task 15B, D18).
+ * with the toast, because the Amazon-only rows differ (Task 15B, D18). A Primary URL another product already has is
+ * not saved: the dialog turns into Lasso's "This Product Already Exists", whose Confirm retires this product in favour
+ * of that one and opens its page (Task 15C, S10, D14); Cancel (or Escape) closes it and keeps the typed link.
  */
 ( function () {
 	'use strict';
@@ -94,6 +96,12 @@
 		var modal = document.querySelector( '[data-save-modal]' );
 		var bar = modal.querySelector( '[data-save-bar]' );
 		var line = modal.querySelector( '[data-save-text]' );
+		var dialog = modal.querySelector( '[role="dialog"]' );
+		var progress = modal.querySelector( '[data-save-progress]' );
+		var repoint = modal.querySelector( '[data-repoint]' );
+		var cancel = repoint.querySelector( '[data-repoint-cancel]' );
+		var confirm = repoint.querySelector( '[data-repoint-confirm]' );
+		var offer = null;
 		var title = document.getElementById( 'affibloom-product-title' );
 		var linkLine = document.querySelector( '.affibloom-product-url' );
 		var rich = [ richField( form, 'description', 'affibloom_description' ), richField( form, 'price', 'affibloom_price' ) ].filter( Boolean );
@@ -215,7 +223,21 @@
 			savedSwitches = switches();
 		};
 
+		// One dialog, two panels: its name and text follow the panel shown.
+		var showPanel = function ( repointing ) {
+			progress.hidden = repointing;
+			repoint.hidden = ! repointing;
+			dialog.setAttribute( 'aria-labelledby', repointing ? 'affibloom-repoint-title' : 'affibloom-save-title' );
+			dialog.setAttribute( 'aria-describedby', repointing ? 'affibloom-repoint-text' : 'affibloom-save-text' );
+		};
+
+		var hideDialog = function () {
+			modal.hidden = true;
+			document.body.classList.remove( 'affibloom-has-modal' );
+		};
+
 		var openDialog = function () {
+			showPanel( false );
 			line.textContent = switches() !== savedSwitches ? modal.dataset.textToggles : modal.dataset.textDefault;
 			bar.style.width = '0';
 			modal.hidden = false;
@@ -229,11 +251,49 @@
 		var closeDialog = function ( then ) {
 			bar.style.width = '100%';
 			window.setTimeout( function () {
-				modal.hidden = true;
-				document.body.classList.remove( 'affibloom-has-modal' );
+				hideDialog();
 				then();
 			}, CLOSE_AFTER );
 		};
+
+		// "This Product Already Exists" (Lasso's repoint panel): this product and the one that has the link.
+		var showRepoint = function ( data, url ) {
+			offer = { to: data.to.id, url: url };
+			[ 'from', 'to' ].forEach( function ( side ) {
+				var box = repoint.querySelector( '[data-repoint-side="' + side + '"]' );
+				var item = data[ side ] || { name: '', url: '', page: '#' };
+				box.querySelector( '[data-repoint-name]' ).textContent = item.name;
+				box.querySelector( '[data-repoint-url]' ).textContent = item.url;
+				box.querySelector( '[data-repoint-view]' ).href = item.page;
+			} );
+			cancel.disabled = false;
+			confirm.disabled = false;
+			showPanel( true );
+			cancel.focus();
+		};
+
+		cancel.addEventListener( 'click', function () {
+			hideDialog();
+			field( 'url' ).focus();
+		} );
+		repoint.addEventListener( 'keydown', function ( event ) {
+			if ( 'Escape' === event.key && ! cancel.disabled ) {
+				cancel.click();
+			}
+		} );
+		confirm.addEventListener( 'click', function () {
+			cancel.disabled = true;
+			confirm.disabled = true;
+			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId + '/repoint', method: 'POST', data: offer } )
+				.then( function ( response ) {
+					window.location.assign( response.data.redirect_to );
+				} )
+				.catch( function ( error ) {
+					cancel.disabled = false;
+					confirm.disabled = false;
+					toast( error && error.message ? error.message : form.dataset.failedText, true );
+				} );
+		} );
 
 		form.addEventListener( 'input', function ( event ) {
 			// A refused field's note goes as soon as it is edited.
@@ -269,6 +329,10 @@
 					} );
 				} )
 				.catch( function ( error ) {
+					if ( error && 'affibloom_duplicate' === error.code && error.data && error.data.to ) {
+						showRepoint( error.data, sent.url );
+						return;
+					}
 					closeDialog( function () {
 						var fields = error && error.data && error.data.fields;
 						if ( fields ) {

@@ -112,6 +112,15 @@ final class InMemoryProductRepository implements ProductRepository {
 		return $product;
 	}
 
+	/** @var array<int, int> Retired product => the product it points to. */
+	public array $retired = array();
+
+	/** A retired product leaves the published list, as the trash takes it out of every query. */
+	public function retire( Product $product, int $to ): void {
+		$this->retired[ (int) $product->id ] = $to;
+		$this->saved                         = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $product->id ) );
+	}
+
 	/** Every saved product counts as published; the ASIN is compared without case, as MySQL's collation does. */
 	public function find_amazon( string $asin, string $country ): ?Product {
 		foreach ( $this->saved as $product ) {

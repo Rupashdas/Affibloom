@@ -84,7 +84,8 @@ final class ProductService {
 	 * the add flow's (Task 15B), then stored on the same product, all or nothing; a field not sent keeps its stored
 	 * value. Every refusal is reported together: an empty name, an empty Primary URL (Lasso's one sentence for both),
 	 * and a Primary URL that is not a link, as adding refuses it. The repository throws a RuntimeException when
-	 * WordPress refuses the post.
+	 * WordPress refuses the post, and with_link() a DuplicateLink when the new Primary URL belongs to another product
+	 * (Task 15C): nothing is saved.
 	 *
 	 * @param int                  $id    Product ID.
 	 * @param array<string, mixed> $input Field => value, as sent.
@@ -133,11 +134,14 @@ final class ProductService {
 	 * - another ASIN: type, ASIN, store and search key from the new link; the name becomes the link's starting name
 	 *   (decision 11) when "Keep title when URL replaced" is off or the name is a placeholder; the image becomes the new
 	 *   product's, which is none until C1 brings Amazon data, unless a media library image is set (S6);
-	 * - another shop's link: the Amazon keys go, as Lasso deletes amazon_product_id; name and image stay.
+	 * - another shop's link: the Amazon keys go, as Lasso deletes amazon_product_id; name and image stay;
+	 * - a link another published product has, by the add flow's rules (Tasks 11B, 12B, 12C): DuplicateLink, and the
+	 *   page offers Lasso's repoint (Task 15C). The same ASIN on the same store is this product, never a duplicate.
 	 *
 	 * @param Product      $changed The product with the form's other changes.
 	 * @param Product      $stored  The product as stored.
 	 * @param AffiliateUrl $typed   The Primary URL as typed.
+	 * @throws DuplicateLink When the link belongs to another published product.
 	 */
 	private function with_link( Product $changed, Product $stored, AffiliateUrl $typed ): Product {
 		$settings = $this->settings->get();
@@ -148,6 +152,12 @@ final class ProductService {
 
 		$link   = $this->rules->primary( $typed, $settings );
 		$amazon = $link->amazon;
+		if ( ! $this->is_same_product( $stored, $amazon ) ) {
+			$other = $this->owner( $link );
+			if ( null !== $other && $other->id !== $stored->id ) {
+				throw new DuplicateLink( $other );
+			}
+		}
 		if ( null === $amazon ) {
 			return $changed->with(
 				array(
@@ -162,8 +172,7 @@ final class ProductService {
 
 		$asin    = $amazon->asin();
 		$country = '' === $asin ? '' : $amazon->country();
-		$same    = '' !== $asin && ProductType::Amazon === $stored->type && 0 === strcasecmp( $stored->asin, $asin ) && $stored->amazon_country === $country;
-		if ( $same ) {
+		if ( $this->is_same_product( $stored, $amazon ) ) {
 			return $changed->with( array( 'url' => AmazonUrl::is_short( $typed ) ? $typed : $link->stored ) );
 		}
 
@@ -184,6 +193,79 @@ final class ProductService {
 		}
 
 		return $changed->with( $changes );
+	}
+
+	/**
+	 * Whether a link leads to this very Amazon product: the same ASIN on the same store (Lasso's shares_same_amazon_asin,
+	 * which updates in place, F1 requirements 9 S8).
+	 *
+	 * @param Product        $product The product as stored.
+	 * @param AmazonUrl|null $amazon  The Amazon link the new Primary URL leads to.
+	 */
+	private function is_same_product( Product $product, ?AmazonUrl $amazon ): bool {
+		if ( null === $amazon || '' === $amazon->asin() || ProductType::Amazon !== $product->type ) {
+			return false;
+		}
+
+		return 0 === strcasecmp( $product->asin, $amazon->asin() ) && $product->amazon_country === $amazon->country();
+	}
+
+	/**
+	 * The published product a link already belongs to, by the add flow's rules in its order (Lasso's
+	 * is_lasso_url_exist): the link as typed, where it leads, then an Amazon link's ASIN and store, search keywords or
+	 * tagged link (existing_amazon()).
+	 *
+	 * @param NormalizedLink $link The link.
+	 */
+	private function owner( NormalizedLink $link ): ?Product {
+		$owner = $this->products->find_by_url_key( $link->typed->key() );
+		if ( null === $owner && $link->destination->key() !== $link->typed->key() ) {
+			$owner = $this->products->find_by_url_key( $link->destination->key() );
+		}
+		if ( null === $owner && null !== $link->amazon ) {
+			$owner = $this->existing_amazon( $link->amazon, $link->destination, $link->stored );
+		}
+
+		return $owner;
+	}
+
+	/**
+	 * "This Product Already Exists" → Confirm (Lasso's lasso_confirm_repoint_merge, F1 requirements 9 S10, D14): this
+	 * product is retired in favour of the one that has the link. Lasso's checks first, in its order: two different
+	 * products, this one still in the library, the other one too, and the link still that product's.
+	 *
+	 * @param int    $from This product.
+	 * @param int    $to   The product that has the link.
+	 * @param string $url  The Primary URL that was typed.
+	 * @throws RepointRefused When a check fails; nothing is changed.
+	 */
+	public function repoint( int $from, int $to, string $url ): Product {
+		if ( $from <= 0 || $to <= 0 || $from === $to ) {
+			throw new RepointRefused( 'repoint_ids' );
+		}
+		$source = $this->get( $from );
+		if ( null === $source ) {
+			throw new RepointRefused( 'repoint_source' );
+		}
+		$target = $this->get( $to );
+		if ( null === $target ) {
+			throw new RepointRefused( 'repoint_target' );
+		}
+		if ( '' === trim( $url ) ) {
+			throw new RepointRefused( 'repoint_url' );
+		}
+		try {
+			$owner = $this->owner( $this->rules->primary( $this->rules->typed( $url ), $this->settings->get() ) );
+		} catch ( InvalidField $not_a_link ) {
+			$owner = null;
+		}
+		if ( null === $owner || $owner->id !== $target->id ) {
+			throw new RepointRefused( 'repoint_mismatch' );
+		}
+
+		$this->products->retire( $source, $to );
+
+		return $target;
 	}
 
 	/**
