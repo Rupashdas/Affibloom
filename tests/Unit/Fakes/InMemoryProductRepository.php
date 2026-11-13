@@ -71,11 +71,15 @@ final class InMemoryProductRepository implements ProductRepository {
 		return null;
 	}
 
+	/** Re-saving makes a product the most recently changed, as wp_update_post() does: it moves to the end of the list. */
 	public function rename( Product $product, string $name ): Product {
 		foreach ( $this->saved as $index => $saved ) {
 			if ( $saved->id === $product->id ) {
-				$this->saved[ $index ] = $saved->with( array( 'name' => $name ) );
-				return $this->saved[ $index ];
+				$renamed = $saved->with( array( 'name' => $name ) );
+				unset( $this->saved[ $index ] );
+				$this->saved   = array_values( $this->saved );
+				$this->saved[] = $renamed;
+				return $renamed;
 			}
 		}
 		return $product;

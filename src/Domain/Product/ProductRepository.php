@@ -65,7 +65,9 @@ interface ProductRepository {
 	public function count(): int;
 
 	/**
-	 * Gives a stored product a new name; returns it renamed.
+	 * Gives a stored product a new name (its own name to keep it); returns it renamed. Either way it is stored again
+	 * and becomes the most recently changed product, as wp_update_post() makes it, so it moves to the top of the
+	 * Dashboard: "Add A New Link" relies on that for a link the site already has (Lasso's re-save).
 	 *
 	 * @param Product $product A stored product.
 	 * @param string  $name    Its new name.

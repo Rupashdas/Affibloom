@@ -252,9 +252,12 @@ test.describe( 'F19 Dashboard list', () => {
 			}
 
 			await page.goto( '/wp-admin/admin.php?page=affibloom' );
-			await expect( page.getByText( 'No products yet.' ) ).toBeVisible();
+			// Lasso's empty Dashboard: its words, and "Add a Link", which opens Add A New Link.
+			await expect( page.getByText( 'Get Started by Adding a Link' ) ).toBeVisible();
 			await expect( page.getByText( 'No products match your search.' ) ).toHaveCount( 0 );
 			await expect( page.locator( '.affibloom-table' ) ).toHaveCount( 0 );
+			await page.getByRole( 'button', { name: 'Add a Link' } ).click();
+			await expect( page.getByRole( 'dialog', { name: 'Add A New Link' } ) ).toBeVisible();
 		} finally {
 			if ( ids.length ) {
 				wp( 'post', 'update', ...ids, '--post_status=publish' );

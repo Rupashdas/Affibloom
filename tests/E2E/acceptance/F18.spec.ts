@@ -12,6 +12,19 @@ test.describe( 'F18 Adding links', () => {
 		return page.getByRole( 'dialog', { name: 'Add A New Link' } );
 	}
 
+	/**
+	 * How an add ends, as Lasso's does (url-add.php): the Dashboard reloads with no message and the product at the top
+	 * of the list. (Lasso opens a non-Amazon product's page instead; that page is Task 14.)
+	 *
+	 * @param page    The page.
+	 * @param shown   Text from the product's link, to find it in the top row.
+	 * @param timeout How long the add may take; a bulk run waits for WP-Cron.
+	 */
+	async function landed( page: Page, shown: string, timeout = 20_000 ) {
+		await expect( page.locator( '.affibloom-table tbody tr' ).first() ).toContainText( shown, { timeout } );
+		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 );
+	}
+
 	/** IDs of the products whose primary link is exactly this one. */
 	function productsWithLink( link: string ): string[] {
 		const out = wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_url', `--meta_value=${ link }`, '--field=ID' );
@@ -20,15 +33,15 @@ test.describe( 'F18 Adding links', () => {
 
 	test( 'AC1 a link pasted into Add A New Link becomes a product, kept exactly', async ( { page } ) => {
 		// Shaped like the site's Mizuno links through Impact (tests/fixtures/inventory/products.json).
-		const link = `https://mizuno.pxf.io/c/123/456/789?u=https%3A%2F%2Fmizunousa.com%2Fwave&subId1=${ unique( 'f18' ) }`;
+		const sub = unique( 'f18' );
+		const link = `https://mizuno.pxf.io/c/123/456/789?u=https%3A%2F%2Fmizunousa.com%2Fwave&subId1=${ sub }`;
 		const dialog = await openAdd( page );
 		await expect( dialog.getByLabel( 'URL' ) ).toBeFocused();
 
 		await dialog.getByLabel( 'URL' ).fill( link );
 		await dialog.getByLabel( 'URL' ).press( 'Enter' );
 
-		// Until Task 14 builds the product page, the add ends on the Dashboard with a toast.
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
+		await landed( page, sub );
 		const ids = productsWithLink( link );
 		expect( ids ).toHaveLength( 1 );
 		// Lasso names an Impact link after the destination in its u= parameter, with no request (Task 11D).
@@ -45,7 +58,7 @@ test.describe( 'F18 Adding links', () => {
 		const path = unique( 'f18-ac2' );
 		await add( page, `mizunousa.com/${ path }` );
 
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
+		await landed( page, path );
 		expect( productsWithLink( `https://mizunousa.com/${ path }` ) ).toHaveLength( 1 );
 	} );
 
@@ -118,8 +131,8 @@ test.describe( 'F18 Adding links', () => {
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 		await expect( dialog.getByRole( 'progressbar' ) ).toBeVisible();
 
-		// Until Task 13 shows the list, the Dashboard says the run finished.
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Bulk add finished.', { timeout: 100_000 } );
+		// As Lasso's heartbeat does at 100%: the Dashboard reloads, with no message and the new products on top.
+		await landed( page, run, 100_000 );
 		for ( const link of links.slice( 0, 10 ) ) {
 			expect( productsWithLink( link ) ).toHaveLength( 1 );
 		}
@@ -157,7 +170,7 @@ test.describe( 'F18 Adding links', () => {
 			const dialog = await openAdd( page );
 			await dialog.getByLabel( 'URL' ).fill( link );
 			await dialog.getByLabel( 'URL' ).press( 'Enter' );
-			await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
+			await landed( page, link.split( '/' ).pop() as string );
 
 			const [ id ] = productsWithLink( link );
 			expect( meta( id, 'nofollow' ) ).toBe( '0' );

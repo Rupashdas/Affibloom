@@ -155,20 +155,26 @@ final class ProductService {
 	}
 
 	/**
-	 * A product the link already is. Lasso renames a match its cloud had named after an Amazon error page ("Sorry!…",
-	 * "…went wrong!") to get_search_page_title() of the new link. Lasso's operator precedence also renames a non-Amazon
-	 * match whose name holds " wrong!"; here the rule needs an Amazon link, as Lasso's own comment says.
+	 * A product the link already is. Lasso re-saves it every time (wp_update_post with its title and the publish
+	 * status, after is_lasso_url_exist), which makes it the most recently changed: it moves to the top of the
+	 * Dashboard, the only sign an Amazon re-add gives, since Lasso then reloads the Dashboard with no message.
+	 *
+	 * Lasso also renames a match its cloud had named after an Amazon error page ("Sorry!…", "…went wrong!") to
+	 * get_search_page_title() of the new link. Lasso's operator precedence also renames a non-Amazon match whose name
+	 * holds " wrong!"; here the rule needs an Amazon link, as Lasso's own comment says.
 	 *
 	 * @param Product      $existing The product found.
 	 * @param AffiliateUrl $url      The link that found it.
-	 * @throws RuntimeException When the new name cannot be stored.
+	 * @throws RuntimeException When the product cannot be stored again.
 	 */
 	private function found( Product $existing, AffiliateUrl $url ): AddedLink {
+		$name   = $existing->name;
 		$amazon = AmazonUrl::from( $url );
-		if ( null !== $amazon && ( str_contains( $existing->name, 'Sorry!' ) || str_contains( $existing->name, ' wrong!' ) ) ) {
-			$existing = $this->products->rename( $existing, $amazon->search_page_title() );
+		if ( null !== $amazon && ( str_contains( $name, 'Sorry!' ) || str_contains( $name, ' wrong!' ) ) ) {
+			$name = $amazon->search_page_title();
 		}
-		return new AddedLink( $existing, true );
+
+		return new AddedLink( $this->products->rename( $existing, $name ), true );
 	}
 
 	/**

@@ -25,11 +25,9 @@ final class Notice {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
-			'link-added'   => __( 'Link added.', 'affibloom' ),
-			// Lasso's warning when "Add A New Link" finds a product with the same link.
+			// Lasso's warning when "Add A New Link" finds a product with the same, non-Amazon link. Lasso shows it on the
+			// product's page (Task 14); until then the Dashboard does. A successful add has no message, as in Lasso.
 			'duplicate'    => __( 'This product already exists. Please update the Primary URL or add a new link.', 'affibloom' ),
-			// Until Task 13 lists the products, the Dashboard says a bulk add finished (Lasso only reloads it).
-			'bulk-added'   => __( 'Bulk add finished.', 'affibloom' ),
 			default        => '',
 		};
 	}

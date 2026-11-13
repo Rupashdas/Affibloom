@@ -26,10 +26,12 @@ test.describe( 'F2 Amazon links', () => {
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
 		await dialog.getByLabel( 'URL' ).fill( input );
+		// An Amazon add ends as Lasso's does: the Dashboard reloads, with no message (url-add.php, its is_amazon branch).
+		// Wait for that load under the test's own timeout: a slow Local copy can take a while to serve it.
+		const reloaded = page.waitForEvent( 'framenavigated' );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
-		// The add ends with a redirect to the Dashboard (a toast notice until Task 14). Wait for that page to load
-		// under the test's own timeout: a toast check's 5 s can run out while a slow Local copy is still loading it.
-		await page.waitForURL( /affibloom_notice=/ );
+		await reloaded;
+		await page.waitForLoadState( 'load' );
 	}
 
 	/** IDs of the products stored with this ASIN. */
@@ -43,8 +45,7 @@ test.describe( 'F2 Amazon links', () => {
 		const before = newestProduct();
 		await submit( page, input );
 
-		// Until Task 14 builds the product page, the add ends on the Dashboard with a toast.
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
+		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 ); // Lasso says nothing after an Amazon add.
 		const id = newestProduct();
 		expect( id ).toBeGreaterThan( before );
 
@@ -98,8 +99,10 @@ test.describe( 'F2 Amazon links', () => {
 		await add( page, `https://www.amazon.com/dp/${ a }` );
 
 		await submit( page, `https://www.amazon.com/gp/product/${ a }?th=1` );
-		// Until Task 14 builds the product page, the warning is a Dashboard toast (Task 11B).
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
+		// Lasso's Amazon branch runs before its duplicate one: the Dashboard reloads with no message, and the product it
+		// found, re-saved, is at the top of the list.
+		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.affibloom-table tbody tr' ).first() ).toContainText( a );
 		expect( productsWithAsin( a ) ).toHaveLength( 1 );
 
 		// Lasso matches the ASIN with its store: the same ASIN on amazon.co.uk is another product.
@@ -128,7 +131,8 @@ test.describe( 'F2 Amazon links', () => {
 
 		// The same keywords written otherwise (case, encoding, other parameters) are that product.
 		await submit( page, `https://www.amazon.com/s?k=${ words.toUpperCase().replace( ' ', '%20' ) }&ref=nb_sb_noss` );
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'This product already exists.' );
+		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 ); // An Amazon duplicate: no message, as in Lasso.
+		await expect( page.locator( '.affibloom-table tbody tr' ).first() ).toContainText( words.split( ' ' )[ 1 ] );
 		expect( wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_search_key', `--meta_value=amazon.com|${ words }`, '--format=count' ) ).toBe( '1' );
 
 		// Another Amazon page that is not one product gets the tag, its query kept.

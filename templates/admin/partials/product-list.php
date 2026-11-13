@@ -30,13 +30,17 @@ $columns   = array(
 		<span class="affibloom-chip">
 			<?php $this->render( 'admin/partials/icon', array( 'name' => $searching ? 'info' : 'plus' ) ); ?>
 		</span>
-		<p class="affibloom-empty__message">
-			<?php
-			echo $searching
-				? esc_html__( 'No products match your search.', 'affibloom' )
-				: esc_html__( 'No products yet.', 'affibloom' );
-			?>
-		</p>
+		<?php if ( $searching ) : ?>
+			<p class="affibloom-empty__message"><?php esc_html_e( 'No products match your search.', 'affibloom' ); ?></p>
+		<?php else : ?>
+			<?php // Lasso's empty Dashboard (admin/views/education/dashboard.php): its words, and its action, which opens "Add A New Link". ?>
+			<p class="affibloom-empty__message"><?php esc_html_e( 'Get Started by Adding a Link', 'affibloom' ); ?></p>
+			<p class="affibloom-empty__text"><?php esc_html_e( "Manage all of your affiliate links here, and see where they're located across your site. Get alerts when a link has new opportunities, is broken, or out of stock.", 'affibloom' ); ?></p>
+			<button type="button" class="affibloom-button affibloom-button--primary affibloom-empty__action" data-affibloom-open="affibloom-add-modal" aria-haspopup="dialog">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+				<span><?php esc_html_e( 'Add a Link', 'affibloom' ); ?></span>
+			</button>
+		<?php endif; ?>
 	</div>
 <?php else : ?>
 	<div class="affibloom-card affibloom-card--table" data-total="<?php echo esc_attr( (string) $products->total ); ?>">

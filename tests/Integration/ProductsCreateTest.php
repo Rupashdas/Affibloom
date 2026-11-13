@@ -27,7 +27,8 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 'affibloom_product', get_post_type( $data['id'] ) );
 		self::assertSame( $url, get_post_meta( $data['id'], '_affibloom_url', true ) );
 		self::assertSame( 'other', get_post_meta( $data['id'], '_affibloom_type', true ) );
-		self::assertStringContainsString( 'affibloom_notice=link-added', $data['redirect_to'] );
+		// No message after an add, as Lasso's (url-add.php); the product page it opens is Task 14.
+		self::assertStringNotContainsString( 'affibloom_notice', $data['redirect_to'] );
 	}
 
 	public function test_a_new_product_takes_the_sites_link_defaults_at_that_moment(): void {

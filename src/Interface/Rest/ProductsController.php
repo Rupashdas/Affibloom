@@ -11,6 +11,7 @@ namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\ProductType;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Messages;
@@ -91,13 +92,15 @@ final class ProductsController implements Module {
 		if ( $added->already_existed ) {
 			$data['duplicate'] = true;
 		}
-		// Lasso opens the product's page (with a warning for a duplicate); that page is Task 14, so until then the
-		// Dashboard says what happened.
-		$data['redirect_to'] = add_query_arg(
-			'affibloom_notice',
-			$added->already_existed ? 'duplicate' : 'link-added',
-			admin_url( 'admin.php?page=' . AdminMenu::SLUG )
-		);
+		// Where Lasso goes after an add (url-add.php, the success handler), with no message of its own:
+		// - an Amazon link, new or found, reloads the Dashboard (its is_amazon branch runs before the duplicate one);
+		// - any other link opens the product's page, with Lasso's warning when it already existed.
+		// That page is Task 14. Until then the Dashboard stands in for it, and a non-Amazon duplicate's warning is shown
+		// there, the one place it can appear. Either way the product is at the top of the list (ProductService::found).
+		$dashboard           = admin_url( 'admin.php?page=' . AdminMenu::SLUG );
+		$data['redirect_to'] = $added->already_existed && ProductType::Amazon !== $added->product->type
+			? add_query_arg( 'affibloom_notice', 'duplicate', $dashboard )
+			: $dashboard;
 
 		return new WP_REST_Response( array( 'data' => $data ), $added->already_existed ? 200 : 201 );
 	}

@@ -97,12 +97,12 @@ final class BulkAddController implements Module {
 	}
 
 	/**
-	 * GET /products/bulk: how the run stands, and where to go when it is done (Lasso reloads the Dashboard; until
-	 * Task 13 lists the products, the Dashboard says the run finished).
+	 * GET /products/bulk: how the run stands, and where to go when it is done: the Dashboard, reloaded with no
+	 * message, as Lasso's heartbeat does at 100%. The new products are at the top of its list.
 	 */
 	public function progress(): WP_REST_Response {
 		$data                = $this->bulk->progress();
-		$data['redirect_to'] = add_query_arg( 'affibloom_notice', 'bulk-added', admin_url( 'admin.php?page=' . AdminMenu::SLUG ) );
+		$data['redirect_to'] = admin_url( 'admin.php?page=' . AdminMenu::SLUG );
 
 		return new WP_REST_Response( array( 'data' => $data ) );
 	}

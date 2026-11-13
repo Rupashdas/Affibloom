@@ -31,6 +31,24 @@ final class ProductServiceTest extends TestCase {
 		return new ProductService( $this->repo, new LinkResolver( $this->fetcher ), new InMemorySettingsRepository( $settings ) );
 	}
 
+	/**
+	 * Lasso re-saves the product it finds (wp_update_post after is_lasso_url_exist), which makes it the most
+	 * recently changed: it moves to the top of the Dashboard, the only sign an Amazon re-add gives (url-add.php
+	 * reloads the Dashboard with no message).
+	 */
+	public function test_adding_a_link_the_site_has_moves_that_product_to_the_top_of_the_list(): void {
+		$service = $this->service();
+		$first   = $service->create_from_url( 'https://www.example.com/first' )->product;
+		$service->create_from_url( 'https://www.example.com/second' );
+
+		$again = $service->create_from_url( 'https://www.example.com/first' );
+
+		self::assertTrue( $again->already_existed );
+		self::assertSame( $first->id, $again->product->id );
+		$top = $service->list( \Affibloom\Domain\Product\SearchTerm::from_input( '' ), \Affibloom\Domain\Product\LinkKind::All, 1, 10 )->items[0];
+		self::assertSame( $first->id, $top->id );
+	}
+
 	public function test_a_link_becomes_one_saved_product_named_as_lasso_names_it(): void {
 		$link = 'https://mizuno.pxf.io/c/123/456/789?u=https%3A%2F%2Fmizunousa.com%2Fwave';
 

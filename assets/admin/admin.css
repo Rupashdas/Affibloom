@@ -364,6 +364,8 @@
 }
 .affibloom-empty .affibloom-chip { margin-bottom: 12px; }
 .affibloom-empty__message { margin: 0; font-weight: 600; }
+.affibloom-empty__text { max-width: 520px; margin: 8px auto 0; color: var(--affibloom-ink-600); font-size: 14px; line-height: 21px; }
+.affibloom-empty__action { margin-top: 20px; }
 
 /* 5. Settings row: icon chip, label with its visible description (U3), switch on the right */
 .affibloom-setting {
