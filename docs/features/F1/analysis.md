@@ -87,7 +87,7 @@ The Details form itself is saved by `PATCH /products/{id}` in Task 15.
   → the dialog's "This Product Already Exists" panel → Confirm
   → POST /affibloom/v1/products/{id}/repoint { to, url }
   → ProductService::repoint( id, to, url )   Lasso's four checks (S10) → 422 with Lasso's message
-       ProductRepository::retire( from, to ): _affibloom_repointed_to = to, post to the trash
+       ProductRepository::retire( from, to ): _affibloom_repointed_to = to, status affibloom_retired (17C; was the trash)
   ← 200 { redirect_to: ProductScreen::url( to ) + repoint_merged=1 } → "Success! Locations now show this link."
 
   leaving with changes                                                                    (15D)

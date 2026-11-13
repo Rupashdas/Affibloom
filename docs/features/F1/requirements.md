@@ -273,7 +273,8 @@ Settled by the user's earlier rules:
   and text links in posts belong to the content link index (area 1, F21), which takes "a product's New Window,
   NoFollow and Sponsored reach its text links at render time" into its gates.
 - **D14 The repoint offer is built (S10, 15C).** It edits no post. Affibloom stores `_affibloom_repointed_to` on the
-  retired product and moves it to the trash (Task 17's delete is the same move); everything that draws a product by
+  retired product and moves it to the trash (Task 17's delete is the same move; **since 17C its own status,
+  `affibloom_retired`, D41**); everything that draws a product by
   its ID follows the pointer: the box (Task 18), `[lasso]` (Task 27), Locations (Tasks 35-36, which also move the
   index rows as Lasso moves its location rows).
 - **D15 A matching product in the trash (S11) belongs to Task 17**, which creates trashed products; until then none

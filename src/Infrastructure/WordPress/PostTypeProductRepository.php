@@ -232,7 +232,8 @@ final class PostTypeProductRepository implements ProductRepository {
 
 	/**
 	 * The repoint (Task 15C): the pointer first, as Lasso writes lasso_repointed_to_lasso_id before it soft-deletes, so a
-	 * product never sits in the trash without it; then the trash, Affibloom's delete (Task 17).
+	 * product is never retired without it; then the retired status (Task 17C), Lasso's lasso_delete. Not
+	 * wp_trash_post(): it marks the post for WordPress's 30-day emptying, which would delete the product and its pointer.
 	 *
 	 * @param Product $product A stored product.
 	 * @param int     $to      The product it points to.
@@ -246,8 +247,15 @@ final class PostTypeProductRepository implements ProductRepository {
 		if ( $written !== $pointer ) {
 			throw new RuntimeException( 'Could not save the repoint.' );
 		}
-		if ( ! wp_trash_post( $id ) ) {
-			throw new RuntimeException( 'Could not move the product to the trash.' );
+		$retired = wp_update_post(
+			array(
+				'ID'          => $id,
+				'post_status' => ProductPostType::RETIRED,
+			),
+			true
+		);
+		if ( is_wp_error( $retired ) ) {
+			throw new RuntimeException( 'Could not retire the product.' );
 		}
 	}
 

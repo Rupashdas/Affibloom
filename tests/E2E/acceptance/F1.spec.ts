@@ -176,7 +176,7 @@ test.describe( 'F1 Product library', () => {
 		await offer.getByRole( 'button', { name: 'Confirm' } ).click();
 		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ other }&affibloom_notice=repointed` ) );
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Success! Locations now show this link.' );
-		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'trash' );
+		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'affibloom_retired' );
 		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_repointed_to' ) ).toBe( String( other ) );
 	} );
 
@@ -449,7 +449,7 @@ test.describe( 'F1 Product library', () => {
 		await offer.getByRole( 'button', { name: 'Confirm' } ).click();
 		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ other }&affibloom_notice=repointed` ) );
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Success! Locations now show this link.' );
-		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'trash' );
+		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'affibloom_retired' );
 		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_repointed_to' ) ).toBe( String( other ) );
 	} );
 
@@ -788,5 +788,29 @@ test.describe( 'F1 Product library', () => {
 		await page.locator( '.affibloom-pagination a.page-numbers', { hasText: /^2$/ } ).click();
 		await expect( page.locator( '.affibloom-pager__range' ) ).toContainText( '11-' );
 		await expect( bar ).toBeHidden();
+	} );
+
+	// Task 17C (requirements 11, X10, X11, D41): a retired product has Lasso's own status (lasso_delete → affibloom_retired),
+	// out of the trash, which WordPress empties after 30 days for posts wp_trash_post() marked.
+	test( 'AC22 a product retired by the repoint has its own status, not the trash', async ( { page } ) => {
+		const otherUrl = `https://www.example.com/${ unique( 'f1-ac22-other' ) }`;
+		const mine = createProduct( { name: unique( 'F1 AC22 mine' ), url: `https://www.example.com/${ unique( 'f1-ac22-mine' ) }` } );
+		const other = createProduct( { name: unique( 'F1 AC22 other' ), url: otherUrl } );
+
+		// The repoint's own route, as the dialog's Confirm calls it (AC15 drives the dialog).
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ mine }` );
+		await page.evaluate( ( [ from, to, url ] ) => ( window as unknown as { wp: { apiFetch: ( o: object ) => Promise< unknown > } } ).wp.apiFetch( {
+			path: `/affibloom/v1/products/${ from }/repoint`,
+			method: 'POST',
+			data: { to, url },
+		} ), [ mine, other, otherUrl ] as const );
+
+		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'affibloom_retired' );
+		expect( wp( 'post', 'meta', 'list', String( mine ), '--keys=_wp_trash_meta_time', '--format=count' ) ).toBe( '0' );
+		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_repointed_to' ) ).toBe( String( other ) );
+		// Not published, so its page sends the editor to the Dashboard (Task 14A), and the list does not show it.
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ mine }` );
+		await expect( page ).toHaveURL( /page=affibloom(&|$)/ );
+		await expect( page.locator( `tr[data-product-id="${ mine }"]` ) ).toHaveCount( 0 );
 	} );
 } );
