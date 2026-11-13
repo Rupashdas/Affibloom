@@ -278,7 +278,16 @@ $soon_tabs   = array(
 	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
-	<?php $this->render( 'admin/partials/delete-modal' ); ?>
+	<?php
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'    => 'affibloom-delete-modal',
+			'title' => __( 'Delete This Link?', 'affibloom' ),
+			'text'  => __( "If deleted, you won't be able to get it back.", 'affibloom' ),
+		)
+	);
+	?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 </div>

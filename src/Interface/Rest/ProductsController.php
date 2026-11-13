@@ -70,6 +70,25 @@ final class ProductsController implements Module {
 						),
 					),
 				),
+				// The Dashboard's selection bar → Delete (Task 17B): the ticked rows to the trash, as Lasso's
+				// lasso_bulk_remove_links. At most a page of them: 50 is the largest page size.
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_many' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+					'args'                => array(
+						'ids' => array(
+							'type'     => 'array',
+							'items'    => array(
+								'type'    => 'integer',
+								'minimum' => 1,
+							),
+							'minItems' => 1,
+							'maxItems' => 50,
+							'required' => true,
+						),
+					),
+				),
 			)
 		);
 
@@ -221,6 +240,20 @@ final class ProductsController implements Module {
 				),
 			)
 		);
+	}
+
+	/**
+	 * DELETE /products?ids[]=…: moves the ticked products to the trash (F1 requirements 11, X7, D33, D39, D40). IDs that
+	 * are not published products are skipped, as Lasso skips records it cannot edit; the answer lists those trashed.
+	 * WordPress has already refused anything but 1-50 positive integers (400 rest_invalid_param).
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response 200 { deleted: [ids] }.
+	 */
+	public function delete_many( WP_REST_Request $request ): WP_REST_Response {
+		$ids = array_map( 'intval', (array) $request['ids'] );
+
+		return new WP_REST_Response( array( 'data' => array( 'deleted' => $this->products->trash( $ids ) ) ) );
 	}
 
 	/**

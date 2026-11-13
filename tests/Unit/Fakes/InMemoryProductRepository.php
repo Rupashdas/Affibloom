@@ -137,6 +137,19 @@ final class InMemoryProductRepository implements ProductRepository {
 		return true;
 	}
 
+	/** @var list<int> Trashed product IDs, in order. */
+	public array $trashed = array();
+
+	/** A trashed product leaves the published list, as the trash takes it out of every query; refused as delete() is. */
+	public function trash( int $id ): bool {
+		if ( ! $this->deletes ) {
+			return false;
+		}
+		$this->trashed[] = $id;
+		$this->saved     = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $id ) );
+		return true;
+	}
+
 	/** Every saved product counts as published; the ASIN is compared without case, as MySQL's collation does. */
 	public function find_amazon( string $asin, string $country ): ?Product {
 		foreach ( $this->saved as $product ) {

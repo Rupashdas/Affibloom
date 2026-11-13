@@ -98,6 +98,25 @@ final class ProductService {
 	}
 
 	/**
+	 * Delete on the Dashboard's selection bar (Task 17B; F1 requirements 11, X7, D33, D39): each published product among
+	 * the IDs goes to the trash, once; an ID that is not one (gone, already trashed, another post type) is skipped, as
+	 * Lasso skips records it cannot edit, and so is one the storage refuses. Whether any is in use is checked from Task
+	 * 36 on, and then nothing is trashed (Lasso's all-or-nothing, D35).
+	 *
+	 * @param list<int> $ids The ticked products' IDs.
+	 * @return list<int> The IDs trashed, in the order given.
+	 */
+	public function trash( array $ids ): array {
+		$trashed = array();
+		foreach ( array_values( array_unique( $ids ) ) as $id ) {
+			if ( null !== $this->get( $id ) && $this->products->trash( $id ) ) {
+				$trashed[] = $id;
+			}
+		}
+		return $trashed;
+	}
+
+	/**
 	 * Save Changes on the product page: the fields sent are cleaned by Lasso's rules (Task 15A) and a Primary URL by
 	 * the add flow's (Task 15B), then stored on the same product, all or nothing; a field not sent keeps its stored
 	 * value. Every refusal is reported together: an empty name, an empty Primary URL (Lasso's one sentence for both),

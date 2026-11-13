@@ -263,6 +263,29 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The Dashboard's delete (Task 17B), as Lasso's lasso_bulk_remove_links: the status becomes trash through
+	 * wp_update_post(), not wp_trash_post(). wp_trash_post() writes _wp_trash_meta_time, which WordPress's daily
+	 * wp_scheduled_delete() reads to delete posts trashed 30 days ago; Lasso's way sets no such mark, so a trashed
+	 * product stays until its link is added again (F1 X11, D40). wp_insert_post() still gives the slug its __trashed
+	 * suffix, so a new product may take the name.
+	 *
+	 * @param int $id A stored product's ID.
+	 * @return bool False when WordPress refused it.
+	 */
+	public function trash( int $id ): bool {
+		$result = wp_update_post(
+			array(
+				'ID'          => $id,
+				'post_status' => 'trash',
+			),
+			true
+		);
+
+		// With $wp_error true, WordPress reports every refusal (no such post included) as a WP_Error, never as 0.
+		return ! is_wp_error( $result );
+	}
+
+	/**
 	 * One page of the published products that match the search, most recently changed first (Lasso's Dashboard
 	 * order).
 	 *

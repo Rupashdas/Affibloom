@@ -76,4 +76,33 @@ final class ProductServiceDeleteTest extends TestCase {
 		$this->expectException( ProductNotFound::class );
 		$this->service()->delete( 0 );
 	}
+
+	/** The Dashboard's bulk delete (Task 17B; X7, D39): the published products among the IDs go to the trash, once each. */
+	public function test_the_ticked_products_go_to_the_trash_and_others_are_skipped(): void {
+		$one   = $this->product( 'one' );
+		$two   = $this->product( 'two' );
+		$kept  = $this->product( 'kept' );
+		$taken = $this->service()->trash( array( (int) $one->id, 999, (int) $two->id, (int) $one->id ) );
+
+		self::assertSame( array( (int) $one->id, (int) $two->id ), $taken );
+		self::assertSame( array( (int) $one->id, (int) $two->id ), $this->repo->trashed );
+		self::assertNull( $this->repo->get( (int) $one->id ) );
+		self::assertNotNull( $this->repo->get( (int) $kept->id ) );
+	}
+
+	public function test_a_product_already_in_the_trash_is_skipped(): void {
+		$one = $this->product( 'one' );
+		$this->service()->trash( array( (int) $one->id ) );
+
+		self::assertSame( array(), $this->service()->trash( array( (int) $one->id ) ) );
+		self::assertSame( array( (int) $one->id ), $this->repo->trashed );
+	}
+
+	public function test_a_product_the_storage_refuses_is_not_reported_as_trashed(): void {
+		$one                 = $this->product( 'one' );
+		$this->repo->deletes = false;
+
+		self::assertSame( array(), $this->service()->trash( array( (int) $one->id ) ) );
+		self::assertNotNull( $this->repo->get( (int) $one->id ) );
+	}
 }

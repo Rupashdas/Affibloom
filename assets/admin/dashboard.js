@@ -1,7 +1,7 @@
 /* global wp */
 /**
- * Affibloom Dashboard: Lasso's selection (Task 13C), the list without page reloads (Task 13D), the filters panel with
- * saved views (Task 13E), and the row's quick edit (Tasks 16A-16C).
+ * Affibloom Dashboard: Lasso's selection (Tasks 13C and 17B), the list without page reloads (Task 13D), the filters
+ * panel with saved views (Task 13E), the row's quick edit (Tasks 16A-16C), and the selection's Delete (Task 17B).
  *
  * The server renders every piece of markup (the list, the saved-view bar) with the same partials the page printed,
  * so this file never builds a row or a pill: it asks, swaps what comes back in, and keeps the address bar in step
@@ -17,31 +17,35 @@
 	}
 
 	/* ---------------------------------------------------------------------------------------------------------
-	 * Selection (Task 13C), as Lasso's (view-js.php, dashboard_selected_ids): a row's box, the page's box, and the
-	 * bar that appears with the first tick, with Select All (every product in the list, on every page) and Clear
-	 * Selection. Delete and Add to Group arrive with Task 17 and the Groups area. Every listener is on the list
-	 * region, so the rows can be replaced and the selection survives: "all" is a mode with the rows unticked since.
+	 * Selection, as Lasso's (view-js.php, dashboard_selected_ids; Tasks 13C and 17B, F1 D36): a row's box, the page's
+	 * box, and the bar that appears with the first tick ("1 link selected", "N links selected"). The selection is the
+	 * page's: Select All ticks the page's rows, and every list load keeps only the IDs it draws, so Delete never reaches
+	 * a product the editor cannot see. Every listener is on the list region, since the rows are replaced.
 	 * ------------------------------------------------------------------------------------------------------- */
 
 	var countLabel = bar.querySelector( '.affibloom-selection__count' );
 	var selectAll = bar.querySelector( '[data-select-all]' );
-	var selection = { all: false, ids: {}, except: {} };
+	var selected = {};
 
-	function total() {
-		var card = region.querySelector( '[data-total]' );
-		return card ? parseInt( card.getAttribute( 'data-total' ), 10 ) || 0 : 0;
+	function ids() {
+		return Object.keys( selected );
 	}
 
-	function isSelected( id ) {
-		return selection.all ? ! selection.except[ id ] : !! selection.ids[ id ];
-	}
-
-	function count() {
-		return selection.all ? total() - Object.keys( selection.except ).length : Object.keys( selection.ids ).length;
-	}
-
+	/** The page's boxes; a disabled one (a product in use, Task 36) cannot be ticked, as Lasso's. */
 	function rowBoxes() {
 		return Array.prototype.slice.call( region.querySelectorAll( 'tbody .affibloom-check' ) );
+	}
+
+	/**
+	 * A count in words from an element's one / many templates: data-one and data-many, or with a prefix
+	 * (data-deleted-one …).
+	 *
+	 * @param {Element} element Holds the templates.
+	 * @param {number}  n       The count.
+	 * @param {string}  prefix  The attributes' prefix, '' for data-one / data-many.
+	 */
+	function counted( element, n, prefix ) {
+		return element.getAttribute( 'data-' + prefix + ( 1 === n ? 'one' : 'many' ) ).replace( '%s', n.toLocaleString() );
 	}
 
 	/** Makes the boxes, the rows and the bar say what the selection is. */
@@ -49,7 +53,7 @@
 		var boxes = rowBoxes();
 		var ticked = 0;
 		boxes.forEach( function ( box ) {
-			var on = isSelected( box.value );
+			var on = !! selected[ box.value ];
 			box.checked = on;
 			box.closest( 'tr' ).classList.toggle( 'is-selected', on );
 			ticked += on ? 1 : 0;
@@ -61,10 +65,9 @@
 			page.indeterminate = ticked > 0 && ticked < boxes.length;
 		}
 
-		var n = count();
+		var n = ids().length;
 		bar.hidden = 0 === n;
-		countLabel.textContent = countLabel.getAttribute( 'data-template' ).replace( '%s', n.toLocaleString() );
-		selectAll.hidden = selection.all && 0 === Object.keys( selection.except ).length;
+		countLabel.textContent = 0 === n ? '' : counted( countLabel, n, '' );
 
 		// With rows ticked, the selection bar takes the saved-view bar's place in the toolbar.
 		var views = document.querySelector( '[data-views]' );
@@ -73,20 +76,28 @@
 		}
 	}
 
-	/** Ticks or unticks a row: in "all" mode an untick is remembered as an exception. */
 	function set( id, on ) {
-		var list = selection.all ? selection.except : selection.ids;
-		if ( on !== selection.all ) {
-			list[ id ] = true;
+		if ( on ) {
+			selected[ id ] = true;
 		} else {
-			delete list[ id ];
+			delete selected[ id ];
 		}
 	}
 
 	function clear() {
-		selection.all = false;
-		selection.ids = {};
-		selection.except = {};
+		selected = {};
+		sync();
+	}
+
+	/** After a list load: only the rows drawn stay selected (Lasso filters dashboard_selected_ids the same way). */
+	function keepDrawn() {
+		var drawn = {};
+		rowBoxes().forEach( function ( box ) {
+			if ( selected[ box.value ] ) {
+				drawn[ box.value ] = true;
+			}
+		} );
+		selected = drawn;
 		sync();
 	}
 
@@ -97,7 +108,9 @@
 		}
 		if ( box.hasAttribute( 'data-select-page' ) ) {
 			rowBoxes().forEach( function ( row ) {
-				set( row.value, box.checked );
+				if ( ! row.disabled ) {
+					set( row.value, box.checked );
+				}
 			} );
 		} else {
 			set( box.value, box.checked );
@@ -106,9 +119,11 @@
 	} );
 
 	selectAll.addEventListener( 'click', function () {
-		selection.all = true;
-		selection.ids = {};
-		selection.except = {};
+		rowBoxes().forEach( function ( box ) {
+			if ( ! box.disabled ) {
+				set( box.value, true );
+			}
+		} );
 		sync();
 	} );
 	bar.querySelector( '[data-clear-selection]' ).addEventListener( 'click', clear );
@@ -247,7 +262,6 @@
 				return;
 			}
 			var data = response.data;
-			var otherList = data.term !== current.s || data.link_type !== current.link_type;
 			current = { s: data.term, link_type: data.link_type, paged: data.page, per_page: data.per_page };
 
 			region.innerHTML = data.html;
@@ -256,11 +270,7 @@
 			if ( remember ) {
 				window.history.pushState( current, '', data.url );
 			}
-			if ( otherList ) {
-				clear(); // A different list: the old selection does not belong to it.
-			} else {
-				sync();
-			}
+			keepDrawn();
 			shownUrl = window.location.href;
 			reflect( ! remember );
 			announce();
@@ -824,4 +834,57 @@
 		event.preventDefault();
 		event.returnValue = '';
 	} );
+
+	/* ---------------------------------------------------------------------------------------------------------
+	 * Delete on the selection bar (Task 17B; F1 requirements 11, X7, D36-D40), as Lasso's dashboard_process_delete_links:
+	 * "Delete the selected links?", then DELETE /affibloom/v1/products?ids[]=… moves the ticked rows to the trash; the
+	 * selection is cleared, the dialog closes and the same list is loaded again (the server shows the last page when
+	 * this one is now past it), with "N products deleted.". The button goes through the quick edit's guard (D38): the
+	 * reload would wipe an open row's edits. A failure keeps the selection and shows the failure toast.
+	 * ------------------------------------------------------------------------------------------------------- */
+
+	var bulkDelete = document.getElementById( 'affibloom-bulk-delete' );
+	var deleteSelected = bar.querySelector( '[data-delete-selected]' );
+	if ( bulkDelete && deleteSelected ) {
+		var confirmBulk = bulkDelete.querySelector( '[data-delete-confirm]' );
+		var confirmLabel = confirmBulk.textContent;
+		var deleting = false;
+		var deletingNow = function ( on ) {
+			deleting = on;
+			confirmBulk.disabled = on;
+			confirmBulk.textContent = on ? confirmBulk.dataset.busyLabel : confirmLabel;
+		};
+
+		deleteSelected.addEventListener( 'click', function () {
+			guarded( function () {
+				if ( ids().length ) {
+					window.affibloomModal.show( bulkDelete, deleteSelected );
+				}
+			}, deleteSelected, false );
+		} );
+
+		confirmBulk.addEventListener( 'click', function () {
+			var chosen = ids();
+			if ( deleting || ! chosen.length ) {
+				return;
+			}
+			deletingNow( true );
+			var query = chosen.map( function ( id ) {
+				return 'ids[]=' + encodeURIComponent( id );
+			} ).join( '&' );
+			wp.apiFetch( { path: '/affibloom/v1/products?' + query, method: 'DELETE' } ).then( function ( response ) {
+				var gone = response.data.deleted.length;
+				deletingNow( false );
+				window.affibloomModal.hide();
+				clear();
+				load( current, false, true, function () {
+					window.affibloomToast( counted( bar, gone, 'deleted-' ), false );
+				} );
+			} ).catch( function ( error ) {
+				deletingNow( false );
+				window.affibloomModal.hide();
+				window.affibloomToast( error && error.message ? error.message : bulkDelete.dataset.failedText, true );
+			} );
+		} );
+	}
 } )();

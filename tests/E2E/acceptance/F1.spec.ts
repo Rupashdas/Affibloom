@@ -742,4 +742,51 @@ test.describe( 'F1 Product library', () => {
 		expect( () => wp( 'post', 'get', String( id ), '--field=ID' ) ).toThrow();
 		expect( wp( 'db', 'query', `SELECT COUNT(*) FROM wp_postmeta WHERE post_id = ${ id }`, '--skip-column-names' ).trim() ).toBe( '0' );
 	} );
+
+	// Task 17B (requirements 11, X5-X7, D35-D40): Lasso's Dashboard deletes the ticked rows into the trash, through
+	// wp_update_post, so WordPress's 30-day emptying never marks them; its selection is the page's.
+	test( 'AC21 the ticked Dashboard rows go to the trash; the selection is the page\'s', async ( { page } ) => {
+		const published = () => parseInt( wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=count' ), 10 );
+		while ( published() < 13 ) {
+			createProduct( { name: unique( 'F1 AC21 filler' ), url: `https://www.example.com/${ unique( 'f1-ac21' ) }` } );
+		}
+		// The three newest products are the first rows of page 1 (F19's order).
+		const kept = createProduct( { name: unique( 'F1 AC21 kept' ) } );
+		const first = createProduct( { name: unique( 'F1 AC21 first' ) } );
+		const second = createProduct( { name: unique( 'F1 AC21 second' ) } );
+		const bar = page.locator( '.affibloom-selection' );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10' );
+		await page.locator( `tr[data-product-id="${ first }"]` ).getByRole( 'checkbox' ).check();
+		await page.locator( `tr[data-product-id="${ second }"]` ).getByRole( 'checkbox' ).check();
+		await expect( bar ).toContainText( '2 links selected' );
+
+		await bar.getByRole( 'button', { name: 'Delete' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Delete the selected links?' } );
+		await expect( dialog ).toContainText( 'If deleted, you won\'t be able to get them back.' );
+		await dialog.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( bar ).toContainText( '2 links selected' );
+
+		await bar.getByRole( 'button', { name: 'Delete' } ).click();
+		await dialog.getByRole( 'button', { name: 'Delete', exact: true } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( '2 products deleted.' );
+		await expect( page.locator( `tr[data-product-id="${ first }"]` ) ).toHaveCount( 0 );
+		await expect( page.locator( `tr[data-product-id="${ second }"]` ) ).toHaveCount( 0 );
+		await expect( page.locator( `tr[data-product-id="${ kept }"]` ) ).toBeVisible();
+		await expect( bar ).toBeHidden();
+		for ( const id of [ first, second ] ) {
+			expect( wp( 'post', 'get', String( id ), '--field=post_status' ) ).toBe( 'trash' );
+			expect( wp( 'post', 'meta', 'list', String( id ), '--keys=_wp_trash_meta_time', '--format=count' ) ).toBe( '0' );
+		}
+		expect( wp( 'post', 'get', String( kept ), '--field=post_status' ) ).toBe( 'publish' );
+
+		// Select All ticks the page's rows only; another page drops them.
+		const rows = page.locator( '.affibloom-table tbody tr[data-product-id]' );
+		await page.locator( `tr[data-product-id="${ kept }"]` ).getByRole( 'checkbox' ).check();
+		await bar.getByRole( 'button', { name: 'Select All' } ).click();
+		await expect( bar ).toContainText( `${ await rows.count() } links selected` );
+		await page.locator( '.affibloom-pagination a.page-numbers', { hasText: /^2$/ } ).click();
+		await expect( page.locator( '.affibloom-pager__range' ) ).toContainText( '11-' );
+		await expect( bar ).toBeHidden();
+	} );
 } );

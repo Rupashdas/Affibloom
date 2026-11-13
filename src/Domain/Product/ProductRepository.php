@@ -119,4 +119,13 @@ interface ProductRepository {
 	 * @return bool False when the storage refused it.
 	 */
 	public function delete( int $id ): bool;
+
+	/**
+	 * Moves a stored product to the trash, where nothing lists it; it keeps everything stored on it (the Dashboard's
+	 * delete, Task 17B).
+	 *
+	 * @param int $id A stored product's ID.
+	 * @return bool False when the storage refused it.
+	 */
+	public function trash( int $id ): bool;
 }

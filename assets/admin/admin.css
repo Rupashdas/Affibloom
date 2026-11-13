@@ -1995,6 +1995,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-grid { grid-template-columns: 1fr; }
 	.affibloom-modal__foot .affibloom-button { width: 100%; }
 	.affibloom-pager { flex-direction: column; align-items: flex-start; }
+	/* The selection bar wraps to two lines on a phone: a card's corners, not a stretched pill. */
+	.affibloom-selection { padding: 8px 10px; border-radius: var(--affibloom-radius-card); }
 	.affibloom-search-kbd { display: none; }
 	.affibloom-admin .affibloom-band__search .affibloom-search { padding-right: 16px; }
 	/* Two tiles a row on a phone, so the five do not fill the first screen on their own. */

@@ -3,9 +3,6 @@
  * The Dashboard's list region: the products card (table and pager) or one of the two empty states. Task 13D
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
- * The card carries the list's numbers for the script: data-total (products behind the list, for "Select All")
- * and data-range (what the pager says, announced after a load).
- *
  * @package Affibloom
  * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string} $view
  */
@@ -26,7 +23,7 @@ $columns   = array(
 );
 ?>
 <?php if ( 0 === $products->total ) : ?>
-	<div class="affibloom-card affibloom-empty" data-total="0">
+	<div class="affibloom-card affibloom-empty">
 		<span class="affibloom-chip">
 			<?php $this->render( 'admin/partials/icon', array( 'name' => $searching ? 'info' : 'plus' ) ); ?>
 		</span>
@@ -43,7 +40,7 @@ $columns   = array(
 		<?php endif; ?>
 	</div>
 <?php else : ?>
-	<div class="affibloom-card affibloom-card--table" data-total="<?php echo esc_attr( (string) $products->total ); ?>">
+	<div class="affibloom-card affibloom-card--table">
 		<div class="affibloom-table-scroll">
 		<table class="affibloom-table">
 			<thead>

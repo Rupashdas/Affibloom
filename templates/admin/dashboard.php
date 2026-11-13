@@ -94,6 +94,17 @@ $placeholder = sprintf(
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/view-delete-modal' ); ?>
+	<?php
+	// The selection bar's Delete (Task 17B): Lasso's words, the ticked rows to the trash.
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'    => 'affibloom-bulk-delete',
+			'title' => __( 'Delete the selected links?', 'affibloom' ),
+			'text'  => __( "If deleted, you won't be able to get them back.", 'affibloom' ),
+		)
+	);
+	?>
 	<?php // Lasso's Dashboard carries the product page's two dialogs (dashboard.php 212-213) for its quick edit. ?>
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>

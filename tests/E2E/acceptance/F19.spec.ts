@@ -165,9 +165,9 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( row.getByRole( 'button', { name: 'Edit' } ) ).toBeEnabled();
 		await expect( row.getByRole( 'button', { name: 'Shortcode' } ) ).toBeDisabled();
 
-		// Lasso's selection bar appears with the first tick.
+		// Lasso's selection bar appears with the first tick, in Lasso's words (Task 17B, F1 D36).
 		await row.getByRole( 'checkbox' ).check();
-		await expect( page.locator( '.affibloom-selection' ) ).toContainText( '1 selected' );
+		await expect( page.locator( '.affibloom-selection' ) ).toContainText( '1 link selected' );
 	} );
 
 	test( 'AC12 search, pages and page size load without a page reload, and Back restores the list', async ( { page } ) => {
