@@ -159,6 +159,8 @@ while read -r plugin; do
 done < tools/local-deactivate.txt
 
 $WP plugin activate lasso affibloom --quiet
+# The snapshot's CSS links two button icons to files that never existed (F28 D4); put them right after every reset.
+$WP eval-file tools/local-icon-links.php
 $WP rewrite flush --quiet
 $WP cache flush --quiet
 

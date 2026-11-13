@@ -85,6 +85,8 @@ for Tasks 14F-14G. Register item **U11** (an addition: Lasso has no picker).
   `2026/11/youtube-icon.svg` (attachment 15696), and the stored set re-imported. **Production's Additional CSS still
   needs the same two changes and the SVG uploaded** (the user's step; production is read only until Task 42). Affibloom
   now checks each image's file (the attachment's, or the uploads file its link names) and flags a missing one (AC7);
-  a link outside uploads is not flagged, since Affibloom cannot tell.
+  a link outside uploads is not flagged, since Affibloom cannot tell. **A reset of the Local copy undid the fix** (the
+  snapshot is production's CSS), so `tools/reset-local.sh` now runs `tools/local-icon-links.php` after every reset; it
+  repoints the two links, restores the SVG and its attachment, and repoints the stored set's two entries.
 - **D3 (Claude): the picker enhances the existing field.** The posted value is still the field's text (composed by the
   script), so every cleaner, route and test that reads it today is unchanged (Task 6 decision 5).
