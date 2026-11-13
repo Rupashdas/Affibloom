@@ -855,6 +855,10 @@
 .affibloom-tile__number { color: var(--affibloom-ink-900); font: 700 26px/30px var(--affibloom-font); }
 .affibloom-tile__label { color: var(--affibloom-ink-600); font-size: 13px; }
 
+/* The search, on its own row above the table, as Lasso has it above its list (Task 13B). */
+.affibloom-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.affibloom-admin .affibloom-search { max-width: 360px; border-radius: var(--affibloom-radius-full); padding-left: 16px; }
+
 .affibloom-card--table { overflow: hidden; }
 /*
  * Fixed layout so a long destination link is cut with an ellipsis instead of widening the table past the

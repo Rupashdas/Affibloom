@@ -5,6 +5,7 @@ use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Product\SearchTerm;
 
 /**
  * Products kept in memory, numbered from 100, found by their link's key, their ASIN and store, or
@@ -21,8 +22,16 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	/** Newest saved first, which is this fake's stand-in for "most recently changed". */
-	public function page( int $page, int $per_page ): ProductPage {
+	public function page( SearchTerm $term, int $page, int $per_page ): ProductPage {
 		$all = array_reverse( $this->saved );
+		if ( ! $term->is_empty() ) {
+			$all = array_values(
+				array_filter(
+					$all,
+					static fn( Product $product ): bool => false !== stripos( $product->name, $term->text() )
+				)
+			);
+		}
 
 		return new ProductPage(
 			array_values( array_slice( $all, ( max( 1, $page ) - 1 ) * $per_page, $per_page ) ),
@@ -30,6 +39,10 @@ final class InMemoryProductRepository implements ProductRepository {
 			max( 1, $page ),
 			$per_page
 		);
+	}
+
+	public function count(): int {
+		return count( $this->saved );
 	}
 
 	public function find_by_url_key( string $key ): ?Product {

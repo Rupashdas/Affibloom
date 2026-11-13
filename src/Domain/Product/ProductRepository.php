@@ -50,10 +50,18 @@ interface ProductRepository {
 	 * One page of the published products, most recently changed first, as Lasso orders its Dashboard
 	 * (Lasso_DB::get_dashboard_query_without_filter: ORDER BY p.post_modified DESC).
 	 *
-	 * @param int $page     Page number, from 1.
-	 * @param int $per_page Products per page.
+	 * @param SearchTerm $term     What to look for; an empty term lists everything.
+	 * @param int        $page     Page number, from 1.
+	 * @param int        $per_page Products per page.
 	 */
-	public function page( int $page, int $per_page ): ProductPage;
+	public function page( SearchTerm $term, int $page, int $per_page ): ProductPage;
+
+	/**
+	 * How many published products the library holds, whatever is being searched for. Lasso counts the same way
+	 * for its search box's placeholder ("Search all 263 links…": Lasso_DB::get_dashboard_link_count with no
+	 * search).
+	 */
+	public function count(): int;
 
 	/**
 	 * Gives a stored product a new name; returns it renamed.

@@ -17,6 +17,7 @@ use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
 use RuntimeException;
@@ -48,11 +49,19 @@ final class ProductService {
 	/**
 	 * One page of the Dashboard list, most recently changed first.
 	 *
-	 * @param int $page     Page number, from 1.
-	 * @param int $per_page Products per page.
+	 * @param SearchTerm $term     What to look for; an empty term lists everything.
+	 * @param int        $page     Page number, from 1.
+	 * @param int        $per_page Products per page.
 	 */
-	public function list( int $page, int $per_page ): ProductPage {
-		return $this->products->page( $page, $per_page );
+	public function list( SearchTerm $term, int $page, int $per_page ): ProductPage {
+		return $this->products->page( $term, $page, $per_page );
+	}
+
+	/**
+	 * How many products the library holds, whatever is being searched for.
+	 */
+	public function count(): int {
+		return $this->products->count();
 	}
 
 	/**

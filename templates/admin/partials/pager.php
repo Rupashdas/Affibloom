@@ -5,7 +5,7 @@
  * screen needs no JavaScript; without JavaScript its Apply button submits it.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +30,9 @@ $links    = paginate_links(
 <div class="affibloom-pager">
 	<form class="affibloom-pager__size" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
 		<input type="hidden" name="page" value="<?php echo esc_attr( AdminMenu::SLUG ); ?>">
+		<?php if ( '' !== $view['term'] ) : ?>
+			<input type="hidden" name="s" value="<?php echo esc_attr( $view['term'] ); ?>">
+		<?php endif; ?>
 		<label class="screen-reader-text" for="affibloom-per-page"><?php esc_html_e( 'Links per page', 'affibloom' ); ?></label>
 		<select id="affibloom-per-page" class="affibloom-select" name="per_page" onchange="this.form.submit()">
 			<?php foreach ( ProductService::PER_PAGE_OPTIONS as $option ) : ?>

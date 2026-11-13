@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Template;
 
 /**
@@ -39,14 +40,18 @@ final class DashboardScreen {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- a read-only list, with no action behind it.
 		$asked = isset( $_GET['per_page'] ) ? absint( wp_unslash( $_GET['per_page'] ) ) : 0;
 		$page  = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1;
+		$typed = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$per_page = $this->per_page->choose( $asked );
+		$term     = SearchTerm::from_input( $typed );
 
 		$this->template->render(
 			'admin/dashboard',
 			array(
-				'products'    => $this->products->list( $page, $per_page ),
+				'products'    => $this->products->list( $term, $page, $per_page ),
+				'term'        => $term->text(),
+				'library'     => $this->products->count(),
 				'notice'      => $this->notice->message(),
 				'notice_kind' => $this->notice->kind(),
 			)

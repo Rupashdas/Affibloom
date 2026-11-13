@@ -14,6 +14,7 @@ use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Product\SearchTerm;
 use RuntimeException;
 use WP_Post;
 use WP_Query;
@@ -22,6 +23,9 @@ use WP_Query;
  * Products as affibloom_product posts with _affibloom_* meta (docs/spec/interface.md, section 4).
  */
 final class PostTypeProductRepository implements ProductRepository {
+
+	/** The query variable that carries the search to the WHERE filter, and nothing else. */
+	private const SEARCH_VAR = 'affibloom_search';
 
 	/**
 	 * Inserts the post with its meta in one call, as Lasso's meta_input does. Updating arrives with Task 15.
@@ -147,7 +151,8 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
-	 * One page of the published products, most recently changed first (Lasso's Dashboard order).
+	 * One page of the published products that match the search, most recently changed first (Lasso's Dashboard
+	 * order).
 	 *
 	 * The total comes from its own query, as Lasso's does (Lasso_DB::get_dashboard_link_count), not from
 	 * WP_Query's found_posts: on MySQL 8.4 a page past the end makes SQL_CALC_FOUND_ROWS report 0, which would
@@ -157,10 +162,11 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * WP_Query primes the meta cache for the page, so building each product reads no further rows; the term
 	 * cache is left alone because no column on this screen shows a taxonomy.
 	 *
-	 * @param int $page     Page number, from 1.
-	 * @param int $per_page Products per page.
+	 * @param SearchTerm $term     What to look for; an empty term lists everything.
+	 * @param int        $page     Page number, from 1.
+	 * @param int        $per_page Products per page.
 	 */
-	public function page( int $page, int $per_page ): ProductPage {
+	public function page( SearchTerm $term, int $page, int $per_page ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -171,33 +177,107 @@ final class PostTypeProductRepository implements ProductRepository {
 			'update_post_term_cache' => false,
 		);
 
-		$counter = new WP_Query(
-			$list + array(
-				'fields'         => 'ids',
-				'posts_per_page' => 1,
-			)
-		);
-		$total   = (int) $counter->found_posts;
-		$pages   = max( 1, (int) ceil( $total / $per_page ) );
-		$wanted  = min( max( 1, $page ), $pages );
+		if ( ! $term->is_empty() ) {
+			$list[ self::SEARCH_VAR ] = $term;
+		}
 
-		$items = array();
-		if ( $total > 0 ) {
-			$query = new WP_Query(
+		$filter = $this->search_filter();
+		add_filter( 'posts_where', $filter, 10, 2 );
+
+		try {
+			$counter = new WP_Query(
 				$list + array(
-					'posts_per_page' => $per_page,
-					'paged'          => $wanted,
-					'no_found_rows'  => true,
+					'fields'         => 'ids',
+					'posts_per_page' => 1,
 				)
 			);
-			foreach ( $query->posts as $post ) {
-				if ( $post instanceof WP_Post ) {
-					$items[] = $this->hydrate( $post );
+			$total   = (int) $counter->found_posts;
+			$pages   = max( 1, (int) ceil( $total / $per_page ) );
+			$wanted  = min( max( 1, $page ), $pages );
+
+			$items = array();
+			if ( $total > 0 ) {
+				$query = new WP_Query(
+					$list + array(
+						'posts_per_page' => $per_page,
+						'paged'          => $wanted,
+						'no_found_rows'  => true,
+					)
+				);
+				foreach ( $query->posts as $post ) {
+					if ( $post instanceof WP_Post ) {
+						$items[] = $this->hydrate( $post );
+					}
 				}
 			}
+		} finally {
+			remove_filter( 'posts_where', $filter, 10 );
 		}
 
 		return new ProductPage( $items, $total, $wanted, $per_page );
+	}
+
+	/**
+	 * How many published products the library holds. WordPress counts a post type's statuses once and caches
+	 * them, so the search box's placeholder and the Products tile cost no query of their own.
+	 */
+	public function count(): int {
+		$counts = wp_count_posts( ProductPostType::NAME );
+
+		return isset( $counts->publish ) ? (int) $counts->publish : 0;
+	}
+
+	/**
+	 * Lasso's Dashboard search, as a WHERE clause for the two queries above and for them only: the filter does
+	 * nothing unless the query carries the term (Lasso_DB::build_dashboard_search_term_string). It is a WHERE
+	 * and not WordPress's own search, which matches the title and the content word by word and would find a
+	 * product by neither its link nor its ASIN; the query is also not marked as a search, so nothing else on
+	 * the site treats this admin list as one.
+	 *
+	 * Task 15 adds `_affibloom_url2` to the meta keys when the second button's link exists: 60 of the 263 live
+	 * Lasso records have one, and Lasso's search matches it. URL variants join if that subsystem is ever built.
+	 *
+	 * @return callable(string, \WP_Query): string
+	 */
+	private function search_filter(): callable {
+		global $wpdb;
+
+		return static function ( string $where, WP_Query $query ) use ( $wpdb ): string {
+			$term = $query->get( self::SEARCH_VAR );
+			if ( ! $term instanceof SearchTerm || $term->is_empty() ) {
+				return $where;
+			}
+
+			$like = $term->like( static fn( string $value ): string => $wpdb->esc_like( $value ) );
+			$arms = array(
+				$wpdb->prepare( "{$wpdb->posts}.post_title LIKE %s", $like ),
+				$wpdb->prepare(
+					"EXISTS ( SELECT 1 FROM {$wpdb->postmeta} AS affibloom_m
+						WHERE affibloom_m.post_id = {$wpdb->posts}.ID
+							AND affibloom_m.meta_key IN ( '_affibloom_url', '_affibloom_asin' )
+							AND affibloom_m.meta_value LIKE %s )",
+					$like
+				),
+			);
+
+			$id = $term->post_id();
+			if ( null !== $id ) {
+				$arms[] = $wpdb->prepare( "{$wpdb->posts}.ID = %d", $id );
+			}
+
+			$asin = $term->asin();
+			if ( null !== $asin ) {
+				$arms[] = $wpdb->prepare(
+					"EXISTS ( SELECT 1 FROM {$wpdb->postmeta} AS affibloom_asin
+						WHERE affibloom_asin.post_id = {$wpdb->posts}.ID
+							AND affibloom_asin.meta_key = '_affibloom_asin'
+							AND affibloom_asin.meta_value = %s )",
+					$asin
+				);
+			}
+
+			return $where . ' AND ( ' . implode( ' OR ', $arms ) . ' ) ';
+		};
 	}
 
 	/**

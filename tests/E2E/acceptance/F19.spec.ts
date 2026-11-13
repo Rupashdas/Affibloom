@@ -3,7 +3,8 @@ import { blockTrackers, createProduct, unique, wp } from '../utils';
 
 // F19 Dashboard list (docs/features/F19/requirements.md).
 // Lasso's rules: published only, most recently changed first, 10 per page from 10/25/50, a "1-10 of 263"
-// range line, page links only when there is more than one page.
+// range line, page links only when there is more than one page, and a search that matches the name, the
+// destination link, the ASIN and the product's ID, with spaces as wildcards.
 
 /** Published products on the site right now. */
 function total(): number {
@@ -20,6 +21,12 @@ function atLeast( wanted: number ): number {
 
 const rows = ( page: Page ) => page.locator( '.affibloom-table tbody tr[data-product-id]' );
 const range = ( page: Page ) => page.locator( '.affibloom-pager__range' );
+
+/** Types a term in the Dashboard's search box and presses Enter, as Lasso searches on Enter. */
+async function search( page: Page, term: string ): Promise< void > {
+	await page.getByLabel( 'Search' ).fill( term );
+	await page.getByLabel( 'Search' ).press( 'Enter' );
+}
 
 test.describe( 'F19 Dashboard list', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
@@ -72,13 +79,92 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( range( page ) ).toHaveText( `1-${ count } of ${ count }` );
 	} );
 
-	// 13B: the search box.
-	test.fixme( 'AC5 a word in the name finds the product, and the search survives a reload', async () => {} );
-	test.fixme( 'AC6 the whole destination link finds the product', async () => {} );
-	test.fixme( 'AC7 an ASIN finds its product, and an ID finds that product', async () => {} );
-	test.fixme( 'AC8 two words find a name that holds both, in that order', async () => {} );
-	test.fixme( 'AC9 a search that matches nothing says so', async () => {} );
-	// 13B too: an empty library needs every product trashed and put back, which only makes sense once the
-	// search's own empty state exists to tell the two apart.
-	test.fixme( 'AC10 an empty library shows the Add empty state, not the search message', async () => {} );
+	test( 'AC5 a word in the name finds the product, and the search survives a reload', async ( { page } ) => {
+		const word = unique( 'kestrel' );
+		const id = createProduct( { name: `F19 AC5 ${ word } shoe` } );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await search( page, word );
+
+		await expect( rows( page ) ).toHaveCount( 1 );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+
+		await page.reload();
+		await expect( page.getByLabel( 'Search' ) ).toHaveValue( word );
+		await expect( rows( page ) ).toHaveCount( 1 );
+	} );
+
+	test( 'AC6 the whole destination link finds the product', async ( { page } ) => {
+		const url = `https://www.example.com/${ unique( 'f19-ac6' ) }?tag=vbvault-20`;
+		const id = createProduct( { name: unique( 'F19 AC6' ), url } );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await search( page, url );
+
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+	} );
+
+	test( 'AC7 an ASIN finds its product, and an ID finds that product', async ( { page } ) => {
+		const asin = ( 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase() ).padEnd( 10, 'X' ).slice( 0, 10 );
+		const id = createProduct( {
+			name: unique( 'F19 AC7' ),
+			type: 'amazon',
+			asin,
+			url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20`,
+		} );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await search( page, asin.toLowerCase() );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+
+		await search( page, String( id ) );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+	} );
+
+	test( 'AC8 two words find a name that holds both, in that order', async ( { page } ) => {
+		const tail = unique( 'ac8' );
+		const id = createProduct( { name: `Mizuno Wave Momentum ${ tail }` } );
+		createProduct( { name: `Momentum Wave Asics ${ tail }` } );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await search( page, `Wave Momentum ${ tail }` );
+
+		await expect( rows( page ) ).toHaveCount( 1 );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+	} );
+
+	test( 'AC9 a search that matches nothing says so, and clearing it brings the list back', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await search( page, unique( 'nothingmatchesthis' ) );
+
+		await expect( page.getByText( 'No products match your search.' ) ).toBeVisible();
+		await expect( page.locator( '.affibloom-table' ) ).toHaveCount( 0 );
+
+		await search( page, '' );
+		await expect( rows( page ).first() ).toBeVisible();
+	} );
+
+	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
+		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
+			.split( /\s+/ )
+			.filter( Boolean );
+
+		try {
+			// Parked as drafts, not trashed: WP-CLI refuses to trash this post type (it is not public), and
+			// wp_untrash_post() brings a product back as a draft anyway. The list shows published products
+			// only, so drafting them empties it exactly as an empty library would be.
+			if ( ids.length ) {
+				wp( 'post', 'update', ...ids, '--post_status=draft' );
+			}
+
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			await expect( page.getByText( 'No products yet.' ) ).toBeVisible();
+			await expect( page.getByText( 'No products match your search.' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-table' ) ).toHaveCount( 0 );
+		} finally {
+			if ( ids.length ) {
+				wp( 'post', 'update', ...ids, '--post_status=publish' );
+			}
+		}
+	} );
 } );
