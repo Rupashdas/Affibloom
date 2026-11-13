@@ -31,6 +31,8 @@ final class Notice {
 			// The product page's tracking-ID offer (Task 14D): Lasso's "Tracking ID Saved!", and why one was not.
 			'tracking-saved'   => __( 'Tracking ID Saved!', 'affibloom' ),
 			'tracking-refused' => __( 'That was not a valid Tracking ID, so it was not saved.', 'affibloom' ),
+			// A product page save that changed the product's type reloads the page (Task 15B, F1 D18); U6's wording.
+			'product-saved'    => __( 'Product saved.', 'affibloom' ),
 			default        => '',
 		};
 	}

@@ -69,7 +69,7 @@ $soon_tabs   = array(
 			?>
 
 			<?php // Save Changes, or Enter in a text field, sends the form through product-save.js (Task 15A). ?>
-			<form id="affibloom-product-form" class="affibloom-product__form" data-product-id="<?php echo esc_attr( (string) $product->id ); ?>" novalidate
+			<form id="affibloom-product-form" class="affibloom-product__form" data-product-id="<?php echo esc_attr( (string) $product->id ); ?>" data-product-type="<?php echo esc_attr( $product->type->value ); ?>" novalidate
 				data-saved-text="<?php esc_attr_e( 'Product saved.', 'affibloom' ); ?>"
 				data-failed-text="<?php esc_attr_e( "Try again. For some reason your product didn't save.", 'affibloom' ); ?>"
 				data-empty-name="<?php esc_attr_e( 'Enter a URL Name', 'affibloom' ); ?>">

@@ -8,12 +8,13 @@
  * untouched one must not be sent back (D19); an Amazon product's read-only price is never sent. On success the page
  * shows what was stored (S15) and "Product saved." (U6); a refused field gets Lasso's sentence under it and the
  * failure toast. Not sent: Permalink, Groups, Detect Opportunities and Link Cloaking (placeholders, D4), the custom
- * fields (they save themselves, D3) and, until Task 15B, the Primary URL.
+ * fields (they save themselves, D3). A save that turns the product into an Amazon one, or the reverse, reloads the page
+ * with the toast, because the Amazon-only rows differ (Task 15B, D18).
  */
 ( function () {
 	'use strict';
 
-	var TEXTS = [ 'name', 'button_text', 'badge', 'disclosure', 'theme', 'image_url' ];
+	var TEXTS = [ 'name', 'url', 'button_text', 'badge', 'disclosure', 'theme', 'image_url' ];
 	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' ];
 	// Lasso's dialog closes a second after the answer, then the message shows (url-details.php 1980-1985).
 	var CLOSE_AFTER = 1000;
@@ -94,6 +95,7 @@
 		var bar = modal.querySelector( '[data-save-bar]' );
 		var line = modal.querySelector( '[data-save-text]' );
 		var title = document.getElementById( 'affibloom-product-title' );
+		var linkLine = document.querySelector( '.affibloom-product-url' );
 		var rich = [ richField( form, 'description', 'affibloom_description' ), richField( form, 'price', 'affibloom_price' ) ].filter( Boolean );
 		var saving = false;
 
@@ -189,10 +191,14 @@
 			}
 		};
 
-		// The page as stored (S15): the heading, the name, every button link, the image and the price.
+		// The page as stored (S15): the heading, the name, the links, the image and the price. The line under the heading
+		// is the destination until link cloaking exists (D5).
 		var showStored = function ( data, sent ) {
 			title.textContent = '' !== data.name ? data.name : form.dataset.emptyName;
 			field( 'name' ).value = data.name;
+			field( 'url' ).value = data.url;
+			linkLine.textContent = data.url;
+			linkLine.href = data.url;
 			// Blocks left empty were not stored (Buttons' rule); the others line up with the stored list.
 			extraBlocks().filter( function ( block ) {
 				return ! isEmpty( block );
@@ -250,6 +256,13 @@
 
 			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId, method: 'PATCH', data: sent } )
 				.then( function ( response ) {
+					if ( response.data.type !== form.dataset.productType ) {
+						var reload = new URL( window.location.href );
+						reload.searchParams.delete( 'is_duplicate' );
+						reload.searchParams.set( 'affibloom_notice', 'product-saved' );
+						window.location.assign( reload.toString() );
+						return;
+					}
 					closeDialog( function () {
 						showStored( response.data, sent );
 						toast( form.dataset.savedText, false );

@@ -85,14 +85,14 @@ final class ProductsController implements Module {
 	}
 
 	/**
-	 * The product page's fields and their types; WordPress refuses a wrong type (400), ProductInput applies Lasso's
-	 * rules to the rest. The Primary URL arrives with Task 15B.
+	 * The product page's fields and their types; WordPress refuses a wrong type (400), ProductInput and the service
+	 * apply Lasso's rules to the rest.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	private function field_args(): array {
 		$args = array();
-		foreach ( array( 'name', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure' ) as $field ) {
+		foreach ( array( 'name', 'url', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure' ) as $field ) {
 			$args[ $field ] = array( 'type' => 'string' );
 		}
 		foreach ( array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' ) as $field ) {

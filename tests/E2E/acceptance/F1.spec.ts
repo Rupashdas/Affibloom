@@ -91,6 +91,62 @@ test.describe( 'F1 Product library', () => {
 		}
 	} );
 
+	// Task 15B (requirements 9, S7, S8, D17, D18). External HTTP is blocked on this copy, so the followed short link
+	// (same ASIN kept as typed, another ASIN stored as its store link) is covered by unit tests, as F2 AC7 does.
+	test( 'AC14 a new Primary URL is stored by the add rules, with Lasso\'s name and image rule', async ( { page } ) => {
+		const stored = ( () => {
+			try {
+				return wp( 'option', 'get', 'affibloom_settings', '--format=json' );
+			} catch {
+				return '';
+			}
+		} )();
+		try {
+			setSettings( { tracking_id: 'vbvault-20', shorten_amazon_links: true, keep_title_when_url_replaced: true } );
+			const id = createProduct( {
+				name: 'Amazon',
+				type: 'amazon',
+				url: 'https://www.amazon.com/dp/B0F1AC14AA?tag=vbvault-20',
+				asin: 'B0F1AC14AA',
+				image_url: 'https://www.example.com/f1-ac14.jpg',
+			} );
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+			// Another ASIN on a placeholder name: tagged, renamed from the link, the image cleared.
+			await page.locator( '#affibloom-url' ).fill( 'https://www.amazon.com/Mikasa-V200W-Volleyball/dp/B0F1AC14BB?tag=someone-20' );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( 'https://www.amazon.com/Mikasa-V200W-Volleyball/dp/B0F1AC14BB?tag=vbvault-20' );
+			await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( 'Mikasa V200W Volleyball' );
+			await expect( page.locator( '#affibloom-image-url' ) ).toHaveValue( '' );
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_asin' ) ).toBe( 'B0F1AC14BB' );
+
+			// Another shop's link: the page reloads as a non-Amazon product, with the toast; the Amazon keys are gone.
+			await page.locator( '#affibloom-url' ).fill( 'www.example.com/f1-ac14' );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await page.waitForURL( /affibloom_notice=product-saved/ );
+			await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Product saved.' );
+			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( 'https://www.example.com/f1-ac14' );
+			await expect( page.locator( '#affibloom-permalink' ) ).toBeVisible();
+			await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( 'Mikasa V200W Volleyball' );
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_type' ) ).toBe( 'other' );
+			expect( wp( 'post', 'meta', 'list', String( id ), '--keys=_affibloom_asin', '--format=count' ) ).toBe( '0' );
+
+			// An empty Primary URL: Lasso's sentence under the field, nothing stored.
+			await page.locator( '#affibloom-url' ).fill( '' );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '#affibloom-url' ) ).toHaveAttribute( 'aria-invalid', 'true' );
+			await expect( page.getByText( 'Name and Primary Destination URL are required.' ) ).toBeVisible();
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_url' ) ).toBe( 'https://www.example.com/f1-ac14' );
+		} finally {
+			if ( stored ) {
+				wp( 'option', 'update', 'affibloom_settings', stored, '--format=json' );
+			} else {
+				wp( 'option', 'delete', 'affibloom_settings' );
+			}
+		}
+	} );
+
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {
 		const name = unique( 'F1 AC3' );
 		const id = createProduct( { name } );

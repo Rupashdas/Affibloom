@@ -13,6 +13,7 @@ use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\PlaceholderName;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
@@ -79,15 +80,16 @@ final class ProductService {
 	}
 
 	/**
-	 * Save Changes on the product page (Task 15A): the fields sent are cleaned by Lasso's rules and stored on the same
-	 * product, all or nothing; a field not sent keeps its stored value.
+	 * Save Changes on the product page: the fields sent are cleaned by Lasso's rules (Task 15A) and a Primary URL by
+	 * the add flow's (Task 15B), then stored on the same product, all or nothing; a field not sent keeps its stored
+	 * value. Every refusal is reported together: an empty name, an empty Primary URL (Lasso's one sentence for both),
+	 * and a Primary URL that is not a link, as adding refuses it. The repository throws a RuntimeException when
+	 * WordPress refuses the post.
 	 *
 	 * @param int                  $id    Product ID.
 	 * @param array<string, mixed> $input Field => value, as sent.
-	 * ProductInput throws ValidationFailed when a field is refused (only an empty name, Lasso's one refusal), and the
-	 * repository a RuntimeException when WordPress refuses the post.
-	 *
-	 * @throws ProductNotFound When there is no published product with that ID.
+	 * @throws ProductNotFound  When there is no published product with that ID.
+	 * @throws ValidationFailed When a field is refused.
 	 */
 	public function update( int $id, array $input ): Product {
 		$product = $this->get( $id );
@@ -95,7 +97,93 @@ final class ProductService {
 			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
 		}
 
-		return $this->products->save( $product->with( $this->input->changes( $input ) ) );
+		$errors  = array();
+		$changes = array();
+		try {
+			$changes = $this->input->changes( $input );
+		} catch ( ValidationFailed $refused ) {
+			$errors = $refused->errors;
+		}
+		$typed = null;
+		if ( array_key_exists( 'url', $input ) ) {
+			try {
+				$typed = $this->rules->typed( is_string( $input['url'] ) ? $input['url'] : '' );
+			} catch ( InvalidField $refused ) {
+				// "Name and Primary Destination URL are required." covers an empty link (S2).
+				$errors['url'] = 'empty' === $refused->reason ? 'required' : $refused->reason;
+			}
+		}
+		if ( array() !== $errors ) {
+			throw new ValidationFailed( $errors );
+		}
+
+		$changed = $product->with( $changes );
+		if ( null !== $typed ) {
+			$changed = $this->with_link( $changed, $product, $typed );
+		}
+
+		return $this->products->save( $changed );
+	}
+
+	/**
+	 * The product with its Primary URL as Lasso's save stores it (F1 requirements 9, S7, S8, D12, D17):
+	 * - the same link as stored: not followed again; an Amazon link gets the site's tag rule again (D12);
+	 * - the same Amazon product (ASIN and store): updated in place, a typed Amazon short link kept as typed, the name,
+	 *   the image and the ASIN untouched;
+	 * - another ASIN: type, ASIN, store and search key from the new link; the name becomes the link's starting name
+	 *   (decision 11) when "Keep title when URL replaced" is off or the name is a placeholder; the image becomes the new
+	 *   product's, which is none until C1 brings Amazon data, unless a media library image is set (S6);
+	 * - another shop's link: the Amazon keys go, as Lasso deletes amazon_product_id; name and image stay.
+	 *
+	 * @param Product      $changed The product with the form's other changes.
+	 * @param Product      $stored  The product as stored.
+	 * @param AffiliateUrl $typed   The Primary URL as typed.
+	 */
+	private function with_link( Product $changed, Product $stored, AffiliateUrl $typed ): Product {
+		$settings = $this->settings->get();
+		if ( $typed->key() === $stored->url->key() ) {
+			$amazon = AmazonUrl::from( $stored->url );
+			return null === $amazon ? $changed : $changed->with( array( 'url' => $this->rules->tagged( $amazon, $settings ) ) );
+		}
+
+		$link   = $this->rules->primary( $typed, $settings );
+		$amazon = $link->amazon;
+		if ( null === $amazon ) {
+			return $changed->with(
+				array(
+					'url'            => $link->stored,
+					'type'           => ProductType::Other,
+					'asin'           => '',
+					'amazon_country' => '',
+					'search_key'     => '',
+				)
+			);
+		}
+
+		$asin    = $amazon->asin();
+		$country = '' === $asin ? '' : $amazon->country();
+		$same    = '' !== $asin && ProductType::Amazon === $stored->type && 0 === strcasecmp( $stored->asin, $asin ) && $stored->amazon_country === $country;
+		if ( $same ) {
+			return $changed->with( array( 'url' => AmazonUrl::is_short( $typed ) ? $typed : $link->stored ) );
+		}
+
+		$changes = array(
+			'url'            => $link->stored,
+			'type'           => ProductType::Amazon,
+			'asin'           => $asin,
+			'amazon_country' => $country,
+			'search_key'     => $amazon->search_key(),
+		);
+		if ( '' !== $asin ) {
+			if ( ! $settings->bool( 'keep_title_when_url_replaced' ) || PlaceholderName::is( $changed->name ) ) {
+				$changes['name'] = $amazon->starting_name();
+			}
+			if ( 0 === $changed->image_id ) {
+				$changes['image_url'] = '';
+			}
+		}
+
+		return $changed->with( $changes );
 	}
 
 	/**
@@ -117,7 +205,7 @@ final class ProductService {
 	 * @throws RuntimeException When the product cannot be stored.
 	 */
 	public function create_from_url( string $input ): AddedLink {
-		$url = AmazonUrl::from_bare_asin( $input ) ?? AffiliateUrl::from_string( $input );
+		$url = $this->rules->typed( $input );
 
 		$existing = $this->products->find_by_url_key( $url->key() );
 		if ( null !== $existing ) {
@@ -127,7 +215,7 @@ final class ProductService {
 		$resolved = $this->links->resolve( $url );
 		$settings = $this->settings->get();
 
-		if ( $resolved->url !== $url->value() && $this->stored_as_destination( $url, $settings ) ) {
+		if ( $resolved->url !== $url->value() && $this->rules->follows( $url, $settings ) ) {
 			$url      = AffiliateUrl::from_string( $resolved->url );
 			$existing = $this->products->find_by_url_key( $url->key() );
 			if ( null !== $existing ) {
@@ -147,20 +235,6 @@ final class ProductService {
 		}
 
 		return new AddedLink( $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
-	}
-
-	/**
-	 * Whether the link is replaced by where it leads before it is stored: an Amazon short link always
-	 * (lasso_add_a_new_link: is_amazon_shortened_url), a geni.us link while Keep Geni.us Formatting is off.
-	 *
-	 * @param AffiliateUrl $url      The pasted link.
-	 * @param Settings     $settings The site's settings.
-	 */
-	private function stored_as_destination( AffiliateUrl $url, Settings $settings ): bool {
-		if ( AmazonUrl::is_short( $url ) ) {
-			return true;
-		}
-		return $url->is_geni_us() && ! $settings->bool( 'keep_genius_formatting' );
 	}
 
 	/**

@@ -95,6 +95,15 @@ final class PostTypeProductRepository implements ProductRepository {
 		if ( array() === $buttons ) {
 			delete_post_meta( $id, '_affibloom_buttons' );
 		}
+		// A product that is no longer Amazon's, or no longer a search page, loses those keys (Lasso:
+		// delete_post_meta( 'amazon_product_id' ) when the new link is not Amazon's; Task 15B).
+		if ( '' === $product->asin ) {
+			delete_post_meta( $id, '_affibloom_asin' );
+			delete_post_meta( $id, '_affibloom_amazon_country' );
+		}
+		if ( '' === $product->search_key ) {
+			delete_post_meta( $id, '_affibloom_search_key' );
+		}
 
 		return $product->with( array( 'id' => $id ) );
 	}
