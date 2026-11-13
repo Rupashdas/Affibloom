@@ -1,7 +1,7 @@
 /* global wp */
 /**
  * Affibloom Dashboard: Lasso's selection (Task 13C), the list without page reloads (Task 13D), the filters panel with
- * saved views (Task 13E), and the row's quick edit (Task 16A).
+ * saved views (Task 13E), and the row's quick edit (Tasks 16A-16B).
  *
  * The server renders every piece of markup (the list, the saved-view bar) with the same partials the page printed,
  * so this file never builds a row or a pill: it asks, swaps what comes back in, and keeps the address bar in step
@@ -142,7 +142,9 @@
 	var requests = 0;
 	// The quick edit's state (Task 16A), here because load() reads it: the open row's product, whether its save is
 	// on its way, and a list asked for meanwhile.
-	var quick = { id: null, saving: false, held: null };
+	var quick = { id: null, saving: false, held: null, opened: '' };
+	// The address of the list on screen: × after Back or Forward puts it back (Task 16B, D29).
+	var shownUrl = window.location.href;
 
 	function listPath( list ) {
 		var args = new URLSearchParams();
@@ -259,6 +261,7 @@
 			} else {
 				sync();
 			}
+			shownUrl = window.location.href;
 			reflect( ! remember );
 			announce();
 			if ( focus ) {
@@ -289,7 +292,9 @@
 	if ( search && search.form ) {
 		search.form.addEventListener( 'submit', function ( event ) {
 			event.preventDefault();
-			load( listWith( { s: search.value } ), true, false );
+			guarded( function () {
+				load( listWith( { s: search.value } ), true, false );
+			}, search, true );
 		} );
 	}
 
@@ -300,13 +305,20 @@
 			return;
 		}
 		event.preventDefault();
-		load( listWith( { paged: parseInt( new URL( link.href ).searchParams.get( 'paged' ), 10 ) || 1 } ), true, true );
+		guarded( function () {
+			load( listWith( { paged: parseInt( new URL( link.href ).searchParams.get( 'paged' ), 10 ) || 1 } ), true, true );
+		}, link, true );
 	} );
 
 	// The page size: a new size starts again at page 1, as Lasso's does.
 	region.addEventListener( 'change', function ( event ) {
-		if ( 'affibloom-per-page' === event.target.id ) {
-			load( listWith( { per_page: parseInt( event.target.value, 10 ) } ), true, false );
+		var size = event.target;
+		if ( 'affibloom-per-page' === size.id ) {
+			guarded( function () {
+				load( listWith( { per_page: parseInt( size.value, 10 ) } ), true, false );
+			}, size, true, function () {
+				size.value = String( current.per_page ); // × keeps the list, so the size it shows.
+			} );
 		}
 	} );
 	region.addEventListener( 'submit', function ( event ) {
@@ -316,14 +328,19 @@
 	} );
 
 	// Back and Forward: draw the list the address names, without pushing it again.
+	// With a quick edit's changes open it asks first (D29); × puts the list's own address back.
 	window.addEventListener( 'popstate', function () {
 		var back = new URLSearchParams( window.location.search );
-		load( {
-			s: back.get( 's' ) || '',
-			link_type: back.get( 'link_type' ) || '',
-			paged: parseInt( back.get( 'paged' ), 10 ) || 1,
-			per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
-		}, false, false );
+		guarded( function () {
+			load( {
+				s: back.get( 's' ) || '',
+				link_type: back.get( 'link_type' ) || '',
+				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
+				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
+			}, false, false );
+		}, null, true, function () {
+			window.history.pushState( current, '', shownUrl );
+		} );
 	} );
 
 	/*
@@ -386,15 +403,22 @@
 		} );
 
 		linkType.addEventListener( 'change', function () {
-			load( listWith( { link_type: linkType.value } ), true, false );
+			guarded( function () {
+				load( listWith( { link_type: linkType.value } ), true, false );
+			}, linkType, true, function () {
+				linkType.value = current.link_type;
+			} );
 		} );
 
 		// Lasso's "Reset filters": search, filters and page size back to the defaults.
-		panel.querySelector( '.affibloom-filters__reset' ).addEventListener( 'click', function () {
-			if ( search ) {
-				search.value = '';
-			}
-			load( { s: '', link_type: '', paged: 1, per_page: 10 }, true, false );
+		panel.querySelector( '.affibloom-filters__reset' ).addEventListener( 'click', function ( event ) {
+			var reset = event.currentTarget;
+			guarded( function () {
+				if ( search ) {
+					search.value = '';
+				}
+				load( { s: '', link_type: '', paged: 1, per_page: 10 }, true, false );
+			}, reset, true );
 		} );
 	}
 
@@ -417,12 +441,14 @@
 			var pill = event.target.closest( '.affibloom-pill' );
 			if ( pill && 0 === event.button && ! event.ctrlKey && ! event.metaKey && ! event.shiftKey && ! event.altKey ) {
 				event.preventDefault();
-				load( {
-					s: pill.getAttribute( 'data-view-s' ),
-					link_type: pill.getAttribute( 'data-view-link-type' ),
-					paged: 1,
-					per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
-				}, true, false );
+				guarded( function () {
+					load( {
+						s: pill.getAttribute( 'data-view-s' ),
+						link_type: pill.getAttribute( 'data-view-link-type' ),
+						paged: 1,
+						per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
+					}, true, false );
+				}, pill, true );
 				return;
 			}
 
@@ -495,6 +521,23 @@
 	 * (D26).
 	 * ------------------------------------------------------------------------------------------------------- */
 
+	/**
+	 * What a save sends from a row's form (D28); also what counts as a change (Q9: name, link, image).
+	 *
+	 * @param {HTMLFormElement} form The row's form.
+	 */
+	function quickValues( form ) {
+		var value = function ( name ) {
+			return form.elements.namedItem( name ).value;
+		};
+		return {
+			name: value( 'name' ),
+			url: value( 'url' ),
+			image_url: value( 'image_url' ),
+			image_id: parseInt( value( 'image_id' ), 10 ) || 0,
+		};
+	}
+
 	function editButton( id ) {
 		return region.querySelector( '[data-quick-edit="' + id + '"]' );
 	}
@@ -539,7 +582,7 @@
 	function openQuick( id ) {
 		var row = productRow( id );
 		var template = region.querySelector( 'template[data-quick-edit-template="' + id + '"]' );
-		if ( quick.id === id || ! row || ! template ) {
+		if ( quick.id === id || quick.saving || ! row || ! template ) {
 			return;
 		}
 		closeQuick( false );
@@ -547,6 +590,7 @@
 		row.after( editing );
 		row.hidden = true;
 		quick.id = id;
+		quick.opened = JSON.stringify( quickValues( editing.querySelector( 'form' ) ) );
 		editButton( id ).setAttribute( 'aria-expanded', 'true' );
 		editing.querySelector( '[name="name"]' ).focus();
 	}
@@ -573,22 +617,16 @@
 	 * sentence under it and the failure toast, and the row stays open with its edits.
 	 *
 	 * @param {HTMLFormElement} form The row's form.
+	 * @param {Function}        then What to do after a good save instead of loading the list again (Task 16B: the
+	 *                               action "Unsaved Changes" held back); never called after a refused save (Q9).
 	 */
-	function saveQuick( form ) {
+	function saveQuick( form, then ) {
 		if ( quick.saving ) {
 			return; // Lasso ignores a second click while saving.
 		}
 		var id = quick.id;
 		var submit = form.querySelector( '[type="submit"]' );
-		var value = function ( name ) {
-			return form.elements.namedItem( name ).value;
-		};
-		var sent = {
-			name: value( 'name' ),
-			url: value( 'url' ),
-			image_url: value( 'image_url' ),
-			image_id: parseInt( value( 'image_id' ), 10 ) || 0,
-		};
+		var sent = quickValues( form );
 		var dialog = window.affibloomSaveDialog;
 
 		quick.saving = true;
@@ -603,6 +641,10 @@
 				quick.held = null;
 				closeQuick( false );
 				window.affibloomToast( region.dataset.savedText, false );
+				if ( then ) {
+					then();
+					return;
+				}
 				if ( held ) {
 					load( held.list, held.remember, held.focus );
 					return;
@@ -637,7 +679,10 @@
 	region.addEventListener( 'click', function ( event ) {
 		var edit = event.target.closest( '[data-quick-edit]' );
 		if ( edit ) {
-			openQuick( edit.getAttribute( 'data-quick-edit' ) );
+			// Another row's Edit asks first (Q9); after a save the list is drawn again before that row opens.
+			guarded( function () {
+				openQuick( edit.getAttribute( 'data-quick-edit' ) );
+			}, edit, false );
 		} else if ( event.target.closest( '[data-quick-cancel]' ) ) {
 			closeQuick( true );
 		} else if ( event.target.closest( '[data-quick-image]' ) ) {
@@ -657,5 +702,110 @@
 		if ( form && event.target.id && document.getElementById( event.target.id + '-save-error' ) ) {
 			window.affibloomFieldErrors.clear( form );
 		}
+	} );
+
+	/* ---------------------------------------------------------------------------------------------------------
+	 * Unsaved changes (Task 16B; F1 requirements 10 Q9, D29), as Lasso's run_page_action and its link and
+	 * beforeunload guards (view-js.php 163-165, 692-733, 927-934, 999-1021). With a row open and its name, link or
+	 * image changed, anything that would redraw the list or leave the page asks "Unsaved Changes" first: Leave
+	 * Without Saving drops the edits and goes on; Save Changes saves and goes on only after a good save; × (or
+	 * Escape) stays. Closing or reloading the tab gets the browser's own question.
+	 * ------------------------------------------------------------------------------------------------------- */
+
+	var unsaved = document.querySelector( '[data-unsaved-modal]' );
+	// The action the dialog holds: what to run, whether it draws the list itself, and what × must undo.
+	var pending = null;
+	var leaving = false;
+
+	function quickChanged() {
+		var form = null === quick.id ? null : region.querySelector( '[data-quick-form="' + quick.id + '"]' );
+		return !! form && JSON.stringify( quickValues( form ) ) !== quick.opened;
+	}
+
+	/**
+	 * Runs an action that would lose an open row's edits, or asks first (Lasso's run_page_action).
+	 *
+	 * @param {Function}         action  What the editor asked for.
+	 * @param {HTMLElement|null} opener  Where the focus returns when the dialog closes.
+	 * @param {boolean}          redraws The action draws the list (or leaves the page) itself; otherwise, after a
+	 *                                   save, the list is drawn again first so the saved row shows what was stored.
+	 * @param {Function}         stay    What × must put back (a select's value, the address after Back); optional.
+	 */
+	function guarded( action, opener, redraws, stay ) {
+		// While the row is being saved, its edits are not lost: a list load waits for the save (16A).
+		if ( quick.saving || ! quickChanged() ) {
+			action();
+			return;
+		}
+		pending = { action: action, redraws: redraws, stay: stay || null };
+		var form = region.querySelector( '[data-quick-form="' + quick.id + '"]' );
+		window.affibloomModal.show( unsaved, opener || form.elements.namedItem( 'name' ) );
+	}
+
+	/** Takes the held action off the dialog, so closing it is not read as ×. */
+	function takePending() {
+		var held = pending;
+		pending = null;
+		return held;
+	}
+
+	function go( href ) {
+		leaving = true;
+		window.location.assign( href );
+	}
+
+	if ( unsaved ) {
+		unsaved.querySelector( '[data-unsaved-leave]' ).addEventListener( 'click', function () {
+			var held = takePending();
+			window.affibloomModal.hide();
+			closeQuick( false );
+			if ( held ) {
+				held.action();
+			}
+		} );
+		unsaved.querySelector( '[data-unsaved-save]' ).addEventListener( 'click', function () {
+			var held = takePending();
+			var form = region.querySelector( '[data-quick-form="' + quick.id + '"]' );
+			window.affibloomModal.hide();
+			if ( ! held || ! form ) {
+				return;
+			}
+			saveQuick( form, held.redraws ? held.action : function () {
+				load( current, false, false, held.action );
+			} );
+		} );
+		// × or Escape: stay, and put back what the asking control already changed.
+		unsaved.addEventListener( 'affibloom:close', function () {
+			var held = takePending();
+			if ( held && held.stay ) {
+				held.stay();
+			}
+		} );
+	}
+
+	// A link that leaves the page: not "#…", "javascript:", a new tab, a modified or middle click, a link inside a
+	// dialog or inside the open row (Lasso's exceptions), and not one a list control has already taken.
+	document.addEventListener( 'click', function ( event ) {
+		var link = event.target.closest( 'a[href]' );
+		if ( ! link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ) {
+			return;
+		}
+		var href = link.getAttribute( 'href' );
+		if ( '' === href || '#' === href.charAt( 0 ) || 0 === href.indexOf( 'javascript:' ) || '_blank' === link.target ||
+			link.closest( '.affibloom-modal, .affibloom-quick' ) || ! quickChanged() ) {
+			return;
+		}
+		event.preventDefault();
+		guarded( function () {
+			go( link.href );
+		}, link, true );
+	} );
+
+	window.addEventListener( 'beforeunload', function ( event ) {
+		if ( leaving || quick.saving || ! quickChanged() ) {
+			return;
+		}
+		event.preventDefault();
+		event.returnValue = '';
 	} );
 } )();

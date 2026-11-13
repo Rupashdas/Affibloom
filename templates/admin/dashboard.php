@@ -94,7 +94,8 @@ $placeholder = sprintf(
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/view-delete-modal' ); ?>
-	<?php // Lasso's Dashboard carries the product page's save dialog (dashboard.php 212) for its quick edit. ?>
+	<?php // Lasso's Dashboard carries the product page's two dialogs (dashboard.php 212-213) for its quick edit. ?>
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
+	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 </div>

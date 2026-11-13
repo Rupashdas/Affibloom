@@ -321,6 +321,92 @@ test.describe( 'F1 Product library', () => {
 		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_badge' ) ).toBe( 'Our Pick' );
 	} );
 
+	// Task 16B (requirements 10, Q9, D29): an open row with edits asks before anything redraws the list or leaves the
+	// page, as Lasso's run_page_action and its link and beforeunload guards do.
+	test( 'AC19 a Dashboard action with unsaved quick-edit changes asks first; Cancel or a save ends that', async ( { page } ) => {
+		const name = unique( 'F1 AC19' );
+		const other = createProduct( { name: unique( 'F1 AC19 other' ) } );
+		const id = createProduct( { name } );
+		const dashboard = '/wp-admin/admin.php?page=affibloom';
+		const ask = page.getByRole( 'dialog', { name: 'Unsaved Changes' } );
+		const row = page.locator( `tr[data-product-id="${ id }"]` );
+		const form = page.locator( `tr[data-quick-edit-for="${ id }"]` );
+		const nameField = form.getByLabel( 'Name', { exact: true } );
+		const search = page.getByLabel( 'Search' );
+		const pageTwo = page.locator( '.affibloom-pagination a', { hasText: /^2$/ } );
+		const settingsLink = page.locator( '.affibloom-header__nav a', { hasText: 'Settings' } );
+		const edit = async () => {
+			await row.getByRole( 'button', { name: 'Edit' } ).click();
+			await nameField.fill( `${ name } edited` );
+		};
+		await page.goto( dashboard );
+
+		// A search: × stays, with the row open and the typed name.
+		await edit();
+		await search.fill( name );
+		await search.press( 'Enter' );
+		await expect( ask ).toContainText( 'You have unsaved changes that will be lost if you leave this page. What would you like to do?' );
+		await ask.getByRole( 'button', { name: 'Close' } ).click();
+		await expect( ask ).toBeHidden();
+		await expect( nameField ).toHaveValue( `${ name } edited` );
+
+		// Another row's Edit: Leave Without Saving opens that row and drops the edit.
+		await page.locator( `tr[data-product-id="${ other }"]` ).getByRole( 'button', { name: 'Edit' } ).click();
+		await ask.getByRole( 'button', { name: 'Leave Without Saving' } ).click();
+		await expect( page.locator( `tr[data-quick-edit-for="${ other }"]` ) ).toBeVisible();
+		await expect( form ).toHaveCount( 0 );
+		await page.locator( `tr[data-quick-edit-for="${ other }"]` ).getByRole( 'button', { name: 'Cancel' } ).click();
+
+		// A page link: Leave Without Saving goes to page 2, with no row open and nothing stored.
+		await edit();
+		await pageTwo.click();
+		await ask.getByRole( 'button', { name: 'Leave Without Saving' } ).click();
+		await expect( page ).toHaveURL( /paged=2/ );
+		await expect( page.locator( 'tr[data-quick-edit-for]' ) ).toHaveCount( 0 );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+
+		// Back with an edit open on that page: × stays on page 2; Leave goes back to page 1.
+		const onTwo = page.locator( '#affibloom-list tbody tr[data-product-id]' ).first();
+		const twoId = await onTwo.getAttribute( 'data-product-id' );
+		await onTwo.getByRole( 'button', { name: 'Edit' } ).click();
+		await page.locator( `tr[data-quick-edit-for="${ twoId }"]` ).getByLabel( 'Name', { exact: true } ).fill( 'Changed on page two' );
+		await page.goBack();
+		await ask.getByRole( 'button', { name: 'Close' } ).click();
+		await expect( page ).toHaveURL( /paged=2/ );
+		await expect( page.locator( `tr[data-quick-edit-for="${ twoId }"]` ) ).toBeVisible();
+		await page.goBack();
+		await ask.getByRole( 'button', { name: 'Leave Without Saving' } ).click();
+		await expect( page ).not.toHaveURL( /paged=2/ );
+		await expect( row ).toBeVisible();
+
+		// An admin link: Save Changes saves, then goes.
+		await edit();
+		await settingsLink.click();
+		await ask.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await page.waitForURL( /page=affibloom-settings/ );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( `${ name } edited` );
+
+		// After Cancel nothing asks; closing or reloading asks only with an edit open.
+		await page.goto( dashboard );
+		await row.getByRole( 'button', { name: 'Edit' } ).click();
+		await nameField.fill( 'not kept' );
+		await form.getByRole( 'button', { name: 'Cancel' } ).click();
+		await search.fill( `${ name } edited` );
+		await search.press( 'Enter' );
+		await expect( page ).toHaveURL( /s=F1/ );
+		await expect( ask ).toBeHidden();
+		await expect( row ).toBeVisible();
+		// The stored name is now "… edited", so the last edit types something else.
+		await row.getByRole( 'button', { name: 'Edit' } ).click();
+		await nameField.fill( `${ name } reloaded` );
+		const asked = new Promise< string >( ( resolve ) => page.once( 'dialog', ( dialog ) => {
+			resolve( dialog.type() );
+			void dialog.dismiss();
+		} ) );
+		void page.reload().catch( () => undefined );
+		expect( await asked ).toBe( 'beforeunload' );
+	} );
+
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {
 		const name = unique( 'F1 AC3' );
 		const id = createProduct( { name } );

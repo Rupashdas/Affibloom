@@ -1,7 +1,8 @@
 <?php
 /**
  * "Unsaved Changes": asked when a link would leave the product page with edits not saved (Lasso's unsaved-changes.php;
- * F1 requirements 5 B8, 9 S16; Task 15D). Lasso's words and buttons, in the design system's modal: × and Escape stay,
+ * F1 requirements 5 B8, 9 S16; Task 15D), and on the Dashboard before an open quick edit's changes would be lost
+ * (requirements 10 Q9; Task 16B). Lasso's words and buttons, in the design system's modal: × and Escape stay,
  * "Leave Without Saving" goes, "Save Changes" saves and then goes.
  *
  * @package Affibloom
