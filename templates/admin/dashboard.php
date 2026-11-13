@@ -6,7 +6,7 @@
  * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int, notice: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int, notice: string, lasso_pending: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -47,6 +47,10 @@ $placeholder = sprintf(
 
 		<div class="affibloom-page__body affibloom-dashboard">
 			<?php $this->render( 'admin/partials/dashboard-tiles', array( 'library' => $view['library'] ) ); ?>
+
+			<?php if ( $view['lasso_pending'] > 0 ) : ?>
+				<?php $this->render( 'admin/partials/lasso-import', array( 'pending' => $view['lasso_pending'] ) ); ?>
+			<?php endif; ?>
 
 			<div class="affibloom-toolbar">
 				<?php

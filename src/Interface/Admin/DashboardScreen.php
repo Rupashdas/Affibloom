@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Dashboard\SavedViewService;
+use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\SearchTerm;
@@ -24,11 +25,12 @@ final class DashboardScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template         $template Template renderer.
-	 * @param ProductService   $products The product library.
-	 * @param PerPage          $per_page How many products this editor sees at a time.
-	 * @param SavedViewService $views    This editor's saved views (Task 13E).
-	 * @param Notice           $notice   The toast after a redirect: "Product deleted." (Task 17A).
+	 * @param Template           $template Template renderer.
+	 * @param ProductService     $products The product library.
+	 * @param PerPage            $per_page How many products this editor sees at a time.
+	 * @param SavedViewService   $views    This editor's saved views (Task 13E).
+	 * @param Notice             $notice   The toast after a redirect: "Product deleted." (Task 17A).
+	 * @param LassoImportService $import   The one-time Lasso import, whose card shows while it has records to bring in.
 	 */
 	public function __construct(
 		private Template $template,
@@ -36,6 +38,7 @@ final class DashboardScreen {
 		private PerPage $per_page,
 		private SavedViewService $views,
 		private Notice $notice,
+		private LassoImportService $import,
 	) {}
 
 	/**
@@ -56,13 +59,14 @@ final class DashboardScreen {
 		$this->template->render(
 			'admin/dashboard',
 			array(
-				'products'  => $this->products->list( $term, $link_kind, $page, $per_page ),
-				'term'      => $term->text(),
-				'link_kind' => $link_kind,
-				'views'     => $this->views->list( get_current_user_id() ),
-				'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
-				'library'   => $this->products->count(),
-				'notice'    => $this->notice->message(),
+				'products'      => $this->products->list( $term, $link_kind, $page, $per_page ),
+				'term'          => $term->text(),
+				'link_kind'     => $link_kind,
+				'views'         => $this->views->list( get_current_user_id() ),
+				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
+				'library'       => $this->products->count(),
+				'notice'        => $this->notice->message(),
+				'lasso_pending' => $this->import->pending(),
 			)
 		);
 	}

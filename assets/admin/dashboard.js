@@ -10,6 +10,22 @@
 ( function () {
 	'use strict';
 
+	/* The one-time Lasso import's button: one click only, and it says it is working while the page waits for the
+	 * import (a few seconds for some 250 products). The form posts without JavaScript too. */
+	var importForm = document.querySelector( '[data-lasso-import]' );
+	if ( importForm ) {
+		importForm.addEventListener( 'submit', function ( event ) {
+			var button = importForm.querySelector( 'button[type="submit"]' );
+			if ( importForm.dataset.sent ) {
+				event.preventDefault();
+				return;
+			}
+			importForm.dataset.sent = '1';
+			button.setAttribute( 'aria-disabled', 'true' );
+			button.textContent = button.dataset.busyText;
+		} );
+	}
+
 	var region = document.getElementById( 'affibloom-list' );
 	var bar = document.querySelector( '.affibloom-selection' );
 	if ( ! region || ! bar ) {

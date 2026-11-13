@@ -13,6 +13,7 @@ use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Icons\IconService;
+use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Application\Products\LinkResolver;
@@ -20,11 +21,13 @@ use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
+use Affibloom\Infrastructure\Lasso\WpLassoSource;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
 use Affibloom\Infrastructure\WordPress\OptionIconRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
+use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
@@ -40,6 +43,7 @@ use Affibloom\Interface\Admin\DisplayController;
 use Affibloom\Interface\Admin\DisplayScreen;
 use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\IconController;
+use Affibloom\Interface\Admin\LassoImportController;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
@@ -127,11 +131,12 @@ final class Plugin {
 		$icons    = new IconService( new OptionIconRepository(), new SiteCssIcons() );
 		$choices  = new IconChoices( $icons );
 		$fields   = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository() );
+		$import   = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice ),
 				new SettingsScreen(
 					$this->template(),
@@ -149,6 +154,7 @@ final class Plugin {
 			new BulkAddCron( $bulk ),
 			new IconController( $icons ),
 			new TrackingIdController( $settings ),
+			new LassoImportController( $import ),
 			new FieldsController( $fields ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),

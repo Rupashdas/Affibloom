@@ -38,7 +38,29 @@ final class Notice {
 			'repointed'        => __( 'Success! Locations now show this link.', 'affibloom' ),
 			// On the Dashboard after Delete This Link (Task 17A, F1 D37); Lasso's redirect says nothing.
 			'deleted'          => __( 'Product deleted.', 'affibloom' ),
+			// The one-time Lasso import (the user, 2026-11-13); the counts ride along in the query.
+			'lasso-imported'   => $this->imported(),
+			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),
 			default        => '',
 		};
+	}
+
+	/**
+	 * "Imported 254 products from Lasso.", with the records left out when there were any (?imported=…&skipped=…).
+	 */
+	private function imported(): string {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
+		$imported = isset( $_GET['imported'] ) ? absint( wp_unslash( $_GET['imported'] ) ) : 0;
+		$skipped  = isset( $_GET['skipped'] ) ? absint( wp_unslash( $_GET['skipped'] ) ) : 0;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		/* translators: %s: how many products were imported. */
+		$message = sprintf( _n( 'Imported %s product from Lasso.', 'Imported %s products from Lasso.', $imported, 'affibloom' ), number_format_i18n( $imported ) );
+		if ( $skipped > 0 ) {
+			/* translators: %s: how many Lasso records were left out. */
+			$message .= ' ' . sprintf( _n( '%s Lasso record has no usable link and was left out.', '%s Lasso records have no usable link and were left out.', $skipped, 'affibloom' ), number_format_i18n( $skipped ) );
+		}
+
+		return $message;
 	}
 }

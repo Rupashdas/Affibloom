@@ -950,6 +950,19 @@
  * The toolbar under the tiles: the selection bar (or, with Task 13E, Lasso's saved-view bar) on the left and the
  * Filters button on the right. It keeps a height of its own, so the selection bar appearing moves nothing.
  */
+/* The one-time Lasso import (the user, 2026-11-13): one row between the tiles and the toolbar, gone once it has run. */
+.affibloom-import {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	margin: -12px 0 32px;
+	padding: 20px 24px;
+	border: 1px solid var(--affibloom-brand-50);
+}
+.affibloom-import__text { flex: 1 1 auto; min-width: 0; }
+.affibloom-admin .affibloom-import__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 700 16px/24px var(--affibloom-font); }
+.affibloom-import__intro { margin: 2px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 19px; }
+.affibloom-import__form { flex: 0 0 auto; margin: 0; }
 .affibloom-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 40px; margin-bottom: 20px; }
 .affibloom-admin .affibloom-search { border-radius: var(--affibloom-radius-full); padding-left: 16px; }
 
@@ -2002,6 +2015,9 @@ body.affibloom-has-modal { overflow: hidden; }
 	/* Two tiles a row on a phone, so the five do not fill the first screen on their own. */
 	.affibloom-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 	.affibloom-tile { padding: 12px 14px; }
+	.affibloom-import { flex-wrap: wrap; margin-top: -4px; padding: 16px; }
+	.affibloom-import__form,
+	.affibloom-import__form .affibloom-button { width: 100%; }
 	.affibloom-tile .affibloom-chip { width: 32px; height: 32px; }
 	.affibloom-tile__number { font-size: 22px; line-height: 26px; }
 	.affibloom-table th,
