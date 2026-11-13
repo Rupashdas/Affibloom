@@ -280,6 +280,71 @@ final class AmazonUrlTest extends TestCase {
 		self::assertSame( '', self::amazon( 'https://www.amazon.com/stores/x' )->search_key() );
 	}
 
+	/**
+	 * @dataProvider bare_asins
+	 */
+	public function test_a_bare_asin_becomes_the_store_link( string $input, string $link ): void {
+		self::assertSame( $link, AmazonUrl::from_bare_asin( $input )?->value() );
+	}
+
+	/**
+	 * @return array<string, array{string, string}>
+	 */
+	public static function bare_asins(): array {
+		return array(
+			'B0 ASIN'          => array( 'B0C1234567', 'https://www.amazon.com/dp/B0C1234567' ),
+			'lower case'       => array( 'b0c1234567', 'https://www.amazon.com/dp/B0C1234567' ),
+			'spaces around'    => array( "  B0C1234567 \n", 'https://www.amazon.com/dp/B0C1234567' ),
+			'ISBN-10'          => array( '0140449132', 'https://www.amazon.com/dp/0140449132' ),
+			'ISBN-10 ending X' => array( '014044913x', 'https://www.amazon.com/dp/014044913X' ),
+		);
+	}
+
+	/**
+	 * @dataProvider not_bare_asins
+	 */
+	public function test_other_input_is_not_a_bare_asin( string $input ): void {
+		self::assertNull( AmazonUrl::from_bare_asin( $input ) );
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public static function not_bare_asins(): array {
+		return array(
+			'a word'        => array( 'BESTSHOE10' ),
+			'too long'      => array( 'B0C12345678' ),
+			'too short'     => array( 'B0C123456' ),
+			'a link'        => array( 'https://www.amazon.com/dp/B0C1234567' ),
+			'nine digits X' => array( '12345678XX' ),
+		);
+	}
+
+	/**
+	 * @dataProvider starting_names
+	 */
+	public function test_the_starting_name( string $link, string $name ): void {
+		self::assertSame( $name, self::amazon( $link )->starting_name() );
+	}
+
+	/**
+	 * @return array<string, array{string, string}>
+	 */
+	public static function starting_names(): array {
+		return array(
+			'slug'               => array( 'https://www.amazon.com/Mizuno-Wave-Momentum-3/dp/B0C1234567?tag=x', 'Mizuno Wave Momentum 3' ),
+			'the live Mikasa'    => array( 'https://www.amazon.com/Mikasa-MGV500-Weight-Volleyball-Official/dp/B00091PQ72?tag=vbvault-20', 'Mikasa MGV500 Weight Volleyball Official' ),
+			'plus and decoding'  => array( 'https://www.amazon.com/Knee+Pads%2C-Volleyball/dp/B0C1234567', 'Knee Pads, Volleyball' ),
+			'spaces collapsed'   => array( 'https://www.amazon.com/-Mizuno--Wave-/dp/B0C1234567', 'Mizuno Wave' ),
+			'no slug'            => array( 'https://www.amazon.com/dp/B0C1234567', 'Amazon' ),
+			'gp/product'         => array( 'https://www.amazon.com/gp/product/B0C1234567', 'Amazon' ),
+			'slug before gp'     => array( 'https://www.amazon.com/Mizuno/gp/product/B0C1234567', 'Amazon' ),
+			'a search page'      => array( 'https://www.amazon.com/s?k=nike+kd14', 'Amazon: nike kd14' ),
+			'a store page'       => array( 'https://www.amazon.com/stores/Mikasa/page/1', 'Amazon' ),
+			'a short link'       => array( 'https://amzn.to/3NGJEvm', 'Amazon' ),
+		);
+	}
+
 	public function test_the_search_page_title(): void {
 		self::assertSame( 'Amazon: nike kd14', self::amazon( 'https://www.amazon.com/s?k=nike+kd14' )->search_page_title() );
 		self::assertSame( 'Amazon', self::amazon( 'https://www.amazon.com/dp/B0C1234567' )->search_page_title() );

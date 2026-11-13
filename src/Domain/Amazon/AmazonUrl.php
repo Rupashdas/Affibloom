@@ -12,8 +12,8 @@ namespace Affibloom\Domain\Amazon;
 use Affibloom\Domain\Product\AffiliateUrl;
 
 /**
- * An Amazon link (F2 requirements, sections 2-3): its ASIN, its store's country, its search keywords, and the form
- * Lasso stores it in. Short links are followed before this (Task 12D).
+ * An Amazon link (F2 requirements, sections 2-3 and 6): its ASIN, its store's country, its search keywords, the form
+ * Lasso stores it in, and the name a new product starts with. Short links are followed before this (Task 12D).
  */
 final class AmazonUrl {
 
@@ -57,6 +57,18 @@ final class AmazonUrl {
 	/** Lasso_Amazon_Api::is_amazon_search_page(): the parameters that hold a search's keywords, in Lasso's preference. */
 	private const KEYWORD_PARAMETERS = array( 'k', 'field-keywords', 'keywords' );
 
+	/**
+	 * A bare ASIN ("B0" and eight letters or digits) or an ISBN-10, the Affibloom addition from F2 AC2 (Task 6). The
+	 * "B0" prefix keeps an ordinary ten-letter word from being taken for an ASIN.
+	 */
+	private const BARE_ASIN = '/^(?:B0[A-Z0-9]{8}|\d{9}[\dX])$/i';
+
+	/**
+	 * Lasso_Amazon_Api::get_default_product_domain() with the site's default tracking country, "us". Its control is
+	 * in the Product Data API card (C1); until then a bare ASIN goes to www.amazon.com.
+	 */
+	private const DEFAULT_STORE_PRODUCT = 'https://www.amazon.com/dp/';
+
 	/** Lasso_Amazon_Api::is_amazon_shortened_url(): Amazon's short-link hosts. */
 	private const SHORT_LINK_HOSTS = array( 'amzn.to', 'amzn.com', 'amzlink.to' );
 
@@ -74,6 +86,35 @@ final class AmazonUrl {
 	 */
 	public static function from( AffiliateUrl $url ): ?self {
 		return $url->is_amazon() ? new self( $url ) : null;
+	}
+
+	/**
+	 * A bare ASIN as the default store's product link (upper case, as Amazon writes ASINs), or null for anything else.
+	 * Lasso refuses a bare ASIN ("This is not a valid link."); F2 requirements, section 8.
+	 *
+	 * @param string $input What was pasted.
+	 */
+	public static function from_bare_asin( string $input ): ?AffiliateUrl {
+		$asin = strtoupper( trim( $input ) );
+		return 1 === preg_match( self::BARE_ASIN, $asin ) ? AffiliateUrl::from_string( self::DEFAULT_STORE_PRODUCT . $asin ) : null;
+	}
+
+	/**
+	 * The name a new Amazon product starts with (the user's decision 11, Task 6; F2 requirements, section 6), with no
+	 * request to Amazon: a product link's slug before "/dp/" as words (hyphens and "+" as spaces, percent-decoded,
+	 * spaces collapsed, case as written), else search_page_title(): "Amazon: <keywords>" or "Amazon". C1 replaces it
+	 * with the catalogue's title once the client's credentials exist.
+	 */
+	public function starting_name(): string {
+		$path = (string) parse_url( $this->url->value(), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
+		if ( '' !== $this->asin() && 1 === preg_match( '#^/([^/]+)/dp/#', $path, $match ) ) {
+			$words = rawurldecode( str_replace( array( '+', '-' ), ' ', $match[1] ) );
+			$words = trim( (string) preg_replace( '/\s+/', ' ', $words ) );
+			if ( '' !== $words ) {
+				return $words;
+			}
+		}
+		return $this->search_page_title();
 	}
 
 	/**

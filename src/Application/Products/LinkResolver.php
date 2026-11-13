@@ -21,7 +21,11 @@ use Affibloom\Domain\Product\PageTitle;
  */
 final class LinkResolver {
 
-	/** Lasso_Affiliate_Link::DEFAULT_AMAZON_NAME, until Task 12 names Amazon products. */
+	/**
+	 * Lasso_Affiliate_Link::DEFAULT_AMAZON_NAME, for a link that ends at Amazon. A new Amazon product takes
+	 * AmazonUrl::starting_name() instead (Task 12E); this name stays for a link stored as itself that leads into Amazon
+	 * (a geni.us link with Keep Geni.us Formatting on).
+	 */
 	private const AMAZON_NAME = 'Amazon';
 
 	/**

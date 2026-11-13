@@ -103,6 +103,15 @@ final class BulkAddServiceTest extends TestCase {
 		self::assertSame( array( 'running' => false, 'percent' => 100 ), $this->service()->progress() );
 	}
 
+	public function test_a_bare_asin_line_is_added_as_an_amazon_product(): void {
+		$this->service()->start( array( 'B0C1234567' ) );
+
+		$this->service()->process();
+
+		self::assertCount( 1, $this->products->saved );
+		self::assertSame( 'B0C1234567', $this->products->saved[0]->asin );
+	}
+
 	public function test_processing_stops_at_the_time_budget_and_wakes_the_job_again(): void {
 		$this->service()->start( array( 'https://a.example/1', 'https://a.example/2', 'https://a.example/3' ) );
 		$dispatched = $this->job->dispatched;

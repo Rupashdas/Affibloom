@@ -110,6 +110,17 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 'amazon', get_post_meta( $kept, '_affibloom_type', true ) );
 	}
 
+	public function test_a_bare_asin_and_the_starting_name(): void {
+		update_option( 'affibloom_settings', array( 'tracking_id' => 'vbvault-20' ) );
+
+		$bare = $this->post( 'B0C2468024' )->get_data()['data'];
+		self::assertSame( 'https://www.amazon.com/dp/B0C2468024?tag=vbvault-20', $bare['url'] );
+		self::assertSame( 'Amazon', $bare['name'] );
+
+		self::assertSame( 'Mizuno Wave Momentum 3', $this->post( 'https://www.amazon.com/Mizuno-Wave-Momentum-3/dp/B0C1357913' )->get_data()['data']['name'] );
+		self::assertSame( 'Amazon: nike kd14', $this->post( 'https://www.amazon.com/s?k=nike+kd14' )->get_data()['data']['name'] );
+	}
+
 	public function test_a_bare_domain_is_stored_with_https(): void {
 		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
 	}

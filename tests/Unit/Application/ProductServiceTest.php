@@ -61,7 +61,7 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( ProductType::Amazon, $added->product->type );
 		self::assertSame( 'B0C1234567', $added->product->asin );
 		self::assertSame( 'gb', $added->product->amazon_country );
-		self::assertSame( 'Amazon', $added->product->name );
+		self::assertSame( 'Mizuno Wave', $added->product->name ); // the slug, decision 11 (Task 12E)
 		self::assertSame( array(), $this->fetcher->asked );
 	}
 
@@ -187,6 +187,38 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( '', $added->product->asin );
 		self::assertSame( 'Amazon', $added->product->name );
 		self::assertSame( array( 'https://amzn.to/46fBGAJ' ), $this->fetcher->asked );
+	}
+
+	public function test_a_bare_asin_becomes_an_amazon_product(): void {
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( ' b0c1234567 ' );
+
+		self::assertSame( 'https://www.amazon.com/dp/B0C1234567?tag=vbvault-20', $added->product->url->value() );
+		self::assertSame( ProductType::Amazon, $added->product->type );
+		self::assertSame( 'B0C1234567', $added->product->asin );
+		self::assertSame( 'Amazon', $added->product->name );
+	}
+
+	public function test_a_bare_asin_of_a_product_that_exists_opens_it(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$first   = $service->create_from_url( 'https://www.amazon.com/Mizuno/dp/B0C1234567?tag=x' );
+
+		self::assertSame( $first->product->id, $service->create_from_url( 'B0C1234567' )->product->id );
+	}
+
+	public function test_a_new_amazon_product_is_named_from_its_slug(): void {
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://www.amazon.com/Mizuno-Wave-Momentum-3/dp/B0C1234567' );
+
+		self::assertSame( 'Mizuno Wave Momentum 3', $added->product->name );
+	}
+
+	public function test_a_new_search_page_is_named_after_its_keywords(): void {
+		self::assertSame( 'Amazon: nike kd14', $this->service( self::LIVE_AMAZON )->create_from_url( 'https://www.amazon.com/s?k=nike+kd14' )->product->name );
+	}
+
+	public function test_a_followed_short_link_is_named_from_its_destination_s_slug(): void {
+		$this->fetcher = new FakePageFetcher( array( 'https://amzn.to/46fBGAJ' => new FetchedPage( 301, 'https://www.amazon.com/Active-Ankle-329/dp/B00XOUQ8PE', '' ) ) );
+
+		self::assertSame( 'Active Ankle 329', $this->service( self::LIVE_AMAZON )->create_from_url( 'https://amzn.to/46fBGAJ' )->product->name );
 	}
 
 	public function test_shorten_amazon_links_off_keeps_the_whole_query(): void {

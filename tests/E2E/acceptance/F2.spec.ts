@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, setSettings, wp } from '../utils';
 
 // F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8; 12B: AC4; 12C: AC6;
-// 12D: AC7. AC2 and AC5 arrive with 12E.
+// 12D: AC7; 12E: AC2, AC5.
 test.describe( 'F2 Amazon links', () => {
 	// The live site's Amazon settings (tests/fixtures/inventory/settings.json).
 	const live = { tracking_id: 'vbvault-20', multiple_tracking_ids: true, tracking_id_whitelist: [ 'vbvault-20' ], shorten_amazon_links: true };
@@ -55,7 +55,14 @@ test.describe( 'F2 Amazon links', () => {
 				return ''; // Not stored.
 			}
 		};
-		return { url: meta( 'url' ), type: meta( 'type' ), asin: meta( 'asin' ), country: meta( 'amazon_country' ), searchKey: meta( 'search_key' ) };
+		return {
+			url: meta( 'url' ),
+			type: meta( 'type' ),
+			asin: meta( 'asin' ),
+			country: meta( 'amazon_country' ),
+			searchKey: meta( 'search_key' ),
+			name: wp( 'post', 'get', String( id ), '--field=post_title' ),
+		};
 	}
 
 	test( 'AC1 a product link keeps its path and gets the site tag first', async ( { page } ) => {
@@ -66,6 +73,15 @@ test.describe( 'F2 Amazon links', () => {
 		expect( stored.type ).toBe( 'amazon' );
 		expect( stored.asin ).toBe( a );
 		expect( stored.country ).toBe( 'us' );
+	} );
+
+	test( 'AC2 a bare ASIN becomes the store link with the site tag', async ( { page } ) => {
+		const a = asin();
+		const stored = await add( page, a );
+
+		expect( stored.url ).toBe( `https://www.amazon.com/dp/${ a }?tag=vbvault-20` );
+		expect( stored.type ).toBe( 'amazon' );
+		expect( stored.asin ).toBe( a );
 	} );
 
 	test( 'AC3 another tag is replaced, a whitelisted one is kept', async ( { page } ) => {
@@ -90,6 +106,15 @@ test.describe( 'F2 Amazon links', () => {
 		const uk = await add( page, `https://www.amazon.co.uk/dp/${ a }` );
 		expect( uk.country ).toBe( 'gb' );
 		expect( productsWithAsin( a ) ).toHaveLength( 2 );
+	} );
+
+	// Decision 11: a starting name from the link itself, with no request to Amazon.
+	test( 'AC5 a new Amazon product starts with a name from its link', async ( { page } ) => {
+		expect( ( await add( page, `https://www.amazon.com/Mizuno-Wave-Momentum-3/dp/${ asin() }?tag=vbvault-20` ) ).name ).toBe( 'Mizuno Wave Momentum 3' );
+		expect( ( await add( page, `https://www.amazon.com/dp/${ asin() }` ) ).name ).toBe( 'Amazon' );
+
+		const words = 'nike kd14 ' + Math.random().toString( 36 ).slice( 2, 8 );
+		expect( ( await add( page, `https://www.amazon.com/s?k=${ words.replaceAll( ' ', '+' ) }` ) ).name ).toBe( `Amazon: ${ words }` );
 	} );
 
 	test( 'AC6 a search page keeps its whole query and is found again by its keywords', async ( { page } ) => {
@@ -121,7 +146,7 @@ test.describe( 'F2 Amazon links', () => {
 		expect( stored.url ).toBe( link );
 		expect( stored.type ).toBe( 'amazon' );
 		expect( stored.asin ).toBe( '' );
-		expect( wp( 'post', 'get', String( newestProduct() ), '--field=post_title' ) ).toBe( 'Amazon' );
+		expect( stored.name ).toBe( 'Amazon' );
 	} );
 
 	test( 'AC8 a protected attribution link is stored exactly as pasted', async ( { page } ) => {

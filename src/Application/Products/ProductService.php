@@ -48,14 +48,16 @@ final class ProductService {
 	 * - an Amazon store link is then looked for in Lasso's order (Tasks 12B, 12C) and, when new, stored as Lasso
 	 *   stores it (Tasks 12A, 12C);
 	 * - a product that is found keeps its name, except for Lasso's "Sorry!" re-title (Task 12C);
+	 * - a bare ASIN is first made the default store's product link (Task 12E);
+	 * - a new Amazon product starts with a name from its link (decision 11, Task 12E);
 	 * - a new product takes the site's link defaults as they are now (Task 11E).
 	 *
 	 * @param string $input What was pasted.
-	 * @throws InvalidField      When the input is empty or not a link.
+	 * @throws InvalidField      When the input is empty, or neither a link nor a bare ASIN.
 	 * @throws RuntimeException When the product cannot be stored.
 	 */
 	public function create_from_url( string $input ): AddedLink {
-		$url = AffiliateUrl::from_string( $input );
+		$url = AmazonUrl::from_bare_asin( $input ) ?? AffiliateUrl::from_string( $input );
 
 		$existing = $this->products->find_by_url_key( $url->key() );
 		if ( null !== $existing ) {
@@ -84,7 +86,7 @@ final class ProductService {
 			return $this->found( $existing, $url );
 		}
 
-		return new AddedLink( $this->products->save( $this->amazon_draft( $resolved->title, $amazon, $stored, $settings ) ), false );
+		return new AddedLink( $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
 	}
 
 	/**
@@ -142,18 +144,17 @@ final class ProductService {
 	}
 
 	/**
-	 * A new Amazon product (save_lasso_url()'s Amazon fields): typed Amazon; with an ASIN, the ASIN and its store; a
-	 * search page, its search key.
+	 * A new Amazon product (save_lasso_url()'s Amazon fields): named from its link, typed Amazon; with an ASIN, the
+	 * ASIN and its store; a search page, its search key.
 	 *
-	 * @param string       $name     Its name.
 	 * @param AmazonUrl    $amazon   Its link, as an Amazon link.
 	 * @param AffiliateUrl $stored   The link to store.
 	 * @param Settings     $settings The site's settings, read once for this add.
 	 */
-	private function amazon_draft( string $name, AmazonUrl $amazon, AffiliateUrl $stored, Settings $settings ): Product {
+	private function amazon_draft( AmazonUrl $amazon, AffiliateUrl $stored, Settings $settings ): Product {
 		$asin = $amazon->asin();
 
-		return Product::draft( $name, $stored, $settings )->with(
+		return Product::draft( $amazon->starting_name(), $stored, $settings )->with(
 			array(
 				'type'           => ProductType::Amazon,
 				'asin'           => $asin,
