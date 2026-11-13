@@ -116,4 +116,9 @@
 	document.addEventListener( 'DOMContentLoaded', function () {
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-icon-field]' ), picker );
 	} );
+
+	// A field added after load (the product page's "Add Another Button", F29) gets its picker too.
+	document.addEventListener( 'affibloom:enhance', function ( event ) {
+		Array.prototype.forEach.call( event.target.querySelectorAll( '[data-icon-field]' ), picker );
+	} );
 } )();

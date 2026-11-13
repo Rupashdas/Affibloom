@@ -35,11 +35,8 @@ final class Product {
 	 *                                      Image column (Task 13C); edited on the product page (Task 14).
 	 * @param string       $button_text     The primary button's text; '' means the Display setting's text (Lasso's
 	 *                                      buy_btn_text, whose placeholder is the site's).
-	 * @param string       $url2            The secondary button's link, as stored; '' when there is no second button.
-	 *                                      Kept as text, as Lasso keeps second_btn_url: Task 15 validates what is saved.
-	 * @param string       $button_text2    The secondary button's text; '' means the Display setting's text.
-	 * @param bool         $new_tab2        The secondary link opens in a new tab.
-	 * @param bool         $nofollow2       The secondary link carries rel="nofollow".
+	 * @param Buttons      $buttons         The buttons added to the default one (whose link is $url), in order, and where
+	 *                                      the default one sits among them (F29, Task 14H).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -55,11 +52,7 @@ final class Product {
 		public readonly string $search_key = '',
 		public readonly string $image_url = '',
 		public readonly string $button_text = '',
-		public readonly string $url2 = '',
-		public readonly string $button_text2 = '',
-		// Lasso's defaults for a new record (open_new_tab2, enable_nofollow2: true), which no screen of its changes.
-		public readonly bool $new_tab2 = true,
-		public readonly bool $nofollow2 = true,
+		public readonly Buttons $buttons = new Buttons( array() ),
 	) {}
 
 	/**

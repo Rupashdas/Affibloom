@@ -67,10 +67,7 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Primary button text | `Button Text` | same | `#affibloom-button-text` | |
 | Primary new tab | `New Window / Tab` | same | `#affibloom-new-tab` | |
 | Primary nofollow | `NoFollow / NoIndex` | same | `#affibloom-nofollow` | |
-| Secondary URL | `Secondary Destination URL` | same | `#affibloom-url2` | |
-| Secondary button text | `Button Text` | same | `#affibloom-button-text2` | |
-| Secondary new tab | `New Window / Tab` | same | `#affibloom-new-tab2` | |
-| Secondary nofollow | `NoFollow / NoIndex` | same | `#affibloom-nofollow2` | |
+| Buttons | Lasso: a primary block and a secondary block | one block per button, "Button <n>": the default one (`Primary Destination URL`, "Main link") and each added one (`Additional Destination URL`), each with `Button Text`, `New Window / Tab`, `NoFollow / NoIndex`, Move up / Move down, Remove (added only); `Add Another Button` | `[data-button]`, `[data-main-button]`, `[data-extra-button]`, names `buttons[<i>][url\|text\|new_tab\|nofollow]`, `primary_position` | **Changed** (F29, the user's request; register U12): any number of buttons, one by default, every one movable; the first is the box's primary. |
 | Groups | `Groups` (multi-select, "Select a group") | same | `#affibloom-groups` | **Changed** (deviation 52): built with the Groups area; a placeholder from 14A. |
 | Rating | custom-field card `Primary Rating`: show toggle, show-name toggle, number 1-5, stars; `Add Custom Field` | same | `.affibloom-field-row[data-field-id="1"]` | **Changed** (14C): Lasso's custom fields in full (create, library, Pros, Cons); saved as edited. |
 | Display Theme | `Display Theme` (`Default (Lab)`) | same | `#affibloom-theme` | **Changed** (14B): built. |

@@ -105,15 +105,26 @@
 			'_affibloom_sponsored'       => $flag( $lasso_id, 'enable_sponsored' ),
 			'_affibloom_show_disclosure' => $flag( $lasso_id, 'show_disclosure', true ),
 			'_affibloom_button_text'     => $text( $lasso_id, 'buy_btn_text' ),
-			'_affibloom_url2'            => $text( $lasso_id, 'second_btn_url' ),
-			'_affibloom_button_text2'    => $text( $lasso_id, 'second_btn_text' ),
-			'_affibloom_new_tab2'        => $flag( $lasso_id, 'open_new_tab2', true ),
-			'_affibloom_nofollow2'       => $flag( $lasso_id, 'enable_nofollow2', true ),
 			'_affibloom_image_url'       => $text( $lasso_id, 'lasso_custom_thumbnail' ),
 			'_affibloom_badge'           => $text( $lasso_id, 'badge_text' ),
 			'_affibloom_description'     => $text( $lasso_id, 'affiliate_desc' ),
 			'_affibloom_disclosure'      => $text( $lasso_id, 'disclosure_text' ),
 		);
+
+		// Lasso's second button is the first of the product's buttons after the primary (F29, Task 14H). Its text is kept
+		// without a link too, as Lasso keeps it (123 records here); a button with neither is not written.
+		$second_url  = trim( $text( $lasso_id, 'second_btn_url' ) );
+		$second_text = $text( $lasso_id, 'second_btn_text' );
+		if ( '' !== $second_url || '' !== trim( $second_text ) ) {
+			$meta['_affibloom_buttons'] = array(
+				array(
+					'url'      => $second_url,
+					'text'     => $second_text,
+					'new_tab'  => '1' === $flag( $lasso_id, 'open_new_tab2', true ),
+					'nofollow' => '1' === $flag( $lasso_id, 'enable_nofollow2', true ),
+				),
+			);
+		}
 
 		if ( $is_amazon ) {
 			$meta['_affibloom_asin']           = (string) $record->product_id;

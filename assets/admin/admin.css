@@ -1440,6 +1440,42 @@
 .affibloom-icon-menu .affibloom-menu__item[aria-checked="true"] { background: var(--affibloom-brand-50); }
 .affibloom-icon-menu .affibloom-menu__item:focus { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
 
+/* 7h. The product page's buttons (F29, Task 14H): one block per button, the default one first by default, each a
+ * sub-card with its name, the "Main link" tag on the default one, Move / Remove on top; "Add Another Button" below. */
+.affibloom-buttons { display: grid; gap: 16px; }
+.affibloom-buttons__list { display: grid; gap: 16px; }
+.affibloom-admin .affibloom-button-block {
+	/* Not a grid: a fieldset's legend cannot sit in one, so the name, the tag and the actions float on one header row. */
+	display: block;
+	min-width: 0;
+	margin: 0;
+	padding: 16px;
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-subtle);
+}
+.affibloom-button-block__legend {
+	float: left;
+	margin: 6px 10px 12px 0;
+	padding: 0;
+	color: var(--affibloom-ink-900);
+	font-weight: 700;
+}
+.affibloom-button-block__tag {
+	float: left;
+	margin-top: 6px;
+	padding: 1px 8px;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-brand-50);
+	color: var(--affibloom-brand-600);
+	font-size: 12px;
+	font-weight: 600;
+}
+.affibloom-button-block__actions { display: flex; float: right; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-bottom: 12px; }
+.affibloom-button-block .affibloom-product__pair { clear: both; }
+.affibloom-button-block .affibloom-product__toggles { margin-top: 12px; }
+.affibloom-buttons__add { justify-self: start; }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;

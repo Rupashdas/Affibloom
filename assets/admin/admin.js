@@ -483,4 +483,9 @@
 		Array.prototype.forEach.call( document.querySelectorAll( 'form[data-save-when-changed]' ), saveWhenChanged );
 		Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-add-form' ), addLink );
 	} );
+
+	// Content added after load (the product page's "Add Another Button", F29) announces itself for its help tips.
+	document.addEventListener( 'affibloom:enhance', function ( event ) {
+		Array.prototype.forEach.call( event.target.querySelectorAll( '.affibloom-help' ), floatingTip );
+	} );
 } )();

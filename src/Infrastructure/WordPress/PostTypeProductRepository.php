@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Infrastructure\WordPress;
 
 use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
@@ -274,8 +275,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * product by neither its link nor its ASIN; the query is also not marked as a search, so nothing else on
 	 * the site treats this admin list as one.
 	 *
-	 * Task 15 adds `_affibloom_url2` to the meta keys when the second button's link exists: 60 of the 263 live
-	 * Lasso records have one, and Lasso's search matches it. URL variants join if that subsystem is ever built.
+	 * The buttons after the primary one (`_affibloom_buttons`, F29) are searched too, as Lasso's search matches the
+	 * second button's link (60 of the 263 live records have one); a LIKE over the stored list finds a link inside it.
+	 * URL variants join if that subsystem is ever built.
 	 *
 	 * @return callable(string, \WP_Query): string
 	 */
@@ -294,7 +296,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				$wpdb->prepare(
 					"EXISTS ( SELECT 1 FROM {$wpdb->postmeta} AS affibloom_m
 						WHERE affibloom_m.post_id = {$wpdb->posts}.ID
-							AND affibloom_m.meta_key IN ( '_affibloom_url', '_affibloom_asin' )
+							AND affibloom_m.meta_key IN ( '_affibloom_url', '_affibloom_asin', '_affibloom_buttons' )
 							AND affibloom_m.meta_value LIKE %s )",
 					$like
 				),
@@ -350,8 +352,6 @@ final class PostTypeProductRepository implements ProductRepository {
 	 */
 	private function hydrate( WP_Post $post ): Product {
 		$meta = static fn( string $key ): string => (string) get_post_meta( $post->ID, '_affibloom_' . $key, true );
-		// The secondary button's toggles: a product saved before Task 15 has none, and reads Lasso's new-record default (on).
-		$flag2 = static fn( string $key ): bool => '0' !== $meta( $key );
 
 		// A flag is on only when stored as "1", as Lasso reads its own (1 === intval( get_post_meta( … ) )).
 		return new Product(
@@ -368,10 +368,7 @@ final class PostTypeProductRepository implements ProductRepository {
 			search_key: $meta( 'search_key' ),
 			image_url: $meta( 'image_url' ),
 			button_text: $meta( 'button_text' ),
-			url2: trim( $meta( 'url2' ) ), // Lasso trims second_btn_url when it reads it.
-			button_text2: $meta( 'button_text2' ),
-			new_tab2: $flag2( 'new_tab2' ),
-			nofollow2: $flag2( 'nofollow2' ),
+			buttons: Buttons::from_array( (array) get_post_meta( $post->ID, '_affibloom_buttons', true ), (int) $meta( 'primary_position' ) ),
 		);
 	}
 

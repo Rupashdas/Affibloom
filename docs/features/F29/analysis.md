@@ -1,6 +1,6 @@
 # F29 Any number of buttons: analysis
 
-Status: gate 2 written 2026-11-13. Waiting for the user's gate 4 on Task 14H.
+Status: gate 2 written 2026-11-13. Gate 4 given by the user 2026-11-13.
 
 **Tasks:** 14H (the product and its page), then the parts in later tasks: 15 (save), 18 and the box tasks (render,
 Phase 3), 33-34 and C3 (clicks and GA), 26 (migration), the seed tool.
@@ -10,11 +10,12 @@ Phase 3), 33-34 and C3 (clicks and GA), 26 (migration), the seed tool.
 | Before (14A) | After (14H) |
 |---|---|
 | `_affibloom_url2`, `_affibloom_button_text2`, `_affibloom_new_tab2`, `_affibloom_nofollow2` | `_affibloom_buttons`: `list<{url: string, text: string, new_tab: bool, nofollow: bool}>`, buttons 2 and up in order |
-| `Product::$url2`, `$button_text2`, `$new_tab2`, `$nofollow2` | `Product::$buttons` (`Domain\Product\Buttons`, a list of `Domain\Product\Button`) |
+| `Product::$url2`, `$button_text2`, `$new_tab2`, `$nofollow2` | `Product::$buttons` (`Domain\Product\Buttons`: the added buttons, a list of `Domain\Product\Button`, and `main_position()`) |
+| — | `_affibloom_primary_position`: where the default button sits among the added ones, from 0 (D6), clamped to the list |
 
-`hydrate()` reads `_affibloom_buttons`; a product with only the old four keys (written by the seed tool before 14H)
-reads them as one button, so nothing on the Local copy is lost before the seed is re-run. The seed tool writes the new
-key from 14H on.
+`hydrate()` reads `_affibloom_buttons` and `_affibloom_primary_position`. The Local copy's products, seeded before
+14H with the old four keys, were converted once by a scratch script after a backup (no reader for the old keys is kept
+in the plugin; production never had them). The seed tool writes the new key.
 
 ## Request path (14H)
 

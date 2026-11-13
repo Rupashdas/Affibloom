@@ -59,13 +59,15 @@ test.describe( 'F1 Product library', () => {
 		await expect( page.locator( '#affibloom-name' ) ).toHaveValue( name );
 		await expect( page.locator( '#affibloom-url' ) ).toHaveValue( /\/f1-ac5-/ );
 		await expect( page.locator( '#affibloom-button-text' ) ).toHaveValue( '<span class="amazon-icon"></span> Buy Now' );
-		await expect( page.locator( '#affibloom-url2' ) ).toHaveValue( 'https://www.example.com/second' );
-		await expect( page.locator( '#affibloom-button-text2' ) ).toHaveValue( '' );
-		await expect( page.locator( '#affibloom-button-text2' ) ).not.toHaveAttribute( 'placeholder', '' );
 		await expect( page.locator( '#affibloom-new-tab' ) ).toBeChecked();
 		await expect( page.locator( '#affibloom-nofollow' ) ).not.toBeChecked();
-		await expect( page.locator( '#affibloom-new-tab2' ) ).not.toBeChecked();
-		await expect( page.locator( '#affibloom-nofollow2' ) ).toBeChecked();
+		// Lasso's secondary button is the first added button since F29 (Task 14H).
+		const second = page.locator( '[data-extra-button]' ).first();
+		await expect( second.getByLabel( 'Additional Destination URL' ) ).toHaveValue( 'https://www.example.com/second' );
+		await expect( second.locator( 'input[name="buttons[0][text]"]' ) ).toHaveValue( '' );
+		await expect( second.locator( 'input[name="buttons[0][text]"]' ) ).not.toHaveAttribute( 'placeholder', '' );
+		await expect( second.getByRole( 'switch', { name: 'New Window / Tab' } ) ).not.toBeChecked();
+		await expect( second.getByRole( 'switch', { name: 'NoFollow / NoIndex' } ) ).toBeChecked();
 		// Lasso's four tabs; only Details exists yet.
 		await expect( page.locator( '.affibloom-tabs__tab' ) ).toHaveText( [ /Details/, /Locations/, /Opportunities/, /Variants/ ] );
 		// A non-Amazon product has a Permalink row (cloaking comes later); an Amazon one does not (AC7).

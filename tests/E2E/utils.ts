@@ -70,11 +70,23 @@ export type ProductFields = Partial< {
 	show_disclosure: '1' | '0';
 	disclosure: string;
 	prime: '1' | '0';
+	// Buttons 2 and up in order (F29); url2, button_text2, new_tab2 and nofollow2 above are a shorthand for the first.
+	buttons: ProductButton[];
+	// Where the default button (the product's main link) sits among them, from 0 (F29: the user's request).
+	primary_position: string;
 } >;
+
+/** A button after the primary (F29, `_affibloom_buttons`). */
+export type ProductButton = { url: string; text?: string; new_tab?: boolean; nofollow?: boolean };
 
 /** Creates a product directly in the database (meta keys from docs/spec/interface.md, section 4). */
 export function createProduct( fields: ProductFields ): number {
-	const { name = 'Test product', ...meta } = fields;
+	const { name = 'Test product', buttons = [], url2, button_text2, new_tab2, nofollow2, ...meta } = fields;
+	// The secondary button is the first of the list since Task 14H (F29 D4); Lasso's toggles default to on.
+	const list = url2 !== undefined || button_text2 !== undefined
+		? [ { url: url2 ?? '', text: button_text2 ?? '', new_tab: new_tab2 !== '0', nofollow: nofollow2 !== '0' }, ...buttons ]
+		: buttons;
+	const stored = list.map( ( b ) => ( { url: b.url, text: b.text ?? '', new_tab: b.new_tab ?? true, nofollow: b.nofollow ?? true } ) );
 	const defaults = { url: 'https://www.example.com/item', type: 'other', new_tab: '1', nofollow: '1', sponsored: '0', show_disclosure: '1' };
 	// An Amazon product's store defaults to the site's (us), as Task 12A stores it.
 	const store = meta.type === 'amazon' ? { amazon_country: 'us' } : {};
@@ -82,8 +94,9 @@ export function createProduct( fields: ProductFields ): number {
 	const metaInput = Object.fromEntries( Object.entries( all ).map( ( [ k, v ] ) => [ `_affibloom_${ k }`, v ] ) );
 	// AffiliateUrl::key(): "&amp;" read as "&", trailing slashes dropped, lower case — for every product, Amazon's too.
 	metaInput._affibloom_url_key = all.url.replace( /&amp;/g, '&' ).replace( /\/+$/, '' ).toLowerCase();
+	const input: Record< string, unknown > = stored.length ? { ...metaInput, _affibloom_buttons: stored } : metaInput;
 	return Number(
-		wp( 'post', 'create', '--post_type=affibloom_product', '--post_status=publish', `--post_title=${ name }`, `--meta_input=${ JSON.stringify( metaInput ) }`, '--porcelain' )
+		wp( 'post', 'create', '--post_type=affibloom_product', '--post_status=publish', `--post_title=${ name }`, `--meta_input=${ JSON.stringify( input ) }`, '--porcelain' )
 	);
 }
 

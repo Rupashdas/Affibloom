@@ -21,14 +21,12 @@ $product = $view['product'];
 // Lasso hides Permalink and Link Cloaking for an Amazon link, a search page included (url-details.php 194, 491).
 $is_amazon = ProductType::Amazon === $product->type;
 // D5: the link under the title is the destination until link cloaking exists (Lasso's rule when cloaking is off).
-$destination   = $product->url->value();
-$soon_tabs     = array(
+$destination = $product->url->value();
+$soon_tabs   = array(
 	__( 'Locations', 'affibloom' ),
 	__( 'Opportunities', 'affibloom' ),
 	__( 'Variants', 'affibloom' ),
 );
-$new_tab_help  = __( 'When enabled, users who click this link will have it loaded in a new tab.', 'affibloom' );
-$nofollow_help = __( "When enabled, this link will be set to nofollow. This indicates to Google that it's an affiliate link.", 'affibloom' );
 ?>
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
@@ -94,113 +92,101 @@ $nofollow_help = __( "When enabled, this link will be set to nofollow. This indi
 					}
 					?>
 
-					<?php // Each button: its link and text side by side (Lasso's 8 / 4 columns), then its two toggles. ?>
-					<div class="affibloom-product__button">
-						<div class="affibloom-product__pair">
+					<?php
+					// The buttons (F29, Task 14H; the user, 2026-11-13): one by default, the product's own link; "Add Another Button" adds
+					// more. Every button moves up and down, the default one too; the first in the list is the box's primary button. Without
+					// JavaScript one empty added block follows the list, so a button can be added one save at a time.
+					$buttons  = $product->buttons;
+					$added    = $buttons->all();
+					$position = $buttons->main_position();
+					$blocks   = array();
+					foreach ( $added as $index => $added_button ) {
+						$blocks[] = array(
+							'main'     => false,
+							'index'    => $index,
+							'key'      => (string) $index,
+							'url'      => $added_button->url,
+							'text'     => $added_button->text,
+							'new_tab'  => $added_button->new_tab,
+							'nofollow' => $added_button->nofollow,
+						);
+					}
+					array_splice(
+						$blocks,
+						$position,
+						0,
+						array(
+							array(
+								'main'     => true,
+								'index'    => 0,
+								'key'      => 'main',
+								'url'      => $destination,
+								'text'     => $product->button_text,
+								'new_tab'  => $product->new_tab,
+								'nofollow' => $product->nofollow,
+							),
+						)
+					);
+					$empty_block = array(
+						'main'        => false,
+						'url'         => '',
+						'text'        => '',
+						'new_tab'     => true,
+						'nofollow'    => true,
+						'placeholder' => $view['button_text2'],
+						'choices'     => $view['choices'],
+					);
+					?>
+					<div class="affibloom-buttons" data-buttons
+						data-legend-format="<?php /* translators: %s: a button's place in the box, e.g. 2. */ echo esc_attr__( 'Button %s', 'affibloom' ); ?>"
+						data-up-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Move %s up', 'affibloom' ); ?>"
+						data-down-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Move %s down', 'affibloom' ); ?>"
+						data-remove-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Remove %s', 'affibloom' ); ?>"
+						data-confirm="<?php esc_attr_e( 'Remove this button? Its link and text are gone once you save.', 'affibloom' ); ?>">
+						<input type="hidden" name="primary_position" value="<?php echo esc_attr( (string) $position ); ?>" data-main-position>
+						<div class="affibloom-buttons__list" data-button-list>
+							<?php
+							foreach ( $blocks as $number => $button_block ) {
+								$this->render(
+									'admin/partials/product-button',
+									$button_block + array(
+										'number'      => $number + 1,
+										// The primary text falls back to the type's primary text; every other to the secondary's (F29 D2).
+										'placeholder' => $button_block['main'] ? $view['button_text'] : $view['button_text2'],
+										'choices'     => $view['choices'],
+									)
+								);
+							}
+							?>
+						</div>
+						<noscript>
 							<?php
 							$this->render(
-								'admin/partials/field-text',
-								array(
-									'id'          => 'affibloom-url',
-									'name'        => 'url',
-									'label'       => __( 'Primary Destination URL', 'affibloom' ),
-									'value'       => $destination,
-									'help'        => __( 'The actual URL you want people to go to when they click a link', 'affibloom' ),
-									'placeholder' => 'https://www.example.com/affiliate-id',
-								)
-							);
-							$this->render(
-								'admin/partials/field-text',
-								array(
-									'id'          => 'affibloom-button-text',
-									'name'        => 'button_text',
-									'label'       => __( 'Button Text', 'affibloom' ),
-									'value'       => $product->button_text,
-									'help'        => __( 'This text will appear in the primary button', 'affibloom' ),
-									'placeholder' => $view['button_text'],
-									'choices'     => $view['choices'],
+								'admin/partials/product-button',
+								$empty_block + array(
+									'index'  => count( $added ),
+									'key'    => 'new',
+									'number' => count( $blocks ) + 1,
 								)
 							);
 							?>
-						</div>
-						<div class="affibloom-product__toggles">
+						</noscript>
+						<template id="affibloom-extra-button-template">
 							<?php
 							$this->render(
-								'admin/partials/switch-row',
-								array(
-									'id'      => 'affibloom-new-tab',
-									'name'    => 'new_tab',
-									'label'   => __( 'New Window / Tab', 'affibloom' ),
-									'checked' => $product->new_tab,
-									'help'    => $new_tab_help,
-								)
-							);
-							$this->render(
-								'admin/partials/switch-row',
-								array(
-									'id'      => 'affibloom-nofollow',
-									'name'    => 'nofollow',
-									'label'   => __( 'NoFollow / NoIndex', 'affibloom' ),
-									'checked' => $product->nofollow,
-									'help'    => $nofollow_help,
+								'admin/partials/product-button',
+								$empty_block + array(
+									'index'  => '__i__',
+									'key'    => '__k__',
+									'number' => '__n__',
 								)
 							);
 							?>
-						</div>
-					</div>
-
-					<div class="affibloom-product__button">
-						<div class="affibloom-product__pair">
-							<?php
-							$this->render(
-								'admin/partials/field-text',
-								array(
-									'id'          => 'affibloom-url2',
-									'name'        => 'url2',
-									'label'       => __( 'Secondary Destination URL', 'affibloom' ),
-									'value'       => $product->url2,
-									'help'        => __( 'A secondary URL you want people to go to when they click an optional second button in displays', 'affibloom' ),
-									'placeholder' => 'https://www.example.com/affiliate-id2',
-								)
-							);
-							$this->render(
-								'admin/partials/field-text',
-								array(
-									'id'          => 'affibloom-button-text2',
-									'name'        => 'button_text2',
-									'label'       => __( 'Button Text', 'affibloom' ),
-									'value'       => $product->button_text2,
-									'help'        => __( 'This text will appear in the optional secondary button', 'affibloom' ),
-									'placeholder' => $view['button_text2'],
-									'choices'     => $view['choices'],
-								)
-							);
-							?>
-						</div>
-						<div class="affibloom-product__toggles">
-							<?php
-							$this->render(
-								'admin/partials/switch-row',
-								array(
-									'id'      => 'affibloom-new-tab2',
-									'name'    => 'new_tab2',
-									'label'   => __( 'New Window / Tab', 'affibloom' ),
-									'checked' => $product->new_tab2,
-									'help'    => $new_tab_help,
-								)
-							);
-							$this->render(
-								'admin/partials/switch-row',
-								array(
-									'id'      => 'affibloom-nofollow2',
-									'name'    => 'nofollow2',
-									'label'   => __( 'NoFollow / NoIndex', 'affibloom' ),
-									'checked' => $product->nofollow2,
-									'help'    => $nofollow_help,
-								)
-							);
-							?>
-						</div>
+						</template>
+						<button type="button" class="affibloom-button affibloom-button--secondary affibloom-buttons__add" data-add-button hidden>
+							<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+							<span><?php esc_html_e( 'Add Another Button', 'affibloom' ); ?></span>
+						</button>
 					</div>
 
 					<?php // Groups: a placeholder until the Groups area (Lasso: a multi-select that can create a group). ?>

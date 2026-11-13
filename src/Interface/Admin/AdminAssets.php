@@ -60,6 +60,11 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-icon-picker', $this->plugin_url . 'assets/admin/icon-picker.js', array( 'affibloom-admin' ), $this->version, true );
 		}
 
+		// The product page's additional buttons: add, move, remove (F29, Task 14H).
+		if ( str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker' ), $this->version, true );
+		}
+
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).
 		if ( 'display' === $tab ) {
 			wp_enqueue_media();
