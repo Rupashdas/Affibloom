@@ -193,9 +193,17 @@
 		} );
 	}
 
-	/** The controls outside the list follow it: the search box, the link type, the filter count, the pills. */
-	function reflect() {
-		if ( search && document.activeElement !== search ) {
+	/**
+	 * The controls outside the list follow it: the search box, the link type, the filter count, the pills.
+	 *
+	 * The search box is left alone while it has the focus, so an answer arriving while the editor types on does not
+	 * overwrite the newer text; but Back and Forward (fromHistory) always set it, since the list they bring back is a
+	 * different search (the focus is often still in the box after the search that is being undone).
+	 *
+	 * @param {boolean} fromHistory The list answers Back or Forward.
+	 */
+	function reflect( fromHistory ) {
+		if ( search && ( fromHistory || document.activeElement !== search ) ) {
 			search.value = current.s;
 		}
 		if ( linkType ) {
@@ -240,7 +248,7 @@
 			} else {
 				sync();
 			}
-			reflect();
+			reflect( ! remember );
 			announce();
 			if ( focus ) {
 				var card = region.querySelector( '.affibloom-card' );

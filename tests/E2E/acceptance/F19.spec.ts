@@ -137,7 +137,8 @@ test.describe( 'F19 Dashboard list', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await search( page, unique( 'nothingmatchesthis' ) );
 
-		await expect( page.getByText( 'No products match your search.' ) ).toBeVisible();
+		// In the list: the screen-reader status line says the same words (Task 13D), which is right, not a second card.
+		await expect( page.locator( '#affibloom-list' ).getByText( 'No products match your search.' ) ).toBeVisible();
 		await expect( page.locator( '.affibloom-table' ) ).toHaveCount( 0 );
 
 		await search( page, '' );
