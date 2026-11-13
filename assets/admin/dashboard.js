@@ -1,7 +1,7 @@
 /* global wp */
 /**
  * Affibloom Dashboard: Lasso's selection (Task 13C), the list without page reloads (Task 13D), the filters panel with
- * saved views (Task 13E), and the row's quick edit (Tasks 16A-16B).
+ * saved views (Task 13E), and the row's quick edit (Tasks 16A-16C).
  *
  * The server renders every piece of markup (the list, the saved-view bar) with the same partials the page printed,
  * so this file never builds a row or a pill: it asks, swaps what comes back in, and keeps the address bar in step
@@ -661,6 +661,22 @@
 				} );
 			} );
 		} ).catch( function ( error ) {
+			// Another product has the new link (Task 16C; Q10, D21): nothing was saved, and the dialog turns into Lasso's
+			// "This Product Already Exists". Cancel keeps the row open with the typed link; Confirm opens the kept
+			// product. Lasso's own Dashboard drops this offer and says "saved".
+			if ( error && 'affibloom_duplicate' === error.code && error.data && error.data.to ) {
+				quick.saving = false;
+				quick.held = null;
+				submit.disabled = false;
+				window.affibloomRepoint.offer( parseInt( id, 10 ), error.data, sent.url, {
+					cancelled: function () {
+						form.elements.namedItem( 'url' ).focus();
+					},
+					leave: go,
+					failedText: region.dataset.failedText,
+				} );
+				return;
+			}
 			dialog.close( function () {
 				var fields = error && error.data && error.data.fields;
 				quick.saving = false;

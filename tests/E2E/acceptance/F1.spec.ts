@@ -278,7 +278,8 @@ test.describe( 'F1 Product library', () => {
 		const name = unique( 'F1 AC18' );
 		const id = createProduct( { name, description: '<p>Kept <span style="color: rgb(0, 0, 0);">as stored</span></p>', badge: 'Our Pick' } );
 		const description = wp( 'post', 'meta', 'get', String( id ), '_affibloom_description' );
-		const image = wp( 'post', 'list', '--post_type=attachment', '--post_mime_type=image', '--orderby=ID', '--order=DESC', '--posts_per_page=1', '--field=ID' );
+		// The newest image, as the media library lists them (by date), so it is in the frame's first view.
+		const image = wp( 'post', 'list', '--post_type=attachment', '--post_mime_type=image', '--orderby=date', '--order=DESC', '--posts_per_page=1', '--field=ID' );
 		const renamed = unique( 'F1 AC18 renamed' );
 		await page.route( /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+/, async ( route ) => {
 			await new Promise( ( done ) => setTimeout( done, 500 ) );
@@ -302,6 +303,8 @@ test.describe( 'F1 Product library', () => {
 		await nameField.fill( renamed );
 		await form.getByRole( 'button', { name: 'Update Image' } ).click();
 		const library = page.getByRole( 'dialog', { name: 'Select an Image' } );
+		// WordPress opens the frame on "Upload files" or "Media Library" as it sees fit; the library is the one to use.
+		await library.getByRole( 'tab', { name: 'Media Library' } ).click();
 		await library.locator( `li.attachment[data-id="${ image }"]` ).click();
 		await library.getByRole( 'button', { name: 'Select Image' } ).click();
 		await form.getByRole( 'button', { name: 'Save Changes' } ).click();
@@ -324,7 +327,13 @@ test.describe( 'F1 Product library', () => {
 	// Task 16B (requirements 10, Q9, D29): an open row with edits asks before anything redraws the list or leaves the
 	// page, as Lasso's run_page_action and its link and beforeunload guards do.
 	test( 'AC19 a Dashboard action with unsaved quick-edit changes asks first; Cancel or a save ends that', async ( { page } ) => {
+		test.setTimeout( 120_000 ); // It may first fill the library up to two pages.
 		const name = unique( 'F1 AC19' );
+		// A page link needs a second page: more than ten products (a reset copy has none).
+		const have = Number( wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=count' ) );
+		for ( let n = have; n < 9; n++ ) {
+			createProduct( { name: unique( 'F1 AC19 filler' ) } );
+		}
 		const other = createProduct( { name: unique( 'F1 AC19 other' ) } );
 		const id = createProduct( { name } );
 		const dashboard = '/wp-admin/admin.php?page=affibloom';
@@ -405,6 +414,43 @@ test.describe( 'F1 Product library', () => {
 		} ) );
 		void page.reload().catch( () => undefined );
 		expect( await asked ).toBe( 'beforeunload' );
+	} );
+
+	// Task 16C (requirements 10, Q10, D21): Lasso's server makes the repoint offer for a quick edit too, but its Dashboard
+	// says "saved"; here the Dashboard shows the offer, the product page's (AC15).
+	test( 'AC20 a quick edit with another product\'s link offers that product; Confirm retires this one', async ( { page } ) => {
+		const mineName = unique( 'F1 AC20 mine' );
+		const otherName = unique( 'F1 AC20 other' );
+		const otherUrl = `https://www.example.com/${ unique( 'f1-ac20-other' ) }`;
+		const other = createProduct( { name: otherName, url: otherUrl } );
+		const mine = createProduct( { name: mineName, url: `https://www.example.com/${ unique( 'f1-ac20-mine' ) }` } );
+		const mineUrl = wp( 'post', 'meta', 'get', String( mine ), '_affibloom_url' );
+		const form = page.locator( `tr[data-quick-edit-for="${ mine }"]` );
+		const link = form.getByLabel( 'Primary Destination URL' );
+		const offer = page.getByRole( 'dialog', { name: 'This Product Already Exists' } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.locator( `tr[data-product-id="${ mine }"]` ).getByRole( 'button', { name: 'Edit' } ).click();
+
+		// Cancel: nothing saved; the row stays open with the typed link, which has the focus.
+		await link.fill( otherUrl );
+		await form.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( offer ).toContainText( 'Do you want to change all Locations to that link?' );
+		await expect( offer ).toContainText( mineName );
+		await expect( offer ).toContainText( otherName );
+		await expect( offer.getByRole( 'link', { name: 'View Existing Link' } ) ).toHaveAttribute( 'href', new RegExp( `id=${ other }$` ) );
+		await offer.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( offer ).toBeHidden();
+		await expect( link ).toHaveValue( otherUrl );
+		await expect( link ).toBeFocused();
+		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_url' ) ).toBe( mineUrl );
+
+		// Confirm: this product is retired, pointing at the other, whose page opens with Lasso's words.
+		await form.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await offer.getByRole( 'button', { name: 'Confirm' } ).click();
+		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ other }&affibloom_notice=repointed` ) );
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Success! Locations now show this link.' );
+		expect( wp( 'post', 'get', String( mine ), '--field=post_status' ) ).toBe( 'trash' );
+		expect( wp( 'post', 'meta', 'get', String( mine ), '_affibloom_repointed_to' ) ).toBe( String( other ) );
 	} );
 
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {

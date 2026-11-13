@@ -1953,6 +1953,8 @@
 .affibloom-repoint__intro,
 .affibloom-repoint__arrow { text-align: center; }
 .affibloom-repoint__arrow { margin: 8px 0; color: var(--affibloom-ink-700); font-size: 18px; }
+/* The question gets room from the title and from the first link box (it sat on the box; seen in 16C's check). */
+.affibloom-admin .affibloom-repoint__intro { margin: 8px 0 20px; font-size: 14px; line-height: 20px; }
 .affibloom-repoint__side {
 	padding: 12px 16px;
 	border: 1px solid var(--affibloom-control-line);

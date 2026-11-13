@@ -77,10 +77,6 @@
 	function productForm( form ) {
 		var save = document.getElementById( 'affibloom-save' );
 		var modal = dialog.modal();
-		var repoint = modal.querySelector( '[data-repoint]' );
-		var cancel = repoint.querySelector( '[data-repoint-cancel]' );
-		var confirm = repoint.querySelector( '[data-repoint-confirm]' );
-		var offer = null;
 		var unsaved = document.querySelector( '[data-unsaved-modal]' );
 		var baseline = null;
 		var leaving = false;
@@ -189,45 +185,6 @@
 			savedSwitches = switches();
 		};
 
-		// "This Product Already Exists" (Lasso's repoint panel): this product and the one that has the link.
-		var showRepoint = function ( data, url ) {
-			offer = { to: data.to.id, url: url };
-			[ 'from', 'to' ].forEach( function ( side ) {
-				var box = repoint.querySelector( '[data-repoint-side="' + side + '"]' );
-				var item = data[ side ] || { name: '', url: '', page: '#' };
-				box.querySelector( '[data-repoint-name]' ).textContent = item.name;
-				box.querySelector( '[data-repoint-url]' ).textContent = item.url;
-				box.querySelector( '[data-repoint-view]' ).href = item.page;
-			} );
-			cancel.disabled = false;
-			confirm.disabled = false;
-			dialog.panel( true );
-			cancel.focus();
-		};
-
-		cancel.addEventListener( 'click', function () {
-			dialog.hide();
-			field( 'url' ).focus();
-		} );
-		repoint.addEventListener( 'keydown', function ( event ) {
-			if ( 'Escape' === event.key && ! cancel.disabled ) {
-				cancel.click();
-			}
-		} );
-		confirm.addEventListener( 'click', function () {
-			cancel.disabled = true;
-			confirm.disabled = true;
-			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId + '/repoint', method: 'POST', data: offer } )
-				.then( function ( response ) {
-					go( response.data.redirect_to );
-				} )
-				.catch( function ( error ) {
-					cancel.disabled = false;
-					confirm.disabled = false;
-					toast( error && error.message ? error.message : form.dataset.failedText, true );
-				} );
-		} );
-
 		form.addEventListener( 'input', function ( event ) {
 			// A refused field's note goes as soon as it is edited.
 			var note = event.target.id ? document.getElementById( event.target.id + '-save-error' ) : null;
@@ -269,7 +226,14 @@
 				.catch( function ( error ) {
 					afterSave = null; // A refused or offered save stays on the page.
 					if ( error && 'affibloom_duplicate' === error.code && error.data && error.data.to ) {
-						showRepoint( error.data, sent.url );
+						// "This Product Already Exists" (admin.js): Cancel keeps the typed link; Confirm opens the kept product.
+						window.affibloomRepoint.offer( parseInt( form.dataset.productId, 10 ), error.data, sent.url, {
+							cancelled: function () {
+								field( 'url' ).focus();
+							},
+							leave: go,
+							failedText: form.dataset.failedText,
+						} );
 						return;
 					}
 					dialog.close( function () {

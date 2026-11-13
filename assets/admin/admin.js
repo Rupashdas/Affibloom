@@ -484,8 +484,8 @@
 	}
 
 	/* ---------------------------------------------------------------------------------------------------------
-	 * Shared by the product page and the Dashboard's quick edit: the toast, the save dialog, field errors and the
-	 * media frame. Moved here from product-save.js and product.js when the quick edit became their second user
+	 * Shared by the product page and the Dashboard's quick edit: the toast, the save dialog and its repoint panel (16C),
+	 * field errors and the media frame. Moved here from product-save.js and product.js when the quick edit became their second user
 	 * (Task 16A); the Display tab's icon card took the media frame as well (its third user).
 	 * ------------------------------------------------------------------------------------------------------- */
 
@@ -562,6 +562,88 @@
 			}, CLOSE_AFTER );
 		},
 		closeAfter: CLOSE_AFTER,
+	};
+
+	/**
+	 * "This Product Already Exists" (Lasso's repoint panel, the save dialog's second panel; F1 S10, D14, D21): the
+	 * product being saved and the one that already has its new link. Cancel (or Escape) closes it and saves nothing;
+	 * Confirm retires the product in favour of the other and opens that one's page. Moved here from product-save.js
+	 * when the Dashboard's quick edit became its second user (Task 16C).
+	 */
+	var offered = null;
+
+	function repointParts() {
+		var panel = saveDialog.modal().querySelector( '[data-repoint]' );
+		return {
+			panel: panel,
+			cancel: panel.querySelector( '[data-repoint-cancel]' ),
+			confirm: panel.querySelector( '[data-repoint-confirm]' ),
+		};
+	}
+
+	/** Binds Cancel, Escape and Confirm once; each offer leaves its own callbacks in `offered`. */
+	function bindRepoint() {
+		var parts = repointParts();
+		if ( parts.panel.dataset.bound ) {
+			return parts;
+		}
+		parts.panel.dataset.bound = '1';
+		parts.cancel.addEventListener( 'click', function () {
+			var offer = offered;
+			offered = null;
+			saveDialog.hide();
+			if ( offer ) {
+				offer.cancelled();
+			}
+		} );
+		parts.panel.addEventListener( 'keydown', function ( event ) {
+			if ( 'Escape' === event.key && ! parts.cancel.disabled ) {
+				parts.cancel.click();
+			}
+		} );
+		parts.confirm.addEventListener( 'click', function () {
+			var offer = offered;
+			if ( ! offer ) {
+				return;
+			}
+			parts.cancel.disabled = true;
+			parts.confirm.disabled = true;
+			wp.apiFetch( { path: '/affibloom/v1/products/' + offer.from + '/repoint', method: 'POST', data: { to: offer.to, url: offer.url } } )
+				.then( function ( response ) {
+					offer.leave( response.data.redirect_to );
+				} )
+				.catch( function ( error ) {
+					parts.cancel.disabled = false;
+					parts.confirm.disabled = false;
+					toast( error && error.message ? error.message : offer.failedText, true );
+				} );
+		} );
+		return parts;
+	}
+
+	var repoint = {
+		/**
+		 * @param {number} from    The product being saved.
+		 * @param {Object} data    The 409 answer's data: { from, to }, each { id, name, url, page }.
+		 * @param {string} url     The link as typed, which the repoint checks again.
+		 * @param {Object} options { cancelled: after Cancel (gives the focus back), leave( href ): goes to the kept
+		 *                         product (the page quiets its leave guard first), failedText: the failure toast's words }.
+		 */
+		offer: function ( from, data, url, options ) {
+			var parts = bindRepoint();
+			offered = { from: from, to: data.to.id, url: url, cancelled: options.cancelled, leave: options.leave, failedText: options.failedText };
+			[ 'from', 'to' ].forEach( function ( side ) {
+				var box = parts.panel.querySelector( '[data-repoint-side="' + side + '"]' );
+				var item = data[ side ] || { name: '', url: '', page: '#' };
+				box.querySelector( '[data-repoint-name]' ).textContent = item.name;
+				box.querySelector( '[data-repoint-url]' ).textContent = item.url;
+				box.querySelector( '[data-repoint-view]' ).href = item.page;
+			} );
+			parts.cancel.disabled = false;
+			parts.confirm.disabled = false;
+			saveDialog.panel( true );
+			parts.cancel.focus();
+		},
 	};
 
 	/**
@@ -662,6 +744,7 @@
 	window.affibloomSaveDialog = saveDialog;
 	window.affibloomFieldErrors = fieldErrors;
 	window.affibloomMedia = media;
+	window.affibloomRepoint = repoint;
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-help' ), floatingTip );
