@@ -68,6 +68,16 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertNotSame( $first, $this->post( 'https://www.amazon.com/gp/aw/d/B0C7654321' )->get_data()['data']['id'] );
 	}
 
+	public function test_a_search_page_is_kept_whole_and_found_again_by_its_keywords(): void {
+		update_option( 'affibloom_settings', array( 'tracking_id' => 'vbvault-20' ) );
+		$first = $this->post( 'https://www.amazon.com/s?k=nike+kd14&crid=X1&tag=someone-20' )->get_data()['data']['id'];
+
+		self::assertSame( 'https://www.amazon.com/s?k=nike%20kd14&crid=X1&tag=vbvault-20', get_post_meta( $first, '_affibloom_url', true ) );
+		self::assertSame( 'amazon', get_post_meta( $first, '_affibloom_type', true ) );
+		self::assertSame( 'amazon.com|nike kd14', get_post_meta( $first, '_affibloom_search_key', true ) );
+		self::assertSame( $first, $this->post( 'https://www.amazon.com/s/ref=x?k=NIKE%20KD14' )->get_data()['data']['id'] );
+	}
+
 	public function test_a_bare_domain_is_stored_with_https(): void {
 		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
 	}

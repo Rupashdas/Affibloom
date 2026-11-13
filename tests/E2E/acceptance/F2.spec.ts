@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, setSettings, wp } from '../utils';
 
-// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8; 12B: AC4. AC2 and AC5
-// arrive with 12E, AC6 with 12C, AC7 with 12D.
+// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8; 12B: AC4; 12C: AC6.
+// AC2 and AC5 arrive with 12E, AC7 with 12D.
 test.describe( 'F2 Amazon links', () => {
 	// The live site's Amazon settings (tests/fixtures/inventory/settings.json).
 	const live = { tracking_id: 'vbvault-20', multiple_tracking_ids: true, tracking_id_whitelist: [ 'vbvault-20' ], shorten_amazon_links: true };
@@ -52,7 +52,7 @@ test.describe( 'F2 Amazon links', () => {
 				return ''; // Not stored.
 			}
 		};
-		return { url: meta( 'url' ), type: meta( 'type' ), asin: meta( 'asin' ), country: meta( 'amazon_country' ) };
+		return { url: meta( 'url' ), type: meta( 'type' ), asin: meta( 'asin' ), country: meta( 'amazon_country' ), searchKey: meta( 'search_key' ) };
 	}
 
 	test( 'AC1 a product link keeps its path and gets the site tag first', async ( { page } ) => {
@@ -87,6 +87,26 @@ test.describe( 'F2 Amazon links', () => {
 		const uk = await add( page, `https://www.amazon.co.uk/dp/${ a }` );
 		expect( uk.country ).toBe( 'gb' );
 		expect( productsWithAsin( a ) ).toHaveLength( 2 );
+	} );
+
+	test( 'AC6 a search page keeps its whole query and is found again by its keywords', async ( { page } ) => {
+		const words = 'f2ac6 ' + Math.random().toString( 36 ).slice( 2, 8 );
+		const search = await add( page, `https://www.amazon.com/s?k=${ words.replace( ' ', '+' ) }&crid=X1&tag=someone-20` );
+
+		expect( search.url ).toBe( `https://www.amazon.com/s?k=${ words.replace( ' ', '%20' ) }&crid=X1&tag=vbvault-20` );
+		expect( search.type ).toBe( 'amazon' );
+		expect( search.asin ).toBe( '' );
+		expect( search.searchKey ).toBe( `amazon.com|${ words }` );
+
+		// The same keywords written otherwise (case, encoding, other parameters) are that product.
+		await submit( page, `https://www.amazon.com/s?k=${ words.toUpperCase().replace( ' ', '%20' ) }&ref=nb_sb_noss` );
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'This product already exists.' );
+		expect( wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_search_key', `--meta_value=amazon.com|${ words }`, '--format=count' ) ).toBe( '1' );
+
+		// Another Amazon page that is not one product gets the tag, its query kept.
+		const store = await add( page, `https://www.amazon.com/stores/Mikasa/page/${ words.split( ' ' )[ 1 ] }?ref_=z&tag=someone-20` );
+		expect( store.url ).toBe( `https://www.amazon.com/stores/Mikasa/page/${ words.split( ' ' )[ 1 ] }?ref_=z&tag=vbvault-20` );
+		expect( store.type ).toBe( 'amazon' );
 	} );
 
 	test( 'AC8 a protected attribution link is stored exactly as pasted', async ( { page } ) => {

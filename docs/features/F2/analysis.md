@@ -86,7 +86,7 @@ Nothing new. `POST /affibloom/v1/products` and the modal are unchanged; the stor
 | `_affibloom_type` | `amazon` for any Amazon destination |
 | `_affibloom_asin` | as Lasso extracts it, case kept; MySQL's collation compares it without case, as Lasso's |
 | `_affibloom_amazon_country` | `us`, `gb`, … |
-| `_affibloom_search_key` | `www.amazon.com|nike kd14` for a search page, else absent |
+| `_affibloom_search_key` | `amazon.com|nike kd14` (Lasso's `base_domain`: the host without `www.`) for a search page, else absent |
 | Option `affibloom_settings` (read) | `tracking_id`, `multiple_tracking_ids`, `tracking_id_whitelist`, `shorten_amazon_links` |
 
 ## 4. Risks

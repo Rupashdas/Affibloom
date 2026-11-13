@@ -45,10 +45,10 @@ final class ProductService {
 	 * - otherwise the link is resolved and the product named as Lasso names it (Task 11D);
 	 * - with keep_genius_formatting off, a geni.us link is stored as its destination, which is then checked for a
 	 *   duplicate too;
-	 * - a new product takes the site's link defaults as they are now (Task 11E);
-	 * - an Amazon link with an ASIN is the published Amazon product with that ASIN on that store, if there is one
-	 *   (get_lasso_post_id_by_url's product-ID lookup, after the stored-link one; Task 12B);
-	 * - an Amazon product link is stored as Lasso stores it, typed Amazon with its ASIN and country (Task 12A).
+	 * - an Amazon store link is then looked for in Lasso's order (Tasks 12B, 12C) and, when new, stored as Lasso
+	 *   stores it (Tasks 12A, 12C);
+	 * - a product that is found keeps its name, except for Lasso's "Sorry!" re-title (Task 12C);
+	 * - a new product takes the site's link defaults as they are now (Task 11E).
 	 *
 	 * @param string $input What was pasted.
 	 * @throws InvalidField      When the input is empty or not a link.
@@ -59,7 +59,7 @@ final class ProductService {
 
 		$existing = $this->products->find_by_url_key( $url->key() );
 		if ( null !== $existing ) {
-			return new AddedLink( $existing, true );
+			return $this->found( $existing, $url );
 		}
 
 		$resolved = $this->links->resolve( $url );
@@ -69,39 +69,82 @@ final class ProductService {
 			$url      = AffiliateUrl::from_string( $resolved->url );
 			$existing = $this->products->find_by_url_key( $url->key() );
 			if ( null !== $existing ) {
-				return new AddedLink( $existing, true );
+				return $this->found( $existing, $url );
 			}
 		}
 
 		$amazon = AmazonUrl::from( $url );
-		if ( null === $amazon || '' === $amazon->asin() ) {
+		if ( null === $amazon || $amazon->is_short_link() ) {
 			return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
 		}
 
-		$existing = $this->products->find_amazon( $amazon->asin(), $amazon->country() );
+		$stored   = $amazon->monetized( TrackingIds::from_settings( $settings ), $settings->bool( 'shorten_amazon_links' ) );
+		$existing = $this->existing_amazon( $amazon, $url, $stored );
 		if ( null !== $existing ) {
-			return new AddedLink( $existing, true );
+			return $this->found( $existing, $url );
 		}
 
-		return new AddedLink( $this->products->save( $this->amazon_draft( $resolved->title, $amazon, $settings ) ), false );
+		return new AddedLink( $this->products->save( $this->amazon_draft( $resolved->title, $amazon, $stored, $settings ) ), false );
 	}
 
 	/**
-	 * A new Amazon product: its link monetized (Lasso_Amazon_Api::get_amazon_product_url()) and typed with its ASIN
-	 * and store (save_lasso_url()'s Amazon fields).
+	 * The published product an Amazon store link already is, after the stored-link lookup found nothing
+	 * (get_lasso_post_id_by_url, then is_lasso_url_exist; F2 requirements 7):
+	 * - a link with an ASIN: the Amazon product with that ASIN on that store;
+	 * - a search page: the product whose search has the same keywords on the same store;
+	 * - any page without an ASIN: the product stored with the link as it would be stored now (the tag rule applied).
 	 *
-	 * @param string    $name     Its name.
-	 * @param AmazonUrl $amazon   Its link, which has an ASIN.
-	 * @param Settings  $settings The site's settings, read once for this add.
+	 * @param AmazonUrl    $amazon The link as an Amazon link.
+	 * @param AffiliateUrl $url    The link as pasted (after the repair).
+	 * @param AffiliateUrl $stored The link as it would be stored.
 	 */
-	private function amazon_draft( string $name, AmazonUrl $amazon, Settings $settings ): Product {
-		$stored = $amazon->monetized( TrackingIds::from_settings( $settings ), $settings->bool( 'shorten_amazon_links' ) );
+	private function existing_amazon( AmazonUrl $amazon, AffiliateUrl $url, AffiliateUrl $stored ): ?Product {
+		if ( '' !== $amazon->asin() ) {
+			return $this->products->find_amazon( $amazon->asin(), $amazon->country() );
+		}
+
+		$existing = '' !== $amazon->search_key() ? $this->products->find_by_search_key( $amazon->search_key() ) : null;
+		if ( null === $existing && $stored->key() !== $url->key() ) {
+			$existing = $this->products->find_by_url_key( $stored->key() );
+		}
+		return $existing;
+	}
+
+	/**
+	 * A product the link already is. Lasso renames a match its cloud had named after an Amazon error page ("Sorry!…",
+	 * "…went wrong!") to get_search_page_title() of the new link. Lasso's operator precedence also renames a non-Amazon
+	 * match whose name holds " wrong!"; here the rule needs an Amazon link, as Lasso's own comment says.
+	 *
+	 * @param Product      $existing The product found.
+	 * @param AffiliateUrl $url      The link that found it.
+	 * @throws RuntimeException When the new name cannot be stored.
+	 */
+	private function found( Product $existing, AffiliateUrl $url ): AddedLink {
+		$amazon = AmazonUrl::from( $url );
+		if ( null !== $amazon && ( str_contains( $existing->name, 'Sorry!' ) || str_contains( $existing->name, ' wrong!' ) ) ) {
+			$existing = $this->products->rename( $existing, $amazon->search_page_title() );
+		}
+		return new AddedLink( $existing, true );
+	}
+
+	/**
+	 * A new Amazon product (save_lasso_url()'s Amazon fields): typed Amazon; with an ASIN, the ASIN and its store; a
+	 * search page, its search key.
+	 *
+	 * @param string       $name     Its name.
+	 * @param AmazonUrl    $amazon   Its link, as an Amazon link.
+	 * @param AffiliateUrl $stored   The link to store.
+	 * @param Settings     $settings The site's settings, read once for this add.
+	 */
+	private function amazon_draft( string $name, AmazonUrl $amazon, AffiliateUrl $stored, Settings $settings ): Product {
+		$asin = $amazon->asin();
 
 		return Product::draft( $name, $stored, $settings )->with(
 			array(
 				'type'           => ProductType::Amazon,
-				'asin'           => $amazon->asin(),
-				'amazon_country' => $amazon->country(),
+				'asin'           => $asin,
+				'amazon_country' => '' === $asin ? '' : $amazon->country(),
+				'search_key'     => $amazon->search_key(),
 			)
 		);
 	}

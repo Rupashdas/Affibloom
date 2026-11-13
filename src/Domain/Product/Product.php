@@ -30,6 +30,7 @@ final class Product {
 	 * @param bool         $show_disclosure The box shows the disclosure.
 	 * @param string       $asin            Amazon's product ID, as written in the link; '' for other links.
 	 * @param string       $amazon_country  The Amazon store's country code ("us", "gb", …); '' for other links.
+	 * @param string       $search_key      An Amazon search page's "<host>|<keywords>" (AmazonUrl::search_key()), or ''.
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -42,6 +43,7 @@ final class Product {
 		public readonly bool $show_disclosure,
 		public readonly string $asin = '',
 		public readonly string $amazon_country = '',
+		public readonly string $search_key = '',
 	) {}
 
 	/**

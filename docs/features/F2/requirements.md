@@ -93,7 +93,7 @@ In this order:
 | `amazon_product_id` meta, `url_details.product_id` | the final link has an ASIN | `_affibloom_asin` |
 | `lasso_amazon_product_country` meta, `url_details.country` | with the ASIN | `_affibloom_amazon_country` |
 | `affiliate_link_type = Amazon Product` / `Basic Link` | ASIN or not | derived: Amazon with an ASIN |
-| `url_details.search_text` (+ the store host) | a search page | `_affibloom_search_key` = `<host>|<keywords>` (section 7) |
+| `url_details.search_text` (+ `base_domain`) | a search page | `_affibloom_search_key` = `<host without www.>|<keywords>` (section 7) |
 
 ## 5. Short links (`lasso_add_a_new_link` 858, `get_redirect_final_target`)
 

@@ -201,10 +201,87 @@ final class AmazonUrlTest extends TestCase {
 		);
 	}
 
-	public function test_an_amazon_page_without_an_asin_is_not_changed_yet(): void {
-		// Task 12C monetizes Amazon pages that are not one product; 12D follows short links.
-		foreach ( array( 'https://www.amazon.com/s?k=volleyball&tag=someone-20', 'https://amzn.to/3NGJEvm' ) as $link ) {
-			self::assertSame( $link, self::amazon( $link )->monetized( self::live(), true )->value() );
-		}
+	public function test_a_short_link_is_not_changed_here(): void {
+		// Task 12D follows short links first.
+		self::assertSame( 'https://amzn.to/3NGJEvm', self::amazon( 'https://amzn.to/3NGJEvm' )->monetized( self::live(), true )->value() );
+	}
+
+	/**
+	 * The four live search pages (tests/fixtures/inventory/products.json) stay byte for byte, shortened or not.
+	 *
+	 * @dataProvider live_searches
+	 */
+	public function test_the_live_search_pages_stay_byte_for_byte( string $link ): void {
+		self::assertSame( $link, self::amazon( $link )->monetized( self::live(), true )->value() );
+		self::assertSame( $link, self::amazon( $link )->monetized( self::live(), false )->value() );
+	}
+
+	/**
+	 * @return list<array{string}>
+	 */
+	public static function live_searches(): array {
+		return array(
+			array( 'https://www.amazon.com/s?k=Nike%20KD14&linkCode=sl2&tag=vbvault-20&linkId=52794cc6e0eebddc6c2cbd97cce68d79&language=en_US&ref_=as_li_ss_tl' ),
+			array( 'https://www.amazon.com/s?k=adidas%20stabil%20next%20gen&crid=2VBFORMERNLYM&sprefix=adidas%20stabil%20next%20%2Caps%2C434&linkCode=sl2&tag=vbvault-20&linkId=8a2a5e139b897dd3a48f24e051e32e2d&language=en_US&ref_=as_li_ss_tl' ),
+			array( 'https://www.amazon.com/s?k=asics%20sky%20elite%20ff%20mens&crid=3PUOMEHYRLU2K&sprefix=asics%20sky%20elite%20ff%20mens%2Caps%2C369&linkCode=sl2&tag=vbvault-20&linkId=877ee10fbd25f7f6a1b4ac31c947d79f&language=en_US&ref_=as_li_ss_tl' ),
+			array( 'https://www.amazon.com/s?k=nike%20react%20hyperset&crid=39BUAJWFO0GLP&sprefix=nike%20rehyperset%2Caps%2C536&linkCode=sl2&tag=vbvault-20&linkId=d9f1941855068e2f01ec70ffeb029cf1&language=en_US&ref_=as_li_ss_tl' ),
+		);
+	}
+
+	public function test_a_page_keeps_its_whole_query_with_the_tag_set_where_it_is(): void {
+		self::assertSame(
+			'https://www.amazon.com/s?k=nike%20kd14&crid=X1&tag=vbvault-20&sprefix=a',
+			self::amazon( 'https://www.amazon.com/s?k=nike+kd14&crid=X1&tag=someone-20&sprefix=a' )->monetized( self::live(), true )->value()
+		);
+	}
+
+	public function test_a_page_without_a_query_gets_the_tag(): void {
+		self::assertSame(
+			'https://www.amazon.com/stores/Mikasa/page/1?tag=vbvault-20',
+			self::amazon( 'https://www.amazon.com/stores/Mikasa/page/1' )->monetized( self::live(), true )->value()
+		);
+	}
+
+	public function test_a_page_with_no_tag_to_set_stays_as_it_is(): void {
+		$link = 'https://www.amazon.com/s?k=nike+kd14';
+
+		self::assertSame( $link, self::amazon( $link )->monetized( self::live( '' ), true )->value() );
+	}
+
+	/**
+	 * @dataProvider searches
+	 */
+	public function test_a_search_page_s_keywords( string $link, string $keywords ): void {
+		self::assertSame( $keywords, self::amazon( $link )->search_keywords() );
+	}
+
+	/**
+	 * @return array<string, array{string, string}>
+	 */
+	public static function searches(): array {
+		return array(
+			'k'                     => array( 'https://www.amazon.com/s?k=nike+kd14', 'nike kd14' ),
+			'field-keywords'        => array( 'https://www.amazon.com/s?field-keywords=pads', 'pads' ),
+			'keywords'              => array( 'https://www.amazon.com/s?keywords=pads', 'pads' ),
+			'k before the others'   => array( 'https://www.amazon.com/s?keywords=b&field-keywords=c&k=a', 'a' ),
+			'/s/ with a ref'        => array( 'https://www.amazon.com/s/ref=nb_sb_noss?k=pads', 'pads' ),
+			'/s/ with a slash'      => array( 'https://www.amazon.com/s/?k=pads', 'pads' ),
+			'slugged search'        => array( 'https://www.amazon.com/curry-flow-10/s?k=curry+flow+10&tag=x', 'curry flow 10' ),
+			'no keywords'           => array( 'https://www.amazon.com/s?i=sporting', '' ),
+			'not a search path'     => array( 'https://www.amazon.com/stores/x?k=pads', '' ),
+			'a product link with k' => array( 'https://www.amazon.com/dp/B0C1234567?k=pads', '' ),
+		);
+	}
+
+	public function test_the_search_key_is_the_host_without_www_and_the_normalised_keywords(): void {
+		self::assertSame( 'amazon.com|Nike KD14', self::amazon( 'https://www.amazon.com/s?k=%20Nike++KD14%20' )->search_key() );
+		self::assertSame( 'amazon.co.uk|a b', self::amazon( 'https://www.amazon.co.uk/s?k=a%2520b' )->search_key() );
+		self::assertSame( 'amazon.com|tom & jerry', self::amazon( 'https://www.amazon.com/s?k=tom+%26amp%3B+jerry' )->search_key() );
+		self::assertSame( '', self::amazon( 'https://www.amazon.com/stores/x' )->search_key() );
+	}
+
+	public function test_the_search_page_title(): void {
+		self::assertSame( 'Amazon: nike kd14', self::amazon( 'https://www.amazon.com/s?k=nike+kd14' )->search_page_title() );
+		self::assertSame( 'Amazon', self::amazon( 'https://www.amazon.com/dp/B0C1234567' )->search_page_title() );
 	}
 }

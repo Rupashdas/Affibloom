@@ -47,6 +47,10 @@ final class PostTypeProductRepository implements ProductRepository {
 			$post['meta_input']['_affibloom_asin']           = $product->asin;
 			$post['meta_input']['_affibloom_amazon_country'] = $product->amazon_country;
 		}
+		// As Lasso fills url_details.search_text only for an Amazon search page.
+		if ( '' !== $product->search_key ) {
+			$post['meta_input']['_affibloom_search_key'] = $product->search_key;
+		}
 
 		// wp_insert_post() unslashes what it is given, so a link's backslashes survive only if slashed first.
 		$id = wp_insert_post( wp_slash( $post ), true );
@@ -101,6 +105,46 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The published product whose Amazon search has this key, or null; meta_value's collation compares it without case.
+	 *
+	 * @param string $key From AmazonUrl::search_key().
+	 */
+	public function find_by_search_key( string $key ): ?Product {
+		return $this->find_one(
+			array(
+				array(
+					'key'   => '_affibloom_search_key',
+					'value' => $key,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Gives a stored product a new name, as Lasso's re-title does (wp_update_post with the title).
+	 *
+	 * @param Product $product A stored product.
+	 * @param string  $name    Its new name.
+	 * @throws RuntimeException When WordPress refuses the change.
+	 */
+	public function rename( Product $product, string $name ): Product {
+		$result = wp_update_post(
+			wp_slash(
+				array(
+					'ID'         => (int) $product->id,
+					'post_title' => $name,
+				)
+			),
+			true
+		);
+		if ( is_wp_error( $result ) ) {
+			throw new RuntimeException( esc_html( $result->get_error_message() ) );
+		}
+
+		return $product->with( array( 'name' => $name ) );
+	}
+
+	/**
 	 * The published product whose meta matches every clause, lowest ID first, or null. Extracted on its second use
 	 * (Task 12B). One lookup per add over a few hundred products, so the meta query's cost does not matter.
 	 *
@@ -143,6 +187,7 @@ final class PostTypeProductRepository implements ProductRepository {
 			'1' === $meta( 'show_disclosure' ),
 			$meta( 'asin' ),
 			$meta( 'amazon_country' ),
+			$meta( 'search_key' ),
 		);
 	}
 

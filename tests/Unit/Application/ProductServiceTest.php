@@ -5,7 +5,10 @@ use Affibloom\Application\Products\FetchedPage;
 use Affibloom\Application\Products\LinkResolver;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Settings\Settings;
 use Affibloom\Tests\Unit\Fakes\FakePageFetcher;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
 use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
@@ -92,6 +95,57 @@ final class ProductServiceTest extends TestCase {
 		$service->create_from_url( 'https://www.amazon.com/dp/B0C1234567' );
 
 		self::assertFalse( $service->create_from_url( 'https://www.example.com/dp/B0C1234567' )->already_existed );
+	}
+
+	public function test_a_search_page_is_stored_whole_typed_amazon_with_its_search_key(): void {
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://www.amazon.com/s?k=nike+kd14&crid=X1&tag=someone-20' );
+
+		self::assertSame( 'https://www.amazon.com/s?k=nike%20kd14&crid=X1&tag=vbvault-20', $added->product->url->value() );
+		self::assertSame( ProductType::Amazon, $added->product->type );
+		self::assertSame( '', $added->product->asin );
+		self::assertSame( 'amazon.com|nike kd14', $added->product->search_key );
+		self::assertSame( array(), $this->fetcher->asked );
+	}
+
+	public function test_the_same_search_written_otherwise_is_the_product_that_exists(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$first   = $service->create_from_url( 'https://www.amazon.com/s?k=nike+kd14&crid=X1' );
+
+		$added = $service->create_from_url( 'https://www.amazon.com/s/ref=nb_sb_noss?k=NIKE%20%20KD14' );
+
+		self::assertTrue( $added->already_existed );
+		self::assertSame( $first->product->id, $added->product->id );
+		self::assertFalse( $service->create_from_url( 'https://www.amazon.co.uk/s?k=nike+kd14' )->already_existed );
+	}
+
+	public function test_another_amazon_page_is_found_again_by_its_tagged_link(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$first   = $service->create_from_url( 'https://www.amazon.com/stores/Mikasa/page/1?ref_=z&tag=someone-20' );
+		self::assertSame( 'https://www.amazon.com/stores/Mikasa/page/1?ref_=z&tag=vbvault-20', $first->product->url->value() );
+
+		$added = $service->create_from_url( 'https://www.amazon.com/stores/Mikasa/page/1?ref_=z&tag=another-21' );
+
+		self::assertTrue( $added->already_existed );
+		self::assertSame( $first->product->id, $added->product->id );
+	}
+
+	public function test_a_matched_amazon_product_lasso_named_sorry_is_renamed(): void {
+		$this->repo->save(
+			Product::draft( 'Sorry! Something went wrong!', AffiliateUrl::from_string( 'https://www.amazon.com/dp/B0C1234567?tag=vbvault-20' ), Settings::from_array( array() ) )
+				->with( array( 'type' => ProductType::Amazon, 'asin' => 'B0C1234567', 'amazon_country' => 'us' ) )
+		);
+
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://www.amazon.com/gp/product/B0C1234567' );
+
+		self::assertTrue( $added->already_existed );
+		self::assertSame( 'Amazon', $added->product->name ); // get_search_page_title() of a product link
+		self::assertSame( 'Amazon', $this->repo->saved[0]->name );
+	}
+
+	public function test_a_non_amazon_product_named_wrong_is_left_alone(): void {
+		$this->repo->save( Product::draft( 'Page went wrong!', AffiliateUrl::from_string( 'https://www.example.com/x' ), Settings::from_array( array() ) ) );
+
+		self::assertSame( 'Page went wrong!', $this->service()->create_from_url( 'https://www.example.com/x' )->product->name );
 	}
 
 	public function test_shorten_amazon_links_off_keeps_the_whole_query(): void {

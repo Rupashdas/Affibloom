@@ -12,8 +12,8 @@ namespace Affibloom\Domain\Amazon;
 use Affibloom\Domain\Product\AffiliateUrl;
 
 /**
- * An Amazon link (F2 requirements, sections 2-3): its ASIN, its store's country, and the form Lasso stores it in.
- * Task 12A changes only links with an ASIN; pages without one follow in 12C, short links in 12D.
+ * An Amazon link (F2 requirements, sections 2-3): its ASIN, its store's country, its search keywords, and the form
+ * Lasso stores it in. Short links are followed before this (Task 12D).
  */
 final class AmazonUrl {
 
@@ -53,6 +53,9 @@ final class AmazonUrl {
 
 	/** Lasso_Amazon_Api::keep_args(): the parameters a shortened product link keeps, in this order. */
 	private const KEPT_PARAMETERS = array( 'maas', 'ref_', 's', 'aa_campaignid', 'aa_creativeid', 'aa_adgroupid', 'campaignId', 'linkCode', 'linkId' );
+
+	/** Lasso_Amazon_Api::is_amazon_search_page(): the parameters that hold a search's keywords, in Lasso's preference. */
+	private const KEYWORD_PARAMETERS = array( 'k', 'field-keywords', 'keywords' );
 
 	/** Lasso_Amazon_Api::is_amazon_shortened_url(): Amazon's short-link hosts. */
 	private const SHORT_LINK_HOSTS = array( 'amzn.to', 'amzn.com', 'amzlink.to' );
@@ -111,10 +114,13 @@ final class AmazonUrl {
 
 	/**
 	 * The link to store (Lasso_Amazon_Api::get_amazon_product_url() with monetizing on, after format_amazon_url()):
-	 * - short links and protected links stay as pasted, and so (until 12C) does a page with no ASIN;
-	 * - "smile.amazon." becomes "amazon.";
-	 * - shortened: the path as pasted, then the tag, then Lasso's kept parameters in its order (no tag with "maas");
-	 * - not shortened: the whole query with the tag set where it is, or added last.
+	 * - short links and protected links stay as pasted;
+	 * - a page with no ASIN (a search, a store, a list) keeps its whole query with the tag set where it is, or added
+	 *   last; with no tag to set it stays as it is (Lasso's search branch needs a tag; its other-page branch would
+	 *   only rewrite the encoding);
+	 * - in a product link, "smile.amazon." becomes "amazon.";
+	 * - a product link, shortened: the path as pasted, then the tag, then Lasso's kept parameters in its order (no tag
+	 *   with "maas"); not shortened: the whole query with the tag set where it is, or added last.
 	 * Three improvements, none changing a link Lasso would store intact: "&amp;" is read as "&" in both forms (Lasso
 	 * does so only when shortening); a fragment is dropped (Lasso drops it when there is a query and puts the query
 	 * after it when there is none, which breaks the tag); kept values are encoded again (Lasso writes them decoded,
@@ -124,8 +130,15 @@ final class AmazonUrl {
 	 * @param bool        $shorten Settings → Amazon, "Shorten Amazon affiliate links".
 	 */
 	public function monetized( TrackingIds $ids, bool $shorten ): AffiliateUrl {
-		if ( $this->is_short_link() || $this->is_protected() || '' === $this->asin() ) {
+		if ( $this->is_short_link() || $this->is_protected() ) {
 			return $this->url;
+		}
+
+		if ( '' === $this->asin() ) {
+			$link  = str_replace( '&amp;', '&', $this->url->value() );
+			$query = self::query_of( $link );
+			$tag   = $ids->tag_for( self::text( $query, 'tag' ) );
+			return '' === $tag ? $this->url : AffiliateUrl::from_string( self::with_tag( $link, $query, $tag ) );
 		}
 
 		$link  = str_replace( array( 'smile.amazon.', '&amp;' ), array( 'amazon.', '&' ), $this->url->value() );
@@ -136,10 +149,59 @@ final class AmazonUrl {
 	}
 
 	/**
-	 * Whether the host is one of Amazon's short-link hosts. Lasso looks for the three names anywhere in the link;
-	 * here only the host counts, so a store link mentioning "amzn.to" in its query is still a store link.
+	 * Lasso_Amazon_Api::is_amazon_search_page(): a search's keywords — no ASIN, a path ending in "/s" or containing
+	 * "/s/", and a "k", "field-keywords" or "keywords" parameter (the first that has a value) — or ''.
 	 */
-	private function is_short_link(): bool {
+	public function search_keywords(): string {
+		if ( '' !== $this->asin() ) {
+			return '';
+		}
+
+		$path = rtrim( (string) parse_url( $this->url->value(), PHP_URL_PATH ), '/' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
+		if ( ! str_ends_with( $path, '/s' ) && ! str_contains( $path, '/s/' ) ) {
+			return '';
+		}
+
+		$query = self::query_of( $this->url->value() );
+		foreach ( self::KEYWORD_PARAMETERS as $name ) {
+			if ( self::filled( self::text( $query, $name ) ) ) {
+				return self::text( $query, $name );
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * What Lasso finds a search page again by (get_amazon_search_match_key(): its base_domain and search_text): the
+	 * host without "www." and the keywords with entities decoded, percent-decoded once more, trimmed and their spaces
+	 * collapsed; '' for any other link. Stored as "<host>|<keywords>"; the lookup compares it without case, as Lasso's
+	 * MySQL columns do.
+	 */
+	public function search_key(): string {
+		$keywords = $this->search_keywords();
+		if ( '' === $keywords ) {
+			return '';
+		}
+
+		$text = trim( rawurldecode( html_entity_decode( $keywords, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+		$text = (string) preg_replace( '/\s+/', ' ', $text );
+		return '' === $text ? '' : $this->url->host() . '|' . $text;
+	}
+
+	/**
+	 * Lasso_Amazon_Api::get_search_page_title(): "Amazon: <keywords>" for a search page, else "Amazon".
+	 */
+	public function search_page_title(): string {
+		$keywords = $this->search_keywords();
+		return '' === $keywords ? 'Amazon' : 'Amazon: ' . $keywords;
+	}
+
+	/**
+	 * Whether the host is one of Amazon's short-link hosts. Lasso looks for the three names anywhere in the link;
+	 * here only the host counts, so a store link mentioning "amzn.to" in its query is still a store link. Public on its
+	 * second use: ProductService types only store links as Amazon until Task 12D follows short links.
+	 */
+	public function is_short_link(): bool {
 		return in_array( $this->url->host(), self::SHORT_LINK_HOSTS, true );
 	}
 
@@ -152,7 +214,7 @@ final class AmazonUrl {
 	 * @param string                  $tag   The tag to store, or ''.
 	 */
 	private static function shortened( string $link, array $query, string $tag ): string {
-		$base = explode( '#', explode( '?', $link, 2 )[0], 2 )[0];
+		$base = self::without_query( $link );
 
 		$args = array();
 		if ( '' !== $tag && ! self::filled( self::text( $query, 'maas' ) ) ) {
@@ -192,8 +254,17 @@ final class AmazonUrl {
 			}
 		}
 
-		$base = explode( '#', explode( '?', $link, 2 )[0], 2 )[0];
+		$base = self::without_query( $link );
 		return array() === $pairs ? $base : $base . '?' . implode( '&', $pairs );
+	}
+
+	/**
+	 * Everything before a link's query and fragment.
+	 *
+	 * @param string $link A link.
+	 */
+	private static function without_query( string $link ): string {
+		return explode( '#', explode( '?', $link, 2 )[0], 2 )[0];
 	}
 
 	/**

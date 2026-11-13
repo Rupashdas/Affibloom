@@ -6,7 +6,8 @@ use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 
 /**
- * Products kept in memory, numbered from 100, found by their link's key or their ASIN and store. Shared by the product and bulk add tests.
+ * Products kept in memory, numbered from 100, found by their link's key, their ASIN and store, or
+ * their search key. Shared by the product and bulk add tests.
  */
 final class InMemoryProductRepository implements ProductRepository {
 	/** @var list<Product> */
@@ -25,6 +26,26 @@ final class InMemoryProductRepository implements ProductRepository {
 			}
 		}
 		return null;
+	}
+
+	/** Compared without case, as MySQL's collation does. */
+	public function find_by_search_key( string $key ): ?Product {
+		foreach ( $this->saved as $product ) {
+			if ( '' !== $product->search_key && 0 === strcasecmp( $product->search_key, $key ) ) {
+				return $product;
+			}
+		}
+		return null;
+	}
+
+	public function rename( Product $product, string $name ): Product {
+		foreach ( $this->saved as $index => $saved ) {
+			if ( $saved->id === $product->id ) {
+				$this->saved[ $index ] = $saved->with( array( 'name' => $name ) );
+				return $this->saved[ $index ];
+			}
+		}
+		return $product;
 	}
 
 	/** Every saved product counts as published; the ASIN is compared without case, as MySQL's collation does. */
