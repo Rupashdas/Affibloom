@@ -483,6 +483,186 @@
 		} );
 	}
 
+	/* ---------------------------------------------------------------------------------------------------------
+	 * Shared by the product page and the Dashboard's quick edit: the toast, the save dialog, field errors and the
+	 * media frame. Moved here from product-save.js and product.js when the quick edit became their second user
+	 * (Task 16A); the Display tab's icon card took the media frame as well (its third user).
+	 * ------------------------------------------------------------------------------------------------------- */
+
+	/**
+	 * Shows a toast like the server's (partials/toast.php), from the page's template (partials/toast-template.php).
+	 *
+	 * @param {string}  message The words.
+	 * @param {boolean} failed  The failure variant, with a cross.
+	 */
+	function toast( message, failed ) {
+		var template = document.getElementById( 'affibloom-toast-template' );
+		var host = document.querySelector( '.affibloom-admin' );
+		if ( ! template || ! host ) {
+			return;
+		}
+		var element = template.content.firstElementChild.cloneNode( true );
+		element.querySelector( '.affibloom-toast__message' ).textContent = message;
+		element.querySelector( '[data-toast-icon="success"]' ).hidden = failed;
+		element.querySelector( '[data-toast-icon="error"]' ).hidden = ! failed;
+		element.classList.toggle( 'affibloom-toast--error', failed );
+		host.appendChild( element );
+		window.setTimeout( function () {
+			element.remove();
+		}, 4500 );
+	}
+
+	/**
+	 * Lasso's "Updating Your Site" (url-save.php; F1 requirements 9 S14, partials/save-modal.php): a static dialog with
+	 * a moving bar and one line, which closes itself a second after the answer (url-details.php 1980-1985). Its second
+	 * panel, "This Product Already Exists", is shown with panel( true ).
+	 */
+	var CLOSE_AFTER = 1000;
+	var saveDialog = {
+		modal: function () {
+			return document.querySelector( '[data-save-modal]' );
+		},
+		// One dialog, two panels: its name and text follow the panel shown.
+		panel: function ( repointing ) {
+			var modal = saveDialog.modal();
+			var dialog = modal.querySelector( '[role="dialog"]' );
+			modal.querySelector( '[data-save-progress]' ).hidden = repointing;
+			modal.querySelector( '[data-repoint]' ).hidden = ! repointing;
+			dialog.setAttribute( 'aria-labelledby', repointing ? 'affibloom-repoint-title' : 'affibloom-save-title' );
+			dialog.setAttribute( 'aria-describedby', repointing ? 'affibloom-repoint-text' : 'affibloom-save-text' );
+		},
+		/**
+		 * @param {string} text The line under the bar.
+		 */
+		open: function ( text ) {
+			var modal = saveDialog.modal();
+			var bar = modal.querySelector( '[data-save-bar]' );
+			saveDialog.panel( false );
+			modal.querySelector( '[data-save-text]' ).textContent = text;
+			bar.style.width = '0';
+			modal.hidden = false;
+			document.body.classList.add( 'affibloom-has-modal' );
+			modal.querySelector( '[role="dialog"]' ).focus();
+			window.requestAnimationFrame( function () {
+				bar.style.width = '90%';
+			} );
+		},
+		hide: function () {
+			saveDialog.modal().hidden = true;
+			document.body.classList.remove( 'affibloom-has-modal' );
+		},
+		/**
+		 * @param {Function} then Called once the dialog has gone.
+		 */
+		close: function ( then ) {
+			saveDialog.modal().querySelector( '[data-save-bar]' ).style.width = '100%';
+			window.setTimeout( function () {
+				saveDialog.hide();
+				then();
+			}, CLOSE_AFTER );
+		},
+		closeAfter: CLOSE_AFTER,
+	};
+
+	/**
+	 * Lasso's sentence under each refused field, in the design system's field error (F1 D11). A field is found by its
+	 * name in the form, and must have an id.
+	 */
+	var fieldErrors = {
+		/**
+		 * @param {HTMLFormElement} form   The form.
+		 * @param {Object}          fields Field name => message, as the REST answer's data.fields.
+		 */
+		show: function ( form, fields ) {
+			var first = null;
+			Object.keys( fields ).forEach( function ( name ) {
+				var input = form.elements.namedItem( name );
+				if ( ! input || input.disabled || ! input.id ) {
+					return;
+				}
+				var note = document.createElement( 'p' );
+				note.className = 'affibloom-field__error';
+				note.id = input.id + '-save-error';
+				note.dataset.saveError = input.id;
+				note.textContent = fields[ name ];
+				( input.closest( '.affibloom-field' ) || input.parentNode ).appendChild( note );
+				input.classList.add( 'is-invalid' );
+				input.setAttribute( 'aria-invalid', 'true' );
+				input.setAttribute( 'aria-describedby', ( ( input.getAttribute( 'aria-describedby' ) || '' ) + ' ' + note.id ).trim() );
+				first = first || input;
+			} );
+			if ( first ) {
+				first.focus();
+			}
+		},
+		/**
+		 * @param {HTMLFormElement} form The form.
+		 */
+		clear: function ( form ) {
+			Array.prototype.forEach.call( form.querySelectorAll( '[data-save-error]' ), function ( note ) {
+				var input = document.getElementById( note.dataset.saveError );
+				if ( input ) {
+					input.classList.remove( 'is-invalid' );
+					input.removeAttribute( 'aria-invalid' );
+					// Only the note's id goes; a field described by nothing else loses the attribute.
+					var described = ( input.getAttribute( 'aria-describedby' ) || '' ).split( /\s+/ ).filter( function ( id ) {
+						return '' !== id && id !== note.id;
+					} ).join( ' ' );
+					if ( '' === described ) {
+						input.removeAttribute( 'aria-describedby' );
+					} else {
+						input.setAttribute( 'aria-describedby', described );
+					}
+				}
+				note.remove();
+			} );
+		},
+	};
+
+	/**
+	 * WordPress's media frame for one item, as Lasso opens it: "Select an Image", images only, one, "Select Image" on
+	 * the product page and in quick edit. A frame is kept per title and file types, as each caller kept its own; the
+	 * newest caller's `then` gets the chosen item.
+	 */
+	var frames = {};
+	var media = {
+		available: function () {
+			return !! ( window.wp && wp.media );
+		},
+		/**
+		 * @param {Object}   options       { title, button, types }: the frame's title and button, the library's types
+		 *                                 ('image' when not given).
+		 * @param {Function} then          Gets the chosen attachment as JSON (id, url, …).
+		 */
+		pick: function ( options, then ) {
+			if ( ! media.available() ) {
+				return;
+			}
+			var types = options.types || 'image';
+			var key = options.title + '|' + String( types );
+			var frame = frames[ key ];
+			if ( ! frame ) {
+				frame = wp.media( {
+					title: options.title,
+					multiple: false,
+					library: { type: types },
+					button: { text: options.button },
+				} );
+				frame.on( 'select', function () {
+					frame.affibloomThen( frame.state().get( 'selection' ).first().toJSON() );
+				} );
+				frames[ key ] = frame;
+			}
+			frame.affibloomThen = then;
+			frame.open();
+		},
+	};
+
+	window.affibloomToast = toast;
+	window.affibloomSaveDialog = saveDialog;
+	window.affibloomFieldErrors = fieldErrors;
+	window.affibloomMedia = media;
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-help' ), floatingTip );
 		Array.prototype.forEach.call( document.querySelectorAll( 'form[data-save-when-changed]' ), saveWhenChanged );

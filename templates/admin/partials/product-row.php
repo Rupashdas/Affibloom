@@ -5,8 +5,13 @@
  * it a target of its own and a label.
  *
  * Placeholders until their tasks: Groups (the Groups area), Alert (Tasks 30-31), Locations (the content link
- * index and Task 36), Clicks (Tasks 33-34), Edit (Task 16), Shortcode (Task 18S). The name and the image open the
- * product page (Task 14A), as Lasso's do; the link under the name opens the destination.
+ * index and Task 36), Clicks (Tasks 33-34), Shortcode (Task 18S). The name and the image open the product page
+ * (Task 14A), as Lasso's do; the link under the name opens the destination.
+ *
+ * Edit opens Lasso's quick edit (url-row.php 12-67; F1 requirements 10, Task 16A): the row itself becomes a form with
+ * Name, Primary Destination URL, Groups, the link and the Image frame. The form is printed here, in a template after
+ * the row, with the values as stored (Q3, D26), so dashboard.js builds no markup; it puts the template's row in place
+ * of this one and back.
  *
  * @package Affibloom
  * @var array{product: \Affibloom\Domain\Product\Product} $view
@@ -18,6 +23,8 @@ $product      = $view['product'];
 $product_page = \Affibloom\Interface\Admin\ProductScreen::url( (int) $product->id );
 /* translators: %s: product name. */
 $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
+$product_id   = (string) $product->id;
+$quick_id     = 'affibloom-quick-' . $product_id;
 ?>
 <tr data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
 	<td class="affibloom-col-select">
@@ -47,8 +54,8 @@ $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
 	<td class="affibloom-col-clicks"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
 	<td class="affibloom-col-actions">
 		<span class="affibloom-row__actions">
-			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" aria-disabled="true"
-				aria-describedby="affibloom-soon-note" title="<?php esc_attr_e( 'Quick Edit: coming soon', 'affibloom' ); ?>">
+			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-quick-edit="<?php echo esc_attr( $product_id ); ?>"
+				aria-expanded="false" aria-controls="<?php echo esc_attr( $quick_id ); ?>" title="<?php esc_attr_e( 'Quick Edit', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'pencil' ) ); ?>
 				<span><?php esc_html_e( 'Edit', 'affibloom' ); ?></span>
 			</button>
@@ -60,3 +67,52 @@ $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
 		</span>
 	</td>
 </tr>
+<?php // Lasso's editing mode of this row (Q2): one cell across the eight columns, the fields left and the image right. ?>
+<template data-quick-edit-template="<?php echo esc_attr( $product_id ); ?>">
+	<tr class="affibloom-quick" id="<?php echo esc_attr( $quick_id ); ?>" data-quick-edit-for="<?php echo esc_attr( $product_id ); ?>">
+		<td colspan="8">
+			<form class="affibloom-quick__form" novalidate data-quick-form="<?php echo esc_attr( $product_id ); ?>">
+				<div class="affibloom-quick__fields">
+					<div class="affibloom-field">
+						<label class="affibloom-label" for="<?php echo esc_attr( $quick_id ); ?>-name"><?php esc_html_e( 'Name', 'affibloom' ); ?></label>
+						<input type="text" class="affibloom-input" id="<?php echo esc_attr( $quick_id ); ?>-name" name="name"
+							value="<?php echo esc_attr( $product->name ); ?>" placeholder="<?php esc_attr_e( 'Enter a URL Name', 'affibloom' ); ?>">
+					</div>
+					<div class="affibloom-field">
+						<label class="affibloom-label" for="<?php echo esc_attr( $quick_id ); ?>-url"><?php esc_html_e( 'Primary Destination URL', 'affibloom' ); ?></label>
+						<input type="text" class="affibloom-input" id="<?php echo esc_attr( $quick_id ); ?>-url" name="url"
+							value="<?php echo esc_attr( $product->url->value() ); ?>" placeholder="https://www.example.com/affiliate-id">
+					</div>
+					<?php // Lasso's Groups select comes with the Groups area (D24). ?>
+					<div class="affibloom-field">
+						<span class="affibloom-label"><?php esc_html_e( 'Groups', 'affibloom' ); ?></span>
+						<span class="affibloom-quick__soon"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?></span>
+					</div>
+					<?php // The public link is the destination until link cloaking exists (D25). ?>
+					<a class="affibloom-quick__link" href="<?php echo esc_url( $product->url->value() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $product->url->value() ); ?></a>
+				</div>
+				<div class="affibloom-quick__image">
+					<span class="affibloom-label" id="<?php echo esc_attr( $quick_id ); ?>-image"><?php esc_html_e( 'Image', 'affibloom' ); ?></span>
+					<?php // Lasso's frame: the picture, and "Update Image" over it on hover (and here on focus); the media library only (Q5). ?>
+					<button type="button" class="affibloom-quick__frame" data-quick-image aria-describedby="<?php echo esc_attr( $quick_id ); ?>-image"
+						data-media-title="<?php esc_attr_e( 'Select an Image', 'affibloom' ); ?>" data-media-button="<?php esc_attr_e( 'Select Image', 'affibloom' ); ?>">
+						<img class="affibloom-quick__picture" src="<?php echo esc_url( $product->image_url ); ?>" alt="" width="120" height="120" data-quick-picture<?php echo '' === $product->image_url ? ' hidden' : ''; ?>>
+						<span class="affibloom-quick__none" data-quick-none<?php echo '' === $product->image_url ? '' : ' hidden'; ?>>
+							<?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?>
+						</span>
+						<span class="affibloom-quick__update">
+							<?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?>
+							<span><?php esc_html_e( 'Update Image', 'affibloom' ); ?></span>
+						</span>
+					</button>
+					<input type="hidden" name="image_url" value="<?php echo esc_attr( $product->image_url ); ?>">
+					<input type="hidden" name="image_id" value="<?php echo esc_attr( (string) $product->image_id ); ?>">
+				</div>
+				<div class="affibloom-quick__actions">
+					<button type="submit" class="affibloom-button affibloom-button--primary"><?php esc_html_e( 'Save Changes', 'affibloom' ); ?></button>
+					<button type="button" class="affibloom-button affibloom-button--secondary" data-quick-cancel><?php esc_html_e( 'Cancel', 'affibloom' ); ?></button>
+				</div>
+			</form>
+		</td>
+	</tr>
+</template>

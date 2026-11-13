@@ -23,31 +23,9 @@
 
 	var TEXTS = [ 'name', 'url', 'button_text', 'badge', 'disclosure', 'theme', 'image_url' ];
 	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' ];
-	// Lasso's dialog closes a second after the answer, then the message shows (url-details.php 1980-1985).
-	var CLOSE_AFTER = 1000;
-
-	/**
-	 * Shows a toast like the server's (partials/toast.php), from the page's template.
-	 *
-	 * @param {string}  message The words.
-	 * @param {boolean} failed  The failure variant, with a cross.
-	 */
-	function toast( message, failed ) {
-		var template = document.getElementById( 'affibloom-toast-template' );
-		var host = document.querySelector( '.affibloom-admin' );
-		if ( ! template || ! host ) {
-			return;
-		}
-		var element = template.content.firstElementChild.cloneNode( true );
-		element.querySelector( '.affibloom-toast__message' ).textContent = message;
-		element.querySelector( '[data-toast-icon="success"]' ).hidden = failed;
-		element.querySelector( '[data-toast-icon="error"]' ).hidden = ! failed;
-		element.classList.toggle( 'affibloom-toast--error', failed );
-		host.appendChild( element );
-		window.setTimeout( function () {
-			element.remove();
-		}, 4500 );
-	}
+	var toast = window.affibloomToast;
+	var dialog = window.affibloomSaveDialog;
+	var errors = window.affibloomFieldErrors;
 
 	/**
 	 * One rich editor (description or price): what it holds, and whether the editor changed it since the last save.
@@ -98,11 +76,7 @@
 	 */
 	function productForm( form ) {
 		var save = document.getElementById( 'affibloom-save' );
-		var modal = document.querySelector( '[data-save-modal]' );
-		var bar = modal.querySelector( '[data-save-bar]' );
-		var line = modal.querySelector( '[data-save-text]' );
-		var dialog = modal.querySelector( '[role="dialog"]' );
-		var progress = modal.querySelector( '[data-save-progress]' );
+		var modal = dialog.modal();
 		var repoint = modal.querySelector( '[data-repoint]' );
 		var cancel = repoint.querySelector( '[data-repoint-cancel]' );
 		var confirm = repoint.querySelector( '[data-repoint-confirm]' );
@@ -188,39 +162,7 @@
 		};
 
 		var clearErrors = function () {
-			Array.prototype.forEach.call( form.querySelectorAll( '[data-save-error]' ), function ( note ) {
-				var input = document.getElementById( note.dataset.saveError );
-				if ( input ) {
-					input.classList.remove( 'is-invalid' );
-					input.removeAttribute( 'aria-invalid' );
-					input.setAttribute( 'aria-describedby', ( input.getAttribute( 'aria-describedby' ) || '' ).replace( ' ' + note.id, '' ) );
-				}
-				note.remove();
-			} );
-		};
-
-		// Lasso's sentence under each refused field, in the design system's field error (D11).
-		var showErrors = function ( fields ) {
-			var first = null;
-			Object.keys( fields ).forEach( function ( name ) {
-				var input = field( name );
-				if ( ! input || ! input.id ) {
-					return;
-				}
-				var note = document.createElement( 'p' );
-				note.className = 'affibloom-field__error';
-				note.id = input.id + '-save-error';
-				note.dataset.saveError = input.id;
-				note.textContent = fields[ name ];
-				( input.closest( '.affibloom-field' ) || input.parentNode ).appendChild( note );
-				input.classList.add( 'is-invalid' );
-				input.setAttribute( 'aria-invalid', 'true' );
-				input.setAttribute( 'aria-describedby', ( ( input.getAttribute( 'aria-describedby' ) || '' ) + ' ' + note.id ).trim() );
-				first = first || input;
-			} );
-			if ( first ) {
-				first.focus();
-			}
+			errors.clear( form );
 		};
 
 		// The page as stored (S15): the heading, the name, the links, the image and the price. The line under the heading
@@ -247,39 +189,6 @@
 			savedSwitches = switches();
 		};
 
-		// One dialog, two panels: its name and text follow the panel shown.
-		var showPanel = function ( repointing ) {
-			progress.hidden = repointing;
-			repoint.hidden = ! repointing;
-			dialog.setAttribute( 'aria-labelledby', repointing ? 'affibloom-repoint-title' : 'affibloom-save-title' );
-			dialog.setAttribute( 'aria-describedby', repointing ? 'affibloom-repoint-text' : 'affibloom-save-text' );
-		};
-
-		var hideDialog = function () {
-			modal.hidden = true;
-			document.body.classList.remove( 'affibloom-has-modal' );
-		};
-
-		var openDialog = function () {
-			showPanel( false );
-			line.textContent = switches() !== savedSwitches ? modal.dataset.textToggles : modal.dataset.textDefault;
-			bar.style.width = '0';
-			modal.hidden = false;
-			document.body.classList.add( 'affibloom-has-modal' );
-			modal.querySelector( '[role="dialog"]' ).focus();
-			window.requestAnimationFrame( function () {
-				bar.style.width = '90%';
-			} );
-		};
-
-		var closeDialog = function ( then ) {
-			bar.style.width = '100%';
-			window.setTimeout( function () {
-				hideDialog();
-				then();
-			}, CLOSE_AFTER );
-		};
-
 		// "This Product Already Exists" (Lasso's repoint panel): this product and the one that has the link.
 		var showRepoint = function ( data, url ) {
 			offer = { to: data.to.id, url: url };
@@ -292,12 +201,12 @@
 			} );
 			cancel.disabled = false;
 			confirm.disabled = false;
-			showPanel( true );
+			dialog.panel( true );
 			cancel.focus();
 		};
 
 		cancel.addEventListener( 'click', function () {
-			hideDialog();
+			dialog.hide();
 			field( 'url' ).focus();
 		} );
 		repoint.addEventListener( 'keydown', function ( event ) {
@@ -336,7 +245,7 @@
 			save.disabled = true;
 			clearErrors();
 			var sent = collect();
-			openDialog();
+			dialog.open( switches() !== savedSwitches ? modal.dataset.textToggles : modal.dataset.textDefault );
 
 			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId, method: 'PATCH', data: sent } )
 				.then( function ( response ) {
@@ -347,7 +256,7 @@
 						go( afterSave || reload.toString() );
 						return;
 					}
-					closeDialog( function () {
+					dialog.close( function () {
 						showStored( response.data, sent );
 						keepBaseline();
 						toast( form.dataset.savedText, false );
@@ -363,10 +272,10 @@
 						showRepoint( error.data, sent.url );
 						return;
 					}
-					closeDialog( function () {
+					dialog.close( function () {
 						var fields = error && error.data && error.data.fields;
 						if ( fields ) {
-							showErrors( fields );
+							errors.show( form, fields );
 							toast( form.dataset.failedText, true );
 						} else {
 							toast( error && error.message ? error.message : form.dataset.failedText, true );
@@ -377,7 +286,7 @@
 					window.setTimeout( function () {
 						saving = false;
 						save.disabled = false;
-					}, CLOSE_AFTER );
+					}, dialog.closeAfter );
 				} );
 		} );
 

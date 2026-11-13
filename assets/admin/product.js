@@ -1,4 +1,3 @@
-/* global wp */
 /**
  * The product page's image (F1, Task 14B). "Update Image" opens WordPress's media library for one image, which fills
  * the image link, the media item and the preview. Apply checks a pasted link as Lasso's upload_thumbnail does ("Image
@@ -97,7 +96,6 @@
 		var media = document.querySelector( '[data-image-id]' );
 		var error = document.querySelector( '[data-image-error]' );
 		var apply = document.querySelector( '[data-image-apply]' );
-		var picker = null;
 
 		var show = function ( src ) {
 			preview.src = src;
@@ -141,27 +139,17 @@
 			fail( '' );
 		} );
 
-		if ( window.wp && wp.media ) {
+		if ( window.affibloomMedia.available() ) {
 			choose.hidden = false;
 			choose.addEventListener( 'click', function () {
-				if ( ! picker ) {
-					// Lasso's media frame: "Select an Image", images only, one, "Select Image".
-					picker = wp.media( {
-						title: choose.dataset.mediaTitle,
-						multiple: false,
-						library: { type: 'image' },
-						button: { text: choose.dataset.mediaButton },
-					} );
-					picker.on( 'select', function () {
-						var image = picker.state().get( 'selection' ).first().toJSON();
-						link.value = image.url;
-						media.value = String( image.id );
-						fail( '' );
-						show( image.url );
-						link.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-					} );
-				}
-				picker.open();
+				// Lasso's media frame: "Select an Image", images only, one, "Select Image" (admin.js).
+				window.affibloomMedia.pick( { title: choose.dataset.mediaTitle, button: choose.dataset.mediaButton }, function ( image ) {
+					link.value = image.url;
+					media.value = String( image.id );
+					fail( '' );
+					show( image.url );
+					link.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				} );
 			} );
 		}
 	} );

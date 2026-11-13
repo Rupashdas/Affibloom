@@ -44,9 +44,11 @@ final class AdminAssets implements Module {
 		// Help tips, Save-when-changed, modals and "Add A New Link". wp-api-fetch carries the REST root and nonce in wp-admin.
 		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
 
-		// The Dashboard's own script: selection (Task 13C), the list without reloads (13D), filters and views (13E).
+		// The Dashboard's own script: selection (Task 13C), the list without reloads (13D), filters and views (13E), and
+		// the quick edit (16A), whose image comes from the media library and whose toast and save dialog are admin.js's.
 		if ( 'toplevel_page_' . AdminMenu::SLUG === $hook_suffix ) {
-			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_media();
+			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 		}
 
 		// Each settings tab's own controls.
@@ -76,8 +78,9 @@ final class AdminAssets implements Module {
 		if ( 'display' === $tab ) {
 			wp_enqueue_media();
 		}
+		// After admin.js: the Display tab's icon card takes its media frame from there (Task 16A).
 		if ( isset( $scripts[ $tab ] ) ) {
-			wp_enqueue_script( 'affibloom-' . $scripts[ $tab ], $this->plugin_url . 'assets/admin/' . $scripts[ $tab ] . '.js', array(), $this->version, true );
+			wp_enqueue_script( 'affibloom-' . $scripts[ $tab ], $this->plugin_url . 'assets/admin/' . $scripts[ $tab ] . '.js', array( 'affibloom-admin' ), $this->version, true );
 		}
 	}
 }

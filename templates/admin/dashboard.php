@@ -66,7 +66,10 @@ $placeholder = sprintf(
 				?>
 			</div>
 
-			<div id="affibloom-list" class="affibloom-list">
+			<?php // The quick edit's toasts (Task 16A; F1 D23), the product page's words. ?>
+			<div id="affibloom-list" class="affibloom-list"
+				data-saved-text="<?php esc_attr_e( 'Product saved.', 'affibloom' ); ?>"
+				data-failed-text="<?php esc_attr_e( "Try again. For some reason your product didn't save.", 'affibloom' ); ?>">
 				<?php
 				$this->render(
 					'admin/partials/product-list',
@@ -91,4 +94,7 @@ $placeholder = sprintf(
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/view-delete-modal' ); ?>
+	<?php // Lasso's Dashboard carries the product page's save dialog (dashboard.php 212) for its quick edit. ?>
+	<?php $this->render( 'admin/partials/save-modal' ); ?>
+	<?php $this->render( 'admin/partials/toast-template' ); ?>
 </div>

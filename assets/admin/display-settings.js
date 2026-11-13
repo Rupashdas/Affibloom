@@ -482,26 +482,20 @@
 	function iconSet( card ) {
 		var add = card.querySelector( '[data-icon-add]' );
 		var choose = card.querySelector( '[data-icon-choose]' );
-		var frame = null;
 
-		if ( add && choose && window.wp && wp.media ) {
+		if ( add && choose && window.affibloomMedia && window.affibloomMedia.available() ) {
 			choose.addEventListener( 'click', function () {
-				if ( ! frame ) {
-					frame = wp.media( {
-						title: choose.textContent.trim(),
-						multiple: false,
-						library: { type: [ 'image/svg+xml', 'image/png', 'image/webp' ] },
-						button: { text: choose.textContent.trim() },
-					} );
-					frame.on( 'select', function () {
-						var image = frame.state().get( 'selection' ).first().toJSON();
-						var preview = add.querySelector( '[data-icon-preview]' );
-						add.querySelector( '[data-icon-attachment]' ).value = image.id;
-						preview.src = image.url;
-						add.querySelector( '[data-icon-preview-tile]' ).hidden = false;
-					} );
-				}
-				frame.open();
+				// admin.js's media frame, with the icon formats only.
+				window.affibloomMedia.pick( {
+					title: choose.textContent.trim(),
+					button: choose.textContent.trim(),
+					types: [ 'image/svg+xml', 'image/png', 'image/webp' ],
+				}, function ( image ) {
+					var preview = add.querySelector( '[data-icon-preview]' );
+					add.querySelector( '[data-icon-attachment]' ).value = image.id;
+					preview.src = image.url;
+					add.querySelector( '[data-icon-preview-tile]' ).hidden = false;
+				} );
 			} );
 		}
 

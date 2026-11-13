@@ -232,6 +232,95 @@ test.describe( 'F1 Product library', () => {
 		await page.waitForURL( /page=affibloom-settings/ );
 	} );
 
+	// Task 16A (requirements 10, Q1-Q4): the row itself becomes Lasso's quick edit form, one row at a time. New products
+	// are the newest, so they are on the Dashboard's first page.
+	test( 'AC17 a row\'s Edit opens Lasso\'s quick edit in the row; Cancel and another row\'s Edit close it', async ( { page } ) => {
+		const first = unique( 'F1 AC17 one' );
+		const link = `https://www.example.com/${ unique( 'f1-ac17' ) }`;
+		const one = createProduct( { name: first, url: link } );
+		const two = createProduct( { name: unique( 'F1 AC17 two' ) } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const rowOne = page.locator( `tr[data-product-id="${ one }"]` );
+		const formOne = page.locator( `tr[data-quick-edit-for="${ one }"]` );
+		const nameField = formOne.getByLabel( 'Name', { exact: true } );
+
+		await rowOne.getByRole( 'button', { name: 'Edit' } ).click();
+		await expect( rowOne ).toBeHidden();
+		await expect( nameField ).toHaveValue( first );
+		await expect( nameField ).toBeFocused();
+		await expect( nameField ).toHaveAttribute( 'placeholder', 'Enter a URL Name' );
+		await expect( formOne.getByLabel( 'Primary Destination URL' ) ).toHaveValue( link );
+		await expect( formOne.getByText( 'Groups', { exact: true } ) ).toBeVisible();
+		await expect( formOne.getByRole( 'link', { name: link } ) ).toHaveAttribute( 'target', '_blank' );
+		await expect( formOne.getByText( 'Image', { exact: true } ) ).toBeVisible();
+		await expect( formOne.getByRole( 'button', { name: 'Update Image' } ) ).toBeVisible();
+
+		// Cancel drops the edit without asking and brings the row back.
+		await nameField.fill( `${ first } changed` );
+		await formOne.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( formOne ).toHaveCount( 0 );
+		await expect( rowOne.getByRole( 'link', { name: first, exact: true } ) ).toBeVisible();
+		await expect( rowOne.getByRole( 'button', { name: 'Edit' } ) ).toBeFocused();
+		expect( wp( 'post', 'get', String( one ), '--field=post_title' ) ).toBe( first );
+
+		// Edit on another row closes the first.
+		await rowOne.getByRole( 'button', { name: 'Edit' } ).click();
+		await page.locator( `tr[data-product-id="${ two }"]` ).getByRole( 'button', { name: 'Edit' } ).click();
+		await expect( formOne ).toHaveCount( 0 );
+		await expect( rowOne ).toBeVisible();
+		await expect( page.locator( `tr[data-quick-edit-for="${ two }"]` ) ).toBeVisible();
+	} );
+
+	// Task 16A (requirements 10, Q5-Q8, D22, D23, D28): the save sends the name, the link and the image only, so every
+	// other field stays as stored; the list is loaded again with the saved product first. The save is held back half a
+	// second so its dialog can be seen.
+	test( 'AC18 Save Changes in quick edit stores the name and the image; an empty name is refused', async ( { page } ) => {
+		const name = unique( 'F1 AC18' );
+		const id = createProduct( { name, description: '<p>Kept <span style="color: rgb(0, 0, 0);">as stored</span></p>', badge: 'Our Pick' } );
+		const description = wp( 'post', 'meta', 'get', String( id ), '_affibloom_description' );
+		const image = wp( 'post', 'list', '--post_type=attachment', '--post_mime_type=image', '--orderby=ID', '--order=DESC', '--posts_per_page=1', '--field=ID' );
+		const renamed = unique( 'F1 AC18 renamed' );
+		await page.route( /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+/, async ( route ) => {
+			await new Promise( ( done ) => setTimeout( done, 500 ) );
+			await route.continue();
+		} );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const row = page.locator( `tr[data-product-id="${ id }"]` );
+		const form = page.locator( `tr[data-quick-edit-for="${ id }"]` );
+		const nameField = form.getByLabel( 'Name', { exact: true } );
+		await row.getByRole( 'button', { name: 'Edit' } ).click();
+
+		// An empty name: Lasso's sentence under it, the failure toast, nothing stored, the row still open.
+		await nameField.fill( '' );
+		await form.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( form.getByText( 'Name and Primary Destination URL are required.' ) ).toBeVisible();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Try again. For some reason your product didn\'t save.' );
+		await expect( nameField ).toBeFocused();
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+
+		// A new name and an image from the media library (Lasso's frame).
+		await nameField.fill( renamed );
+		await form.getByRole( 'button', { name: 'Update Image' } ).click();
+		const library = page.getByRole( 'dialog', { name: 'Select an Image' } );
+		await library.locator( `li.attachment[data-id="${ image }"]` ).click();
+		await library.getByRole( 'button', { name: 'Select Image' } ).click();
+		await form.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toContainText( 'Just saving your URL changes' );
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+
+		const top = page.locator( '#affibloom-list tbody tr[data-product-id]' ).first();
+		await expect( top ).toHaveAttribute( 'data-product-id', String( id ) );
+		await expect( top.locator( '.affibloom-row__name' ) ).toHaveText( renamed );
+		await expect( form ).toHaveCount( 0 );
+		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_image_id' ) ).toBe( image );
+		const stored = wp( 'post', 'meta', 'get', String( id ), '_affibloom_image_url' );
+		expect( stored ).not.toBe( '' );
+		await expect( top.locator( 'img.affibloom-thumb' ) ).toHaveAttribute( 'src', stored );
+		// Not sent, so as stored (Q6).
+		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_description' ) ).toBe( description );
+		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_badge' ) ).toBe( 'Our Pick' );
+	} );
+
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {
 		const name = unique( 'F1 AC3' );
 		const id = createProduct( { name } );

@@ -1,7 +1,7 @@
 /* global wp */
 /**
- * Affibloom Dashboard: Lasso's selection (Task 13C), the list without page reloads (Task 13D), and the filters
- * panel with saved views (Task 13E).
+ * Affibloom Dashboard: Lasso's selection (Task 13C), the list without page reloads (Task 13D), the filters panel with
+ * saved views (Task 13E), and the row's quick edit (Task 16A).
  *
  * The server renders every piece of markup (the list, the saved-view bar) with the same partials the page printed,
  * so this file never builds a row or a pill: it asks, swaps what comes back in, and keeps the address bar in step
@@ -140,6 +140,9 @@
 		per_page: sizeSelect ? parseInt( sizeSelect.value, 10 ) : 0,
 	};
 	var requests = 0;
+	// The quick edit's state (Task 16A), here because load() reads it: the open row's product, whether its save is
+	// on its way, and a list asked for meanwhile.
+	var quick = { id: null, saving: false, held: null };
 
 	function listPath( list ) {
 		var args = new URLSearchParams();
@@ -225,8 +228,15 @@
 	 * @param {Object}  list     The search, link type, page and size.
 	 * @param {boolean} remember Push the result's address into the history (not when answering Back).
 	 * @param {boolean} focus    Move the focus to the list (after a page link, which the new list replaces).
+	 * @param {Function} after   Called once the new list is drawn (optional).
 	 */
-	function load( list, remember, focus ) {
+	function load( list, remember, focus, after ) {
+		// While a quick edit is being saved the list waits: a good save loads the list asked for, a refused one keeps
+		// the open row (Task 16A).
+		if ( quick.saving ) {
+			quick.held = { list: list, remember: remember, focus: focus };
+			return;
+		}
 		var mine = ++requests;
 		busy( true );
 
@@ -239,6 +249,7 @@
 			current = { s: data.term, link_type: data.link_type, paged: data.page, per_page: data.per_page };
 
 			region.innerHTML = data.html;
+			quick.id = null; // An open quick edit went with the old rows.
 			busy( false );
 			if ( remember ) {
 				window.history.pushState( current, '', data.url );
@@ -256,6 +267,9 @@
 					card.setAttribute( 'tabindex', '-1' );
 					card.focus();
 				}
+			}
+			if ( after ) {
+				after();
 			}
 		} ).catch( function () {
 			if ( mine !== requests ) {
@@ -472,4 +486,176 @@
 			} );
 		} );
 	}
+
+	/* ---------------------------------------------------------------------------------------------------------
+	 * Quick edit (Task 16A; F1 requirements 10), as Lasso's (view-js.php 735-863): Edit turns the row into a form
+	 * with the name, the link and the image; Save Changes stores those three through the product page's route, so
+	 * every other field stays as stored (Q6, D28), and loads the list again (Q7); Cancel brings the row back without
+	 * asking. One row at a time (Q4). The form is the row's template, printed by the server with the stored values
+	 * (D26).
+	 * ------------------------------------------------------------------------------------------------------- */
+
+	function editButton( id ) {
+		return region.querySelector( '[data-quick-edit="' + id + '"]' );
+	}
+
+	function productRow( id ) {
+		return region.querySelector( 'tr[data-product-id="' + id + '"]' );
+	}
+
+	/**
+	 * Puts the row back in place of its form.
+	 *
+	 * @param {boolean} focusEdit Move the focus to the row's Edit (after Cancel, D27).
+	 */
+	function closeQuick( focusEdit ) {
+		var id = quick.id;
+		if ( null === id ) {
+			return;
+		}
+		quick.id = null;
+		var editing = region.querySelector( '[data-quick-edit-for="' + id + '"]' );
+		if ( editing ) {
+			editing.remove();
+		}
+		var row = productRow( id );
+		if ( row ) {
+			row.hidden = false;
+		}
+		var button = editButton( id );
+		if ( button ) {
+			button.setAttribute( 'aria-expanded', 'false' );
+			if ( focusEdit ) {
+				button.focus();
+			}
+		}
+	}
+
+	/**
+	 * Opens a row's form; another open row closes first, and the open row's own Edit does nothing (Q4).
+	 *
+	 * @param {string} id The product.
+	 */
+	function openQuick( id ) {
+		var row = productRow( id );
+		var template = region.querySelector( 'template[data-quick-edit-template="' + id + '"]' );
+		if ( quick.id === id || ! row || ! template ) {
+			return;
+		}
+		closeQuick( false );
+		var editing = template.content.firstElementChild.cloneNode( true );
+		row.after( editing );
+		row.hidden = true;
+		quick.id = id;
+		editButton( id ).setAttribute( 'aria-expanded', 'true' );
+		editing.querySelector( '[name="name"]' ).focus();
+	}
+
+	/**
+	 * Lasso's media frame for the image (Q5): the picture shows in the frame; its link and media item are sent.
+	 *
+	 * @param {HTMLButtonElement} frame The image frame.
+	 */
+	function pickImage( frame ) {
+		window.affibloomMedia.pick( { title: frame.dataset.mediaTitle, button: frame.dataset.mediaButton }, function ( image ) {
+			var picture = frame.querySelector( '[data-quick-picture]' );
+			picture.src = image.url;
+			picture.hidden = false;
+			frame.querySelector( '[data-quick-none]' ).hidden = true;
+			frame.form.elements.namedItem( 'image_url' ).value = image.url;
+			frame.form.elements.namedItem( 'image_id' ).value = String( image.id );
+		} );
+	}
+
+	/**
+	 * Saves the open row (Q6-Q8): "Updating Your Site" with the product page's line (D22), then "Product saved." and
+	 * the list loaded again, the saved row's Edit focused when it is on the page (D27); a refused field gets Lasso's
+	 * sentence under it and the failure toast, and the row stays open with its edits.
+	 *
+	 * @param {HTMLFormElement} form The row's form.
+	 */
+	function saveQuick( form ) {
+		if ( quick.saving ) {
+			return; // Lasso ignores a second click while saving.
+		}
+		var id = quick.id;
+		var submit = form.querySelector( '[type="submit"]' );
+		var value = function ( name ) {
+			return form.elements.namedItem( name ).value;
+		};
+		var sent = {
+			name: value( 'name' ),
+			url: value( 'url' ),
+			image_url: value( 'image_url' ),
+			image_id: parseInt( value( 'image_id' ), 10 ) || 0,
+		};
+		var dialog = window.affibloomSaveDialog;
+
+		quick.saving = true;
+		submit.disabled = true;
+		window.affibloomFieldErrors.clear( form );
+		dialog.open( dialog.modal().dataset.textDefault );
+
+		wp.apiFetch( { path: '/affibloom/v1/products/' + id, method: 'PATCH', data: sent } ).then( function () {
+			dialog.close( function () {
+				var held = quick.held;
+				quick.saving = false;
+				quick.held = null;
+				closeQuick( false );
+				window.affibloomToast( region.dataset.savedText, false );
+				if ( held ) {
+					load( held.list, held.remember, held.focus );
+					return;
+				}
+				load( current, false, false, function () {
+					var button = editButton( id );
+					var card = region.querySelector( '.affibloom-card' );
+					if ( button ) {
+						button.focus();
+					} else if ( card ) {
+						card.setAttribute( 'tabindex', '-1' );
+						card.focus();
+					}
+				} );
+			} );
+		} ).catch( function ( error ) {
+			dialog.close( function () {
+				var fields = error && error.data && error.data.fields;
+				quick.saving = false;
+				quick.held = null;
+				submit.disabled = false;
+				if ( fields ) {
+					window.affibloomFieldErrors.show( form, fields );
+					window.affibloomToast( region.dataset.failedText, true );
+				} else {
+					window.affibloomToast( error && error.message ? error.message : region.dataset.failedText, true );
+				}
+			} );
+		} );
+	}
+
+	region.addEventListener( 'click', function ( event ) {
+		var edit = event.target.closest( '[data-quick-edit]' );
+		if ( edit ) {
+			openQuick( edit.getAttribute( 'data-quick-edit' ) );
+		} else if ( event.target.closest( '[data-quick-cancel]' ) ) {
+			closeQuick( true );
+		} else if ( event.target.closest( '[data-quick-image]' ) ) {
+			pickImage( event.target.closest( '[data-quick-image]' ) );
+		}
+	} );
+	region.addEventListener( 'submit', function ( event ) {
+		var form = event.target.closest( '[data-quick-form]' );
+		if ( form ) {
+			event.preventDefault();
+			saveQuick( form );
+		}
+	} );
+	// A refused field's note goes as soon as it is edited, as on the product page.
+	region.addEventListener( 'input', function ( event ) {
+		var form = event.target.closest( '[data-quick-form]' );
+		if ( form && event.target.id && document.getElementById( event.target.id + '-save-error' ) ) {
+			window.affibloomFieldErrors.clear( form );
+		}
+	} );
 } )();

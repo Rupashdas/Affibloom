@@ -3,7 +3,7 @@
 Status: gate 2 approved with Task 6 (2026-11-12); **the product page re-run 2026-11-13** with the requirements'
 sections 2-8. Gate 4 given by the user 2026-11-13. **Saving re-run 2026-11-13** with requirements section 9
 (section "Saving" below); gate 4 given 2026-11-13. **Quick edit re-run 2026-11-13** with requirements section 10
-(section "Dashboard quick edit" below); waiting for gate 4.
+(section "Dashboard quick edit" below); gate 4 given 2026-11-13.
 
 **Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, **15A-15D**, **16A-16C**, 17.
 

@@ -278,12 +278,5 @@ $soon_tabs   = array(
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
-	<?php // The toast's JS twin (Task 15A): product-save.js fills a copy with its message; the error one has a cross. ?>
-	<template id="affibloom-toast-template">
-		<div class="affibloom-toast" role="status" aria-live="polite">
-			<span class="affibloom-toast__icon" data-toast-icon="success"><?php $this->render( 'admin/partials/icon', array( 'name' => 'check' ) ); ?></span>
-			<span class="affibloom-toast__icon" data-toast-icon="error" hidden><?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?></span>
-			<span class="affibloom-toast__message"></span>
-		</div>
-	</template>
+	<?php $this->render( 'admin/partials/toast-template' ); ?>
 </div>

@@ -6,7 +6,7 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
 **Saving the page (Task 15) re-run the same way on 2026-11-13** (progress deviation 70): section 9, written from
 Lasso's save path. **Gate 4 given by the user 2026-11-13** for Tasks 15A-15D.
 **Dashboard quick edit (Task 16) re-run the same way on 2026-11-13** (progress deviation 76): section 10, written
-from Lasso's Dashboard row and script. Waiting for gate 4 (Tasks 16A-16C).
+from Lasso's Dashboard row and script. **Gate 4 given by the user 2026-11-13** for Tasks 16A-16C.
 
 ## 1. User stories and acceptance criteria
 
