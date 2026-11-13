@@ -3,9 +3,10 @@
 Status: gate 2 approved with Task 6 (2026-11-12); **the product page re-run 2026-11-13** with the requirements'
 sections 2-8. Gate 4 given by the user 2026-11-13. **Saving re-run 2026-11-13** with requirements section 9
 (section "Saving" below); gate 4 given 2026-11-13. **Quick edit re-run 2026-11-13** with requirements section 10
-(section "Dashboard quick edit" below); gate 4 given 2026-11-13.
+(section "Dashboard quick edit" below); gate 4 given 2026-11-13. **Deleting re-run 2026-11-13** with requirements
+section 11 (section "Deleting" below); gate 4 waiting.
 
-**Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, **15A-15D**, **16A-16C**, 17.
+**Tasks:** 8, 11A-11E, 13A-13E, **14A-14E**, **15A-15D**, **16A-16C**, **17A-17D**.
 
 ## Depends on
 
@@ -162,6 +163,58 @@ outside the rows (the open ID and the values at opening), as Lasso's `dashboard_
 answers while a row is open (a slow search started before Edit) would wipe the row: 16B's guard runs before any
 `load()`, and `load()` refuses to draw while a quick-edit save is in flight. `wp_enqueue_media()` adds the media
 scripts to the Dashboard (they load on the product page already).
+
+## Deleting (Task 17, requirements section 11)
+
+```
+product page [Delete This Link] → delete-modal.php ("Delete This Link?")                                  (17A)
+  [Delete] → product-save.js → wp.apiFetch DELETE /affibloom/v1/products/{id}
+  → ProductsController::delete()        Capabilities::PRODUCTS; id absint
+  → ProductService::delete( id )        ProductRepository::get( id ) → ProductNotFound → 404 affibloom_not_found
+       ProductRepository::delete( id ) → wp_delete_post( id, true )      permanent (D33); meta and terms go with it
+  ← 200 { data: { id, deleted: true } } → the leave guard quieted (D38) → Dashboard + affibloom_notice=deleted
+                                                                          → "Product deleted." (D37)
+
+Dashboard: ticked rows (the page's only, D36) → selection bar [Delete] → guarded() (16B, D38)            (17B)
+  → bulk-delete-modal.php ("Delete the selected links?") → [Delete]
+  → wp.apiFetch DELETE /affibloom/v1/products?ids[]=…  (1-50)
+  → ProductsController::delete_many()   ids absint, unique
+  → ProductService::trash( ids )        published products only (others skipped, D39)
+       ProductRepository::trash( id ) → wp_update_post( status trash )   no 30-day mark (D40)
+  ← 200 { data: { deleted: [ids] } } → clear the selection, close, load( current list ) — the page before when it is
+                                        now past the last — "N products deleted." (D37)
+  Task 36 adds: any selected product in use → 409 affibloom_in_use, nothing trashed, the sentence in the dialog
+
+repoint Confirm → ProductRepository::retire( from, to )                                                    (17C)
+       _affibloom_repointed_to = to, then wp_update_post( status affibloom_retired )  (D41; was wp_trash_post)
+  ProductPostType registers the status affibloom_retired (not public, not in searches or lists)
+
+POST /products { url }, bulk add, PATCH /products/{id} with a new url                                     (17D)
+  → the duplicate lookup finds no published product
+  → ProductRepository::find_deleted( url_key, asin, country, search_key )   trash or affibloom_retired, by the keys
+                                                       the three published lookups use
+  → add: ProductRepository::revive( product ) → status publish, _affibloom_repointed_to removed (D42)
+         → answered as a new product (redirect_to as 14A: its page, or the Dashboard for Amazon)
+  → save: revive, then ValidationFailed { url: already_exists } → 422 under Primary Destination URL (D42)
+```
+
+**Layers.** Application: `ProductService::delete()`, `trash()`, and the revive branch in `create_from_url()` and
+`update()`. Domain: `ProductRepository` gains `delete()`, `trash()`, `find_deleted()` (one method taking the link's
+keys as strings, so the three published lookups keep their meaning) and `revive()`; `retire()` changes its status.
+Infrastructure: `PostTypeProductRepository` and `ProductPostType` (the status). Interface: the two DELETE routes, the
+`deleted` and `deleted-many` notices, `templates/admin/partials/{delete-modal,bulk-delete-modal}.php` (Lasso's two
+dialogs in Aurora's modal), `product.php`'s footer button, `selection-bar.php`'s Delete, `product-save.js` (the page's
+delete), `dashboard.js` (the per-page selection and the bulk delete), `Messages` for `already_exists`.
+
+**Data written:** none new for 17A-17B (a permanent delete removes the post and its meta; the trash is a status).
+17C: the post status `affibloom_retired`. 17D: status back to `publish`; `_affibloom_repointed_to` deleted.
+
+**Risks.** A permanent delete cannot be undone: the dialog says so (Lasso's words) and Task 36 blocks products in use;
+until then a product used in a box can be deleted (D35), which only matters once boxes are Affibloom's (Phase 3 on).
+A product other retired products point to may be deleted for good: the box resolver stops at the last product that
+exists (D43, Task 18). The bulk route takes IDs from the page, at most 50, so one request; `wp_update_post` per ID
+moves each product's modified date, which no list shows for trashed products. Reviving through the lookups adds one
+query to an add or save that found no published match.
 
 ## Layers
 

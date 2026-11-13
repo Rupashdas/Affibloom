@@ -7,6 +7,8 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
 Lasso's save path. **Gate 4 given by the user 2026-11-13** for Tasks 15A-15D.
 **Dashboard quick edit (Task 16) re-run the same way on 2026-11-13** (progress deviation 76): section 10, written
 from Lasso's Dashboard row and script. **Gate 4 given by the user 2026-11-13** for Tasks 16A-16C.
+**Deleting a product (Task 17) re-run the same way on 2026-11-13** (progress deviation 82): section 11, written from
+Lasso's delete paths; D33 and D34 are the user's answers. Gate 4 for Tasks 17A-17D: waiting.
 
 ## 1. User stories and acceptance criteria
 
@@ -18,7 +20,9 @@ from Lasso's Dashboard row and script. **Gate 4 given by the user 2026-11-13** f
   "Product saved." (U6); after a reload the name, every button (URL, text, toggles, order), theme, image, badge,
   price and its toggle, description, disclosure and the switches are as saved. (15A)
 - **AC3** Dashboard search finds a product by name.
-- **AC4** A product not in use can be deleted. (Task 17)
+- **AC4** On a product's page, "Delete This Link" asks "Delete This Link?" ("If deleted, you won't be able to get it
+  back."); Cancel keeps it; Delete removes it for good and opens the Dashboard with "Product deleted."; with unsaved
+  edits nothing else asks. (17A, X1-X3, D33, D37, D38)
 - **AC5** A product's page shows every Details field as stored, in Lasso's order and with Lasso's labels; an empty
   button text or disclosure shows the site's default as its placeholder. (14A, 14B)
 - **AC6** Adding a non-Amazon link that already exists opens the existing product's page with "This product already
@@ -58,6 +62,16 @@ from Lasso's Dashboard row and script. **Gate 4 given by the user 2026-11-13** f
 - **AC20** A Primary URL another product has, saved from quick edit, opens "This Product Already Exists"; Cancel keeps
   the row open with the typed link and saves nothing; Confirm opens the other product's page with "Success! Locations
   now show this link." (16C, Q10, D21)
+
+- **AC21** On the Dashboard, ticked rows and the bar's Delete ask "Delete the selected links?" ("If deleted, you won't
+  be able to get them back."); Delete moves them to the trash, clears the selection and redraws the same page with
+  "2 products deleted."; Select All ticks only the page's rows, the bar reads "N links selected", and a page link
+  drops the selection. (17B, X5-X7, D35-D37, D39, D40)
+- **AC22** A product retired by the repoint (AC15) has the status `affibloom_retired`, not `trash`. (17C, D41)
+- **AC23** Adding the link of a product deleted from the Dashboard brings that product back with its name and fields
+  (its ID, its page); saving another product with that link brings it back too and refuses the save with "This link
+  already exists. Please try again with a different URL." under Primary Destination URL; a retired product brought
+  back has no pointer. (17D, X9, D42)
 
 `tests/E2E/acceptance/F1.spec.ts` holds AC1-AC4; each task adds its own before it is built.
 
@@ -339,3 +353,81 @@ link opened while adding a display in the post editor and from Opportunities; it
 - **D31 A product with no image** shows the list's no-image tile in the frame, with "Update Image".
 - **D32 The quick-detail modal (Q12)** belongs to the editor block (Phase 4, display add) and Opportunities (area 3);
   each area's gates take it up. It is not part of Task 16.
+
+## 11. Deleting a product (Task 17 sweep, 2026-11-13)
+
+**Evidence, all read:** modals `url-delete.php` and `url-delete-reject.php`; `url-details.php` 515-527 (the footer),
+1700-1730 (the leave guard), 2000-2400 (the delete, the location count, the force delete's five steps);
+`pages/url-details/class-ajax.php` `lasso_delete_post` (269-293), `get_lasso_url_location_count`,
+`lasso_delete_post_in_table`, `lasso_delete_link_from_all_groups`, `lasso_remove_links_and_shortcodes_from_post`
+(446-489); `pages/class-ajax.php` `lasso_bulk_remove_links` (1941-1981); `admin/assets/js/view-js.php` 387-454 (the
+selection), 575-630 (the bulk dialog), 2065-2078 (the selection after a list load), 2181-2187;
+`admin/views/dashboard/dashboard.php` 93-100 (the selection bar); `admin/views/rows/url-row.php` 74-84;
+`Lasso_Cron::delete_post_associate_data` (348-358); `Lasso_Affiliate_Link::is_lasso_url_exist` (763-810), the add
+flow's duplicate branch (877-920) and `save_lasso_url` 1261-1290; `Lasso_Repoint_Merge::resolve_repointed_lasso_id`
+(29-55) and `merge` 180-195; `pages/class-hook.php` `lasso_custom_post_status`. **This copy, 2026-11-13:** Lasso has
+263 published records, 1 in the trash and 1 `lasso_delete` (repointed); 180 records have link locations (3,015 rows),
+83 have none. Affibloom has 40 published products and 4 in the trash (15C's retired test products).
+
+### What Lasso's delete does
+
+| # | Rule | Lasso | Source |
+|---|---|---|---|
+| X1 | **The product page's footer** has "Delete This Link" (trash icon, a red link) on the left | `#btn-confirm-delete` | url-details.php 523-526 |
+| X2 | A click first asks for the record's **location count**; none → "**Delete This Link?**" / "If deleted, you won't be able to get it back." / Cancel, **Delete** (red); some → "Hold Up" (X8) | `get_lasso_url_location_count`, `#url-delete` | url-details.php 2082-2106; url-delete.php |
+| X3 | **Delete is permanent:** the record must be Lasso's post type (else "Invalid post.", 400) and the user needs `delete_post`; `wp_delete_post( id, true )` removes the post and its meta, and Lasso's `deleted_post` hook removes its link-location rows. Success opens the Dashboard with no message; a failure shows the red bar with the server's message; the dialog closes either way | `lasso_delete_post` | class-ajax.php 269-293; url-details.php 2000-2040; class-lasso-cron.php 348-358 |
+| X4 | **The leave guard:** links inside the delete dialogs never ask; the move to the Dashboard after a delete is not quieted, so with unsaved edits the browser asks its own question | | url-details.php 1703-1730 |
+| X5 | **The Dashboard has no delete in a row.** Each row's box selects it; a product with locations has its box disabled, with "You can't delete a URL if it has active links or displays" | | url-row.php 74-84 |
+| X6 | **The selection is the page's:** "Select All" ticks the page's enabled boxes; every list load drops the IDs that are not on the page it loaded; the bar says "1 link selected" or "N links selected" and offers Select All, Clear Selection, **Delete** (red), Add to Group | `dashboard_selected_ids` | view-js.php 387-454, 2073-2077; dashboard.php 93-100 |
+| X7 | **Bulk Delete** (not behind the quick edit's unsaved check) → "**Delete the selected links?**" / "If deleted, you won't be able to get them back." / Cancel, Delete → `lasso_bulk_remove_links` (`edit_posts`, then `edit_post` per record): if any selected record has locations, **nothing** is deleted and the dialog shows "Invalid Lasso Post ID!" in red with no heading; otherwise each record's status becomes `trash` through `wp_update_post`. Then the selection is cleared, the dialog closes and the current page of the list is loaded again; no message | `dashboard_process_delete_links` | view-js.php 575-630; pages/class-ajax.php 1941-1981 |
+| X8 | **In use, "Hold Up":** "This URL has active links and/or displays. Deleting this link will: - Delete active displays - Delete active links - Delete this link from Lasso. This can't be undone. Do you want to proceed?" / **Keep This Link**, **Delete This Link**. The force delete runs five requests: table mappings, groups, the posts that use it, then **for each post its links and shortcodes are removed from `post_content`** (`update_post_content`), with a status line ("Links and shortcodes removed from N. M posts remaining."), then `wp_delete_post` as X3; a 4-second countdown closes the dialog and opens the Dashboard | `#url-delete-reject`, `#btn-force-delete` | url-delete-reject.php; url-details.php 2108-2400; class-ajax.php 446-489 |
+| X9 | **A deleted record's link added again:** the add lookup matches records of **any** status; a match that is not published is **published again** and opened as a new link would be (no "already exists" warning, which is set only for a published match). **On save** (S11) the match is published again and the save refused with "This link is already exists. Please try again with a different URL." | `is_lasso_url_exist`, `wp_update_post( publish )` | class-lasso-affiliate-link.php 763-810, 877-920, 1261-1290 |
+| X10 | **Retired records** (the repoint, S10) get their own status, `lasso_delete` (registered, not public), **not the trash**. The pointer is followed whatever the status, up to 50 hops, stopping at a target that is not a Lasso post. The add lookup matches retired records too and publishes them again **with the pointer kept** | `lasso_custom_post_status`, `resolve_repointed_lasso_id` | class-hook.php 262-276; class-lasso-repoint-merge.php 29-55, 180-195 |
+| X11 | **WordPress empties the trash** daily (`wp_scheduled_delete`) for posts that `wp_trash_post()` marked more than 30 days ago (`_wp_trash_meta_time`). Lasso's bulk delete uses `wp_update_post`, which sets no such mark, so its trashed records stay until re-added or deleted | | WordPress core |
+
+### Decisions
+
+Made by the user, 2026-11-13 (both reverse or drop something, so asked):
+
+- **D33 Lasso's split** (the user: "Lasso's split"): the product page's Delete is **permanent** (X3), the Dashboard's
+  bulk Delete moves to the **trash** (X7). This replaces the old Task 17 text's trash for every delete.
+- **D34 In use: block only** (the user: "Block only"): Task 36 shows "Hold Up" with Lasso's heading and the posts
+  that use the product, and only **Keep This Link**; the routes refuse (409 `affibloom_in_use`). Lasso's force delete
+  (X8) is not built, since it rewrites posts (deviation 52's rule: nothing Affibloom builds edits post content).
+
+Settled by Claude from Lasso and the records (none drops anything Lasso does or reverses a user decision):
+
+- **D35 Before Task 36 nothing is known to be in use,** so every product can be deleted; the bulk route already takes
+  the whole selection or nothing (X7's rule), so Task 36 adds only the check, its words and the disabled boxes.
+- **D36 The selection is the page's (X6).** 13C's "Select all `<n>`" across pages is not Lasso's and would send a
+  delete to products the editor cannot see; 17B makes it Lasso's: Select All ticks the page, a list load keeps only
+  the IDs on the new page, and the count reads "1 link selected" / "N links selected".
+- **D37 Messages:** after the product page's delete the Dashboard says "**Product deleted.**" (the old Task 17 text;
+  Lasso says nothing after its redirect); after a bulk delete "**1 product deleted.**" / "**N products deleted.**".
+  A failure shows the failure toast with the server's message, else "Could not delete. Please try again.". Lasso's
+  "Invalid Lasso Post ID!" (X7) is not copied: Task 36's refusal says "You can't delete a URL if it has active links
+  or displays." in the dialog.
+- **D38 A confirmed delete quiets the product page's leave guard** (15D): the editor has just agreed to lose the
+  product, so the browser's question after it (X4) is not copied. **The bulk Delete goes through 16B's guard**: the
+  reload after it would wipe an open quick edit, which Lasso guards for Add to Group but not for Delete.
+- **D39 The routes:** `DELETE /products/{id}` (17A) answers 404 for anything that is not a published product and 200
+  `{ id, deleted: true }`; `DELETE /products` with `ids` (17B, 1-50: the largest page) skips IDs that are not
+  published products, as Lasso skips records it cannot edit, and answers 200 `{ deleted: [ids] }`.
+- **D40 Bulk trash is Lasso's (X7, X11):** the status changes through `wp_update_post`, so WordPress's 30-day
+  emptying never removes a trashed product and re-adding its link brings it back with its data (D42).
+- **D41 Retired products get their own status, `affibloom_retired`** (Lasso's `lasso_delete`, X10), instead of 15C's
+  trash: `wp_trash_post()` marks a post for the 30-day emptying (X11), which would delete a retired product and with
+  it the pointer every old box follows. No upgrade step: nothing has shipped, and this copy's four are test products
+  that the next Local reset removes.
+- **D42 A deleted product's link added again (X9):** a trashed or retired match is published again and opened as a
+  new product would be (non-Amazon: its page; Amazon: the Dashboard), keeping its stored data; bulk add counts it as
+  added. **A retired product loses its pointer** when it comes back: Lasso keeps it, so every box of the revived
+  record keeps showing the other product and the revived one can never be shown. **On save** (S11, D15, D30) the
+  match is published again and the save refused under Primary Destination URL with "This link already exists.
+  Please try again with a different URL." (Lasso's sentence, its grammar fixed); Lasso's writing of that record's
+  data into this form is not copied (D15).
+- **D43 Owned elsewhere:** the box after a permanent delete follows the pointer chain and stops at the last product
+  that exists (Lasso's rule; Task 18's note); the Tables area removes a deleted product from its tables (Lasso's
+  `lasso_delete_post_in_table`); Groups go with the post (WordPress removes its terms); the migration maps Lasso's
+  `trash` to the trash and `lasso_delete` to `affibloom_retired` (Task 26's note); the content link index drops a
+  deleted product's rows (Task 35).

@@ -196,7 +196,7 @@ decision the user has made.
 | The summary stats as filter tabs (broken / out of stock / opportunities) | Broken: Task 31. The others with their subsystems |
 | The filters panel: Group, Link type, Placements, Comparison table | One task after Task 36, with whichever filters exist by then (Group needs Groups, Placements needs Task 36, Comparison table needs Tables; Link type could be built today) |
 | Saved views (per user, up to 30, named, restorable) | The same task as the filters panel: a saved view is a saved set of filters |
-| Bulk selection, Select All, Clear Selection, Delete, Add to Group | After Tasks 17 and 36 (the in-use rule disables a row's checkbox); Add to Group with Groups |
+| Bulk selection, Select All, Clear Selection, Delete, Add to Group | After Tasks 17 and 36 (the in-use rule disables a row's checkbox); Add to Group with Groups. **Task 17 sweep (F1 D36):** Lasso's selection is the page's (Select All ticks the page; a list load drops rows not drawn; "N links selected"); 13C's across-pages Select All is corrected in 17B |
 | Export CSV (WP All Import), on the broken / out-of-stock tabs only | Task 38, which already builds a CSV export; it needs Task 31's data |
 | `Ctrl+Shift+L` command palette | A small task in Phase 8 |
 | "Learn" link to Lasso's support site | Not rebuilt: it points at Lasso's own documentation |
