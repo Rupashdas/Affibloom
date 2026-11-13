@@ -20,6 +20,8 @@ for Tasks 14F-14G. Register item **U11** (an addition: Lasso has no picker).
   unchanged unless the editor picks another icon.
 - **AC5** "No icon" stores the text alone.
 - **AC6** Without JavaScript the field is today's plain text field and still saves.
+- **AC7** An icon whose image file is not on the site shows "Image missing: <link>" in the icon list and a warning
+  (with "Image missing") in the pickers, never a broken picture (D4).
 
 ## 2. Evidence
 
@@ -76,5 +78,13 @@ for Tasks 14F-14G. Register item **U11** (an addition: Lasso has no picker).
   imported and their CSS left in place; a new icon needs no CSS.
 - **D2 (the user, 2026-11-13): broken classes are flagged, not fixed.** The picker shows "Unknown icon: <class>"; the
   data and the boxes stay as they are. The migration (Task 26) copies the texts unchanged.
+- **D4 (the user, 2026-11-13: "two icons are shows broken. full review and youtube. fix it."; chose "Fix CSS + flag").**
+  The site's CSS pointed `full-review-icon` and `youtube-icon` at `/wp-content/uploads/2023/04/…svg`, files that were
+  never there (404 on production too); no text or post used either class. On Local the two links were repointed:
+  Full review to the existing `2023/05/full-review-icon.svg` (attachment 9501), YouTube to a new white play glyph,
+  `2026/11/youtube-icon.svg` (attachment 15696), and the stored set re-imported. **Production's Additional CSS still
+  needs the same two changes and the SVG uploaded** (the user's step; production is read only until Task 42). Affibloom
+  now checks each image's file (the attachment's, or the uploads file its link names) and flags a missing one (AC7);
+  a link outside uploads is not flagged, since Affibloom cannot tell.
 - **D3 (Claude): the picker enhances the existing field.** The posted value is still the field's text (composed by the
   script), so every cleaner, route and test that reads it today is unchanged (Task 6 decision 5).

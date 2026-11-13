@@ -114,6 +114,31 @@ test.describe( 'F28 Button icons', () => {
 		await expect( picker ).toHaveAccessibleName( 'Icon for Button Text: No icon' );
 	} );
 
+	// D4: the site's CSS once pointed two icons at files that were never uploaded; a missing image is flagged.
+	test( 'AC7 an icon whose image is not on the site shows "Image missing", not a broken picture', async ( { page } ) => {
+		const restore = keep( 'affibloom_icons' );
+		try {
+			const icons = JSON.parse( wp( 'option', 'get', 'affibloom_icons', '--format=json' ) );
+			const url = '/wp-content/uploads/2001/01/f28-missing-icon.svg';
+			icons.push( { class: 'f28-missing-icon', name: 'F28 missing', url, attachment: 0, imported: true } );
+			wp( 'option', 'update', 'affibloom_icons', JSON.stringify( icons ), '--format=json' );
+
+			await page.goto( `${ displayTab }&panel=colors` );
+			const row = page.locator( '.affibloom-icon-set [data-icon-class="f28-missing-icon"]' );
+			await expect( row ).toContainText( `Image missing: ${ url }` );
+			await expect( row.locator( 'img' ) ).toHaveCount( 0 );
+			// Icons whose image is there keep their picture.
+			await expect( page.locator( '.affibloom-icon-set [data-icon-class="amazon-icon"] img' ) ).toHaveCount( 1 );
+
+			await page.getByRole( 'button', { name: /^Icon for Primary button text/ } ).click();
+			const item = page.getByRole( 'menuitemradio', { name: /F28 missing/ } ).first();
+			await expect( item ).toContainText( 'Image missing' );
+			await expect( item.locator( 'img' ) ).toHaveCount( 0 );
+		} finally {
+			restore();
+		}
+	} );
+
 	test.describe( 'without JavaScript', () => {
 		test.use( { javaScriptEnabled: false } );
 

@@ -6,7 +6,7 @@
  * stays `<span class="<class>"></span> <words>`.
  *
  * @package Affibloom
- * @var array{id: string, name: string, label: string, value: string, placeholder: string, help_id: string, text: \Affibloom\Domain\Icons\IconText|null, words_placeholder: string, current: array{icon: \Affibloom\Domain\Icons\Icon, src: string}|null, unknown: string, rows: list<array{icon: \Affibloom\Domain\Icons\Icon, src: string}>} $view
+ * @var array{id: string, name: string, label: string, value: string, placeholder: string, help_id: string, text: \Affibloom\Domain\Icons\IconText|null, words_placeholder: string, current: array{icon: \Affibloom\Domain\Icons\Icon, src: string, missing: bool}|null, unknown: string, rows: list<array{icon: \Affibloom\Domain\Icons\Icon, src: string, missing: bool}>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,7 +32,7 @@ $button_name = __( 'Icon for %1$s: %2$s', 'affibloom' );
 		<button type="button" class="affibloom-icon-field__button" aria-haspopup="menu" aria-expanded="false" aria-controls="<?php echo esc_attr( $menu_id ); ?>"
 			aria-label="<?php echo esc_attr( sprintf( $button_name, $view['label'], $shown ) ); ?>" title="<?php echo esc_attr( $shown ); ?>" hidden>
 			<?php if ( null !== $current ) : ?>
-				<span class="affibloom-icon-set__tile"><img class="affibloom-icon-set__image" src="<?php echo esc_url( $current['src'] ); ?>" alt="" width="20" height="20"></span>
+				<?php $this->render( 'admin/partials/icon-picture', array( 'row' => $current ) ); ?>
 			<?php elseif ( '' !== $view['unknown'] ) : ?>
 				<span class="affibloom-icon-field__glyph affibloom-icon-field__glyph--unknown"><?php $this->render( 'admin/partials/icon', array( 'name' => 'warning' ) ); ?></span>
 			<?php else : ?>
@@ -47,8 +47,15 @@ $button_name = __( 'Icon for %1$s: %2$s', 'affibloom' );
 			<?php foreach ( $view['rows'] as $row ) : ?>
 				<button type="button" class="affibloom-menu__item" role="menuitemradio" tabindex="-1"
 					aria-checked="<?php echo $row['icon']->css_class === $css_class ? 'true' : 'false'; ?>" data-icon="<?php echo esc_attr( $row['icon']->css_class ); ?>">
-					<span class="affibloom-icon-set__tile"><img class="affibloom-icon-set__image" src="<?php echo esc_url( $row['src'] ); ?>" alt="" width="20" height="20" loading="lazy"></span>
-					<span class="affibloom-menu__title"><?php echo esc_html( $row['icon']->name ); ?></span>
+					<?php $this->render( 'admin/partials/icon-picture', array( 'row' => $row ) ); ?>
+					<?php if ( $row['missing'] ) : ?>
+						<span class="affibloom-menu__text">
+							<span class="affibloom-menu__title"><?php echo esc_html( $row['icon']->name ); ?></span>
+							<span class="affibloom-menu__desc"><?php esc_html_e( 'Image missing', 'affibloom' ); ?></span>
+						</span>
+					<?php else : ?>
+						<span class="affibloom-menu__title"><?php echo esc_html( $row['icon']->name ); ?></span>
+					<?php endif; ?>
 				</button>
 			<?php endforeach; ?>
 			<?php if ( '' !== $view['unknown'] ) : ?>

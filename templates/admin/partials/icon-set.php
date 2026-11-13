@@ -6,7 +6,7 @@
  * refused with the reason.
  *
  * @package Affibloom
- * @var array{icons: list<array{icon: \Affibloom\Domain\Icons\Icon, src: string}>} $view
+ * @var array{icons: list<array{icon: \Affibloom\Domain\Icons\Icon, src: string, missing: bool}>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -25,11 +25,18 @@ $admin_post = admin_url( 'admin-post.php' );
 		<?php foreach ( $view['icons'] as $row ) : ?>
 			<?php $icon = $row['icon']; ?>
 			<li class="affibloom-icon-set__item" data-icon-class="<?php echo esc_attr( $icon->css_class ); ?>">
-				<?php // On a dark tile, as on a button: the site's icons are white glyphs. ?>
-				<span class="affibloom-icon-set__tile"><img class="affibloom-icon-set__image" src="<?php echo esc_url( $row['src'] ); ?>" alt="" width="20" height="20" loading="lazy"></span>
+				<?php $this->render( 'admin/partials/icon-picture', array( 'row' => $row ) ); ?>
 				<span class="affibloom-icon-set__text">
 					<span class="affibloom-icon-set__name"><?php echo esc_html( $icon->name ); ?></span>
 					<code class="affibloom-icon-set__class"><?php echo esc_html( $icon->css_class ); ?></code>
+					<?php if ( $row['missing'] ) : ?>
+						<span class="affibloom-icon-set__missing">
+							<?php
+							/* translators: %s: the image's link, e.g. /wp-content/uploads/2023/04/youtube-icon.svg. */
+							echo esc_html( sprintf( __( 'Image missing: %s', 'affibloom' ), $icon->url ) );
+							?>
+						</span>
+					<?php endif; ?>
 				</span>
 				<?php if ( $icon->imported ) : ?>
 					<span class="affibloom-icon-set__source"><?php esc_html_e( "From your site's CSS", 'affibloom' ); ?></span>

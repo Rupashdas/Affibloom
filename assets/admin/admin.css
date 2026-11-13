@@ -1396,9 +1396,12 @@
 	border-radius: var(--affibloom-radius-nav);
 	background: var(--affibloom-ink-900);
 }
+/* An icon whose image file is not on the site (F28 D4): a warning instead of a broken picture. */
+.affibloom-icon-set__tile--missing { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
 .affibloom-icon-set__image { width: 20px; height: 20px; object-fit: contain; }
 .affibloom-icon-set__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .affibloom-icon-set__name { font-weight: 600; }
+.affibloom-icon-set__missing { color: var(--affibloom-warning-700); font-size: 13px; overflow-wrap: anywhere; }
 .affibloom-admin .affibloom-icon-set__class { align-self: flex-start; padding: 1px 6px; border-radius: 4px; background: var(--affibloom-subtle); color: var(--affibloom-ink-600); font-size: 12px; overflow-wrap: anywhere; }
 .affibloom-icon-set__source { flex: 0 0 auto; margin-left: auto; color: var(--affibloom-ink-600); font-size: 13px; text-align: right; }
 .affibloom-icon-set__remove { margin-left: auto; }
@@ -1669,6 +1672,9 @@
 	color: var(--affibloom-toast-tick);
 }
 .affibloom-toast__icon .affibloom-icon { width: 16px; height: 16px; stroke-width: 2.2; }
+/* The failure toast (Task 15A): the same card, a white cross on danger-700 (6.6:1). */
+.affibloom-toast--error .affibloom-toast__icon { background: var(--affibloom-danger-700); color: var(--affibloom-white); }
+.affibloom-toast__icon[hidden] { display: none; }
 @keyframes affibloom-toast {
 	0% { opacity: 0; transform: translateY(8px); }
 	5%, 90% { opacity: 1; transform: none; }
@@ -1771,6 +1777,12 @@
 	background: linear-gradient(90deg, var(--affibloom-brand-500), var(--affibloom-brand-600));
 	transition: width 300ms ease;
 }
+
+/* "Updating Your Site" (Task 15A): Lasso's static dialog, a title, the bar and one line; no head, foot or close. */
+.affibloom-save-modal .affibloom-modal__panel { max-width: 440px; }
+.affibloom-save-modal .affibloom-modal__panel:focus { outline: none; }
+.affibloom-save-modal__body { text-align: center; }
+.affibloom-save-modal__body .affibloom-progress { margin: 16px 0; }
 
 /* The page behind an open modal does not scroll. */
 body.affibloom-has-modal { overflow: hidden; }
