@@ -27,6 +27,9 @@ test.describe( 'F2 Amazon links', () => {
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
 		await dialog.getByLabel( 'URL' ).fill( input );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
+		// The add ends with a redirect to the Dashboard (a toast notice until Task 14). Wait for that page to load
+		// under the test's own timeout: a toast check's 5 s can run out while a slow Local copy is still loading it.
+		await page.waitForURL( /affibloom_notice=/ );
 	}
 
 	/** IDs of the products stored with this ASIN. */
