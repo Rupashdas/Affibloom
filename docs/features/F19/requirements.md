@@ -149,16 +149,19 @@ decision the user has made.
 - **D7 — The placeholder counts every product, always.** Lasso rewrites it with the filtered total after a search,
   which makes the box claim the site has 7 links. Affibloom leaves `Search all <n> links…` at the unfiltered count.
 
-### Open for the user (gate 4)
+### Answered by the user, 2026-11-13 (gate 4)
 
-- **Q1 — The screen's structure.** Deviation 25 settled the Display screen (Lasso's structure, Affibloom's colours
-  and type) and left the other screens open. Recommendation: keep Aurora's shell that Tasks 8 and 9A already built
-  (navy header, gradient band with the title and subtitle, one centred column, cards), and take **Lasso's
-  arrangement inside it** — the search on the toolbar row above the table, the table in a card, and the pager in
-  that card's footer with the per-page select and range on the left and the page links on the right, exactly as
-  Lasso 370 does it.
-- **Q2 — The Dashboard capabilities that no task owns.** Section 8 lists eight. Each needs "build it, with the
-  subsystem named" or "drop it", explicitly.
+- **Q1 — The screen's structure: Aurora's shell, Lasso's arrangement.** Deviation 25 settled the Display screen
+  and left the other screens open; the user chose, for the Dashboard: keep the shell Tasks 8 and 9A built (navy
+  header, gradient band with the title and subtitle, one centred column, cards), and take **Lasso's arrangement
+  inside it** — the search on the toolbar row above the table, the table in a card, and the pager in that card's
+  footer with the per-page select and the range on the left and the page links on the right, as Lasso 370 has it.
+- **Q2 — Every capability is scheduled with the data it needs; nothing is dropped.** The user: *"Schedule each
+  with its data: dont drop the shortcode. we are going to keep the shortcode functionalities as well."* So
+  **Affibloom has a shortcode of its own**, as well as the `[lasso]` compatibility handler that ADR-3 already
+  plans, and the Dashboard row keeps its **Shortcode** button, which copies it. That shortcode needs a task of
+  its own in **Phase 3**, after Task 18 renders the box; the row's button then comes with the Actions cell
+  (Task 14). Section 8 carries the schedule.
 
 ## 7. Where the plan and the earlier records were wrong
 
@@ -185,17 +188,17 @@ decision the user has made.
 | Image column and the thumbnail | Task 14 (the product's image field) |
 | Link Name over the destination link | **Task 13A** |
 | Actions → `Edit` (quick edit in the row) | Task 16 |
-| Actions → `Shortcode` (copies `[lasso …]`) | **Q2**: Affibloom has no shortcode of its own (boxes are placed with the block); drop or build |
+| Actions → `Shortcode` (copies the shortcode) | Task 14 (the Actions cell), once Affibloom's own shortcode exists — a new Phase 3 task after Task 18 (the user, 2026-11-13: the shortcode stays) |
 | Alert column, its icons and its sort | Task 31 (broken links). Out-of-stock needs Amazon product data (C1); opportunities is its own subsystem |
 | Locations column, its count and its sort | Task 36 |
 | Clicks column and its sort | Task 34 |
 | Groups column | Left out by the Task 6 decision (1 term, 0 assignments). The Groups subsystem may bring it back |
 | The summary stats as filter tabs (broken / out of stock / opportunities) | Broken: Task 31. The others with their subsystems |
-| The filters panel: Group, Link type, Placements, Comparison table | **Q2**. Group needs Groups; Placements needs Task 36; Comparison table needs Tables; only Link type (Amazon / non-Amazon) could be built today |
-| Saved views (per user, up to 30, named, restorable) | **Q2**: 0 saved views exist on the live site |
-| Bulk selection, Select All, Clear Selection, Delete, Add to Group | **Q2**: bulk delete needs Task 17 and Task 36's in-use rule; Add to Group needs Groups |
-| Export CSV (WP All Import), on the broken / out-of-stock tabs only | **Q2**: a third-party integration, and it needs Task 31 |
-| `Ctrl+Shift+L` command palette | **Q2**: the roadmap's U-register treated the shortcut as not built |
+| The filters panel: Group, Link type, Placements, Comparison table | One task after Task 36, with whichever filters exist by then (Group needs Groups, Placements needs Task 36, Comparison table needs Tables; Link type could be built today) |
+| Saved views (per user, up to 30, named, restorable) | The same task as the filters panel: a saved view is a saved set of filters |
+| Bulk selection, Select All, Clear Selection, Delete, Add to Group | After Tasks 17 and 36 (the in-use rule disables a row's checkbox); Add to Group with Groups |
+| Export CSV (WP All Import), on the broken / out-of-stock tabs only | Task 38, which already builds a CSV export; it needs Task 31's data |
+| `Ctrl+Shift+L` command palette | A small task in Phase 8 |
 | "Learn" link to Lasso's support site | Not rebuilt: it points at Lasso's own documentation |
 | Bulk Amazon sync / auto-monetize banners | Lasso cloud and auto-monetization; their own subsystems |
 
