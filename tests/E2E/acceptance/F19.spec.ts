@@ -168,6 +168,34 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( page.locator( '.affibloom-selection' ) ).toContainText( '1 selected' );
 	} );
 
+	test( 'AC12 search, pages and page size load without a page reload, and Back restores the list', async ( { page } ) => {
+		atLeast( 26 );
+		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10' );
+		// A real navigation would wipe this; a list loaded in place keeps it.
+		await page.evaluate( () => ( ( window as unknown as { f19Marker: string } ).f19Marker = 'same page' ) );
+		const marker = () => page.evaluate( () => ( window as unknown as { f19Marker?: string } ).f19Marker );
+
+		await page.locator( '.affibloom-pagination a.page-numbers', { hasText: /^2$/ } ).click();
+		await expect( range( page ) ).toContainText( '11-20' );
+		await expect( page ).toHaveURL( /paged=2/ );
+
+		await page.getByLabel( 'Links per page' ).selectOption( '25' );
+		await expect( rows( page ) ).toHaveCount( 25 );
+		await expect( page ).toHaveURL( /per_page=25/ );
+
+		const name = unique( 'F19 AC12' );
+		const id = createProduct( { name } );
+		await search( page, name );
+		await expect( rows( page ) ).toHaveCount( 1 );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+
+		expect( await marker() ).toBe( 'same page' );
+
+		await page.goBack();
+		await expect( rows( page ) ).toHaveCount( 25 );
+		await expect( page.getByLabel( 'Search' ) ).toHaveValue( '' );
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )

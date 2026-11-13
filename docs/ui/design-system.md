@@ -93,7 +93,8 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
   band: inactive on-band text on `rgba(255,255,255,.12)`, active white segment with ink-900 text).
 - **One centred column** (the user, 2026-11-13: "centred, like Lasso"): the band's content and the body share a column
   of at most 1080px (`--affibloom-content-width`), centred in the content area, with 32px gutters (20px from 960px
-  down). The band's gradient still runs the full width; the header stays full width with the logo on the left.
+  down). **The Dashboard is wider, 1320px** (`.affibloom-page--wide`; the user, 2026-11-13): its table has eight
+  columns, and 1320px is Lasso's own container width on large screens. Settings keep 1080px. The band's gradient still runs the full width; the header stays full width with the logo on the left.
 - **Body:** the first row of tiles or the first card overlaps the band by 48px, so content floats over it. Cards fill
   the column's width (forms included).
 - **Dashboard:** a row of overview tiles (U9), then the products card. Each tile appears with the task that provides

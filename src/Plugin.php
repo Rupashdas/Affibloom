@@ -32,6 +32,7 @@ use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Rest\BulkAddController;
+use Affibloom\Interface\Rest\DashboardController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Template;
@@ -103,11 +104,12 @@ final class Plugin {
 		$notice   = new Notice();
 		$products = new ProductService( new PostTypeProductRepository(), new LinkResolver( new WpPageFetcher() ), $this->settings_repository() );
 		$bulk     = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
+		$per_page = new PerPage();
 
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
-				new DashboardScreen( $this->template(), $notice, $products, new PerPage() ),
+				new DashboardScreen( $this->template(), $notice, $products, $per_page ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -120,6 +122,7 @@ final class Plugin {
 			new DisplayController( $display, $settings ),
 			new ProductsController( $products, new ProductResource() ),
 			new BulkAddController( $bulk ),
+			new DashboardController( $products, $per_page, $this->template() ),
 			new BulkAddCron( $bulk ),
 		);
 	}

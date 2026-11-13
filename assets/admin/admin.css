@@ -205,6 +205,38 @@
 	line-height: 20px;
 }
 
+/* The list while it loads (Task 13D): the card steps back and a thin bar runs along its top. */
+.affibloom-list { position: relative; }
+.affibloom-list .affibloom-card { transition: opacity var(--affibloom-ease); }
+.affibloom-list.is-loading .affibloom-card { opacity: 0.55; }
+.affibloom-list.is-loading::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	right: 16px;
+	left: 16px;
+	height: 3px;
+	border-radius: var(--affibloom-radius-full);
+	background: linear-gradient(90deg, transparent, var(--affibloom-brand-500), transparent);
+	background-size: 40% 100%;
+	background-repeat: no-repeat;
+	animation: affibloom-loading 900ms linear infinite;
+}
+@keyframes affibloom-loading {
+	from { background-position: -40% 0; }
+	to { background-position: 140% 0; }
+}
+.affibloom-list-error .affibloom-button { margin-top: 12px; }
+.affibloom-list .affibloom-card:focus { outline: none; }
+
+/*
+ * A wide page: the Dashboard's eight columns get 1320px, Lasso's own container width on large screens (Bootstrap's
+ * .container at 1400px and up). The band and the body read the same token, so the title stays over the table.
+ * Settings keep 1080px, where a wider row would carry a switch far from its label.
+ */
+.affibloom-page--wide { --affibloom-content-width: 1320px; }
+
 /* A band with something on its right, as the Dashboard's search beside its title (Lasso's title row). */
 .affibloom-band__inner--split {
 	display: flex;
@@ -214,7 +246,22 @@
 	gap: 16px 32px;
 }
 .affibloom-band__text { min-width: 0; }
-.affibloom-band__search { flex: 0 1 380px; min-width: 240px; }
+.affibloom-band__search { position: relative; flex: 0 1 380px; min-width: 240px; }
+/* Lasso's shortcut hint, inside the search box on its right. */
+.affibloom-search-kbd {
+	position: absolute;
+	top: 50%;
+	right: 12px;
+	padding: 2px 6px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: 6px;
+	background: var(--affibloom-subtle);
+	color: var(--affibloom-ink-600);
+	font: 500 11px/16px var(--affibloom-font);
+	pointer-events: none;
+	transform: translateY(-50%);
+}
+.affibloom-admin .affibloom-band__search .affibloom-search { padding-right: 110px; }
 /* On the gradient the search is a white field with no border, as the header's white button is. */
 .affibloom-admin .affibloom-band__search .affibloom-search {
 	max-width: none;
@@ -1304,6 +1351,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-grid { grid-template-columns: 1fr; }
 	.affibloom-modal__foot .affibloom-button { width: 100%; }
 	.affibloom-pager { flex-direction: column; align-items: flex-start; }
+	.affibloom-search-kbd { display: none; }
+	.affibloom-admin .affibloom-band__search .affibloom-search { padding-right: 16px; }
 	/* Two tiles a row on a phone, so the five do not fill the first screen on their own. */
 	.affibloom-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 	.affibloom-tile { padding: 12px 14px; }
@@ -1314,6 +1363,7 @@ body.affibloom-has-modal { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.affibloom-list.is-loading::before { animation: none; background-size: 100% 100%; opacity: 0.6; }
 	.affibloom-admin *,
 	.affibloom-admin *::after { transition: none; }
 	.affibloom-toast { animation: none; }

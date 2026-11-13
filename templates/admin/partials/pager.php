@@ -5,7 +5,7 @@
  * screen needs no JavaScript; without JavaScript its Apply button submits it.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +16,9 @@ use Affibloom\Interface\Admin\AdminMenu;
 $products = $view['products'];
 $links    = paginate_links(
 	array(
-		'base'      => add_query_arg( 'paged', '%#%' ),
+		// The list's own address (DashboardUrl), never the current request's: inside the REST route of Task 13D that
+		// would be the API's.
+		'base'      => add_query_arg( 'paged', '%#%', $view['url'] ),
 		'format'    => '',
 		'current'   => $products->current(),
 		'total'     => $products->pages(),
@@ -34,7 +36,7 @@ $links    = paginate_links(
 			<input type="hidden" name="s" value="<?php echo esc_attr( $view['term'] ); ?>">
 		<?php endif; ?>
 		<label class="screen-reader-text" for="affibloom-per-page"><?php esc_html_e( 'Links per page', 'affibloom' ); ?></label>
-		<select id="affibloom-per-page" class="affibloom-select" name="per_page" onchange="this.form.submit()">
+		<select id="affibloom-per-page" class="affibloom-select" name="per_page">
 			<?php foreach ( ProductService::PER_PAGE_OPTIONS as $option ) : ?>
 				<option value="<?php echo esc_attr( (string) $option ); ?>" <?php selected( $option, $products->per_page ); ?>>
 					<?php echo esc_html( number_format_i18n( $option ) ); ?>

@@ -7,7 +7,7 @@
  * and data-range (what the pager says, announced after a load).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -73,6 +73,7 @@ $columns   = array(
 			array(
 				'products' => $products,
 				'term'     => $view['term'],
+				'url'      => $view['url'],
 			)
 		);
 		?>

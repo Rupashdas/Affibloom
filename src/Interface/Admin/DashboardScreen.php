@@ -51,6 +51,7 @@ final class DashboardScreen {
 			array(
 				'products'    => $this->products->list( $term, $page, $per_page ),
 				'term'        => $term->text(),
+				'url'         => DashboardUrl::to( $term->text(), 1, $per_page ),
 				'library'     => $this->products->count(),
 				'notice'      => $this->notice->message(),
 				'notice_kind' => $this->notice->kind(),

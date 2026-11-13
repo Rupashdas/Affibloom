@@ -6,7 +6,7 @@
  * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, library: int, notice: string, notice_kind: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, library: int, notice: string, notice_kind: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,7 +23,8 @@ $placeholder = sprintf(
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
 
-	<div class="affibloom-page">
+	<?php // 1320px, Lasso's container width on large screens (the user, 2026-11-13); Settings keep 1080px. ?>
+	<div class="affibloom-page affibloom-page--wide">
 		<div class="affibloom-band">
 			<div class="affibloom-band__inner affibloom-band__inner--split">
 				<div class="affibloom-band__text">
@@ -36,7 +37,10 @@ $placeholder = sprintf(
 					<input type="hidden" name="per_page" value="<?php echo esc_attr( (string) $products->per_page ); ?>">
 					<label class="screen-reader-text" for="affibloom-search"><?php esc_html_e( 'Search', 'affibloom' ); ?></label>
 					<input type="search" id="affibloom-search" class="affibloom-input affibloom-search" name="s"
-						value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+						value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"
+						aria-describedby="affibloom-search-kbd">
+					<?php // Lasso's hint for its shortcut; the script shows ⌘⇧L on a Mac. ?>
+					<kbd id="affibloom-search-kbd" class="affibloom-search-kbd">Ctrl+Shift+L</kbd>
 				</form>
 			</div>
 		</div>
@@ -59,12 +63,21 @@ $placeholder = sprintf(
 					array(
 						'products' => $products,
 						'term'     => $view['term'],
+						'url'      => $view['url'],
 					)
 				);
 				?>
 			</div>
 
 			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
+			<p id="affibloom-list-status" class="screen-reader-text" role="status" aria-live="polite"></p>
+			<template id="affibloom-list-error">
+				<div class="affibloom-card affibloom-empty affibloom-list-error">
+					<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'refresh' ) ); ?></span>
+					<p class="affibloom-empty__message"><?php esc_html_e( 'The list could not be loaded.', 'affibloom' ); ?></p>
+					<button type="button" class="affibloom-button affibloom-button--secondary" data-retry><?php esc_html_e( 'Try again', 'affibloom' ); ?></button>
+				</div>
+			</template>
 		</div>
 	</div>
 	<?php

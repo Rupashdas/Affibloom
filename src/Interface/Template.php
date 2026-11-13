@@ -37,4 +37,23 @@ final class Template {
 		}
 		include $file;
 	}
+
+	/**
+	 * A template's output as a string, for a REST response that carries markup (the Dashboard's list, Task 13D),
+	 * so the page and the response share one template.
+	 *
+	 * @param string               $name Path below templates/, without ".php".
+	 * @param array<string, mixed> $view Values the template prints.
+	 * @throws InvalidArgumentException When the template does not exist.
+	 */
+	public function fetch( string $name, array $view = array() ): string {
+		ob_start();
+		try {
+			$this->render( $name, $view );
+		} finally {
+			$html = (string) ob_get_clean();
+		}
+
+		return $html;
+	}
 }
