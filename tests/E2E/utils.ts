@@ -1,9 +1,32 @@
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { BrowserContext } from '@playwright/test';
 
-// Git Bash runs tools/local-wp.sh (decision D1 = b: WP-CLI on the Local site, not wp-env).
-// If `bash` on PATH is WSL's, set AFFIBLOOM_BASH to Git Bash's bash.exe.
-const bash = process.env.AFFIBLOOM_BASH ?? 'bash';
+/**
+ * The Git Bash that runs tools/local-wp.sh (decision D1 = b: WP-CLI on the Local site, not wp-env).
+ * AFFIBLOOM_BASH wins when set. On Windows, Git Bash is looked for where its installer puts it, because
+ * PowerShell usually does not have it on PATH (environment.md, "bash in the user's PowerShell") and a `bash`
+ * that is on PATH may be WSL's. Elsewhere, `bash` on PATH.
+ */
+function findBash(): string {
+	if ( process.env.AFFIBLOOM_BASH ) {
+		return process.env.AFFIBLOOM_BASH;
+	}
+	if ( 'win32' === process.platform ) {
+		const roots = [ process.env.ProgramW6432, process.env.ProgramFiles, process.env.LOCALAPPDATA && join( process.env.LOCALAPPDATA, 'Programs' ) ];
+		const found = roots
+			.filter( ( root ): root is string => Boolean( root ) )
+			.map( ( root ) => join( root, 'Git', 'bin', 'bash.exe' ) )
+			.find( ( candidate ) => existsSync( candidate ) );
+		if ( found ) {
+			return found;
+		}
+	}
+	return 'bash';
+}
+
+const bash = findBash();
 
 /**
  * Runs WP-CLI on the Local site and returns its output. Each argument reaches WP-CLI as one argument,
