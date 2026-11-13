@@ -1,6 +1,7 @@
 <?php
 namespace Affibloom\Tests\Unit\Fakes;
 
+use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
@@ -55,6 +56,17 @@ final class InMemoryProductRepository implements ProductRepository {
 			}
 		}
 		return null;
+	}
+
+	/** @var array<int, ProductFields> */
+	public array $fields = array();
+
+	public function fields( int $id ): ?ProductFields {
+		return null === $this->get( $id ) ? null : ( $this->fields[ $id ] ?? ProductFields::from_array( array() ) );
+	}
+
+	public function save_fields( int $id, ProductFields $fields ): void {
+		$this->fields[ $id ] = $fields;
 	}
 
 	public function count(): int {

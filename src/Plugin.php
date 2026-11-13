@@ -11,6 +11,7 @@ namespace Affibloom;
 
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\LinkResolver;
@@ -19,6 +20,7 @@ use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
+use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
 use Affibloom\Infrastructure\WordPress\OptionIconRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
@@ -41,6 +43,8 @@ use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
+use Affibloom\Interface\Rest\FieldsController;
+use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\IconStyles;
@@ -117,12 +121,13 @@ final class Plugin {
 		$views    = new SavedViewService( new UserMetaSavedViewRepository() );
 		$icons    = new IconService( new OptionIconRepository(), new SiteCssIcons() );
 		$choices  = new IconChoices( $icons );
+		$fields   = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository() );
 
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
 				new DashboardScreen( $this->template(), $products, $per_page, $views ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -138,6 +143,8 @@ final class Plugin {
 			new DashboardController( $products, $per_page, $views, $this->template() ),
 			new BulkAddCron( $bulk ),
 			new IconController( $icons ),
+			new FieldsController( $fields ),
+			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),
 		);
 	}

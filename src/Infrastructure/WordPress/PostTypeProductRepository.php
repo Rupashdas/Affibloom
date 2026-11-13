@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Infrastructure\WordPress;
 
 use Affibloom\Domain\Display\Theme;
+use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
@@ -83,6 +84,30 @@ final class PostTypeProductRepository implements ProductRepository {
 		}
 
 		return $this->hydrate( $post );
+	}
+
+	/**
+	 * A published product's custom fields (`_affibloom_fields`), or null.
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function fields( int $id ): ?ProductFields {
+		$post = get_post( $id );
+		if ( ! $post instanceof WP_Post || ProductPostType::NAME !== $post->post_type || 'publish' !== $post->post_status ) {
+			return null;
+		}
+
+		return ProductFields::from_array( (array) get_post_meta( $id, '_affibloom_fields', true ) );
+	}
+
+	/**
+	 * Stores a product's custom fields; the post itself is not touched.
+	 *
+	 * @param int           $id     Post ID.
+	 * @param ProductFields $fields The fields.
+	 */
+	public function save_fields( int $id, ProductFields $fields ): void {
+		update_post_meta( $id, '_affibloom_fields', $fields->to_array() );
 	}
 
 	/**

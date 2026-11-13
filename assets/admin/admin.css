@@ -1506,6 +1506,81 @@
 .affibloom-admin .affibloom-editor .mce-toolbar-grp { border-bottom: 1px solid var(--affibloom-line); }
 .affibloom-product__switches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
 
+/* 7j. Custom fields on the product page (Task 14C): Lasso's dashed box holding the rows, each row a white sub-card
+ * (name, help, switches; the value with Move and Remove beside it), the rating's stars, and the "Add Field" dialog's
+ * underline tabs and library list. */
+.affibloom-product__fields { display: grid; justify-items: stretch; gap: 14px; }
+.affibloom-product__fields > .affibloom-button { justify-self: center; }
+.affibloom-field-list { display: grid; gap: 12px; }
+.affibloom-field-list:empty { display: none; }
+.affibloom-field-row {
+	display: grid;
+	gap: 8px;
+	padding: 14px 16px;
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-segment);
+}
+.affibloom-field-row__head { display: flex; align-items: center; gap: 6px; }
+.affibloom-field-row__switches { display: flex; gap: 8px; margin-left: auto; }
+.affibloom-field-row__value { display: flex; align-items: flex-start; gap: 8px; }
+.affibloom-field-row__value .affibloom-input { flex: 1 1 auto; min-width: 0; }
+.affibloom-admin .affibloom-input--rating { flex: 0 0 76px; }
+.affibloom-field-row__head { flex-wrap: wrap; }
+.affibloom-field-row__actions { display: flex; align-items: center; gap: 4px; }
+/* Lasso's stars: five, filled to the rating. */
+.affibloom-stars {
+	--rating: 0;
+	align-self: center;
+	font-size: 22px;
+	line-height: 1;
+	letter-spacing: 2px;
+}
+.affibloom-stars::before {
+	content: "\2605\2605\2605\2605\2605";
+	background: linear-gradient(90deg, #f5b400 calc(var(--rating) / 5 * 100%), var(--affibloom-control-line) calc(var(--rating) / 5 * 100%));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+.affibloom-icon-button {
+	display: inline-grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-full);
+	background: none;
+	color: var(--affibloom-ink-600);
+	cursor: pointer;
+}
+.affibloom-icon-button--danger:hover,
+.affibloom-icon-button--danger:focus { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+.affibloom-field-modal__manage { position: absolute; top: 30px; right: 60px; display: inline-flex; align-items: center; gap: 6px; color: var(--affibloom-ink-600); font-size: 13px; }
+.affibloom-underline-tabs { display: flex; gap: 20px; margin-bottom: 18px; border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-underline-tabs [role="tab"] {
+	margin-bottom: -1px;
+	padding: 0 0 10px;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background: none;
+	color: var(--affibloom-ink-600);
+	font: 600 14px/20px var(--affibloom-font);
+	cursor: pointer;
+}
+.affibloom-underline-tabs [role="tab"][aria-selected="true"] { border-bottom-color: var(--affibloom-brand-600); color: var(--affibloom-ink-900); }
+.affibloom-field-modal__panel { display: grid; gap: 16px; }
+.affibloom-field-modal__actions { display: flex; justify-content: flex-end; }
+.affibloom-admin .affibloom-field-library { display: grid; gap: 0; max-height: 360px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.affibloom-field-library__item { display: flex; align-items: center; gap: 12px; margin: 0; padding: 10px 0; border-top: 1px solid var(--affibloom-line); }
+.affibloom-field-library__item:first-child { border-top: 0; }
+.affibloom-field-library__text { display: grid; min-width: 0; }
+.affibloom-field-library__meta { color: var(--affibloom-ink-600); font-size: 13px; }
+.affibloom-field-library__item .affibloom-button { margin-left: auto; }
+.affibloom-field-library__empty { padding: 24px 0; color: var(--affibloom-ink-600); text-align: center; }
+.affibloom-field-library__pager { display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--affibloom-ink-600); font-size: 13px; }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;

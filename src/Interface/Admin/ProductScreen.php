@@ -10,10 +10,13 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Theme;
+use Affibloom\Domain\Fields\FieldType;
+use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Interface\Template;
 
@@ -41,6 +44,7 @@ final class ProductScreen {
 	 * @param IconChoices            $icons    The button icons, for the button text pickers (F28, Task 14G).
 	 * @param SettingsService        $settings The site's settings: the disclosure text and Show Price a product falls
 	 *                                         back to (Task 14B).
+	 * @param FieldsService          $fields   The product's custom fields and the field library (Task 14C).
 	 */
 	public function __construct(
 		private Template $template,
@@ -48,6 +52,7 @@ final class ProductScreen {
 		private DisplaySettingsService $display,
 		private IconChoices $icons,
 		private SettingsService $settings,
+		private FieldsService $fields,
 	) {}
 
 	/**
@@ -114,6 +119,10 @@ final class ProductScreen {
 				'own_text'     => $this->product->disclosure === $disclosure ? '' : $this->product->disclosure,
 				'show_price'   => $this->product->show_price ?? $site->bool( 'show_price' ),
 				'amazon_tab'   => admin_url( 'admin.php?page=' . SettingsScreen::SLUG . '&tab=amazon' ),
+				// Custom fields (Task 14C): the product's rows, every definition, and the kinds the dialog offers.
+				'fields'       => $this->fields->fields( (int) $this->product->id ) ?? ProductFields::from_array( array() ),
+				'library'      => $this->fields->all(),
+				'types'        => FieldType::cases(),
 			)
 		);
 	}

@@ -9,7 +9,7 @@
  * tabs (their areas), Save Changes (Task 15) and Delete This Link (Task 17).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -210,13 +210,24 @@ $soon_tabs   = array(
 						</select>
 					</div>
 
-					<?php // Custom fields (Primary Rating, Pros, Cons and the editor's own) arrive with Task 14C. ?>
-					<div class="affibloom-product__fields">
-						<button type="button" class="affibloom-button affibloom-button--secondary" aria-disabled="true" aria-describedby="affibloom-soon-note">
+					<?php // Custom fields (Task 14C): Lasso's dashed box with the product's fields, then "Add Custom Field". ?>
+					<div class="affibloom-product__fields" data-product-fields data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
+						<div class="affibloom-field-list" data-field-list>
+							<?php
+							$this->render(
+								'admin/partials/product-fields',
+								array(
+									'product' => (int) $product->id,
+									'fields'  => $view['fields'],
+									'library' => $view['library'],
+								)
+							);
+							?>
+						</div>
+						<button type="button" class="affibloom-button affibloom-button--primary" data-affibloom-open="affibloom-field-modal" aria-haspopup="dialog">
 							<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
 							<span><?php esc_html_e( 'Add Custom Field', 'affibloom' ); ?></span>
 						</button>
-						<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?>
 					</div>
 				</div>
 
@@ -252,4 +263,5 @@ $soon_tabs   = array(
 			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 		</div>
 	</div>
+	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>
 </div>

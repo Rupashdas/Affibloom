@@ -65,6 +65,8 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
 			wp_enqueue_media();
 			wp_enqueue_script( 'affibloom-product', $this->plugin_url . 'assets/admin/product.js', array( 'affibloom-admin' ), $this->version, true );
+			// Custom fields: the rows and the "Add Field" dialog (Task 14C).
+			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker' ), $this->version, true );
 		}
 

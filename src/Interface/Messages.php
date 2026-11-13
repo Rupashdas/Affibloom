@@ -29,6 +29,10 @@ final class Messages {
 			// Lasso's words for a saved view it refuses (Dashboard_Saved_Views::upsert).
 			'view_name_empty', 'view_name_too_long' => __( 'Invalid view name.', 'affibloom' ),
 			'view_limit'  => __( 'Saved view limit reached.', 'affibloom' ),
+			// Custom fields (Task 14C). Lasso refuses an empty title without a word; these say why.
+			'invalid_name' => __( 'Give the field a title of 1 to 80 characters.', 'affibloom' ),
+			'invalid_type' => __( 'Choose a field type.', 'affibloom' ),
+			'not_found'    => __( 'That field does not exist.', 'affibloom' ),
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}

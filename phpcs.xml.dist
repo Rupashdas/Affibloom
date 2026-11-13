@@ -33,6 +33,12 @@
 		<exclude-pattern>src/Interface/*</exclude-pattern>
 	</rule>
 
+	<!-- An enum's methods run on its case, so $this is valid there (PHP 8.1 enums). PHPCompatibility 9.3.5 predates
+	     enums and reads the method as a plain function. Only the enums whose methods use $this are listed. -->
+	<rule ref="PHPCompatibility.Variables.ForbiddenThisUseContexts.OutsideObjectContext">
+		<exclude-pattern>src/Domain/Fields/FieldType.php</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">

@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Affibloom\Domain\Product;
 
+use Affibloom\Domain\Fields\ProductFields;
+
 /**
  * Where products are kept.
  */
@@ -29,6 +31,22 @@ interface ProductRepository {
 	 * @param int $id Post ID.
 	 */
 	public function get( int $id ): ?Product;
+
+	/**
+	 * A published product's custom fields, or null when there is no such product (Task 14C).
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function fields( int $id ): ?ProductFields;
+
+	/**
+	 * Stores a product's custom fields, as each change is made (F1 requirements B6). It does not count as changing the
+	 * product (Lasso's field saves leave its record alone), so the Dashboard's order is unchanged.
+	 *
+	 * @param int           $id     Post ID.
+	 * @param ProductFields $fields The fields.
+	 */
+	public function save_fields( int $id, ProductFields $fields ): void;
 
 	/**
 	 * The published product whose link has this key, or null. Drafts and trashed products are not matches.

@@ -156,6 +156,58 @@ test.describe( 'F1 Product library', () => {
 		await expect( row.locator( '.affibloom-col-image a' ) ).toHaveAttribute( 'href', target );
 	} );
 
+	// Task 14C: Lasso's custom fields. Every change is stored as it is made (requirements B6), so the test waits for the
+	// route's answer before it reloads.
+	test( 'AC10 a field is added from the library or created, edited, kept after a reload, and removed after a question', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F1 AC10' ) } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		const saved = () => page.waitForResponse( ( r ) => /affibloom\/v1\/products\/\d+\/fields/.test( r.url() ) && r.ok() );
+
+		await page.getByRole( 'button', { name: 'Add Custom Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByRole( 'tab', { name: 'Add from library' } ).click();
+		await Promise.all( [ saved(), dialog.getByRole( 'button', { name: 'Add Primary Rating' } ).click() ] );
+
+		// Lasso's rating starts at 3.5, visible, without its name.
+		const rating = page.locator( '[data-field-row][data-field-id="1"]' );
+		await expect( rating.getByLabel( 'Primary Rating', { exact: true } ) ).toHaveValue( '3.5' );
+		await rating.getByLabel( 'Primary Rating', { exact: true } ).fill( '4.5' );
+		await Promise.all( [ saved(), rating.getByLabel( 'Primary Rating', { exact: true } ).blur() ] );
+		await Promise.all( [ saved(), rating.getByRole( 'switch', { name: 'Show field name in your display.' } ).check() ] );
+
+		// A field of the editor's own: created, then added from the library, as Lasso's dialog does it.
+		const title = unique( 'F1 AC10 Sizes' );
+		await page.getByRole( 'button', { name: 'Add Custom Field' } ).click();
+		await dialog.getByRole( 'tab', { name: 'Create new' } ).click();
+		await dialog.getByLabel( 'Field Title' ).fill( title );
+		await dialog.getByLabel( 'Field Type' ).selectOption( { label: 'Bulleted List' } );
+		await dialog.getByLabel( 'Description', { exact: true } ).fill( 'One size per line.' );
+		await dialog.getByRole( 'button', { name: 'Create Field' } ).click();
+		await expect( dialog.getByRole( 'tab', { name: 'Add from library' } ) ).toHaveAttribute( 'aria-selected', 'true' );
+		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( title );
+		await Promise.all( [ saved(), dialog.getByRole( 'button', { name: `Add ${ title }` } ).click() ] );
+		const own = page.locator( '[data-field-row]' ).filter( { hasText: title } );
+		await own.getByLabel( title, { exact: true } ).fill( '38\n39' );
+		await Promise.all( [ saved(), own.getByLabel( title, { exact: true } ).blur() ] );
+
+		await page.reload();
+		await expect( rating.getByLabel( 'Primary Rating', { exact: true } ) ).toHaveValue( '4.5' );
+		await expect( rating.getByRole( 'switch', { name: 'Show field name in your display.' } ) ).toBeChecked();
+		await expect( rating.getByRole( 'switch', { name: 'Show this field in your display by default.' } ) ).toBeChecked();
+		await expect( own.getByLabel( title, { exact: true } ) ).toHaveValue( '38\n39' );
+		// Primary Rating keeps the first place (Lasso: "Position in display is fixed.").
+		await expect( page.locator( '[data-field-row]' ).first() ).toHaveAttribute( 'data-field-id', '1' );
+
+		await rating.getByRole( 'button', { name: 'Remove Primary Rating' } ).click();
+		const ask = page.getByRole( 'dialog', { name: 'Remove "Primary Rating"?' } );
+		await expect( ask ).toContainText( "If removed, you won't be able to get its value back." );
+		await Promise.all( [ saved(), ask.getByRole( 'button', { name: 'Remove' } ).click() ] );
+		await expect( rating ).toHaveCount( 0 );
+		await page.reload();
+		await expect( rating ).toHaveCount( 0 );
+		await expect( own ).toHaveCount( 1 );
+	} );
+
 	// Delete is on the product page, as in Lasso (docs/spec/interface.md, section 7, question 4).
 	test( 'AC4 a product not in use can be deleted', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F1 AC4' ) } );
