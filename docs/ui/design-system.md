@@ -75,6 +75,11 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 ## 4. Space, shape, depth
 
 - **Spacing (4px base):** 4, 8, 12, 16, 20, 24, 32, 40, 48.
+- **Room (the user, 2026-11-13: "make all admin pages spacious"):** every screen gets Lasso's breathing room, which
+  uses 24px inside a row and 48px around a section. Three tokens carry it: `--affibloom-space-gutter` 40px (the page's
+  side gutters; 20px from 960px down), `--affibloom-space-section` 28px (between cards and sections),
+  `--affibloom-space-card` 32px (a card's inner padding). Table rows have 20px padding and 48px images, so a row is
+  about 80px tall, as Lasso's is; settings rows 20px. The Display screen's rail keeps Lasso's measurements (section 0).
 - **Radius:** 16px cards and tiles; 12px icon chips; 10px buttons and the segmented control; 7px segments; 8px
   header navigation items; full round for toggles and status pills.
 - **Depth:** cards and tiles `0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08)`, no border; toast

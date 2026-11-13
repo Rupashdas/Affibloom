@@ -42,6 +42,14 @@
 	--affibloom-shadow-segment: 0 1px 3px rgba(16, 24, 40, 0.12);
 	--affibloom-ease: 150ms ease;
 	--affibloom-content-width: 1080px;
+	/*
+	 * Space (the user, 2026-11-13: "make all admin pages spacious"). Lasso's own screens use 24px inside a row and
+	 * 48px around a section; these give every screen that room: the page's side gutters, the gap between cards and
+	 * sections, and a card's inner padding.
+	 */
+	--affibloom-space-gutter: 40px;
+	--affibloom-space-section: 28px;
+	--affibloom-space-card: 32px;
 
 	/* Full width inside wp-admin's content area. */
 	margin: 0 0 0 -20px;
@@ -183,7 +191,7 @@
 
 /* 3. Band: the gradient with the title, the subtitle and section tabs */
 .affibloom-band {
-	padding: 28px 32px 72px;
+	padding: 40px var(--affibloom-space-gutter) 88px;
 	background: linear-gradient(120deg, var(--affibloom-navy-900) 0%, var(--affibloom-brand-600) 100%);
 	color: var(--affibloom-white);
 }
@@ -304,7 +312,7 @@
 .affibloom-page__body {
 	max-width: var(--affibloom-content-width);
 	margin: -48px auto 0;
-	padding: 0 32px 32px;
+	padding: 0 var(--affibloom-space-gutter) 56px;
 }
 
 /* Card */
@@ -313,7 +321,7 @@
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
 }
-.affibloom-card__head { padding: 22px 24px 6px; }
+.affibloom-card__head { padding: 28px var(--affibloom-space-card) 8px; }
 .affibloom-admin .affibloom-card__title {
 	margin: 0;
 	padding: 0;
@@ -326,12 +334,12 @@
 	font-size: 13px;
 	line-height: 18px;
 }
-.affibloom-card__body { padding: 4px 24px; }
+.affibloom-card__body { padding: 8px var(--affibloom-space-card); }
 .affibloom-card__foot {
 	display: flex;
 	justify-content: flex-end;
 	gap: 10px;
-	padding: 16px 24px;
+	padding: 20px var(--affibloom-space-card);
 	border-top: 1px solid var(--affibloom-line);
 	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
 	background: var(--affibloom-subtle);
@@ -351,7 +359,7 @@
 
 /* Empty state */
 .affibloom-empty {
-	padding: 40px 24px;
+	padding: 56px var(--affibloom-space-card);
 	text-align: center;
 }
 .affibloom-empty .affibloom-chip { margin-bottom: 12px; }
@@ -361,8 +369,8 @@
 .affibloom-setting {
 	display: flex;
 	align-items: center;
-	gap: 16px;
-	padding: 16px 0;
+	gap: 20px;
+	padding: 20px 0;
 	border-top: 1px solid var(--affibloom-line);
 }
 .affibloom-setting:first-child { border-top: 0; }
@@ -427,8 +435,8 @@
 }
 
 /* 7. Form fields: text, textarea and colour, each with its help tip (design system, "Text field", "Help tip") */
-.affibloom-settings .affibloom-card + .affibloom-card { margin-top: 20px; }
-.affibloom-card__body--fields { padding: 16px 24px 20px; }
+.affibloom-settings .affibloom-card + .affibloom-card { margin-top: var(--affibloom-space-section); }
+.affibloom-card__body--fields { padding: 20px var(--affibloom-space-card) 28px; }
 .affibloom-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -678,7 +686,7 @@
 .affibloom-accordion__body { padding-bottom: 12px; }
 
 /* An element row: the switch on the left and its name on the right, as in Lasso's Elements panel */
-.affibloom-toggle-row { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+.affibloom-toggle-row { display: flex; align-items: center; gap: 12px; min-height: 36px; }
 .affibloom-toggle-row__label { color: var(--affibloom-ink-900); }
 
 /* Steppers and line clamps */
@@ -779,11 +787,11 @@
  * 7c. Two columns of cards, as Lasso's Amazon tab (the user, 2026-11-13): each column a stack of cards, the form's
  * Save at the bottom right. Stacks below 992px, Lasso's breakpoint.
  */
-.affibloom-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-.affibloom-columns__column { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.affibloom-form-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
-.affibloom-columns .affibloom-card__body--fields > .affibloom-toggle-row + .affibloom-toggle-row { margin-top: 4px; }
-.affibloom-field + .affibloom-toggle-row { margin-top: 12px; }
+.affibloom-columns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--affibloom-space-section); align-items: start; }
+.affibloom-columns__column { display: flex; flex-direction: column; gap: var(--affibloom-space-section); min-width: 0; }
+.affibloom-form-actions { display: flex; justify-content: flex-end; margin-top: var(--affibloom-space-section); }
+.affibloom-columns .affibloom-card__body--fields > .affibloom-toggle-row + .affibloom-toggle-row { margin-top: 10px; }
+.affibloom-field + .affibloom-toggle-row { margin-top: 16px; }
 .affibloom-admin .affibloom-input--number { width: 64px; flex: none; padding: 0 8px; }
 
 /* Text field error (design system): danger border, the message below, linked with aria-describedby */
@@ -908,9 +916,9 @@
  */
 .affibloom-tiles {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-	gap: 16px;
-	margin-bottom: 20px;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 24px;
+	margin-bottom: 36px;
 }
 .affibloom-tile {
 	display: grid;
@@ -918,9 +926,9 @@
 	grid-template-rows: auto auto auto;
 	align-content: center;
 	align-items: center;
-	gap: 0 12px;
+	gap: 2px 14px;
 	min-width: 0;
-	padding: 16px 18px;
+	padding: 22px 24px;
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
@@ -937,7 +945,7 @@
  * The toolbar under the tiles: the selection bar (or, with Task 13E, Lasso's saved-view bar) on the left and the
  * Filters button on the right. It keeps a height of its own, so the selection bar appearing moves nothing.
  */
-.affibloom-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 40px; margin-bottom: 12px; }
+.affibloom-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 40px; margin-bottom: 20px; }
 .affibloom-admin .affibloom-search { border-radius: var(--affibloom-radius-full); padding-left: 16px; }
 
 /*
@@ -971,13 +979,13 @@
  * does with its title attribute. The widths follow Lasso's grid (1 / 4 / 2 / 1 / 1 / 1 / 2 of 12), with a
  * column of its own for the select box, and the Link Name takes what is left.
  */
-/* Widths include the padding (border-box), so they add up: the fixed columns take 668px and the name keeps
-   at least 240px before the table starts to scroll. */
-.affibloom-table { width: 100%; min-width: 908px; table-layout: fixed; border-collapse: collapse; }
+/* Widths include the padding (border-box), so they add up: the fixed columns take 816px and the name keeps
+   at least 260px before the table starts to scroll. */
+.affibloom-table { width: 100%; min-width: 1076px; table-layout: fixed; border-collapse: collapse; }
 .affibloom-table th,
 .affibloom-table td { box-sizing: border-box; }
 .affibloom-admin .affibloom-table th {
-	padding: 12px 16px;
+	padding: 16px 20px;
 	border-bottom: 1px solid var(--affibloom-line);
 	background: var(--affibloom-subtle);
 	color: var(--affibloom-ink-600);
@@ -988,7 +996,7 @@
 	white-space: nowrap;
 }
 .affibloom-table td {
-	padding: 12px 16px;
+	padding: 20px;
 	border-bottom: 1px solid var(--affibloom-line);
 	vertical-align: middle;
 }
@@ -1000,13 +1008,13 @@
 .affibloom-th { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; vertical-align: middle; }
 .affibloom-admin .affibloom-table th { vertical-align: middle; }
 
-.affibloom-table .affibloom-col-select { width: 44px; padding-right: 0; }
-.affibloom-table .affibloom-col-image { width: 64px; padding-right: 8px; padding-left: 8px; text-align: center; }
-.affibloom-table .affibloom-col-groups { width: 120px; }
-.affibloom-table .affibloom-col-alert { width: 72px; padding-right: 8px; padding-left: 8px; text-align: center; }
-.affibloom-table .affibloom-col-locations { width: 96px; padding-right: 8px; padding-left: 8px; text-align: center; }
-.affibloom-table .affibloom-col-clicks { width: 72px; padding-right: 8px; padding-left: 8px; text-align: center; }
-.affibloom-table .affibloom-col-actions { width: 200px; padding-right: 12px; padding-left: 8px; text-align: center; }
+.affibloom-table .affibloom-col-select { width: 56px; padding-right: 0; padding-left: 24px; }
+.affibloom-table .affibloom-col-image { width: 88px; text-align: center; }
+.affibloom-table .affibloom-col-groups { width: 140px; }
+.affibloom-table .affibloom-col-alert { width: 92px; padding-right: 12px; padding-left: 12px; text-align: center; }
+.affibloom-table .affibloom-col-locations { width: 112px; padding-right: 12px; padding-left: 12px; text-align: center; }
+.affibloom-table .affibloom-col-clicks { width: 92px; padding-right: 12px; padding-left: 12px; text-align: center; }
+.affibloom-table .affibloom-col-actions { width: 236px; padding-right: 24px; text-align: center; }
 .affibloom-table th.affibloom-col-alert .affibloom-th,
 .affibloom-table th.affibloom-col-locations .affibloom-th,
 .affibloom-table th.affibloom-col-clicks .affibloom-th,
@@ -1044,10 +1052,10 @@
 	display: inline-grid;
 	place-items: center;
 	box-sizing: border-box;
-	width: 40px;
-	height: 40px;
+	width: 48px;
+	height: 48px;
 	border: 1px solid var(--affibloom-line);
-	border-radius: 8px;
+	border-radius: 10px;
 	background: var(--affibloom-white);
 	object-fit: contain;
 	vertical-align: middle;
@@ -1058,23 +1066,24 @@
 	display: block;
 	overflow: hidden;
 	color: var(--affibloom-ink-900);
-	font: 600 14px/20px var(--affibloom-font);
+	font: 600 15px/22px var(--affibloom-font);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 .affibloom-admin .affibloom-row__url {
 	display: block;
 	max-width: 100%;
+	margin-top: 2px;
 	overflow: hidden;
 	color: var(--affibloom-ink-600);
-	font-size: 12px;
+	font-size: 13px;
 	line-height: 18px;
 	text-decoration: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 .affibloom-admin .affibloom-row__url:hover { color: var(--affibloom-brand-600); text-decoration: underline; }
-.affibloom-row__actions { display: inline-flex; gap: 6px; }
+.affibloom-row__actions { display: inline-flex; gap: 8px; }
 
 /* Placeholders (Task 13C): a "Soon" chip by a column's name, a muted dash in its cells. */
 .affibloom-soon {
@@ -1207,7 +1216,7 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	padding: 12px 24px;
+	padding: 18px 24px;
 	border-top: 1px solid var(--affibloom-line);
 	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
 	background: var(--affibloom-subtle);
