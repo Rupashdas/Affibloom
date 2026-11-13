@@ -9,7 +9,7 @@
  * tabs (their areas), Save Changes (Task 15) and Delete This Link (Task 17).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -220,12 +220,22 @@ $soon_tabs   = array(
 					</div>
 				</div>
 
-				<?php // The preview and the display fields (theme, image, badge, price, description, disclosure): Task 14B. ?>
-				<div class="affibloom-card affibloom-product__card affibloom-product__card--display affibloom-empty">
-					<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'box' ) ); ?></span>
-					<p class="affibloom-empty__message"><?php esc_html_e( 'Preview and display fields', 'affibloom' ); ?></p>
-					<p class="affibloom-empty__text"><?php esc_html_e( 'Coming soon: the box preview, theme, image, badge, price, description and disclosure.', 'affibloom' ); ?></p>
-				</div>
+				<?php
+				// The preview and the display fields (Task 14B).
+				$this->render(
+					'admin/partials/product-display-card',
+					array(
+						'product'    => $product,
+						'theme'      => $view['theme'],
+						'themes'     => $view['themes'],
+						'disclosure' => $view['disclosure'],
+						'own_text'   => $view['own_text'],
+						'show_price' => $view['show_price'],
+						'amazon_tab' => $view['amazon_tab'],
+						'choices'    => $view['choices'],
+					)
+				);
+				?>
 			</form>
 
 			<?php // Lasso's footer: Delete This Link on the left, Save Changes on the right ("Learn About This Page" is Lasso's help site). ?>

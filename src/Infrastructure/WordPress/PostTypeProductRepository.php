@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Infrastructure\WordPress;
 
+use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
@@ -369,6 +370,16 @@ final class PostTypeProductRepository implements ProductRepository {
 			image_url: $meta( 'image_url' ),
 			button_text: $meta( 'button_text' ),
 			buttons: Buttons::from_array( (array) get_post_meta( $post->ID, '_affibloom_buttons', true ), (int) $meta( 'primary_position' ) ),
+			// '' means the display type's theme; an unknown stored name reads as Lasso's default theme.
+			theme: '' === $meta( 'theme' ) ? null : Theme::from( $meta( 'theme' ) ),
+			badge: $meta( 'badge' ),
+			price: $meta( 'price' ),
+			// '' means the site's Show Price, as Lasso reads show_price.
+			show_price: '' === $meta( 'show_price' ) ? null : '1' === $meta( 'show_price' ),
+			description: $meta( 'description' ),
+			disclosure: $meta( 'disclosure' ),
+			prime: '1' === $meta( 'prime' ),
+			image_id: (int) $meta( 'image_id' ),
 		);
 	}
 

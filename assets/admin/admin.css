@@ -1476,6 +1476,36 @@
 .affibloom-button-block .affibloom-product__toggles { margin-top: 12px; }
 .affibloom-buttons__add { justify-self: start; }
 
+/* 7i. The product page's right card (Task 14B): the image frame (the live preview's place), two-column pairs, the
+ * rich text editors in the design system's field frame, and the switches in two columns, as Lasso's. */
+.affibloom-product__card--display { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.affibloom-product__pair--even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.affibloom-image-frame {
+	position: relative;
+	display: grid;
+	place-items: center;
+	gap: 12px;
+	min-height: 220px;
+	padding: 24px;
+	border: 1px dashed var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-subtle);
+}
+.affibloom-image-frame__image { max-width: 240px; max-height: 180px; object-fit: contain; }
+.affibloom-image-frame__empty { display: grid; place-items: center; width: 96px; height: 96px; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); color: var(--affibloom-ink-400); }
+.affibloom-image-frame__empty .affibloom-icon { width: 36px; height: 36px; }
+.affibloom-image-frame__note { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--affibloom-ink-600); font-size: 13px; }
+.affibloom-image-field { display: flex; gap: 8px; }
+.affibloom-image-field .affibloom-input { flex: 1 1 auto; min-width: 0; }
+.affibloom-price .affibloom-field__head { flex-wrap: wrap; }
+.affibloom-price__show { margin-left: auto; }
+.affibloom-price__show .affibloom-toggle-row { min-height: 0; gap: 8px; font-size: 13px; }
+.affibloom-editor { overflow: hidden; border: 1px solid var(--affibloom-control-line); border-radius: var(--affibloom-radius-control); }
+.affibloom-admin .affibloom-editor .wp-editor-container { border: 0; }
+.affibloom-admin .affibloom-editor .mce-panel { border: 0; background: var(--affibloom-white); }
+.affibloom-admin .affibloom-editor .mce-toolbar-grp { border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-product__switches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;
@@ -1698,6 +1728,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-table th,
 	.affibloom-table td { padding-right: 16px; padding-left: 16px; }
 	.affibloom-product__pair { grid-template-columns: 1fr; }
+	.affibloom-product__switches { grid-template-columns: 1fr; }
 	.affibloom-product__card { padding: 20px; }
 }
 

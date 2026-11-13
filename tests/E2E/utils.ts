@@ -70,6 +70,9 @@ export type ProductFields = Partial< {
 	show_disclosure: '1' | '0';
 	disclosure: string;
 	prime: '1' | '0';
+	theme: string;
+	price: string;
+	show_price: '1' | '0';
 	// Buttons 2 and up in order (F29); url2, button_text2, new_tab2 and nofollow2 above are a shorthand for the first.
 	buttons: ProductButton[];
 	// Where the default button (the product's main link) sits among them, from 0 (F29: the user's request).

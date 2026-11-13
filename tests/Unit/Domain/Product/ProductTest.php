@@ -47,6 +47,23 @@ final class ProductTest extends TestCase {
 		self::assertSame( 0, $product->buttons->main_position() );
 	}
 
+	/**
+	 * Lasso's display fields start "not set": the type's theme, the site's Show Price and disclosure, no badge, price,
+	 * description or Prime logo (get_lasso_url's defaults).
+	 */
+	public function test_a_draft_leaves_its_display_fields_to_the_sites_defaults(): void {
+		$product = Product::draft( 'Example', $this->url(), Settings::from_array( array() ) );
+
+		self::assertNull( $product->theme );
+		self::assertNull( $product->show_price );
+		self::assertSame( '', $product->badge );
+		self::assertSame( '', $product->price );
+		self::assertSame( '', $product->description );
+		self::assertSame( '', $product->disclosure );
+		self::assertFalse( $product->prime );
+		self::assertSame( 0, $product->image_id );
+	}
+
 	public function test_a_copy_keeps_the_defaults(): void {
 		$product = Product::draft( 'Example', $this->url(), Settings::from_array( array( 'sponsored' => true ) ) );
 

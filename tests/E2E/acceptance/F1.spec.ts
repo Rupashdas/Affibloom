@@ -74,6 +74,56 @@ test.describe( 'F1 Product library', () => {
 		await expect( page.locator( '#affibloom-permalink' ) ).toBeVisible();
 	} );
 
+	// Task 14B: the right card, in Lasso's order (requirements section 4). An empty disclosure shows the site's text as
+	// its placeholder; a description written by Lasso's editor opens unchanged.
+	test( 'AC5 a product page shows its display fields as stored', async ( { page } ) => {
+		const id = createProduct( {
+			name: unique( 'F1 AC5 display' ),
+			image_url: 'https://www.example.com/f1-ac5.jpg',
+			badge: '<span class="medal-icon"></span> Best Overall',
+			price: '$29.99',
+			show_price: '1',
+			description: '<p><span style="color: rgb(0, 0, 0);">Sticks to the floor like glue.</span></p>',
+			disclosure: '',
+			theme: 'Splash',
+			sponsored: '1',
+			show_disclosure: '0',
+		} );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+		await expect( page.locator( '#affibloom-theme' ) ).toHaveValue( 'Splash' );
+		await expect( page.locator( '#affibloom-theme option' ).first() ).toHaveText( /^Default \((Cactus|Cutter|Flow|Geek|Lab|Llama|Money|Splash)\)$/ );
+		await expect( page.getByLabel( 'Product Image' ) ).toHaveValue( 'https://www.example.com/f1-ac5.jpg' );
+		await expect( page.locator( '.affibloom-image-frame img' ) ).toHaveAttribute( 'src', 'https://www.example.com/f1-ac5.jpg' );
+		await expect( page.getByRole( 'button', { name: 'Update Image' } ) ).toBeVisible();
+		await expect( page.locator( '#affibloom-badge' ) ).toHaveValue( '<span class="medal-icon"></span> Best Overall' );
+		await expect( page.getByRole( 'button', { name: 'Icon for Badge Text: Medal' } ) ).toBeVisible();
+		await expect( page.locator( 'textarea[name="price"]' ) ).toHaveValue( '$29.99' );
+		await expect( page.locator( '#affibloom-show-price' ) ).toBeChecked();
+		await expect( page.locator( 'textarea[name="description"]' ) ).toHaveValue( /Sticks to the floor like glue\./ );
+		await expect( page.locator( '#affibloom-disclosure' ) ).toHaveValue( '' );
+		await expect( page.locator( '#affibloom-disclosure' ) ).not.toHaveAttribute( 'placeholder', '' );
+		await expect( page.locator( '#affibloom-sponsored' ) ).toBeChecked();
+		await expect( page.locator( '#affibloom-show-disclosure' ) ).not.toBeChecked();
+		await expect( page.locator( '#affibloom-cloaking' ) ).toBeDisabled();
+		await expect( page.locator( '#affibloom-opportunities' ) ).toBeDisabled();
+		await expect( page.locator( '#affibloom-prime' ) ).toHaveCount( 0 );
+	} );
+
+	test( 'AC7 an Amazon product has no Permalink or cloaking, an Amazon Image field and a read-only price', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F1 AC7' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC7XYZ?tag=vbvault-20', asin: 'B0F1AC7XYZ', price: '$198.03' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+		await expect( page.locator( '#affibloom-permalink' ) ).toHaveCount( 0 );
+		await expect( page.locator( '#affibloom-cloaking' ) ).toHaveCount( 0 );
+		await expect( page.getByLabel( 'Amazon Image' ) ).toBeVisible();
+		await expect( page.getByRole( 'button', { name: 'Refresh' } ) ).toBeDisabled();
+		await expect( page.locator( '#affibloom-price' ) ).toHaveAttribute( 'readonly', '' );
+		await expect( page.locator( '#affibloom-price' ) ).toHaveValue( '$198.03' );
+		await expect( page.getByText( 'Amazon prices updated via' ) ).toBeVisible();
+		await expect( page.locator( '#affibloom-prime' ) ).toBeVisible();
+	} );
+
 	test( 'AC6 adding a non-Amazon link that exists opens that product with Lasso\'s warning', async ( { page } ) => {
 		const link = `https://www.example.com/${ unique( 'f1-ac6' ) }`;
 		const id = createProduct( { name: unique( 'F1 AC6' ), url: link } );

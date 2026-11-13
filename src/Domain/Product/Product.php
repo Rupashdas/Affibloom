@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Domain\Product;
 
+use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Settings\Settings;
 
 /**
@@ -37,6 +38,16 @@ final class Product {
 	 *                                      buy_btn_text, whose placeholder is the site's).
 	 * @param Buttons      $buttons         The buttons added to the default one (whose link is $url), in order, and where
 	 *                                      the default one sits among them (F29, Task 14H).
+	 * @param Theme|null   $theme           The box theme for this product; null means the display type's (Lasso's
+	 *                                      custom_theme, "Default (<type's theme>)").
+	 * @param string       $badge           The badge text; '' for none (Lasso's badge_text).
+	 * @param string       $price           The price as typed, small HTML allowed; '' for none (Lasso's price).
+	 * @param bool|null    $show_price      Show the price in the box; null means the site's Show Price (Lasso's
+	 *                                      show_price: '' falls back to the setting).
+	 * @param string       $description     The description, rich text (Lasso's affiliate_desc).
+	 * @param string       $disclosure      The disclosure; '' means the site's text (Lasso's disclosure_text).
+	 * @param bool         $prime           Show the Prime logo (Amazon products; set by the editor until C1).
+	 * @param int          $image_id        The image's media library item, when it was picked there; 0 otherwise.
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -53,6 +64,14 @@ final class Product {
 		public readonly string $image_url = '',
 		public readonly string $button_text = '',
 		public readonly Buttons $buttons = new Buttons( array() ),
+		public readonly ?Theme $theme = null,
+		public readonly string $badge = '',
+		public readonly string $price = '',
+		public readonly ?bool $show_price = null,
+		public readonly string $description = '',
+		public readonly string $disclosure = '',
+		public readonly bool $prime = false,
+		public readonly int $image_id = 0,
 	) {}
 
 	/**

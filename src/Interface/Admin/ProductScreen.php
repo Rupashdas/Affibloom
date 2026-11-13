@@ -11,7 +11,9 @@ namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Interface\Template;
 
@@ -37,12 +39,15 @@ final class ProductScreen {
 	 * @param ProductService         $products The product library.
 	 * @param DisplaySettingsService $display  The Display settings: the button texts an empty field falls back to.
 	 * @param IconChoices            $icons    The button icons, for the button text pickers (F28, Task 14G).
+	 * @param SettingsService        $settings The site's settings: the disclosure text and Show Price a product falls
+	 *                                         back to (Task 14B).
 	 */
 	public function __construct(
 		private Template $template,
 		private ProductService $products,
 		private DisplaySettingsService $display,
 		private IconChoices $icons,
+		private SettingsService $settings,
 	) {}
 
 	/**
@@ -83,7 +88,13 @@ final class ProductScreen {
 			return;
 		}
 
-		$palette = $this->display->config( DisplayType::single() )->palette();
+		// The description and price editors keep Lasso's toolbars, whatever other plugins do to editors (Task 14B).
+		ProductEditors::apply();
+
+		$single     = $this->display->config( DisplayType::single() );
+		$palette    = $single->palette();
+		$site       = $this->settings->current();
+		$disclosure = $site->string( 'disclosure_text' );
 		$this->template->render(
 			'admin/product',
 			array(
@@ -94,6 +105,15 @@ final class ProductScreen {
 				// Lasso's "add" redirect for a link the site already has (url-details.php 2597-2600).
 				'duplicate'    => isset( $_GET['is_duplicate'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 				'choices'      => $this->icons,
+				// The right card (Task 14B). "Default (<theme>)" names the Single type's theme, as Lasso's select does.
+				'theme'        => $single->theme()->name(),
+				'themes'       => Theme::NAMES,
+				'disclosure'   => $disclosure,
+				// Lasso shows a stored disclosure equal to the site's text as empty (header.php 210-212), so a later
+				// change of the site's text reaches it once saved (F1 requirements, edge case 3).
+				'own_text'     => $this->product->disclosure === $disclosure ? '' : $this->product->disclosure,
+				'show_price'   => $this->product->show_price ?? $site->bool( 'show_price' ),
+				'amazon_tab'   => admin_url( 'admin.php?page=' . SettingsScreen::SLUG . '&tab=amazon' ),
 			)
 		);
 	}

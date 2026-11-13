@@ -122,7 +122,7 @@ final class Plugin {
 			new ProductPostType(),
 			new AdminMenu(
 				new DashboardScreen( $this->template(), $products, $per_page, $views ),
-				new ProductScreen( $this->template(), $products, $display, $choices ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
