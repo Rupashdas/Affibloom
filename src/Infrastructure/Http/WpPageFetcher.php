@@ -11,6 +11,7 @@ namespace Affibloom\Infrastructure\Http;
 
 use Affibloom\Application\Products\FetchedPage;
 use Affibloom\Application\Products\PageFetcher;
+use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use WP_Http;
@@ -18,7 +19,8 @@ use WP_Http;
 /**
  * Fetches a page with WordPress's HTTP API, as Lasso does (wp_remote_get with the editor's browser user agent and
  * WordPress's 5-second timeout). Redirects are followed by hand, up to WordPress's usual five, so that a redirect
- * into Amazon stops before Amazon's page is requested; Lasso lets wp_remote_get follow it.
+ * into an Amazon store stops before the store's page is requested; Lasso lets wp_remote_get follow it. An Amazon
+ * short link on the way (amzn.to → amzn.to) is followed, since it is only a redirect (Task 12D).
  */
 final class WpPageFetcher implements PageFetcher {
 
@@ -60,7 +62,7 @@ final class WpPageFetcher implements PageFetcher {
 			}
 
 			$next = WP_Http::make_absolute_url( $location, $current );
-			if ( $this->is_amazon( $next ) ) {
+			if ( $this->is_amazon_store( $next ) ) {
 				return new FetchedPage( $status, $next, '' );
 			}
 			$current = $next;
@@ -91,15 +93,16 @@ final class WpPageFetcher implements PageFetcher {
 	}
 
 	/**
-	 * Whether a URL is Amazon's.
+	 * Whether a URL is an Amazon store's (an Amazon link that is not a short link).
 	 *
 	 * @param string $url Any URL.
 	 */
-	private function is_amazon( string $url ): bool {
+	private function is_amazon_store( string $url ): bool {
 		try {
-			return AffiliateUrl::from_string( $url )->is_amazon();
+			$link = AffiliateUrl::from_string( $url );
 		} catch ( InvalidField $not_a_link ) {
 			return false;
 		}
+		return $link->is_amazon() && ! AmazonUrl::is_short( $link );
 	}
 }

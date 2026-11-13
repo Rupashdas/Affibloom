@@ -35,6 +35,26 @@ final class LinkResolverTest extends TestCase {
 		self::assertSame( array(), $fetcher->asked );
 	}
 
+	public function test_a_short_link_is_followed_to_the_amazon_store_link(): void {
+		// The fetcher stops at the first redirect into an Amazon store and reports it, with no body (Task 12D).
+		$fetcher  = $this->fetcher( array( 'https://amzn.to/46fBGAJ' => new FetchedPage( 301, 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?tag=x-20', '' ) ) );
+		$resolved = ( new LinkResolver( $fetcher ) )->resolve( AffiliateUrl::from_string( 'https://amzn.to/46fBGAJ' ) );
+
+		self::assertSame( array( 'https://amzn.to/46fBGAJ' ), $fetcher->asked );
+		self::assertSame( 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?tag=x-20', $resolved->url );
+		self::assertSame( 'Amazon', $resolved->title );
+	}
+
+	/**
+	 * @dataProvider no_answers
+	 */
+	public function test_a_short_link_that_cannot_be_followed_is_itself_named_amazon( ?FetchedPage $page ): void {
+		$resolved = ( new LinkResolver( $this->fetcher( array( 'https://amzn.to/x' => $page ) ) ) )->resolve( AffiliateUrl::from_string( 'https://amzn.to/x' ) );
+
+		self::assertSame( 'https://amzn.to/x', $resolved->url );
+		self::assertSame( 'Amazon', $resolved->title );
+	}
+
 	public function test_the_page_title_after_redirects_names_it(): void {
 		$fetcher  = $this->fetcher( array( 'https://go.example/x' => new FetchedPage( 200, 'https://www.shop.example/p', '<title>Volleyball Knee Pads</title>' ) ) );
 		$resolved = ( new LinkResolver( $fetcher ) )->resolve( AffiliateUrl::from_string( 'https://go.example/x' ) );

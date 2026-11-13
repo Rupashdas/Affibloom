@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, setSettings, wp } from '../utils';
 
-// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8; 12B: AC4; 12C: AC6.
-// AC2 and AC5 arrive with 12E, AC7 with 12D.
+// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8; 12B: AC4; 12C: AC6;
+// 12D: AC7. AC2 and AC5 arrive with 12E.
 test.describe( 'F2 Amazon links', () => {
 	// The live site's Amazon settings (tests/fixtures/inventory/settings.json).
 	const live = { tracking_id: 'vbvault-20', multiple_tracking_ids: true, tracking_id_whitelist: [ 'vbvault-20' ], shorten_amazon_links: true };
@@ -110,6 +110,18 @@ test.describe( 'F2 Amazon links', () => {
 		const store = await add( page, `https://www.amazon.com/stores/Mikasa/page/${ words.split( ' ' )[ 1 ] }?ref_=z&tag=someone-20` );
 		expect( store.url ).toBe( `https://www.amazon.com/stores/Mikasa/page/${ words.split( ' ' )[ 1 ] }?ref_=z&tag=vbvault-20` );
 		expect( store.type ).toBe( 'amazon' );
+	} );
+
+	// External HTTP is blocked on this copy, so the short link cannot be followed; the followed case is covered by
+	// unit tests and checked by hand (docs/features/F2/analysis.md, risks).
+	test( 'AC7 a short link that cannot be followed is kept as pasted, typed Amazon', async ( { page } ) => {
+		const link = `https://amzn.to/${ Math.random().toString( 36 ).slice( 2, 9 ) }`;
+		const stored = await add( page, link );
+
+		expect( stored.url ).toBe( link );
+		expect( stored.type ).toBe( 'amazon' );
+		expect( stored.asin ).toBe( '' );
+		expect( wp( 'post', 'get', String( newestProduct() ), '--field=post_title' ) ).toBe( 'Amazon' );
 	} );
 
 	test( 'AC8 a protected attribution link is stored exactly as pasted', async ( { page } ) => {

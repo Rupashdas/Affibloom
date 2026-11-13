@@ -148,6 +148,47 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( 'Page went wrong!', $this->service()->create_from_url( 'https://www.example.com/x' )->product->name );
 	}
 
+	public function test_a_short_link_is_stored_as_the_product_link_it_opens(): void {
+		$this->fetcher = new FakePageFetcher( array( 'https://amzn.to/46fBGAJ' => new FetchedPage( 301, 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?tag=someone-20&ref_=x', '' ) ) );
+
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://amzn.to/46fBGAJ' );
+
+		self::assertSame( 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?tag=vbvault-20&ref_=x', $added->product->url->value() );
+		self::assertSame( ProductType::Amazon, $added->product->type );
+		self::assertSame( 'B00XOUQ8PE', $added->product->asin );
+		self::assertSame( 'us', $added->product->amazon_country );
+	}
+
+	public function test_a_short_link_to_a_product_that_exists_opens_it(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$first   = $service->create_from_url( 'https://www.amazon.com/dp/B00XOUQ8PE' );
+		$this->fetcher = new FakePageFetcher( array( 'https://amzn.to/46fBGAJ' => new FetchedPage( 301, 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?th=1', '' ) ) );
+
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://amzn.to/46fBGAJ' );
+
+		self::assertTrue( $added->already_existed );
+		self::assertSame( $first->product->id, $added->product->id );
+		self::assertCount( 1, $this->repo->saved );
+	}
+
+	public function test_a_short_link_whose_destination_is_stored_is_that_product(): void {
+		$service = $this->service( self::LIVE_AMAZON );
+		$first   = $service->create_from_url( 'https://www.amazon.com/s?k=nike+kd14&tag=vbvault-20' );
+		$this->fetcher = new FakePageFetcher( array( 'https://amzn.to/3NGJEvm' => new FetchedPage( 301, 'https://www.amazon.com/s?k=nike%20kd14&tag=vbvault-20', '' ) ) );
+
+		self::assertSame( $first->product->id, $this->service( self::LIVE_AMAZON )->create_from_url( 'https://amzn.to/3NGJEvm' )->product->id );
+	}
+
+	public function test_a_short_link_that_cannot_be_followed_is_kept_typed_amazon(): void {
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://amzn.to/46fBGAJ' );
+
+		self::assertSame( 'https://amzn.to/46fBGAJ', $added->product->url->value() );
+		self::assertSame( ProductType::Amazon, $added->product->type );
+		self::assertSame( '', $added->product->asin );
+		self::assertSame( 'Amazon', $added->product->name );
+		self::assertSame( array( 'https://amzn.to/46fBGAJ' ), $this->fetcher->asked );
+	}
+
 	public function test_shorten_amazon_links_off_keeps_the_whole_query(): void {
 		$settings = array( 'shorten_amazon_links' => false ) + self::LIVE_AMAZON;
 

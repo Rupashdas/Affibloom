@@ -130,7 +130,7 @@ final class AmazonUrl {
 	 * @param bool        $shorten Settings → Amazon, "Shorten Amazon affiliate links".
 	 */
 	public function monetized( TrackingIds $ids, bool $shorten ): AffiliateUrl {
-		if ( $this->is_short_link() || $this->is_protected() ) {
+		if ( self::is_short( $this->url ) || $this->is_protected() ) {
 			return $this->url;
 		}
 
@@ -197,12 +197,14 @@ final class AmazonUrl {
 	}
 
 	/**
-	 * Whether the host is one of Amazon's short-link hosts. Lasso looks for the three names anywhere in the link;
-	 * here only the host counts, so a store link mentioning "amzn.to" in its query is still a store link. Public on its
-	 * second use: ProductService types only store links as Amazon until Task 12D follows short links.
+	 * Whether a link is one of Amazon's short links (amzn.to, amzn.com, amzlink.to). Lasso looks for the three names
+	 * anywhere in the link; here only the host counts, so a store link mentioning "amzn.to" in its query is still a
+	 * store link. Static, for its callers that hold a plain link: LinkResolver, ProductService and WpPageFetcher.
+	 *
+	 * @param AffiliateUrl $url Any link.
 	 */
-	public function is_short_link(): bool {
-		return in_array( $this->url->host(), self::SHORT_LINK_HOSTS, true );
+	public static function is_short( AffiliateUrl $url ): bool {
+		return in_array( $url->host(), self::SHORT_LINK_HOSTS, true );
 	}
 
 	/**

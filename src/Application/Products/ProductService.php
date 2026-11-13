@@ -43,8 +43,8 @@ final class ProductService {
 	 * - a published product with the same link is returned instead of a new one (is_lasso_url_exist with
 	 *   check_duplicate_link on, its default and the live value), before any request is made;
 	 * - otherwise the link is resolved and the product named as Lasso names it (Task 11D);
-	 * - with keep_genius_formatting off, a geni.us link is stored as its destination, which is then checked for a
-	 *   duplicate too;
+	 * - an Amazon short link, and a geni.us link with keep_genius_formatting off, is stored as its destination, which
+	 *   is then checked for a duplicate too (Task 12D; Lasso: $url = $get_final_url);
 	 * - an Amazon store link is then looked for in Lasso's order (Tasks 12B, 12C) and, when new, stored as Lasso
 	 *   stores it (Tasks 12A, 12C);
 	 * - a product that is found keeps its name, except for Lasso's "Sorry!" re-title (Task 12C);
@@ -65,7 +65,7 @@ final class ProductService {
 		$resolved = $this->links->resolve( $url );
 		$settings = $this->settings->get();
 
-		if ( $url->is_geni_us() && $resolved->url !== $url->value() && ! $settings->bool( 'keep_genius_formatting' ) ) {
+		if ( $resolved->url !== $url->value() && $this->stored_as_destination( $url, $settings ) ) {
 			$url      = AffiliateUrl::from_string( $resolved->url );
 			$existing = $this->products->find_by_url_key( $url->key() );
 			if ( null !== $existing ) {
@@ -74,7 +74,7 @@ final class ProductService {
 		}
 
 		$amazon = AmazonUrl::from( $url );
-		if ( null === $amazon || $amazon->is_short_link() ) {
+		if ( null === $amazon ) {
 			return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
 		}
 
@@ -88,7 +88,21 @@ final class ProductService {
 	}
 
 	/**
-	 * The published product an Amazon store link already is, after the stored-link lookup found nothing
+	 * Whether the link is replaced by where it leads before it is stored: an Amazon short link always
+	 * (lasso_add_a_new_link: is_amazon_shortened_url), a geni.us link while Keep Geni.us Formatting is off.
+	 *
+	 * @param AffiliateUrl $url      The pasted link.
+	 * @param Settings     $settings The site's settings.
+	 */
+	private function stored_as_destination( AffiliateUrl $url, Settings $settings ): bool {
+		if ( AmazonUrl::is_short( $url ) ) {
+			return true;
+		}
+		return $url->is_geni_us() && ! $settings->bool( 'keep_genius_formatting' );
+	}
+
+	/**
+	 * The published product an Amazon link already is, after the stored-link lookup found nothing
 	 * (get_lasso_post_id_by_url, then is_lasso_url_exist; F2 requirements 7):
 	 * - a link with an ASIN: the Amazon product with that ASIN on that store;
 	 * - a search page: the product whose search has the same keywords on the same store;

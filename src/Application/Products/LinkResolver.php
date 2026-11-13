@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Products;
 
+use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\EmbeddedDestination;
@@ -33,10 +34,12 @@ final class LinkResolver {
 	/**
 	 * In Lasso's order, each step ending the search:
 	 * 1. a destination embedded in the link names it after that destination's site, with no request;
-	 * 2. an Amazon link is never requested;
-	 * 3. otherwise one request, following redirects. No answer or a 403 (where Lasso asks its cloud) gives the link's
-	 *    own site. Any other answer gives the page title, or the final URL's site for a placeholder or missing title;
-	 *    a destination embedded in the final URL, or a stop before Amazon, decides instead.
+	 * 2. an Amazon store link is never requested;
+	 * 3. otherwise one request, following redirects; an Amazon short link is requested too (Task 12D), and the fetcher
+	 *    stops before the Amazon store page it leads to. No answer or a 403 (where Lasso asks its cloud) gives the
+	 *    link's own site, or "Amazon" for an Amazon short link. Any other answer gives the page title, or the final
+	 *    URL's site for a placeholder or missing title; a destination embedded in the final URL, or a stop before
+	 *    Amazon, decides instead.
 	 *
 	 * @param AffiliateUrl $url The new product's link.
 	 */
@@ -45,13 +48,14 @@ final class LinkResolver {
 		if ( null !== $embedded ) {
 			return new ResolvedLink( $embedded, self::site_of( $embedded, $url ) );
 		}
-		if ( $url->is_amazon() ) {
+		$short = AmazonUrl::is_short( $url );
+		if ( $url->is_amazon() && ! $short ) {
 			return new ResolvedLink( $url->value(), self::AMAZON_NAME );
 		}
 
 		$page = $this->pages->fetch( $url->value() );
 		if ( null === $page || 403 === $page->status ) {
-			return new ResolvedLink( $url->value(), $url->site_name() );
+			return new ResolvedLink( $url->value(), $short ? self::AMAZON_NAME : $url->site_name() );
 		}
 
 		$final = '' !== $page->final_url ? $page->final_url : $url->value();

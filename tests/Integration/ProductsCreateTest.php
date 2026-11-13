@@ -78,6 +78,38 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( $first, $this->post( 'https://www.amazon.com/s/ref=x?k=NIKE%20KD14' )->get_data()['data']['id'] );
 	}
 
+	public function test_a_short_link_is_stored_as_the_product_link_it_opens(): void {
+		update_option( 'affibloom_settings', array( 'tracking_id' => 'vbvault-20' ) );
+		$asked = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $request, $url ) use ( &$asked ) {
+				$asked[] = $url;
+				return 'https://amzn.to/46fBGAJ' === $url
+					? array(
+						'headers'  => array( 'location' => 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?tag=x-20' ),
+						'body'     => '',
+						'response' => array( 'code' => 301, 'message' => 'Moved Permanently' ),
+						'cookies'  => array(),
+						'filename' => null,
+					)
+					: new \WP_Error( 'blocked', 'No other request in this test.' );
+			},
+			10,
+			3
+		);
+
+		$id = $this->post( 'https://amzn.to/46fBGAJ' )->get_data()['data']['id'];
+
+		self::assertSame( 'https://www.amazon.com/Stabilizer/dp/B00XOUQ8PE?tag=vbvault-20', get_post_meta( $id, '_affibloom_url', true ) );
+		self::assertSame( 'B00XOUQ8PE', get_post_meta( $id, '_affibloom_asin', true ) );
+		self::assertSame( array( 'https://amzn.to/46fBGAJ' ), $asked ); // the store page is never requested
+
+		$kept = $this->post( 'https://amzn.to/unreachable' )->get_data()['data']['id'];
+		self::assertSame( 'https://amzn.to/unreachable', get_post_meta( $kept, '_affibloom_url', true ) );
+		self::assertSame( 'amazon', get_post_meta( $kept, '_affibloom_type', true ) );
+	}
+
 	public function test_a_bare_domain_is_stored_with_https(): void {
 		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
 	}
