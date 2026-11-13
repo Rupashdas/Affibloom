@@ -2,8 +2,8 @@
 
 Status: gates 1-2 written 2026-11-13 at the user's request (*"for the buttons, we should have a icon picker.
 currently we had to use hardcoded html like this `<span class="amazon-icon"></span>` for icons"*). The user chose
-the icon source and the handling of broken icons the same day (section 5). **Waiting for the user's gate 4** on
-Tasks 14F-14G. Register item **U11** (an addition: Lasso has no picker).
+the icon source and the handling of broken icons the same day (section 5). **Gate 4 given by the user 2026-11-13** ("Approve, start 14F")
+for Tasks 14F-14G. Register item **U11** (an addition: Lasso has no picker).
 
 ## 1. User story and acceptance criteria
 

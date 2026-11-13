@@ -24,6 +24,10 @@ final class Notice {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
+			'icon-added'   => __( 'Icon added.', 'affibloom' ),
+			'icon-removed' => __( 'Icon removed.', 'affibloom' ),
+			'icon-refused' => __( 'The icon was not added. Give it a name of 1 to 40 characters and choose an SVG, PNG or WebP image.', 'affibloom' ),
+			'icon-kept'    => __( "That icon comes from your site's CSS, so it stays.", 'affibloom' ),
 			default        => '',
 		};
 	}

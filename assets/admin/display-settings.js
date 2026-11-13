@@ -473,8 +473,53 @@
 		} );
 	}
 
+	/**
+	 * The "Button icons" card (F28, Task 14F): "Choose image" opens WordPress's media library for one SVG, PNG or WebP
+	 * image, which fills the hidden attachment and the preview; Remove asks first, as the reset does.
+	 *
+	 * @param {HTMLElement} card The card.
+	 */
+	function iconSet( card ) {
+		var add = card.querySelector( '[data-icon-add]' );
+		var choose = card.querySelector( '[data-icon-choose]' );
+		var frame = null;
+
+		if ( add && choose && window.wp && wp.media ) {
+			choose.addEventListener( 'click', function () {
+				if ( ! frame ) {
+					frame = wp.media( {
+						title: choose.textContent.trim(),
+						multiple: false,
+						library: { type: [ 'image/svg+xml', 'image/png', 'image/webp' ] },
+						button: { text: choose.textContent.trim() },
+					} );
+					frame.on( 'select', function () {
+						var image = frame.state().get( 'selection' ).first().toJSON();
+						var preview = add.querySelector( '[data-icon-preview]' );
+						add.querySelector( '[data-icon-attachment]' ).value = image.id;
+						preview.src = image.url;
+						add.querySelector( '[data-icon-preview-tile]' ).hidden = false;
+					} );
+				}
+				frame.open();
+			} );
+		}
+
+		Array.prototype.forEach.call( card.querySelectorAll( 'form[data-confirm]' ), function ( form ) {
+			form.addEventListener( 'submit', function ( event ) {
+				if ( ! window.confirm( form.dataset.confirm ) ) {
+					event.preventDefault();
+				}
+			} );
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var rail = document.querySelector( '.affibloom-split__rail' );
+		var icons = document.querySelector( '.affibloom-icon-set' );
+		if ( icons ) {
+			iconSet( icons );
+		}
 		var layout = document.querySelector( '[data-rail-panel="layout"]' );
 
 		var resetForm = document.querySelector( '[data-reset-form]' );

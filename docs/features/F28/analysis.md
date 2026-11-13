@@ -1,6 +1,6 @@
 # F28 Button icons: analysis
 
-Status: gate 2 written 2026-11-13. Waiting for the user's gate 4 on Tasks 14F-14G.
+Status: gate 2 written 2026-11-13. Gate 4 given by the user 2026-11-13.
 
 **Tasks:** 14F (the icon set), 14G (the picker). Then 14B and 16 use the picker for their fields.
 

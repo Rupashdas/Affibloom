@@ -1,0 +1,147 @@
+.lasso-display.lasso-cutter .lasso-box-1 {
+width:100% !important;
+max-width:100% !important;
+flex:0 0 100% !important;
+text-align: center !important;
+}
+
+
+	
+	.lasso-display.lasso-cutter a.lasso-button-1{
+font-size:calc(11px + 0.8vw) !important;
+
+}
+.lasso-display.lasso-cutter a.lasso-button-2{
+
+font-size:calc(11px + 0.8vw) !important;
+}
+	
+}
+
+
+/*edit icons here*/
+
+span.pricetag-icon {
+
+content: url('/wp-content/uploads/2023/06/pricetag-icon.svg');
+
+object-fit: contain;
+height: 21px;
+margin-right: 3px;
+width:25px;
+
+position:relative;
+
+top:2px;
+	@media(max-width: 768px) {
+		height: 15px;
+		width: 15px;
+	}
+}
+
+span.medal-icon {
+
+content: url('/wp-content/uploads/2023/06/medal-icon.svg');
+	
+	
+
+object-fit: contain;
+height: 0.9em;
+width: 0.9em;
+
+position:relative;
+
+top:2px;
+	@media(max-width: 768px) {
+
+		height: 18px;
+		width: 18px;
+		
+	}
+}
+span.full-review-icon {
+
+content: url('/wp-content/uploads/2023/04/full-review-icon.svg');
+
+object-fit: contain;
+
+height: 21px;
+margin-right: 3px;
+width:21px;
+
+position:relative;
+
+top:2px;
+	@media(max-width: 768px) {
+		height: 15px;
+		width: 15px;
+	}
+}
+
+span.amazon-icon {
+
+content: url('/wp-content/uploads/2023/06/amazon-icon.svg');
+
+object-fit: contain;
+
+height: 21px;
+margin-right: 3px;
+width:21px;
+
+position:relative;
+
+top:3px;
+	@media(max-width: 768px) {
+		height: 15px;
+		width: 15px;
+	}
+}
+
+span.alsogood-icon {
+
+content: url('wp-content/uploads/2023/06/alsogood-icon.svg');
+
+object-fit: contain;
+
+height: 21px;
+margin-right: 3px;
+width: 21px;
+
+position:relative;
+
+top:2px;
+	@media(max-width: 768px) {
+		height: 18px;
+		width: 18px;
+	}
+}
+span.youtube-icon {
+
+content: url('/wp-content/uploads/2023/04/youtube-icon.svg');
+
+object-fit: contain;
+
+height: 21px;
+margin-right: 3px;
+width:21px;
+
+position:relative;
+
+top:2px;
+	@media(max-width: 768px) {
+		height: 15px;
+		width: 15px;
+	}
+}
+.lasso-description{
+font-size:calc(10px + 0.4vw);
+	padding-top: 5px;
+padding-bottom: 10px;
+@media(max-width: 768px) {
+		font-size:calc(12px + 0.6vw) !important;
+	}
+
+}
+
+
+/*edit icons ends here*/

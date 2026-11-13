@@ -55,6 +55,10 @@ final class AdminAssets implements Module {
 			'display' => 'display-settings',
 			'amazon'  => 'amazon-settings',
 		);
+		// The "Button icons" card chooses its image from the media library (F28, Task 14F).
+		if ( 'display' === $tab ) {
+			wp_enqueue_media();
+		}
 		if ( isset( $scripts[ $tab ] ) ) {
 			wp_enqueue_script( 'affibloom-' . $scripts[ $tab ], $this->plugin_url . 'assets/admin/' . $scripts[ $tab ] . '.js', array(), $this->version, true );
 		}

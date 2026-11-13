@@ -11,6 +11,7 @@ namespace Affibloom;
 
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\LinkResolver;
 use Affibloom\Application\Products\ProductService;
@@ -18,9 +19,11 @@ use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
+use Affibloom\Infrastructure\WordPress\OptionIconRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
+use Affibloom\Infrastructure\WordPress\SiteCssIcons;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Interface\Cron\BulkAddCron;
@@ -31,6 +34,7 @@ use Affibloom\Interface\Admin\PerPage;
 use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Admin\DisplayController;
 use Affibloom\Interface\Admin\DisplayScreen;
+use Affibloom\Interface\Admin\IconController;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
@@ -38,6 +42,7 @@ use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
+use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
 
@@ -109,6 +114,7 @@ final class Plugin {
 		$bulk     = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$per_page = new PerPage();
 		$views    = new SavedViewService( new UserMetaSavedViewRepository() );
+		$icons    = new IconService( new OptionIconRepository(), new SiteCssIcons() );
 
 		return array(
 			new ProductPostType(),
@@ -118,7 +124,7 @@ final class Plugin {
 				new SettingsScreen(
 					$this->template(),
 					$settings,
-					new DisplayScreen( $this->template(), $display, $settings, $notice ),
+					new DisplayScreen( $this->template(), $display, $settings, $notice, $icons ),
 					$notice
 				)
 			),
@@ -129,6 +135,8 @@ final class Plugin {
 			new BulkAddController( $bulk ),
 			new DashboardController( $products, $per_page, $views, $this->template() ),
 			new BulkAddCron( $bulk ),
+			new IconController( $icons ),
+			new IconStyles( $icons ),
 		);
 	}
 

@@ -232,6 +232,9 @@ $fields = array(
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
 				<?php wp_nonce_field( $view['reset'], '_affibloom_reset_nonce', false ); ?>
 			</form>
+
+			<?php // Site-wide, so outside the per-type editor above (F28, Task 14F). ?>
+			<?php $this->render( 'admin/partials/icon-set', array( 'icons' => $view['icons'] ) ); ?>
 		</div>
 	</div>
 

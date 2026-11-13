@@ -1374,6 +1374,38 @@
 .affibloom-notice__text { margin: 0; color: var(--affibloom-ink-900); font-weight: 600; }
 .affibloom-chip--warning { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
 
+/* 7f. "Button icons" on Settings → Display (F28, Task 14F): one row per icon, the add form in the card's foot. */
+.affibloom-icon-set { margin-top: var(--affibloom-space-section); }
+.affibloom-admin .affibloom-icon-set__list { margin: 0; padding-top: 4px; padding-bottom: 4px; list-style: none; }
+.affibloom-icon-set__item {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin: 0;
+	padding: 12px 0;
+	border-top: 1px solid var(--affibloom-line);
+}
+.affibloom-icon-set__item:first-child { border-top: 0; }
+/* The site's icons are white glyphs made for coloured buttons, so each sits on a dark tile like a button. */
+.affibloom-icon-set__tile {
+	display: inline-grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 36px;
+	height: 36px;
+	border-radius: var(--affibloom-radius-nav);
+	background: var(--affibloom-ink-900);
+}
+.affibloom-icon-set__image { width: 20px; height: 20px; object-fit: contain; }
+.affibloom-icon-set__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.affibloom-icon-set__name { font-weight: 600; }
+.affibloom-admin .affibloom-icon-set__class { align-self: flex-start; padding: 1px 6px; border-radius: 4px; background: var(--affibloom-subtle); color: var(--affibloom-ink-600); font-size: 12px; overflow-wrap: anywhere; }
+.affibloom-icon-set__source { flex: 0 0 auto; margin-left: auto; color: var(--affibloom-ink-600); font-size: 13px; text-align: right; }
+.affibloom-icon-set__remove { margin-left: auto; }
+.affibloom-icon-set__add { align-items: center; justify-content: flex-start; flex-wrap: wrap; }
+.affibloom-admin .affibloom-icon-set__add .affibloom-input { width: 240px; }
+.affibloom-icon-set__add .affibloom-button--primary { margin-left: auto; }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;
