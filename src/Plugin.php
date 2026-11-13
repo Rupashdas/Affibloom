@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\LinkResolver;
@@ -20,6 +21,7 @@ use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
+use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
@@ -105,11 +107,12 @@ final class Plugin {
 		$products = new ProductService( new PostTypeProductRepository(), new LinkResolver( new WpPageFetcher() ), $this->settings_repository() );
 		$bulk     = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$per_page = new PerPage();
+		$views    = new SavedViewService( new UserMetaSavedViewRepository() );
 
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
-				new DashboardScreen( $this->template(), $notice, $products, $per_page ),
+				new DashboardScreen( $this->template(), $notice, $products, $per_page, $views ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -122,7 +125,7 @@ final class Plugin {
 			new DisplayController( $display, $settings ),
 			new ProductsController( $products, new ProductResource() ),
 			new BulkAddController( $bulk ),
-			new DashboardController( $products, $per_page, $this->template() ),
+			new DashboardController( $products, $per_page, $views, $this->template() ),
 			new BulkAddCron( $bulk ),
 		);
 	}

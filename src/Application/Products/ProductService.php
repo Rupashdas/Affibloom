@@ -13,6 +13,7 @@ use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\Amazon\TrackingIds;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
@@ -49,12 +50,13 @@ final class ProductService {
 	/**
 	 * One page of the Dashboard list, most recently changed first.
 	 *
-	 * @param SearchTerm $term     What to look for; an empty term lists everything.
-	 * @param int        $page     Page number, from 1.
-	 * @param int        $per_page Products per page.
+	 * @param SearchTerm $term      What to look for; an empty term lists everything.
+	 * @param LinkKind   $link_kind Lasso's "Link type" filter.
+	 * @param int        $page      Page number, from 1.
+	 * @param int        $per_page  Products per page.
 	 */
-	public function list( SearchTerm $term, int $page, int $per_page ): ProductPage {
-		return $this->products->page( $term, $page, $per_page );
+	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page ): ProductPage {
+		return $this->products->page( $term, $link_kind, $page, $per_page );
 	}
 
 	/**

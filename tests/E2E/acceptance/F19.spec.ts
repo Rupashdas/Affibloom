@@ -196,6 +196,48 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( page.getByLabel( 'Search' ) ).toHaveValue( '' );
 	} );
 
+	test( 'AC13 the Link type filter shows Amazon products only, and the Filters button counts it', async ( { page } ) => {
+		const asin = ( 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase() ).padEnd( 10, 'X' ).slice( 0, 10 );
+		const amazon = createProduct( { name: unique( 'F19 AC13 amazon' ), type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20` } );
+		const other = createProduct( { name: unique( 'F19 AC13 other' ) } ); // Newer, so first without the filter.
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10' );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( other ) );
+
+		await page.getByRole( 'button', { name: /Filters/ } ).click();
+		await page.getByLabel( 'Link type' ).selectOption( 'amazon' );
+
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( amazon ) );
+		await expect( page.locator( `tr[data-product-id="${ other }"]` ) ).toHaveCount( 0 );
+		await expect( page.locator( '.affibloom-filters__count' ) ).toHaveText( '1' );
+		await expect( page ).toHaveURL( /link_type=amazon/ );
+	} );
+
+	test( 'AC14 a saved view is kept, restores its list, and is deleted after the confirmation', async ( { page } ) => {
+		const name = unique( 'F19 AC14' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom&link_type=amazon&per_page=10' );
+
+		await page.getByRole( 'button', { name: /Filters/ } ).click();
+		await page.getByLabel( 'Save as' ).fill( name );
+		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await expect( page.locator( '.affibloom-pill', { hasText: name } ) ).toHaveAttribute( 'aria-current', 'true' );
+
+		// Kept across a reload, and it brings its list back.
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.locator( '.affibloom-pill', { hasText: name } ).click();
+		await expect( page ).toHaveURL( /link_type=amazon/ );
+		await expect( page.getByLabel( 'Link type' ) ).toHaveValue( 'amazon' );
+
+		await page.getByRole( 'button', { name: `Delete saved view ${ name }` } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Delete saved view?' } );
+		await expect( dialog ).toContainText( name );
+		await dialog.getByRole( 'button', { name: 'Delete filter' } ).click();
+		await expect( page.locator( '.affibloom-pill', { hasText: name } ) ).toHaveCount( 0 );
+
+		await page.reload();
+		await expect( page.locator( '.affibloom-pill', { hasText: name } ) ).toHaveCount( 0 );
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )

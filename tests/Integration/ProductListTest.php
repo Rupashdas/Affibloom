@@ -1,6 +1,7 @@
 <?php
 namespace Affibloom\Tests\Integration;
 
+use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use WP_UnitTestCase;
@@ -55,7 +56,7 @@ final class ProductListTest extends WP_UnitTestCase {
 	public function test_published_products_come_back_most_recently_changed_first(): void {
 		$this->seed();
 
-		$page = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), 1, 10 );
+		$page = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), LinkKind::All, 1, 10 );
 
 		self::assertSame( 3, $page->total );
 		self::assertSame(
@@ -67,8 +68,8 @@ final class ProductListTest extends WP_UnitTestCase {
 	public function test_a_page_holds_only_its_own_products(): void {
 		$this->seed();
 
-		$first  = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), 1, 2 );
-		$second = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), 2, 2 );
+		$first  = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), LinkKind::All, 1, 2 );
+		$second = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), LinkKind::All, 2, 2 );
 
 		self::assertCount( 2, $first->items );
 		self::assertCount( 1, $second->items );
@@ -80,7 +81,7 @@ final class ProductListTest extends WP_UnitTestCase {
 	public function test_a_page_past_the_end_is_empty_but_keeps_the_total(): void {
 		$this->seed();
 
-		$page = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), 99, 10 );
+		$page = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), LinkKind::All, 99, 10 );
 
 		self::assertTrue( $page->is_empty() );
 		self::assertSame( 3, $page->total );
@@ -94,12 +95,12 @@ final class ProductListTest extends WP_UnitTestCase {
 
 		$repository = new PostTypeProductRepository();
 
-		self::assertSame( 1, $repository->page( SearchTerm::from_input( 'Newest' ), 1, 10 )->total );
-		self::assertSame( 1, $repository->page( SearchTerm::from_input( 'example.com/oldest' ), 1, 10 )->total );
-		self::assertSame( 1, $repository->page( SearchTerm::from_input( 'b0cph9npk8' ), 1, 10 )->total );
+		self::assertSame( 1, $repository->page( SearchTerm::from_input( 'Newest' ), LinkKind::All, 1, 10 )->total );
+		self::assertSame( 1, $repository->page( SearchTerm::from_input( 'example.com/oldest' ), LinkKind::All, 1, 10 )->total );
+		self::assertSame( 1, $repository->page( SearchTerm::from_input( 'b0cph9npk8' ), LinkKind::All, 1, 10 )->total );
 		self::assertSame( 1, $repository->page( SearchTerm::from_input( (string) $ids['oldest'] ), 1, 10 )->total );
-		self::assertSame( 0, $repository->page( SearchTerm::from_input( 'nothing matches' ), 1, 10 )->total );
-		self::assertSame( 3, $repository->page( SearchTerm::from_input( 'product' ), 1, 10 )->total );
+		self::assertSame( 0, $repository->page( SearchTerm::from_input( 'nothing matches' ), LinkKind::All, 1, 10 )->total );
+		self::assertSame( 3, $repository->page( SearchTerm::from_input( 'product' ), LinkKind::All, 1, 10 )->total );
 	}
 
 	/** The search runs for its own two queries only; the next query must be untouched. */
@@ -107,9 +108,9 @@ final class ProductListTest extends WP_UnitTestCase {
 		$this->seed();
 		$repository = new PostTypeProductRepository();
 
-		$repository->page( SearchTerm::from_input( 'Newest' ), 1, 10 );
+		$repository->page( SearchTerm::from_input( 'Newest' ), LinkKind::All, 1, 10 );
 
-		self::assertSame( 3, $repository->page( SearchTerm::from_input( '' ), 1, 10 )->total );
+		self::assertSame( 3, $repository->page( SearchTerm::from_input( '' ), LinkKind::All, 1, 10 )->total );
 		self::assertCount( 3, get_posts( array( 'post_type' => 'affibloom_product', 'fields' => 'ids' ) ) );
 	}
 
@@ -119,8 +120,22 @@ final class ProductListTest extends WP_UnitTestCase {
 		self::assertSame( 3, ( new PostTypeProductRepository() )->count() );
 	}
 
+	public function test_the_link_type_filter_splits_amazon_from_the_rest(): void {
+		$ids = $this->seed();
+		update_post_meta( $ids['newest'], '_affibloom_type', 'amazon' );
+		update_post_meta( $ids['middle'], '_affibloom_type', 'other' );
+		delete_post_meta( $ids['oldest'], '_affibloom_type' ); // No type at all counts as not Amazon's.
+
+		$repository = new PostTypeProductRepository();
+		$all        = SearchTerm::from_input( '' );
+
+		self::assertSame( 1, $repository->page( $all, LinkKind::Amazon, 1, 10 )->total );
+		self::assertSame( 2, $repository->page( $all, LinkKind::NonAmazon, 1, 10 )->total );
+		self::assertSame( 3, $repository->page( $all, LinkKind::All, 1, 10 )->total );
+	}
+
 	public function test_an_empty_library_has_one_page_and_no_range(): void {
-		$page = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), 1, 10 );
+		$page = ( new PostTypeProductRepository() )->page( SearchTerm::from_input( '' ), LinkKind::All, 1, 10 );
 
 		self::assertSame( 0, $page->total );
 		self::assertSame( 1, $page->pages() );

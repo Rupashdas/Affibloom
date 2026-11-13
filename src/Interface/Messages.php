@@ -26,6 +26,9 @@ final class Messages {
 			'invalid_url' => __( 'This is not a valid link.', 'affibloom' ),
 			// Lasso's words while a bulk add is still going.
 			'bulk_running' => __( 'Your bulk add is still processing. Try again in a few minutes.', 'affibloom' ),
+			// Lasso's words for a saved view it refuses (Dashboard_Saved_Views::upsert).
+			'view_name_empty', 'view_name_too_long' => __( 'Invalid view name.', 'affibloom' ),
+			'view_limit'  => __( 'Saved view limit reached.', 'affibloom' ),
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}

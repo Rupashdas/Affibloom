@@ -6,7 +6,7 @@
  * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, library: int, notice: string, notice_kind: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int, notice: string, notice_kind: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,9 +50,19 @@ $placeholder = sprintf(
 
 			<div class="affibloom-toolbar">
 				<?php
-				// The toolbar row keeps its height whether or not anything is selected, so the selection bar appearing
-				// with the first tick does not push the rows down under the pointer.
+				// Lasso's views bar on the left, the Filters button on the right. With rows ticked, the selection bar
+				// takes the views bar's place in the same row, so appearing moves nothing under the pointer.
 				$this->render( 'admin/partials/selection-bar' );
+				$this->render(
+					'admin/partials/saved-views',
+					array(
+						'views'     => $view['views'],
+						'term'      => $view['term'],
+						'link_kind' => $view['link_kind'],
+						'per_page'  => $products->per_page,
+					)
+				);
+				$this->render( 'admin/partials/filters-panel', array( 'link_kind' => $view['link_kind'] ) );
 				?>
 			</div>
 
@@ -80,6 +90,7 @@ $placeholder = sprintf(
 			</template>
 		</div>
 	</div>
+	<?php $this->render( 'admin/partials/view-delete-modal' ); ?>
 	<?php
 	$this->render(
 		'admin/partials/toast',

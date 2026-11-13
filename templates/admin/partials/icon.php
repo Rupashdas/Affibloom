@@ -36,6 +36,8 @@ $icon_paths = array(
 	'copy'         => '<path d="M8.5 7h7A1.5 1.5 0 0 1 17 8.5v7a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 15.5v-7A1.5 1.5 0 0 1 8.5 7z"/><path d="M13 7V4.5A1.5 1.5 0 0 0 11.5 3h-7A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13H7"/>',
 	'trash'        => '<path d="M4 6h12M8 6V4.5h4V6M5.5 6l.8 10h7.4l.8-10M8.5 9v4.5M11.5 9v4.5"/>',
 	'folder'       => '<path d="M3 5.5a1 1 0 0 1 1-1h4l1.5 2H16a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',
+	// The Dashboard's Filters button (Task 13E).
+	'filter'       => '<path d="M3.5 4.5h13l-5 6v5l-3 1.5v-6.5z"/>',
 );
 
 if ( ! isset( $icon_paths[ $view['name'] ] ) ) {

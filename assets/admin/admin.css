@@ -1089,6 +1089,118 @@
 }
 .affibloom-soon-cell { color: var(--affibloom-ink-400); font-size: 14px; cursor: default; }
 
+/*
+ * Lasso's saved-view bar (Task 13E): "Saved view", then pills. The pill showing the current list is marked; a saved
+ * view's pill carries its × at its right end.
+ */
+.affibloom-views { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; margin-right: auto; }
+.affibloom-views[hidden] { display: none; }
+.affibloom-views__label { color: var(--affibloom-ink-600); font: 700 11px/16px var(--affibloom-font); letter-spacing: 0.06em; text-transform: uppercase; }
+.affibloom-admin .affibloom-views__list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.affibloom-admin .affibloom-views__item { position: relative; display: inline-flex; align-items: center; margin: 0; }
+.affibloom-admin .affibloom-pill {
+	display: inline-flex;
+	align-items: center;
+	box-sizing: border-box;
+	max-width: 240px;
+	height: 30px;
+	padding: 0 14px;
+	overflow: hidden;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-700);
+	font: 600 13px/18px var(--affibloom-font);
+	text-decoration: none;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.affibloom-admin .affibloom-pill:hover { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-pill[aria-current="true"] { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-pill:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+.affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove) .affibloom-pill { padding-right: 32px; }
+.affibloom-admin .affibloom-pill__remove {
+	position: absolute;
+	right: 4px;
+	display: grid;
+	place-items: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-full);
+	background: transparent;
+	color: var(--affibloom-ink-400);
+	cursor: pointer;
+}
+.affibloom-admin .affibloom-pill__remove:hover { background: var(--affibloom-line); color: var(--affibloom-danger-700); }
+.affibloom-admin .affibloom-pill__remove:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 1px; }
+.affibloom-pill__remove .affibloom-icon { width: 12px; height: 12px; stroke-width: 2.2; }
+
+/*
+ * Lasso's Filters button and panel (Task 13E). The panel is a card under the button, not beside the table as in
+ * Lasso: eight columns leave no room for a side panel without squeezing the Link Name.
+ */
+.affibloom-filters { position: relative; margin-left: auto; }
+.affibloom-filters__toggle[aria-expanded="true"] { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
+.affibloom-filters__count {
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	box-sizing: border-box;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-brand-600);
+	color: var(--affibloom-white);
+	font: 700 11px/18px var(--affibloom-font);
+	text-align: center;
+}
+.affibloom-filters__count[hidden],
+.affibloom-filters__panel[hidden] { display: none; }
+.affibloom-filters__panel {
+	position: absolute;
+	z-index: 20;
+	top: calc(100% + 8px);
+	right: 0;
+	width: 340px;
+	max-width: calc(100vw - 32px);
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-toast);
+}
+.affibloom-filters__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-admin .affibloom-filters__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 700 15px/20px var(--affibloom-font); }
+.affibloom-admin .affibloom-filters__close {
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-nav);
+	background: none;
+	color: var(--affibloom-ink-600);
+	cursor: pointer;
+}
+.affibloom-admin .affibloom-filters__close:hover { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+.affibloom-filters__body { display: grid; gap: 14px; padding: 14px 16px; }
+.affibloom-admin .affibloom-filters__field { display: grid; gap: 6px; margin: 0; }
+.affibloom-filters__label { display: flex; align-items: center; gap: 6px; color: var(--affibloom-ink-900); font: 600 13px/18px var(--affibloom-font); }
+.affibloom-admin .affibloom-filters__field .affibloom-select { width: 100%; max-width: none; height: 34px; min-height: 34px; }
+.affibloom-admin .affibloom-filters__field .affibloom-select:disabled { background: var(--affibloom-subtle); color: var(--affibloom-ink-400); }
+.affibloom-filters__inline { display: flex; gap: 8px; }
+.affibloom-admin .affibloom-filters__inline .affibloom-input { height: 32px; min-height: 32px; }
+.affibloom-filters__save .affibloom-field__error:empty { display: none; }
+.affibloom-filters__foot {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	border-top: 1px solid var(--affibloom-line);
+	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
+	background: var(--affibloom-subtle);
+}
+.affibloom-filters__hint { color: var(--affibloom-ink-600); font-size: 12px; }
+
 /* Pager: the card's footer, the size and range left, the page links right (Lasso's lasso-dashboard-pager). */
 .affibloom-pager {
 	display: flex;
@@ -1180,6 +1292,11 @@
 /* Small button (design system): 32px, for table rows and bars. */
 .affibloom-button--small { height: 32px; padding: 0 12px; border-radius: var(--affibloom-radius-nav); font-size: 13px; }
 .affibloom-button--small .affibloom-icon { width: 16px; height: 16px; }
+
+/* Danger button (design system): only for destructive actions, always labelled. */
+.affibloom-button--danger,
+.affibloom-button--danger:focus { background: var(--affibloom-danger-700); color: var(--affibloom-white); }
+.affibloom-button--danger:hover { background: #8a1b31; color: var(--affibloom-white); }
 
 .affibloom-button:disabled,
 .affibloom-button[aria-disabled="true"] {

@@ -1,6 +1,7 @@
 <?php
 namespace Affibloom\Tests\Unit\Fakes;
 
+use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
@@ -22,8 +23,14 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	/** Newest saved first, which is this fake's stand-in for "most recently changed". */
-	public function page( SearchTerm $term, int $page, int $per_page ): ProductPage {
-		$all = array_reverse( $this->saved );
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page ): ProductPage {
+		$all = array_values(
+			array_filter(
+				array_reverse( $this->saved ),
+				static fn( Product $product ): bool => LinkKind::All === $link_kind
+					|| ( LinkKind::Amazon === $link_kind ) === ( ProductType::Amazon === $product->type )
+			)
+		);
 		if ( ! $term->is_empty() ) {
 			$all = array_values(
 				array_filter(

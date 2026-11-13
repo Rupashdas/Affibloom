@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Infrastructure\WordPress;
 
 use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
@@ -162,11 +163,12 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * WP_Query primes the meta cache for the page, so building each product reads no further rows; the term
 	 * cache is left alone because no column on this screen shows a taxonomy.
 	 *
-	 * @param SearchTerm $term     What to look for; an empty term lists everything.
-	 * @param int        $page     Page number, from 1.
-	 * @param int        $per_page Products per page.
+	 * @param SearchTerm $term      What to look for; an empty term lists everything.
+	 * @param LinkKind   $link_kind Lasso's "Link type" filter: Amazon's products, the others', or all (Task 13E).
+	 * @param int        $page      Page number, from 1.
+	 * @param int        $per_page  Products per page.
 	 */
-	public function page( SearchTerm $term, int $page, int $per_page ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -179,6 +181,29 @@ final class PostTypeProductRepository implements ProductRepository {
 
 		if ( ! $term->is_empty() ) {
 			$list[ self::SEARCH_VAR ] = $term;
+		}
+
+		// Lasso: url_details.product_type = amazon, or not (a product with no type counts as not Amazon's).
+		if ( LinkKind::Amazon === $link_kind ) {
+			$list['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one indexed key, a few hundred posts.
+				array(
+					'key'   => '_affibloom_type',
+					'value' => ProductType::Amazon->value,
+				),
+			);
+		} elseif ( LinkKind::NonAmazon === $link_kind ) {
+			$list['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- as above.
+				'relation' => 'OR',
+				array(
+					'key'     => '_affibloom_type',
+					'value'   => ProductType::Amazon->value,
+					'compare' => '!=',
+				),
+				array(
+					'key'     => '_affibloom_type',
+					'compare' => 'NOT EXISTS',
+				),
+			);
 		}
 
 		$filter = $this->search_filter();

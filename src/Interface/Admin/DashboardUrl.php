@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Domain\Product\LinkKind;
 
 /**
  * The Dashboard's own address for a list. The page and the REST route that refreshes it (Task 13D) both build it
@@ -22,14 +23,18 @@ final class DashboardUrl {
 	 * The address of this list. Arguments at their defaults are left out, so the plain Dashboard stays
 	 * `admin.php?page=affibloom`.
 	 *
-	 * @param string $term     The cleaned search text; '' for none.
-	 * @param int    $page     Page number, from 1.
-	 * @param int    $per_page Products per page.
+	 * @param string   $term      The cleaned search text; '' for none.
+	 * @param LinkKind $link_kind The link-type filter.
+	 * @param int      $page      Page number, from 1.
+	 * @param int      $per_page  Products per page.
 	 */
-	public static function to( string $term, int $page, int $per_page ): string {
+	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page ): string {
 		$args = array( 'page' => AdminMenu::SLUG );
 		if ( '' !== $term ) {
 			$args['s'] = $term;
+		}
+		if ( LinkKind::All !== $link_kind ) {
+			$args['link_type'] = $link_kind->value;
 		}
 		if ( ProductService::PER_PAGE_DEFAULT !== $per_page ) {
 			$args['per_page'] = $per_page;
