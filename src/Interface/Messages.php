@@ -23,6 +23,8 @@ final class Messages {
 		return match ( $reason ) {
 			// Lasso's words for an empty "Add A New Link" box.
 			'empty'       => __( 'URL is incorrect.', 'affibloom' ),
+			// Lasso's one refusal when the product page is saved (save_lasso_url 1133-1140).
+			'required'    => __( 'Name and Primary Destination URL are required.', 'affibloom' ),
 			'invalid_url' => __( 'This is not a valid link.', 'affibloom' ),
 			// Lasso's words while a bulk add is still going.
 			'bulk_running' => __( 'Your bulk add is still processing. Try again in a few minutes.', 'affibloom' ),

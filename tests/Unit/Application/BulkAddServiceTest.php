@@ -4,7 +4,9 @@ namespace Affibloom\Tests\Unit\Application;
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Products\BulkAddRunning;
 use Affibloom\Application\Products\BulkAddService;
+use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Application\Products\LinkResolver;
+use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\BulkRun;
@@ -49,7 +51,10 @@ final class BulkAddServiceTest extends TestCase {
 	 * Adding one link, with no network: every page fetch has no answer.
 	 */
 	private function products(): ProductService {
-		return new ProductService( $this->products, new LinkResolver( new FakePageFetcher() ), new InMemorySettingsRepository() );
+		$resolver = new LinkResolver( new FakePageFetcher() );
+		$settings = new InMemorySettingsRepository();
+		$links    = new LinkNormaliser( $resolver, $settings );
+		return new ProductService( $this->products, $resolver, $settings, new ProductInput( $links ), $links );
 	}
 
 	private function service(): BulkAddService {

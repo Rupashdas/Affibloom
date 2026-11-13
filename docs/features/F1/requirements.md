@@ -4,7 +4,7 @@ Status: gate 1 approved with Task 6 (2026-11-12). **The product page (Task 14) r
 2026-11-13** (progress deviations 24 and 57): sections 2-8 below, written from Lasso 369's source and this copy's data.
 **Gate 4 given by the user 2026-11-13** for Tasks 14A-14E, with D1 answered: Lasso's two cards in Aurora's shell.
 **Saving the page (Task 15) re-run the same way on 2026-11-13** (progress deviation 70): section 9, written from
-Lasso's save path. Waiting for gate 4 on Tasks 15A-15D.
+Lasso's save path. **Gate 4 given by the user 2026-11-13** for Tasks 15A-15D.
 
 ## 1. User stories and acceptance criteria
 

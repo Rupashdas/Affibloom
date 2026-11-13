@@ -68,6 +68,8 @@ final class AdminAssets implements Module {
 			// Custom fields: the rows and the "Add Field" dialog (Task 14C).
 			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker' ), $this->version, true );
+			// Save Changes: the form through PATCH /products/{id}, its dialog and toasts (Task 15A).
+			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 		}
 
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).

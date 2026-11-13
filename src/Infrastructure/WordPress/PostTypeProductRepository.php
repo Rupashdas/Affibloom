@@ -32,26 +32,45 @@ final class PostTypeProductRepository implements ProductRepository {
 	private const SEARCH_VAR = 'affibloom_search';
 
 	/**
-	 * Inserts the post with its meta in one call, as Lasso's meta_input does. Updating arrives with Task 15.
+	 * Stores the post with every field in one call, as Lasso's meta_input does: a new product is inserted, one with an
+	 * ID is updated in place (Task 15A), which also makes it the most recently changed on the Dashboard (F19's order).
+	 * A value read and written back unchanged keeps its bytes: get_post_meta() gives it unslashed and wp_slash() is
+	 * undone by WordPress on the way in.
 	 *
-	 * @param Product $product A new product.
+	 * @param Product $product A new product, or a stored one with its changes.
 	 * @throws RuntimeException When WordPress refuses the post.
 	 */
 	public function save( Product $product ): Product {
-		$post = array(
+		$post    = array(
 			'post_type'   => ProductPostType::NAME,
 			'post_status' => 'publish',
 			'post_title'  => $product->name,
 			'meta_input'  => array(
-				'_affibloom_url'             => $product->url->value(),
-				'_affibloom_url_key'         => $product->url->key(),
-				'_affibloom_type'            => $product->type->value,
-				'_affibloom_new_tab'         => self::flag( $product->new_tab ),
-				'_affibloom_nofollow'        => self::flag( $product->nofollow ),
-				'_affibloom_sponsored'       => self::flag( $product->sponsored ),
-				'_affibloom_show_disclosure' => self::flag( $product->show_disclosure ),
+				'_affibloom_url'              => $product->url->value(),
+				'_affibloom_url_key'          => $product->url->key(),
+				'_affibloom_type'             => $product->type->value,
+				'_affibloom_new_tab'          => self::flag( $product->new_tab ),
+				'_affibloom_nofollow'         => self::flag( $product->nofollow ),
+				'_affibloom_sponsored'        => self::flag( $product->sponsored ),
+				'_affibloom_show_disclosure'  => self::flag( $product->show_disclosure ),
+				'_affibloom_button_text'      => $product->button_text,
+				'_affibloom_primary_position' => (string) $product->buttons->main_position(),
+				// '' is the display type's theme, and the site's Show Price (hydrate() reads them back that way).
+				'_affibloom_theme'            => null === $product->theme ? '' : $product->theme->name(),
+				'_affibloom_image_url'        => $product->image_url,
+				'_affibloom_image_id'         => (string) $product->image_id,
+				'_affibloom_badge'            => $product->badge,
+				'_affibloom_price'            => $product->price,
+				'_affibloom_show_price'       => null === $product->show_price ? '' : self::flag( $product->show_price ),
+				'_affibloom_description'      => $product->description,
+				'_affibloom_disclosure'       => $product->disclosure,
+				'_affibloom_prime'            => self::flag( $product->prime ),
 			),
 		);
+		$buttons = $product->buttons->to_array();
+		if ( array() !== $buttons ) {
+			$post['meta_input']['_affibloom_buttons'] = $buttons;
+		}
 		// As Lasso stores amazon_product_id and its country only for an Amazon product (save_lasso_url).
 		if ( '' !== $product->asin ) {
 			$post['meta_input']['_affibloom_asin']           = $product->asin;
@@ -63,9 +82,18 @@ final class PostTypeProductRepository implements ProductRepository {
 		}
 
 		// wp_insert_post() unslashes what it is given, so a link's backslashes survive only if slashed first.
-		$id = wp_insert_post( wp_slash( $post ), true );
+		// wp_update_post() keeps what is not given (author, dates, slug) and expects the same slashing.
+		if ( null === $product->id ) {
+			$id = wp_insert_post( wp_slash( $post ), true );
+		} else {
+			$id = wp_update_post( wp_slash( array( 'ID' => $product->id ) + $post ), true );
+		}
 		if ( is_wp_error( $id ) ) {
 			throw new RuntimeException( esc_html( $id->get_error_message() ) );
+		}
+		// The last button removed: no list is stored, as a new product has none.
+		if ( array() === $buttons ) {
+			delete_post_meta( $id, '_affibloom_buttons' );
 		}
 
 		return $product->with( array( 'id' => $id ) );

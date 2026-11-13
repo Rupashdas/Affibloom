@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace Affibloom\Application\Products;
 
 use Affibloom\Domain\Amazon\AmazonUrl;
-use Affibloom\Domain\Amazon\TrackingIds;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\LinkKind;
@@ -34,11 +33,15 @@ final class ProductService {
 	 * @param ProductRepository  $products Product storage.
 	 * @param LinkResolver       $links    Where a new link leads and what to call it.
 	 * @param SettingsRepository $settings Site settings (keep_genius_formatting, the link defaults, the Amazon tag rule).
+	 * @param ProductInput       $input    The product page's field rules (Task 15A).
+	 * @param LinkNormaliser     $rules    The link rules the add flow and the product page share.
 	 */
 	public function __construct(
 		private ProductRepository $products,
 		private LinkResolver $links,
 		private SettingsRepository $settings,
+		private ProductInput $input,
+		private LinkNormaliser $rules,
 	) {}
 
 	/** Products per Dashboard page on a fresh install: Lasso's default (Lasso_Helper::get_dashboard_page_size_options). */
@@ -73,6 +76,26 @@ final class ProductService {
 	 */
 	public function get( int $id ): ?Product {
 		return $id > 0 ? $this->products->get( $id ) : null;
+	}
+
+	/**
+	 * Save Changes on the product page (Task 15A): the fields sent are cleaned by Lasso's rules and stored on the same
+	 * product, all or nothing; a field not sent keeps its stored value.
+	 *
+	 * @param int                  $id    Product ID.
+	 * @param array<string, mixed> $input Field => value, as sent.
+	 * ProductInput throws ValidationFailed when a field is refused (only an empty name, Lasso's one refusal), and the
+	 * repository a RuntimeException when WordPress refuses the post.
+	 *
+	 * @throws ProductNotFound When there is no published product with that ID.
+	 */
+	public function update( int $id, array $input ): Product {
+		$product = $this->get( $id );
+		if ( null === $product ) {
+			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
+		}
+
+		return $this->products->save( $product->with( $this->input->changes( $input ) ) );
 	}
 
 	/**
@@ -117,7 +140,7 @@ final class ProductService {
 			return new AddedLink( $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
 		}
 
-		$stored   = $amazon->monetized( TrackingIds::from_settings( $settings ), $settings->bool( 'shorten_amazon_links' ) );
+		$stored   = $this->rules->tagged( $amazon, $settings );
 		$existing = $this->existing_amazon( $amazon, $url, $stored );
 		if ( null !== $existing ) {
 			return $this->found( $existing, $url );

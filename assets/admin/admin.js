@@ -147,13 +147,6 @@
 	 * Menus (design system, "Menu"): a button with `aria-controls` and `aria-expanded` shows the menu card under it;
 	 * choosing an item, Escape or a click elsewhere closes it.
 	 */
-	// A form shown before its save exists (the product page until Task 15): Enter in a field must not send it.
-	document.addEventListener( 'submit', function ( event ) {
-		if ( event.target.matches( 'form[data-not-saved]' ) ) {
-			event.preventDefault();
-		}
-	} );
-
 	var openMenu = null;
 
 	function setMenu( toggle, open ) {

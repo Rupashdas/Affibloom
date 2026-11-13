@@ -15,18 +15,80 @@ test.describe( 'F1 Product library', () => {
 		await expect( page.getByLabel( 'Name', { exact: true } ) ).toBeVisible();
 	} );
 
+	// Task 15A (requirements 9, S1-S6, S14, S15). The save is held back half a second so its dialog can be seen.
 	test( 'AC2 fields saved on the Details tab persist and show a toast', async ( { page } ) => {
-		const id = createProduct( { name: unique( 'F1 AC2' ) } );
+		const id = createProduct( { name: unique( 'F1 AC2' ), url2: 'https://www.example.com/f1-ac2-second', button_text2: 'Second' } );
 		const name = unique( 'F1 AC2 renamed' );
+		await page.route( /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+/, async ( route ) => {
+			await new Promise( ( done ) => setTimeout( done, 500 ) );
+			await route.continue();
+		} );
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
-		await page.getByLabel( 'Name' ).fill( name );
-		await page.getByLabel( 'Badge Text' ).fill( 'Best Overall' );
+		await page.locator( '#affibloom-name' ).fill( name );
+		const extra = page.locator( '[data-extra-button]' ).first();
+		await extra.locator( 'input[name="buttons[0][text]"]' ).fill( 'Women\'s' );
+		await extra.getByRole( 'button', { name: /Move .* up/ } ).click();
+		await page.locator( '#affibloom-badge' ).fill( 'Best Overall' );
+		await page.locator( '#affibloom-theme' ).selectOption( 'Splash' );
+		await page.locator( '#affibloom-sponsored' ).check();
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'saved' );
+		await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeVisible();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+		await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( name );
 
 		await page.reload();
-		await expect( page.getByLabel( 'Name' ) ).toHaveValue( name );
-		await expect( page.getByLabel( 'Badge Text' ) ).toHaveValue( 'Best Overall' );
+		await expect( page.locator( '#affibloom-name' ) ).toHaveValue( name );
+		// The added button now comes first, before the default one (F29: primary_position).
+		await expect( page.locator( '[data-button]' ).first() ).toHaveAttribute( 'data-extra-button', '' );
+		await expect( page.locator( 'input[name="buttons[0][text]"]' ) ).toHaveValue( 'Women\'s' );
+		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_primary_position' ) ).toBe( '1' );
+		await expect( page.locator( '#affibloom-badge' ) ).toHaveValue( 'Best Overall' );
+		await expect( page.locator( '#affibloom-theme' ) ).toHaveValue( 'Splash' );
+		await expect( page.locator( '#affibloom-sponsored' ) ).toBeChecked();
+	} );
+
+	// Task 15A: Lasso refuses only an empty name or link (S2); button links are cleaned, never refused (S4); a description
+	// nobody touched is not sent, so it stays byte for byte (D19).
+	test( 'AC13 an empty name is refused; button links are cleaned; an untouched description is kept as stored', async ( { page } ) => {
+		const stored = ( () => {
+			try {
+				return wp( 'option', 'get', 'affibloom_settings', '--format=json' );
+			} catch {
+				return '';
+			}
+		} )();
+		const description = '<p><span style="color: rgb(20, 20, 20);">Grip&nbsp;that   lasts</span></p>';
+		const name = unique( 'F1 AC13' );
+		try {
+			setSettings( { tracking_id: 'vbvault-20', shorten_amazon_links: true } );
+			const id = createProduct( { name, description, url2: 'https://www.example.com/f1-ac13' } );
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+			await page.locator( '#affibloom-name' ).fill( '' );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '#affibloom-name' ) ).toHaveAttribute( 'aria-invalid', 'true' );
+			await expect( page.getByText( 'Name and Primary Destination URL are required.' ) ).toBeVisible();
+			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Try again. For some reason your product didn\'t save.' );
+			expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+
+			await page.locator( '#affibloom-name' ).fill( name );
+			await page.locator( 'input[name="buttons[0][url]"]' ).fill( 'www.amazon.com/dp/B0C7654321?tag=someone-20' );
+			await page.getByRole( 'button', { name: 'Add Another Button' } ).click();
+			await page.locator( 'input[name="buttons[1][url]"]' ).fill( 'www.example.com/f1-ac13-third' );
+			await page.locator( '#affibloom-badge' ).fill( 'Top Pick' );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+			await expect( page.locator( 'input[name="buttons[0][url]"]' ) ).toHaveValue( 'https://www.amazon.com/dp/B0C7654321?tag=vbvault-20' );
+			await expect( page.locator( 'input[name="buttons[1][url]"]' ) ).toHaveValue( 'https://www.example.com/f1-ac13-third' );
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_description' ) ).toBe( description );
+			expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_badge' ) ).toBe( 'Top Pick' );
+		} finally {
+			if ( stored ) {
+				wp( 'option', 'update', 'affibloom_settings', stored, '--format=json' );
+			} else {
+				wp( 'option', 'delete', 'affibloom_settings' );
+			}
+		}
 	} );
 
 	test( 'AC3 Dashboard search finds a product by name', async ( { page } ) => {

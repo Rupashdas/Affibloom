@@ -6,7 +6,8 @@
  *
  * Built in Task 14A: the band, the left card and the ways in. Placeholders until their tasks: the right card (14B),
  * custom fields (14C), Groups (the Groups area), Permalink (link cloaking), the Locations, Opportunities and Variants
- * tabs (their areas), Save Changes (Task 15) and Delete This Link (Task 17).
+ * tabs (their areas) and Delete This Link (Task 17). Save Changes stores the form through PATCH /products/{id}
+ * (Task 15A, assets/admin/product-save.js).
  *
  * @package Affibloom
  * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
@@ -67,8 +68,11 @@ $soon_tabs   = array(
 			$this->render( 'admin/partials/share-kit' );
 			?>
 
-			<?php // data-not-saved: Enter in a field must not send the form until Task 15 saves it (admin.js). ?>
-			<form id="affibloom-product-form" class="affibloom-product__form" data-product-id="<?php echo esc_attr( (string) $product->id ); ?>" data-not-saved novalidate>
+			<?php // Save Changes, or Enter in a text field, sends the form through product-save.js (Task 15A). ?>
+			<form id="affibloom-product-form" class="affibloom-product__form" data-product-id="<?php echo esc_attr( (string) $product->id ); ?>" novalidate
+				data-saved-text="<?php esc_attr_e( 'Product saved.', 'affibloom' ); ?>"
+				data-failed-text="<?php esc_attr_e( "Try again. For some reason your product didn't save.", 'affibloom' ); ?>"
+				data-empty-name="<?php esc_attr_e( 'Enter a URL Name', 'affibloom' ); ?>">
 				<div class="affibloom-card affibloom-product__card affibloom-product__card--link">
 					<?php
 					$this->render(
@@ -262,8 +266,8 @@ $soon_tabs   = array(
 					<?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?>
 					<span><?php esc_html_e( 'Delete This Link', 'affibloom' ); ?></span>
 				</button>
-				<?php // A plain button until Task 15 saves the form: it must not send it anywhere yet. ?>
-				<button type="button" id="affibloom-save" class="affibloom-button affibloom-button--primary" aria-disabled="true" aria-describedby="affibloom-soon-note">
+				<?php // Outside the form, as Lasso's footer is, and still its submit button, so Enter in a field saves too. ?>
+				<button type="submit" form="affibloom-product-form" id="affibloom-save" class="affibloom-button affibloom-button--primary">
 					<?php esc_html_e( 'Save Changes', 'affibloom' ); ?>
 				</button>
 			</div>
@@ -271,5 +275,14 @@ $soon_tabs   = array(
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>
+	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
+	<?php // The toast's JS twin (Task 15A): product-save.js fills a copy with its message; the error one has a cross. ?>
+	<template id="affibloom-toast-template">
+		<div class="affibloom-toast" role="status" aria-live="polite">
+			<span class="affibloom-toast__icon" data-toast-icon="success"><?php $this->render( 'admin/partials/icon', array( 'name' => 'check' ) ); ?></span>
+			<span class="affibloom-toast__icon" data-toast-icon="error" hidden><?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?></span>
+			<span class="affibloom-toast__message"></span>
+		</div>
+	</template>
 </div>

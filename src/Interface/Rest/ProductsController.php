@@ -9,7 +9,9 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Products\ProductNotFound;
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Application\Products\ValidationFailed;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Interface\Admin\AdminMenu;
@@ -66,10 +68,91 @@ final class ProductsController implements Module {
 				),
 			)
 		);
+
+		// Save Changes on the product page (Task 15A). Only the fields sent change.
+		register_rest_route(
+			self::NAMESPACE,
+			'/products/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+					'args'                => $this->field_args(),
+				),
+			)
+		);
 	}
 
 	/**
-	 * Only people who manage products may add them (decision 1; Lasso's endpoint allowed edit_posts).
+	 * The product page's fields and their types; WordPress refuses a wrong type (400), ProductInput applies Lasso's
+	 * rules to the rest. The Primary URL arrives with Task 15B.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function field_args(): array {
+		$args = array();
+		foreach ( array( 'name', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure' ) as $field ) {
+			$args[ $field ] = array( 'type' => 'string' );
+		}
+		foreach ( array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' ) as $field ) {
+			$args[ $field ] = array( 'type' => 'boolean' );
+		}
+		$args['image_id']         = array(
+			'type'    => 'integer',
+			'minimum' => 0,
+		);
+		$args['primary_position'] = array(
+			'type'    => 'integer',
+			'minimum' => 0,
+		);
+		$args['buttons']          = array(
+			'type'  => 'array',
+			'items' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'url'      => array( 'type' => 'string' ),
+					'text'     => array( 'type' => 'string' ),
+					'new_tab'  => array( 'type' => 'boolean' ),
+					'nofollow' => array( 'type' => 'boolean' ),
+				),
+			),
+		);
+
+		return $args;
+	}
+
+	/**
+	 * PATCH /products/{id}: stores the fields sent and answers with the product as stored (S15).
+	 *
+	 * @param WP_REST_Request $request The request.
+	 * @return WP_REST_Response|WP_Error 200 with the product; 404 for no such product; 422 with a message per field.
+	 */
+	public function update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$input = array_intersect_key( $request->get_params(), $this->field_args() );
+
+		try {
+			$product = $this->products->update( (int) $request['id'], $input );
+		} catch ( ProductNotFound $missing ) {
+			return new WP_Error( 'affibloom_not_found', __( 'This product does not exist.', 'affibloom' ), array( 'status' => 404 ) );
+		} catch ( ValidationFailed $refused ) {
+			$fields = array_map( array( Messages::class, 'for_reason' ), $refused->errors );
+
+			return new WP_Error(
+				'affibloom_invalid',
+				(string) reset( $fields ),
+				array(
+					'status' => 422,
+					'fields' => $fields,
+				)
+			);
+		}
+
+		return new WP_REST_Response( array( 'data' => $this->product_resource->full( $product ) ) );
+	}
+
+	/**
+	 * Only people who manage products may add or change them (decision 1; Lasso's endpoint allowed edit_posts).
 	 */
 	public function can_manage(): bool {
 		return current_user_can( Capabilities::PRODUCTS );

@@ -18,6 +18,12 @@ final class InMemoryProductRepository implements ProductRepository {
 	public array $saved = array();
 
 	public function save( Product $product ): Product {
+		if ( null !== $product->id && null !== $this->get( $product->id ) ) {
+			// An update, as wp_update_post(): the same product, now the most recently changed (the end of the list).
+			$this->saved   = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $product->id ) );
+			$this->saved[] = $product;
+			return $product;
+		}
 		$stored        = $product->with( array( 'id' => 100 + count( $this->saved ) ) );
 		$this->saved[] = $stored;
 		return $stored;

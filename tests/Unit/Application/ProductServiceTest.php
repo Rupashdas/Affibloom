@@ -2,7 +2,9 @@
 namespace Affibloom\Tests\Unit\Application;
 
 use Affibloom\Application\Products\FetchedPage;
+use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Application\Products\LinkResolver;
+use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -28,7 +30,10 @@ final class ProductServiceTest extends TestCase {
 	 * @param array<string, mixed> $settings Settings changed from the defaults.
 	 */
 	private function service( array $settings = array() ): ProductService {
-		return new ProductService( $this->repo, new LinkResolver( $this->fetcher ), new InMemorySettingsRepository( $settings ) );
+		$resolver   = new LinkResolver( $this->fetcher );
+		$repository = new InMemorySettingsRepository( $settings );
+		$links      = new LinkNormaliser( $resolver, $repository );
+		return new ProductService( $this->repo, $resolver, $repository, new ProductInput( $links ), $links );
 	}
 
 	/**
