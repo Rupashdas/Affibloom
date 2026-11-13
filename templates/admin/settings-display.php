@@ -199,10 +199,15 @@ $fields = array(
 														value="#000000"
 														aria-label="<?php echo esc_attr( $picker_label ); ?>">
 												<?php endif; ?>
-												<input type="text" class="affibloom-input" id="<?php echo esc_attr( $field_id ); ?>"
-													name="display[palette][<?php echo esc_attr( $key ); ?>]"
-													value="<?php echo esc_attr( $palette->value( $key ) ); ?>"
-													maxlength="500" aria-describedby="<?php echo esc_attr( $help_id ); ?>">
+												<?php if ( 'text' === $field_type ) : ?>
+													<?php // The button texts take an icon from the set (F28, Task 14G). ?>
+													<?php $this->render( 'admin/partials/icon-text-field', $view['choices']->field( $field_id, 'display[palette][' . $key . ']', $label, $palette->value( $key ), '', $help_id ) ); ?>
+												<?php else : ?>
+													<input type="text" class="affibloom-input" id="<?php echo esc_attr( $field_id ); ?>"
+														name="display[palette][<?php echo esc_attr( $key ); ?>]"
+														value="<?php echo esc_attr( $palette->value( $key ) ); ?>"
+														maxlength="500" aria-describedby="<?php echo esc_attr( $help_id ); ?>">
+												<?php endif; ?>
 											</span>
 										</div>
 									<?php endforeach; ?>

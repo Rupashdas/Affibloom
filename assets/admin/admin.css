@@ -1406,6 +1406,40 @@
 .affibloom-admin .affibloom-icon-set__add .affibloom-input { width: 240px; }
 .affibloom-icon-set__add .affibloom-button--primary { margin-left: auto; }
 
+/* 7g. The icon picker on button and badge texts (F28, Task 14G): a 38px button left of the words, opening a Menu
+ * that floats against the viewport (icon-picker.js places it), so the Display rail's scrolling cannot clip it. */
+.affibloom-icon-field { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
+.affibloom-icon-field .affibloom-input { flex: 1 1 auto; min-width: 0; }
+.affibloom-icon-field__button {
+	display: inline-grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	box-sizing: border-box;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	cursor: pointer;
+}
+.affibloom-icon-field__button:hover,
+.affibloom-icon-field__button[aria-expanded="true"] { border-color: var(--affibloom-brand-600); }
+.affibloom-icon-field__button .affibloom-icon-set__tile { width: 28px; height: 28px; border-radius: 6px; }
+.affibloom-icon-field__glyph { display: inline-grid; place-items: center; width: 28px; height: 28px; color: var(--affibloom-ink-400); }
+.affibloom-icon-field__glyph--unknown { color: var(--affibloom-warning-700); }
+.affibloom-icon-menu {
+	position: fixed;
+	right: auto;
+	width: 240px;
+	max-height: 320px;
+	overflow-y: auto;
+}
+.affibloom-icon-menu .affibloom-menu__item { gap: 10px; padding: 6px 8px; }
+.affibloom-icon-menu .affibloom-icon-set__tile { width: 28px; height: 28px; border-radius: 6px; }
+.affibloom-icon-menu .affibloom-menu__item[aria-checked="true"] { background: var(--affibloom-brand-50); }
+.affibloom-icon-menu .affibloom-menu__item:focus { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
+
 /* 8. Buttons */
 .affibloom-button {
 	display: inline-flex;

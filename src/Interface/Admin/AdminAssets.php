@@ -55,6 +55,11 @@ final class AdminAssets implements Module {
 			'display' => 'display-settings',
 			'amazon'  => 'amazon-settings',
 		);
+		// The icon picker on button texts: Settings → Display and the product page (F28, Task 14G).
+		if ( 'display' === $tab || str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-icon-picker', $this->plugin_url . 'assets/admin/icon-picker.js', array( 'affibloom-admin' ), $this->version, true );
+		}
+
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).
 		if ( 'display' === $tab ) {
 			wp_enqueue_media();

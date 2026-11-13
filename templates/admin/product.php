@@ -9,7 +9,7 @@
  * tabs (their areas), Save Changes (Task 15) and Delete This Link (Task 17).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -118,6 +118,7 @@ $nofollow_help = __( "When enabled, this link will be set to nofollow. This indi
 									'value'       => $product->button_text,
 									'help'        => __( 'This text will appear in the primary button', 'affibloom' ),
 									'placeholder' => $view['button_text'],
+									'choices'     => $view['choices'],
 								)
 							);
 							?>
@@ -171,6 +172,7 @@ $nofollow_help = __( "When enabled, this link will be set to nofollow. This indi
 									'value'       => $product->button_text2,
 									'help'        => __( 'This text will appear in the optional secondary button', 'affibloom' ),
 									'placeholder' => $view['button_text2'],
+									'choices'     => $view['choices'],
 								)
 							);
 							?>

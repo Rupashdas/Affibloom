@@ -36,11 +36,13 @@ final class ProductScreen {
 	 * @param Template               $template Template renderer.
 	 * @param ProductService         $products The product library.
 	 * @param DisplaySettingsService $display  The Display settings: the button texts an empty field falls back to.
+	 * @param IconChoices            $icons    The button icons, for the button text pickers (F28, Task 14G).
 	 */
 	public function __construct(
 		private Template $template,
 		private ProductService $products,
 		private DisplaySettingsService $display,
+		private IconChoices $icons,
 	) {}
 
 	/**
@@ -91,6 +93,7 @@ final class ProductScreen {
 				'button_text2' => $palette->value( 'secondary_button_text' ),
 				// Lasso's "add" redirect for a link the site already has (url-details.php 2597-2600).
 				'duplicate'    => isset( $_GET['is_duplicate'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+				'choices'      => $this->icons,
 			)
 		);
 	}

@@ -241,6 +241,9 @@ test.describe( 'F16 Display system', () => {
 
 		await page.goto( displayTab( 'list' ) );
 		await openColours( page );
-		await expect( page.getByLabel( 'Secondary button text', { exact: true } ) ).toHaveValue( label );
+		// The stored text is unchanged; since the icon picker (F28, Task 14G) the field shows it as the icon and the words.
+		await expect( page.locator( '#affibloom-display-secondary_button_text' ) ).toHaveValue( label );
+		await expect( page.getByRole( 'button', { name: 'Icon for Secondary button text: Amazon' } ) ).toBeVisible();
+		await expect( page.getByLabel( 'Secondary button text', { exact: true } ) ).toHaveValue( 'Buy Now' );
 	} );
 } );

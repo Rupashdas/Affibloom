@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Display\DisplaySettingsService;
-use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Interface\Template;
@@ -27,14 +26,14 @@ final class DisplayScreen {
 	 * @param DisplaySettingsService $display  Display use cases.
 	 * @param SettingsService        $settings The site-wide display settings (disclosure, Show Price, Custom CSS).
 	 * @param Notice                 $notice   The toast after a save.
-	 * @param IconService            $icons    The button icons (the "Button icons" card, F28).
+	 * @param IconChoices            $icons    The button icons: the "Button icons" card and the pickers (F28).
 	 */
 	public function __construct(
 		private Template $template,
 		private DisplaySettingsService $display,
 		private SettingsService $settings,
 		private Notice $notice,
-		private IconService $icons,
+		private IconChoices $icons,
 	) {}
 
 	/**
@@ -63,28 +62,9 @@ final class DisplayScreen {
 				'settings' => $this->settings->current(),
 				'notice'   => $this->notice->message(),
 				'panel'    => $panel,
-				'icons'    => $this->icon_rows(),
+				'icons'    => $this->icons->rows(),
+				'choices'  => $this->icons,
 			)
 		);
-	}
-
-	/**
-	 * The "Button icons" card's rows (F28, Task 14F): each icon with a link the admin can show. A media library item
-	 * gives its own; otherwise the link is the one the site's CSS writes, made absolute (the site writes
-	 * "/wp-content/…" and, once, "wp-content/…", which inside wp-admin would point into /wp-admin/).
-	 *
-	 * @return list<array{icon: \Affibloom\Domain\Icons\Icon, src: string}>
-	 */
-	private function icon_rows(): array {
-		$rows = array();
-		foreach ( $this->icons->all()->all() as $icon ) {
-			$src    = $icon->attachment > 0 ? (string) wp_get_attachment_url( $icon->attachment ) : '';
-			$src    = '' !== $src ? $src : ( 1 === preg_match( '#^https?://#i', $icon->url ) ? $icon->url : home_url( '/' . ltrim( $icon->url, '/' ) ) );
-			$rows[] = array(
-				'icon' => $icon,
-				'src'  => $src,
-			);
-		}
-		return $rows;
 	}
 }

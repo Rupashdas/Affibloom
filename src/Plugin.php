@@ -34,6 +34,7 @@ use Affibloom\Interface\Admin\PerPage;
 use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Admin\DisplayController;
 use Affibloom\Interface\Admin\DisplayScreen;
+use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\IconController;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
@@ -115,16 +116,17 @@ final class Plugin {
 		$per_page = new PerPage();
 		$views    = new SavedViewService( new UserMetaSavedViewRepository() );
 		$icons    = new IconService( new OptionIconRepository(), new SiteCssIcons() );
+		$choices  = new IconChoices( $icons );
 
 		return array(
 			new ProductPostType(),
 			new AdminMenu(
 				new DashboardScreen( $this->template(), $products, $per_page, $views ),
-				new ProductScreen( $this->template(), $products, $display ),
+				new ProductScreen( $this->template(), $products, $display, $choices ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
-					new DisplayScreen( $this->template(), $display, $settings, $notice, $icons ),
+					new DisplayScreen( $this->template(), $display, $settings, $notice, $choices ),
 					$notice
 				)
 			),
