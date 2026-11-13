@@ -42,6 +42,11 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_show_disclosure' => self::flag( $product->show_disclosure ),
 			),
 		);
+		// As Lasso stores amazon_product_id and its country only for an Amazon product (save_lasso_url).
+		if ( '' !== $product->asin ) {
+			$post['meta_input']['_affibloom_asin']           = $product->asin;
+			$post['meta_input']['_affibloom_amazon_country'] = $product->amazon_country;
+		}
 
 		// wp_insert_post() unslashes what it is given, so a link's backslashes survive only if slashed first.
 		$id = wp_insert_post( wp_slash( $post ), true );
@@ -93,6 +98,8 @@ final class PostTypeProductRepository implements ProductRepository {
 			'1' === $meta( 'nofollow' ),
 			'1' === $meta( 'sponsored' ),
 			'1' === $meta( 'show_disclosure' ),
+			$meta( 'asin' ),
+			$meta( 'amazon_country' ),
 		);
 	}
 

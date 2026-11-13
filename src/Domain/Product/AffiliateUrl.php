@@ -168,9 +168,9 @@ final class AffiliateUrl {
 	}
 
 	/**
-	 * Lower-case host without a leading "www.".
+	 * Lower-case host without a leading "www.". Public on its second use: AmazonUrl reads the store from it.
 	 */
-	private function host(): string {
+	public function host(): string {
 		$host = strtolower( (string) parse_url( $this->value, PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
 		return str_starts_with( $host, 'www.' ) ? substr( $host, 4 ) : $host;
 	}

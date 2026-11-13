@@ -1,59 +1,70 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, setSettings } from '../utils';
+import { blockTrackers, setSettings, wp } from '../utils';
 
-// F2 Amazon links (docs/features/F2/requirements.md).
+// F2 Amazon links (docs/features/F2/requirements.md, section 11). Task 12A: AC1, AC3, AC8. AC2 and AC5 arrive
+// with 12E, AC4 with 12B, AC6 with 12C, AC7 with 12D.
 test.describe( 'F2 Amazon links', () => {
-	test.beforeAll( () => {
-		setSettings( { tracking_id: 'vbvault-20' } );
-	} );
+	// The live site's Amazon settings (tests/fixtures/inventory/settings.json).
+	const live = { tracking_id: 'vbvault-20', multiple_tracking_ids: true, tracking_id_whitelist: [ 'vbvault-20' ], shorten_amazon_links: true };
+
+	test.beforeAll( () => setSettings( live ) );
+	test.afterAll( () => setSettings( live ) );
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
 	// ASINs are random per run, so no earlier run's product makes a later one a duplicate.
 	const asin = () => 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase().padEnd( 8, 'X' );
 
-	async function add( page: Page, input: string ): Promise< string > {
+	/** The highest product ID, or 0. */
+	function newestProduct(): number {
+		const id = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=any', '--orderby=ID', '--order=DESC', '--posts_per_page=1', '--field=ID' );
+		return Number( id || 0 );
+	}
+
+	/** Adds a link through "Add A New Link" and returns the new product's stored fields. */
+	async function add( page: Page, input: string ) {
+		const before = newestProduct();
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
 		await dialog.getByLabel( 'URL' ).fill( input );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
-		await page.waitForURL( /page=affibloom-product&id=\d+/ );
-		return page.getByLabel( 'Primary Destination URL' ).inputValue();
+
+		// Until Task 14 builds the product page, the add ends on the Dashboard with a toast.
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Link added.' );
+		const id = newestProduct();
+		expect( id ).toBeGreaterThan( before );
+
+		const meta = ( key: string ) => {
+			try {
+				return wp( 'post', 'meta', 'get', String( id ), `_affibloom_${ key }` );
+			} catch {
+				return ''; // Not stored.
+			}
+		};
+		return { url: meta( 'url' ), type: meta( 'type' ), asin: meta( 'asin' ), country: meta( 'amazon_country' ) };
 	}
 
-	test( 'AC1 any Amazon link format becomes a clean tagged link', async ( { page } ) => {
+	test( 'AC1 a product link keeps its path and gets the site tag first', async ( { page } ) => {
 		const a = asin();
-		const url = await add( page, `https://www.amazon.com/Mizuno-Wave-Momentum/dp/${ a }/ref=sr_1_3?keywords=shoe` );
-		expect( url ).toBe( `https://www.amazon.com/dp/${ a }?tag=vbvault-20` );
+		const stored = await add( page, `https://www.amazon.com/Mizuno-Wave/dp/${ a }/ref=sr_1_3?keywords=shoe&tag=someone-20&ref_=x` );
+
+		expect( stored.url ).toBe( `https://www.amazon.com/Mizuno-Wave/dp/${ a }/ref=sr_1_3?tag=vbvault-20&ref_=x` );
+		expect( stored.type ).toBe( 'amazon' );
+		expect( stored.asin ).toBe( a );
+		expect( stored.country ).toBe( 'us' );
 	} );
 
-	test( 'AC2 a bare ASIN works', async ( { page } ) => {
+	test( 'AC3 another tag is replaced, a whitelisted one is kept', async ( { page } ) => {
 		const a = asin();
-		expect( await add( page, a ) ).toBe( `https://www.amazon.com/dp/${ a }?tag=vbvault-20` );
+		expect( ( await add( page, `https://www.amazon.com/dp/${ a }?tag=someone-20&th=1` ) ).url ).toBe( `https://www.amazon.com/dp/${ a }?tag=vbvault-20` );
+
+		setSettings( { tracking_id_whitelist: [ 'other-21', 'vbvault-20' ] } );
+		const b = asin();
+		expect( ( await add( page, `https://www.amazon.com/dp/${ b }?tag=other-21` ) ).url ).toBe( `https://www.amazon.com/dp/${ b }?tag=other-21` );
 	} );
 
-	test( 'AC3 another tag is replaced', async ( { page } ) => {
-		const a = asin();
-		expect( await add( page, `https://www.amazon.com/dp/${ a }?tag=someone-20&th=1` ) ).toBe( `https://www.amazon.com/dp/${ a }?tag=vbvault-20` );
-	} );
-
-	// Decision 11: a starting name from the link itself, with no request to Amazon.
-	test( 'AC5 a link with a product slug gives the product a starting name from it', async ( { page } ) => {
-		await add( page, `https://www.amazon.com/Mizuno-Wave-Momentum-3/dp/${ asin() }?tag=vbvault-20` );
-		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'Mizuno Wave Momentum 3' );
-
-		await add( page, asin() );
-		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'Amazon' );
-	} );
-
-	test( 'AC4 the same ASIN twice is refused', async ( { page } ) => {
-		const a = asin();
-		await add( page, a );
-		await page.goto( '/wp-admin/admin.php?page=affibloom' );
-		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
-		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-		await dialog.getByLabel( 'URL' ).fill( `https://www.amazon.com/gp/product/${ a }` );
-		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
-		await expect( dialog.getByText( 'This Product Already Exists' ) ).toBeVisible();
+	test( 'AC8 a protected attribution link is stored exactly as pasted', async ( { page } ) => {
+		const link = `https://www.amazon.com/dp/${ asin() }?maas=maas_adg_123&ref_=aa_maas&tag=maas`;
+		expect( ( await add( page, link ) ).url ).toBe( link );
 	} );
 } );

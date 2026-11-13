@@ -43,6 +43,16 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( '0', get_post_meta( $id, '_affibloom_nofollow', true ) );
 	}
 
+	public function test_an_amazon_product_link_is_stored_as_lasso_stores_it(): void {
+		update_option( 'affibloom_settings', array( 'tracking_id' => 'vbvault-20', 'tracking_id_whitelist' => array( 'vbvault-20' ) ) );
+		$data = $this->post( 'https://www.amazon.com/Mizuno-Wave/dp/B0C1234567/ref=sr_1_3?keywords=shoe&tag=someone-20&ref_=x' )->get_data()['data'];
+
+		self::assertSame( 'https://www.amazon.com/Mizuno-Wave/dp/B0C1234567/ref=sr_1_3?tag=vbvault-20&ref_=x', get_post_meta( $data['id'], '_affibloom_url', true ) );
+		self::assertSame( 'amazon', get_post_meta( $data['id'], '_affibloom_type', true ) );
+		self::assertSame( 'B0C1234567', get_post_meta( $data['id'], '_affibloom_asin', true ) );
+		self::assertSame( 'us', get_post_meta( $data['id'], '_affibloom_amazon_country', true ) );
+	}
+
 	public function test_a_bare_domain_is_stored_with_https(): void {
 		self::assertSame( 'https://mizunousa.com/wave', $this->post( 'mizunousa.com/wave' )->get_data()['data']['url'] );
 	}

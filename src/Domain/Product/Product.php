@@ -28,6 +28,8 @@ final class Product {
 	 * @param bool         $nofollow        The primary link carries rel="nofollow".
 	 * @param bool         $sponsored       Links carry rel="sponsored".
 	 * @param bool         $show_disclosure The box shows the disclosure.
+	 * @param string       $asin            Amazon's product ID, as written in the link; '' for other links.
+	 * @param string       $amazon_country  The Amazon store's country code ("us", "gb", …); '' for other links.
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -38,6 +40,8 @@ final class Product {
 		public readonly bool $nofollow,
 		public readonly bool $sponsored,
 		public readonly bool $show_disclosure,
+		public readonly string $asin = '',
+		public readonly string $amazon_country = '',
 	) {}
 
 	/**

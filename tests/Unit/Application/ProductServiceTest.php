@@ -38,7 +38,44 @@ final class ProductServiceTest extends TestCase {
 		self::assertSame( 'Mizunousa', $added->product->name ); // the embedded destination's site (Task 11D)
 		self::assertSame( $link, $added->product->url->value() ); // the link itself is kept as pasted
 		self::assertSame( ProductType::Other, $added->product->type );
+		self::assertSame( '', $added->product->asin );
+		self::assertSame( '', $added->product->amazon_country );
 		self::assertCount( 1, $this->repo->saved );
+	}
+
+	/** The live Amazon settings (tests/fixtures/inventory/settings.json). */
+	private const LIVE_AMAZON = array(
+		'tracking_id'           => 'vbvault-20',
+		'multiple_tracking_ids' => true,
+		'tracking_id_whitelist' => array( 'vbvault-20' ),
+		'shorten_amazon_links'  => true,
+	);
+
+	public function test_an_amazon_product_link_is_stored_as_lasso_stores_it_without_a_request(): void {
+		$added = $this->service( self::LIVE_AMAZON )->create_from_url( 'https://www.amazon.co.uk/Mizuno-Wave/dp/B0C1234567/ref=sr_1_3?keywords=shoe&tag=someone-20&ref_=x' );
+
+		self::assertSame( 'https://www.amazon.co.uk/Mizuno-Wave/dp/B0C1234567/ref=sr_1_3?tag=vbvault-20&ref_=x', $added->product->url->value() );
+		self::assertSame( ProductType::Amazon, $added->product->type );
+		self::assertSame( 'B0C1234567', $added->product->asin );
+		self::assertSame( 'gb', $added->product->amazon_country );
+		self::assertSame( 'Amazon', $added->product->name );
+		self::assertSame( array(), $this->fetcher->asked );
+	}
+
+	public function test_shorten_amazon_links_off_keeps_the_whole_query(): void {
+		$settings = array( 'shorten_amazon_links' => false ) + self::LIVE_AMAZON;
+
+		$added = $this->service( $settings )->create_from_url( 'https://www.amazon.com/dp/B0C1234567?th=1&tag=someone-20' );
+
+		self::assertSame( 'https://www.amazon.com/dp/B0C1234567?th=1&tag=vbvault-20', $added->product->url->value() );
+	}
+
+	public function test_a_whitelisted_tag_is_kept(): void {
+		$settings = array( 'tracking_id_whitelist' => array( 'other-21', 'vbvault-20' ) ) + self::LIVE_AMAZON;
+
+		$added = $this->service( $settings )->create_from_url( 'https://www.amazon.com/dp/B0C1234567?tag=other-21' );
+
+		self::assertSame( 'https://www.amazon.com/dp/B0C1234567?tag=other-21', $added->product->url->value() );
 	}
 
 	public function test_a_page_title_names_a_plain_link(): void {
@@ -86,14 +123,18 @@ final class ProductServiceTest extends TestCase {
 
 		self::assertSame( 'https://geni.us/abc', $added->product->url->value() );
 		self::assertSame( 'Amazon', $added->product->name );
+		self::assertSame( ProductType::Other, $added->product->type ); // the stored link is geni.us's
 	}
 
 	public function test_geni_us_is_stored_as_its_destination_with_the_setting_off(): void {
 		$this->fetcher = new FakePageFetcher( array( 'https://geni.us/abc' => new FetchedPage( 302, 'https://www.amazon.com/dp/B0CPH9NPK7?tag=vbvault-20', '' ) ) );
 
-		$added = $this->service( array( 'keep_genius_formatting' => false ) )->create_from_url( 'https://geni.us/abc' );
+		$added = $this->service( array( 'keep_genius_formatting' => false ) + self::LIVE_AMAZON )->create_from_url( 'https://geni.us/abc' );
 
+		// The destination is then an Amazon product link like any other (Task 12A).
 		self::assertSame( 'https://www.amazon.com/dp/B0CPH9NPK7?tag=vbvault-20', $added->product->url->value() );
+		self::assertSame( ProductType::Amazon, $added->product->type );
+		self::assertSame( 'B0CPH9NPK7', $added->product->asin );
 	}
 
 	public function test_with_the_setting_off_a_geni_us_link_to_a_known_product_is_a_duplicate(): void {
