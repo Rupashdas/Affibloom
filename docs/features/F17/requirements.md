@@ -91,7 +91,8 @@ Help texts are Lasso's (`amazon.php` 220-340) with the product name removed. The
 
 | Setting | Behaviour | Planned with |
 |---|---|---|
-| tracking ID, whitelist, blacklist, force changes | which tag each Amazon link carries; rewriting other tags | Amazon links (Task 12), link rewriting |
+| tracking ID, whitelist, blacklist, force changes | which tag each Amazon link carries; rewriting other tags | Amazon links (Task 12A: tracking ID, multiple IDs, whitelist), link rewriting (blacklist, force changes) |
+| shorten links (stored form) | the query an Amazon product link is stored with (`get_amazon_product_url`, at add) | Task 12A (F2 requirements 3.4) |
 | auto-monetize | monetizing existing and future Amazon links | auto-monetization subsystem |
 | commission upgrades | link boosting | open decision (Lasso cloud) |
 | pricing daily, locations only, discount pricing, out-of-stock days | price and stock updates | Amazon data (C1) |
