@@ -132,6 +132,8 @@ test.describe( 'F16 Display system', () => {
 		await layoutOption( page, 'ctaWidth', 'Full width' ).check();
 
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		// Read the option only once the save has answered (the toast after the redirect), as AC1 does.
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
 		const single = storedDisplay().single.layout;
 		expect( single.orientation ).toBe( 'stacked' );
 		expect( single.imagePosition ).toBe( 'bottom' );
@@ -143,6 +145,7 @@ test.describe( 'F16 Display system', () => {
 		await layoutOption( page, 'columns', '2' ).check();
 		await expect( page.locator( '[data-layout-summary]' ) ).toHaveText( '2 col · stacked · image top' );
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
 		expect( storedDisplay().columns ).toBe( 2 );
 	} );
 
