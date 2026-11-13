@@ -59,9 +59,10 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Element | Lasso shows | Label | id / selector | Note |
 |---|---|---|---|---|
 | Heading | product name, then its URL as a link | same | `h1`, `.affibloom-product-url` | |
-| Share kit | five Copy buttons (Lasso 370) | — | — | Left out (new in 370, not in the feature plan). |
-| Tabs | `Details`, `Locations <n>`, `Opportunities <n>`, `Variants <n>` | `Details`, `Locations` | `.affibloom-tabs a` | Opportunities and Variants excluded. |
+| Share kit | five Copy buttons (Lasso 370) | `Share kit`, `Copy shareable URL`, `Copy destination URL`, `Copy disclosure`, `Copy shortcode`, `Copy block` | `.affibloom-share-kit button` | **Changed** (F1 sweep, 14D): built; shortcode and block "Coming soon" until Task 18S and Phase 4. |
+| Tabs | `Details`, `Locations <n>`, `Opportunities <n>`, `Variants <n>` | same | `.affibloom-tabs a` | **Changed** (14A): all four; Locations, Opportunities and Variants "Coming soon" until their areas. |
 | Name | `Name` | `Name` | `#affibloom-name` | |
+| Permalink | `Permalink` (not for Amazon) | same | `#affibloom-permalink` | **Added** (14A): a placeholder until link cloaking (area 7). |
 | Primary URL | `Primary Destination URL` | same | `#affibloom-url` | |
 | Primary button text | `Button Text` | same | `#affibloom-button-text` | |
 | Primary new tab | `New Window / Tab` | same | `#affibloom-new-tab` | |
@@ -70,24 +71,24 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Secondary button text | `Button Text` | same | `#affibloom-button-text2` | |
 | Secondary new tab | `New Window / Tab` | same | `#affibloom-new-tab2` | |
 | Secondary nofollow | `NoFollow / NoIndex` | same | `#affibloom-nofollow2` | |
-| Groups | `Groups` | — | — | Left out (unused). |
-| Rating | custom-field card `Primary Rating`: show toggle, number, stars; `Add Custom Field` | `Primary Rating` | `#affibloom-rating` | **Changed** from `Rating`. Other custom fields left out. |
-| Display Theme | `Display Theme` (`Default (Lab)`) | — | — | Left out: one theme in use. |
-| Image | Amazon: `Amazon Image` (an editable image link) + `Refresh`; others and quick edit: `Update Image` | Amazon products: `Amazon Image` link field; every product: `Update Image` | `#affibloom-image-url` (text, visible for Amazon products), `#affibloom-image-button` | **Decided** (decision 11): the editor can paste the image link from Amazon. `Refresh` only with task C1. |
+| Groups | `Groups` (multi-select, "Select a group") | same | `#affibloom-groups` | **Changed** (deviation 52): built with the Groups area; a placeholder from 14A. |
+| Rating | custom-field card `Primary Rating`: show toggle, show-name toggle, number 1-5, stars; `Add Custom Field` | same | `.affibloom-field-row[data-field-id="1"]` | **Changed** (14C): Lasso's custom fields in full (create, library, Pros, Cons); saved as edited. |
+| Display Theme | `Display Theme` (`Default (Lab)`) | same | `#affibloom-theme` | **Changed** (14B): built. |
+| Image | Amazon: `Amazon Image` + `Refresh`; others: `Product Image` + `Apply`; the preview's `Update Image` | `Amazon Image` / `Product Image` + `Apply`; `Update Image`; `Refresh` disabled until C1 | `#affibloom-image-url` (text, visible for Amazon products), `#affibloom-image-button` | **Decided** (decision 11): the editor can paste the image link from Amazon. `Refresh` only with task C1. |
 | Badge | `Badge Text` | same | `#affibloom-badge` | |
-| Price | `Price` + toggle | — | — | Left out (price is not shown on the site). |
+| Price | `Price` + show toggle; rich text, or read-only for Amazon | same | `#affibloom-price`, `#affibloom-show-price` | **Changed** (14B): built. |
 | Description | `Description` (rich text: bold, italic, underline, strike, link, list, colour, highlight, clear) | same | `#affibloom_description` | |
 | Disclosure text | `Disclosure` | `Disclosure` | `#affibloom-disclosure` | **Changed** from `Disclosure Text`. |
 | Sponsored | `Sponsored` toggle | `Sponsored` | `#affibloom-sponsored` | **Added** (decision 3): in Lasso, in the feature plan (F9) and in the product meta. Tasks 14–15. |
 | Show disclosure | `Show Disclosure` | same | `#affibloom-show-disclosure` | |
-| Opportunities, upgrades | `Detect Opportunities`, `Commission Upgrades` | — | — | Excluded. |
+| Opportunities, cloaking, upgrades | `Detect Opportunities`, `Link Cloaking` (non-Amazon), `Commission Upgrades` | `Detect Opportunities`, `Link Cloaking` | `#affibloom-opportunities`, `#affibloom-cloaking` | **Changed** (14B): placeholders until areas 3 and 7; Commission Upgrades left out (Lasso's cloud, deviation 52). |
 | Prime | not on Lasso's page (Lasso takes it from its Amazon data) | `Show Prime Logo` | `#affibloom-prime` | Kept from the plan: without an Amazon data fetch (client point 1) the editor sets it. |
 | Save | `Save Changes` | same | `#affibloom-save` | `Learn About This Page` left out. |
 | Delete | `Delete This Link` | same | `#affibloom-delete` | **Changed** (decision 4): here, not on the Dashboard row, as in Lasso. |
 | Delete dialog | `Delete This Link?` / `If deleted, you won't be able to get it back.` / `Cancel`, `Delete` | same | `#affibloom-delete-modal[role=dialog]` | |
 | In use | Lasso: `Hold Up` … `This can't be undone. Do you want to proceed?` and allows it | refused: 409 `affibloom_in_use` | — | Deliberately safer than Lasso (F12 AC3). |
 | Toast | `Yee haw! Your <name> saved.` | `Product saved.` | `.affibloom-toast` | **Changed** (U6, approved): wording only. |
-| Out-of-stock notice | `This product may be out of stock.` | — | — | Left out (no Amazon data refresh). |
+| Notices | out of stock, broken, bulk Amazon sync, missing tracking ID | missing tracking ID (14D); broken (area 4); out of stock (C1) | `.affibloom-notice` | Bulk Amazon sync left out (Lasso's cloud). |
 | Unsaved changes | browser prompt + in-page `#unsaved-changes` dialog | same behaviour | — | Lasso already does this, so U7 is parity, not an improvement. |
 
 ### Locations tab
@@ -159,7 +160,7 @@ Success responses are `{ "data": … }`. Errors are a `WP_Error` with an `affibl
 | Image | `_affibloom_image_url` | empty, or a full link | `invalid_url` |
 | Badge Text | `_affibloom_badge` | at most 60 | `too_long` |
 | Description | `_affibloom_description` | `wp_kses_post`, at most 5,000 bytes | `too_long` |
-| Primary Rating | `_affibloom_rating` | empty, or 0 to 5 with one decimal | `invalid_rating` → "Enter a rating from 0 to 5." |
+| Primary Rating | `_affibloom_fields` (custom field 1, Task 14C, saved as edited) | 1 to 5 with one decimal, clamped as Lasso's box does | — |
 | Disclosure | `_affibloom_disclosure` | at most 500; empty = site default | `too_long` |
 
 ## 5. Settings (option `affibloom_settings`) and fresh-install defaults
