@@ -1376,16 +1376,28 @@
 
 /* 7f. "Button icons" on Settings → Display (F28, Task 14F): one row per icon, the add form in the card's foot. */
 .affibloom-icon-set { margin-top: var(--affibloom-space-section); }
-.affibloom-admin .affibloom-icon-set__list { margin: 0; padding-top: 4px; padding-bottom: 4px; list-style: none; }
+/* The icon library is a grid of cells (the user, 2026-11-13): as many 160px+ columns as fit, two on a phone. */
+.affibloom-admin .affibloom-icon-set__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(160px, calc(50% - 6px)), 1fr));
+	gap: 12px;
+	margin: 0;
+	list-style: none;
+}
 .affibloom-icon-set__item {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 14px;
+	gap: 8px;
+	min-width: 0;
 	margin: 0;
-	padding: 12px 0;
-	border-top: 1px solid var(--affibloom-line);
+	padding: 16px 12px 12px;
+	border: 1px solid var(--affibloom-line);
+	border-radius: 12px;
+	text-align: center;
 }
-.affibloom-icon-set__item:first-child { border-top: 0; }
+.affibloom-icon-set__item .affibloom-icon-set__tile { width: 48px; height: 48px; border-radius: 12px; }
+.affibloom-icon-set__item .affibloom-icon-set__image { width: 26px; height: 26px; }
 /* The site's icons are white glyphs made for coloured buttons, so each sits on a dark tile like a button. */
 .affibloom-icon-set__tile {
 	display: inline-grid;
@@ -1399,12 +1411,13 @@
 /* An icon whose image file is not on the site (F28 D4): a warning instead of a broken picture. */
 .affibloom-icon-set__tile--missing { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
 .affibloom-icon-set__image { width: 20px; height: 20px; object-fit: contain; }
-.affibloom-icon-set__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.affibloom-icon-set__text { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; max-width: 100%; }
 .affibloom-icon-set__name { font-weight: 600; }
 .affibloom-icon-set__missing { color: var(--affibloom-warning-700); font-size: 13px; overflow-wrap: anywhere; }
-.affibloom-admin .affibloom-icon-set__class { align-self: flex-start; padding: 1px 6px; border-radius: 4px; background: var(--affibloom-subtle); color: var(--affibloom-ink-600); font-size: 12px; overflow-wrap: anywhere; }
-.affibloom-icon-set__source { flex: 0 0 auto; margin-left: auto; color: var(--affibloom-ink-600); font-size: 13px; text-align: right; }
-.affibloom-icon-set__remove { margin-left: auto; }
+.affibloom-admin .affibloom-icon-set__class { max-width: 100%; padding: 1px 6px; border-radius: 4px; background: var(--affibloom-subtle); color: var(--affibloom-ink-600); font-size: 12px; overflow-wrap: anywhere; }
+/* The cell's foot: where the icon comes from, or Remove, held at the bottom so a row of cells lines up. */
+.affibloom-icon-set__source { margin-top: auto; padding-top: 4px; color: var(--affibloom-ink-600); font-size: 12px; line-height: 16px; }
+.affibloom-icon-set__remove { margin-top: auto; padding-top: 4px; }
 .affibloom-icon-set__add { align-items: center; justify-content: flex-start; flex-wrap: wrap; }
 .affibloom-admin .affibloom-icon-set__add .affibloom-input { width: 240px; }
 .affibloom-icon-set__add .affibloom-button--primary { margin-left: auto; }
