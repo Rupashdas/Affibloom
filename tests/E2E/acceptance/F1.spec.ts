@@ -26,9 +26,10 @@ test.describe( 'F1 Product library', () => {
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 		await page.locator( '#affibloom-name' ).fill( name );
 		const extra = page.locator( '[data-extra-button]' ).first();
-		await extra.locator( 'input[name="buttons[0][text]"]' ).fill( 'Women\'s' );
+		// Button texts and the badge are icon fields: the words are typed in their own box (F28, Task 14G).
+		await extra.locator( '.affibloom-icon-field__words' ).fill( 'Women\'s' );
 		await extra.getByRole( 'button', { name: /Move .* up/ } ).click();
-		await page.locator( '#affibloom-badge' ).fill( 'Best Overall' );
+		await page.locator( '#affibloom-badge-words' ).fill( 'Best Overall' );
 		await page.locator( '#affibloom-theme' ).selectOption( 'Splash' );
 		await page.locator( '#affibloom-sponsored' ).check();
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
@@ -75,7 +76,7 @@ test.describe( 'F1 Product library', () => {
 			await page.locator( 'input[name="buttons[0][url]"]' ).fill( 'www.amazon.com/dp/B0C7654321?tag=someone-20' );
 			await page.getByRole( 'button', { name: 'Add Another Button' } ).click();
 			await page.locator( 'input[name="buttons[1][url]"]' ).fill( 'www.example.com/f1-ac13-third' );
-			await page.locator( '#affibloom-badge' ).fill( 'Top Pick' );
+			await page.locator( '#affibloom-badge-words' ).fill( 'Top Pick' );
 			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
 			await expect( page.locator( 'input[name="buttons[0][url]"]' ) ).toHaveValue( 'https://www.amazon.com/dp/B0C7654321?tag=vbvault-20' );
