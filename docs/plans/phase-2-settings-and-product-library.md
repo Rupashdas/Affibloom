@@ -206,7 +206,7 @@ they were, then the new sections in the order listed after G5.
 
 - [x] Task 2X0: PHP 8.3 and WordPress 7.1.4 everywhere (decision F7)
 - [x] Task 2X1: Product page — the gaps a done task left
-- [ ] Task 2X2: The F1 AC2 test checks everything it claims
+- [x] Task 2X2: The F1 AC2 test checks everything it claims
 - [x] Task 2X3: Display colours accept every CSS colour Lasso accepts
 - [ ] Task 2X4: A kept redirect that ends at Amazon is an Amazon product
 - [ ] Task 2X5: Bulk add never stalls on one bad link; "Continue Anyway"
@@ -5056,7 +5056,7 @@ toggles after the reload. Tests only.
   built code (expected green; a red result is a real bug: fix it in this task and record a deviation). To show it can
   fail, break one field's save by hand (for example, drop the price from the form) and see the case go red, then
   restore it.
-- [ ] **Step 2: Run and look.** Run the whole F1 file twice in a row; both runs pass and the library's order is the
+- [x] **Step 2: Run and look.** Run the whole F1 file twice in a row; both runs pass and the library's order is the
   same after both.
 - [x] **Step 3: Commit** — "Check every product field after a save in F1 AC2".
 

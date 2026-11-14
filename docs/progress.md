@@ -26,7 +26,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Gate 4 given for the whole plan** (the user, 2026-11-14 walkthrough; answers in `open-decisions.md`). Building
    resumes task by task in the phase files' order.
-2. **Tasks 2X0 and 2X3 are done; 2X2 is written and passes, its quiet double F1 run is still open**; 2X1 awaits the user's run. Then 2X4-2X6, then Groups G1-G5.
+2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. Then 2X4-2X6, then Groups G1-G5.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
