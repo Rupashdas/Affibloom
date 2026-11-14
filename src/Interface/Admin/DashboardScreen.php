@@ -54,6 +54,7 @@ final class DashboardScreen {
 		$typed = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 		$kind  = isset( $_GET['link_type'] ) ? sanitize_key( wp_unslash( $_GET['link_type'] ) ) : '';
 		$group = isset( $_GET['group'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['group'] ) ) : 0;
+		$one   = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$per_page  = $this->per_page->choose( $asked );
@@ -61,7 +62,7 @@ final class DashboardScreen {
 		$link_kind = LinkKind::from_input( $kind );
 		// A group that is gone (a bookmark, a saved view) falls back to all groups (F23 edge case 5).
 		$group    = $this->groups->choose_filter( $group );
-		$products = $this->products->list( $term, $link_kind, $page, $per_page, $group );
+		$products = $this->products->list( $term, $link_kind, $page, $per_page, $group, $one );
 		$ids      = array_map( static fn( $product ): int => (int) $product->id, $products->items );
 
 		$this->template->render(
@@ -74,7 +75,9 @@ final class DashboardScreen {
 				'group_list'    => $this->groups->all(),
 				'groups_of'     => $this->groups->for_products( $ids ),
 				'views'         => $this->views->list( get_current_user_id() ),
-				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group ),
+				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
+				// Every list argument but the page, for the GET forms' hidden inputs (Task 13F).
+				'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one ),
 				'library'       => $this->products->count(),
 				'notice'        => $this->notice->message(),
 				'lasso_pending' => $this->import->pending(),

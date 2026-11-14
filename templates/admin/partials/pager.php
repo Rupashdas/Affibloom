@@ -2,16 +2,15 @@
 /**
  * The list's footer, as Lasso's (admin/views/dashboard/dashboard.php, lasso-dashboard-pager): the page-size
  * select and the "1-10 of 263" range on the left, the page links on the right. The select is a form, so the
- * screen needs no JavaScript; without JavaScript its Apply button submits it.
+ * screen needs no JavaScript; without JavaScript its Apply button submits it, with the list's other arguments.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Application\Products\ProductService;
-use Affibloom\Interface\Admin\AdminMenu;
 
 $products = $view['products'];
 $links    = paginate_links(
@@ -31,10 +30,15 @@ $links    = paginate_links(
 ?>
 <div class="affibloom-pager">
 	<form class="affibloom-pager__size" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
-		<input type="hidden" name="page" value="<?php echo esc_attr( AdminMenu::SLUG ); ?>">
-		<?php if ( '' !== $view['term'] ) : ?>
-			<input type="hidden" name="s" value="<?php echo esc_attr( $view['term'] ); ?>">
-		<?php endif; ?>
+		<?php
+		$this->render(
+			'admin/partials/list-args',
+			array(
+				'args'   => $view['args'],
+				'except' => array( 'per_page' ),
+			)
+		);
+		?>
 		<label class="screen-reader-text" for="affibloom-per-page"><?php esc_html_e( 'Links per page', 'affibloom' ); ?></label>
 		<select id="affibloom-per-page" class="affibloom-select" name="per_page">
 			<?php foreach ( ProductService::PER_PAGE_OPTIONS as $option ) : ?>

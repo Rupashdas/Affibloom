@@ -1372,6 +1372,25 @@
 	background: var(--affibloom-subtle);
 }
 .affibloom-filters__hint { color: var(--affibloom-ink-600); font-size: 12px; }
+.affibloom-filters__form { display: grid; gap: 14px; margin: 0; }
+.affibloom-filters__form .affibloom-no-js { justify-self: start; }
+
+/*
+ * Without JavaScript (Task 13F; F19 D17). wp-admin prints the body with `no-js` and its first script swaps it for
+ * `js`, so these rules only hold when no script runs: the panel is shown open in the toolbar's flow, its Filters
+ * button and the parts that need a script (×, Save as, Reset filters) are hidden, and Apply submits the filters.
+ */
+/* One class above `.affibloom-button` (later in this file), which would show it again. */
+.affibloom-admin .affibloom-no-js { display: none; }
+.no-js .affibloom-admin .affibloom-no-js { display: inline-flex; }
+.no-js .affibloom-filters__toggle,
+.no-js .affibloom-filters__close,
+.no-js .affibloom-filters__save,
+.no-js .affibloom-filters__foot { display: none; }
+/* The panel is printed `hidden` so it never flashes open before the script runs; this outranks the !important of
+   `.affibloom-admin [hidden]`, for this one element and only without a script. */
+.no-js .affibloom-admin .affibloom-filters__panel[hidden] { display: block !important; }
+.no-js .affibloom-filters__panel { position: static; box-shadow: var(--affibloom-shadow-card); }
 
 /* Pager: the card's footer, the size and range left, the page links right (Lasso's lasso-dashboard-pager). */
 .affibloom-pager {

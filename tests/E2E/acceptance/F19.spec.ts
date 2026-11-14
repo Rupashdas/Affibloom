@@ -240,6 +240,55 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( page.locator( '.affibloom-pill', { hasText: name } ) ).toHaveCount( 0 );
 	} );
 
+	test( 'AC15 without JavaScript the filters apply and every form keeps them; post_id lists one product', async ( { browser } ) => {
+		const tail = unique( 'ac15' );
+		const asin = ( 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase() ).padEnd( 10, 'X' ).slice( 0, 10 );
+		const amazon = createProduct( { name: `F19 AC15 amazon ${ tail }`, type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20` } );
+		const other = createProduct( { name: `F19 AC15 other ${ tail }` } );
+
+		const context = await browser.newContext( { javaScriptEnabled: false } );
+		await blockTrackers( context );
+		const page = await context.newPage();
+		try {
+			await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10' );
+
+			// wp-admin's no-js class: the panel is open, its button hidden, and Apply submits the filters.
+			await expect( page.locator( '.affibloom-filters__toggle' ) ).toBeHidden();
+			await expect( page.getByLabel( 'Link type' ) ).toBeVisible();
+			await page.getByLabel( 'Link type' ).selectOption( 'amazon' );
+			await page.getByRole( 'button', { name: 'Apply', exact: true } ).first().click();
+			await expect( page ).toHaveURL( /link_type=amazon/ );
+			await expect( page.locator( `tr[data-product-id="${ other }"]` ) ).toHaveCount( 0 );
+
+			// A search keeps the filter.
+			await page.getByLabel( 'Search' ).fill( tail );
+			await page.getByLabel( 'Search' ).press( 'Enter' );
+			await expect( page ).toHaveURL( /link_type=amazon/ );
+			await expect( rows( page ) ).toHaveCount( 1 );
+			await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( amazon ) );
+
+			// So does a new page size (its Apply shows only without JavaScript).
+			await page.getByLabel( 'Links per page' ).selectOption( '25' );
+			await page.locator( '.affibloom-pager__size' ).getByRole( 'button', { name: 'Apply' } ).click();
+			await expect( page ).toHaveURL( /link_type=amazon/ );
+			await expect( page ).toHaveURL( /per_page=25/ );
+			await expect( page ).toHaveURL( new RegExp( `s=${ tail }` ) );
+			await expect( rows( page ) ).toHaveCount( 1 );
+
+			// ?post_id= lists that one product (Lasso's R30).
+			await page.goto( `/wp-admin/admin.php?page=affibloom&post_id=${ other }` );
+			await expect( rows( page ) ).toHaveCount( 1 );
+			await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( other ) );
+
+			// An ID that is no published product finds nothing, and says so as a search does.
+			wp( 'post', 'update', String( other ), '--post_status=draft' );
+			await page.goto( `/wp-admin/admin.php?page=affibloom&post_id=${ other }` );
+			await expect( page.locator( '#affibloom-list' ).getByText( 'No products match your search.' ) ).toBeVisible();
+		} finally {
+			await context.close();
+		}
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )

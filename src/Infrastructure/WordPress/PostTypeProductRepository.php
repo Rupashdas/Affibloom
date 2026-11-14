@@ -477,8 +477,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param int        $page      Page number, from 1.
 	 * @param int        $per_page  Products per page.
 	 * @param int        $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
+	 * @param int        $post_id   One product only (Lasso's `?post_id=`, F19 R30): 0 for all; still published only.
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -514,6 +515,11 @@ final class PostTypeProductRepository implements ProductRepository {
 					'compare' => 'NOT EXISTS',
 				),
 			);
+		}
+
+		// Lasso's `?post_id=` (class-ajax.php 126-132: p.ID = %d), with the other filters still applied.
+		if ( $post_id > 0 ) {
+			$list['p'] = $post_id;
 		}
 
 		// Lasso's Group filter (dashboard.php 158-165): one group's products, or the products in no group.

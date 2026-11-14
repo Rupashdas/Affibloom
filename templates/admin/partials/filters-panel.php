@@ -8,7 +8,7 @@
  * column leave no room for a 280px side panel without squeezing the Link Name.
  *
  * @package Affibloom
- * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>} $view
+ * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>, args: array<string, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,6 +46,20 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 		</div>
 
 		<div class="affibloom-filters__body">
+			<?php
+			// The working filters are one GET form (Task 13F; F19 D17): with JavaScript they load as you toggle, as
+			// Lasso's do; without it, Apply submits them with the list's other arguments.
+			?>
+			<form class="affibloom-filters__form" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
+			<?php
+			$this->render(
+				'admin/partials/list-args',
+				array(
+					'args'   => $view['args'],
+					'except' => array( 'link_type', 'group' ),
+				)
+			);
+			?>
 			<?php // Lasso's Group filter (dashboard.php 158-165, Task G5): all groups, "Not in Groups", then every group. ?>
 			<div class="affibloom-filters__field">
 				<label class="affibloom-filters__label" for="affibloom-filter-group"><?php esc_html_e( 'Group', 'affibloom' ); ?></label>
@@ -66,6 +80,8 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 					<?php endforeach; ?>
 				</select>
 			</div>
+			<button type="submit" class="affibloom-button affibloom-button--small affibloom-button--primary affibloom-no-js"><?php esc_html_e( 'Apply', 'affibloom' ); ?></button>
+			</form>
 
 			<?php foreach ( $pending as $field ) : ?>
 				<div class="affibloom-filters__field">

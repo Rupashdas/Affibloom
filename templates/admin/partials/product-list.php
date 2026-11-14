@@ -4,13 +4,14 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
+// A `?post_id=` that names no published product is a search that found nothing, not an empty library (Task 13F).
 $products  = $view['products'];
-$searching = '' !== $view['term'];
+$searching = '' !== $view['term'] || isset( $view['args']['post_id'] );
 $columns   = array(
 	// [ class, label, a placeholder until its task ].
 	array( 'affibloom-col-image', __( 'Image', 'affibloom' ), false ),
@@ -83,6 +84,7 @@ $columns   = array(
 				'products' => $products,
 				'term'     => $view['term'],
 				'url'      => $view['url'],
+				'args'     => $view['args'],
 			)
 		);
 		?>

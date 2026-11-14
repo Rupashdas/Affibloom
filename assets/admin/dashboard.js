@@ -175,6 +175,8 @@
 		link_type: params.get( 'link_type' ) || '',
 		// The Group filter (Task G5): 0 all groups, -1 "Not in Groups", else a group's ID.
 		group: parseInt( params.get( 'group' ), 10 ) || 0,
+		// Lasso's ?post_id= (Task 13F; F19 D24): one product, kept by every list change until Reset or a pill.
+		post_id: parseInt( params.get( 'post_id' ), 10 ) || 0,
 		paged: parseInt( params.get( 'paged' ), 10 ) || 1,
 		// The size the page was printed with (remembered per editor), so the first search keeps it.
 		per_page: sizeSelect ? parseInt( sizeSelect.value, 10 ) : 0,
@@ -191,6 +193,7 @@
 		args.set( 's', list.s );
 		args.set( 'link_type', list.link_type );
 		args.set( 'group', String( list.group || 0 ) );
+		args.set( 'post_id', String( list.post_id || 0 ) );
 		args.set( 'paged', String( list.paged ) );
 		args.set( 'per_page', String( list.per_page ) );
 		return '/affibloom/v1/dashboard/products?' + args.toString();
@@ -198,7 +201,7 @@
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, group: current.group, paged: 1, per_page: current.per_page };
+		var next = { s: current.s, link_type: current.link_type, group: current.group, post_id: current.post_id, paged: 1, per_page: current.per_page };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -221,14 +224,14 @@
 		var pills = Array.prototype.slice.call( document.querySelectorAll( '[data-views] .affibloom-pill' ) );
 		var match = null;
 		pills.slice( 1 ).forEach( function ( pill ) {
-			if ( ! match && pill.getAttribute( 'data-view-s' ) === current.s &&
+			if ( ! match && ! current.post_id && pill.getAttribute( 'data-view-s' ) === current.s &&
 				pill.getAttribute( 'data-view-link-type' ) === current.link_type &&
 				parseInt( pill.getAttribute( 'data-view-group' ), 10 ) === current.group &&
 				parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) === current.per_page ) {
 				match = pill;
 			}
 		} );
-		if ( ! match && pills[ 0 ] && '' === current.s && '' === current.link_type && 0 === current.group ) {
+		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group ) {
 			match = pills[ 0 ];
 		}
 		pills.forEach( function ( pill ) {
@@ -292,7 +295,7 @@
 				return;
 			}
 			var data = response.data;
-			current = { s: data.term, link_type: data.link_type, group: data.group, paged: data.page, per_page: data.per_page };
+			current = { s: data.term, link_type: data.link_type, group: data.group, post_id: data.post_id, paged: data.page, per_page: data.per_page };
 
 			region.innerHTML = data.html;
 			quick.id = null; // An open quick edit went with the old rows.
@@ -376,6 +379,7 @@
 				s: back.get( 's' ) || '',
 				link_type: back.get( 'link_type' ) || '',
 				group: parseInt( back.get( 'group' ), 10 ) || 0,
+				post_id: parseInt( back.get( 'post_id' ), 10 ) || 0,
 				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
 				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
 			}, false, false );
@@ -450,6 +454,14 @@
 				linkType.value = current.link_type;
 			} );
 		} );
+
+		// The filters' form is for a page without JavaScript (Task 13F); here they load as you toggle.
+		var filtersForm = panel.querySelector( '.affibloom-filters__form' );
+		if ( filtersForm ) {
+			filtersForm.addEventListener( 'submit', function ( event ) {
+				event.preventDefault();
+			} );
+		}
 
 		// The Group filter, as the link type is (Task G5; F23 R22).
 		if ( groupFilter ) {

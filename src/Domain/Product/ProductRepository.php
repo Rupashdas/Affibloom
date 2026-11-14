@@ -101,8 +101,9 @@ interface ProductRepository {
 	 * @param int        $page      Page number, from 1.
 	 * @param int        $per_page  Products per page.
 	 * @param int        $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
+	 * @param int        $post_id   One product only (F19 R30, Task 13F): 0 for all.
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): ProductPage;
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): ProductPage;
 
 	/**
 	 * How many published products the library holds, whatever is being searched for. Lasso counts the same way

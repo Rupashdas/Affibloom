@@ -249,7 +249,7 @@ they were, then the new sections in the order listed after G5.
 **Dashboard, second pass (F19)** — 13K (sorting) is in Phase 7; 13L (command palette) and 13M (tour) are dropped as
 duplicates of F38 ON9 and ON8 (Phase 8)
 
-- [ ] Task 13F: The list keeps every argument without JavaScript, and `?post_id=`
+- [x] Task 13F: The list keeps every argument without JavaScript, and `?post_id=`
 - [ ] Task 13G: The search finds added buttons' links, not their texts
 - [ ] Task 13H: F19 AC4 and AC10 tests that run on a full library
 - [ ] Task 13I: A stable order, and counts that follow the list
@@ -5830,12 +5830,12 @@ search message when it is not a published product). With JavaScript on nothing c
 `src/Interface/Rest/DashboardController.php`, `PostTypeProductRepository.php`, `ProductService.php`,
 `assets/admin/admin.css`; tests `F19.spec.ts` AC15 (a `javaScriptEnabled: false` context), `DashboardUrlTest`.
 
-- [ ] **Step 1: Failing test.** AC15 with JavaScript off: Apply missing → fails for the right reason.
-- [ ] **Step 2: Hidden arguments.** `list-args.php` takes the list and the names to leave out; the three forms use it.
-- [ ] **Step 3: The panel without a script.** The GET form, Apply, `.no-js` CSS (wp-admin swaps `no-js` for `js`).
-- [ ] **Step 4: `post_id`.** Screen, route (`integer`, minimum 0), `DashboardUrl`, repository (`p` + publish).
-- [ ] **Step 5: Run and look** with JavaScript off and on, 1280 and 375 px; F19 AC12-AC14 still pass.
-- [ ] **Step 6: Commit** — "Keep the Dashboard's filters without JavaScript".
+- [x] **Step 1: Failing test.** AC15 with JavaScript off: Apply missing → fails for the right reason.
+- [x] **Step 2: Hidden arguments.** `list-args.php` takes the list and the names to leave out; the three forms use it.
+- [x] **Step 3: The panel without a script.** The GET form, Apply, `.no-js` CSS (wp-admin swaps `no-js` for `js`).
+- [x] **Step 4: `post_id`.** Screen, route (`integer`, minimum 0), `DashboardUrl`, repository (`p` + publish).
+- [x] **Step 5: Run and look** with JavaScript off and on, 1280 and 375 px; F19 AC12-AC14 still pass.
+- [x] **Step 6: Commit** — "Keep the Dashboard's filters without JavaScript".
 
 ---
 

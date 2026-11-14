@@ -6,12 +6,10 @@
  * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, library: int, notice: string, lasso_pending: int} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, lasso_pending: int, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
-
-use Affibloom\Interface\Admin\AdminMenu;
 
 $products    = $view['products'];
 $placeholder = sprintf(
@@ -32,8 +30,15 @@ $placeholder = sprintf(
 				</div>
 				<?php // The search sits right of the title, as in Lasso's title row (the user, 2026-11-13). ?>
 				<form class="affibloom-band__search" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" role="search">
-					<input type="hidden" name="page" value="<?php echo esc_attr( AdminMenu::SLUG ); ?>">
-					<input type="hidden" name="per_page" value="<?php echo esc_attr( (string) $products->per_page ); ?>">
+					<?php
+					$this->render(
+						'admin/partials/list-args',
+						array(
+							'args'   => $view['args'],
+							'except' => array( 's' ),
+						)
+					);
+					?>
 					<label class="screen-reader-text" for="affibloom-search"><?php esc_html_e( 'Search', 'affibloom' ); ?></label>
 					<input type="search" id="affibloom-search" class="affibloom-input affibloom-search" name="s"
 						value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"
@@ -73,6 +78,7 @@ $placeholder = sprintf(
 						'link_kind'  => $view['link_kind'],
 						'group'      => $view['group'],
 						'group_list' => $view['group_list'],
+						'args'       => $view['args'],
 					)
 				);
 				?>
@@ -89,6 +95,7 @@ $placeholder = sprintf(
 						'products'  => $products,
 						'term'      => $view['term'],
 						'url'       => $view['url'],
+						'args'      => $view['args'],
 						'groups_of' => $view['groups_of'],
 					)
 				);

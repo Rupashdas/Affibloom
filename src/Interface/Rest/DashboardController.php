@@ -103,10 +103,16 @@ final class DashboardController implements Module {
 					'callback'            => array( $this, 'products' ),
 					'permission_callback' => array( $this, 'can_manage' ),
 					'args'                => $list + array(
-						'paged' => array(
+						'paged'   => array(
 							'type'    => 'integer',
 							'minimum' => 1,
 							'default' => 1,
+						),
+						// Lasso's `?post_id=` (Task 13F; F19 D24): one product, 0 for all. Not kept in a saved view, as in Lasso.
+						'post_id' => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'default' => 0,
 						),
 					),
 				),
@@ -166,7 +172,8 @@ final class DashboardController implements Module {
 		$link_kind = LinkKind::from_input( (string) $request->get_param( 'link_type' ) );
 		$per_page  = $this->per_page->choose( absint( $request->get_param( 'per_page' ) ) );
 		$group     = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
-		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group );
+		$one       = absint( $request->get_param( 'post_id' ) );
+		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $list->items );
 
 		return new WP_REST_Response(
@@ -177,7 +184,8 @@ final class DashboardController implements Module {
 						array(
 							'products'  => $list,
 							'term'      => $term->text(),
-							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group ),
+							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
+							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one ),
 							'groups_of' => $this->groups->for_products( $ids ),
 						)
 					),
@@ -187,7 +195,8 @@ final class DashboardController implements Module {
 					'page'      => $list->current(),
 					'per_page'  => $per_page,
 					'total'     => $list->total,
-					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group ),
+					'post_id'   => $one,
+					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one ),
 				),
 			)
 		);

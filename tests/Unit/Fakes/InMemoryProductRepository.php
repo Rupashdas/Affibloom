@@ -41,12 +41,13 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	/** Newest saved first, which is this fake's stand-in for "most recently changed". */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): ProductPage {
 		$all = array_values(
 			array_filter(
 				array_reverse( $this->saved ),
-				static fn( Product $product ): bool => LinkKind::All === $link_kind
-					|| ( LinkKind::Amazon === $link_kind ) === ( ProductType::Amazon === $product->type )
+				static fn( Product $product ): bool => ( LinkKind::All === $link_kind
+					|| ( LinkKind::Amazon === $link_kind ) === ( ProductType::Amazon === $product->type ) )
+					&& ( 0 === $post_id || $post_id === (int) $product->id )
 			)
 		);
 		if ( ! $term->is_empty() ) {
