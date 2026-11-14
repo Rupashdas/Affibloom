@@ -3,14 +3,7 @@ includes:
 
 parameters:
 	level: 6
+	phpVersion: 80300
 	paths:
 		- affibloom.php
 		- src
-	ignoreErrors:
-		# PHPStan analyses as PHP 8.1+ (composer.json platform), so it sees the
-		# runtime PHP check in affibloom.php as always false. That check exists
-		# for servers older than the platform, so it stays.
-		-
-			identifier: booleanOr.leftAlwaysFalse
-			path: affibloom.php
-			count: 1

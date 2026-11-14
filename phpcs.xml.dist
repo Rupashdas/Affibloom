@@ -11,8 +11,8 @@
 	<arg name="colors"/>
 	<arg value="sp"/>
 
-	<config name="testVersion" value="8.1-"/>
-	<config name="minimum_wp_version" value="6.5"/>
+	<config name="testVersion" value="8.3-"/>
+	<config name="minimum_wp_version" value="7.1.4"/>
 
 	<rule ref="WordPress">
 		<!-- PSR-4 file names (Plugin.php), not class-plugin.php. -->
@@ -27,7 +27,7 @@
 		<exclude-pattern>src/Application/*</exclude-pattern>
 	</rule>
 	<rule ref="PHPCompatibilityWP"/>
-	<!-- PHP 8.0+ reads a namespaced name as one token, so Affibloom\Interface\… is valid (the plugin needs 8.1).
+	<!-- PHP 8.0+ reads a namespaced name as one token, so Affibloom\Interface\… is valid (the plugin needs 8.3).
 	     PHPCompatibility 9.3.5, the latest stable release, predates that rule and still reports the keyword. -->
 	<rule ref="PHPCompatibility.Keywords.ForbiddenNames.interfaceFound">
 		<exclude-pattern>src/Interface/*</exclude-pattern>

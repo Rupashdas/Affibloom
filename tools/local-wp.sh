@@ -7,7 +7,7 @@ set -euo pipefail
 
 LOCAL_DATA="${LOCAL_DATA:-$APPDATA/Local}"
 LOCAL_SITE_ID="${LOCAL_SITE_ID:-XMaGBQZ-W}"
-LOCAL_PHP_DIR="${LOCAL_PHP_DIR:-$LOCAL_DATA/lightning-services/php-8.2.29+0/bin/win64}"
+LOCAL_PHP_DIR="${LOCAL_PHP_DIR:-$LOCAL_DATA/lightning-services/php-8.3.36+0/bin/win64}"
 LOCAL_MYSQL_DIR="${LOCAL_MYSQL_DIR:-$LOCAL_DATA/lightning-services/mysql-8.4.0+2/bin/win64/bin}"
 LOCAL_WP_CLI="${LOCAL_WP_CLI:-/c/Program Files (x86)/Local/resources/extraResources/bin/wp-cli/wp-cli.phar}"
 # The site's MySQL port, read from Local's run/<site id>/conf/mysql/my.cnf on every run:

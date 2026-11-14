@@ -54,6 +54,13 @@ final class ProductEditors {
 			$init['height']           = 40;
 			$init['wp_autoresize_on'] = false;
 		}
+		// Lasso's Quill description says "Enter a description" while empty. TinyMCE 4.9 has no placeholder of its own, so the
+		// words travel as a setting and a style inside the editor draws them; product.js toggles the class and the attribute.
+		if ( 'affibloom_description' === $editor_id ) {
+			$init['placeholder']   = __( 'Enter a description', 'affibloom' );
+			$init['content_style'] = ( isset( $init['content_style'] ) && is_string( $init['content_style'] ) ? $init['content_style'] . ' ' : '' )
+				. 'body.affibloom-empty::before { content: attr(data-placeholder); color: #6b7280; position: absolute; pointer-events: none; }';
+		}
 
 		return $init;
 	}

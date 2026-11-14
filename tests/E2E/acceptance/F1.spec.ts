@@ -862,4 +862,90 @@ test.describe( 'F1 Product library', () => {
 		expect( status( gone ) ).toBe( 'publish' );
 		expect( wp( 'post', 'meta', 'list', String( gone ), '--keys=_affibloom_repointed_to', '--format=count' ) ).toBe( '0' );
 	} );
+
+	// Task 2X1: details the product page's earlier tasks (14B, 14C, 14H) were ticked done without.
+	test( 'AC5 the Description editor says "Enter a description" while it is empty, and stops when there is text', async ( { page } ) => {
+		const empty = createProduct( { name: unique( 'F1 AC5 empty' ), description: '' } );
+		const filled = createProduct( { name: unique( 'F1 AC5 filled' ), description: '<p>Grips the floor.</p>' } );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ empty }` );
+		const body = page.frameLocator( '#affibloom_description_ifr' ).locator( 'body' );
+		await expect( body ).toHaveAttribute( 'data-placeholder', 'Enter a description' );
+		await expect( body ).toHaveClass( /affibloom-empty/ );
+		// The words are drawn by the editor's own style, so they are not part of the saved content.
+		expect( await body.evaluate( ( el ) => window.getComputedStyle( el, '::before' ).content ) ).toBe( '"Enter a description"' );
+		await body.click();
+		await page.keyboard.type( 'Sticky.' );
+		await expect( body ).not.toHaveClass( /affibloom-empty/ );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ filled }` );
+		await expect( page.frameLocator( '#affibloom_description_ifr' ).locator( 'body' ) ).not.toHaveClass( /affibloom-empty/ );
+	} );
+
+	test( 'AC7 the disabled Refresh button gives its reason to a screen reader, not through a title alone', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F1 AC7 refresh' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC7RFS?tag=vbvault-20', asin: 'B0F1AC7RFS' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+		const refresh = page.getByRole( 'button', { name: 'Refresh' } );
+		await expect( refresh ).toBeDisabled();
+		await expect( refresh ).toHaveAttribute( 'aria-describedby', 'affibloom-refresh-reason' );
+		await expect( page.locator( '#affibloom-refresh-reason' ) ).toHaveText( 'Needs the Amazon API' );
+		await expect( refresh ).toHaveAccessibleDescription( 'Needs the Amazon API' );
+	} );
+
+	test( 'AC10 Remove on an added button asks in the page\'s own dialog; a failed field save or remove says so', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F1 AC10 faults' ), url2: 'https://www.example.com/f1-ac10-second', button_text2: 'Second' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+		// Remove: the design system's dialog, not the browser's; Cancel keeps the button, Remove takes it out.
+		let browserDialogs = 0;
+		page.on( 'dialog', ( dialog ) => {
+			browserDialogs += 1;
+			void dialog.dismiss();
+		} );
+		const blocks = page.locator( '[data-button]' );
+		await expect( blocks ).toHaveCount( 2 );
+		await blocks.nth( 0 ).getByRole( 'button', { name: 'Remove Button 1' } ).click();
+		const ask = page.getByRole( 'dialog', { name: 'Remove this button?' } );
+		await expect( ask ).toContainText( 'Its link and text are gone once you save.' );
+		await ask.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( ask ).toBeHidden();
+		await expect( blocks ).toHaveCount( 2 );
+		await blocks.nth( 0 ).getByRole( 'button', { name: 'Remove Button 1' } ).click();
+		await ask.getByRole( 'button', { name: 'Remove' } ).click();
+		await expect( blocks ).toHaveCount( 1 );
+		expect( browserDialogs ).toBe( 0 );
+
+		// A field added for real, then every later save and remove answered 500 by a stub.
+		await page.getByRole( 'button', { name: 'Add Custom Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByRole( 'tab', { name: 'Add from library' } ).click();
+		await Promise.all( [
+			page.waitForResponse( ( r ) => /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+(\/|%2F)fields/.test( r.url() ) && r.ok() ),
+			dialog.getByRole( 'button', { name: 'Add Primary Rating' } ).click(),
+		] );
+		await page.route( /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+(\/|%2F)fields/, ( route ) => {
+			if ( 'POST' === route.request().method() ) {
+				return route.continue();
+			}
+			return route.fulfill( {
+				status: 500,
+				contentType: 'application/json',
+				body: JSON.stringify( { code: 'affibloom_test_failure', message: 'The field could not be stored.', data: { status: 500 } } ),
+			} );
+		} );
+
+		const rating = page.locator( '[data-field-row][data-field-id="1"]' );
+		await rating.getByLabel( 'Primary Rating', { exact: true } ).fill( '4.5' );
+		await rating.getByLabel( 'Primary Rating', { exact: true } ).blur();
+		await expect( page.locator( '.affibloom-toast--error' ) ).toContainText( 'The field could not be stored.' );
+
+		// Remove: the question stays open with the reason, and the field is still there.
+		await rating.getByRole( 'button', { name: 'Remove Primary Rating' } ).click();
+		const confirm = page.getByRole( 'dialog', { name: 'Remove "Primary Rating"?' } );
+		await confirm.getByRole( 'button', { name: 'Remove' } ).click();
+		await expect( confirm.getByRole( 'alert' ) ).toContainText( 'The field could not be stored.' );
+		await expect( confirm ).toBeVisible();
+		await expect( rating ).toHaveCount( 1 );
+	} );
 } );

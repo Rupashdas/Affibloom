@@ -8,15 +8,15 @@
   (Local by Flywheel). Plugin repo: `...\app\public\wp-content\plugins\affibloom`.
 - Local site: id `XMaGBQZ-W`, URL `http://volleyballvault.local` (`siteurl` confirmed 2026-11-12).
   Table prefix `wp_`. `WP_ENVIRONMENT_TYPE` is already `local` in `wp-config.php`.
-- Local's versions (2026-11-12): WordPress 7.1.4, PHP 8.2.29, MySQL 8.4.0, nginx 1.26.1, Mailpit 1.24.1.
-  Production runs WP 7.1.4, **PHP 8.3, MariaDB 10.11**, so PHP and the database differ here. MariaDB
+- Local's versions (2026-11-14): WordPress 7.1.4, **PHP 8.3.36** (switched from 8.2.29 for Task 2X0), MySQL 8.4.0, nginx 1.26.1, Mailpit 1.24.1.
+  Production runs WP 7.1.4, **PHP 8.3, MariaDB 10.11**, so only the database differs here. MariaDB
   10.11.18 is installed in Local, but Local can't switch an existing site's database. CI (wp-env) tests
   the production versions.
 - WP-CLI: Local's site shell (Local → the site → "Open site shell"), or from any terminal with Local's PHP,
   the site's php.ini and the bundled WP-CLI (read-only call checked 2026-11-12):
   ```bash
   export PHPRC="$APPDATA/Local/run/XMaGBQZ-W/conf/php"
-  "$APPDATA/Local/lightning-services/php-8.2.29+0/bin/win64/php.exe" \
+  "$APPDATA/Local/lightning-services/php-8.3.36+0/bin/win64/php.exe" \
     "/c/Program Files (x86)/Local/resources/extraResources/bin/wp-cli/wp-cli.phar" <command>
   ```
   **Use `bash tools/local-wp.sh <command>` from the plugin folder** (Task 2): it does the above, puts PHP's

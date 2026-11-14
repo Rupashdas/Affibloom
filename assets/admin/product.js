@@ -69,8 +69,44 @@
 		} );
 	}
 
+	/**
+	 * Lasso's description box says "Enter a description" while it is empty (Task 2X1). TinyMCE 4.9 has no placeholder, so
+	 * the page's editor setting `placeholder` (ProductEditors) is copied to the editor body as `data-placeholder`, and the
+	 * class `affibloom-empty` is on the body while the editor holds nothing; the style that draws the words is the
+	 * editor's own (also ProductEditors), so they never become content.
+	 *
+	 * @param {Object} editor The TinyMCE editor.
+	 */
+	function placeholder( editor ) {
+		var update = function () {
+			var body = editor.getBody();
+			if ( ! body ) {
+				return;
+			}
+			body.setAttribute( 'data-placeholder', editor.getParam( 'placeholder', '' ) );
+			body.classList.toggle( 'affibloom-empty', editor.dom.isEmpty( body ) );
+		};
+		editor.on( 'init SetContent keyup input change NodeChange undo redo', update );
+		if ( editor.initialized ) {
+			update();
+		}
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var kit = document.querySelector( '[data-share-kit]' );
+		if ( window.tinymce ) {
+			// An editor may already exist when this runs, or arrive after it.
+			window.tinymce.editors.forEach( function ( editor ) {
+				if ( 'affibloom_description' === editor.id ) {
+					placeholder( editor );
+				}
+			} );
+			window.tinymce.on( 'AddEditor', function ( event ) {
+				if ( 'affibloom_description' === event.editor.id ) {
+					placeholder( event.editor );
+				}
+			} );
+		}
 		if ( kit ) {
 			shareKit( kit );
 		}

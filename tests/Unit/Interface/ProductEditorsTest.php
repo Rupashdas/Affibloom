@@ -2,7 +2,8 @@
 namespace Affibloom\Tests\Unit\Interface;
 
 use Affibloom\Interface\Admin\ProductEditors;
-use PHPUnit\Framework\TestCase;
+use Affibloom\Tests\Unit\TestCase;
+use Brain\Monkey\Functions;
 
 final class ProductEditorsTest extends TestCase {
 	/**
@@ -31,6 +32,24 @@ final class ProductEditorsTest extends TestCase {
 		self::assertSame( 40, $price['min_height'] );
 		self::assertFalse( $price['wp_autoresize_on'] );
 		self::assertArrayNotHasKey( 'min_height', $description );
+	}
+
+	/**
+	 * TinyMCE 4.9 (WordPress) has no placeholder of its own. The description editor carries Lasso's words as a setting
+	 * and a style that draws them while the editor is empty; product.js sets the class and the attribute.
+	 */
+	public function test_the_description_editor_has_a_placeholder_and_the_price_editor_has_none(): void {
+		Functions\stubTranslationFunctions();
+
+		$description = ProductEditors::settings( array( 'content_style' => 'body{margin:0}' ), 'affibloom_description' );
+		self::assertSame( 'Enter a description', $description['placeholder'] );
+		self::assertStringStartsWith( 'body{margin:0}', $description['content_style'] );
+		self::assertStringContainsString( 'body.affibloom-empty::before', $description['content_style'] );
+		self::assertStringContainsString( 'attr(data-placeholder)', $description['content_style'] );
+
+		$price = ProductEditors::settings( array(), 'affibloom_price' );
+		self::assertArrayNotHasKey( 'placeholder', $price );
+		self::assertArrayNotHasKey( 'content_style', $price );
 	}
 
 	public function test_every_other_editor_is_left_alone(): void {

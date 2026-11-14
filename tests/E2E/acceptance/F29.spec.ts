@@ -61,8 +61,8 @@ test.describe( 'F29 Any number of buttons', () => {
 		await expect( page.locator( 'input[name="primary_position"]' ) ).toHaveValue( '1' );
 
 		// A filled button asks before it goes; an empty one does not.
-		page.once( 'dialog', ( dialog ) => dialog.accept() );
 		await blocks.nth( 0 ).getByRole( 'button', { name: 'Remove Button 1' } ).click();
+		await page.getByRole( 'dialog', { name: 'Remove this button?' } ).getByRole( 'button', { name: 'Remove' } ).click();
 		await expect( blocks ).toHaveCount( 1 );
 		await expect( page.locator( 'input[name="primary_position"]' ) ).toHaveValue( '0' );
 

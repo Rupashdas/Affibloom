@@ -87,7 +87,7 @@ The roadmap leaves several decisions open. This plan is written on the defaults 
   - Lasso source: `D:\lasso\lasso`. Read only. Never write to it (Lasso writes logs into its own folder). The live Lasso in the Local site (`wp-content/plugins/lasso/`) is never edited either.
   - Local copy of production: `D:\vv-dev\` (gitignored backup files, database dump, copied plugins and theme).
 - **Production is read only** until Task 42. Every script in Phases 0–8 runs against the local copy or staging.
-- **Versions:** PHP `>=8.3`, WordPress `>=7.1.4` (the user's `affibloom.php` header stands, decision F7, 2026-11-14; Task 2X0 aligns the runtime check, Composer, PHPCS and PHPStan). The local environment matches production: WordPress 7.1.4, PHP 8.3.
+- **Versions:** PHP `>=8.3`, WordPress `>=7.1.4` (decision F7, 2026-11-14; Task 2X0 aligned the runtime check, Composer, PHPCS and PHPStan). The local environment matches production: WordPress 7.1.4, PHP 8.3.
 - **Names:**
   - Plugin `Affibloom`; text domain `affibloom`; PHP namespace `Affibloom\`.
   - Prefix `affibloom_` for hooks, options, meta and tables; constants start with `AFFIBLOOM_`; CSS classes start with `affibloom-`.
@@ -241,7 +241,7 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | 17B | F1, F19 | done `f61e12c` |
 | 17C | F1 | done `c86378f` |
 | 17D | F1, F18 | done `82b6015` |
-| 2X0 | F37 | open (decision F7) |
+| 2X0 | F37 | done (decision F7) |
 | 2X1 | F1 | open |
 | 2X2 | F1 | open |
 | 2X3 | F16 | open |

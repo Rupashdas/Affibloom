@@ -204,7 +204,7 @@ they were, then the new sections in the order listed after G5.
 
 **Corrections from the code audits (2026-11-14) and the user's decisions**
 
-- [ ] Task 2X0: PHP 8.3 and WordPress 7.1.4 everywhere (decision F7)
+- [x] Task 2X0: PHP 8.3 and WordPress 7.1.4 everywhere (decision F7)
 - [ ] Task 2X1: Product page — the gaps a done task left
 - [ ] Task 2X2: The F1 AC2 test checks everything it claims
 - [ ] Task 2X3: Display colours accept every CSS colour Lasso accepts
@@ -4984,17 +4984,17 @@ constraints in `docs/plans/00-overview.md`, the conventions line in `CLAUDE.md` 
 (Local's PHP version). Tests: a unit test for the check where it is testable (the comparison in a small function), or a
 manual check recorded in the task summary if the bootstrap cannot be loaded in unit tests.
 
-- [ ] **Step 1: Failing check.** `composer lint` on the user's `affibloom.php` shows the 31 errors (record the list);
+- [x] **Step 1: Failing check.** `composer lint` on the user's `affibloom.php` shows the 31 errors (record the list);
   a test or a by-hand run shows the old check still lets PHP 8.1 or WordPress 6.9 through (expected red).
-- [ ] **Step 2: Make the check and the notice say 8.3 and 7.1.4.** Set the Composer, PHPCS and PHPStan versions as in
+- [x] **Step 2: Make the check and the notice say 8.3 and 7.1.4.** Set the Composer, PHPCS and PHPStan versions as in
   the table. Run `composer update --lock` only as `environment.md` allows (Known issues: `composer.lock` is committed
   only when made from Packagist).
-- [ ] **Step 3: Fix the lint errors in `affibloom.php`.** `composer lint:fix` (30), then the last by hand; never
+- [x] **Step 3: Fix the lint errors in `affibloom.php`.** `composer lint:fix` (30), then the last by hand; never
   suppress an error.
-- [ ] **Step 4: Update the three documents** named above.
-- [ ] **Step 5: Run and look.** `composer lint`, `composer analyse`, the unit tests; deactivate and re-activate the
+- [x] **Step 4: Update the three documents** named above.
+- [x] **Step 5: Run and look.** `composer lint`, `composer analyse`, the unit tests; deactivate and re-activate the
   plugin on Local (PHP 8.3 after the user's switch): no notice, the Dashboard opens.
-- [ ] **Step 6: Commit** — "Require PHP 8.3 and WordPress 7.1.4", committing the user's `affibloom.php` change with it.
+- [x] **Step 6: Commit** — "Require PHP 8.3 and WordPress 7.1.4", committing the user's `affibloom.php` change with it.
 
 ---
 

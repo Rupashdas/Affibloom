@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D (+ the one-time Lasso import button, deviation 87) | 46: 2X1-2X5, G1-G5, 9B-9L (not 9J), FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D (+ the one-time Lasso import button, deviation 87) | 45: 2X1-2X5, G1-G5, 9B-9L (not 9J), FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -26,8 +26,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Gate 4 given for the whole plan** (the user, 2026-11-14 walkthrough; answers in `open-decisions.md`). Building
    resumes task by task in the phase files' order.
-2. **First: Task 2X0** (PHP 8.3 and WordPress 7.1.4 everywhere; the user's `affibloom.php` change stands). **The user
-   switches the Local site to PHP 8.3 first** (Local → the site → PHP version); then 2X1-2X6, then Groups G1-G5.
+2. **Task 2X0 is done** (2026-11-14, deviation 90). **Next: Task 2X1** (product page gaps), then 2X2-2X6, then Groups G1-G5.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -1931,6 +1930,20 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       unsaved-changes guard; Lasso's Sponsored default is on; the Phase 5 Task 26 duplicate mapping was inverted.
     - **Waiting for the user:** `open-decisions.md` (about 60 items, each with a recommendation), then gate 4 for the
       whole plan.
+90. **Task 2X0 (2026-11-14), PHP 8.3 and WordPress 7.1.4 everywhere.** Red: `composer lint` on the user's `affibloom.php`
+    showed 31 errors (30 spacing, fixed by `lint:fix`; the last, a blank line before the file comment, by hand); the old
+    gate let PHP 8.1 and WP 6.9 through (checked with `version_compare`). Changes: the runtime check and its notice, the
+    header (the user's change, committed here), `composer.json` (`>=8.3`, platform `8.3.0`), `composer.lock` (`composer
+    update --lock`: only the hash and the two PHP constraints changed, Packagist URLs), `phpcs.xml.dist` (`testVersion`
+    `8.3-`, `minimum_wp_version` `7.1.4`), `phpstan.neon.dist` (`phpVersion: 80300`).
+    - **Deviations from the task text:** the `booleanOr.leftAlwaysFalse` ignore entry in `phpstan.neon.dist` was removed:
+      at platform 8.3 PHPStan no longer reports it (`ignore.unmatched` otherwise). **`tools/local-wp.sh` pointed at PHP
+      8.2.29**, which broke once Local's site php.ini moved to 8.3.36 (extension API mismatch): it now uses 8.3.36 (also
+      in `environment.md`). No unit test: the bootstrap file cannot be loaded without WordPress; checked by hand instead.
+    - Checks: `composer lint` clean, `composer analyse` no errors, 431 unit tests pass; Local is PHP 8.3.36 / WP 7.1.4,
+      the plugin re-activated with no notice, the front page answers 200 and the Dashboard page hook registers for an
+      administrator (WP-CLI). The browser pane was signed out, so the Dashboard was not looked at (Claude does not sign in).
+    - `CLAUDE.md` (site root, outside git) and `docs/environment.md` updated.
 
 ## Open decisions (ask the user; record the answer here)
 
@@ -1963,6 +1976,7 @@ deviation 89). The items below are the Phase 0 history.
 
 ## Session log
 
+- **2026-11-14 (Claude Code, Task 2X0):** PHP 8.3 and WordPress 7.1.4 made the minimums everywhere (deviation 90); lint, PHPStan and 431 unit tests green; re-activated on Local (PHP 8.3.36). Committed and pushed.
 - **2026-11-14 (Claude Code, full planning pass):** the user asked for all planning and documentation of Phases 1-9 to
   be finished before any more building (deviation 89). Lasso's surface inventoried and swept in 21 subsystem sweeps;
   the built code audited (two audits); obligations and facts registers; every phase file rewritten or completed from
