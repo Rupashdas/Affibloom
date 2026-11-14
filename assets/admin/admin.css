@@ -1754,6 +1754,14 @@
 .affibloom-button-block__actions { display: flex; float: right; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-bottom: 12px; }
 .affibloom-button-block .affibloom-product__pair { clear: both; }
 .affibloom-button-block .affibloom-product__toggles { margin-top: 12px; }
+/* Lasso puts the link and the button text side by side (8 : 4). Here the text field also holds the icon button (F28),
+   so its third of a narrow block left the words ~55px at 1280px. Side by side only while the block is wide enough for
+   the words (a pair of 520px gives them ~120px); narrower, the link and the text stack, each full width. The list is
+   the container: the pair is 34px narrower (the block's padding and border). */
+.affibloom-buttons__list { container-type: inline-size; }
+@container (max-width: 553px) {
+	.affibloom-button-block .affibloom-product__pair { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+}
 .affibloom-buttons__add { justify-self: start; }
 
 /* 7i. The product page's right card (Task 14B): the image frame (the live preview's place), two-column pairs, the

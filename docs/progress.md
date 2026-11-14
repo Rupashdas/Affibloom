@@ -26,8 +26,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Phase 2 audit done (2026-11-15, deviation 107).** The records were reconciled and the open checks run:
    the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
-   and 375 px looks made, Display's clipped Button alignment fixed. Not changed: the product page's narrow Button Text
-   field at 1280 px and Settings → General's uneven gaps at 375 px (seen, recorded in deviation 107).
+   and 375 px looks made, Display's clipped Button alignment fixed, and the product page's squeezed Button Text
+   (deviation 108). Not changed: Settings → General's uneven gaps at 375 px (seen, recorded in deviation 107).
 2. **Next task: C1A** (the Product Data API card and Validate), then the rest of C1 in the phase file's order
    (C1B-C1D, C1I, C1K-C1P), then Phase 2's exit check and the user's sign-off.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
@@ -2360,9 +2360,20 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     - **Shared commits, as recorded:** 9B-9L `8277caf`, G2-G5 `97c1ac0`; part of 2X1 is in 2X0's `7c73290`.
     - **Not done:** `tools/reset-local.sh` was not run (its snapshot predates the seeded library and the saved
       sign-in; "Next up" 4). The copy holds the test data of these runs (saved views "AC9 view-…", "F1 AC10 …" fields
-      and products). **Seen, not changed:** at 1280 px the product page's Button 1 row squeezes the Button Text field
-      to about 55px beside the Primary Destination URL; Settings → General's cards leave uneven gaps when the columns
+      and products). **Seen, not changed:** at 1280 px the product page's Button 1 row squeezed the Button Text field
+      to about 55px beside the Primary Destination URL (fixed the same day, deviation 108); Settings → General's cards leave uneven gaps when the columns
       stack at 375 px.
+
+108. **The product page's Button Text no longer squeezed (2026-11-15; the user: "Yes, fix it", after deviation 107 named
+    it).** Lasso's button row is the link and the button text side by side, 8 : 4 (`url-details.php` 201, 208), in the
+    5 : 7 page split, which Affibloom keeps. Affibloom's Button Text also holds the icon button (F28) inside a padded
+    button block (F29), so its third left the words 96px at 1920px, 57px at 1280px and 32px at 1100px: measured, at
+    every desktop width. A wider share would squeeze the link instead. **Change (`admin.css`):** the buttons list is a
+    size container, and when it is under 554px (a pair under 520px, whose third would give the words under ~120px)
+    each button's link and text stack, each full width; wider (the one-column layout at 960px and below while
+    the block is wide enough: a 726px pair at 900px), the row stays side by side as Lasso's. At 1280px the words now get 279px. Both block types (Button 1 and an added
+    button) checked at 1280, 900 and 375 px; no sideways scroll. No markup or script changed.
+    - Checks: F28 6/6, F29 2/2 and F1 27/27 passed (quiet runs); no PHP changed, so lint, PHPStan and the unit tests stand as in deviation 107.
 
 ## Open decisions (ask the user; record the answer here)
 
@@ -2394,6 +2405,10 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-15 (Claude Code, the product page's Button Text, at the user's word):** the link and the button text stack
+  when the button block is too narrow for both (a container query on the buttons list), so Button Text is no longer
+  ~55px wide at 1280 px; Lasso's side-by-side row stays where it fits. Deviation 108. F28 6/6, F29 2/2 and F1 27/27 passed (quiet runs); no PHP changed, so lint, PHPStan and the unit tests stand as in deviation 107.
 
 - **2026-11-15 (Claude Code, Phase 2 audit at the user's request):** the whole phase checked against the code, git
   and these records; deviation 107. Records reconciled (deviations 71a and 95a, status, Next up, stale headings and
