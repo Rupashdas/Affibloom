@@ -51,9 +51,9 @@ if ( $view['has_acf'] ) {
 				<?php if ( array() === $choices ) : ?>
 					<p class="affibloom-field__hint"><?php echo esc_html( $none ); ?></p>
 				<?php else : ?>
-					<div class="affibloom-chips">
+					<div class="affibloom-choice-list">
 						<?php foreach ( $choices as $name => $choice_label ) : ?>
-							<label class="affibloom-chip">
+							<label class="affibloom-choice">
 								<input type="checkbox" name="settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( (string) $name ); ?>" <?php checked( in_array( (string) $name, $chosen, true ) ); ?>>
 								<span><?php echo esc_html( $choice_label ); ?></span>
 							</label>

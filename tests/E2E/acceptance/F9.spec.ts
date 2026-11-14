@@ -211,7 +211,7 @@ test.describe( 'F9 Link settings', () => {
 		const card = page.locator( '#affibloom-card-detection' );
 		await expect( card.getByText( 'Custom Post Types:' ) ).toBeVisible();
 		for ( const never of [ 'Posts', 'Pages', 'Reusable blocks', 'Affibloom Products' ] ) {
-			await expect( card.locator( '.affibloom-chip', { hasText: new RegExp( `^${ never }$` ) } ) ).toHaveCount( 0 );
+			await expect( card.locator( '.affibloom-choice', { hasText: new RegExp( `^${ never }$` ) } ) ).toHaveCount( 0 );
 		}
 		// This site has no ACF.
 		await expect( card.getByText( 'Custom Fields (ACF):' ) ).toHaveCount( 0 );

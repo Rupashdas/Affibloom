@@ -52,7 +52,7 @@ final class WpDetectionChoices implements DetectionChoices {
 	 */
 	public function post_types(): array {
 		$types = array();
-		foreach ( get_post_types( array(), 'objects' ) as $name => $type ) {
+		foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $name => $type ) {
 			if ( in_array( $name, self::EXCLUDED, true ) ) {
 				continue;
 			}
