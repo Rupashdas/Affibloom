@@ -11,6 +11,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Dashboard\SavedViewService;
+use Affibloom\Application\Dashboard\ViewNotFound;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Dashboard\SavedView;
@@ -243,10 +244,20 @@ final class DashboardController implements Module {
 	 * DELETE /dashboard/views/{id}: the pill's ×, after Lasso's "Delete saved view?". The editor's links are not
 	 * touched.
 	 *
+	 * A view that is not there is a 404 with Lasso's words, "Saved view not found." (Task 13J; F19 D14; Lasso answers
+	 * 400, REST's status for a missing resource is 404).
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request Request with the view's ID in the path.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function delete_view( WP_REST_Request $request ): WP_REST_Response {
-		return $this->views_response( $this->views->delete( get_current_user_id(), (string) $request->get_param( 'id' ) ), null );
+	public function delete_view( WP_REST_Request $request ) {
+		try {
+			$views = $this->views->delete( get_current_user_id(), (string) $request->get_param( 'id' ) );
+		} catch ( ViewNotFound $missing ) {
+			return new WP_Error( 'affibloom_not_found', Messages::for_reason( 'view_not_found' ), array( 'status' => 404 ) );
+		}
+
+		return $this->views_response( $views, null );
 	}
 
 	/**

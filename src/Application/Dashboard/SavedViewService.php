@@ -50,13 +50,19 @@ final class SavedViewService {
 	}
 
 	/**
-	 * Deletes a view. Deleting one that is not there changes nothing, so a second click cannot fail.
+	 * Deletes a view. One that is not there is refused, as Lasso's delete answers "Saved view not found." (Task 13J;
+	 * F19 R15, D14), so a view deleted in another tab is reported instead of looking deleted here.
 	 *
 	 * @param int    $user The editor's user ID.
 	 * @param string $id   The view's ID.
+	 * @throws ViewNotFound When this editor has no view with this ID.
 	 */
 	public function delete( int $user, string $id ): SavedViews {
-		$views = $this->views->for_user( $user )->without( $id );
+		$before = $this->views->for_user( $user );
+		$views  = $before->without( $id );
+		if ( count( $views->all() ) === count( $before->all() ) ) {
+			throw new ViewNotFound();
+		}
 		$this->views->save( $user, $views );
 
 		return $views;

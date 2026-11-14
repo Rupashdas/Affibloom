@@ -37,7 +37,13 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 			aria-label="<?php esc_attr_e( 'Active filters', 'affibloom' ); ?>"><?php echo esc_html( (string) $active ); ?></span>
 	</button>
 
-	<section id="affibloom-filters-panel" class="affibloom-filters__panel" hidden aria-labelledby="affibloom-filters-title">
+	<?php // Lasso's saved-view messages (view-js.php 1383-1476; Task 13J, F19 D14), shown by dashboard.js. ?>
+	<section id="affibloom-filters-panel" class="affibloom-filters__panel" hidden aria-labelledby="affibloom-filters-title"
+		data-saved-text="<?php esc_attr_e( 'View saved.', 'affibloom' ); ?>"
+		data-deleted-text="<?php esc_attr_e( 'View deleted.', 'affibloom' ); ?>"
+		data-name-first-text="<?php esc_attr_e( 'Name your view first.', 'affibloom' ); ?>"
+		data-save-failed-text="<?php esc_attr_e( 'Could not save.', 'affibloom' ); ?>"
+		data-delete-failed-text="<?php esc_attr_e( 'Could not delete.', 'affibloom' ); ?>">
 		<div class="affibloom-filters__head">
 			<h2 id="affibloom-filters-title" class="affibloom-filters__title"><?php esc_html_e( 'Filters', 'affibloom' ); ?></h2>
 			<button type="button" class="affibloom-filters__close" aria-label="<?php esc_attr_e( 'Close filters', 'affibloom' ); ?>">

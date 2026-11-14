@@ -440,20 +440,50 @@
 	var toggle = document.querySelector( '.affibloom-filters__toggle' );
 	var panel = document.getElementById( 'affibloom-filters-panel' );
 
-	function openPanel( open ) {
+	// Whether the panel was left open (Task 13J; F19 R17, D16): written by the Filters button and × only, as Lasso's
+	// lasso_dashboard_filters_panel_open; Escape and an outside click close it for this visit. Storage that throws
+	// (a private window) is ignored, and the panel then opens closed.
+	var PANEL_KEY = 'affibloom_filters_open';
+
+	function rememberPanel( open ) {
+		try {
+			window.localStorage.setItem( PANEL_KEY, open ? '1' : '0' );
+		} catch ( e ) {}
+	}
+
+	function panelWasOpen() {
+		try {
+			return '1' === window.localStorage.getItem( PANEL_KEY );
+		} catch ( e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Opens or closes the panel.
+	 *
+	 * @param {boolean} open  Open it.
+	 * @param {boolean} focus Move the focus into it (not when it opens on load).
+	 */
+	function openPanel( open, focus ) {
 		panel.hidden = ! open;
 		toggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
-		if ( open && linkType ) {
+		if ( open && focus !== false && linkType ) {
 			linkType.focus();
 		}
 	}
 
 	if ( toggle && panel && linkType ) {
+		if ( panelWasOpen() ) {
+			openPanel( true, false );
+		}
 		toggle.addEventListener( 'click', function () {
 			openPanel( panel.hidden );
+			rememberPanel( ! panel.hidden );
 		} );
 		panel.querySelector( '.affibloom-filters__close' ).addEventListener( 'click', function () {
 			openPanel( false );
+			rememberPanel( false );
 			toggle.focus();
 		} );
 		document.addEventListener( 'keydown', function ( event ) {
@@ -498,14 +528,20 @@
 
 		// Lasso's "Reset filters": search, filters and page size back to the defaults.
 		panel.querySelector( '.affibloom-filters__reset' ).addEventListener( 'click', function ( event ) {
-			var reset = event.currentTarget;
-			guarded( function () {
-				if ( search ) {
-					search.value = '';
-				}
-				load( { s: '', link_type: '', group: 0, paged: 1, per_page: 10 }, true, false );
-			}, reset, true );
+			guarded( reset, event.currentTarget, true );
 		} );
+	}
+
+	/**
+	 * Lasso's Reset filters (view-js.php 1252-1299): All links, an empty search, all types and groups, 10 a page, page 1.
+	 * Also what the active pill clicked again, and deleting the active view, do (Task 13J; F19 R13, R15). Callers go
+	 * through guarded(), so a quick edit with changes asks first.
+	 */
+	function reset() {
+		if ( search ) {
+			search.value = '';
+		}
+		load( { s: '', link_type: '', group: 0, post_id: 0, paged: 1, per_page: 10 }, true, false );
 	}
 
 	var toolbar = document.querySelector( '.affibloom-toolbar' );
@@ -527,6 +563,11 @@
 			var pill = event.target.closest( '.affibloom-pill' );
 			if ( pill && 0 === event.button && ! event.ctrlKey && ! event.metaKey && ! event.shiftKey && ! event.altKey ) {
 				event.preventDefault();
+				// "All links", or the marked pill clicked again, is Lasso's Reset filters (R13).
+				if ( pill === document.querySelector( '[data-views] .affibloom-pill' ) || 'true' === pill.getAttribute( 'aria-current' ) ) {
+					guarded( reset, pill, true );
+					return;
+				}
 				guarded( function () {
 					load( {
 						s: pill.getAttribute( 'data-view-s' ),
@@ -555,11 +596,20 @@
 			if ( ! id ) {
 				return;
 			}
+			// Whether the view being deleted is the one on screen: then All links comes back, as Lasso's does (R15).
+			var remove = document.querySelector( '.affibloom-pill__remove[data-view-id="' + CSS.escape( id ) + '"]' );
+			var pill = remove ? remove.parentNode.querySelector( '.affibloom-pill' ) : null;
+			var wasActive = !! pill && 'true' === pill.getAttribute( 'aria-current' );
 			confirmDelete.disabled = true;
 			wp.apiFetch( { path: '/affibloom/v1/dashboard/views/' + encodeURIComponent( id ), method: 'DELETE' } ).then( function ( response ) {
 				replaceViews( response.data.html );
-			} ).catch( function () {
+				window.affibloomToast( panel.dataset.deletedText, false );
+				if ( wasActive ) {
+					guarded( reset, null, true );
+				}
+			} ).catch( function ( error ) {
 				// Nothing was deleted; the pill stays and the editor can try again.
+				window.affibloomToast( error && error.message ? error.message : panel.dataset.deleteFailedText, true );
 			} ).then( function () {
 				confirmDelete.disabled = false;
 				pendingDelete = null;
@@ -578,24 +628,40 @@
 		var nameField = document.getElementById( 'affibloom-view-name' );
 		var saveError = document.getElementById( 'affibloom-view-error' );
 
+		var saveButton = saveForm.querySelector( '[type="submit"]' );
+		var refuse = function ( message ) {
+			saveError.textContent = message;
+			nameField.classList.add( 'is-invalid' );
+			nameField.setAttribute( 'aria-invalid', 'true' );
+			nameField.focus();
+		};
+
 		saveForm.addEventListener( 'submit', function ( event ) {
 			event.preventDefault();
 			saveError.textContent = '';
 			nameField.classList.remove( 'is-invalid' );
 			nameField.removeAttribute( 'aria-invalid' );
 
+			// Lasso checks the name before it asks the server (R14): an empty one sends nothing.
+			var name = nameField.value.trim();
+			if ( '' === name ) {
+				refuse( panel.dataset.nameFirstText );
+				return;
+			}
+
+			saveButton.disabled = true;
 			wp.apiFetch( {
 				path: '/affibloom/v1/dashboard/views',
 				method: 'POST',
-				data: { name: nameField.value, s: current.s, link_type: current.link_type, group: current.group, per_page: current.per_page },
+				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, per_page: current.per_page },
 			} ).then( function ( response ) {
 				replaceViews( response.data.html );
 				nameField.value = '';
+				window.affibloomToast( panel.dataset.savedText, false );
 			} ).catch( function ( error ) {
-				saveError.textContent = ( error && error.message ) || '';
-				nameField.classList.add( 'is-invalid' );
-				nameField.setAttribute( 'aria-invalid', 'true' );
-				nameField.focus();
+				refuse( ( error && error.message ) || panel.dataset.saveFailedText );
+			} ).then( function () {
+				saveButton.disabled = false;
 			} );
 		} );
 	}

@@ -253,7 +253,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 - [x] Task 13G: The search finds added buttons' links, not their texts
 - [x] Task 13H: F19 AC4 and AC10 tests that run on a full library
 - [x] Task 13I: A stable order, and counts that follow the list
-- [ ] Task 13J: Saved views and the Filters panel behave as Lasso's
+- [x] Task 13J: Saved views and the Filters panel behave as Lasso's
 
 **Admin shell (F38)** — ON3-ON4 are in Phase 5, ON5-ON9 in Phase 8; ON10 is dropped as a duplicate of 9E
 
@@ -5968,13 +5968,13 @@ after a reload; closed with × it stays closed; Escape and an outside click clos
 `templates/admin/partials/filters-panel.php` (data texts); tests `SavedViewServiceTest` (missing id), `F19.spec.ts`
 AC19, AC20, AC14 rerun.
 
-- [ ] **Step 1: Failing tests.** AC19 and AC20 fail on the built code (the pill reloads the same view; the panel
+- [x] **Step 1: Failing tests.** AC19 and AC20 fail on the built code (the pill reloads the same view; the panel
   opens closed).
-- [ ] **Step 2: The route.** Unknown id → 404 with Lasso's text; unit test.
-- [ ] **Step 3: The resets and messages** (through `guarded()`; the empty name checked before any request).
-- [ ] **Step 4: The panel's memory.**
-- [ ] **Step 5: Run and look** (keyboard only; toasts announced; 375 px).
-- [ ] **Step 6: Commit** — "Reset and confirm saved views as Lasso does".
+- [x] **Step 2: The route.** Unknown id → 404 with Lasso's text; unit test.
+- [x] **Step 3: The resets and messages** (through `guarded()`; the empty name checked before any request).
+- [x] **Step 4: The panel's memory.**
+- [x] **Step 5: Run and look** (keyboard only; toasts announced; 375 px).
+- [x] **Step 6: Commit** — "Reset and confirm saved views as Lasso does".
 
 ---
 

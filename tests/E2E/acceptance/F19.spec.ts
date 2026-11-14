@@ -380,6 +380,76 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( page.getByLabel( 'Search' ) ).toHaveAttribute( 'placeholder', `Search all ${ ( await tile.innerText() ).trim() } links…` );
 	} );
 
+	test( 'AC19 the active pill clicked again, or the active view deleted, brings back All links', async ( { page } ) => {
+		const name = unique( 'F19 AC19' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom&link_type=amazon&per_page=25' );
+		const allLinks = page.locator( '.affibloom-pill', { hasText: 'All links' } );
+		const toast = page.locator( '.affibloom-toast__message' );
+
+		// An empty name is refused before any request (Lasso's R14).
+		let posted = 0;
+		page.on( 'request', ( request ) => {
+			if ( 'POST' === request.method() && decodeURIComponent( request.url() ).includes( 'dashboard/views' ) ) {
+				posted++;
+			}
+		} );
+		await page.getByRole( 'button', { name: /Filters/ } ).click();
+		await page.getByLabel( 'Save as' ).fill( '   ' );
+		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await expect( page.locator( '#affibloom-view-error' ) ).toHaveText( 'Name your view first.' );
+		expect( posted ).toBe( 0 );
+
+		await page.getByLabel( 'Save as' ).fill( name );
+		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await expect( toast.filter( { hasText: 'View saved.' } ) ).toHaveCount( 1 );
+		const pill = page.locator( '.affibloom-pill', { hasText: name } );
+		await expect( pill ).toHaveAttribute( 'aria-current', 'true' );
+
+		// The marked pill again: All links (empty search, all types, 10 a page).
+		await pill.click();
+		await expect( page ).toHaveURL( /page=affibloom$/ );
+		await expect( page.getByLabel( 'Link type' ) ).toHaveValue( '' );
+		await expect( page.getByLabel( 'Links per page' ) ).toHaveValue( '10' );
+		await expect( allLinks ).toHaveAttribute( 'aria-current', 'true' );
+
+		// Its own list again, then the view deleted while it is the one on screen: All links, and "View deleted.".
+		await pill.click();
+		await expect( page ).toHaveURL( /link_type=amazon/ );
+		await page.getByRole( 'button', { name: `Delete saved view ${ name }` } ).click();
+		await page.getByRole( 'dialog', { name: 'Delete saved view?' } ).getByRole( 'button', { name: 'Delete filter' } ).click();
+		await expect( toast.filter( { hasText: 'View deleted.' } ) ).toHaveCount( 1 );
+		await expect( page ).toHaveURL( /page=affibloom$/ );
+		await expect( page.getByLabel( 'Link type' ) ).toHaveValue( '' );
+		await expect( allLinks ).toHaveAttribute( 'aria-current', 'true' );
+	} );
+
+	test( 'AC20 the Filters panel stays open across a reload when opened with its button, and closed when closed with ×', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.evaluate( () => window.localStorage.removeItem( 'affibloom_filters_open' ) );
+		await page.reload();
+		const panel = page.locator( '#affibloom-filters-panel' );
+		const toggle = page.getByRole( 'button', { name: /Filters/ } );
+		await expect( panel ).toBeHidden();
+
+		await toggle.click();
+		await expect( panel ).toBeVisible();
+		await page.reload();
+		await expect( panel ).toBeVisible();
+		await expect( toggle ).toHaveAttribute( 'aria-expanded', 'true' );
+
+		// Escape closes it for this visit only.
+		await page.keyboard.press( 'Escape' );
+		await expect( panel ).toBeHidden();
+		await page.reload();
+		await expect( panel ).toBeVisible();
+
+		await page.getByRole( 'button', { name: 'Close filters' } ).click();
+		await expect( panel ).toBeHidden();
+		await expect( toggle ).toBeFocused();
+		await page.reload();
+		await expect( panel ).toBeHidden();
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )
