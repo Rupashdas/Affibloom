@@ -258,7 +258,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 **Admin shell (F38)** — ON3-ON4 are in Phase 5, ON5-ON9 in Phase 8; ON10 is dropped as a duplicate of 9E
 
 - [x] Task ON1: Navigation in Lasso's order — header, WordPress menu, titles, footer
-- [ ] Task ON2: The notice region, foreign notices, and the update notice
+- [x] Task ON2: The notice region, foreign notices, and the update notice
 
 **Amazon product data (C1)** — dormant where the Creators API credentials are needed; C1E and C1H are in Phase 7,
 C1F and C1G in Phase 3
@@ -6054,12 +6054,12 @@ the link starts WordPress's update. A script can add a warning there (Settings �
 UpdateAvailableNoticeTest}.php`, `tests/Integration/ForeignNoticesTest.php`, F38 AC4-AC6; modify `src/Plugin.php`,
 screen templates, `assets/admin/admin.js`, `docs/ui/design-system.md` (Notice tones).
 
-- [ ] **Step 1: Failing tests.** AC4 (a test plugin's `admin_notices` hidden on the Dashboard, shown on Posts), AC5
+- [x] **Step 1: Failing tests.** AC4 (a test plugin's `admin_notices` hidden on the Dashboard, shown on Posts), AC5
   (a script notice), AC6 (a faked `update_plugins` transient). Unit: a throwing provider is skipped.
-- [ ] **Step 2: Domain and application.**
-- [ ] **Step 3: Module, partial, script API.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Add the notice region and hide other plugins' notices".
+- [x] **Step 2: Domain and application.**
+- [x] **Step 3: Module, partial, script API.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Add the notice region and hide other plugins' notices".
 
 ---
 

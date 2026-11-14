@@ -9,6 +9,15 @@ final class PluginTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		Functions\when( 'plugin_dir_url' )->justReturn( 'https://example.test/wp-content/plugins/affibloom/' );
+		// The update notice's source names the plugin as WordPress does (Task ON2).
+		Functions\when( 'plugin_basename' )->justReturn( 'affibloom/affibloom.php' );
+	}
+
+	/** Task ON2: other plugins' notices leave Affibloom's pages late in admin_head. */
+	public function test_boot_hides_other_plugins_notices_on_affibloom_pages(): void {
+		Plugin::boot( '/plugins/affibloom/affibloom.php' );
+
+		self::assertSame( 99999, has_action( 'admin_head', 'Affibloom\Interface\Admin\ForeignNotices->remove()' ) );
 	}
 
 	public function test_boot_loads_translations_on_init(): void {

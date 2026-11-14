@@ -10,15 +10,17 @@ declare( strict_types=1 );
 namespace Affibloom\Interface;
 
 use Affibloom\Application\Lifecycle;
+use Affibloom\Application\Shell\NoticeProvider;
 use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Application\Upgrade\UpgradeResult;
+use Affibloom\Domain\Shell\ShellNotice;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
 
 /**
  * Runs the upgrade on admin pages (not AJAX or cron, as Lasso's Update_DB) and watches the plugin version on init.
  */
-final class UpgradeHooks implements Module {
+final class UpgradeHooks implements Module, NoticeProvider {
 
 	/**
 	 * A failed run on this request, for the notice.
@@ -59,23 +61,26 @@ final class UpgradeHooks implements Module {
 	}
 
 	/**
-	 * The failed step and its error, for those who manage the plugin's settings.
+	 * The failed step and its error, for those who manage the plugin's settings, on WordPress's own pages.
 	 */
 	public function failure_notice(): void {
-		if ( null === $this->failure || ! current_user_can( Capabilities::SETTINGS ) ) {
-			return;
+		foreach ( $this->notices( '' ) as $notice ) {
+			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html( NoticeText::for( $notice )['text'] ) );
 		}
-		printf(
-			'<div class="notice notice-error"><p>%s</p></div>',
-			esc_html(
-				sprintf(
-					/* translators: 1: step number, 2: the error. */
-					__( 'Affibloom could not finish updating its data (step %1$d: %2$s). It will try again on the next admin page.', 'affibloom' ),
-					$this->failure->failed_step,
-					$this->failure->message
-				)
-			)
-		);
+	}
+
+	/**
+	 * The same failure in the notice region of Affibloom's pages, which hide every admin_notices notice (Task ON2).
+	 *
+	 * @param string $page The Affibloom admin page slug being shown.
+	 * @return list<ShellNotice>
+	 */
+	public function notices( string $page ): array {
+		if ( null === $this->failure || ! current_user_can( Capabilities::SETTINGS ) ) {
+			return array();
+		}
+
+		return array( new ShellNotice( 'upgrade_failed', ShellNotice::ERROR, array( $this->failure->failed_step, $this->failure->message ) ) );
 	}
 
 	/**

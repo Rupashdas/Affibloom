@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface;
 
+use Affibloom\Application\Shell\NoticeBoard;
 use Affibloom\Interface\Admin\AdminNavigation;
 use InvalidArgumentException;
 
@@ -22,14 +23,22 @@ final class Template {
 	 *
 	 * @param string          $dir        Absolute path of templates/.
 	 * @param AdminNavigation $navigation The screens in Lasso's order, which every screen's header lists (Task ON1).
+	 * @param NoticeBoard     $notices    The notices the region under every screen's header shows (Task ON2).
 	 */
-	public function __construct( private string $dir, private AdminNavigation $navigation ) {}
+	public function __construct( private string $dir, private AdminNavigation $navigation, private NoticeBoard $notices ) {}
 
 	/**
 	 * The screens in Lasso's order, for the header partial, so no screen has to pass them in its view.
 	 */
 	public function navigation(): AdminNavigation {
 		return $this->navigation;
+	}
+
+	/**
+	 * The notice board, for the header partial's notice region, so no screen has to pass notices in its view.
+	 */
+	public function notice_board(): NoticeBoard {
+		return $this->notices;
 	}
 
 	/**

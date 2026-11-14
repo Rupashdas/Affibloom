@@ -5,7 +5,8 @@
  * opens is printed after the header.
  *
  * The tabs are the navigation's, in Lasso's order (F38 D1, Task ON1); the one the page belongs to is current, so a
- * product page marks Dashboard (R3). Below 992 px they fold behind a Menu button (R6).
+ * product page marks Dashboard (R3). Below 992 px they fold behind a Menu button (R6). The notice region follows the
+ * header (Task ON2).
  *
  * @package Affibloom
  */
@@ -74,6 +75,8 @@ $header_can_add = current_user_can( Capabilities::PRODUCTS );
 	<?php endif; ?>
 </header>
 <?php
+// The notice region sits right under the header on every screen (Task ON2), so no screen passes notices itself.
+$this->render( 'admin/partials/notices', array( 'notices' => $this->notice_board()->for_page( AdminMenu::requested_page() ) ) );
 if ( $header_can_add ) {
 	$this->render( 'admin/partials/add-modal' );
 }

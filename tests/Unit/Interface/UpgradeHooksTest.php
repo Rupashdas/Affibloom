@@ -116,6 +116,30 @@ final class UpgradeHooksTest extends TestCase {
 		self::assertStringContainsString( 'Table full', $notice );
 	}
 
+	/**
+	 * Task ON2: Affibloom's pages hide every admin_notices notice (F38 D9), so the failure also goes to the notice
+	 * region, for the same people.
+	 */
+	public function test_a_failed_step_is_also_a_notice_in_the_region(): void {
+		Functions\when( 'wp_doing_ajax' )->justReturn( false );
+		Functions\when( 'wp_doing_cron' )->justReturn( false );
+		$this->fails = new StepFailed( 2, new \RuntimeException( 'Table full' ) );
+		$hooks       = $this->hooks();
+		Functions\when( 'current_user_can' )->justReturn( true );
+		self::assertSame( array(), $hooks->notices( 'affibloom' ) );
+
+		$hooks->upgrade();
+		$notices = $hooks->notices( 'affibloom' );
+
+		self::assertCount( 1, $notices );
+		self::assertSame( 'upgrade_failed', $notices[0]->key );
+		self::assertSame( \Affibloom\Domain\Shell\ShellNotice::ERROR, $notices[0]->tone );
+		self::assertSame( array( 2, 'Table full' ), $notices[0]->args );
+
+		Functions\when( 'current_user_can' )->justReturn( false );
+		self::assertSame( array(), $hooks->notices( 'affibloom' ) );
+	}
+
 	public function test_a_new_plugin_version_flushes_rewrite_rules_once_and_is_stored(): void {
 		$this->stored_version = '0.0.0-old';
 		$this->hooks()->watch_version();

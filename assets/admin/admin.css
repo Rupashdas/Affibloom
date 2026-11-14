@@ -24,6 +24,10 @@
 	/* Warning (the product page's notices, Task 14A): warning-700 on warning-50 6.2:1, on white 6.8:1. */
 	--affibloom-warning-700: #8a4b00;
 	--affibloom-warning-50: #fff4e0;
+	/* The notice region's other tones (Task ON2): success-700 on success-50 5.8:1, danger-700 on danger-50 6.6:1. */
+	--affibloom-success-700: #136c3a;
+	--affibloom-success-50: #e7f6ed;
+	--affibloom-danger-50: #fdecef;
 	--affibloom-page: #f3f6fb;
 	--affibloom-subtle: #fafbfe;
 	--affibloom-white: #fff;
@@ -1589,6 +1593,46 @@
 .affibloom-notice__text { margin: 0; color: var(--affibloom-ink-900); font-weight: 600; }
 .affibloom-chip--warning { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
 
+/* The notice region (Task ON2, F38 D8; Lasso's notification bars): a navy strip that continues the header into the
+   band, holding the notices in the page's column, newest last. Empty, it takes no room. */
+.affibloom-notices-bar { background: var(--affibloom-navy-900); }
+.affibloom-notices {
+	display: grid;
+	gap: 12px;
+	max-width: var(--affibloom-content-width);
+	margin: 0 auto;
+	padding: 0 32px;
+	box-sizing: border-box;
+}
+.affibloom-notices:has(.affibloom-notice) { padding-top: 8px; padding-bottom: 20px; }
+.affibloom-notices .affibloom-notice { margin: 0; }
+.affibloom-notice--warning .affibloom-chip { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
+.affibloom-notice--success { border-left-color: var(--affibloom-success-700); }
+.affibloom-notice--success .affibloom-chip { background: var(--affibloom-success-50); color: var(--affibloom-success-700); }
+.affibloom-notice--error { border-left-color: var(--affibloom-danger-700); }
+.affibloom-notice--error .affibloom-chip { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+.affibloom-notice--update { border-left-color: var(--affibloom-brand-600); }
+.affibloom-notice--update .affibloom-chip { background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-notice__link { color: var(--affibloom-brand-600); font-weight: 700; text-decoration: underline; }
+.affibloom-admin .affibloom-notice__link:hover { color: var(--affibloom-navy-900); }
+.affibloom-admin .affibloom-notice__close {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin-left: auto;
+	padding: 0;
+	border: 0;
+	border-radius: var(--affibloom-radius-full);
+	background: transparent;
+	color: var(--affibloom-ink-600);
+	cursor: pointer;
+	transition: background-color var(--affibloom-ease), color var(--affibloom-ease);
+}
+.affibloom-admin .affibloom-notice__close:hover { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+
 /* 7f. "Button icons" on Settings → Display (F28, Task 14F): one row per icon, the add form in the card's foot. */
 .affibloom-icon-set { margin-top: var(--affibloom-space-section); }
 /* The icon library is a grid of cells (the user, 2026-11-13): as many 160px+ columns as fit, two on a phone. */
@@ -2192,7 +2236,8 @@ body.affibloom-has-modal { overflow: hidden; }
 @media (max-width: 960px) {
 	.affibloom-header,
 	.affibloom-band { padding-right: 20px; padding-left: 20px; }
-	.affibloom-page__body { padding-right: 20px; padding-left: 20px; }
+	.affibloom-page__body,
+	.affibloom-notices { padding-right: 20px; padding-left: 20px; }
 }
 /* Lasso stacks the rail above the preview below 992px; the same point here. */
 @media (max-width: 991px) {

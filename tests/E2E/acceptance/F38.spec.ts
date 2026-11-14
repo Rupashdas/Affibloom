@@ -1,3 +1,5 @@
+import { copyFileSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, createProduct, unique, wp } from '../utils';
 
@@ -5,7 +7,8 @@ import { blockTrackers, createProduct, unique, wp } from '../utils';
 // ON2 adds AC4-AC6. Lasso's rules: the header lists Dashboard, Opportunities, Tables, Groups (each once its screen
 // exists), then Affibloom's Settings; the tab of the page's group is current; below 992 px a Menu button folds the
 // tabs. The WordPress menu sits after Pages (position 20) with Lasso's submenu order; detail pages are not listed but
-// highlight their list's item. Every page ends with "Version <x.y.z>".
+// highlight their list's item. Every page ends with "Version <x.y.z>". Other plugins' notices are removed on Affibloom's
+// pages; Affibloom's own go to one region under the header (PHP providers, and affibloomNotice() for scripts).
 
 const DASHBOARD = '/wp-admin/admin.php?page=affibloom';
 
@@ -121,5 +124,104 @@ test.describe( 'F38 Admin shell', () => {
 		}
 		await page.goto( '/wp-admin/index.php' );
 		await expect( page.locator( '#footer-upgrade' ) ).not.toHaveText( '' );
+	} );
+
+	test( 'AC4 other plugins\' notices are not shown on Affibloom\'s pages, and are on WordPress\'s', async ( { page } ) => {
+		// The fixture stands in for another plugin: an admin notice and a line in the admin header.
+		const muPlugins = join( __dirname, '..', '..', '..', '..', '..', 'mu-plugins' );
+		const made = ! existsSync( muPlugins );
+		mkdirSync( muPlugins, { recursive: true } );
+		const fixture = join( muPlugins, 'affibloom-e2e-foreign-notice.php' );
+		copyFileSync( join( __dirname, '..', 'fixtures', 'foreign-notice.php' ), fixture );
+		try {
+			await page.goto( '/wp-admin/edit.php' );
+			await expect( page.locator( '#affibloom-e2e-foreign-notice' ) ).toBeVisible();
+			await expect( page.locator( '#affibloom-e2e-foreign-header' ) ).toHaveCount( 1 );
+
+			for ( const url of [ DASHBOARD, '/wp-admin/admin.php?page=affibloom-groups', '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' ] ) {
+				await page.goto( url );
+				await expect( page.locator( '.affibloom-header' ), url ).toBeVisible();
+				await expect( page.locator( '#affibloom-e2e-foreign-notice' ), url ).toHaveCount( 0 );
+				await expect( page.locator( '#affibloom-e2e-foreign-header' ), url ).toHaveCount( 0 );
+				// WordPress's own admin bar stays.
+				await expect( page.locator( '#wpadminbar' ), url ).toBeVisible();
+			}
+
+			await page.goto( '/wp-admin/edit.php' );
+			await expect( page.locator( '#affibloom-e2e-foreign-notice' ) ).toBeVisible();
+		} finally {
+			unlinkSync( fixture );
+			if ( made ) {
+				rmdirSync( muPlugins );
+			}
+		}
+	} );
+
+	test( 'AC5 a script adds notices to one region under the header, newest last', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+		const region = page.locator( '#affibloom-notices' );
+		const notices = region.locator( '.affibloom-notice' );
+		await expect( notices ).toHaveCount( 0 );
+
+		await page.evaluate( () => {
+			const notice = ( window as unknown as { affibloomNotice: ( tone: string, message?: unknown ) => void } ).affibloomNotice;
+			notice( 'success', 'Your group saved.' );
+			notice( 'warning', 'Please Enter GA Tracking ID Before Enable Click Tracking' );
+			notice( 'error' );
+			notice( 'error', { code: 'not words' } );
+		} );
+
+		// A failure without words of its own gets Lasso's.
+		const fallback = 'An unexpected error has occurred please try again later.';
+		await expect( notices ).toHaveText( [ 'Your group saved.', 'Please Enter GA Tracking ID Before Enable Click Tracking', fallback, fallback ] );
+		await expect( notices.nth( 0 ) ).toHaveClass( /affibloom-notice--success/ );
+		await expect( notices.nth( 1 ) ).toHaveClass( /affibloom-notice--warning/ );
+		await expect( notices.nth( 2 ) ).toHaveClass( /affibloom-notice--error/ );
+
+		// Under the header and above the page's title.
+		const header = await page.locator( '.affibloom-header' ).boundingBox();
+		const regionBox = await region.boundingBox();
+		const title = await page.getByRole( 'heading', { level: 1, name: 'Groups' } ).boundingBox();
+		expect( regionBox!.y ).toBeGreaterThanOrEqual( header!.y + header!.height - 1 );
+		expect( regionBox!.y + regionBox!.height ).toBeLessThanOrEqual( title!.y );
+
+		// × closes one.
+		await notices.nth( 0 ).getByRole( 'button', { name: 'Dismiss this notice' } ).click();
+		await expect( notices ).toHaveCount( 3 );
+		await expect( notices.first() ).toHaveText( 'Please Enter GA Tracking ID Before Enable Click Tracking' );
+	} );
+
+	test( 'AC6 an update of Affibloom is announced on every page with WordPress\'s update link', async ( { page } ) => {
+		// Keep the site's own update_plugins transient in a test option and put it back after.
+		wp(
+			'eval',
+			'$t = get_site_transient( "update_plugins" ); update_option( "affibloom_e2e_update_plugins", $t, false );' +
+				' if ( ! is_object( $t ) ) { $t = new stdClass(); }' +
+				' $t->last_checked = time(); $t->response = isset( $t->response ) ? (array) $t->response : array();' +
+				' $t->response["affibloom/affibloom.php"] = (object) array( "slug" => "affibloom", "plugin" => "affibloom/affibloom.php", "new_version" => "9.9.9", "package" => "", "url" => "" );' +
+				' set_site_transient( "update_plugins", $t );'
+		);
+		try {
+			for ( const url of [ DASHBOARD, '/wp-admin/admin.php?page=affibloom-fields', '/wp-admin/admin.php?page=affibloom-settings' ] ) {
+				await page.goto( url );
+				const notice = page.locator( '#affibloom-notices .affibloom-notice--update' );
+				await expect( notice, url ).toHaveText( 'There\'s a new version available. Update now.' );
+				await expect( notice.getByRole( 'link', { name: 'Update now' } ), url ).toHaveAttribute(
+					'href',
+					/update\.php\?action=upgrade-plugin&plugin=affibloom%2Faffibloom\.php&_wpnonce=[0-9a-f]+$/
+				);
+				// Lasso's has no ×.
+				await expect( notice.getByRole( 'button' ), url ).toHaveCount( 0 );
+			}
+		} finally {
+			wp(
+				'eval',
+				'$t = get_option( "affibloom_e2e_update_plugins" ); delete_option( "affibloom_e2e_update_plugins" );' +
+					' if ( is_object( $t ) ) { set_site_transient( "update_plugins", $t ); } else { delete_site_transient( "update_plugins" ); }'
+			);
+		}
+
+		await page.goto( DASHBOARD );
+		await expect( page.locator( '#affibloom-notices .affibloom-notice--update' ) ).toHaveCount( 0 );
 	} );
 } );

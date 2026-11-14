@@ -183,6 +183,58 @@
 	}
 
 	/**
+	 * The notice region under the header (Task ON2, F38 D8): `affibloomNotice( tone, message )` adds a success, error
+	 * or warning notice from the page's template, newest last, and returns it. A failure that brings no words of its
+	 * own gets Lasso's (R20, the template's data-fallback); another tone without words adds nothing. The × of any
+	 * notice in the region removes it and moves the focus to the next notice's ×, when there is one.
+	 *
+	 * @param {string} tone    'success', 'error' or 'warning'; anything else is a warning.
+	 * @param {*}      message The words; only a non-empty string counts.
+	 * @return {HTMLElement|null} The notice, or null when none was added.
+	 */
+	function notice( tone, message ) {
+		var region = document.getElementById( 'affibloom-notices' );
+		var template = document.getElementById( 'affibloom-notice-template' );
+		var text = 'string' === typeof message ? message.trim() : '';
+		if ( ! region || ! template ) {
+			return null;
+		}
+		tone = [ 'success', 'error', 'warning' ].indexOf( tone ) < 0 ? 'warning' : tone;
+		if ( '' === text ) {
+			if ( 'error' !== tone ) {
+				return null;
+			}
+			text = template.getAttribute( 'data-fallback' );
+		}
+
+		var element = template.content.firstElementChild.cloneNode( true );
+		element.classList.add( 'affibloom-notice--' + tone );
+		element.querySelectorAll( '[data-notice-icon]' ).forEach( function ( icon ) {
+			if ( icon.getAttribute( 'data-notice-icon' ) !== tone ) {
+				icon.remove();
+			}
+		} );
+		element.querySelector( '.affibloom-notice__text' ).textContent = text;
+		region.appendChild( element );
+		return element;
+	}
+
+	document.addEventListener( 'click', function ( event ) {
+		var close = event.target.closest( '#affibloom-notices [data-affibloom-dismiss]' );
+		if ( ! close ) {
+			return;
+		}
+		var item = close.closest( '.affibloom-notice' );
+		var next = item.nextElementSibling ? item.nextElementSibling.querySelector( '[data-affibloom-dismiss]' ) : null;
+		item.remove();
+		if ( next ) {
+			next.focus();
+		}
+	} );
+
+	window.affibloomNotice = notice;
+
+	/**
 	 * Menus (design system, "Menu"): a button with `aria-controls` and `aria-expanded` shows the menu card under it;
 	 * choosing an item, Escape or a click elsewhere closes it.
 	 */

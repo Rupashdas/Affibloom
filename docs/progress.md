@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL4, TL1, TL2, ON1, 13F-13J (+ the one-time Lasso import button, deviation 87) | 18: 2X1-2X5, FL5, ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5 and FL5 (deviation 89; 13F-13H done, deviation 102) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL4, TL1, TL2, ON1, ON2, 13F-13J (+ the one-time Lasso import button, deviation 87) | 17: 2X1-2X5, FL5, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5 and FL5 (deviation 89; 13F-13H done, deviation 102) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -31,7 +31,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 2b. **Task G1 (the Groups list and a new group) is done (2026-11-14, deviation 97); F23 AC1-AC2 passed in Claude's runs.**
     **Tasks G2-G5 are built too (the user, 2026-11-14: "Let's do G2-G5", tested together; deviation 98).**
 2c. **Admin shell (the user, 2026-11-14: "Do Task ON1 and Task ON2", both in one session):** **ON1 done (deviation 101);
-    F38 AC1-AC3 passed in Claude's runs.**
+    ON2 done (deviation 103); F38 AC1-AC6 passed in Claude's runs.** ON3-ON4 are Phase 5, ON5-ON9 Phase 8.
 2d. **Fields: FL1-FL4 are done** (committed `89ef637`, `b366954`, `ba6e821`, `e05a9c7` on 2026-11-14; recorded
     afterwards, see the session log). F26 13/13 and F1 AC10 passed in Claude's runs. **Next for Fields: FL5.**
 2c. **Tasks 13F-13J (the Dashboard's second pass, F19) are done (2026-11-14, deviation 102; the user asked for all
@@ -2225,6 +2225,33 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       the panel, not in `Messages` (the script needs them in the page). Save is disabled while it runs (no spinner).
       "All links" is told apart as the first pill (pills carry no ID). `SavedViewServiceTest` is new.
 
+103. **Task ON2 (2026-11-14), the notice region, foreign notices and the update notice; done, checked by Claude's own
+    runs.** Same session as ON1 (the user asked for both). Differences from the plan's text:
+    - **A notice is a key, not words:** `Domain\Shell\ShellNotice` holds a key, a tone (success, error, warning,
+      update), values, a link and whether it has a ×; `Interface\NoticeText` gives the words, with %s where the link
+      goes, as `Messages` does for reason codes (Application has no WordPress calls). `NoticeText` is its own class
+      because `Messages.php` held another session's uncommitted edits.
+    - **The region is rendered by the header partial** through `Template::notice_board()` (as ON1's
+      `navigation()`), so no screen template changed; `partials/notices.php` and `partials/shell-notice.php`.
+    - **The port is `Application\Shell\UpdateSource`**, implemented by `Infrastructure\WordPress\PluginUpdates`
+      (`get_plugin_updates()`, `update_plugins` capability, WordPress's nonce'd `update.php` link).
+    - **A failing provider is reported with `wp_trigger_error()`** (only with WP_DEBUG), injected into `NoticeBoard` as a
+      closure.
+    - **TL2's open item is closed:** `UpgradeHooks` is also a `NoticeProvider`, so a failed upgrade step shows in the
+      region on Affibloom's pages (where `ForeignNotices` removes every admin_notices callback) and stays an admin
+      notice on WordPress's pages; both use `NoticeText`.
+    - **`ForeignNotices`** removes admin_notices, all_admin_notices, network_admin_notices, user_admin_notices and
+      in_admin_header on Affibloom's pages at admin_head 99999, then puts back `wp_admin_bar_render` (priority 0).
+    - **Script notices:** `affibloomNotice( tone, message )` returns the notice; an unknown tone is a warning; an error
+      without a string gets Lasso's fallback, another tone without words adds nothing. Every × (PHP or script) removes
+      its notice without saving anything (Lasso's collapse) and moves the focus to the next ×.
+    - **Design:** tokens success-700 `#136C3A`, success-50 `#E7F6ED`, danger-50 `#FDECEF`; "Notice tones" and "Notice
+      region" in the design system. The region is a navy strip between the header and the band.
+    - **Tests:** `NoticeBoardTest` (3), `UpdateAvailableNoticeTest` (2), an `UpgradeHooksTest` case, a `PluginTest` case;
+      `tests/Integration/ForeignNoticesTest.php` is written, not run (no wp-env, deviation 10). F38 AC4 copies
+      `tests/E2E/fixtures/foreign-notice.php` into `wp-content/mu-plugins` for the test and removes it after; AC6 keeps the
+      site's `update_plugins` transient in a test option and puts it back.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2255,6 +2282,13 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Task ON2; the same session as ON1):** the notice region, foreign notices and the update
+  notice (F38 AC4-AC6); deviation 103. Started from `NoticeBoardTest`, `UpdateAvailableNoticeTest`, an `UpgradeHooks`
+  case and F38 AC4-AC6 (red: classes missing; the fixture's notice showed on the Dashboard; no `affibloomNotice`; no
+  update notice). Unit 563, lint and analyse clean; F38 AC1-AC6 7 passed; looked at 1280 and 375px with the update
+  notice and three script notices (the transient put back after). The commit holds only this task's hunks (another
+  session shared the tree). Next: the user's choice; Phase 2's open tasks are 2X1-2X5, FL5 and C1A-C1P.
 
 - **2026-11-14 (Claude Code, Tasks 13F-13J in one session at the user's word):** the Dashboard's second pass (F19);
   deviation 102. First, at the user's choice, the uncommitted G2-G5 work was committed alone (`97c1ac0`). Then 13F

@@ -23,6 +23,8 @@ use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\LinkDefaultsService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Application\Shell\NoticeBoard;
+use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
@@ -37,6 +39,7 @@ use Affibloom\Infrastructure\WordPress\OptionIconRepository;
 use Affibloom\Infrastructure\WordPress\OptionLock;
 use Affibloom\Infrastructure\WordPress\OptionPluginState;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
+use Affibloom\Infrastructure\WordPress\PluginUpdates;
 use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
@@ -54,6 +57,7 @@ use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\FieldScreen;
 use Affibloom\Interface\Admin\FieldsScreen;
+use Affibloom\Interface\Admin\ForeignNotices;
 use Affibloom\Interface\Admin\GroupScreen;
 use Affibloom\Interface\Admin\GroupsScreen;
 use Affibloom\Interface\Admin\PerPage;
@@ -81,6 +85,7 @@ use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
 use Affibloom\Interface\UpgradeHooks;
 use Affibloom\Module;
+use Throwable;
 
 /**
  * Starts the plugin once WordPress has loaded it.
@@ -107,6 +112,20 @@ final class Plugin {
 	 * @var AdminNavigation|null
 	 */
 	private ?AdminNavigation $navigation = null;
+
+	/**
+	 * The notices for the region under the header, shared by every screen; built on first use.
+	 *
+	 * @var NoticeBoard|null
+	 */
+	private ?NoticeBoard $notice_board = null;
+
+	/**
+	 * The upgrade's hooks: a module, and a notice provider when a step failed; built on first use.
+	 *
+	 * @var UpgradeHooks|null
+	 */
+	private ?UpgradeHooks $upgrade_hooks = null;
 
 	/**
 	 * Settings storage, shared by every reader in a request.
@@ -256,8 +275,9 @@ final class Plugin {
 			new GroupsController( $groups, $this->template() ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),
-			new UpgradeHooks( $upgrader, self::lifecycle( $upgrader ) ),
+			$this->upgrade_hooks(),
 			new UpgradeCommand( $upgrader ),
+			new ForeignNotices( $this->navigation() ),
 		);
 	}
 
@@ -273,8 +293,37 @@ final class Plugin {
 	 * The template renderer for templates/.
 	 */
 	private function template(): Template {
-		$this->template ??= new Template( dirname( $this->file ) . '/templates', $this->navigation() );
+		$this->template ??= new Template( dirname( $this->file ) . '/templates', $this->navigation(), $this->notice_board() );
 		return $this->template;
+	}
+
+	/**
+	 * The notices for the region under the header (F38 D8, D10), in this order: the update notice, then a failed
+	 * upgrade. C1, F11, F21 and F33 add their providers here. A provider that fails is reported to the debug log.
+	 */
+	private function notice_board(): NoticeBoard {
+		$this->notice_board ??= new NoticeBoard(
+			array(
+				new UpdateAvailableNotice( new PluginUpdates( plugin_basename( $this->file ) ) ),
+				$this->upgrade_hooks(),
+			),
+			static function ( Throwable $error ): void {
+				wp_trigger_error( '', 'Affibloom skipped a notice: ' . $error->getMessage(), E_USER_WARNING );
+			}
+		);
+		return $this->notice_board;
+	}
+
+	/**
+	 * The upgrade's hooks, one instance: WordPress runs them, and the notice board reads their failure.
+	 */
+	private function upgrade_hooks(): UpgradeHooks {
+		if ( null === $this->upgrade_hooks ) {
+			$upgrader            = self::upgrader();
+			$this->upgrade_hooks = new UpgradeHooks( $upgrader, self::lifecycle( $upgrader ) );
+		}
+
+		return $this->upgrade_hooks;
 	}
 
 	/**
