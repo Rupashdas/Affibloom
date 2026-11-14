@@ -347,6 +347,84 @@ test.describe( 'F26 Fields', () => {
 		expect( JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) ).fields.map( ( f: { name: string } ) => f.name ) ).toEqual( [ used ] );
 	} );
 
+	test( 'AC5 the Links tab lists the published products that have the field, ten a page', async ( { page } ) => {
+		const own = unique( 'F26 Links' );
+		seedFields( {
+			fields: [
+				{ id: 8200, name: own, type: 'text', description: '' },
+				{ id: 8201, name: `${ own } none`, type: 'text', description: '' },
+				{ id: 8202, name: `${ own } many`, type: 'text', description: '' },
+			],
+		} );
+		const image = 'https://www.example.com/wp-content/uploads/f26.jpg';
+		const first = createProduct( { name: unique( 'F26 Zeta' ), image_url: image } );
+		const second = createProduct( { name: unique( 'F26 Alpha' ) } );
+		const draft = createProduct( { name: unique( 'F26 draft' ) } );
+		const trashed = createProduct( { name: unique( 'F26 trashed' ) } );
+		made.push( first, second, draft, trashed );
+		for ( const id of [ first, second, draft, trashed ] ) {
+			giveFields( id, [ 8200 ] );
+		}
+		wp( 'post', 'update', String( draft ), '--post_status=draft' );
+		wp( 'post', 'update', String( trashed ), '--post_status=trash' );
+
+		// The field opens on Links <n>, and n is the products the tab lists: the two published ones.
+		await page.goto( `${ FIELD }&id=8200` );
+		const tabs = page.locator( '.affibloom-tabs' );
+		await expect( tabs.getByRole( 'link', { name: /^Links\s*2$/ } ) ).toHaveAttribute( 'aria-current', 'page' );
+		await expect( tabs.getByRole( 'link', { name: 'Details' } ) ).not.toHaveAttribute( 'aria-current', 'page' );
+		for ( const column of [ 'Image', 'Link Name', 'Permalink' ] ) {
+			await expect( page.getByRole( 'columnheader', { name: column } ) ).toBeVisible();
+		}
+		const links = page.locator( '.affibloom-table--field-links tbody tr' );
+		await expect( links ).toHaveCount( 2 );
+		// Alphabetical by name; the first row's name is the Alpha product, a link to its page; the permalink is its slug.
+		await expect( links.nth( 0 ).locator( '.affibloom-row__name' ) ).toContainText( 'F26 Alpha' );
+		await expect( links.nth( 0 ).getByRole( 'link', { name: /F26 Alpha/ } ) ).toHaveAttribute( 'href', new RegExp( `page=affibloom-product&id=${ second }$` ) );
+		const slug = wp( 'post', 'get', String( second ), '--field=post_name' );
+		await expect( links.nth( 0 ).locator( '.affibloom-col-permalink' ) ).toHaveText( `/${ slug }/` );
+		// The image is 50 px wide, as Lasso's thumbnail.
+		const picture = links.nth( 1 ).locator( 'img' );
+		await expect( picture ).toHaveAttribute( 'src', image );
+		await expect( picture ).toHaveAttribute( 'width', '50' );
+		await expect( page.locator( '.affibloom-pager__range' ) ).toHaveText( '1-2 of 2' );
+
+		// Details is the other tab.
+		await tabs.getByRole( 'link', { name: 'Details' } ).click();
+		await expect( page.getByLabel( 'Field Title' ) ).toHaveValue( own );
+
+		// No product has this one: the empty state, and no number on the tab.
+		await page.goto( `${ FIELD }&id=8201` );
+		await expect( page.locator( '.affibloom-empty' ) ).toContainText( "Looks like we're coming up empty." );
+		await expect( tabs.getByRole( 'link', { name: /^Links$/ } ) ).toBeVisible();
+	} );
+
+	test( 'AC5 more than ten products make a second page', async ( { page } ) => {
+		seedFields( { fields: [ { id: 8202, name: unique( 'F26 Many' ), type: 'text', description: '' } ] } );
+		const ids = wp(
+			'eval',
+			`foreach ( range( 1, 11 ) as $i ) { echo wp_insert_post( array( "post_type" => "affibloom_product", "post_status" => "publish", "post_title" => "F26 many " . str_pad( (string) $i, 2, "0", STR_PAD_LEFT ), "meta_input" => array( "_affibloom_url" => "https://www.example.com/f26-many-$i", "_affibloom_type" => "other", "_affibloom_new_tab" => "1", "_affibloom_nofollow" => "1", "_affibloom_sponsored" => "0", "_affibloom_show_disclosure" => "1", "_affibloom_url_key" => "https://www.example.com/f26-many-$i", "_affibloom_fields" => array( array( "field" => 8202, "value" => "", "visible" => true, "show_name" => false ) ) ) ) ), " "; }`
+		).split( /\s+/ ).map( Number );
+		made.push( ...ids );
+
+		await page.goto( `${ FIELD }&id=8202&tab=links` );
+		const links = page.locator( '.affibloom-table--field-links tbody tr' );
+		await expect( links ).toHaveCount( 10 );
+		await expect( page.locator( '.affibloom-pager__range' ) ).toHaveText( '1-10 of 11' );
+		await expect( page.locator( '.affibloom-tabs' ).getByRole( 'link', { name: /^Links\s*11$/ } ) ).toBeVisible();
+
+		await page.locator( '.affibloom-pagination a', { hasText: '2' } ).click();
+		await expect( links ).toHaveCount( 1 );
+		await expect( page.locator( '.affibloom-pager__range' ) ).toHaveText( '11-11 of 11' );
+		await expect( links.first().locator( '.affibloom-row__name' ) ).toContainText( 'F26 many 11' );
+	} );
+
+	test( 'AC5 a row of the Fields list opens the Links tab of its field', async ( { page } ) => {
+		seedFields();
+		await page.goto( LIST );
+		await expect( rows( page ).nth( 1 ).getByRole( 'link', { name: 'Pros' } ) ).toHaveAttribute( 'href', /page=affibloom-field&id=2&tab=links$/ );
+	} );
+
 	test( 'AC3 a field that does not exist goes back to the list; a list row opens its field', async ( { page } ) => {
 		seedFields();
 		await page.goto( `${ FIELD }&id=987654` );

@@ -14,11 +14,11 @@ use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\FieldPage;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\Fields\FieldType;
-use Affibloom\Domain\Fields\FieldUsage;
 use Affibloom\Domain\Fields\FieldUsageRepository;
 use Affibloom\Domain\Fields\ProductField;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 
 /**
@@ -108,6 +108,29 @@ final class FieldsService {
 	 */
 	public function usage_of( int $id ): int {
 		return $this->usage->usage()->of( $id );
+	}
+
+	/**
+	 * One page of the Links tab (F26 R20, D7): the published products that have the field, by name, ten a page. The total is
+	 * what the tab's number shows.
+	 *
+	 * @param int $id   The field's ID.
+	 * @param int $page From 1; a page past the end is the last page.
+	 */
+	public function products_using( int $id, int $page ): ProductPage {
+		$ids   = $this->usage->published_with( $id );
+		$pages = max( 1, (int) ceil( count( $ids ) / self::PER_PAGE ) );
+		$page  = min( max( 1, $page ), $pages );
+
+		$items = array();
+		foreach ( array_slice( $ids, ( $page - 1 ) * self::PER_PAGE, self::PER_PAGE ) as $product ) {
+			$found = $this->products->get( $product );
+			if ( null !== $found ) {
+				$items[] = $found;
+			}
+		}
+
+		return new ProductPage( $items, count( $ids ), $page, self::PER_PAGE );
 	}
 
 	/**

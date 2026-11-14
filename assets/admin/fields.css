@@ -34,7 +34,35 @@
 .affibloom-admin .affibloom-field-modal__manage:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
 .affibloom-field-modal__manage .affibloom-icon { width: 14px; height: 14px; }
 
+/* A field's Links tab: Image (50px), Link Name, Permalink. */
+.affibloom-table.affibloom-table--field-links { min-width: 0; }
+.affibloom-table--field-links .affibloom-col-image { width: 96px; text-align: center; }
+.affibloom-table--field-links th.affibloom-col-image .affibloom-th { align-items: center; }
+.affibloom-table--field-links .affibloom-col-name { width: 42%; overflow-wrap: anywhere; }
+.affibloom-table--field-links td.affibloom-col-permalink { color: var(--affibloom-ink-700); font-size: 14px; overflow-wrap: anywhere; }
+.affibloom-table--field-links .affibloom-thumb { width: 50px; height: 50px; }
+.affibloom-table--field-links .affibloom-row__name { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
+.affibloom-admin .affibloom-table--field-links .affibloom-row__name { text-decoration: none; }
+.affibloom-admin .affibloom-table--field-links .affibloom-row__name:hover { text-decoration: underline; }
+/* The number on the Links tab (Lasso's badge). */
+.affibloom-tabs__count {
+	display: inline-block;
+	min-width: 20px;
+	margin-left: 6px;
+	padding: 0 6px;
+	border-radius: 10px;
+	background: var(--affibloom-on-navy-active);
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 20px;
+	text-align: center;
+}
+.affibloom-tabs__tab.is-active .affibloom-tabs__count { background: var(--affibloom-brand-50); color: var(--affibloom-brand-700, var(--affibloom-brand-600)); }
+
 @media (max-width: 782px) {
+	.affibloom-table--field-links .affibloom-col-image { width: 72px; padding-right: 8px; padding-left: 16px; }
+	.affibloom-table--field-links .affibloom-col-name { width: 40%; }
+	.affibloom-table--field-links td.affibloom-col-permalink { font-size: 13px; }
 	/* Save Changes fills the width on a phone (admin.css), so Delete This Field goes under it instead of beside it. */
 	.affibloom-fieldpage .affibloom-card__foot--split { flex-direction: column-reverse; align-items: stretch; gap: 12px; }
 	.affibloom-fieldpage .affibloom-card__foot--split .affibloom-link-button { justify-content: center; }

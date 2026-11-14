@@ -17,7 +17,7 @@ use Affibloom\Interface\Template;
 /**
  * One field's page, or "Add a New Field" when no field is named (`admin/views/fields/{header,field-details}.php`; F26
  * R12-R13). Reached from the Fields list, never from the menu. Task FL2 builds the new-field form; FL3 a field's Details
- * tab, with Delete This Field; FL4 adds its Links tab.
+ * tab, with Delete This Field; FL4 its Links tab, which an existing field opens on, as Lasso's list row does (R10).
  */
 final class FieldScreen {
 
@@ -82,13 +82,20 @@ final class FieldScreen {
 	 * Prints the page. WordPress has already checked the capability (Capabilities::PRODUCTS, in AdminMenu).
 	 */
 	public function render(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which tab and page to show, no action behind it.
+		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		$page = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 		$this->template->render(
 			'admin/field',
 			array(
-				'field'  => $this->field,
-				'types'  => FieldType::choosable(),
-				'usage'  => null === $this->field ? 0 : $this->fields->usage_of( $this->field->id ),
-				'notice' => $this->notice->message(),
+				'field'    => $this->field,
+				'tab'      => 'details' === $tab ? 'details' : 'links',
+				'products' => null === $this->field ? null : $this->fields->products_using( $this->field->id, $page ),
+				'types'    => FieldType::choosable(),
+				'usage'    => null === $this->field ? 0 : $this->fields->usage_of( $this->field->id ),
+				'notice'   => $this->notice->message(),
 			)
 		);
 	}

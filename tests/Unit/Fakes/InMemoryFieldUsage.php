@@ -4,7 +4,7 @@ namespace Affibloom\Tests\Unit\Fakes;
 use Affibloom\Domain\Fields\FieldUsage;
 use Affibloom\Domain\Fields\FieldUsageRepository;
 
-/** Field usage counted from the in-memory products' field rows. */
+/** Field usage counted from the in-memory products' field rows; every saved product is published. */
 final class InMemoryFieldUsage implements FieldUsageRepository {
 	public function __construct( private InMemoryProductRepository $products ) {}
 
@@ -17,5 +17,16 @@ final class InMemoryFieldUsage implements FieldUsageRepository {
 		}
 
 		return new FieldUsage( $counts );
+	}
+
+	public function published_with( int $field ): array {
+		$ids = array();
+		foreach ( $this->products->fields as $product => $fields ) {
+			if ( in_array( $field, $fields->ids(), true ) ) {
+				$ids[] = $product;
+			}
+		}
+
+		return $ids;
 	}
 }
