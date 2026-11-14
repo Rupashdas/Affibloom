@@ -250,7 +250,7 @@ they were, then the new sections in the order listed after G5.
 duplicates of F38 ON9 and ON8 (Phase 8)
 
 - [x] Task 13F: The list keeps every argument without JavaScript, and `?post_id=`
-- [ ] Task 13G: The search finds added buttons' links, not their texts
+- [x] Task 13G: The search finds added buttons' links, not their texts
 - [ ] Task 13H: F19 AC4 and AC10 tests that run on a full library
 - [ ] Task 13I: A stable order, and counts that follow the list
 - [ ] Task 13J: Saved views and the Filters panel behave as Lasso's
@@ -5863,12 +5863,12 @@ product with an added button. Lasso's arm is the second button's link only (`sec
 **Files:** modify `src/Domain/Product/Buttons.php`, `PostTypeProductRepository.php`, `tools/seed-from-lasso.php`
 (writes through `save()`; re-run on Local); tests `ButtonsTest` (`urls()`), `F19.spec.ts` AC16.
 
-- [ ] **Step 1: Failing test.** AC16: a product with an added button "Buy Now"; searching "Buy Now" finds it → fails.
-- [ ] **Step 2: Domain.** `Buttons::urls()` with its unit test.
-- [ ] **Step 3: Storage and the arm.** `save()` deletes and adds the rows; the arm reads them; `_affibloom_buttons`
+- [x] **Step 1: Failing test.** AC16: a product with an added button "Buy Now"; searching "Buy Now" finds it → fails.
+- [x] **Step 2: Domain.** `Buttons::urls()` with its unit test.
+- [x] **Step 3: Storage and the arm.** `save()` deletes and adds the rows; the arm reads them; `_affibloom_buttons`
   leaves the IN list.
-- [ ] **Step 4: Run and look.** Re-run the seed on Local; search a second button's link (60 live records have one).
-- [ ] **Step 5: Commit** — "Search only the links of a product's added buttons".
+- [x] **Step 4: Run and look.** Re-run the seed on Local; search a second button's link (60 live records have one).
+- [x] **Step 5: Commit** — "Search only the links of a product's added buttons".
 
 ---
 

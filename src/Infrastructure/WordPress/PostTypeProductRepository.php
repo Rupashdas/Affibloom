@@ -105,6 +105,7 @@ final class PostTypeProductRepository implements ProductRepository {
 		if ( array() === $buttons ) {
 			delete_post_meta( $id, '_affibloom_buttons' );
 		}
+		$this->index_button_urls( $id, $product->buttons );
 		// A product that is no longer Amazon's, or no longer a search page, loses those keys (Lasso:
 		// delete_post_meta( 'amazon_product_id' ) when the new link is not Amazon's; Task 15B).
 		if ( '' === $product->asin ) {
@@ -119,6 +120,47 @@ final class PostTypeProductRepository implements ProductRepository {
 		}
 
 		return $product->with( array( 'id' => $id ) );
+	}
+
+	/**
+	 * Writes `_affibloom_button_url` for every product that has added buttons, once: upgrade step 1 (Task 13G), for the
+	 * products stored before save() wrote the key. Any status, so a draft or a retired product is found when it comes
+	 * back.
+	 *
+	 * @return int How many products were indexed.
+	 */
+	public function index_all_button_urls(): int {
+		$ids = get_posts(
+			array(
+				'post_type'        => ProductPostType::NAME,
+				'post_status'      => 'any',
+				'posts_per_page'   => -1,
+				'fields'           => 'ids',
+				'meta_key'         => '_affibloom_buttons', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- once, at an upgrade.
+				'suppress_filters' => true,
+			)
+		);
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+			$this->index_button_urls( $id, Buttons::from_array( (array) get_post_meta( $id, '_affibloom_buttons', true ) ) );
+		}
+
+		return count( $ids );
+	}
+
+	/**
+	 * One `_affibloom_button_url` row per added button's link (Task 13G; F19 D4), rewritten whole: the Dashboard's
+	 * search finds a product by these links only, as Lasso's finds it by `second_btn_url`, never by a button's text or
+	 * the keys of the stored list.
+	 *
+	 * @param int     $id      Post ID.
+	 * @param Buttons $buttons The product's added buttons.
+	 */
+	private function index_button_urls( int $id, Buttons $buttons ): void {
+		delete_post_meta( $id, '_affibloom_button_url' );
+		foreach ( $buttons->urls() as $url ) {
+			add_post_meta( $id, '_affibloom_button_url', wp_slash( $url ) );
+		}
 	}
 
 	/**
@@ -594,8 +636,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * product by neither its link nor its ASIN; the query is also not marked as a search, so nothing else on
 	 * the site treats this admin list as one.
 	 *
-	 * The buttons after the primary one (`_affibloom_buttons`, F29) are searched too, as Lasso's search matches the
-	 * second button's link (60 of the 263 live records have one); a LIKE over the stored list finds a link inside it.
+	 * The buttons after the primary one (F29) are searched by their links only, as Lasso's search matches the second
+	 * button's link (60 of the 263 live records have one): one `_affibloom_button_url` row each (Task 13G), not the
+	 * serialised list, whose button texts and keys (`url`, `nofollow`) would match too.
 	 * URL variants join if that subsystem is ever built.
 	 *
 	 * @return callable(string, \WP_Query): string
@@ -615,7 +658,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				$wpdb->prepare(
 					"EXISTS ( SELECT 1 FROM {$wpdb->postmeta} AS affibloom_m
 						WHERE affibloom_m.post_id = {$wpdb->posts}.ID
-							AND affibloom_m.meta_key IN ( '_affibloom_url', '_affibloom_asin', '_affibloom_buttons' )
+							AND affibloom_m.meta_key IN ( '_affibloom_url', '_affibloom_asin', '_affibloom_button_url' )
 							AND affibloom_m.meta_value LIKE %s )",
 					$like
 				),

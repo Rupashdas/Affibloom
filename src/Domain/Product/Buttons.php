@@ -95,6 +95,18 @@ final class Buttons {
 	}
 
 	/**
+	 * The added buttons' links, in order, without the empty ones: what the Dashboard's search finds a product by (Task
+	 * 13G; F19 D4). Lasso's search reads the second button's link only, never its text.
+	 *
+	 * @return list<string>
+	 */
+	public function urls(): array {
+		$urls = array_map( static fn( Button $button ): string => $button->url, $this->buttons );
+
+		return array_values( array_filter( $urls, static fn( string $url ): bool => '' !== $url ) );
+	}
+
+	/**
 	 * Where the default button sits among the added ones: 0 is first.
 	 */
 	public function main_position(): int {

@@ -124,6 +124,10 @@
 					'nofollow' => '1' === $flag( $lasso_id, 'enable_nofollow2', true ),
 				),
 			);
+			// The row the Dashboard's search reads, as PostTypeProductRepository::save() writes it (Task 13G).
+			if ( '' !== $second_url ) {
+				$meta['_affibloom_button_url'] = $second_url;
+			}
 		}
 
 		if ( $is_amazon ) {

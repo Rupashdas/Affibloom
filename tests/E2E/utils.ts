@@ -98,9 +98,14 @@ export function createProduct( fields: ProductFields ): number {
 	// AffiliateUrl::key(): "&amp;" read as "&", trailing slashes dropped, lower case — for every product, Amazon's too.
 	metaInput._affibloom_url_key = all.url.replace( /&amp;/g, '&' ).replace( /\/+$/, '' ).toLowerCase();
 	const input: Record< string, unknown > = stored.length ? { ...metaInput, _affibloom_buttons: stored } : metaInput;
-	return Number(
+	const id = Number(
 		wp( 'post', 'create', '--post_type=affibloom_product', '--post_status=publish', `--post_title=${ name }`, `--meta_input=${ JSON.stringify( input ) }`, '--porcelain' )
 	);
+	// One `_affibloom_button_url` row per added button's link, as save() writes them (Task 13G): the search reads these.
+	for ( const button of stored.filter( ( b ) => b.url.trim() !== '' ) ) {
+		wp( 'post', 'meta', 'add', String( id ), '_affibloom_button_url', button.url.trim() );
+	}
+	return id;
 }
 
 /** The block markup for a product box (docs/spec/interface.md, Editor). */

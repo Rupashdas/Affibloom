@@ -31,6 +31,11 @@ final class LifecycleHooksTest extends TestCase {
 		Functions\expect( 'flush_rewrite_rules' )->once();
 		Functions\expect( 'wp_clear_scheduled_hook' )->never();
 		Functions\expect( 'delete_option' )->never();
+		// A site whose schema steps are all done (step 1 is Task 13G's), so activation runs none; the steps are
+		// UpgraderTest's and MigratorTest's.
+		Functions\when( 'get_option' )->alias(
+			static fn( string $name, mixed $fallback = false ): mixed => 'affibloom_db_version' === $name ? PHP_INT_MAX : $fallback
+		);
 
 		$before = time();
 		Plugin::activate();

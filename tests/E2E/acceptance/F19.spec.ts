@@ -289,6 +289,23 @@ test.describe( 'F19 Dashboard list', () => {
 		}
 	} );
 
+	test( 'AC16 an added button is found by its link, not by its text or the stored keys', async ( { page } ) => {
+		const word = unique( 'ac16link' );
+		const text = unique( 'Buy Now ac16' );
+		const id = createProduct( { name: unique( 'F19 AC16' ), buttons: [ { url: `https://shop.example.com/${ word }`, text } ] } );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await search( page, word );
+		await expect( rows( page ) ).toHaveCount( 1 );
+		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
+
+		// Narrowed to this product (?post_id=, Task 13F), so "not found" means this product, not a long list.
+		for ( const term of [ text, 'url', 'nofollow' ] ) {
+			await page.goto( `/wp-admin/admin.php?page=affibloom&post_id=${ id }&s=${ encodeURIComponent( term ) }` );
+			await expect( page.locator( '#affibloom-list' ).getByText( 'No products match your search.' ) ).toBeVisible();
+		}
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )

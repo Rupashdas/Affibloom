@@ -78,4 +78,21 @@ final class ButtonsTest extends TestCase {
 			$buttons->to_array()
 		);
 	}
+
+	/**
+	 * The links the Dashboard's search reads (Task 13G; F19 D4): non-empty, in order. A button kept with its text only
+	 * (Lasso keeps 123 such records here) has no link to find.
+	 */
+	public function test_urls_are_the_added_buttons_links_in_order_without_empty_ones(): void {
+		$buttons = Buttons::from_array(
+			array(
+				array( 'url' => 'https://www.example.com/men', 'text' => 'Men' ),
+				array( 'url' => '', 'text' => 'Text only' ),
+				array( 'url' => ' https://www.example.com/women ', 'text' => '' ),
+			)
+		);
+
+		self::assertSame( array( 'https://www.example.com/men', 'https://www.example.com/women' ), $buttons->urls() );
+		self::assertSame( array(), ( new Buttons( array() ) )->urls() );
+	}
 }

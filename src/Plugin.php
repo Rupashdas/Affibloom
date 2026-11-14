@@ -156,13 +156,18 @@ final class Plugin {
 
 	/**
 	 * The schema and data steps by number. Append a step with the next number; never renumber or remove one, because
-	 * affibloom_db_version records the last number a site finished. None yet: the first is C1C's
-	 * affibloom_amazon_products table.
+	 * affibloom_db_version records the last number a site finished.
 	 *
 	 * @return array<int, callable(): void>
 	 */
 	private static function schema_steps(): array {
-		return array();
+		return array(
+			// Task 13G: the Dashboard's search reads added buttons' links from their own rows; products stored before
+			// then get them once.
+			1 => static function (): void {
+				( new PostTypeProductRepository() )->index_all_button_urls();
+			},
+		);
 	}
 
 	/**
