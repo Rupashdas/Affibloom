@@ -974,13 +974,13 @@ test.describe( 'F1 Product library', () => {
 		} );
 		const blocks = page.locator( '[data-button]' );
 		await expect( blocks ).toHaveCount( 2 );
-		await blocks.nth( 0 ).getByRole( 'button', { name: 'Remove Button 1' } ).click();
+		await blocks.nth( 1 ).getByRole( 'button', { name: 'Remove Button 2' } ).click();
 		const ask = page.getByRole( 'dialog', { name: 'Remove this button?' } );
 		await expect( ask ).toContainText( 'Its link and text are gone once you save.' );
 		await ask.getByRole( 'button', { name: 'Cancel' } ).click();
 		await expect( ask ).toBeHidden();
 		await expect( blocks ).toHaveCount( 2 );
-		await blocks.nth( 0 ).getByRole( 'button', { name: 'Remove Button 1' } ).click();
+		await blocks.nth( 1 ).getByRole( 'button', { name: 'Remove Button 2' } ).click();
 		await ask.getByRole( 'button', { name: 'Remove' } ).click();
 		await expect( blocks ).toHaveCount( 1 );
 		expect( browserDialogs ).toBe( 0 );

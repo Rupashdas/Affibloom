@@ -1963,6 +1963,10 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       "Needs the Amazon API"; Remove opens "Remove this button?" with no browser dialog and Cancel keeps the button; the
       dialog looks right. **Still not seen:** the field-failure toast and the remove-failure message (that product has no
       field; the E2E case stubs them), the 375 px layout, and the E2E runs.
+    - **The user's run (F1 + F29, 29 tests):** 25 passed, including the new AC5 and AC7 cases and F29 AC2 with the dialog.
+      AC2, AC14 and AC12 ended with Playwright's own `ENOENT` on its trace files in `test-results` (no assertion failed;
+      to be rerun alone). The new AC10 case timed out on a fault in the test: it clicked "Remove Button 1", the main
+      link, which has no Remove; fixed to Button 2 and awaiting a rerun.
     - **Commit mix-up:** a concurrent Task 2X0 session committed part of this work in `7c73290` (`product.js`,
       `ProductEditors.php`, `F1.spec.ts`, `F29.spec.ts`, `ProductEditorsTest.php`), already pushed; history was not
       rewritten. The rest is in the 2X1 commit. `assets/admin/product-save.js` also carries an uncommitted change that is
