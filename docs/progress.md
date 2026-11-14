@@ -41,6 +41,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    at the user's word until another session's work is applied; then C1C, C1D, C1I, C1K-C1P, then Phase 2's exit check
    and the user's sign-off.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
+   Standing rule (the user, 2026-11-15): **one batch per session**, as listed with its rules in
+   [`plans/batches.md`](plans/batches.md); it replaces "one task per session". Each task still has its own commit.
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    **`tools/reset-local.sh` is not safe to run as it stands:** `.local/snapshot.sql` dates from 2026-11-12, before the
    library was seeded from Lasso (deviation 51) and before the saved sign-in Claude's runs use, so a reset would lose

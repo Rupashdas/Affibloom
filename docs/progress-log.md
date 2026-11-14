@@ -4,6 +4,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, faster implementation, at the user's request):** `progress.md` split into `progress.md`,
+  `deviations.md` and `progress-log.md` (`29a4cae`); `/next-task` reads only the current task's section. Then, at the
+  user's word ("let's do change 2, batching small tasks"), one batch per session: `plans/batches.md` holds the rules
+  and 139 batches for the 252 open tasks (each in exactly one, checked by script; MCP1 is dropped). `CLAUDE.md`,
+  `/next-task` and the memory note updated. Docs only, no code.
+
 - **2026-11-15 (Claude Code, Task C1A, at the user's word "All of C1 here", paused after C1A at the user's word):**
   Settings → Amazon has the Product Data API card (Default Tracking ID, Credential ID, Secret, Partner tag, Version,
   Validate, the state chip); `POST /amazon/validate`; Save Changes validates unvalidated credentials (R23); the
