@@ -734,15 +734,20 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
+	flex-wrap: wrap;
+	gap: 6px 12px;
 	min-height: 34px;
 	margin: 0 0 6px;
 	padding: 0;
 	border: 0;
 }
 .affibloom-stepper-row__label { float: left; padding: 0; color: var(--affibloom-ink-900); }
+/* Never narrower than their options (the clip hid "Right" at 375px): a row too narrow for both wraps the control onto
+   its own line, still on the right. */
 .affibloom-stepper,
 .affibloom-options {
+	flex: none;
+	margin-left: auto;
 	display: inline-flex;
 	align-items: center;
 	overflow: hidden;

@@ -299,7 +299,9 @@ test.describe( 'F1 Product library', () => {
 			resolve( dialog.type() );
 			void dialog.dismiss();
 		} ) );
-		void page.reload().catch( () => undefined );
+		// The page reloads itself: a page.reload() left pending while its beforeunload is dismissed leaves Playwright a
+		// response that no longer exists ("Object with guid response@… was not bound in the connection").
+		await page.evaluate( () => setTimeout( () => window.location.reload(), 0 ) );
 		expect( await asked ).toBe( 'beforeunload' );
 		await page.getByRole( 'button', { name: 'Save Changes', exact: true } ).click();
 		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
@@ -487,7 +489,9 @@ test.describe( 'F1 Product library', () => {
 			resolve( dialog.type() );
 			void dialog.dismiss();
 		} ) );
-		void page.reload().catch( () => undefined );
+		// The page reloads itself: a page.reload() left pending while its beforeunload is dismissed leaves Playwright a
+		// response that no longer exists ("Object with guid response@… was not bound in the connection").
+		await page.evaluate( () => setTimeout( () => window.location.reload(), 0 ) );
 		expect( await asked ).toBe( 'beforeunload' );
 	} );
 

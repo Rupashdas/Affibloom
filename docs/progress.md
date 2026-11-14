@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2, 13F-13J (+ the one-time Lasso import button, deviation 87) | 16: 2X1-2X5, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5 (deviation 89; FL5 done, deviation 105; 13F-13H done, deviation 102) |
+| 2 | Settings and product library | 2X0-2X6, 8, 9, 9A, 9B-9I, 9K, 9L, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13J, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2 (+ the one-time Lasso import button, deviation 87) | 11: C1A-C1D, C1I, C1K-C1P (C1J is no code) | **In progress.** Audited 2026-11-15 (deviation 107): everything but C1 is built, recorded and passes its acceptance tests; C1 is next |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -24,25 +24,21 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 ## Next up
 
-1. **Gate 4 given for the whole plan** (the user, 2026-11-14 walkthrough; answers in `open-decisions.md`). Building
-   resumes task by task in the phase files' order.
-2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. **2X4, 2X5 and 2X6 are built and committed (2026-11-14, deviations 93-95; the user asked for all three in one session, overriding the one-task rule for this session); each waits for the user's signed-in run** (F2 and F18 for 2X4, F18 for 2X5, F16 for 2X6). Then Groups G1-G5.
-2a. **Tasks 9B-9L are built (2026-11-14, deviation 96); they wait for the user's signed-in F9 run** (14 tests, AC4-AC15). 9J is in Phase 5.
-2b. **Task G1 (the Groups list and a new group) is done (2026-11-14, deviation 97); F23 AC1-AC2 passed in Claude's runs.**
-    **Tasks G2-G5 are built too (the user, 2026-11-14: "Let's do G2-G5", tested together; deviation 98).**
-2c. **Admin shell (the user, 2026-11-14: "Do Task ON1 and Task ON2", both in one session):** **ON1 done (deviation 101);
-    ON2 done (deviation 103); F38 AC1-AC6 passed in Claude's runs.** ON3-ON4 are Phase 5, ON5-ON9 Phase 8.
-2d. **Fields: FL1-FL5 are done; F26 (all seven ACs) is complete in Phase 2.** FL1-FL4 committed `89ef637`, `b366954`,
-    `ba6e821`, `e05a9c7`; **FL5 (the product page's field rows) done 2026-11-14, deviation 105**: F26 15/15, F1 AC10
-    and F23 AC5 (the shared drag) passed in Claude's runs. Fields in displays and tables wait for Phase 3 and F25.
-2c. **Tasks 13F-13J (the Dashboard's second pass, F19) are done (2026-11-14, deviation 102; the user asked for all
-    five in one session).** F19 AC4 and AC10-AC20 passed in Claude's runs; a quiet full F19 run is still owed (other
-    sessions ran Playwright in the same copy at the time). Local holds upgrade step 1 (`affibloom_db_version` 1).
+1. **Phase 2 audit done (2026-11-15, deviation 107).** The records were reconciled and the open checks run:
+   the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
+   and 375 px looks made, Display's clipped Button alignment fixed. Not changed: the product page's narrow Button Text
+   field at 1280 px and Settings → General's uneven gaps at 375 px (seen, recorded in deviation 107).
+2. **Next task: C1A** (the Product Data API card and Validate), then the rest of C1 in the phase file's order
+   (C1B-C1D, C1I, C1K-C1P), then Phase 2's exit check and the user's sign-off.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
-   The Local copy still needs a reset before the next full test run.
+   **`tools/reset-local.sh` is not safe to run as it stands:** `.local/snapshot.sql` dates from 2026-11-12, before the
+   library was seeded from Lasso (deviation 51) and before the saved sign-in Claude's runs use, so a reset would lose
+   both. The test runs of 2026-11-15 ran on the copy as it was (backup `.local/backup-2026-11-15-before-phase2-audit-runs.sql`).
+   A new snapshot is the user's call.
 5. Open, from the client: C1 Creators API credentials; the optional GA4 check.
-6. Pending, no action unless the user brings it up: CI has never run (deviation 10).
+6. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
+   run (no wp-env).
 
 ## Earlier "Next up" notes (history, before 2026-11-14)
 
@@ -175,22 +171,28 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
 1. **Repository location.** The plan says `D:\affibloom`. The repo is
    `wp-content/plugins/affibloom` inside this Local site, so the plugin runs next to the real Lasso.
    Wherever the plan says `D:\affibloom`, read this path.
+
 2. **PHPStan fixes in Task 1** (the plan's code failed `composer analyse`):
    - `affibloom_requirements_notice()` got a `@return void` docblock instead of a `: void` return type, so
      `affibloom.php` stays parseable by old PHP and can show its notice.
    - `phpstan.neon.dist` has one `ignoreErrors` entry: identifier `booleanOr.leftAlwaysFalse`, path
      `affibloom.php`, `count: 1`, with a comment. PHPStan analyses as PHP 8.1+ (Composer platform), so it
      sees the runtime `PHP_VERSION` check as always false; the check exists for older servers and stays.
+
 3. **wp-env was not run.** `package.json` and `.wp-env.json` are committed as written (CI uses them from
    Task 3), but the session that wrote them could not run Docker. Local activation (Step 7) replaces the
    wp-env check for Task 1.
+
 4. **`composer.lock` is committed** (`8732ff4`, "Lock development dependency versions"). Its download URLs
    are Packagist's normal GitHub ones (no mirror), so it is safe for CI.
+
 5. **`vendor/` now holds the full dev install** (PHPUnit, PHPCS, PHPStan, …) from `composer install` on this
    machine. The earlier runtime-only autoloader is gone. `vendor/` stays gitignored.
+
 6. **Plugin header author.** The plan's `affibloom.php` says `Author: VolleyballVault`. The user changed it
    in `7102461` ("Renamed ownership") to `Author: Devrupash` and added `Author URI: https://devrupash.com`.
    Keep the user's header wherever later tasks show `affibloom.php`.
+
 7. **Task 2 rewritten for Local (D1 = b, approved by the user 2026-11-12).** The phase file now holds the
    adapted text. In short: `tools/local-wp.sh` runs Local's bundled WP-CLI from any terminal (it puts
    PHP's `ImageMagick` folder on PATH, which fixes the cause of a `php_imagick.dll` startup warning on
@@ -204,9 +206,11 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
    During the task: `local-wp.sh` gained `MYSQL_TCP_PORT` (mysql otherwise tried port 3306); the
    production search-replace was not run (only two plugin options matched, no content); the smoke test and
    `vvadmin` creation were done by the user (Claude does not enter credentials on a `.local` host).
+
 8. **`.gitattributes` added** (`* text=auto eol=lf`, commit `196f0f1`), not in the plan. Git on this machine
    has `core.autocrlf=true` system-wide, so checkouts would get CRLF, which breaks `tools/*.sh` under bash
    and PHPCS's line-ending rule. It matches `.editorconfig`'s `end_of_line = lf`.
+
 9. **Task 3 workflow fixes** (found before the first run, each confirmed on this machine):
    - The `integration-and-e2e` job checks out into `path: affibloom` with `working-directory: affibloom`.
      wp-env names the plugin folder `path.basename(<checkout>)` (`@wordpress/env/lib/config/parse-source-string.js`),
@@ -221,6 +225,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
    - **Branch protection (Step 4) not set up:** GitHub answers "Upgrade to GitHub Pro or make this
      repository public" for this private repo on a Free account. The user chose D3 (c): the branch + PR +
      green CI routine is kept by discipline instead.
+
 10. **Simple workflow, no CI (the user's decision, 2026-11-12).** GitHub Actions is blocked by the account's
     billing ("recent account payments have failed or your spending limit needs to be increased"), and the
     user does not want to spend more time on CI. PR #1 was merged on the local checks (lint, analyse, unit,
@@ -271,6 +276,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     `00-overview.md` (decisions, C1–C3 outlines, task index), `roadmap.md` (1.6, U3/U7 findings, new **U8**, items
     in phases 2 and 7, the 7.2 "as in Lasso" correction), `feature-plan.md` (features 13–15, Amazon count 233).
     **The Claude Docs originals of the roadmap and the feature plan are now behind these local copies.**
+
 15. **Task 7 (acceptance suite), changes to the plan:**
     - `tests/E2E/utils.ts`: `wp( ...args )` runs `tools/local-wp.sh` through `execFileSync` (no shell string, no
       wp-env) and refuses arguments Git Bash would rewrite (`environment.md`). Added `blockTrackers()` (Local pages
@@ -1507,7 +1513,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       Not part of Task 15; open item for the General settings pass.
     No code changed; docs `4f7c25c`. **Gate 4 given by the user 2026-11-13** ("approved. go for it.").
 
-71. **Two broken button icons fixed (2026-11-13, the user: "two icons are shows broken. full review and youtube. fix
+71a. **Two broken button icons fixed (2026-11-13, the user: "two icons are shows broken. full review and youtube. fix
    it.")**, F28 D4 and AC7. Cause: the site's Additional CSS (post 5977) linked both to `uploads/2023/04/…svg`, which
    never existed (404 on production as well); no text used them. The user chose "Fix CSS + flag": after a backup
    (`app/affibloom-backup-2026-11-13-icons.sql`) the Local CSS was repointed (Full review → `2023/05/…` attachment
@@ -1617,11 +1623,6 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     Now Shift + Enter in the single field opens the textarea with the caret already on line 2, and in the textarea
     Shift + Enter keeps the browser's newline; closing the dialog still goes back to one link. `admin.js` (the
     textarea's keydown handler removed), F18 AC6 rewritten to type three links, F18 requirements entry point 7 noted.
-77. **Bulk add: one click on Add Link from the textarea submits (2026-11-13, found while adding three links in Brave).**
-    Pressing the button blurred the textarea, the blur swapped it for the shorter preview, and the button moved
-    away before mouseup, so the first click did nothing. Lasso has a mousedown workaround for the same thing. Now the
-    button's mousedown keeps the focus in the textarea, and `addMany` shows the preview itself once the confirm is
-    accepted. F18 AC6 gains a final step: one click from the textarea reaches the confirm (dismissed).
 
 76. **Task 16 superseded by 16A-16C (2026-11-13), from a sweep of Lasso's Dashboard quick edit** (`docs/features/F1/`
     requirements section 10 and analysis "Dashboard quick edit", gates 1-2 re-run; the old text moved to the phase
@@ -1645,6 +1646,12 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     - **Shared code** (second use): the toast, the save dialog and its repoint panel, the field errors and the media
       frame move from `product-save.js`/`product.js` into `admin.js` in 16A and 16C.
     No code changed; docs `ab709c9`. **Gate 4 given by the user 2026-11-13** ("Approve, start 16A").
+
+77. **Bulk add: one click on Add Link from the textarea submits (2026-11-13, found while adding three links in Brave).**
+    Pressing the button blurred the textarea, the blur swapped it for the shorter preview, and the button moved
+    away before mouseup, so the first click did nothing. Lasso has a mousedown workaround for the same thing. Now the
+    button's mousedown keeps the focus in the textarea, and `addMany` shows the preview itself once the confirm is
+    accepted. F18 AC6 gains a final step: one click from the textarea reaches the confirm (dismissed).
 
 78. **Task 16A (2026-11-13, `852cb00`), the Dashboard row's quick edit**, built as written (deviation 76), with these points:
     - **The unsaved dialog waits for 16B**, its caller ("nothing before its caller"); 16A's table and 16B's Files were
@@ -1851,6 +1858,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       least: 7.1.4" and "Requires PHP: 8.3" (the plan: 6.5 and 8.1) and the file is reformatted without WordPress's
       spacing, so `composer lint` fails on it (31 errors). Left untouched and out of the commit. **The user, 2026-11-13:
       "I'll handle it"**: Claude does not touch it; until it is settled, `composer lint` fails on that file alone.
+
 87. **A staging build for the client's review, with a one-time Lasso import (2026-11-13, `447bf1b`), outside the
     phase order.** The user asked for a zip of what is done so far, to upload to staging
     (https://staging.volleyballvault.com/), and for Lasso's products to be imported once so the client sees real
@@ -1941,6 +1949,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       unsaved-changes guard; Lasso's Sponsored default is on; the Phase 5 Task 26 duplicate mapping was inverted.
     - **Waiting for the user:** `open-decisions.md` (about 60 items, each with a recommendation), then gate 4 for the
       whole plan.
+
 90. **Task 2X0 (2026-11-14), PHP 8.3 and WordPress 7.1.4 everywhere.** Red: `composer lint` on the user's `affibloom.php`
     showed 31 errors (30 spacing, fixed by `lint:fix`; the last, a blank line before the file comment, by hand); the old
     gate let PHP 8.1 and WP 6.9 through (checked with `version_compare`). Changes: the runtime check and its notice, the
@@ -1956,7 +1965,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       administrator (WP-CLI). The browser pane was signed out, so the Dashboard was not looked at (Claude does not sign in).
     - `CLAUDE.md` (site root, outside git) and `docs/environment.md` updated.
 
-91. **Task 2X1 (2026-11-14), the product page's four gaps; built, waiting for the user's signed-in run.** Red: the new
+91. **Task 2X1 (2026-11-14), the product page's four gaps; done (the user's F1 and F29 runs, below; the 375 px look still owed).** Red: the new
     unit test failed on the missing `placeholder` setting; the E2E cases (F1 AC5, AC7, AC10) were written first but could
     not be run here (the browser pane was signed out and Claude does not sign in on `.local`), so their red state was not
     seen. Changes: (1) the Description editor says "Enter a description" while empty: TinyMCE 4.9 has no placeholder, so
@@ -2004,8 +2013,8 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       user ran F16 signed in (2026-11-14): 10 passed, 1 skipped (the Phase 3 box test), including the new "Edge case 7" case.
     - Other sessions have uncommitted work in this tree (2X1): the 2X3 commit holds only its own files.
 
-93. **Task 2X4 (2026-11-14), a kept redirect that ends at Amazon is an Amazon product; built, waiting for the user's F2
-    and F18 runs.** `create_from_url()` now asks `kept_redirect()` when the pasted link is not Amazon and the resolver
+93. **Task 2X4 (2026-11-14), a kept redirect that ends at Amazon is an Amazon product; built; F2 and F18 passed
+    in Claude's runs (deviation 95a).** `create_from_url()` now asks `kept_redirect()` when the pasted link is not Amazon and the resolver
     found a different final URL (a geni.us link with "Keep geni.us formatting" on): if the final URL is Amazon, the
     product is typed Amazon with the ASIN, store and search key of where it ends, named from that link, and the stored
     link is the one pasted. A product already in the library for that ASIN is found first (a duplicate, as Lasso's
@@ -2013,7 +2022,8 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     `other`. This **reverses `test_geni_us_is_kept_as_pasted…`, which asserted type `other`** (written in 12D); the plan's
     task text overrules it. Lines 376-380 in the task text are now elsewhere in the file. Red first (type and a missing
     duplicate); 453 unit tests pass. Not checked by hand: it needs a stubbed redirect and a signed-in page.
-94. **Task 2X5 (2026-11-14), bulk add past a failing link and "Continue Anyway"; built, waiting for the user's F18 run.**
+
+94. **Task 2X5 (2026-11-14), bulk add past a failing link and "Continue Anyway"; built; F18 passed in Claude's run (deviation 95a).**
     - `BulkAddService::process()` keeps Lasso's silence for a refused or duplicate link (`InvalidField`,
       `RuntimeException`) and now also catches any other `Throwable`: the link goes into the new `BulkRun::failed` list
       (stored with the run, empty for a run stored before) and the run moves on. Nothing reads the list yet; Lasso's bulk
@@ -2025,18 +2035,20 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       "Continue Anyway" with `data-continue="1"`; typing in the field, closing the dialog or submitting puts "Add Link"
       back (Lasso does the same on change, paste and keypress). Bulk-mode errors do not use it (Lasso's `!form_add_link_is_text_area()`).
     - New F18 case (route stub answers the POST with 500). Not run: the spec needs a sign-in; it loads (`--list`).
-96. **Claude runs the signed-in specs itself (the user, 2026-11-14).** With the saved session and
-    `.local/no-login.config.ts` (no sign-in is typed). 2X4-2X6: F2, F16 and F18 pass, 31 tests (1 skipped, the Phase 3
-    box test). My new "Continue Anyway" case first failed because its route stub missed the REST URL (it now matches
-    `/affibloom/v1/products` with or without a query). Two full runs also showed failures that passed alone: another
-    session's unfinished Groups work in the same tree briefly broke the site (a WordPress critical error), and runs
-    overlapped. So the "waiting for the user's run" notes in deviations 93-95 are settled; no browser look at 375 px yet.
-95. **Task 2X6 (2026-11-14), brag mode removed; built, waiting for the user's F16 run.** The two controls, the keys
+
+95. **Task 2X6 (2026-11-14), brag mode removed; built; F16 passed in Claude's run (deviation 95a).** The two controls, the keys
     `enable_brag_mode` and `brag_url` (defaults and the Display tab's field list) and the old test are gone; a posted
     value is not stored, and a value already stored is not read, so the next save drops it. `SettingsService`'s `url`
     cleaner, whose only caller was `brag_url`, went with it. New unit case and a new F16 case ("no brag control");
     F16's fixture no longer lists the keys. 456 unit tests, lint and PHPStan clean. Not looked at in a browser at 1280
     and 375 px (signed out).
+
+95a. **Claude runs the signed-in specs itself (the user, 2026-11-14).** With the saved session and
+    `.local/no-login.config.ts` (no sign-in is typed). 2X4-2X6: F2, F16 and F18 pass, 31 tests (1 skipped, the Phase 3
+    box test). My new "Continue Anyway" case first failed because its route stub missed the REST URL (it now matches
+    `/affibloom/v1/products` with or without a query). Two full runs also showed failures that passed alone: another
+    session's unfinished Groups work in the same tree briefly broke the site (a WordPress critical error), and runs
+    overlapped. So the "waiting for the user's run" notes in deviations 93-95 are settled; no browser look at 375 px yet.
 
 96. **Tasks 9B-9L (2026-11-14), Settings → General in Lasso's structure; built in one session at the user's word
     ("9B to 9L one by one, run the tests at the end"), waiting for the user's signed-in F9 run.** Built: two columns of
@@ -2096,7 +2108,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     Checks: 466 unit tests, `composer lint` and `composer analyse` clean on this task's files (the rest of the tree was
     mid-edit by another session at the time); F23 5 passed twice in a row; F19 and `admin-shell` 15 passed, 1 skipped (the
     header changed); looked at 1280 and 375 px (list, new-group form with its error, Details tab with the toast).
-    **Content width:** another session's uncommitted change makes 1320px the default for every screen and removes
+    **Content width:** another session's change (then uncommitted, since committed as `38b8695`) makes 1320px the default for every screen and removes
     `.affibloom-page--wide`; the Groups templates were written with that class and now carry none. Until that change is
     committed, the committed CSS still gives them the old 1080px default.
 
@@ -2196,7 +2208,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
 102. **Tasks 13F-13J (2026-11-14), the Dashboard's second pass (F19); five tasks in one session at the user's word
     ("Let's do the Dashboard, second pass (F19) from Task 13F to Task 13J"), one commit each:** 13F `c0b7021`, 13G
     `67a5562`, 13H `a09a1f1`, 13I `7c400e9`, 13J `2c9a0da`. Before them, at the user's choice, the uncommitted Groups
-    work G2-G5 (deviation 98 said committed; it was not) was committed alone as `97c1ac0`, without TL2's files.
+    work G2-G5 (deviation 98 and its session-log entry said committed; it was not) was committed alone as `97c1ac0`, without TL2's files.
     Differences from the plan's text:
     - **13F:** the hidden inputs come from a new `DashboardUrl::args()` (the list's arguments, each left out at its
       default; `to()` builds on it), passed to `list-args.php` as `args` + `except`. The panel's GET form wraps Group and
@@ -2273,9 +2285,9 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       Without JavaScript the forms post to admin-post.php as before.
     - **Templates:** the three Settings templates carry the save dialog and toast template; the forms carry
       `data-ajax-save` and their texts.
-    - **Tests:** F9 AC16 (new: dialog, admin-ajax request, toast, clean address on General, Amazon and Display/Colors);
+    - **Tests:** F9 AC17 (new, first named AC16 and renamed 2026-11-15, deviation 107: dialog, admin-ajax request, toast, clean address on General, Amazon and Display/Colors);
       `tests/E2E/settings.ts` `saveSettings()` waits for the reload, used by F9 and F16 where a test reads the option
-      or leaves right after Save. F16 11/11, F17 5/5, F28 7/7, F9 AC16 passed. F9 AC2, AC3, AC7, AC8, AC9 and AC15 fail
+      or leaves right after Save. F16 11/11, F17 5/5, F28 7/7, F9 AC17 passed. F9 AC2, AC3, AC7, AC8, AC9 and AC15 fail
       for reasons outside the save path (AC3: the Sponsored toggle's Update Link Settings dialog covers Save; AC8: the
       first "Dashboard" link is WordPress's; AC15: "Cron" matches two headings), seen while other sessions ran
       Playwright on the same site; not changed here.
@@ -2293,12 +2305,64 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     their AC6 checks. (d) While a row is dragged, the Move buttons' disabled states update on the drop, not during
     the drag. (e) Test detail: `wp.apiFetch` sends PUT as POST with `X-HTTP-Method-Override`, so AC6-AC7 wait on that
     header; the drag test scrolls the list into view first (the rows are below the fold at 1280x900).
+
 106. **The Filters panel remembers every close (2026-11-14; the user: the Dashboard "keeping open the filter
     settings").** F19 R17/D16 followed Lasso: `affibloom_filters_open` was written by the Filters button and × only,
     so a panel closed with Escape or an outside click (the usual ways, since it is a card over the table) reopened on
     every load. Now Escape and an outside click write `'0'` too (`dashboard.js`); the Filters button still writes
     `'1'`. Deviates from Lasso's R17 and amends D16 (F19 requirements). AC20 changed first (red: open after Escape and a
     reload), then green. Users who already have `'1'` stored see it open once more, until they close it any way.
+
+107. **Phase 2 audit (2026-11-15; the user: "thoroughly re-review Phase 2 ... I switched between two different accounts").**
+    Phase 2 was built by several sessions, some at once and on two accounts; the records had drifted from each other.
+    The code was sound (lint, PHPStan, 571 unit tests clean; tree clean, `main` level with GitHub). What was found and
+    done:
+    - **Records.** Deviation numbers 71 and 96 were each used twice: the button-icon fix is now **71a** and "Claude runs
+      the signed-in specs itself" **95a** (moved after 95); 77 now follows 76; citations in the plan, this file and
+      phase 9 follow. The status table, "Next up" and the headings of deviations 91, 93-95 (still "waiting for the
+      user's run") were brought up to date; the plan's "Tasks 2X1-2X5" heading, its Status section and the notes that
+      `affibloom.php` fails lint (settled in 2X0) were corrected.
+    - **Ticks.** 9B-9L were ticked with their "Run and look" steps open and F9 failing (AC2, AC3, AC7, AC8, AC9, AC15,
+      deviation 104); 2X4 was ticked with its by-hand step open; 2X2's and 13H's double runs, G2-G5's F23 results and
+      FL1-FL4's look were never recorded. All are now made and noted on their steps (below).
+    - **F9 (`F9.spec.ts`), six test faults, no code fault:** AC2 needs the box (Phase 3; now `test.fixme`, as the exit
+      check moves it); AC3 never answered 9D's "Update Link Settings" dialog, which covered Save; AC7 compared whole
+      addresses (the second add lands on `&is_duplicate=1`) and its text matched the hidden repoint dialog too; AC8
+      clicked WordPress's own "Dashboard" link (now the header's) and filled Custom CSS in a closed accordion (now
+      Colors' Primary button text); AC9 clicked the switch's label, which Playwright treats as the disabled switch
+      (now the row, as an editor clicks it); AC15's "Cron" also matched "Cronjob Manually" (now exact). **The AJAX
+      save test, written as a second "AC16", is AC17** in `F9.spec.ts` and `F9/requirements.md` (AC16 is the Uninstall
+      card, Phase 8); the exit check lists it.
+    - **F1 (`F1.spec.ts`), a test race:** AC16 and AC19 started `page.reload()` without awaiting it and dismissed its
+      beforeunload, which sometimes failed with "Object with guid response@… was not bound in the connection" (seen in
+      2 of 4 full runs and 1 of 3 alone). The page now reloads itself (`page.evaluate`); both then passed 4/4 alone.
+    - **Runs (quiet: no other session, one Playwright run at a time):** F9 14 passed, 1 skipped; F23 14/14; F1 twice
+      in a row, 27/27 each, the 863 products that existed before in the same order after both; F16 11 passed, 1
+      skipped; F19 20/20 (one run). One earlier F1 pass of this audit failed AC16 while Claude's own screenshot script
+      ran beside it (two Playwright processes; Claude's error, rerun).
+    - **By hand:** 9D's Override All Links on all 1,025 products through the real service, counted and restored; 9H a
+      real General save keeps Balanced + 80; 9K the keyboard reaches a "?" tip with its name and text; 2X4 with a
+      temporary mu-plugin stub (a geni.us link answering 301 to Amazon): type `amazon`, ASIN set, link kept as
+      pasted, Amazon Image and no Permalink; Settings (all tabs, `&support=1`), the Fields screens and the product page
+      at 1280 and 375 px.
+    - **Fix (the user, 2026-11-15: "also fix the Button alignment clipping at 375px"):** in the Display rail the
+      option groups (`.affibloom-options`) and steppers shrank below their content in a narrow row and `overflow:
+      hidden` cut them ("Rig…" for Right). `.affibloom-stepper-row` now wraps and the groups never shrink
+      (`flex: none`, `margin-left: auto`): a row too narrow for both puts the control on its own line, on the right
+      (Button alignment and Description lines at 375 px); 1280 px unchanged; no group clipped at either width.
+    - **Commits that had no record:** `38b8695` (1320px content width on every page; deviation 97 called it another
+      session's uncommitted change), `afc43dd` (Custom Link Detection lists public post types only; its chips renamed
+      off a clashing class), `98d9105` (the product price editor laid out as Lasso's: format buttons in the label row,
+      one-line box, `$99.99` placeholder), `5e89914` and `7f286a3` (the group form card fitted to its fields and
+      centred), `8fa4c8d` (F23 AC9 reopens the Filters panel the saved view's pill closes). Deviation 104's commit is
+      `9109716`, 106's `e0d8256`. FL1-FL4 (`89ef637`, `b366954`, `ba6e821`, `e05a9c7`) and 2X2 (its test is in 2X1's
+      `9a6edf3`) have no deviation entry of their own; nothing known about them differs from the plan.
+    - **Shared commits, as recorded:** 9B-9L `8277caf`, G2-G5 `97c1ac0`; part of 2X1 is in 2X0's `7c73290`.
+    - **Not done:** `tools/reset-local.sh` was not run (its snapshot predates the seeded library and the saved
+      sign-in; "Next up" 4). The copy holds the test data of these runs (saved views "AC9 view-…", "F1 AC10 …" fields
+      and products). **Seen, not changed:** at 1280 px the product page's Button 1 row squeezes the Button Text field
+      to about 55px beside the Primary Destination URL; Settings → General's cards leave uneven gaps when the columns
+      stack at 375 px.
 
 ## Open decisions (ask the user; record the answer here)
 
@@ -2331,6 +2395,14 @@ deviation 89). The items below are the Phase 0 history.
 
 ## Session log
 
+- **2026-11-15 (Claude Code, Phase 2 audit at the user's request):** the whole phase checked against the code, git
+  and these records; deviation 107. Records reconciled (deviations 71a and 95a, status, Next up, stale headings and
+  plan notes); F9's six failing tests were test faults and are fixed (AC2 waits for Phase 3; the save test renamed
+  AC17); F1's AC16/AC19 reload race fixed. Quiet runs: F9 14 + 1 skipped, F23 14/14, F1 27/27 twice with the order
+  kept, F16 11 + 1 skipped, F19 20/20. By hand: 9D on 1,025 products, 9H, 9K, 2X4 (stubbed redirect), the 375 px looks.
+  The user also asked to fix Display's Button alignment clipped at 375 px: `admin.css`, checked at 375 and 1280 px.
+  Lint, PHPStan and 571 unit tests clean. Every Phase 2 task but C1A-C1P is done; next: C1A.
+
 - **2026-11-14 (Claude Code, Filters panel fix at the user's request):** the Dashboard's Filters panel no longer
   reopens on every load after being closed with Escape or an outside click; every close now clears
   `affibloom_filters_open`; deviation 106. F19 AC20 updated first (red), then passed; `node --check` clean. No PHP
@@ -2346,8 +2418,8 @@ deviation 89). The items below are the Phase 0 history.
 
 - **2026-11-14 (Claude Code, settings save fix at the user's request):** Settings → General, Display (and its Reset)
   and Amazon now save as Lasso does: AJAX behind "Updating Your Site", then the same address again with the toast;
-  deviation 104 (reverses F9 D5; the user chose "Exactly as Lasso"). Started from F9 AC16 (red: no dialog). Unit 571,
-  PHPStan clean, PHPCS clean on the changed files; F16, F17, F28 and F9 AC16 passed; dialog and toast seen in a
+  deviation 104 (reverses F9 D5; the user chose "Exactly as Lasso"). Started from F9 AC17 (then named AC16; red: no dialog). Unit 571,
+  PHPStan clean, PHPCS clean on the changed files; F16, F17, F28 and F9 AC17 passed; dialog and toast seen in a
   screenshot. Other sessions shared the tree and ran Playwright at the same time, so the commit holds only this
   change's hunks. **Open:** F9 AC2, AC3, AC7, AC8, AC9, AC15 fail for reasons outside the save path.
 
@@ -2426,7 +2498,7 @@ deviation 89). The items below are the Phase 0 history.
   redirect to Amazon is an Amazon product; 2X5 `48ef102` a bulk run records and skips any failing link, and the add
   button reads "Continue Anyway" after a server error (retries the same link, the user's choice); 2X6 `4e34621` brag
   mode removed. Each started from a failing unit test; 456 unit tests, `composer lint` and `composer analyse` clean.
-  Deviations 93-95. Run by Claude afterwards (deviation 96): F2, F16 and F18 pass with the new cases. Next: Groups G1-G5.
+  Deviations 93-95. Run by Claude afterwards (deviation 95a): F2, F16 and F18 pass with the new cases. Next: Groups G1-G5.
 - **2026-11-14 (Claude Code, Task 2X2):** F1 AC2 now changes every field the page shows (name, Primary URL, button text and
   both toggles, the added button's URL, text and toggles and its position, badge, theme, image URL with Apply, price,
   Show Price, description, disclosure, Show Disclosure, Sponsored), saves, reloads, and checks the page and the stored
@@ -2530,7 +2602,7 @@ deviation 89). The items below are the Phase 0 history.
 - **2026-11-13 (Claude Code, Task 15A):** the user gave gate 4 ("approved. go for it."). **Task 15A built and committed
   `59ee8da`** (deviation 71), pushed. The user asked for the check by hand in Brave instead of the app's pane.
 
-- **2026-11-13 (Claude Code, broken icons):** the user reported Full review and YouTube broken; fixed by deviation 71
+- **2026-11-13 (Claude Code, broken icons):** the user reported Full review and YouTube broken; fixed by deviation 71a
   (site CSS on Local + "Image missing" flag). Checks: lint, analyse, 380 unit tests, F28 acceptance 6/6 (run from
   Claude's shell with the saved sign-in), screenshots of the card and picker. Committed `e522c60` (it also carried
   9 lines of Task 15A's CSS, the error toast and save modal, from the work in progress in this folder: unused until

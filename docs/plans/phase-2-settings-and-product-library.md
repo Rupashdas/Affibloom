@@ -18,9 +18,11 @@ F19 fix `6a743ed`, 14B `9640685`, 14C `0a24290`, 14D `0ee6801`; 15A `59ee8da`, 1
 `c86378f`, 17D `82b6015`. The Lasso import button for the staging build (`447bf1b`, deviation 87) is recorded and is
 retired by Task 26O. Tasks 10D and 14E moved to Phase 3.
 
-**The remaining tasks (2X0-2X6, G1-G5, the F9 General-settings tasks, FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P)
-are planned; gate 4 given by the user 2026-11-14 for every open task** (the whole plan, with the answers in
-`open-decisions.md`; for Tasks G1-G5 it was recorded in this file earlier as "Approve, start G1").
+**Tasks written in the 2026-11-14 planning pass** (2X0-2X6, G1-G5, the F9 General-settings tasks 9B-9L, FL1-FL5,
+TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P) have gate 4 from the user (2026-11-14, the whole plan, with the answers in
+`open-decisions.md`; for Tasks G1-G5 it was recorded in this file earlier as "Approve, start G1"). **State after the
+Phase 2 audit (2026-11-15, progress.md deviation 107):** every one of them is built and ticked except C1A-C1P (not
+started); the task list below says, per task, what is still owed.
 
 This phase's exit check, and the list of acceptance criteria that moved to later phases, is the "Exit check"
 section at the end.
@@ -208,7 +210,7 @@ they were, then the new sections in the order listed after G5.
 - [x] Task 2X1: Product page — the gaps a done task left
 - [x] Task 2X2: The F1 AC2 test checks everything it claims
 - [x] Task 2X3: Display colours accept every CSS colour Lasso accepts
-- [x] Task 2X4: A kept redirect that ends at Amazon is an Amazon product
+- [x] Task 2X4: A kept redirect that ends at Amazon is an Amazon product (by-hand check made 2026-11-15, deviation 107)
 - [x] Task 2X5: Bulk add never stalls on one bad link; "Continue Anyway"
 - [x] Task 2X6: Brag mode leaves the Display tab (decision B9)
 
@@ -222,16 +224,16 @@ they were, then the new sections in the order listed after G5.
 
 **Settings → General (F9)** — 9J (Link Index card) moves to Phase 5
 
-- [x] Task 9B: The General tab in Lasso's structure, and Link Defaults in full (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9E: Unsaved-changes guard on every Settings tab (decision C7) (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9C: "Allow duplicate destinations" off (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9D: "Update Link Settings": Only New Links / Override All Links (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9F: Google Analytics card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9G: Cloaked Link Prefix and Smart CSS Loading (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9H: Performance card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9I: Custom Link Detection card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9K: Notifications card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
-- [x] Task 9L: Support view (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9B: The General tab in Lasso's structure, and Link Defaults in full (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9E: Unsaved-changes guard on every Settings tab (decision C7) (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9C: "Allow duplicate destinations" off (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9D: "Update Link Settings": Only New Links / Override All Links (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9F: Google Analytics card (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9G: Cloaked Link Prefix and Smart CSS Loading (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9H: Performance card (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9I: Custom Link Detection card (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9K: Notifications card (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
+- [x] Task 9L: Support view (built 2026-11-14, deviation 96; F9 passed and checked by hand 2026-11-15, deviation 107)
 
 **Fields (F26)**
 
@@ -4758,7 +4760,7 @@ baselines for their delete controls, labels and order; the look follows the desi
 > Written 2026-11-14 from a sweep of Lasso's Groups (`docs/features/F23/{requirements,analysis}.md`, gates 1-2;
 > deviation 88). Lasso's groups are unused on this site (one empty group) and are built in full under the full-scope
 > rule. **Gate 4: given (recorded in this file 2026-11-14 as "Approve, start G1", confirmed by the user with the whole plan).** Every task: outside-in, its acceptance test first and red, `composer lint` on the files it
-> touches (the user's `affibloom.php` fails lint until the user settles it), `composer analyse`, unit tests, the check
+> touches (the user's `affibloom.php` failed lint then; settled and committed in 2X0, deviation 90), `composer analyse`, unit tests, the check
 > by hand at 1280 and 375 px, one commit, pushed.
 >
 > Cross-checks added in the 2026-11-14 assembly (every R and AC of F23 owned; the routes and the picker
@@ -4841,7 +4843,7 @@ markup, its third user), `assets/admin/groups.js`; tests F23 **AC3**, unit tests
 - [x] **Step 1: Failing tests** (AC3: edit keeps the slug; delete of an empty group; "Hold Up" for a group with a
   product attached through WP-CLI).
 - [x] **Step 2: Routes, service, repository.**  - [x] **Step 3: The tab and the dialogs.**
-- [x] **Step 4: Run and look.**  - [x] **Step 5: Commit** — "Edit and delete a group, never one in use".
+- [x] **Step 4: Run and look.**  - [x] **Step 5: Commit** — "Edit and delete a group, never one in use". *(G2-G5's results were not recorded when built, deviation 98; a quiet F23 run 2026-11-15 passed 14/14, AC1-AC10, deviation 107. G2-G5 share one commit, `97c1ac0`.)*
 
 ---
 
@@ -4943,7 +4945,7 @@ join the chosen groups and keep their others; none chosen → "Select at least o
 
 ---
 
-### Tasks 2X1-2X5: Corrections from the code audits (2026-11-14)
+### Tasks 2X0-2X6: Corrections from the code audits and the user's decisions (2026-11-14)
 
 > Source: the code audits (`audit-1.md` sections 3 and 6, `audit-2.md` sections 1-3). Findings owned elsewhere are not
 > repeated here: 13E's no-JavaScript filter → 13F; 14H's search over-match → 13G; the F19 AC4 test gap → 13H; 14C's drag
@@ -5028,7 +5030,7 @@ tests `tests/E2E/acceptance/F1.spec.ts` (new cases for the four behaviours), uni
 - [x] **Step 1: Failing tests** (placeholder visible; Refresh reason in the accessible name/description; Remove dialog;
   a field save answered 500 by a route stub shows an error).
 - [x] **Step 2: Build the four fixes.**
-- [x] **Step 3: Run and look** (1280 and 375 px, keyboard, screen reader names). *Done 2026-11-14: F1 and F29 specs green (the user's runs), looked at in Brave at desktop width; the 375 px look could not be made (the extension's window resize did not change the viewport), so it is still owed (deviation 91).*
+- [x] **Step 3: Run and look** (1280 and 375 px, keyboard, screen reader names). *Done 2026-11-14: F1 and F29 specs green (the user's runs), looked at in Brave at desktop width; the 375 px look could not be made (the extension's window resize did not change the viewport), so it was still owed (deviation 91). Looked at 375 px 2026-11-15 (deviation 107): no sideways scroll, the placeholder shows, Refresh is described by `#affibloom-refresh-reason`.*
 - [x] **Step 4: Commit** — "Finish the product page's description, Refresh, button and field details".
 
 ---
@@ -5057,7 +5059,7 @@ toggles after the reload. Tests only.
   fail, break one field's save by hand (for example, drop the price from the form) and see the case go red, then
   restore it.
 - [x] **Step 2: Run and look.** Run the whole F1 file twice in a row; both runs pass and the library's order is the
-  same after both.
+  same after both. *Ticked by the user 2026-11-14 before a quiet double run; met 2026-11-15 (deviation 107): two runs in a row, 27/27 each, the 863 products that existed before in the same order after both (after AC16's and AC19's reload race was fixed in the test).*
 - [x] **Step 3: Commit** — "Check every product field after a save in F1 AC2".
 
 ---
@@ -5118,8 +5120,8 @@ the F2 and F18 acceptance specs rerun.
 - [x] **Step 1: Failing unit test** in `ProductServiceTest` (kept geni.us → Amazon final URL → type `amazon`, ASIN set,
   stored URL unchanged).
 - [x] **Step 2: Fix.**
-- [ ] **Step 3: Run and look.** F2 and F18 acceptance rerun; by hand on Local with a stubbed redirect, add a kept link
-  that ends at Amazon and see the Amazon product page (Amazon Image field, no Permalink row). *Done by Claude with the saved session (`.local/no-login.config.ts`): F2 and F18 pass (deviation 96); the by-hand check with a stubbed redirect was not made.*
+- [x] **Step 3: Run and look.** F2 and F18 acceptance rerun; by hand on Local with a stubbed redirect, add a kept link
+  that ends at Amazon and see the Amazon product page (Amazon Image field, no Permalink row). *Done by Claude with the saved session (`.local/no-login.config.ts`): F2 and F18 pass (deviation 95a). By hand 2026-11-15 (deviation 107): a temporary mu-plugin answered one geni.us link with a 301 to an Amazon product page; Add A New Link made a product of type `amazon` with the ASIN, kept the geni.us link as pasted and stayed on the Dashboard (Amazon); its page shows Amazon Image and no Permalink. Product and stub removed.*
 - [x] **Step 4: Commit** — "Type a kept redirect to Amazon as an Amazon product, as Lasso does".
 
 ---
@@ -5151,7 +5153,7 @@ is reported. After a server error in the Add A New Link modal the button reads "
 
 - [x] **Step 1: Failing unit test** (a `RuntimeException` on link 3 of 5: links 4-5 still added, 3 reported).
 - [x] **Step 2:** catch per link, record the failure in the run; build "Continue Anyway" as F18 specifies.
-- [x] **Step 3: Run and look** (bulk add of 10 with one failing stub URL; the modal after a server error). *F18 passes with the new case, run by Claude (deviation 96).*
+- [x] **Step 3: Run and look** (bulk add of 10 with one failing stub URL; the modal after a server error). *F18 passes with the new case, run by Claude (deviation 95a).*
 - [x] **Step 4: Commit** — "Keep a bulk add going past a failing link, as Lasso does".
 
 ---
@@ -5188,14 +5190,14 @@ requirements rows for brag are marked "not built: B9". Task 26D (Display migrati
   `enable_brag_mode` and `brag_url` stores neither"; both red because the controls and keys exist.
 - [x] **Step 2: Remove the controls, the keys and the old tests.**
 - [x] **Step 3: Run and look.** Settings → Display at 1280 and 375 px: the accordion is intact; `composer lint`,
-  `composer analyse`, the unit tests, F16's acceptance spec. *All pass, F16 run by Claude; the new case checks the accordion is intact; no screenshot at 375 px (deviation 96).*
+  `composer analyse`, the unit tests, F16's acceptance spec. *All pass, F16 run by Claude; the new case checks the accordion is intact; no screenshot at 375 px (deviation 95a); looked at 375 px 2026-11-15 (deviation 107), where the Layout accordion's Button alignment was clipped (fixed then, `admin.css`).*
 - [x] **Step 4: Commit** — "Remove brag mode, which only advertised Lasso".
 
 ---
 
 ### Tasks 9B-9L: Settings → General, the full Lasso pass (F9)
 
-> Written 2026-11-14 from a sweep of Lasso's General tab (`docs/features/F9/requirements.md`, R1-R69, AC1-AC16,
+> Written 2026-11-14 from a sweep of Lasso's General tab (`docs/features/F9/requirements.md`, R1-R69, AC1-AC16 (AC17 added 2026-11-15, deviation 104),
 > D1-D13, N1-N7; analysis in `F9/analysis.md`). Order: 9B, 9E, 9C, 9D, 9F, 9G, 9H, 9I, 9K,
 > 9L. **9J (the Link Index card) is in Phase 5**, after F21's status route. Each task adds its own keys to
 > `Settings::DEFAULTS` and `SettingsService::FIELDS['general']`. Gate 4: given 2026-11-14. N1-N7 are answered (see "Decisions that change this phase"); the
@@ -5236,7 +5238,7 @@ partial; tests `tests/Unit/Application/SettingsServiceTest.php`, `tests/E2E/acce
 - [x] **Step 3:** Domain and service: keys and FIELDS.
 - [x] **Step 4:** Template: columns, Link Defaults card with switch rows and tips (Lasso's texts, "Lasso" removed).
 - [x] **Step 5:** 11B reads `allow_duplicates` (true = today's behaviour; false waits for 9C, until then treated as true and noted).
-- [ ] **Step 6:** Run and look at 1280 and 375 px; lint, analyse, unit; F9 acceptance.
+- [x] **Step 6:** Run and look at 1280 and 375 px; lint, analyse, unit; F9 acceptance. *Done 2026-11-15 (deviation 107): looked at 1280 and 375 px (no sideways scroll, no script errors); lint, analyse, 571 unit tests; F9 14 passed, AC2 skipped (the box, Phase 3).*
 - [x] **Step 7:** Commit `Give Settings → General Lasso's layout and all eight link defaults`.
 
 ---
@@ -5265,7 +5267,7 @@ goes, "Save Changes" saves and then goes; closing the tab triggers the browser p
 - [x] **Step 1:** Failing AC8 (three paths).
 - [x] **Step 2:** Controller `redirect_to` with a failing unit test for a foreign host (falls back to the tab).
 - [x] **Step 3:** Guard script; extract the comparison shared with `product-save.js` if identical (second use).
-- [ ] **Step 4:** Run and look; keyboard only (Escape = ×); the same three paths on the Display and Amazon tabs.
+- [x] **Step 4:** Run and look; keyboard only (Escape = ×); the same three paths on the Display and Amazon tabs. *Done 2026-11-15 (deviation 107): F9 AC8 — Escape (×) stays, Leave Without Saving goes, Save Changes saves and goes, on General, Display and Amazon.*
 - [x] **Step 5:** Commit `Warn before leaving a Settings tab with unsaved changes`.
 
 ---
@@ -5295,7 +5297,7 @@ E2E AC7.
 
 - [x] **Step 1:** Failing AC7 and `PlainUrlKeyTest`.
 - [x] **Step 2:** Domain key, then lookup order (plain key, then pasted key), then the meta on save.
-- [ ] **Step 3: Run and look.** On Local, setting off, two links to one page; back on afterwards.
+- [x] **Step 3: Run and look.** On Local, setting off, two links to one page; back on afterwards. *Done 2026-11-15 (deviation 107): F9 AC7 (setting off, two links to one page open the same product, back on afterwards).*
 - [x] **Step 4:** Commit `Compare final destinations when duplicate destinations are not allowed`.
 
 ---
@@ -5325,7 +5327,7 @@ Links updates every product at once (toast "All products updated.") — the sett
 
 - [x] **Step 1:** Failing AC6 and unit test (unknown key → 422).
 - [x] **Step 2:** Repository, service, route, dialog.
-- [ ] **Step 3: Run and look.** On Local, 82 test products, count meta before/after.
+- [x] **Step 3: Run and look.** On Local, 82 test products, count meta before/after. *Done 2026-11-15 (deviation 107), by WP-CLI through `LinkDefaultsService::apply_to_all()`: all 1,025 products (every status), `_affibloom_show_disclosure` 1,002 × "1" and 23 × "0" before, 1,025 × "0" after; each product's value put back. F9 AC6 passes.*
 - [x] **Step 4:** Commit `Offer to apply a changed link default to every product`.
 (Link Cloaking and Detect Opportunities are added to the key map by F24's and F22's product-field tasks.)
 
@@ -5357,7 +5359,7 @@ off; Pageview asks "Enable Pageview"; clicking the disabled Click Tracking shows
 - [x] **Step 2: Keys and card** (`Settings::DEFAULTS`, `SettingsService::FIELDS['general']`, the partials).
 - [x] **Step 3: The script** (`general-settings.js`: switches disabled while the ID is empty, the Pageview dialog, the
   warning).
-- [ ] **Step 4: Run and look** at 1280 and 375 px; F9 AC3 and AC9; the Lasso screenshot for fields, labels and order only.
+- [x] **Step 4: Run and look** at 1280 and 375 px; F9 AC3 and AC9; the Lasso screenshot for fields, labels and order only. *Done 2026-11-15 (deviation 107): 1280 and 375 px; F9 AC3 and AC9 pass.*
 - [x] **Step 5: Commit** — "Add the Google Analytics settings".
 
 ---
@@ -5388,7 +5390,7 @@ prefix; one switch, "Enable Smart CSS Loading".
 - [x] **Step 1: Failing tests.** AC10 and a unit test for the slug cleaner ("Re Commends!" → `re-commends`).
 - [x] **Step 2: Keys and cards.**
 - [x] **Step 3: The keyup rule** (the typed text becomes the slug form live; the example line follows).
-- [ ] **Step 4: Run and look** at 1280 and 375 px; F9 AC3 and AC10.
+- [x] **Step 4: Run and look** at 1280 and 375 px; F9 AC3 and AC10. *Done 2026-11-15 (deviation 107): 1280 and 375 px; F9 AC3 and AC10 pass.*
 - [x] **Step 5: Commit** — "Add the cloaked link prefix and Smart CSS settings".
 
 ---
@@ -5420,7 +5422,7 @@ support fields); Custom shows the `%` field; loading the page never changes a st
 - [x] **Step 1: Failing tests.** AC11 and `PerformanceModeTest` (presets; load never rewrites values, D13).
 - [x] **Step 2: Domain, keys, service.**
 - [x] **Step 3: Card and script.**
-- [ ] **Step 4: Run and look** at 1280 and 375 px; this site keeps Balanced + 80 after a save.
+- [x] **Step 4: Run and look** at 1280 and 375 px; this site keeps Balanced + 80 after a save. *Done 2026-11-15 (deviation 107): a real save from the General form (an unrelated switch changed) stored Balanced with 80 unchanged, then the option was put back; F9 AC11; 1280 and 375 px.*
 - [x] **Step 5: Commit** — "Add the performance mode and CPU threshold".
 
 ---
@@ -5454,7 +5456,7 @@ Lasso's excluded list, `affibloom_product`); "Custom Fields (ACF):" only with AC
 - [x] **Step 1: Failing tests.** AC12 and a unit test (unknown type refused).
 - [x] **Step 2: Choices, keys, service.**
 - [x] **Step 3: Card.**
-- [ ] **Step 4: Run and look** (this site has no ACF, so that field is hidden); 1280 and 375 px.
+- [x] **Step 4: Run and look** (this site has no ACF, so that field is hidden); 1280 and 375 px. *Done 2026-11-15 (deviation 107): 1280 and 375 px, no ACF row; F9 AC12 passes.*
 - [x] **Step 5: Commit** — "Add the custom link detection settings".
 
 ---
@@ -5483,7 +5485,7 @@ Notification"); "Disable Help Tooltips" hides the "?" tips on Affibloom screens 
 - [x] **Step 1: Failing tests.** AC14 (the tips hide after a save with the switch on).
 - [x] **Step 2: Keys and card.**
 - [x] **Step 3: The body class** from `AdminAssets`.
-- [ ] **Step 4: Run and look** at 1280 and 375 px; keyboard and screen reader still reach help when tips are shown (U3).
+- [x] **Step 4: Run and look** at 1280 and 375 px; keyboard and screen reader still reach help when tips are shown (U3). *Done 2026-11-15 (deviation 107): 1280 and 375 px; with tips shown, Shift+Tab from the Tracking ID reaches its "?" button, named "Help for Tracking ID or Property ID" and described by its tip, which shows on focus; F9 AC14.*
 - [x] **Step 5: Commit** — "Add the notification settings".
 
 ---
@@ -5519,7 +5521,7 @@ shows.
 - [x] **Step 1: Failing tests.** AC15 and the cleaner and range unit tests.
 - [x] **Step 2: Keys, cleaners, ranges.**
 - [x] **Step 3: The cards.** Rebuild only when F21's route exists (else the button is not shown).
-- [ ] **Step 4: Run and look** with and without `&support=1`; 1280 and 375 px.
+- [x] **Step 4: Run and look** with and without `&support=1`; 1280 and 375 px. *Done 2026-11-15 (deviation 107): with and without `&support=1` at 1280 and 375 px; F9 AC15.*
 - [x] **Step 5: Commit** — "Add the support-only General settings".
 
 ---
@@ -5670,7 +5672,7 @@ open this tab.
 - [x] **Step 1: Failing test.**
 - [x] **Step 2: Query and service.**
 - [x] **Step 3: The tab.**
-- [x] **Step 4: Run and look.**
+- [x] **Step 4: Run and look.** *FL1-FL4's look was not recorded when built; 2026-11-15 (deviation 107) the Fields list, a field's Links tab and Details at 1280 and 375 px: no sideways scroll, no script errors. F26 passed 15/15 in FL5's session (deviation 105).*
 - [x] **Step 5: Commit** — "List the products that use a field".
 
 ---
@@ -5713,9 +5715,9 @@ be dragged (Primary Rating stays first) as well as moved by the buttons; the ord
 
 ---
 
-**Coordination point (TL1):** TL1 needs `register_activation_hook` and `register_deactivation_hook` in
-`affibloom.php`, which has the user's uncommitted edit (it also fails lint until the user settles it). Before TL1's
-Step 2, ask the user how to proceed (commit their edit first, or add the two hook lines on top of it); never overwrite it.
+**Coordination point (TL1) — settled:** TL1 needed `register_activation_hook` and `register_deactivation_hook` in
+`affibloom.php`, which then held the user's uncommitted edit. The edit was committed, lint-clean, in Task 2X0
+(`7c73290`, deviation 90), and TL1 added the two hook lines on top of it (deviation 99).
 
 ### Task TL1: Activation and deactivation
 
@@ -5723,8 +5725,8 @@ Step 2, ask the user how to proceed (commit their edit first, or add the two hoo
 
 **Why:** Affibloom has no lifecycle hooks; its bulk-add cron (`affibloom_bulk_add`) survives deactivation today.
 
-**Depends on:** nothing (`BulkAddCron::HOOK` is the first registered hook). Coordination: `affibloom.php` has the
-user's uncommitted edit; see Cross-phase notes.
+**Depends on:** nothing (`BulkAddCron::HOOK` is the first registered hook). Coordination with the user's
+`affibloom.php` edit: settled in 2X0 (see above).
 
 **User action:** `wp plugin deactivate affibloom` → no `affibloom_*` event in `wp cron event list`; `activate` → version
 and activation time stored, rewrite rules flushed; products and settings untouched.
@@ -5733,7 +5735,7 @@ and activation time stored, rewrite rules flushed; products and settings untouch
 
 | New | Called by |
 |---|---|
-| `register_activation_hook` / `register_deactivation_hook` in `affibloom.php` → `Plugin::activate()/deactivate()` (note: `affibloom.php` has the user's uncommitted edit — coordinate) | WordPress |
+| `register_activation_hook` / `register_deactivation_hook` in `affibloom.php` → `Plugin::activate()/deactivate()` (the user's `affibloom.php` edit was committed in 2X0) | WordPress |
 | `Application\Lifecycle` | `Plugin` |
 | `Infrastructure\WordPress\CronRegistry` (hooks from each cron module) | `Lifecycle::deactivate()` |
 
@@ -5898,7 +5900,7 @@ modified time.
 - [x] **Step 1: The new AC4** runs on this copy and passes on the built code (a test-only task: it must fail when the
   pager's single-page rule is broken — check by hand with `per_page` forced to 1 and expect the failure).
 - [x] **Step 2: AC10's park/restore** keeps every `post_modified` (compare a sample before and after).
-- [x] **Step 3: Run and look.** Run the whole F19 file twice in a row; the order of the library is the same after both.
+- [x] **Step 3: Run and look.** Run the whole F19 file twice in a row; the order of the library is the same after both. *The two runs of 2026-11-14 had scattered failures from other sessions' runs (deviation 102); a quiet run 2026-11-15 passed 20/20 (deviation 107). A second quiet run was not made.*
 - [x] **Step 4: Commit** — "Check the one-page Dashboard on a full library".
 
 ---
@@ -6418,7 +6420,7 @@ Amazon stub where C1 needs Amazon) and **the user signs it off**:
 - **F16 (what Settings → Display stores and shows):** AC1, AC4, AC7, AC8, AC11 (without the brag controls: 2X6). Moves to Phase 3: AC2 (the preview,
   Task 10D) and the front-end halves of AC3, AC5, AC6, AC8, AC9, AC10 and AC13 (they need the box). AC12 (settings
   migrated from Lasso) moves to Phase 5 (Task 26D).
-- **F9:** AC1, AC3-AC12, AC14, AC15 (what is stored and shown). Moves: AC2 to Phase 3 (Task 18's box); the
+- **F9:** AC1, AC3-AC12, AC14, AC15, AC17 (what is stored and shown; AC17 is the AJAX save, deviation 104). Moves: AC2 to Phase 3 (Task 18's box); the
   behaviour behind AC10 to Phase 5 (F24) and Phase 3 (F5), behind AC11 to Phase 6 (F11), behind AC12 to Phase 5
   (F21), the notices behind AC14 to Phases 7-8 (F38); AC13 (Link Index card, 9J) to Phase 5; AC16 (Uninstall card,
   F37 TL5) to Phase 8.
@@ -6468,7 +6470,7 @@ go.
 | F9 | R51-R54, AC14 | 9K; notices F38 |
 | F9 | R55-R62, R66, AC15 | 9L |
 | F9 | R20-R21, AC13 | 9J (Phase 5) |
-| F9 | R41 | built (Task 9, 10F); D5 |
+| F9 | R41, AC17 | built (Task 9, 10F); the AJAX save of deviation 104 (D5 reversed) |
 | F9 | R43 | 9I (`cpt_support` fallback), 9L (domains, clamp) |
 | F9 | R37-R39 | F24, F22, F35/C2 |
 | F9 | R4-R7, R59 | not built: decision B1 (cloud) |

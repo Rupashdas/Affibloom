@@ -19,7 +19,8 @@ test.describe( 'F9 Link settings', () => {
 		setSettings( { new_tab: true } ); // the site's value again
 	} );
 
-	test( 'AC2 box links carry rel and target by the Lasso rules', async ( { page } ) => {
+	// The box is Phase 3 (Task 18); the phase 2 exit check moves AC2 there.
+	test.fixme( 'AC2 box links carry rel and target by the Lasso rules', async ( { page } ) => {
 		const id = createProduct( { name: 'F9 AC2', nofollow: '1', new_tab: '1', sponsored: '1' } );
 		await page.goto( newPostWith( boxBlock( id ) ) );
 		const button = page.locator( '.affibloom-box .affibloom-button-1' );
@@ -31,12 +32,16 @@ test.describe( 'F9 Link settings', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
 		const sponsored = page.getByLabel( 'Sponsored' );
 		const before = await sponsored.isChecked();
+		// A link default asks whether to update the products (9D, AC6); this test only saves the site's value.
+		const onlyNew = page.getByRole( 'dialog', { name: 'Update Link Settings' } ).getByRole( 'button', { name: 'Only New Links' } );
 		await sponsored.setChecked( ! before );
+		await onlyNew.click();
 		await saveSettings( page );
 		await page.reload();
 		await expect( page.getByLabel( 'Sponsored' ) ).toBeChecked( { checked: ! before } );
 
 		await page.getByLabel( 'Sponsored' ).setChecked( before ); // leave it as it was
+		await onlyNew.click();
 		await saveSettings( page );
 	} );
 
@@ -101,31 +106,35 @@ test.describe( 'F9 Link settings', () => {
 			await dialog.getByLabel( 'URL' ).fill( `https://merchant.example/${ path }?ref=${ query }` );
 			await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 			await page.waitForURL( /page=affibloom-product&id=\d+/ );
-			return page.url();
+			return new URL( page.url() ).searchParams.get( 'id' );
 		};
 		const first = await add( 'b' );
 		const second = await add( 'a' );
+		// The same product opens, with the "already exists" notice (`&is_duplicate=1`).
 		expect( second ).toBe( first );
-		await expect( page.getByText( 'This product already exists' ) ).toBeVisible();
+		await expect( page.locator( '.affibloom-notice__text', { hasText: 'This product already exists.' } ) ).toBeVisible();
 		setSettings( { allow_duplicates: true } );
 	} );
 
 	test( 'AC8 unsaved changes ask before leaving, on every Settings tab', async ( { page } ) => {
+		// Affibloom's own Dashboard tab; WordPress's menu has a "Dashboard" link too, which the guard also catches.
+		const dashboard = page.locator( '#affibloom-header-nav' ).getByRole( 'link', { name: 'Dashboard' } );
 		await page.goto( GENERAL );
 		// Nothing changed: nothing asked.
 		await page.getByRole( 'link', { name: 'Amazon' } ).click();
 		await page.waitForURL( /tab=amazon/ );
 
 		for ( const tab of [ 'general', 'display', 'amazon' ] ) {
-			await page.goto( `/wp-admin/admin.php?page=affibloom-settings&tab=${ tab }` );
+			// Display opens on its Colors panel, whose text fields are in view (Custom CSS sits in a closed accordion).
+			await page.goto( `/wp-admin/admin.php?page=affibloom-settings&tab=${ tab }${ tab === 'display' ? '&panel=colors' : '' }` );
 			await page.waitForLoadState( 'load' );
-			const control = tab === 'general' ? page.getByLabel( 'Disable Help Tooltips' ) : tab === 'amazon' ? page.getByLabel( 'Show Prime Logo In Displays' ) : page.locator( '#affibloom-disclosure-text, textarea[name$="[custom_css]"]' ).first();
+			const control = tab === 'general' ? page.getByLabel( 'Disable Help Tooltips' ) : tab === 'amazon' ? page.getByLabel( 'Show Prime Logo In Displays' ) : page.getByLabel( 'Primary button text', { exact: true } );
 			if ( tab === 'display' ) {
-				await control.fill( '/* f9 ac8 */' );
+				await control.fill( unique( 'F9 AC8' ) );
 			} else {
 				await control.setChecked( ! ( await control.isChecked() ) );
 			}
-			await page.getByRole( 'link', { name: 'Dashboard' } ).first().click();
+			await dashboard.click();
 			const dialog = page.getByRole( 'dialog', { name: 'Unsaved Changes' } );
 			await expect( dialog ).toBeVisible();
 
@@ -135,7 +144,7 @@ test.describe( 'F9 Link settings', () => {
 			expect( page.url() ).toContain( `tab=${ tab }` );
 
 			// Leave Without Saving goes.
-			await page.getByRole( 'link', { name: 'Dashboard' } ).first().click();
+			await dashboard.click();
 			await dialog.getByRole( 'button', { name: 'Leave Without Saving' } ).click();
 			await page.waitForURL( /page=affibloom(&|$)/ );
 		}
@@ -143,7 +152,7 @@ test.describe( 'F9 Link settings', () => {
 		// Save Changes saves and then goes.
 		await page.goto( GENERAL );
 		await page.getByLabel( 'Disable Import Notifications' ).setChecked( true );
-		await page.getByRole( 'link', { name: 'Dashboard' } ).first().click();
+		await dashboard.click();
 		await page.getByRole( 'dialog', { name: 'Unsaved Changes' } ).getByRole( 'button', { name: 'Save Changes' } ).click();
 		await page.waitForURL( /page=affibloom(&|$)/ );
 		expect( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) ).disable_import_notice ).toBe( true );
@@ -157,7 +166,8 @@ test.describe( 'F9 Link settings', () => {
 		for ( const label of [ 'Click Tracking', 'Pageview', 'IP Anonymization' ] ) {
 			await expect( page.getByLabel( label, { exact: true } ) ).toBeDisabled();
 		}
-		await page.locator( '[data-ga="click"]' ).locator( 'xpath=..' ).locator( '.affibloom-toggle-row__label' ).click();
+		// The row, not its label: Playwright treats a label's click as one on its (disabled) switch and waits.
+		await page.locator( '.affibloom-toggle-row', { has: page.locator( '[data-ga="click"]' ) } ).click();
 		await expect( page.getByText( 'Please Enter GA Tracking ID Before Enable Click Tracking' ) ).toBeVisible();
 
 		await id.fill( 'G-TESTID123' );
@@ -235,7 +245,7 @@ test.describe( 'F9 Link settings', () => {
 
 		await page.goto( `${ GENERAL }&support=1` );
 		for ( const title of [ 'Keep Original URL', 'Cron', 'Cronjob Manually', 'Optional Settings' ] ) {
-			await expect( page.getByRole( 'heading', { name: title } ) ).toBeVisible();
+			await expect( page.getByRole( 'heading', { name: title, exact: true } ) ).toBeVisible();
 		}
 		await page.getByLabel( 'Time interval (hours)' ).fill( '2' );
 		await page.getByLabel( 'Restrict Prefix' ).setChecked( true );
@@ -248,12 +258,12 @@ test.describe( 'F9 Link settings', () => {
 
 	// Lasso's save (R41, settings.js 2379-2464): the form goes by AJAX behind "Updating Your Site", then the same
 	// address loads again. Affibloom keeps its toast after the reload and leaves no notice in the address.
-	test( 'AC16 Save Changes saves behind Updating Your Site and reloads the same address', async ( { page } ) => {
+	test( 'AC17 Save Changes saves behind Updating Your Site and reloads the same address', async ( { page } ) => {
 		const tabs: Array<{ tab: string; change: () => Promise<void> }> = [
 			{ tab: 'general', change: async () => page.getByLabel( 'Disable Import Notifications' ).setChecked( true ) },
 			{ tab: 'amazon', change: async () => page.getByLabel( 'Show Prime Logo In Displays' ).setChecked( ! ( await page.getByLabel( 'Show Prime Logo In Displays' ).isChecked() ) ) },
 			// The Colors panel, so the reload must also come back to that panel.
-			{ tab: 'display&panel=colors', change: async () => page.getByLabel( 'Primary button text', { exact: true } ).fill( unique( 'F9 AC16' ) ) },
+			{ tab: 'display&panel=colors', change: async () => page.getByLabel( 'Primary button text', { exact: true } ).fill( unique( 'F9 AC17' ) ) },
 		];
 		const options = [ 'affibloom_settings', 'affibloom_display' ];
 		// An option not stored yet (the Display one after a Reset) is deleted again afterwards.

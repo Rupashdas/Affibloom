@@ -44,7 +44,7 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
 - **ThirstyAffiliates `/recommends/` links** (post 3297 and six drafts, F33 N6): imported on staging through F33 IM2
   with the client's approval; this replaces the old "content fix" step.
 - **Production's Additional CSS** carries `.lasso-*` rules (33, F5 N1) and needs the two icon links and the SVG
-  (deviation 71, F28 D4). ADR-6 stands (the user, 2026-11-14): the box keeps Affibloom's own class names and stylesheet, so the cutover
+  (deviation 71a, F28 D4). ADR-6 stands (the user, 2026-11-14): the box keeps Affibloom's own class names and stylesheet, so the cutover
   translates those 33 `.lasso-*` rules to Affibloom's classes (Task 41 step 5; the list is prepared in Task 40 step 2)
   and adds the icon links.
 - Lasso's tables and posts are archived for **90 days** after removal (roadmap 9.6). The old Task 42 said 30; the

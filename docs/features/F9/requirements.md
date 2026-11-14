@@ -52,6 +52,10 @@ activation, upgrades) are F37.
   Disable AAWP Description) and "Rebuild Database" with "Ready to rebuild?". (9L; R55-R62)
 - **AC16** The Uninstall card holds the opt-in "Delete all Affibloom data when the plugin is deleted" and the list of
   posts that still use Affibloom; nothing rewrites a post. (TL5 in F37; R63-R67, Needs the user N2)
+- **AC17** Save Changes on General, Amazon and Display sends the form by AJAX behind "Updating Your Site", then the
+  same address (tab and panel) loads again with the "Settings saved." toast and no notice left in the address; a
+  failed save shows "Try again. For some reason your settings didn't save." and keeps the edits. (R41; added
+  2026-11-15 for progress.md deviation 104, which reversed D5; first written as a second "AC16" in `F9.spec.ts`)
 
 ## 2. Evidence
 
