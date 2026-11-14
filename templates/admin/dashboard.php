@@ -11,12 +11,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$products    = $view['products'];
-$placeholder = sprintf(
-	/* translators: %s: how many products the library holds. */
-	__( 'Search all %s links…', 'affibloom' ),
-	number_format_i18n( $view['library'] )
-);
+$products = $view['products'];
+/* translators: %s: how many products the library holds. */
+$placeholder_text = __( 'Search all %s links…', 'affibloom' );
+$placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['library'] ) );
 ?>
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header' ); ?>
@@ -42,6 +40,7 @@ $placeholder = sprintf(
 					<label class="screen-reader-text" for="affibloom-search"><?php esc_html_e( 'Search', 'affibloom' ); ?></label>
 					<input type="search" id="affibloom-search" class="affibloom-input affibloom-search" name="s"
 						value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"
+						data-placeholder="<?php echo esc_attr( $placeholder_text ); ?>"
 						aria-describedby="affibloom-search-kbd">
 					<?php // Lasso's hint for its shortcut; the script shows ⌘⇧L on a Mac. ?>
 					<kbd id="affibloom-search-kbd" class="affibloom-search-kbd">Ctrl+Shift+L</kbd>

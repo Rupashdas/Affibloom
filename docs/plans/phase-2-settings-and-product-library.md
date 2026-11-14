@@ -252,7 +252,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 - [x] Task 13F: The list keeps every argument without JavaScript, and `?post_id=`
 - [x] Task 13G: The search finds added buttons' links, not their texts
 - [x] Task 13H: F19 AC4 and AC10 tests that run on a full library
-- [ ] Task 13I: A stable order, and counts that follow the list
+- [x] Task 13I: A stable order, and counts that follow the list
 - [ ] Task 13J: Saved views and the Filters panel behave as Lasso's
 
 **Admin shell (F38)** — ON3-ON4 are in Phase 5, ON5-ON9 in Phase 8; ON10 is dropped as a duplicate of 9E
@@ -5928,13 +5928,13 @@ selection bar the Products tile and the placeholder show the new number at once.
 (`data-placeholder`), `partials/dashboard-tiles.php` (a hook on the Products number), `assets/admin/dashboard.js`;
 tests `F19.spec.ts` AC17, AC18; `tests/Integration/ProductListTest.php` (ties).
 
-- [ ] **Step 1: Failing tests.** AC17 (three products with one modified time across a page boundary at 10 per
+- [x] **Step 1: Failing tests.** AC17 (three products with one modified time across a page boundary at 10 per
   page, set with `wp eval`), AC18 (delete one, the tile drops by one without a reload).
-- [ ] **Step 2: The order.** `ID DESC` after every key.
-- [ ] **Step 3: The counts.** `library` in the answer; the script writes the tile and the placeholder after each load.
-- [ ] **Step 4: Run and look** (delete, revive through 17D, quick edit; the numbers change; screen reader hears the
+- [x] **Step 2: The order.** `ID DESC` after every key.
+- [x] **Step 3: The counts.** `library` in the answer; the script writes the tile and the placeholder after each load.
+- [x] **Step 4: Run and look** (delete, revive through 17D, quick edit; the numbers change; screen reader hears the
   range only).
-- [ ] **Step 5: Commit** — "Keep the Dashboard's order stable and its counts current".
+- [x] **Step 5: Commit** — "Keep the Dashboard's order stable and its counts current".
 
 ---
 

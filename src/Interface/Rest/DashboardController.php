@@ -195,6 +195,9 @@ final class DashboardController implements Module {
 					'page'      => $list->current(),
 					'per_page'  => $per_page,
 					'total'     => $list->total,
+					// Every answer carries the library's size, as Lasso's carries its counts, so the Products tile and
+					// the search placeholder follow a delete, a revive or a quick edit at once (Task 13I; F19 D18).
+					'library'   => $this->products->count(),
 					'post_id'   => $one,
 					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one ),
 				),

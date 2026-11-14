@@ -332,6 +332,54 @@ test.describe( 'F19 Dashboard list', () => {
 		}
 	} );
 
+	test( 'AC17 products sharing a modified time show once across pages, the higher ID first', async ( { page } ) => {
+		// Twelve products in one search, ten a page; the oldest three share one modified time, so the page boundary
+		// falls inside the tie (Task 13I; F19 D9).
+		const word = unique( 'ac17tie' );
+		const ids: number[] = [];
+		for ( let i = 1; i <= 12; i++ ) {
+			ids.push( createProduct( { name: `F19 AC17 ${ word } ${ i }` } ) );
+		}
+		wp(
+			'eval',
+			`global $wpdb; $ids = array_map( 'intval', explode( ',', '${ ids.join( ',' ) }' ) );
+			foreach ( $ids as $i => $id ) {
+				$wpdb->update( $wpdb->posts, array( 'post_modified' => gmdate( 'Y-m-d H:i:s', 1700000000 + ( $i < 3 ? 0 : $i ) * 60 ) ), array( 'ID' => $id ) );
+				clean_post_cache( $id );
+			}`
+		);
+		// Newest first: ids[11] down to ids[3], then the tie by ID, ids[2], ids[1], ids[0]. Page 1 ends with ids[2].
+		const expected = [ ...ids.slice( 3 ).reverse(), ...ids.slice( 0, 3 ).reverse() ].map( String );
+
+		const seen: string[] = [];
+		for ( const paged of [ 1, 2 ] ) {
+			await page.goto( `/wp-admin/admin.php?page=affibloom&per_page=10&s=${ word }&paged=${ paged }` );
+			seen.push( ...( await rows( page ).evaluateAll( ( trs ) => trs.map( ( tr ) => tr.getAttribute( 'data-product-id' ) ?? '' ) ) ) );
+		}
+
+		expect( seen ).toEqual( expected );
+	} );
+
+	test( 'AC18 after a bulk delete the Products tile and the placeholder show the new count at once', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F19 AC18' ) } );
+		const shown = ( n: number ) => n.toLocaleString( 'en-US' );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10' );
+		const tile = page.locator( '[data-library-count]' );
+		const count = Number( ( await tile.innerText() ).replace( /\D/g, '' ) );
+		expect( count ).toBeGreaterThan( 0 );
+
+		await page.locator( `tr[data-product-id="${ id }"]` ).getByRole( 'checkbox' ).check();
+		await page.locator( '.affibloom-selection' ).getByRole( 'button', { name: 'Delete' } ).click();
+		await page.getByRole( 'dialog', { name: 'Delete the selected links?' } ).getByRole( 'button', { name: 'Delete' } ).click();
+
+		// Without a reload the tile and the placeholder follow the library as it now is. (Compared with the database,
+		// not "count - 1": other runs may add products to this copy meanwhile.)
+		await expect( page.locator( `tr[data-product-id="${ id }"]` ) ).toHaveCount( 0 );
+		await expect.poll( async () => ( await tile.innerText() ).trim() ).toBe( shown( total() ) );
+		await expect( page.getByLabel( 'Search' ) ).toHaveAttribute( 'placeholder', `Search all ${ ( await tile.innerText() ).trim() } links…` );
+	} );
+
 	test( 'AC10 an empty library shows the Add empty state, not the search message', async ( { page } ) => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )

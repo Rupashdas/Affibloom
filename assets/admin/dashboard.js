@@ -219,6 +219,27 @@
 		status.textContent = said ? said.textContent.trim() : '';
 	}
 
+	/**
+	 * The library's size in the Products tile and the search placeholder, from the list answer (Task 13I; F19 D18):
+	 * Lasso rewrites its counts after every load, so a delete, a revive or a quick edit shows at once. Not announced:
+	 * the status line says the range only.
+	 *
+	 * @param {number} library Published products.
+	 */
+	function counts( library ) {
+		if ( 'number' !== typeof library ) {
+			return;
+		}
+		var shown = new Intl.NumberFormat( document.documentElement.lang || undefined ).format( library );
+		var tile = document.querySelector( '[data-library-count]' );
+		if ( tile ) {
+			tile.textContent = shown;
+		}
+		if ( search && search.getAttribute( 'data-placeholder' ) ) {
+			search.placeholder = search.getAttribute( 'data-placeholder' ).replace( '%s', shown );
+		}
+	}
+
 	/** Marks the pill whose list is on screen, as Lasso marks the active view; "All links" when none is. */
 	function markActivePill() {
 		var pills = Array.prototype.slice.call( document.querySelectorAll( '[data-views] .affibloom-pill' ) );
@@ -305,6 +326,7 @@
 			}
 			keepDrawn();
 			shownUrl = window.location.href;
+			counts( data.library );
 			reflect( ! remember );
 			announce();
 			if ( focus ) {

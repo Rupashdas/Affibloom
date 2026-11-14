@@ -94,7 +94,8 @@ interface ProductRepository {
 
 	/**
 	 * One page of the published products, most recently changed first, as Lasso orders its Dashboard
-	 * (Lasso_DB::get_dashboard_query_without_filter: ORDER BY p.post_modified DESC).
+	 * (Lasso_DB::get_dashboard_query_without_filter: ORDER BY p.post_modified DESC), the higher ID first on a tie
+	 * (F19 D9).
 	 *
 	 * @param SearchTerm $term      What to look for; an empty term lists everything.
 	 * @param LinkKind   $link_kind Lasso's "Link type" filter (Task 13E).

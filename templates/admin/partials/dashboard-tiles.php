@@ -24,7 +24,8 @@ $tiles = array(
 	<?php foreach ( $tiles as $tile ) : ?>
 		<div class="affibloom-tile<?php echo null === $tile[1] ? ' affibloom-tile--soon' : ''; ?>">
 			<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => $tile[0] ) ); ?></span>
-			<span class="affibloom-tile__number">
+			<?php // The Products number is rewritten by dashboard.js after each list load (Task 13I). ?>
+			<span class="affibloom-tile__number" <?php echo 'link' === $tile[0] ? 'data-library-count' : ''; ?>>
 				<?php if ( null === $tile[1] ) : ?>
 					<span aria-hidden="true">—</span>
 				<?php else : ?>

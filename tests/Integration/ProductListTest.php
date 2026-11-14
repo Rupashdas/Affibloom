@@ -65,6 +65,38 @@ final class ProductListTest extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * Products that share a modified time keep one order, the higher ID first, so a page boundary between them shows
+	 * each once (Task 13I; F19 D9, AC17).
+	 */
+	public function test_a_tie_on_the_modified_time_goes_to_the_higher_id(): void {
+		$ids = array();
+		for ( $i = 1; $i <= 3; $i++ ) {
+			$ids[] = self::factory()->post->create(
+				array(
+					'post_type'         => 'affibloom_product',
+					'post_status'       => 'publish',
+					'post_title'        => "Tie {$i}",
+					'post_modified'     => '2026-01-01 10:00:00',
+					'post_modified_gmt' => '2026-01-01 10:00:00',
+				)
+			);
+		}
+		global $wpdb;
+		// wp_insert_post() stamps "now"; the time is set where the order reads it.
+		$wpdb->query( "UPDATE {$wpdb->posts} SET post_modified = '2026-01-01 10:00:00' WHERE ID IN (" . implode( ',', $ids ) . ')' ); // phpcs:ignore WordPress.DB
+		clean_post_cache( $ids[0] );
+
+		$repository = new PostTypeProductRepository();
+		$first      = $repository->page( SearchTerm::from_input( '' ), LinkKind::All, 1, 2 );
+		$second     = $repository->page( SearchTerm::from_input( '' ), LinkKind::All, 2, 2 );
+
+		self::assertSame(
+			array_reverse( $ids ),
+			array_map( static fn( $product ): int => (int) $product->id, array_merge( $first->items, $second->items ) )
+		);
+	}
+
 	public function test_a_page_holds_only_its_own_products(): void {
 		$this->seed();
 

@@ -526,8 +526,12 @@ final class PostTypeProductRepository implements ProductRepository {
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
 			'post_status'            => 'publish',
-			'orderby'                => 'modified',
-			'order'                  => 'DESC',
+			// Lasso's order (post_modified DESC) has no second key, so products sharing a time could show on two pages
+			// or none; the highest ID decides a tie (Task 13I; F19 D9). No order Lasso defines changes.
+			'orderby'                => array(
+				'modified' => 'DESC',
+				'ID'       => 'DESC',
+			),
 			'ignore_sticky_posts'    => true,
 			'update_post_term_cache' => false,
 		);
