@@ -5115,12 +5115,13 @@ product (type Amazon, its ASIN set); the stored link is the one pasted.
 **Files:** modify `src/Application/Products/ProductService.php`; tests `tests/Unit/Application/ProductServiceTest.php`;
 the F2 and F18 acceptance specs rerun.
 
-- [ ] **Step 1: Failing unit test** in `ProductServiceTest` (kept geni.us → Amazon final URL → type `amazon`, ASIN set,
+- [x] **Step 1: Failing unit test** in `ProductServiceTest` (kept geni.us → Amazon final URL → type `amazon`, ASIN set,
   stored URL unchanged).
-- [ ] **Step 2: Fix.**
+- [x] **Step 2: Fix.**
 - [ ] **Step 3: Run and look.** F2 and F18 acceptance rerun; by hand on Local with a stubbed redirect, add a kept link
-  that ends at Amazon and see the Amazon product page (Amazon Image field, no Permalink row).
-- [ ] **Step 4: Commit** — "Type a kept redirect to Amazon as an Amazon product, as Lasso does".
+  that ends at Amazon and see the Amazon product page (Amazon Image field, no Permalink row). *Open: needs a signed-in
+  session, which Claude does not have; the user runs the F2 and F18 specs (deviation 93).*
+- [x] **Step 4: Commit** — "Type a kept redirect to Amazon as an Amazon product, as Lasso does".
 
 ---
 
@@ -5149,10 +5150,11 @@ is reported. After a server error in the Add A New Link modal the button reads "
 **Files:** modify `src/Application/Products/BulkAddService.php`, `assets/admin/admin.js`; tests
 `tests/Unit/Application/BulkAddServiceTest.php`, F18 acceptance spec.
 
-- [ ] **Step 1: Failing unit test** (a `RuntimeException` on link 3 of 5: links 4-5 still added, 3 reported).
-- [ ] **Step 2:** catch per link, record the failure in the run; build "Continue Anyway" as F18 specifies.
-- [ ] **Step 3: Run and look** (bulk add of 10 with one failing stub URL; the modal after a server error).
-- [ ] **Step 4: Commit** — "Keep a bulk add going past a failing link, as Lasso does".
+- [x] **Step 1: Failing unit test** (a `RuntimeException` on link 3 of 5: links 4-5 still added, 3 reported).
+- [x] **Step 2:** catch per link, record the failure in the run; build "Continue Anyway" as F18 specifies.
+- [ ] **Step 3: Run and look** (bulk add of 10 with one failing stub URL; the modal after a server error). *Open: the
+  user runs F18 signed in; the new "Continue Anyway" case is in the spec (deviation 94).*
+- [x] **Step 4: Commit** — "Keep a bulk add going past a failing link, as Lasso does".
 
 ---
 
@@ -5184,12 +5186,13 @@ rest of the accordion is unchanged; a stored `enable_brag_mode` or `brag_url` is
 `tests/E2E/acceptance/F16.spec.ts` (remove the two keys from the fixture; add: the controls are absent). F16's
 requirements rows for brag are marked "not built: B9". Task 26D (Display migration) does not import the two keys.
 
-- [ ] **Step 1: Failing tests.** The E2E case "the Display tab has no brag control" and the unit case "a save with
+- [x] **Step 1: Failing tests.** The E2E case "the Display tab has no brag control" and the unit case "a save with
   `enable_brag_mode` and `brag_url` stores neither"; both red because the controls and keys exist.
-- [ ] **Step 2: Remove the controls, the keys and the old tests.**
+- [x] **Step 2: Remove the controls, the keys and the old tests.**
 - [ ] **Step 3: Run and look.** Settings → Display at 1280 and 375 px: the accordion is intact; `composer lint`,
-  `composer analyse`, the unit tests, F16's acceptance spec.
-- [ ] **Step 4: Commit** — "Remove brag mode, which only advertised Lasso".
+  `composer analyse`, the unit tests, F16's acceptance spec. *Lint, analyse and unit tests done; the look and the F16
+  run are open (signed-in; deviation 95).*
+- [x] **Step 4: Commit** — "Remove brag mode, which only advertised Lasso".
 
 ---
 

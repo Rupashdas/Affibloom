@@ -26,7 +26,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Gate 4 given for the whole plan** (the user, 2026-11-14 walkthrough; answers in `open-decisions.md`). Building
    resumes task by task in the phase files' order.
-2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. Then 2X4-2X6, then Groups G1-G5.
+2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. **2X4, 2X5 and 2X6 are built and committed (2026-11-14, deviations 93-95; the user asked for all three in one session, overriding the one-task rule for this session); each waits for the user's signed-in run** (F2 and F18 for 2X4, F18 for 2X5, F16 for 2X6). Then Groups G1-G5.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -1993,6 +1993,34 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       user ran F16 signed in (2026-11-14): 10 passed, 1 skipped (the Phase 3 box test), including the new "Edge case 7" case.
     - Other sessions have uncommitted work in this tree (2X1): the 2X3 commit holds only its own files.
 
+93. **Task 2X4 (2026-11-14), a kept redirect that ends at Amazon is an Amazon product; built, waiting for the user's F2
+    and F18 runs.** `create_from_url()` now asks `kept_redirect()` when the pasted link is not Amazon and the resolver
+    found a different final URL (a geni.us link with "Keep geni.us formatting" on): if the final URL is Amazon, the
+    product is typed Amazon with the ASIN, store and search key of where it ends, named from that link, and the stored
+    link is the one pasted. A product already in the library for that ASIN is found first (a duplicate, as Lasso's
+    `is_lasso_url_exist` uses the final URL), and a trashed or retired one is revived. A redirect that ends elsewhere stays
+    `other`. This **reverses `test_geni_us_is_kept_as_pasted…`, which asserted type `other`** (written in 12D); the plan's
+    task text overrules it. Lines 376-380 in the task text are now elsewhere in the file. Red first (type and a missing
+    duplicate); 453 unit tests pass. Not checked by hand: it needs a stubbed redirect and a signed-in page.
+94. **Task 2X5 (2026-11-14), bulk add past a failing link and "Continue Anyway"; built, waiting for the user's F18 run.**
+    - `BulkAddService::process()` keeps Lasso's silence for a refused or duplicate link (`InvalidField`,
+      `RuntimeException`) and now also catches any other `Throwable`: the link goes into the new `BulkRun::failed` list
+      (stored with the run, empty for a run stored before) and the run moves on. Nothing reads the list yet; Lasso's bulk
+      run reports nothing (F18 section 8), so no screen shows it. It is there so a failure is recorded, not swallowed.
+      The fake repository gained `failure`/`fail_at` to throw on the Nth new product.
+    - **"Continue Anyway" (the user's choice, 2026-11-14): the click sends the same link again.** Lasso opens a new link
+      page with the typed URL filled in; Affibloom's product page opens only existing products, so a retry was chosen
+      over creating a product from a link that failed. After a server error in the single add the button reads
+      "Continue Anyway" with `data-continue="1"`; typing in the field, closing the dialog or submitting puts "Add Link"
+      back (Lasso does the same on change, paste and keypress). Bulk-mode errors do not use it (Lasso's `!form_add_link_is_text_area()`).
+    - New F18 case (route stub answers the POST with 500). Not run: the spec needs a sign-in; it loads (`--list`).
+95. **Task 2X6 (2026-11-14), brag mode removed; built, waiting for the user's F16 run.** The two controls, the keys
+    `enable_brag_mode` and `brag_url` (defaults and the Display tab's field list) and the old test are gone; a posted
+    value is not stored, and a value already stored is not read, so the next save drops it. `SettingsService`'s `url`
+    cleaner, whose only caller was `brag_url`, went with it. New unit case and a new F16 case ("no brag control");
+    F16's fixture no longer lists the keys. 456 unit tests, lint and PHPStan clean. Not looked at in a browser at 1280
+    and 375 px (signed out).
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2024,6 +2052,12 @@ deviation 89). The items below are the Phase 0 history.
 
 ## Session log
 
+- **2026-11-14 (Claude Code, Tasks 2X4, 2X5, 2X6, three in one session at the user's word):** 2X4 `6fdb829` a kept
+  redirect to Amazon is an Amazon product; 2X5 `48ef102` a bulk run records and skips any failing link, and the add
+  button reads "Continue Anyway" after a server error (retries the same link, the user's choice); 2X6 `4e34621` brag
+  mode removed. Each started from a failing unit test; 456 unit tests, `composer lint` and `composer analyse` clean.
+  Deviations 93-95. **Open: the user's signed-in runs** (F2 and F18, then F16), where the new F18 and F16 cases run for
+  the first time, and the look at Settings → Display. Next: Groups G1-G5.
 - **2026-11-14 (Claude Code, Task 2X2):** F1 AC2 now changes every field the page shows (name, Primary URL, button text and
   both toggles, the added button's URL, text and toggles and its position, badge, theme, image URL with Apply, price,
   Show Price, description, disclosure, Show Disclosure, Sponsored), saves, reloads, and checks the page and the stored
