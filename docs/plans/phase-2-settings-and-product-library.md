@@ -5085,11 +5085,11 @@ store.
 `tests/Unit/Application/Display/DisplaySettingsServiceTest.php`, `tests/E2E/acceptance/F16.spec.ts` (a typed `rgba()`
 value saves and shows again).
 
-- [ ] **Step 1: Failing unit tests** in `DisplaySettingsServiceTest` (rgb, rgba, hsl if Lasso accepts it — check
+- [x] **Step 1: Failing unit tests** in `DisplaySettingsServiceTest` (rgb, rgba, hsl if Lasso accepts it — check
   `admin/views/settings/display.php` and Lasso's save sanitiser first and follow it exactly; 8-digit hex).
-- [ ] **Step 2:** widen `clean_colour()`; `display-settings.js` keeps the text value when the picker cannot show it.
+- [x] **Step 2:** widen `clean_colour()`; `display-settings.js` keeps the text value when the picker cannot show it.
 - [ ] **Step 3: Run and look.** Type both forms in a Display colour on Local, save, reload; F16's Display spec reruns.
-- [ ] **Step 4: Commit** — "Accept every colour form Lasso's Display settings accept".
+- [x] **Step 4: Commit** — "Accept every colour form Lasso's Display settings accept".
 
 ---
 

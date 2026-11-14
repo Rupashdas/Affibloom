@@ -12,13 +12,6 @@ use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
 
 final class DisplaySettingsServiceTest extends TestCase {
-	protected function setUp(): void {
-		parent::setUp();
-		\Brain\Monkey\Functions\when( 'sanitize_hex_color' )->alias(
-			static fn( $c ) => preg_match( '/^#([A-Fa-f0-9]{3}){1,2}$/', (string) $c ) ? (string) $c : null
-		);
-	}
-
 	/**
 	 * The service, with site-wide settings where Show Price is as given.
 	 */
@@ -81,6 +74,72 @@ final class DisplaySettingsServiceTest extends TestCase {
 		self::assertSame( array( 'background', 'button' ), $refused );
 		self::assertSame( 'white', $repo->get()->config( DisplayType::grid() )->palette()->value( 'title' ) );
 		self::assertSame( '#ffffff', $repo->get()->config( DisplayType::grid() )->palette()->value( 'background' ) ); // kept its default
+	}
+
+	/**
+	 * Lasso keeps whatever its colour field holds (its picker writes hex, rgb(), rgba() and hsl()), so every
+	 * CSS colour form is accepted and stored as typed, lower-cased (edge case 7).
+	 *
+	 * @dataProvider colour_forms
+	 */
+	public function test_every_css_colour_form_lasso_accepts_is_kept( string $typed, string $stored ): void {
+		$repo    = $this->repository();
+		$refused = ( $this->service( $repo ) )->update_type(
+			DisplayType::single(),
+			array( 'palette' => array( 'main' => $typed ) )
+		);
+
+		self::assertSame( array(), $refused );
+		self::assertSame( $stored, $repo->get()->config( DisplayType::single() )->palette()->value( 'main' ) );
+	}
+
+	/**
+	 * @return array<string, array{string, string}>
+	 */
+	public static function colour_forms(): array {
+		return array(
+			'rgb'                  => array( 'rgb(0, 0, 0)', 'rgb(0, 0, 0)' ),
+			'rgba'                 => array( 'rgba(0,0,0,.5)', 'rgba(0,0,0,.5)' ),
+			'rgb with percentages' => array( 'RGB(100%, 0%, 0%)', 'rgb(100%, 0%, 0%)' ),
+			'modern rgb'           => array( 'rgb(0 0 0 / 50%)', 'rgb(0 0 0 / 50%)' ),
+			'hsl'                  => array( 'hsl(210, 50%, 40%)', 'hsl(210, 50%, 40%)' ),
+			'hsla'                 => array( 'hsla(210, 50%, 40%, 0.5)', 'hsla(210, 50%, 40%, 0.5)' ),
+			'8-digit hex'          => array( '#00000080', '#00000080' ),
+			'4-digit hex'          => array( '#0008', '#0008' ),
+			'upper-case hex'       => array( '#AABBCC', '#aabbcc' ),
+			'padded'               => array( '  #00000080 ', '#00000080' ),
+		);
+	}
+
+	/**
+	 * @dataProvider refused_colours
+	 */
+	public function test_a_value_that_is_not_a_colour_is_refused( string $typed ): void {
+		$repo    = $this->repository();
+		$refused = ( $this->service( $repo ) )->update_type(
+			DisplayType::single(),
+			array( 'palette' => array( 'main' => $typed ) )
+		);
+
+		self::assertSame( array( 'main' ), $refused );
+		self::assertSame( '#000000', $repo->get()->config( DisplayType::single() )->palette()->value( 'main' ) );
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public static function refused_colours(): array {
+		return array(
+			'5-digit hex'        => array( '#12345' ),
+			'not hex'            => array( '#nothex' ),
+			'rgb with a tail'    => array( 'rgb(0,0,0); background: red' ),
+			'rgb with markup'    => array( 'rgb(0,0,0)</style>' ),
+			'a url'              => array( 'url(http://example.com/a.png)' ),
+			'an expression'      => array( 'expression(alert(1))' ),
+			'an unknown function' => array( 'calc(1 + 1)' ),
+			'empty brackets'     => array( 'rgb()' ),
+			'nested'             => array( 'rgb(rgb(0,0,0),0,0)' ),
+		);
 	}
 
 	public function test_a_label_goes_through_the_icon_allowlist(): void {

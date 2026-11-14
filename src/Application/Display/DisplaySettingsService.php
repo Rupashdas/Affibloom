@@ -222,7 +222,11 @@ final class DisplaySettingsService {
 	}
 
 	/**
-	 * A colour as Lasso stores them: a hex value, or a CSS colour keyword such as "black" (edge case 7).
+	 * A colour as Lasso's colour fields hold them (edge case 7). Lasso keeps whatever the field says and its picker
+	 * writes hex, rgb(), rgba() and hsl(), so every one of those forms is kept, as typed but lower-cased: hex of 3,
+	 * 4, 6 or 8 digits, `rgb()`/`rgba()`/`hsl()`/`hsla()` with numbers, percentages or degrees (comma or space
+	 * separated, with an optional "/ alpha"), and a CSS keyword such as "black". Nothing else passes, so a colour
+	 * can never carry a second declaration, markup or a url().
 	 *
 	 * @param mixed $raw Raw value.
 	 */
@@ -231,18 +235,25 @@ final class DisplaySettingsService {
 			return null;
 		}
 
-		$value = trim( $raw );
+		$value = strtolower( trim( $raw ) );
 		if ( '' === $value ) {
 			return null;
 		}
 
-		if ( str_starts_with( $value, '#' ) ) {
-			$hex = sanitize_hex_color( $value );
+		$number = '[0-9.]+(?:%|deg)?';
+		$forms  = array(
+			'/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/',
+			'/^(?:rgb|hsl)a?\(\s*' . $number . '(?:\s*[,\s\/]\s*' . $number . '){2,3}\s*\)$/',
+			'/^[a-z]{3,20}$/',
+		);
 
-			return is_string( $hex ) && '' !== $hex ? strtolower( $hex ) : null;
+		foreach ( $forms as $form ) {
+			if ( 1 === preg_match( $form, $value ) ) {
+				return $value;
+			}
 		}
 
-		return preg_match( '/^[a-zA-Z]{3,20}$/', $value ) ? strtolower( $value ) : null;
+		return null;
 	}
 
 	/**

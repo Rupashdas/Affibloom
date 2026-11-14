@@ -7,8 +7,9 @@
  * step the way Lasso's does (admin/assets/js/settings.js): a preset chip fills the steppers, a stepper moves
  * by its step and clamps to its range, and any edit turns the preset into Custom.
  *
- * Colours: the text field stays the value that is saved, because Lasso stores CSS keywords as well as hex and a
- * colour input can only hold hex. The picker shows that value and writes a hex back when the editor picks one.
+ * Colours: the text field stays the value that is saved, because Lasso stores CSS keywords, rgb()/rgba()/hsl() and
+ * 8-digit hex as well as 6-digit hex, and a colour input can only hold #rrggbb. The picker shows the nearest opaque
+ * colour of that value and writes a hex back only when the editor picks one (task 2X3).
  */
 ( function () {
 	'use strict';

@@ -235,6 +235,22 @@ test.describe( 'F16 Display system', () => {
 		expect( storedSettings().show_price ).toBe( true );
 	} );
 
+	test( 'Edge case 7: a colour typed as rgba() or 8-digit hex is kept as typed', async ( { page } ) => {
+		await page.goto( displayTab( 'list' ) );
+		await openColours( page );
+		await page.locator( '#affibloom-display-main' ).fill( 'rgba(0,0,0,.5)' );
+		await page.locator( '#affibloom-display-background' ).fill( '#00000080' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
+
+		// The text value survives the save and the reload; the picker only shows the nearest opaque colour.
+		await page.goto( displayTab( 'list' ) );
+		await openColours( page );
+		await expect( page.locator( '#affibloom-display-main' ) ).toHaveValue( 'rgba(0,0,0,.5)' );
+		await expect( page.locator( '#affibloom-display-background' ) ).toHaveValue( '#00000080' );
+		expect( storedDisplay().list.palette.main ).toBe( 'rgba(0,0,0,.5)' );
+	} );
+
 	test( 'AC8 a button label keeps its icon markup', async ( { page } ) => {
 		const label = '<span class="amazon-icon"></span> Buy Now';
 		await page.goto( displayTab( 'list' ) );
