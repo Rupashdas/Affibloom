@@ -94,7 +94,9 @@ $editor = static fn( int $height ): array => array(
 				<button type="button" class="affibloom-button affibloom-button--secondary" data-image-apply
 					data-required="<?php esc_attr_e( 'Image URL is required.', 'affibloom' ); ?>" data-invalid="<?php esc_attr_e( 'Invalid image url.', 'affibloom' ); ?>"><?php esc_html_e( 'Apply', 'affibloom' ); ?></button>
 				<?php if ( $is_amazon ) : ?>
-					<button type="button" class="affibloom-button affibloom-button--secondary" disabled title="<?php esc_attr_e( 'Needs the Amazon API', 'affibloom' ); ?>"><?php esc_html_e( 'Refresh', 'affibloom' ); ?></button>
+					<?php // A disabled button cannot be focused, so a title alone never reaches a keyboard or touch user: the reason is text a screen reader reads with the button. ?>
+					<button type="button" class="affibloom-button affibloom-button--secondary" disabled aria-describedby="affibloom-refresh-reason" title="<?php esc_attr_e( 'Needs the Amazon API', 'affibloom' ); ?>"><?php esc_html_e( 'Refresh', 'affibloom' ); ?></button>
+					<span class="screen-reader-text" id="affibloom-refresh-reason"><?php esc_html_e( 'Needs the Amazon API', 'affibloom' ); ?></span>
 				<?php endif; ?>
 			</span>
 			<p class="affibloom-field__error" id="affibloom-image-url-error" data-image-error hidden></p>

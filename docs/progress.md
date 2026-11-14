@@ -1945,6 +1945,24 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       administrator (WP-CLI). The browser pane was signed out, so the Dashboard was not looked at (Claude does not sign in).
     - `CLAUDE.md` (site root, outside git) and `docs/environment.md` updated.
 
+91. **Task 2X1 (2026-11-14), the product page's four gaps; built, waiting for the user's signed-in run.** Red: the new
+    unit test failed on the missing `placeholder` setting; the E2E cases (F1 AC5, AC7, AC10) were written first but could
+    not be run here (the browser pane was signed out and Claude does not sign in on `.local`), so their red state was not
+    seen. Changes: (1) the Description editor says "Enter a description" while empty: TinyMCE 4.9 has no placeholder, so
+    `ProductEditors` sets the `placeholder` setting and a `content_style` rule, and `product.js` copies the setting to the
+    editor body and toggles `affibloom-empty` (the words are never content); (2) the disabled Refresh is described by
+    `#affibloom-refresh-reason` (screen-reader text) as well as its title; (3) Remove on a filled added button asks in the
+    shared `delete-modal.php` partial (second use: optional `confirm_label`, `confirm_attr`, `busy_label`, `failed_text`),
+    no `window.confirm`; F29's remove step uses the dialog; (4) `product-fields.js`: a failed value, switch or order save
+    and a failed add show the failure toast (server message, else the page's), and a failed remove keeps its question open
+    with the reason in the dialog (`role="alert"`).
+    - Checks: `composer lint` clean, `composer analyse` no errors, 432 unit tests pass; the changed partials and the editor
+      settings rendered through WP-CLI. **Not run: the E2E specs and the look at 1280 and 375 px** (Step 3 stays open).
+    - **Commit mix-up:** a concurrent Task 2X0 session committed part of this work in `7c73290` (`product.js`,
+      `ProductEditors.php`, `F1.spec.ts`, `F29.spec.ts`, `ProductEditorsTest.php`), already pushed; history was not
+      rewritten. The rest is in the 2X1 commit. `assets/admin/product-save.js` also carries an uncommitted change that is
+      not this task's (`disclosure` removed from its `TEXTS` list): left alone.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -1976,6 +1994,9 @@ deviation 89). The items below are the Phase 0 history.
 
 ## Session log
 
+- **2026-11-14 (Claude Code, Task 2X1):** the four product-page gaps built and checked by lint, PHPStan, 432 unit tests and
+  a WP-CLI render (deviation 91). Waiting for the user's signed-in run of F1 (AC5, AC7, AC10) and F29 and a look at the
+  page; Step 3 of the task stays open until then. Next: 2X2.
 - **2026-11-14 (Claude Code, Task 2X0):** PHP 8.3 and WordPress 7.1.4 made the minimums everywhere (deviation 90); lint, PHPStan and 431 unit tests green; re-activated on Local (PHP 8.3.36). Committed and pushed.
 - **2026-11-14 (Claude Code, full planning pass):** the user asked for all planning and documentation of Phases 1-9 to
   be finished before any more building (deviation 89). Lasso's surface inventoried and swept in 21 subsystem sweeps;

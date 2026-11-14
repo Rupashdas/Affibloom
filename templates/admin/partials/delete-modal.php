@@ -6,20 +6,27 @@
  * - the Dashboard's (view-js.php dashboard_configure_delete_modal, X7): "Delete the selected links?", whose Delete
  *   moves the ticked rows to the trash.
  * Each page passes its id, title and sentence; the script on the page does the delete.
+ * Task 2X1 reuses it, on its second use, for the product page's "Remove this button?": a view may give the confirm
+ * button's label, its attribute (the page's script finds the button by it) and the words of the busy and failed states;
+ * without them it is the delete dialog.
  *
  * @package Affibloom
- * @var array{id: string, title: string, text: string} $view
+ * @var array{id: string, title: string, text: string, confirm_label?: string, confirm_attr?: string, busy_label?: string, failed_text?: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Interface\Admin\AdminMenu;
 
-$modal_id = $view['id'];
+$modal_id      = $view['id'];
+$confirm_label = $view['confirm_label'] ?? __( 'Delete', 'affibloom' );
+$confirm_attr  = $view['confirm_attr'] ?? 'data-delete-confirm';
+$busy_label    = $view['busy_label'] ?? __( 'Deleting…', 'affibloom' );
+$failed_text   = $view['failed_text'] ?? __( 'Could not delete. Please try again.', 'affibloom' );
 ?>
 <div id="<?php echo esc_attr( $modal_id ); ?>" class="affibloom-modal" hidden
 	data-dashboard-url="<?php echo esc_url( admin_url( 'admin.php?page=' . AdminMenu::SLUG ) ); ?>"
-	data-failed-text="<?php esc_attr_e( 'Could not delete. Please try again.', 'affibloom' ); ?>">
+	data-failed-text="<?php echo esc_attr( $failed_text ); ?>">
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr( $modal_id ); ?>-title" aria-describedby="<?php echo esc_attr( $modal_id ); ?>-text">
 		<div class="affibloom-modal__head">
@@ -33,8 +40,8 @@ $modal_id = $view['id'];
 		</div>
 		<div class="affibloom-modal__foot">
 			<button type="button" class="affibloom-button affibloom-button--secondary" data-affibloom-close><?php esc_html_e( 'Cancel', 'affibloom' ); ?></button>
-			<button type="button" class="affibloom-button affibloom-button--danger" data-delete-confirm
-				data-busy-label="<?php esc_attr_e( 'Deleting…', 'affibloom' ); ?>"><?php esc_html_e( 'Delete', 'affibloom' ); ?></button>
+			<button type="button" class="affibloom-button affibloom-button--danger" <?php echo esc_attr( $confirm_attr ); ?>
+				data-busy-label="<?php echo esc_attr( $busy_label ); ?>"><?php echo esc_html( $confirm_label ); ?></button>
 		</div>
 	</div>
 </div>

@@ -125,6 +125,9 @@ $title_help = __( 'Ideal title for use in things like a comparison table header.
 		</div>
 		<div class="affibloom-modal__body">
 			<p id="affibloom-field-remove-text" class="affibloom-modal__intro"><?php esc_html_e( "If removed, you won't be able to get its value back.", 'affibloom' ); ?></p>
+			<?php // Task 2X1: a remove that fails keeps the question open and says why. ?>
+			<p class="affibloom-field__error" role="alert" data-field-remove-error
+				data-failed="<?php esc_attr_e( 'Could not remove the field. Please try again.', 'affibloom' ); ?>" hidden></p>
 		</div>
 		<div class="affibloom-modal__foot">
 			<button type="button" class="affibloom-button affibloom-button--secondary" data-affibloom-close><?php esc_html_e( 'Cancel', 'affibloom' ); ?></button>

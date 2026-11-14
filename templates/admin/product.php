@@ -152,8 +152,7 @@ $soon_tabs   = array(
 						data-legend-format="<?php /* translators: %s: a button's place in the box, e.g. 2. */ echo esc_attr__( 'Button %s', 'affibloom' ); ?>"
 						data-up-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Move %s up', 'affibloom' ); ?>"
 						data-down-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Move %s down', 'affibloom' ); ?>"
-						data-remove-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Remove %s', 'affibloom' ); ?>"
-						data-confirm="<?php esc_attr_e( 'Remove this button? Its link and text are gone once you save.', 'affibloom' ); ?>">
+						data-remove-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Remove %s', 'affibloom' ); ?>">
 						<input type="hidden" name="primary_position" value="<?php echo esc_attr( (string) $position ); ?>" data-main-position>
 						<div class="affibloom-buttons__list" data-button-list>
 							<?php
@@ -222,7 +221,9 @@ $soon_tabs   = array(
 					</div>
 
 					<?php // Custom fields (Task 14C): Lasso's dashed box with the product's fields, then "Add Custom Field". ?>
-					<div class="affibloom-product__fields" data-product-fields data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
+					<div class="affibloom-product__fields" data-product-fields data-product-id="<?php echo esc_attr( (string) $product->id ); ?>"
+						data-save-failed="<?php esc_attr_e( 'Could not save the field. Please try again.', 'affibloom' ); ?>"
+						data-add-failed="<?php esc_attr_e( 'Could not add the field. Please try again.', 'affibloom' ); ?>">
 						<div class="affibloom-field-list" data-field-list>
 							<?php
 							$this->render(
@@ -285,6 +286,21 @@ $soon_tabs   = array(
 			'id'    => 'affibloom-delete-modal',
 			'title' => __( 'Delete This Link?', 'affibloom' ),
 			'text'  => __( "If deleted, you won't be able to get it back.", 'affibloom' ),
+		)
+	);
+	?>
+	<?php // Task 2X1: an added button asks through the page's own dialog, as the delete does, never the browser's. ?>
+	<?php
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'            => 'affibloom-button-remove-modal',
+			'title'         => __( 'Remove this button?', 'affibloom' ),
+			'text'          => __( 'Its link and text are gone once you save.', 'affibloom' ),
+			'confirm_label' => __( 'Remove', 'affibloom' ),
+			'confirm_attr'  => 'data-remove-confirm',
+			'busy_label'    => __( 'Removing…', 'affibloom' ),
+			'failed_text'   => __( 'Could not remove the button. Please try again.', 'affibloom' ),
 		)
 	);
 	?>

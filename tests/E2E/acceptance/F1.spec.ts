@@ -16,21 +16,53 @@ test.describe( 'F1 Product library', () => {
 	} );
 
 	// Task 15A (requirements 9, S1-S6, S14, S15). The save is held back half a second so its dialog can be seen.
+	// Task 2X2: every field the page shows (14A-14H) is changed to a value of its own, saved, and read back after a reload,
+	// from the page and from the stored product, so a field the save drops or reads back wrongly fails here.
 	test( 'AC2 fields saved on the Details tab persist and show a toast', async ( { page } ) => {
-		const id = createProduct( { name: unique( 'F1 AC2' ), url2: 'https://www.example.com/f1-ac2-second', button_text2: 'Second' } );
+		const key = unique( 'f1-ac2' );
+		const id = createProduct( {
+			name: unique( 'F1 AC2' ),
+			url: `https://www.example.com/${ key }-before`,
+			url2: 'https://www.example.com/f1-ac2-second',
+			button_text2: 'Second',
+			description: '<p>Before.</p>',
+			price: '$1.00',
+			disclosure: 'Before.',
+			show_price: '0',
+			show_disclosure: '1',
+		} );
 		const name = unique( 'F1 AC2 renamed' );
+		const primaryUrl = `https://www.example.com/${ key }-after`;
+		const extraUrl = `https://www.example.com/${ key }-extra`;
+		const imageUrl = `https://www.example.com/${ key }.jpg`;
+		const disclosure = 'Our links may earn us a commission.';
 		await page.route( /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+/, async ( route ) => {
 			await new Promise( ( done ) => setTimeout( done, 500 ) );
 			await route.continue();
 		} );
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 		await page.locator( '#affibloom-name' ).fill( name );
-		const extra = page.locator( '[data-extra-button]' ).first();
+		await page.locator( '#affibloom-url' ).fill( primaryUrl );
 		// Button texts and the badge are icon fields: the words are typed in their own box (F28, Task 14G).
+		await page.locator( '[data-main-button] .affibloom-icon-field__words' ).fill( 'Check Price' );
+		await page.locator( '#affibloom-new-tab' ).uncheck();
+		await page.locator( '#affibloom-nofollow' ).uncheck();
+		const extra = page.locator( '[data-extra-button]' ).first();
+		await extra.getByLabel( 'Additional Destination URL' ).fill( extraUrl );
 		await extra.locator( '.affibloom-icon-field__words' ).fill( 'Women\'s' );
+		await extra.getByRole( 'switch', { name: 'New Window / Tab' } ).uncheck();
+		await extra.getByRole( 'switch', { name: 'NoFollow / NoIndex' } ).uncheck();
 		await extra.getByRole( 'button', { name: /Move .* up/ } ).click();
 		await page.locator( '#affibloom-badge-words' ).fill( 'Best Overall' );
 		await page.locator( '#affibloom-theme' ).selectOption( 'Splash' );
+		await page.locator( '#affibloom-image-url' ).fill( imageUrl );
+		await page.getByRole( 'button', { name: 'Apply', exact: true } ).click();
+		await expect( page.locator( '.affibloom-image-frame img' ) ).toHaveAttribute( 'src', imageUrl );
+		await page.frameLocator( '#affibloom_price_ifr' ).locator( 'body' ).fill( '$24.50' );
+		await page.locator( '#affibloom-show-price' ).check();
+		await page.frameLocator( '#affibloom_description_ifr' ).locator( 'body' ).fill( 'Grips the floor.' );
+		await page.locator( '#affibloom-disclosure' ).fill( disclosure );
+		await page.locator( '#affibloom-show-disclosure' ).uncheck();
 		await page.locator( '#affibloom-sponsored' ).check();
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 		await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeVisible();
@@ -39,13 +71,50 @@ test.describe( 'F1 Product library', () => {
 
 		await page.reload();
 		await expect( page.locator( '#affibloom-name' ) ).toHaveValue( name );
+		await expect( page.locator( '#affibloom-url' ) ).toHaveValue( primaryUrl );
+		await expect( page.locator( '[data-main-button] .affibloom-icon-field__words' ) ).toHaveValue( 'Check Price' );
+		await expect( page.locator( '#affibloom-new-tab' ) ).not.toBeChecked();
+		await expect( page.locator( '#affibloom-nofollow' ) ).not.toBeChecked();
 		// The added button now comes first, before the default one (F29: primary_position).
 		await expect( page.locator( '[data-button]' ).first() ).toHaveAttribute( 'data-extra-button', '' );
+		const added = page.locator( '[data-extra-button]' ).first();
+		await expect( added.getByLabel( 'Additional Destination URL' ) ).toHaveValue( extraUrl );
 		await expect( page.locator( 'input[name="buttons[0][text]"]' ) ).toHaveValue( 'Women\'s' );
-		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_primary_position' ) ).toBe( '1' );
+		await expect( added.getByRole( 'switch', { name: 'New Window / Tab' } ) ).not.toBeChecked();
+		await expect( added.getByRole( 'switch', { name: 'NoFollow / NoIndex' } ) ).not.toBeChecked();
 		await expect( page.locator( '#affibloom-badge' ) ).toHaveValue( 'Best Overall' );
 		await expect( page.locator( '#affibloom-theme' ) ).toHaveValue( 'Splash' );
+		await expect( page.locator( '#affibloom-image-url' ) ).toHaveValue( imageUrl );
+		await expect( page.locator( '.affibloom-image-frame img' ) ).toHaveAttribute( 'src', imageUrl );
+		await expect( page.frameLocator( '#affibloom_price_ifr' ).locator( 'body' ) ).toContainText( '$24.50' );
+		await expect( page.locator( '#affibloom-show-price' ) ).toBeChecked();
+		await expect( page.frameLocator( '#affibloom_description_ifr' ).locator( 'body' ) ).toContainText( 'Grips the floor.' );
+		await expect( page.locator( '#affibloom-disclosure' ) ).toHaveValue( disclosure );
+		await expect( page.locator( '#affibloom-show-disclosure' ) ).not.toBeChecked();
 		await expect( page.locator( '#affibloom-sponsored' ) ).toBeChecked();
+
+		// What is stored, as the page's own save wrote it.
+		// One call for all of it: each wp() call starts PHP, and the case has a minute.
+		const rows = JSON.parse( wp( 'post', 'meta', 'list', String( id ), '--format=json' ) ) as Array< { meta_key: string; meta_value: string } >;
+		const meta = ( field: string ): string => rows.find( ( row ) => row.meta_key === `_affibloom_${ field }` )?.meta_value ?? '';
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+		expect( meta( 'url' ) ).toBe( primaryUrl );
+		expect( meta( 'button_text' ) ).toBe( 'Check Price' );
+		expect( meta( 'new_tab' ) ).not.toBe( '1' );
+		expect( meta( 'nofollow' ) ).not.toBe( '1' );
+		expect( meta( 'primary_position' ) ).toBe( '1' );
+		expect( meta( 'badge' ) ).toBe( 'Best Overall' );
+		expect( meta( 'theme' ) ).toBe( 'Splash' );
+		expect( meta( 'image_url' ) ).toBe( imageUrl );
+		expect( meta( 'price' ) ).toContain( '$24.50' );
+		expect( meta( 'show_price' ) ).toBe( '1' );
+		expect( meta( 'description' ) ).toContain( 'Grips the floor.' );
+		expect( meta( 'disclosure' ) ).toBe( disclosure );
+		expect( meta( 'show_disclosure' ) ).not.toBe( '1' );
+		expect( meta( 'sponsored' ) ).toBe( '1' );
+		const buttons = JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_buttons', '--format=json' ) );
+		expect( buttons ).toHaveLength( 1 );
+		expect( buttons[ 0 ] ).toMatchObject( { url: extraUrl, text: 'Women\'s', new_tab: false, nofollow: false } );
 	} );
 
 	// Task 15A: Lasso refuses only an empty name or link (S2); button links are cleaned, never refused (S4); a description

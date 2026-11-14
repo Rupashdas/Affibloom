@@ -5025,11 +5025,11 @@ only); **Remove** on an added button asks through the design-system dialog (`del
 `templates/admin/partials/product-button.php`, `assets/admin/product-buttons.js`, `assets/admin/product-fields.js`;
 tests `tests/E2E/acceptance/F1.spec.ts` (new cases for the four behaviours), unit test for `ProductEditors`.
 
-- [ ] **Step 1: Failing tests** (placeholder visible; Refresh reason in the accessible name/description; Remove dialog;
+- [x] **Step 1: Failing tests** (placeholder visible; Refresh reason in the accessible name/description; Remove dialog;
   a field save answered 500 by a route stub shows an error).
-- [ ] **Step 2: Build the four fixes.**
-- [ ] **Step 3: Run and look** (1280 and 375 px, keyboard, screen reader names).
-- [ ] **Step 4: Commit** — "Finish the product page's description, Refresh, button and field details".
+- [x] **Step 2: Build the four fixes.**
+- [ ] **Step 3: Run and look** (1280 and 375 px, keyboard, screen reader names). *Open: the browser pane was signed out and Claude does not sign in; the user runs the F1 and F29 specs and looks (deviation 91).*
+- [x] **Step 4: Commit** — "Finish the product page's description, Refresh, button and field details".
 
 ---
 

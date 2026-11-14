@@ -39,6 +39,11 @@
 			return Array.prototype.slice.call( list.querySelectorAll( '[data-field-row]' ) );
 		};
 
+		/** A failure shown as the failure toast: the server's words, else the page's (Task 2X1; no change goes by silently). */
+		var failed = function ( problem, fallback ) {
+			window.affibloomToast( problem && problem.message ? problem.message : fallback, true );
+		};
+
 		/** The order, values and switches, as the page shows them (Lasso's lasso_save_field_positions). */
 		var save = function () {
 			return wp.apiFetch( {
@@ -55,6 +60,8 @@
 						};
 					} ),
 				},
+			} ).catch( function ( problem ) {
+				failed( problem, box.dataset.saveFailed );
 			} );
 		};
 
@@ -110,18 +117,24 @@
 				pending = row;
 				var title = removeModal.querySelector( '[data-field-remove-title]' );
 				title.textContent = format( title.dataset.format, [ row.dataset.fieldName ] );
+				removeProblem.hidden = true;
 			}
 		} );
 
+		// A remove that fails keeps the question open, with the reason, so it can be tried again or cancelled.
+		var removeProblem = removeModal.querySelector( '[data-field-remove-error]' );
 		removeModal.querySelector( '[data-field-remove-confirm]' ).addEventListener( 'click', function () {
 			if ( ! pending ) {
 				return;
 			}
 			var id = pending.dataset.fieldId;
-			pending = null;
 			wp.apiFetch( { path: path + '/' + id, method: 'DELETE' } ).then( function ( response ) {
+				pending = null;
 				draw( response.data.html );
 				close( removeModal );
+			} ).catch( function ( problem ) {
+				removeProblem.textContent = problem && problem.message ? problem.message : removeProblem.dataset.failed;
+				removeProblem.hidden = false;
 			} );
 		} );
 
@@ -259,8 +272,9 @@
 			wp.apiFetch( { path: path, method: 'POST', data: { field: parseInt( add.dataset.fieldAdd, 10 ) } } ).then( function ( response ) {
 				draw( response.data.html );
 				close( modal );
-			} ).catch( function () {
+			} ).catch( function ( problem ) {
 				add.disabled = false;
+				failed( problem, box.dataset.addFailed );
 			} );
 		} );
 

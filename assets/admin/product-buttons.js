@@ -3,7 +3,7 @@
  *
  * One button by default, the product's own link. "Add Another Button" clones the page's <template> (giving its ids a
  * key of their own); Move up and Move down swap any block with its neighbour, the default one included; Remove takes
- * an added block out, asking first when its link is filled. After every change the blocks are renumbered: each group's
+ * an added block out, asking first (in the page's own dialog, Task 2X1) when its link is filled. After every change the blocks are renumbered: each group's
  * name "Button <n>", the added buttons' field names buttons[<i>][…] in their order, the hidden primary_position (where
  * the default button sits among them), and the action buttons' names. Task 15 saves exactly that. A new block is
  * announced with "affibloom:enhance" so the icon picker and the help tips wire themselves up inside it.
@@ -56,6 +56,28 @@
 			} );
 		};
 
+		/** Takes an added block out; the focus goes to "Add Another Button", as the block it was on is gone. */
+		var take = function ( block ) {
+			block.remove();
+			renumber();
+			add.focus();
+		};
+
+		// "Remove this button?" (partials/delete-modal.php): the block waiting for the answer.
+		var asking = document.getElementById( 'affibloom-button-remove-modal' );
+		var pending = null;
+		asking.querySelector( '[data-remove-confirm]' ).addEventListener( 'click', function () {
+			var block = pending;
+			pending = null;
+			window.affibloomModal.hide();
+			if ( block ) {
+				take( block );
+			}
+		} );
+		asking.addEventListener( 'affibloom:close', function () {
+			pending = null;
+		} );
+
 		var wire = function ( block ) {
 			block.querySelector( '.affibloom-button-block__actions' ).hidden = false;
 			block.addEventListener( 'click', function ( event ) {
@@ -72,12 +94,13 @@
 					( move.disabled ? block.querySelector( '[data-move]:not([disabled])' ) : move ).focus();
 				} else if ( remove ) {
 					var link = block.querySelector( 'input[name$="[url]"]' );
-					if ( link && '' !== link.value.trim() && ! window.confirm( box.dataset.confirm ) ) {
-						return;
+					if ( link && '' !== link.value.trim() ) {
+						// A filled button asks first, in the page's own dialog; its Remove calls take().
+						pending = block;
+						window.affibloomModal.show( asking, remove );
+					} else {
+						take( block );
 					}
-					block.remove();
-					renumber();
-					add.focus();
 				}
 			} );
 		};

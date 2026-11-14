@@ -6,6 +6,11 @@ use Affibloom\Tests\Unit\TestCase;
 use Brain\Monkey\Functions;
 
 final class ProductEditorsTest extends TestCase {
+	protected function setUp(): void {
+		parent::setUp();
+		Functions\stubTranslationFunctions();
+	}
+
 	/**
 	 * Advanced Editor Tools (active on this site) gives every editor its menu bar and its toolbars; the product page's
 	 * two editors keep Lasso's toolbars instead.
@@ -39,8 +44,6 @@ final class ProductEditorsTest extends TestCase {
 	 * and a style that draws them while the editor is empty; product.js sets the class and the attribute.
 	 */
 	public function test_the_description_editor_has_a_placeholder_and_the_price_editor_has_none(): void {
-		Functions\stubTranslationFunctions();
-
 		$description = ProductEditors::settings( array( 'content_style' => 'body{margin:0}' ), 'affibloom_description' );
 		self::assertSame( 'Enter a description', $description['placeholder'] );
 		self::assertStringStartsWith( 'body{margin:0}', $description['content_style'] );
