@@ -270,11 +270,11 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | FL5 | F26, F1 | open |
 | TL1 | F37 | open |
 | TL2 | F37 | open |
-| 13F | F19 | open |
-| 13G | F19 | open |
-| 13H | F19 | open |
-| 13I | F19 | open |
-| 13J | F19 | open |
+| 13F | F19 | done `c0b7021` |
+| 13G | F19 | done `67a5562` |
+| 13H | F19 | done `a09a1f1` |
+| 13I | F19 | done `7c400e9` |
+| 13J | F19 | done `2c9a0da` |
 | ON1 | F38 | open |
 | ON2 | F38 | open |
 | C1A | C1 | open |

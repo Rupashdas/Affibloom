@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL4, TL1, TL2, ON1 (+ the one-time Lasso import button, deviation 87) | 23: 2X1-2X5, FL5, 13F-13J, ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL4, TL1, TL2, ON1, 13F-13J (+ the one-time Lasso import button, deviation 87) | 18: 2X1-2X5, FL5, ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5 and FL5 (deviation 89; 13F-13H done, deviation 102) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -34,6 +34,9 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
     F38 AC1-AC3 passed in Claude's runs.**
 2d. **Fields: FL1-FL4 are done** (committed `89ef637`, `b366954`, `ba6e821`, `e05a9c7` on 2026-11-14; recorded
     afterwards, see the session log). F26 13/13 and F1 AC10 passed in Claude's runs. **Next for Fields: FL5.**
+2c. **Tasks 13F-13J (the Dashboard's second pass, F19) are done (2026-11-14, deviation 102; the user asked for all
+    five in one session).** F19 AC4 and AC10-AC20 passed in Claude's runs; a quiet full F19 run is still owed (other
+    sessions ran Playwright in the same copy at the time). Local holds upgrade step 1 (`affibloom_db_version` 1).
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2189,6 +2192,39 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       were not run: another session was changing the Dashboard and F19 in this tree at the time; F1's two header
       lookups (`.affibloom-header__nav a` with "Settings") still match at 1280px.
 
+102. **Tasks 13F-13J (2026-11-14), the Dashboard's second pass (F19); five tasks in one session at the user's word
+    ("Let's do the Dashboard, second pass (F19) from Task 13F to Task 13J"), one commit each:** 13F `c0b7021`, 13G
+    `67a5562`, 13H `a09a1f1`, 13I `7c400e9`, 13J `2c9a0da`. Before them, at the user's choice, the uncommitted Groups
+    work G2-G5 (deviation 98 said committed; it was not) was committed alone as `97c1ac0`, without TL2's files.
+    Differences from the plan's text:
+    - **13F:** the hidden inputs come from a new `DashboardUrl::args()` (the list's arguments, each left out at its
+      default; `to()` builds on it), passed to `list-args.php` as `args` + `except`. The panel's GET form wraps Group and
+      Link type (G5 added Group); Apply, ×, Save as and the footer are shown or hidden by `no-js` CSS. Two specificity
+      fixes: `.affibloom-admin [hidden] { display: none !important }` needed a stronger `!important` for the panel, and
+      `.affibloom-button` (later in the file) needed one more class on `.affibloom-no-js`. A `?post_id=` with no
+      published product shows the empty-search message. `post_id` rides in the script's list state; saved views do not
+      store it, as Lasso's do not.
+    - **13G:** the seed writes no product through `save()`, so it writes `_affibloom_button_url` itself (not re-run on
+      Local). **Products stored before 13G get the rows from upgrade step 1** in `Plugin::schema_steps()` (TL2's
+      Migrator; `PostTypeProductRepository::index_all_button_urls()`, sharing one private writer with `save()`); the
+      first step is therefore not C1C's table, which takes the next number. On Local (backup
+      `app/affibloom-backup-2026-11-14-before-13g.sql`) the step ran on an admin request: 213 products with buttons, 91
+      link rows, every product's rows equal to `Buttons::urls()`. `createProduct()` in `tests/E2E/utils.ts` writes the
+      rows too. `LifecycleHooksTest` now stubs `affibloom_db_version` so activation runs no step.
+    - **13H:** AC10's sample of modified times is the five oldest products (the newest are other tests' and were
+      deleted mid-run once). The mutation check (pager forced to one more page) made AC4 fail as it should. Two full F19
+      runs in a row kept the order of all 552 products; both runs also had scattered failures (AC2-AC16), because
+      another session's Playwright run and the ON1 edits shared the copy at the time (Local answered 502 once); the
+      failing tests passed when rerun alone.
+    - **13I:** the code was written before AC17/AC18 (the site was down from another session's half-done edit and the
+      runs held the spec file); each test was then shown to fail with its change taken out (ties `ID ASC`; `counts()`
+      not called). AC18 compares the tile with the database's count, not "count − 1": other runs add products meanwhile.
+      `ProductListTest` has the tie case; the integration suite still does not run here (deviation 10).
+    - **13J:** `SavedViewService::delete()` throws `ViewNotFound` (it changed nothing before); `DashboardController`
+      answers 404 `affibloom_not_found` with `Messages` `view_not_found`. The five client texts are `data-*` attributes on
+      the panel, not in `Messages` (the script needs them in the page). Save is disabled while it runs (no spinner).
+      "All links" is told apart as the first pill (pills carry no ID). `SavedViewServiceTest` is new.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2219,6 +2255,15 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Tasks 13F-13J in one session at the user's word):** the Dashboard's second pass (F19);
+  deviation 102. First, at the user's choice, the uncommitted G2-G5 work was committed alone (`97c1ac0`). Then 13F
+  `c0b7021` (filters without JavaScript, `?post_id=`), 13G `67a5562` (search by added buttons' links; upgrade step 1),
+  13H `a09a1f1` (AC4/AC10 on a full library), 13I `7c400e9` (stable order, live counts), 13J `2c9a0da` (saved-view
+  resets, messages, panel memory). Each started from its acceptance test, red for the right reason; 562 unit tests,
+  lint and PHPStan clean on these tasks' files (another session's new `ShellNotice.php` fails lint). Seen at 1280 and
+  375 px with and without JavaScript. Three other sessions (TL2, ON1, ON2 and Settings work) shared the tree, so each
+  commit holds only its task's hunks. **Open:** a quiet full F19 run; Local needs a reset before the user's next run.
 
 - **2026-11-14 (Claude Code, records for Tasks FL1-FL4; the user: "Run F26 and update the records for FL1-FL4"):**
   FL1-FL4 had been built and pushed earlier the same day (`89ef637` Fields list, `b366954` new field, `ba6e821` edit
