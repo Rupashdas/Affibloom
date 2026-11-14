@@ -19,6 +19,28 @@ function atLeast( wanted: number ): number {
 	return total();
 }
 
+/**
+ * Sets the products' status in the posts table itself, leaving `post_modified` alone (Task 13H): `wp post update`
+ * stamps every product "changed now", which reorders the whole library for every later test.
+ */
+function setStatus( ids: string[], status: 'draft' | 'publish' ): void {
+	if ( ! ids.length ) {
+		return;
+	}
+	wp(
+		'eval',
+		`global $wpdb; $ids = array_map( 'intval', explode( ',', '${ ids.join( ',' ) }' ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->posts} SET post_status = %s WHERE ID IN (" . implode( ',', $ids ) . ')', '${ status }' ) );
+		foreach ( $ids as $id ) { clean_post_cache( $id ); }
+		wp_cache_delete( _count_posts_cache_key( 'affibloom_product' ), 'counts' );`
+	);
+}
+
+/** The products' `post_modified`, by ID. */
+function modified( ids: string[] ): Record< string, string > {
+	return Object.fromEntries( ids.map( ( id ) => [ id, wp( 'post', 'get', id, '--field=post_modified' ) ] ) );
+}
+
 const rows = ( page: Page ) => page.locator( '.affibloom-table tbody tr[data-product-id]' );
 const range = ( page: Page ) => page.locator( '.affibloom-pager__range' );
 
@@ -70,13 +92,17 @@ test.describe( 'F19 Dashboard list', () => {
 	} );
 
 	test( 'AC4 one page needs no page links', async ( { page } ) => {
-		const count = atLeast( 11 );
-		test.skip( count > 50, 'More products than the largest page size; the one-page case needs a reset first.' );
+		// A list of exactly three, whatever the library holds (Task 13H): three products share a word no other has.
+		const word = unique( 'ac4onepage' );
+		for ( let i = 1; i <= 3; i++ ) {
+			createProduct( { name: `F19 AC4 ${ word } ${ i }` } );
+		}
 
-		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=50' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&per_page=10&s=${ word }` );
 
+		await expect( rows( page ) ).toHaveCount( 3 );
 		await expect( page.locator( '.affibloom-pagination' ) ).toHaveCount( 0 );
-		await expect( range( page ) ).toHaveText( `1-${ count } of ${ count }` );
+		await expect( range( page ) ).toHaveText( '1-3 of 3' );
 	} );
 
 	test( 'AC5 a word in the name finds the product, and the search survives a reload', async ( { page } ) => {
@@ -310,14 +336,15 @@ test.describe( 'F19 Dashboard list', () => {
 		const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=publish', '--format=ids' )
 			.split( /\s+/ )
 			.filter( Boolean );
+		// The oldest five (the list is newest first): seeded products, not ones another test may delete meanwhile.
+		const sample = ids.slice( -5 );
+		const before = modified( sample );
 
 		try {
 			// Parked as drafts, not trashed: WP-CLI refuses to trash this post type (it is not public), and
 			// wp_untrash_post() brings a product back as a draft anyway. The list shows published products
 			// only, so drafting them empties it exactly as an empty library would be.
-			if ( ids.length ) {
-				wp( 'post', 'update', ...ids, '--post_status=draft' );
-			}
+			setStatus( ids, 'draft' );
 
 			await page.goto( '/wp-admin/admin.php?page=affibloom' );
 			// Lasso's empty Dashboard: its words, and "Add a Link", which opens Add A New Link.
@@ -327,9 +354,9 @@ test.describe( 'F19 Dashboard list', () => {
 			await page.getByRole( 'button', { name: 'Add a Link' } ).click();
 			await expect( page.getByRole( 'dialog', { name: 'Add A New Link' } ) ).toBeVisible();
 		} finally {
-			if ( ids.length ) {
-				wp( 'post', 'update', ...ids, '--post_status=publish' );
-			}
+			setStatus( ids, 'publish' );
 		}
+		// The library's order is its modified times; parking them must not touch one (Task 13H).
+		expect( modified( sample ) ).toEqual( before );
 	} );
 } );

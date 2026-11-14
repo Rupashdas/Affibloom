@@ -251,7 +251,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 
 - [x] Task 13F: The list keeps every argument without JavaScript, and `?post_id=`
 - [x] Task 13G: The search finds added buttons' links, not their texts
-- [ ] Task 13H: F19 AC4 and AC10 tests that run on a full library
+- [x] Task 13H: F19 AC4 and AC10 tests that run on a full library
 - [ ] Task 13I: A stable order, and counts that follow the list
 - [ ] Task 13J: Saved views and the Filters panel behave as Lasso's
 
@@ -5895,11 +5895,11 @@ modified time.
 
 **Files:** modify `tests/E2E/acceptance/F19.spec.ts` (and its helper file if the helpers are shared).
 
-- [ ] **Step 1: The new AC4** runs on this copy and passes on the built code (a test-only task: it must fail when the
+- [x] **Step 1: The new AC4** runs on this copy and passes on the built code (a test-only task: it must fail when the
   pager's single-page rule is broken — check by hand with `per_page` forced to 1 and expect the failure).
-- [ ] **Step 2: AC10's park/restore** keeps every `post_modified` (compare a sample before and after).
-- [ ] **Step 3: Run and look.** Run the whole F19 file twice in a row; the order of the library is the same after both.
-- [ ] **Step 4: Commit** — "Check the one-page Dashboard on a full library".
+- [x] **Step 2: AC10's park/restore** keeps every `post_modified` (compare a sample before and after).
+- [x] **Step 3: Run and look.** Run the whole F19 file twice in a row; the order of the library is the same after both.
+- [x] **Step 4: Commit** — "Check the one-page Dashboard on a full library".
 
 ---
 
