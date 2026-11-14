@@ -243,7 +243,7 @@ they were, then the new sections in the order listed after G5.
 
 **Activation and the upgrade routine (F37 part)** — moved here from Phase 6; URL variants V1-V5 moved to Phase 5
 
-- [ ] Task TL1: Activation and deactivation
+- [x] Task TL1: Activation and deactivation
 - [ ] Task TL2: Upgrade routine
 
 **Dashboard, second pass (F19)** — 13K (sorting) is in Phase 7; 13L (command palette) and 13M (tour) are dropped as
@@ -5740,13 +5740,13 @@ and activation time stored, rewrite rules flushed; products and settings untouch
 **Files:** create `src/Application/Lifecycle.php`, `src/Infrastructure/WordPress/CronRegistry.php`,
 `tests/Integration/LifecycleTest.php`; modify `affibloom.php`, `src/Plugin.php`, `src/Interface/Cron/BulkAddCron.php`.
 
-- [ ] **Step 1: Failing integration test** (deactivate leaves no Affibloom cron hook; activate writes the version and the
+- [x] **Step 1: Failing integration test** (deactivate leaves no Affibloom cron hook; activate writes the version and the
   activation time and leaves products and settings alone). Expected red: no hooks are registered.
-- [ ] **Step 2: Registry, Lifecycle, hooks** (`CronRegistry`, `Lifecycle`, the two hooks in `affibloom.php`, `Plugin`,
+- [x] **Step 2: Registry, Lifecycle, hooks** (`CronRegistry`, `Lifecycle`, the two hooks in `affibloom.php`, `Plugin`,
   `BulkAddCron` lists its hook).
-- [ ] **Step 3: Run and look.** On Local with WP-CLI: `wp plugin deactivate affibloom`, `wp cron event list` shows no
+- [x] **Step 3: Run and look.** On Local with WP-CLI: `wp plugin deactivate affibloom`, `wp cron event list` shows no
   `affibloom_*` event; `wp plugin activate affibloom`, the options exist; products and settings unchanged.
-- [ ] **Step 4: Commit:** "Clean up schedules on deactivation and record activation".
+- [x] **Step 4: Commit:** "Clean up schedules on deactivation and record activation".
 
 ---
 

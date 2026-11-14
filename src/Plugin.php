@@ -14,6 +14,7 @@ use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
+use Affibloom\Application\Lifecycle;
 use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\LinkNormaliser;
@@ -24,12 +25,14 @@ use Affibloom\Application\Settings\LinkDefaultsService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
+use Affibloom\Infrastructure\WordPress\CronRegistry;
 use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaFieldUsage;
 use Affibloom\Infrastructure\WordPress\OptionIconRepository;
+use Affibloom\Infrastructure\WordPress\OptionPluginState;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
@@ -113,6 +116,34 @@ final class Plugin {
 	 */
 	public static function boot( string $file ): void {
 		( new self( $file ) )->register();
+	}
+
+	/**
+	 * Activation hook (register_activation_hook in affibloom.php).
+	 */
+	public static function activate(): void {
+		self::lifecycle()->activate();
+	}
+
+	/**
+	 * Deactivation hook (register_deactivation_hook in affibloom.php).
+	 */
+	public static function deactivate(): void {
+		self::lifecycle()->deactivate();
+	}
+
+	/**
+	 * What activation and deactivation do. It needs none of the request's modules, so it is built on its own.
+	 */
+	private static function lifecycle(): Lifecycle {
+		return new Lifecycle( self::cron_registry(), new OptionPluginState(), AFFIBLOOM_VERSION );
+	}
+
+	/**
+	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
+	 */
+	private static function cron_registry(): CronRegistry {
+		return new CronRegistry( BulkAddCron::HOOKS );
 	}
 
 	/**

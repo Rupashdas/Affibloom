@@ -51,4 +51,7 @@ if ( ! is_readable( __DIR__ . '/vendor/autoload.php' ) ) {
 
 require __DIR__ . '/vendor/autoload.php';
 
+register_activation_hook( __FILE__, array( Affibloom\Plugin::class, 'activate' ) );
+register_deactivation_hook( __FILE__, array( Affibloom\Plugin::class, 'deactivate' ) );
+
 Affibloom\Plugin::boot( __FILE__ );

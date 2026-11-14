@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1 (+ the one-time Lasso import button, deviation 87) | 34: 2X1-2X5, G2-G5, FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1, TL1 (+ the one-time Lasso import button, deviation 87) | 33: 2X1-2X5, G2-G5, FL1-FL5, TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -2092,6 +2092,24 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     `.affibloom-page--wide`; the Groups templates were written with that class and now carry none. Until that change is
     committed, the committed CSS still gives them the old 1080px default.
 
+99. **Task TL1 (2026-11-14), activation and deactivation (F37 AC1); done, checked on Local with WP-CLI.** Differences
+    from the plan's text:
+    - **The coordination point is moot:** the user's `affibloom.php` edit was settled and committed in Task 2X0 (open
+      decision F7's answer), so the two hook lines were added on top of the committed file.
+    - **Two ports, so `Application\Lifecycle` makes no WordPress call:** `Application\Schedules` (`clear()`, implemented by
+      `Infrastructure\WordPress\CronRegistry`) and `Application\PluginState` (`record_activation()`,
+      `flush_rewrite_rules()`, implemented by the new `Infrastructure\WordPress\OptionPluginState`, which owns the option
+      names `affibloom_version` and `affibloom_activated_at`).
+    - **How each cron module lists its hooks:** `BulkAddCron::HOOKS` (a constant); `Plugin::cron_registry()` builds the
+      `CronRegistry` from each module's `HOOKS`, so a new cron module adds its list there. `Plugin::activate()` and
+      `Plugin::deactivate()` are static and build only the lifecycle, not the request's modules.
+    - **`affibloom_activated_at` is the latest activation's time, not autoloaded**, as Lasso's
+      `lasso_plugin_activated_at` (class-activator.php line 53); `affibloom_version` is autoloaded, as `lasso_version`.
+    - **The outermost test that runs here is `tests/Unit/LifecycleHooksTest.php`** (through `Plugin::activate()` /
+      `deactivate()`, red on the missing methods). `tests/Integration/LifecycleTest.php` is written, not run (no
+      wp-env, deviation 10).
+    - **Not in TL1:** the Migrator step on activation and the version watch are TL2's.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2122,6 +2140,15 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Task TL1):** activation and deactivation (F37 AC1); deviation 99. Started from
+  `tests/Unit/LifecycleHooksTest.php` (red: no `Plugin::activate()`/`deactivate()`), then `Lifecycle`, its two ports,
+  `CronRegistry`, `OptionPluginState`, `BulkAddCron::HOOKS` and the two hooks in `affibloom.php`. 527 unit tests,
+  `composer lint` and `composer analyse` clean. On Local (backup `app/affibloom-backup-2026-11-14-before-tl1.sql`):
+  an `affibloom_bulk_add` event scheduled, `wp plugin deactivate affibloom` → no `affibloom_*` event left;
+  `wp plugin activate affibloom` → `affibloom_version` 0.1.0, `affibloom_activated_at` set (autoload off); 528
+  products and `affibloom_settings` unchanged. Another session's Groups work (G2-G5) was uncommitted in the same tree,
+  so the commit holds only this task's hunks. Next: Task TL2 (upgrade routine).
 
 - **2026-11-14 (Claude Code, Task G1):** the Groups list and the new-group form (F23 AC1-AC2); deviation 97. Another
   session was working in the same tree (Tasks 9B-9L and the width change), so the commit holds only this task's hunks.

@@ -20,6 +20,13 @@ final class BulkAddCron implements Module {
 	public const HOOK = 'affibloom_bulk_add';
 
 	/**
+	 * Every hook this module schedules, for the CronRegistry deactivation clears.
+	 *
+	 * @var list<string>
+	 */
+	public const HOOKS = array( self::HOOK );
+
+	/**
 	 * Builds the module.
 	 *
 	 * @param BulkAddService $bulk Bulk add.
