@@ -419,9 +419,10 @@ Settled from Lasso and the records:
   400; REST status for a missing resource).
 - **D15 — A view name's 80 is characters** (`mb_strlen`, built), Lasso's is bytes; a multibyte name Lasso refuses at
   80 bytes is accepted up to 80 characters. The limit's purpose, a short label, is kept.
-- **D16 — The panel remembers being open** in `localStorage.affibloom_filters_open`, written by the Filters button
-  and × only, as Lasso; the panel is a card under the button (deviation 54) that Escape and an outside click also
-  close without writing. Storage that throws is ignored, as Lasso's `try`.
+- **D16 — The panel remembers being open** in `localStorage.affibloom_filters_open`: the Filters button writes it,
+  and every close writes `'0'` — ×, Escape and an outside click (the panel is a card under the button, deviation 54).
+  Lasso writes it from the button and × only; with Escape and outside clicks not writing, the panel reopened on every
+  load (amended 2026-11-14, progress.md deviation 106). Storage that throws is ignored, as Lasso's `try`.
 - **D17 — Without JavaScript the list keeps every argument.** wp-admin's `no-js` body class shows the panel open and
   an **Apply** button; every GET form (search, size, filters) carries the list's other arguments as hidden inputs;
   page links, header links and pills are links already. This is what D1's reversal promised (deviation 53).

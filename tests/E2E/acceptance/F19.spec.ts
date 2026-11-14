@@ -423,7 +423,7 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( allLinks ).toHaveAttribute( 'aria-current', 'true' );
 	} );
 
-	test( 'AC20 the Filters panel stays open across a reload when opened with its button, and closed when closed with ×', async ( { page } ) => {
+	test( 'AC20 the Filters panel stays open across a reload when opened with its button, and closed however it was closed', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.evaluate( () => window.localStorage.removeItem( 'affibloom_filters_open' ) );
 		await page.reload();
@@ -437,12 +437,21 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( panel ).toBeVisible();
 		await expect( toggle ).toHaveAttribute( 'aria-expanded', 'true' );
 
-		// Escape closes it for this visit only.
+		// Escape and a click outside close it for good, as × does (deviation from Lasso: it reopened on every load).
 		await page.keyboard.press( 'Escape' );
 		await expect( panel ).toBeHidden();
 		await page.reload();
-		await expect( panel ).toBeVisible();
+		await expect( panel ).toBeHidden();
 
+		await toggle.click();
+		await expect( panel ).toBeVisible();
+		await page.locator( '.affibloom-page__body' ).click( { position: { x: 5, y: 5 } } );
+		await expect( panel ).toBeHidden();
+		await page.reload();
+		await expect( panel ).toBeHidden();
+
+		await toggle.click();
+		await expect( panel ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Close filters' } ).click();
 		await expect( panel ).toBeHidden();
 		await expect( toggle ).toBeFocused();

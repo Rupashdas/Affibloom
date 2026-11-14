@@ -440,9 +440,10 @@
 	var toggle = document.querySelector( '.affibloom-filters__toggle' );
 	var panel = document.getElementById( 'affibloom-filters-panel' );
 
-	// Whether the panel was left open (Task 13J; F19 R17, D16): written by the Filters button and × only, as Lasso's
-	// lasso_dashboard_filters_panel_open; Escape and an outside click close it for this visit. Storage that throws
-	// (a private window) is ignored, and the panel then opens closed.
+	// Whether the panel was left open (Task 13J; F19 R17, D16), as Lasso's lasso_dashboard_filters_panel_open. Lasso
+	// writes it from the Filters button and × only, so a panel closed with Escape or an outside click came back on
+	// every load; here every way of closing it writes it (deviation, see progress.md). Storage that throws (a private
+	// window) is ignored, and the panel then opens closed.
 	var PANEL_KEY = 'affibloom_filters_open';
 
 	function rememberPanel( open ) {
@@ -489,6 +490,7 @@
 		document.addEventListener( 'keydown', function ( event ) {
 			if ( 'Escape' === event.key && ! panel.hidden && ! document.body.classList.contains( 'affibloom-has-modal' ) ) {
 				openPanel( false );
+				rememberPanel( false );
 				toggle.focus();
 			}
 		} );
@@ -496,6 +498,7 @@
 		document.addEventListener( 'click', function ( event ) {
 			if ( ! panel.hidden && ! panel.contains( event.target ) && ! toggle.contains( event.target ) ) {
 				openPanel( false );
+				rememberPanel( false );
 			}
 		} );
 

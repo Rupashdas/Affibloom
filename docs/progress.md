@@ -2293,6 +2293,12 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     their AC6 checks. (d) While a row is dragged, the Move buttons' disabled states update on the drop, not during
     the drag. (e) Test detail: `wp.apiFetch` sends PUT as POST with `X-HTTP-Method-Override`, so AC6-AC7 wait on that
     header; the drag test scrolls the list into view first (the rows are below the fold at 1280x900).
+106. **The Filters panel remembers every close (2026-11-14; the user: the Dashboard "keeping open the filter
+    settings").** F19 R17/D16 followed Lasso: `affibloom_filters_open` was written by the Filters button and × only,
+    so a panel closed with Escape or an outside click (the usual ways, since it is a card over the table) reopened on
+    every load. Now Escape and an outside click write `'0'` too (`dashboard.js`); the Filters button still writes
+    `'1'`. Deviates from Lasso's R17 and amends D16 (F19 requirements). AC20 changed first (red: open after Escape and a
+    reload), then green. Users who already have `'1'` stored see it open once more, until they close it any way.
 
 ## Open decisions (ask the user; record the answer here)
 
@@ -2324,6 +2330,11 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Filters panel fix at the user's request):** the Dashboard's Filters panel no longer
+  reopens on every load after being closed with Escape or an outside click; every close now clears
+  `affibloom_filters_open`; deviation 106. F19 AC20 updated first (red), then passed; `node --check` clean. No PHP
+  changed, so PHPCS and PHPStan were not rerun; the rest of F19 was not run (it writes test data).
 
 - **2026-11-14 (Claude Code, Task FL5, a session started from another):** the product page's field rows now store each
   value with its lines trimmed and blank lines dropped (`Domain\Fields\FieldValue`), refuse a value over 1,000
