@@ -62,6 +62,13 @@ final class DisplayController implements Module {
 			$this->settings->update_tab( 'display', $flat )
 		);
 
+		// The unsaved-changes guard's "Save Changes" goes on to where the reader was going (Task 9E).
+		$goto = isset( $_POST['redirect_to'] ) ? SettingsController::admin_target( esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) ) : '';
+		if ( '' !== $goto && ! $refused ) {
+			wp_safe_redirect( $goto );
+			exit;
+		}
+
 		$this->back( $type->key(), isset( $_POST['panel'] ) && 'colors' === $_POST['panel'] ? 'colors' : 'layout', $refused ? 'partly-saved' : 'saved' );
 	}
 

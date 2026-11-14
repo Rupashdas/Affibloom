@@ -1,0 +1,58 @@
+/**
+ * Settings → General (Tasks 9B-9L): the parts of the cards that the shared components do not cover, in the design
+ * system's tokens (admin.css). Loaded on every Affibloom screen because the first rule applies to all of them.
+ */
+
+/* Disable Help Tooltips (Task 9K): HelpTips puts this class on the body; the "?" tips go, on every Affibloom screen. */
+.affibloom-no-tips .affibloom-help { display: none; }
+
+/* A label with its "?" beside it, above a field. */
+.affibloom-field__label-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.affibloom-field__label-row .affibloom-label { margin: 0; }
+
+/* A switch that cannot be changed for now (Google Analytics while there is no Tracking ID): clicks fall through to its
+   row, which explains why (general-settings.js). */
+.affibloom-admin .affibloom-toggle__input:disabled { pointer-events: none; }
+.affibloom-toggle-row:has( .affibloom-toggle__input:disabled ) .affibloom-toggle-row__label { color: var(--affibloom-ink-400); cursor: not-allowed; }
+.affibloom-toggle-row:has( .affibloom-toggle__input:disabled ) .affibloom-toggle { opacity: 0.55; }
+
+/* Lasso's orange warning under the Tracking ID. */
+.affibloom-field__warning {
+	margin: 8px 0 0;
+	padding: 8px 12px;
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-warning-50);
+	color: var(--affibloom-warning-700);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 18px;
+}
+
+/* The CPU level and its "%". */
+.affibloom-input-suffix { display: inline-flex; align-items: center; gap: 6px; color: var(--affibloom-ink-600); }
+
+/* A textarea field in a card. */
+.affibloom-admin textarea.affibloom-input { height: auto; min-height: 96px; padding: 10px 12px; resize: vertical; }
+
+/* An example address under a field. */
+.affibloom-field__hint code { padding: 1px 5px; border-radius: 6px; background: var(--affibloom-subtle); color: var(--affibloom-ink-700); font-size: 12px; word-break: break-all; }
+
+/* Custom Link Detection: a set of choices that look like chips and are plain checkboxes. */
+.affibloom-choices { margin: 0; padding: 0; border: 0; min-width: 0; }
+.affibloom-choices + .affibloom-choices { margin-top: 16px; }
+.affibloom-choices > legend { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0; }
+.affibloom-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.affibloom-chip { position: relative; display: inline-flex; cursor: pointer; }
+.affibloom-chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.affibloom-chip span {
+	padding: 6px 12px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-700);
+	font-size: 13px;
+	line-height: 18px;
+	transition: background var(--affibloom-ease), border-color var(--affibloom-ease), color var(--affibloom-ease);
+}
+.affibloom-chip input:checked + span { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); font-weight: 700; }
+.affibloom-chip input:focus-visible + span { outline: 2px solid var(--affibloom-brand-500); outline-offset: 2px; }

@@ -14,10 +14,10 @@ final class ProductTest extends TestCase {
 	public function test_a_draft_copies_the_sites_link_defaults(): void {
 		$product = Product::draft( 'Example', $this->url(), Settings::from_array( array() ) );
 
-		// Fresh-install defaults (docs/spec/interface.md, section 5): New Window, NoFollow, Show Disclosure on.
+		// Fresh-install defaults are Lasso's, all on (F9 D4, Task 9B): New Window, NoFollow, Sponsored, Show Disclosure.
 		self::assertTrue( $product->new_tab );
 		self::assertTrue( $product->nofollow );
-		self::assertFalse( $product->sponsored );
+		self::assertTrue( $product->sponsored );
 		self::assertTrue( $product->show_disclosure );
 	}
 

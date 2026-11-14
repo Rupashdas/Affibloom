@@ -14,11 +14,13 @@ use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\PlainUrlKey;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Product\SearchTerm;
+use InvalidArgumentException;
 use RuntimeException;
 use WP_Post;
 use WP_Query;
@@ -27,6 +29,9 @@ use WP_Query;
  * Products as affibloom_product posts with _affibloom_* meta (docs/spec/interface.md, section 4).
  */
 final class PostTypeProductRepository implements ProductRepository {
+
+	/** The product fields that are switches on the primary link, which a changed link default can be pushed to (Task 9D). */
+	private const LINK_SWITCHES = array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure' );
 
 	/** The query variable that carries the search to the WHERE filter, and nothing else. */
 	private const SEARCH_VAR = 'affibloom_search';
@@ -76,6 +81,11 @@ final class PostTypeProductRepository implements ProductRepository {
 			$post['meta_input']['_affibloom_asin']           = $product->asin;
 			$post['meta_input']['_affibloom_amazon_country'] = $product->amazon_country;
 		}
+		// As Lasso writes url_without_arguments only for a link that is not Amazon's (Task 9C).
+		$plain_key = PlainUrlKey::of( $product->url );
+		if ( '' !== $plain_key ) {
+			$post['meta_input']['_affibloom_url_plain_key'] = $plain_key;
+		}
 		// As Lasso fills url_details.search_text only for an Amazon search page.
 		if ( '' !== $product->search_key ) {
 			$post['meta_input']['_affibloom_search_key'] = $product->search_key;
@@ -103,6 +113,9 @@ final class PostTypeProductRepository implements ProductRepository {
 		}
 		if ( '' === $product->search_key ) {
 			delete_post_meta( $id, '_affibloom_search_key' );
+		}
+		if ( '' === $plain_key ) {
+			delete_post_meta( $id, '_affibloom_url_plain_key' );
 		}
 
 		return $product->with( array( 'id' => $id ) );
@@ -145,6 +158,74 @@ final class PostTypeProductRepository implements ProductRepository {
 	 */
 	public function save_fields( int $id, ProductFields $fields ): void {
 		update_post_meta( $id, '_affibloom_fields', $fields->to_array() );
+	}
+
+	/**
+	 * The published product whose link without its query string has this key, or null (Task 9C).
+	 *
+	 * @param string $key From PlainUrlKey::of().
+	 */
+	public function find_by_plain_key( string $key ): ?Product {
+		return $this->find_one(
+			array(
+				array(
+					'key'   => '_affibloom_url_plain_key',
+					'value' => $key,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Sets one link switch on every product of any status, in two statements, as Lasso's override does (one UPDATE, one
+	 * INSERT for the products that never had the value). Nothing else on a product changes, and neither does its
+	 * modified date, so the Dashboard's order stays.
+	 *
+	 * @param string $field The product field.
+	 * @param bool   $value The new value.
+	 * @return int How many products now hold the value.
+	 * @throws InvalidArgumentException For a field that is not a link switch.
+	 */
+	public function set_flag_for_all( string $field, bool $value ): int {
+		if ( ! in_array( $field, self::LINK_SWITCHES, true ) ) {
+			throw new InvalidArgumentException( 'Not a link switch.' );
+		}
+
+		global $wpdb;
+		$key  = '_affibloom_' . $field;
+		$flag = self::flag( $value );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one statement for all products is the point (edge case 5); the caches are flushed below.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} AS m INNER JOIN {$wpdb->posts} AS p ON p.ID = m.post_id SET m.meta_value = %s WHERE m.meta_key = %s AND p.post_type = %s",
+				$flag,
+				$key,
+				ProductPostType::NAME
+			)
+		);
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) SELECT p.ID, %s, %s FROM {$wpdb->posts} AS p WHERE p.post_type = %s AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} AS m WHERE m.post_id = p.ID AND m.meta_key = %s )",
+				$key,
+				$flag,
+				ProductPostType::NAME,
+				$key
+			)
+		);
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} AS m INNER JOIN {$wpdb->posts} AS p ON p.ID = m.post_id WHERE m.meta_key = %s AND m.meta_value = %s AND p.post_type = %s",
+				$key,
+				$flag,
+				ProductPostType::NAME
+			)
+		);
+		// phpcs:enable
+
+		wp_cache_flush_group( 'post_meta' );
+
+		return $count;
 	}
 
 	/**

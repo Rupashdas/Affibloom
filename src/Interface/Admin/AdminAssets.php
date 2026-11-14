@@ -41,6 +41,8 @@ final class AdminAssets implements Module {
 			return;
 		}
 		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array(), $this->version );
+		// The General tab's own parts, and "Disable Help Tooltips" (Tasks 9B-9K), which reaches every screen.
+		wp_enqueue_style( 'affibloom-settings-general', $this->plugin_url . 'assets/admin/settings-general.css', array( 'affibloom-admin' ), $this->version );
 		// Help tips, Save-when-changed, modals and "Add A New Link". wp-api-fetch carries the REST root and nonce in wp-admin.
 		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
 
@@ -57,6 +59,14 @@ final class AdminAssets implements Module {
 			'display' => 'display-settings',
 			'amazon'  => 'amazon-settings',
 		);
+		// Every Settings tab warns before unsaved changes are lost (Task 9E, decision C7), and General has its own rules
+		// (Tasks 9D, 9F-9H). The General tab is the one without a tab in the address.
+		if ( str_contains( $hook_suffix, SettingsScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-settings-guard', $this->plugin_url . 'assets/admin/settings-guard.js', array( 'affibloom-admin' ), $this->version, true );
+			if ( '' === $tab || 'general' === $tab ) {
+				wp_enqueue_script( 'affibloom-general-settings', $this->plugin_url . 'assets/admin/general-settings.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			}
+		}
 		// The icon picker on button texts: Settings → Display and the product page (F28, Task 14G).
 		if ( 'display' === $tab || str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-icon-picker', $this->plugin_url . 'assets/admin/icon-picker.js', array( 'affibloom-admin' ), $this->version, true );

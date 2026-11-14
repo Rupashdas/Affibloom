@@ -56,6 +56,26 @@ interface ProductRepository {
 	public function find_by_url_key( string $key ): ?Product;
 
 	/**
+	 * The published product whose link, without its query string, has this key (PlainUrlKey; Task 9C, the way Lasso's
+	 * `url_without_arguments` finds the same page behind two different links). Only products stored with a plain key
+	 * can be found; Amazon products never have one.
+	 *
+	 * @param string $key From PlainUrlKey::of(), never empty.
+	 */
+	public function find_by_plain_key( string $key ): ?Product;
+
+	/**
+	 * Sets one of the link switches (`new_tab`, `nofollow`, `sponsored`, `show_disclosure`) on every product, whatever
+	 * its status, adding it where it is missing (Task 9D; Lasso's lasso_override_display_option).
+	 *
+	 * @param string $field The product field.
+	 * @param bool   $value The new value.
+	 * @return int How many products were given the value.
+	 * @throws \InvalidArgumentException For a field that is not one of the four.
+	 */
+	public function set_flag_for_all( string $field, bool $value ): int;
+
+	/**
 	 * The published Amazon product with this ASIN on this store, or null (Lasso_DB::get_lasso_id_by_product_id_and_type).
 	 * The ASIN is compared without case, as Lasso's MySQL lookup does.
 	 *

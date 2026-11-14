@@ -18,11 +18,42 @@ final class Settings {
 
 	/** Defaults for a fresh install. Task 26 imports the site's real values from Lasso. */
 	public const DEFAULTS = array(
-		// General.
+		// General: Link Defaults. Lasso's factory defaults are all on (admin/lasso-constant.php 152, 163-168, 172, 382-383;
+		// F9 D4), Sponsored included; the Lasso import brings the site's own values.
 		'new_tab'                         => true,
 		'nofollow'                        => true,
-		'sponsored'                       => false,
+		'sponsored'                       => true,
 		'show_disclosure'                 => true,
+		'allow_duplicates'                => true,
+		'link_cloaking'                   => true,
+		'detect_opportunities'            => true,
+		'auto_detect_links'               => true,
+		// General: Google Analytics (Task 9F; C3 reads them).
+		'ga_tracking_id'                  => '',
+		'ga_click_tracking'               => false,
+		'ga_pageview'                     => false,
+		'ga_anonymize_ip'                 => false,
+		// General: Cloaked Link Prefix and Smart CSS Loading (Task 9G). Smart CSS is on for a fresh install (decision C5).
+		'link_prefix'                     => '',
+		'smart_css'                       => true,
+		// General: Performance (Task 9H). Lasso's default mode is Balanced, whose CPU level is 65.
+		'performance_mode'                => 'balanced',
+		'cpu_threshold'                   => 65,
+		// General: Custom Link Detection (Task 9I). Empty = the defaults (F9 R27).
+		'scan_post_types'                 => array(),
+		'scan_custom_fields'              => array(),
+		// General: Notifications (Task 9K).
+		'disable_amazon_notice'           => false,
+		'disable_help_tips'               => false,
+		'disable_import_notice'           => false,
+		// General, support view only (`&support=1`, Task 9L).
+		'keep_original_domains'           => array(),
+		'cron_interval'                   => 0,
+		'manual_process_limit'            => 2,
+		'restrict_prefix'                 => false,
+		'process_limit'                   => false,
+		'fontawesome_svg'                 => false,
+		'no_feature_description'          => false,
 		// Display, site-wide. The per-type theme, colours and labels live in the display model
 		// (Domain\Display\DisplaySettings), because Lasso keeps one set per display type.
 		'disclosure_text'                 => 'We earn a commission if you make a purchase, at no additional cost to you.',

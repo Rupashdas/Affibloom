@@ -358,4 +358,26 @@ final class ProductServiceTest extends TestCase {
 		self::assertTrue( $added->already_existed );
 		self::assertCount( 1, $this->repo->saved );
 	}
+
+	/** Task 9C, F9 AC7: with "Allow duplicate destinations" off, the page is compared, not the pasted link. */
+	public function test_with_duplicates_not_allowed_a_link_to_the_same_page_is_the_same_product(): void {
+		$service = $this->service( array( 'allow_duplicates' => false ) );
+		$first   = $service->create_from_url( 'https://merchant.example/p?ref=b' )->product;
+
+		$again = $service->create_from_url( 'https://merchant.example/p?ref=a' );
+
+		self::assertTrue( $again->already_existed );
+		self::assertSame( $first->id, $again->product->id );
+		self::assertCount( 1, $this->repo->saved );
+	}
+
+	public function test_with_duplicates_allowed_only_the_pasted_link_is_compared(): void {
+		$service = $this->service();
+		$service->create_from_url( 'https://merchant.example/p?ref=b' );
+
+		$again = $service->create_from_url( 'https://merchant.example/p?ref=a' );
+
+		self::assertFalse( $again->already_existed );
+		self::assertCount( 2, $this->repo->saved );
+	}
 }

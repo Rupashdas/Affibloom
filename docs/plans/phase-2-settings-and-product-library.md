@@ -222,16 +222,16 @@ they were, then the new sections in the order listed after G5.
 
 **Settings → General (F9)** — 9J (Link Index card) moves to Phase 5
 
-- [ ] Task 9B: The General tab in Lasso's structure, and Link Defaults in full
-- [ ] Task 9E: Unsaved-changes guard on every Settings tab (decision C7)
-- [ ] Task 9C: "Allow duplicate destinations" off
-- [ ] Task 9D: "Update Link Settings": Only New Links / Override All Links
-- [ ] Task 9F: Google Analytics card
-- [ ] Task 9G: Cloaked Link Prefix and Smart CSS Loading
-- [ ] Task 9H: Performance card
-- [ ] Task 9I: Custom Link Detection card
-- [ ] Task 9K: Notifications card
-- [ ] Task 9L: Support view
+- [x] Task 9B: The General tab in Lasso's structure, and Link Defaults in full (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9E: Unsaved-changes guard on every Settings tab (decision C7) (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9C: "Allow duplicate destinations" off (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9D: "Update Link Settings": Only New Links / Override All Links (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9F: Google Analytics card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9G: Cloaked Link Prefix and Smart CSS Loading (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9H: Performance card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9I: Custom Link Detection card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9K: Notifications card (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
+- [x] Task 9L: Support view (built 2026-11-14, deviation 96; waits for the user's signed-in F9 run)
 
 **Fields (F26)**
 
@@ -5234,13 +5234,13 @@ changes; saving reloads with "Settings saved.".
 **Files:** modify `Settings.php`, `SettingsService.php`, `templates/admin/settings.php`, `admin.css`; create the
 partial; tests `tests/Unit/Application/SettingsServiceTest.php`, `tests/E2E/acceptance/F9.spec.ts` (AC4, AC5).
 
-- [ ] **Step 1:** Failing AC4 (two columns, Save disabled until a change) and AC5 (eight switches, order, fresh defaults).
-- [ ] **Step 2:** Failing unit tests: new keys default as Lasso (all true), `sponsored` true; `allow_duplicates` saved.
-- [ ] **Step 3:** Domain and service: keys and FIELDS.
-- [ ] **Step 4:** Template: columns, Link Defaults card with switch rows and tips (Lasso's texts, "Lasso" removed).
-- [ ] **Step 5:** 11B reads `allow_duplicates` (true = today's behaviour; false waits for 9C, until then treated as true and noted).
+- [x] **Step 1:** Failing AC4 (two columns, Save disabled until a change) and AC5 (eight switches, order, fresh defaults).
+- [x] **Step 2:** Failing unit tests: new keys default as Lasso (all true), `sponsored` true; `allow_duplicates` saved.
+- [x] **Step 3:** Domain and service: keys and FIELDS.
+- [x] **Step 4:** Template: columns, Link Defaults card with switch rows and tips (Lasso's texts, "Lasso" removed).
+- [x] **Step 5:** 11B reads `allow_duplicates` (true = today's behaviour; false waits for 9C, until then treated as true and noted).
 - [ ] **Step 6:** Run and look at 1280 and 375 px; lint, analyse, unit; F9 acceptance.
-- [ ] **Step 7:** Commit `Give Settings → General Lasso's layout and all eight link defaults`.
+- [x] **Step 7:** Commit `Give Settings → General Lasso's layout and all eight link defaults`.
 
 ---
 
@@ -5265,11 +5265,11 @@ goes, "Save Changes" saves and then goes; closing the tab triggers the browser p
 **Files:** modify `assets/admin/admin.js`, `templates/admin/settings.php` (include `partials/unsaved-modal.php`),
 `SettingsController.php`; tests: E2E AC8, unit for the redirect validation.
 
-- [ ] **Step 1:** Failing AC8 (three paths).
-- [ ] **Step 2:** Controller `redirect_to` with a failing unit test for a foreign host (falls back to the tab).
-- [ ] **Step 3:** Guard script; extract the comparison shared with `product-save.js` if identical (second use).
+- [x] **Step 1:** Failing AC8 (three paths).
+- [x] **Step 2:** Controller `redirect_to` with a failing unit test for a foreign host (falls back to the tab).
+- [x] **Step 3:** Guard script; extract the comparison shared with `product-save.js` if identical (second use).
 - [ ] **Step 4:** Run and look; keyboard only (Escape = ×); the same three paths on the Display and Amazon tabs.
-- [ ] **Step 5:** Commit `Warn before leaving a Settings tab with unsaved changes`.
+- [x] **Step 5:** Commit `Warn before leaving a Settings tab with unsaved changes`.
 
 ---
 
@@ -5296,10 +5296,10 @@ or add a new link."
 **Files:** create `PlainUrlKey.php` + unit test; modify `DuplicateLookup`, `ProductService`, `PostTypeProductRepository`;
 E2E AC7.
 
-- [ ] **Step 1:** Failing AC7 and `PlainUrlKeyTest`.
-- [ ] **Step 2:** Domain key, then lookup order (plain key, then pasted key), then the meta on save.
+- [x] **Step 1:** Failing AC7 and `PlainUrlKeyTest`.
+- [x] **Step 2:** Domain key, then lookup order (plain key, then pasted key), then the meta on save.
 - [ ] **Step 3: Run and look.** On Local, setting off, two links to one page; back on afterwards.
-- [ ] **Step 4:** Commit `Compare final destinations when duplicate destinations are not allowed`.
+- [x] **Step 4:** Commit `Compare final destinations when duplicate destinations are not allowed`.
 
 ---
 
@@ -5326,10 +5326,10 @@ Links updates every product at once (toast "All products updated.") — the sett
 
 **Files:** as listed; tests: unit service, integration repository (all statuses), E2E AC6. DB backup before the run.
 
-- [ ] **Step 1:** Failing AC6 and unit test (unknown key → 422).
-- [ ] **Step 2:** Repository, service, route, dialog.
+- [x] **Step 1:** Failing AC6 and unit test (unknown key → 422).
+- [x] **Step 2:** Repository, service, route, dialog.
 - [ ] **Step 3: Run and look.** On Local, 82 test products, count meta before/after.
-- [ ] **Step 4:** Commit `Offer to apply a changed link default to every product`.
+- [x] **Step 4:** Commit `Offer to apply a changed link default to every product`.
 (Link Cloaking and Detect Opportunities are added to the key map by F24's and F22's product-field tasks.)
 
 ---
@@ -5355,13 +5355,13 @@ off; Pageview asks "Enable Pageview"; clicking the disabled Click Tracking shows
 **Files:** modify `Settings.php`, `SettingsService.php`, `templates/admin/settings.php`; create the two partials and
 `assets/admin/general-settings.js`; tests `SettingsServiceTest.php`, `tests/E2E/acceptance/F9.spec.ts` (AC9).
 
-- [ ] **Step 1: Failing tests.** AC9; unit: the three switches are stored off when the ID is empty (the server rule
+- [x] **Step 1: Failing tests.** AC9; unit: the three switches are stored off when the ID is empty (the server rule
   mirrors the browser's).
-- [ ] **Step 2: Keys and card** (`Settings::DEFAULTS`, `SettingsService::FIELDS['general']`, the partials).
-- [ ] **Step 3: The script** (`general-settings.js`: switches disabled while the ID is empty, the Pageview dialog, the
+- [x] **Step 2: Keys and card** (`Settings::DEFAULTS`, `SettingsService::FIELDS['general']`, the partials).
+- [x] **Step 3: The script** (`general-settings.js`: switches disabled while the ID is empty, the Pageview dialog, the
   warning).
 - [ ] **Step 4: Run and look** at 1280 and 375 px; F9 AC3 and AC9; the Lasso screenshot for fields, labels and order only.
-- [ ] **Step 5: Commit** — "Add the Google Analytics settings".
+- [x] **Step 5: Commit** — "Add the Google Analytics settings".
 
 ---
 
@@ -5388,11 +5388,11 @@ prefix; one switch, "Enable Smart CSS Loading".
 `assets/admin/general-settings.js`; create the two partials; tests `SettingsServiceTest.php`,
 `tests/E2E/acceptance/F9.spec.ts` (AC10).
 
-- [ ] **Step 1: Failing tests.** AC10 and a unit test for the slug cleaner ("Re Commends!" → `re-commends`).
-- [ ] **Step 2: Keys and cards.**
-- [ ] **Step 3: The keyup rule** (the typed text becomes the slug form live; the example line follows).
+- [x] **Step 1: Failing tests.** AC10 and a unit test for the slug cleaner ("Re Commends!" → `re-commends`).
+- [x] **Step 2: Keys and cards.**
+- [x] **Step 3: The keyup rule** (the typed text becomes the slug form live; the example line follows).
 - [ ] **Step 4: Run and look** at 1280 and 375 px; F9 AC3 and AC10.
-- [ ] **Step 5: Commit** — "Add the cloaked link prefix and Smart CSS settings".
+- [x] **Step 5: Commit** — "Add the cloaked link prefix and Smart CSS settings".
 
 ---
 
@@ -5420,11 +5420,11 @@ support fields); Custom shows the `%` field; loading the page never changes a st
 `PerformanceModeTest.php`; modify `Settings.php`, `SettingsService.php`, `settings.php`, `general-settings.js`;
 `F9.spec.ts` (AC11).
 
-- [ ] **Step 1: Failing tests.** AC11 and `PerformanceModeTest` (presets; load never rewrites values, D13).
-- [ ] **Step 2: Domain, keys, service.**
-- [ ] **Step 3: Card and script.**
+- [x] **Step 1: Failing tests.** AC11 and `PerformanceModeTest` (presets; load never rewrites values, D13).
+- [x] **Step 2: Domain, keys, service.**
+- [x] **Step 3: Card and script.**
 - [ ] **Step 4: Run and look** at 1280 and 375 px; this site keeps Balanced + 80 after a save.
-- [ ] **Step 5: Commit** — "Add the performance mode and CPU threshold".
+- [x] **Step 5: Commit** — "Add the performance mode and CPU threshold".
 
 ---
 
@@ -5454,11 +5454,11 @@ Lasso's excluded list, `affibloom_product`); "Custom Fields (ACF):" only with AC
 `Settings.php`, `SettingsService.php`, `settings.php`, `general-settings.js`; tests unit (an unknown type is refused),
 `F9.spec.ts` (AC12).
 
-- [ ] **Step 1: Failing tests.** AC12 and a unit test (unknown type refused).
-- [ ] **Step 2: Choices, keys, service.**
-- [ ] **Step 3: Card.**
+- [x] **Step 1: Failing tests.** AC12 and a unit test (unknown type refused).
+- [x] **Step 2: Choices, keys, service.**
+- [x] **Step 3: Card.**
 - [ ] **Step 4: Run and look** (this site has no ACF, so that field is hidden); 1280 and 375 px.
-- [ ] **Step 5: Commit** — "Add the custom link detection settings".
+- [x] **Step 5: Commit** — "Add the custom link detection settings".
 
 ---
 
@@ -5483,11 +5483,11 @@ Notification"); "Disable Help Tooltips" hides the "?" tips on Affibloom screens 
 **Files:** create the card's partial (`partials/settings-general-notifications.php`); modify `Settings.php`,
 `SettingsService.php`, `settings.php`, `AdminAssets.php`, `admin.css`; tests `F9.spec.ts` (AC14), a unit test of the keys.
 
-- [ ] **Step 1: Failing tests.** AC14 (the tips hide after a save with the switch on).
-- [ ] **Step 2: Keys and card.**
-- [ ] **Step 3: The body class** from `AdminAssets`.
+- [x] **Step 1: Failing tests.** AC14 (the tips hide after a save with the switch on).
+- [x] **Step 2: Keys and card.**
+- [x] **Step 3: The body class** from `AdminAssets`.
 - [ ] **Step 4: Run and look** at 1280 and 375 px; keyboard and screen reader still reach help when tips are shown (U3).
-- [ ] **Step 5: Commit** — "Add the notification settings".
+- [x] **Step 5: Commit** — "Add the notification settings".
 
 ---
 
@@ -5519,11 +5519,11 @@ shows.
 `SettingsService.php`, `settings.php`, `general-settings.js`; tests `SettingsServiceTest.php` (cleaners, ranges),
 `F9.spec.ts` (AC15).
 
-- [ ] **Step 1: Failing tests.** AC15 and the cleaner and range unit tests.
-- [ ] **Step 2: Keys, cleaners, ranges.**
-- [ ] **Step 3: The cards.** Rebuild only when F21's route exists (else the button is not shown).
+- [x] **Step 1: Failing tests.** AC15 and the cleaner and range unit tests.
+- [x] **Step 2: Keys, cleaners, ranges.**
+- [x] **Step 3: The cards.** Rebuild only when F21's route exists (else the button is not shown).
 - [ ] **Step 4: Run and look** with and without `&support=1`; 1280 and 375 px.
-- [ ] **Step 5: Commit** — "Add the support-only General settings".
+- [x] **Step 5: Commit** — "Add the support-only General settings".
 
 ---
 

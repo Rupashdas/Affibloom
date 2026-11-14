@@ -90,6 +90,29 @@ final class InMemoryProductRepository implements ProductRepository {
 		return count( $this->saved );
 	}
 
+	public function find_by_plain_key( string $key ): ?Product {
+		foreach ( $this->saved as $product ) {
+			if ( \Affibloom\Domain\Product\PlainUrlKey::of( $product->url ) === $key ) {
+				return $product;
+			}
+		}
+		return null;
+	}
+
+	/** @var array<string, bool> The last value set for each link switch, to check what was asked. */
+	public array $flags_set = array();
+
+	public function set_flag_for_all( string $field, bool $value ): int {
+		if ( ! in_array( $field, array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure' ), true ) ) {
+			throw new \InvalidArgumentException( 'Not a link switch.' );
+		}
+		$this->flags_set[ $field ] = $value;
+		foreach ( $this->saved as $id => $product ) {
+			$this->saved[ $id ] = $product->with( array( $field => $value ) );
+		}
+		return count( $this->saved );
+	}
+
 	public function find_by_url_key( string $key ): ?Product {
 		foreach ( $this->saved as $product ) {
 			if ( $product->url->key() === $key ) {

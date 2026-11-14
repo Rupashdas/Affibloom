@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D (+ the one-time Lasso import button, deviation 87) | 45: 2X1-2X5, G1-G5, 9B-9L (not 9J), FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D (+ the one-time Lasso import button, deviation 87) | 35: 2X1-2X5, G1-G5, FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -27,6 +27,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 1. **Gate 4 given for the whole plan** (the user, 2026-11-14 walkthrough; answers in `open-decisions.md`). Building
    resumes task by task in the phase files' order.
 2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. **2X4, 2X5 and 2X6 are built and committed (2026-11-14, deviations 93-95; the user asked for all three in one session, overriding the one-task rule for this session); each waits for the user's signed-in run** (F2 and F18 for 2X4, F18 for 2X5, F16 for 2X6). Then Groups G1-G5.
+2a. **Tasks 9B-9L are built (2026-11-14, deviation 96); they wait for the user's signed-in F9 run** (14 tests, AC4-AC15). 9J is in Phase 5.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2021,6 +2022,36 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     F16's fixture no longer lists the keys. 456 unit tests, lint and PHPStan clean. Not looked at in a browser at 1280
     and 375 px (signed out).
 
+96. **Tasks 9B-9L (2026-11-14), Settings → General in Lasso's structure; built in one session at the user's word
+    ("9B to 9L one by one, run the tests at the end"), waiting for the user's signed-in F9 run.** Built: two columns of
+    cards (9B), the unsaved-changes guard on all three Settings tabs (9E), duplicates off (9C), Update Link Settings (9D),
+    Google Analytics (9F), prefix and Smart CSS (9G), Performance (9H), Custom Link Detection (9I), Notifications (9K)
+    and the `&support=1` view (9L). Checks run once at the end: 495 unit tests, `composer lint` and `composer analyse`
+    clean; the three tabs render without PHP notices when rendered through WP-CLI as an administrator. **Not run:** the
+    14 F9 acceptance tests (the browser pane is signed out; they are written and listed), and not looked at in a
+    browser at 1280 and 375 px. Differences from the plan's text:
+    - **Not built, no caller yet:** `new_tab2` / `nofollow2` (R31: defaults of a second button with no control; F29's
+      buttons carry their own flags); `rebuild-index-modal.php` and the Rebuild Database button (F21's route is Task
+      35G); `Segment Analytics` (cloud, decision B1).
+    - **`_affibloom_url_plain_key` is written on every save of a non-Amazon product**, not only while duplicates are
+      off, so switching the setting off later finds products saved since. Products stored before this task have no key
+      (Lasso is the same: its `url_without_arguments` is written on save); the Lasso import saves through the
+      repository, so imported products get one. `PlainUrlKey::of()` is empty for an Amazon link.
+    - **Files moved off the shared ones** (two other sessions were editing `admin.css`, `admin.js`, `AdminAssets.php`):
+      the guard is `assets/admin/settings-guard.js` (not `admin.js`) and the styles are `assets/admin/settings-general.css`;
+      the "?" tips are hidden by a body class from a new `Interface\Admin\HelpTips` module (not `AdminAssets`), because
+      `AdminAssets` has no settings. The guard's comparison is not shared with `product-save.js`: that one also watches
+      rich fields and extra buttons, so the two are not identical.
+    - **The support fields are saved only when the form carries `settings[_support]`**, otherwise an ordinary save would
+      read their absent checkboxes as "off". `SettingsController` keeps `support=1` in the redirect.
+    - **Sponsored's fresh-install default is now on** (D4); `Settings::DEFAULTS` and `ProductTest` changed. Custom
+      Link Detection is a set of chip-styled checkboxes, not select2; a refused list keeps the old choice.
+    - **Server-side GA rule:** Click Tracking is stored off without an ID, Pageview and IP Anonymization off without
+      Click Tracking, as the form does. Performance presets are applied by the page, not the server, so a stored
+      Balanced with 80 is never rewritten (D13).
+    - **Plugin.php and AdminAssets.php** were committed with only this task's hunks; the other sessions' uncommitted
+      changes in them stay uncommitted.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2051,6 +2082,13 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Tasks 9B-9L in one session at the user's word; two other sessions were working on 2X4-2X6 and
+  G1 in the same tree):** Settings → General rebuilt in Lasso's two-column structure with all of F9's cards except the
+  Link Index (9J, Phase 5), Permissions and Uninstall (F37). Deviation 96. One commit; the other sessions' changes were
+  left out of it. 495 unit tests, lint and PHPStan clean; **F9's 14 acceptance tests not run** (signed out).
+  **Open: the user's signed-in F9 run**, the look at 1280 and 375 px, and a DB-backed check of Override All Links (82
+  products, count the meta before and after). Next: Groups G1-G5 (another session), then FL1.
 
 - **2026-11-14 (Claude Code, Tasks 2X4, 2X5, 2X6, three in one session at the user's word):** 2X4 `6fdb829` a kept
   redirect to Amazon is an Amazon product; 2X5 `48ef102` a bulk run records and skips any failing link, and the add

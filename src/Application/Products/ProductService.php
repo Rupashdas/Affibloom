@@ -14,6 +14,7 @@ use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\PlaceholderName;
+use Affibloom\Domain\Product\PlainUrlKey;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
@@ -373,6 +374,15 @@ final class ProductService {
 			}
 		}
 
+		// "Allow duplicate destinations" off (Task 9C; Lasso's check_duplicate_link): two links that end at the same page,
+		// whatever their query strings, are one product.
+		if ( ! $settings->bool( 'allow_duplicates' ) ) {
+			$existing = $this->same_destination( array( $resolved->url, $url->value(), $typed->value() ) );
+			if ( null !== $existing ) {
+				return $this->found( $existing, $url );
+			}
+		}
+
 		$amazon = AmazonUrl::from( $url );
 		if ( null === $amazon && $resolved->url !== $url->value() ) {
 			$kept = $this->kept_redirect( $url, $resolved->url, $settings );
@@ -393,6 +403,28 @@ final class ProductService {
 
 		$revived = $this->revived( array( $typed, $url, $stored ), $amazon );
 		return new AddedLink( $revived ?? $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
+	}
+
+	/**
+	 * The published product that already ends at the same page as one of these links, ignoring query strings (F9 R36),
+	 * trying the final link first, as Lasso does.
+	 *
+	 * @param list<string> $links The final link, the stored link and the typed link.
+	 */
+	private function same_destination( array $links ): ?Product {
+		foreach ( $links as $link ) {
+			try {
+				$key = PlainUrlKey::of( AffiliateUrl::from_string( $link ) );
+			} catch ( InvalidField ) {
+				continue;
+			}
+			$owner = '' === $key ? null : $this->products->find_by_plain_key( $key );
+			if ( null !== $owner ) {
+				return $owner;
+			}
+		}
+
+		return null;
 	}
 
 	/**
