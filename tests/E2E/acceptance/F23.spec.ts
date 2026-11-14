@@ -391,6 +391,8 @@ test.describe( 'F23 Groups', () => {
 		await expect( page.locator( '#affibloom-filter-group' ) ).toHaveValue( String( group ) );
 		await expect( page.locator( 'tr[data-product-id]' ) ).toHaveCount( 1 );
 
+		// Clicking the pill closed the panel: open it again.
+		await page.getByRole( 'button', { name: /^Filters/ } ).click();
 		await page.locator( '#affibloom-filter-group' ).selectOption( '-1' );
 		await expect( page.locator( `tr[data-product-id="${ outside }"]` ) ).toBeVisible();
 		await expect( page.locator( `tr[data-product-id="${ inside }"]` ) ).toHaveCount( 0 );
