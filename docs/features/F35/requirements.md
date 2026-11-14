@@ -3,7 +3,7 @@
 Status: written 2026-11-14 from a sweep of Lasso 369's auto-monetization (detected affiliate links, Amazon
 auto-monetization, the affiliate-program catalogue, "extend products", Commission Upgrades). Client point **C2** is
 this feature's first slice (Tasks C2A-C2C, `docs/features/C2/requirements.md`, which keeps its AC numbers); the Amazon
-half is Tasks AM1-AM6. Gate 4 for Tasks C2A-C2C and AM1-AM6: waiting.
+half is Tasks AM1-AM6. Gate 4 for Tasks C2A-C2C and AM1-AM6: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -238,15 +238,18 @@ Settled from Lasso and the records:
   text". **Recommendation:** Lasso's way through the shared add path (F18 D3, embedded destination's site name when there
   is one), so a detected product is named like a pasted one; C2 AC1 is corrected so and `tests/E2E/acceptance/C2.spec.ts`
   AC1's title check must follow. Alternative: link text first, then F18 D3.
+  → **Decided 2026-11-14:** E8: the user accepted the recommendation
 - **N2 Amazon short links stay `amzn.to` in posts (R28).** Readers get the full link through the render filter; feeds,
   e-mails and builders the filter does not reach (F21 N1) keep `amzn.to` (183 anchors here, all already on the site's
   tag via Amazon's redirect). Resolving needs one request to Amazon's short-link host (no store page). **Recommendation:**
   accept.
+  → **Decided 2026-11-14:** A11: the user accepted the recommendation
 - **N3 The first import at cutover.** Lasso's Amazon job stalled here after 2025-03-28 (UNVERIFIED why; the setting is
   on): 91 ASINs in posts are no product and 218 `amzn.to` rows are untied. With the live value carried over, AM1 will
   create about 91 Amazon products (starting names, no data until C1) and resolve the short links within an hour or two.
   **Recommendation:** keep Lasso's behaviour (it is what the site's setting asks for), run it on staging first and
   review the list; alternative: carry the setting over as off and let the user switch it on.
+  → **Decided 2026-11-14:** E9: the Amazon auto-import stays on; run it and review the list on staging first.
 
 ## 5. Scope that needs a home
 

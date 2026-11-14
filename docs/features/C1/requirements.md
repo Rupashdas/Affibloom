@@ -2,7 +2,7 @@
 
 Status: rewritten 2026-11-14 from a sweep of Lasso 369's Amazon subsystem (beyond link parsing, which is F2). The
 first version (2026-11-12) is kept in its decisions: C1 is an **upgrade** that needs the client's Creators API
-credentials and ships dormant without them (the user, 2026-11-12; decision 11). Gate 4 for Tasks C1A-C1P: waiting.
+credentials and ships dormant without them (the user, 2026-11-12; decision 11). Gate 4 for Tasks C1A-C1P: given by the user 2026-11-14.
 
 **What this feature is:** where Amazon product data comes from (Lasso's two clients), when it is fetched (add, Refresh,
 the scheduled job, bulk sync, the Marketplace search), how it is stored and shown (price, discount, timestamp, Prime,
@@ -198,7 +198,7 @@ settings-amazon.php`, `src/` (listing).
 
 | # | Rule | Source |
 |---|---|---|
-| R46 | **Prime:** the box's `is_prime` is `enable_amazon_prime && ASIN set` — **every Amazon product with an ASIN, whatever the cache's `is_prime`**; the shortcode's `prime=` (any value) forces it on. Markup: `<div class="lasso-price">` … `<i class="lasso-amazon-prime"></i></div>`, printed when `(price && show_price) || is_prime`; v2 displays can hide it (`data-v2-hide-prime`) | affiliate-link 577; single.php 216-219; layout-*-box.php; list-box 48-58; sitestripe 35-47; display-v2-frontend.css 1114 |
+| R46 | **Decision C4, 2026-11-14: Lasso's rule; the per-product switch is an opt-out defaulting on.** **Prime:** the box's `is_prime` is `enable_amazon_prime && ASIN set` — **every Amazon product with an ASIN, whatever the cache's `is_prime`**; the shortcode's `prime=` (any value) forces it on. Markup: `<div class="lasso-price">` … `<i class="lasso-amazon-prime"></i></div>`, printed when `(price && show_price) || is_prime`; v2 displays can hide it (`data-v2-hide-prime`) | affiliate-link 577; single.php 216-219; layout-*-box.php; list-box 48-58; sitestripe 35-47; display-v2-frontend.css 1114 |
 | R47 | Help: "Show the blue Prime logo beside the price for all eligible Amazon products in your Lasso Displays." | amazon.php 221 |
 | R48 | **Price of an Amazon product** is the cache's `latest_price` (it replaces the `price` meta when the product reads); others use `price` meta. **Show price** per product = meta `show_price` (1/0) else the site's `show_price`; the shortcode `price="hide|show|<text>"` overrides | affiliate-link 316-343; single.php 207-214 |
 | R49 | **Product page price:** Amazon → read-only text input `$99.99` placeholder with "Amazon prices updated via Amazon API settings" (link to the Amazon tab); others → Quill one-line editor with bold, italic, underline, strike and the 35-colour palette of `lasso-price-quill-palette.php`; tooltip "This price can be any text or amount that'll only be shown in displays. Prices automatically update every 24 hours with integrations like Amazon."; show toggle "Turn this on to show the price in this display." | url-details.php 350-408; palette 10-44 |
@@ -226,9 +226,9 @@ settings-amazon.php`, `src/` (listing).
 | R61 | **Shorten Amazon affiliate links** — the stored and rendered form (F2 section 3; Task 12A); the box's links pass through `get_amazon_product_url` again when read | affiliate-link 342, 500, 546 |
 | R62 | **Keep Geni.us Formatting** off: an added `geni.us` link is replaced by its destination (redirect followed; cloud when the answer is not 200/404); a saved one too, keeping the original in `old_genius_url` / `old_second_btn_genius_url`; help "Turn this off to remove geni.us cloaking from all Lasso links." | affiliate-link 827, 852-856, 1145-1158, 3602-3616; helper 466-469; amazon.php 321 |
 | R63 | Turning it **off** on save runs `Lasso_Process_Remove_Genius_Formatting` (scheduled, 10 links a page: every `url_details` row with `geni.us` re-saved through `save_lasso_url` with its name, link, slug, second link, price, description, image) and schedules the daily `lasso_cron_remove_genius_formatting`; turning it **on** clears that cron | settings-general 424-475; remove-genius 43-121; cron 139, 311-314, 369-371, 6984-6987; url-details model 369 |
-| R64 | **Mobile Deep Linking** ("Open clicks in the Amazon app.") and **Send Readers to Their Local Store** ("Readers will be redirected to the Amazon store closest to their detect country.") are read only to pass `mobile_deep_linking` and `international_click` to Lasso's cloud snippet's `init` and to the cloud's site settings; no PHP or local JS acts on them | class-hook 1648, 1755-1762; cron 6553; connect-snippet.min.js (`params.mobile_deep_linking`, `params.international_click`) |
-| R65 | The snippet (loaded from `js.codedrink.com`) sends Amazon product, Amazon short and geni.us clicks to **`https://lasso.to/amazon?url=<link>&matching=<0|1>&…`**; what that server does with deep linking and the reader's country is not in Lasso's code (UNVERIFIED: looked for `intent:`, `com.amazon`, `onelink`, `geo`, `country` in the snippet; none) | connect-snippet.min.js (`LASSO_REDIRECT_AMAZON_URL`, `buildLeanRedirectAmazonUrl`, `isLeanRedirect`) |
-| R66 | **Commission Upgrades** (`auto_upgrade_eligible_links`): the cloud decides better Amazon links (R6); results set `is_aff_plus`, rewrite `monetized_url` and fill `lasso_amazon_affiliate_plus (id, new_id, created_at)` (ASIN_country pairs, 13 characters, loop guard); a content-scan filter replaces old-ASIN hrefs **in post content** with the new ASIN's `/dp/` link; the Dashboard shows "Marketplace" on such rows | update-aff-plus; affiliate-plus 454-488; pages/fix/class-hook 951-990; affiliate-link 1846-1868; url-row.php 39 |
+| R64 | **Decision B4, 2026-11-14: the stored value is kept and labelled "no effect"; nothing is built behind it.** **Mobile Deep Linking** ("Open clicks in the Amazon app.") and **Send Readers to Their Local Store** ("Readers will be redirected to the Amazon store closest to their detect country.") are read only to pass `mobile_deep_linking` and `international_click` to Lasso's cloud snippet's `init` and to the cloud's site settings; no PHP or local JS acts on them | class-hook 1648, 1755-1762; cron 6553; connect-snippet.min.js (`params.mobile_deep_linking`, `params.international_click`) |
+| R65 | **Decision B4, 2026-11-14: the stored value is kept and labelled "no effect"; nothing is built behind it.** The snippet (loaded from `js.codedrink.com`) sends Amazon product, Amazon short and geni.us clicks to **`https://lasso.to/amazon?url=<link>&matching=<0|1>&…`**; what that server does with deep linking and the reader's country is not in Lasso's code (UNVERIFIED: looked for `intent:`, `com.amazon`, `onelink`, `geo`, `country` in the snippet; none) | connect-snippet.min.js (`LASSO_REDIRECT_AMAZON_URL`, `buildLeanRedirectAmazonUrl`, `isLeanRedirect`) |
+| R66 | **Decision B4, 2026-11-14: the stored value is kept and labelled "no effect"; nothing is built behind it.** **Commission Upgrades** (`auto_upgrade_eligible_links`): the cloud decides better Amazon links (R6); results set `is_aff_plus`, rewrite `monetized_url` and fill `lasso_amazon_affiliate_plus (id, new_id, created_at)` (ASIN_country pairs, 13 characters, loop guard); a content-scan filter replaces old-ASIN hrefs **in post content** with the new ASIN's `/dp/` link; the Dashboard shows "Marketplace" on such rows | update-aff-plus; affiliate-plus 454-488; pages/fix/class-hook 951-990; affiliate-link 1846-1868; url-row.php 39 |
 | R67 | **Force changes from link details**, the blacklist rewrite, SiteStripe scanning and `monetize_amazon_link` act on post content (link rewriting, auto-monetization): `monetize_amazon_link` (nonce `lasso_ajax`, `edit_posts`) follows `amzn.` links, adds the product if missing and **rewrites the link in the post** (`update_link_in_post`) | pages/class-ajax 1112-1170; cron 2816-2828, 1704-1745 |
 
 ### 3.8 Marketplace and Amazon search
@@ -306,19 +306,23 @@ Settled from Lasso and the records:
   straight to `amazon.com` with `vbvault-20`. **Recommendation:** keep the three stored values, show them with "This
   worked through Lasso's cloud and has no effect in Affibloom" (C1L), build nothing; a local-store feature would need
   per-country tracking IDs (none set: 13 empty rows) and reader geolocation — revisit only if the client asks.
+  → **Decided 2026-11-14:** B4: keep the three stored values, label them "no effect", build nothing behind them.
 - **N2 Prime per product:** Lasso shows the logo on every Amazon product with an ASIN (R46; 7 of 7 baseline variants
   carry it), but Affibloom's product page has a "Show Prime Logo" switch (F1 D7) and the migration maps the cache's
   `is_prime` (1 published product), which would remove the logo from about 225 boxes at cutover. **Recommendation:**
   Lasso's rule (setting + ASIN) for the box; drop the per-product switch (or keep it as an opt-out that defaults on).
+  → **Decided 2026-11-14:** C4: Lasso's rule, the Prime logo on every Amazon product while the site setting is on; the per-product switch becomes an opt-out defaulting on.
 - **N3 Amazon prices after cutover without credentials:** today prices are hidden (site Show Price off; per-product 0
   on 216, none on); Amazon's Participation Requirements allow prices only from the API (report 2026-11-12, quoted).
   **Recommendation:** an Amazon product's price shows only from a `creators` cache row younger than 24 h; Lasso's
   migrated prices stay in the cache but are not shown (no visible change on this site).
+  → **Decided 2026-11-14:** E6: the user accepted the recommendation
 - **N4 Amazon's 24-hour rules** (images as links for at most 24 h; other content refreshed within 24 h) come from the
   Associates Program Policies as quoted in `reports/2026-11-12-lasso-amazon-product-data.md`; **not re-read in this
   sweep and not stated anywhere in Lasso's code** (Lasso's 24 h due rule, R38, is practice). Migrated image links from
   Lasso's cloud are kept by decision 11 (the user). **Recommendation:** re-read the policies and the Creators API terms
   when C1E starts; no change before that.
+  → **Decided 2026-11-14:** E7: the user accepted the recommendation
 
 ## 5. Scope that needs a home
 

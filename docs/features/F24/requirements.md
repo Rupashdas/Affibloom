@@ -1,7 +1,7 @@
 # F24 Link cloaking, redirects and permalinks: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369 (area 7 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks CL1-CL11: waiting.
+`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks CL1-CL11: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -193,19 +193,26 @@ Settled from Lasso and the records:
 - **N1 Old slugs keep answering.** Lasso 404s an old slug (R6) because it rewrites the posts; Affibloom does not
   rewrite posts, so a renamed slug would break published links. Recommendation: an old slug answers exactly as the
   current one (302 to the destination); 2 real old slugs here.
+  → **Decided 2026-11-14:** D3: the user accepted the recommendation
 - **N2 Prefix change.** Lasso rewrites every post (R30); Affibloom cannot. Recommendation: old prefixes stay in a
   history and keep answering; F21's render-time pass prints the new address.
+  → **Decided 2026-11-14:** A7: the user accepted the recommendation
 - **N3 Flag and slug changes reach stored content only at render time** (F21 35H), not in places F21 does not filter
   (other plugins' stored HTML); those links keep the stored address, which still answers (R21 ignores the flag).
   Recommendation: accept.
+  → **Decided 2026-11-14:** A6: the user accepted the recommendation
 - **N4 `wp_old_slug_redirect`.** Lasso switches WordPress's old-slug redirects off for the whole site (22 posts and
   pages have old slugs). Recommendation: do not copy that; WordPress's own redirects come back at cutover.
+  → **Decided 2026-11-14:** D4: the user accepted the recommendation: not copied.
 - **N5 Lasso's cloud in the redirect** (R23: the `sid` click post, `lcid`, data sync): left out (C — never); the local
   `sid` → sub-ID rewrite is kept.
+  → **Decided 2026-11-14:** B8: the user accepted the recommendation: the cloud parts are omitted; the local sid to sub-ID rewrite is kept.
 - **N6 Longer paths** (`/a/b/<slug>/`, R17) are not matched. Recommendation: accept; no such link exists here.
+  → **Decided 2026-11-14:** D5: the user accepted the recommendation
 - **N7 The conflict warning's wording.** Lasso says "We updated the permalink to avoid a conflict." when it did not
   (R5). Recommendation: "Permalink **<slug>** is being used by **<type>**. This product's link will not open until
   you change it."
+  → **Decided 2026-11-14:** D6: the user accepted the recommendation: truthful wording.
 
 ## 5. Scope that needs a home
 

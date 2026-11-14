@@ -18,7 +18,7 @@ Task 7 turns these into `tests/E2E/acceptance/F12.spec.ts`.
 ## Clicks — sweep of Lasso 369, 2026-11-14
 
 Status: written 2026-11-14 from a sweep of Lasso 369's click counting and tracking (area 5 of the dashboard
-completion plan). Gate 4 for Tasks 33A-33D and 34A-34D: waiting. This section owns AC1 and AC4-AC19. Google Analytics
+completion plan). Gate 4 for Tasks 33A-33D and 34A-34D: given by the user 2026-11-14. This section owns AC1 and AC4-AC19. Google Analytics
 events are C3 (`docs/features/C3/`).
 
 **The answer to "where do Lasso's click numbers come from":** from **Lasso's cloud**, never from the site. The plugin
@@ -55,7 +55,7 @@ per-location click is stored anywhere in the site's database.
   the last 30 days, 0 when none; a group row shows its locations' sum. (34C, R11; Locations AC23)
 - **AC14** Clicks on a trashed or retired product are not counted; a repointed product's clicks are counted for its
   target (the click arrives with the old ID). (33A, D9)
-- **AC15** With Lasso's last synced figures imported (N1), the Dashboard shows them on the cutover day and they leave
+- **AC15** (not built: decision E1, start from zero) With Lasso's last synced figures imported (N1), the Dashboard shows them on the cutover day and they leave
   the 30-day window 30 days after the date of that sync. (34D, R12, N1)
 - **AC16** The page keeps working when the click route fails or is blocked (ad blockers): no error is shown, the link
   opens. (33A, R6)
@@ -103,8 +103,8 @@ snapshot's date is unknown. Settings: `performance_event_tracking` true, `stop_l
 | R4 | **The period** is the cloud's; the plugin's own texts call it 30 days ("Total clicks in the last 30 days.", "clicks in 30 days", "Clicks (last 30 days, synced from the Lasso API)"). The cloud's query is UNVERIFIED (not in the plugin) | url-links.php 40-41; request-review.php 13-20 |
 | R5 | **The front-end script:** in `wp_footer` (not admin, not Elementor preview, filter `lasso_event_tracking`), printed when tracking is on (R14) or GA click tracking is on with an ID (C3): a loader tries two sources with a 2.5 s timeout each — the cloud script (`js_domain` option, default `https://js.codedrink.com/snippet.min.js`, refreshed daily from `lasso.link/api/js-domain`) and the site's own copy (`/?<md5(domain)>=1&ver=…` or `/js/snippet.min.js`, serving `admin/assets/js/connect-snippet.min.js`, refreshed daily from `lasso.link/api/snippet/performance`); the local copy goes first when it knows the `/js/e` proxy; then `LSAFFEvents.init({lsid, pid, ipa, performance, matching, mobile_deep_linking, international_click})` | class-hook.php 1633-1797; class-hook-frontend.php 50; class-redirect.php 31-86; class-lasso-cron.php 5805-5828, 6943-6970; class-helper.php 6853-6939 |
 | R6 | **What it listens to:** one `click` listener on `document` (capture) for any `<a>` (from the target, its closest `a`, or the composed path); every link is sent, not only Lasso's; no `auxclick`; failures are swallowed (Sentry) | connect-snippet.min.js `resolveClickAnchor`, `lassoClickTracking` |
-| R7 | **Event type:** `data-lasso-box-trackable="true"` (every display link Lasso prints: buttons, title, image) → "Lasso Display Secondary Click" with class `lasso-button-2`, else "Lasso Display Primary Click"; `data-lasso-name` without it (text links) → "Lasso Link Click"; else "Internal Click" (same origin) or "External Click" | connect-snippet `getEventName`; class-lasso-url.php 214-287; class-lasso-shortcode.php 496 |
-| R8 | **Payload** (POST, `text/plain` JSON `{n:"click", u, d, r, w, h, p}`) to `<apiHost>/js/e`: `lasso_title`, `lasso_href` (with a generated `LCID_xxxxxxxxxx` sub-ID added for known networks, or `lcid=` on own-domain links), `lasso_text`, `lasso_badge`, `raw_href`, `lid` (`data-lasso-lid`), `lasso_lid` (`data-lasso-id`, the location), `tag`, `class`, `hierarchy`, `cx`, `cy`, `sw`, `sh`, `type`, `lsid` (cookie `lsid`, one day), `pid`, `ipa`, `gclid`, `d`, `pt`, `js_*`; not sent on localhost; the href carries the sub-ID for 500 ms | connect-snippet `sendClickEvent`, `sendEvent`, `addLassoClickIdToSubIDUrlArgument`, `init` |
+| R7 | **Event type:** `data-lasso-box-trackable="true"` (every display link Lasso prints: buttons, title, image) → Lasso's Display Secondary event (Affibloom: `affibloom_secondary_click`) with class `lasso-button-2`, else Lasso's Display Primary event (Affibloom: `affibloom_primary_click`); `data-lasso-name` without it (text links) → Lasso's Link Click event (Affibloom: `affibloom_link_click`); else "Internal Click" (same origin) or "External Click" | connect-snippet `getEventName`; class-lasso-url.php 214-287; class-lasso-shortcode.php 496 |
+| R8 | **Payload** (POST, `text/plain` JSON `{n:"click", u, d, r, w, h, p}`) to `<apiHost>/js/e`: Lasso's title and href parameters (Affibloom's GA names: `affibloom_title`, `affibloom_href`; the href with a generated `LCID_xxxxxxxxxx` sub-ID added for known networks, or `lcid=` on own-domain links), text and badge parameters (`affibloom_text`, `affibloom_badge`), `raw_href`, `lid` (`data-lasso-lid`), `lasso_lid` (`data-lasso-id`, the location), `tag`, `class`, `hierarchy`, `cx`, `cy`, `sw`, `sh`, `type`, `lsid` (cookie `lsid`, one day), `pid`, `ipa`, `gclid`, `d`, `pt`, `js_*`; not sent on localhost; the href carries the sub-ID for 500 ms | connect-snippet `sendClickEvent`, `sendEvent`, `addLassoClickIdToSubIDUrlArgument`, `init` |
 | R9 | **Bots:** the script carries a bot list and an `isBot()` but never calls it; any filtering is the cloud's (UNVERIFIED) | connect-snippet `isBot`, `lassoEventsLoad` |
 | R10 | **Dashboard Clicks column:** header "Clicks" after "Locations", sortable `clicks` (`data-order-init="desc"`), no tooltip; cell `IFNULL(ud.clicks,0)` in bold; sort `IFNULL(ud.clicks,0)` on every list query; allowed in saved views | dashboard.php 120; url-row.php 170-173; view-js.php 369; class-lasso-db.php 503-504, 518-522, 573; pages/class-ajax.php 156, 184; class-dashboard-saved-views.php 129 |
 | R11 | **Clicks per location:** `lasso_get_location_clicks` (nonce `lasso_ajax`, `edit_posts`; 400 "A valid Lasso link ID is required.") GETs `LASSO_LINK/clicks/locations?lasso_id=`, caches `lasso_clicks_loc_<id>` 15 min (filter `lasso_location_clicks_cache_ttl`, min 60 s; failures not cached); the tab maps `location_id → clicks` onto rows by `link_id`, 0 when missing | pages/class-ajax.php 2512-2565; view-js.php 2093-2096, 2316-2346, 2394 |
@@ -159,8 +159,10 @@ Settled from Lasso and the records:
   `lasso`), so the Dashboard matches Lasso at cutover and the figures age out after 30 days; (b) start at 0.
   **Recommendation (a)**, run in Task 26 against production's values at cutover (Task 42); this copy's numbers are
   stale. Earlier plans' "copy the table" is wrong (Corrections).
+  → **Decided 2026-11-14:** E1 (revised): start from zero; no figures are imported; Task 34D and 26J are dropped.
 - **N2 Visitor bot traffic** Lasso's cloud may have filtered differently (UNVERIFIED), so Affibloom's numbers will not
   equal Lasso's after cutover. **Recommendation:** accept; say so in the cutover notes.
+  → **Decided 2026-11-14:** E2: the user accepted the recommendation; say so in the cutover notes.
 
 ### Edge cases (Clicks)
 

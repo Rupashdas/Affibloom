@@ -16,8 +16,8 @@ day (section 5). **Gate 4 given by the user 2026-11-13** ("Approve, start 14H").
   and down, the default one too; an added block can be removed. Task 15 saves the order. (14H shows and edits.)
 - **AC3** In a box, the buttons follow that order; the first is the primary button (`lasso-button-1`, primary colour),
   the rest look like the secondary; each shows only with a URL and when it does not link to the page itself. (Phase 3.)
-- **AC4** A click on the first button sends `Lasso Display Primary Click`, on any other `Lasso Display Secondary
-  Click`, labelled with its text; each counts as a click on the product. (C3, F12.)
+- **AC4** A click on the first button sends `affibloom_primary_click`, on any other `affibloom_secondary_click`,
+  labelled with its text; each counts as a click on the product. (C3, F12.)
 - **AC5** A product whose default button is first and that has at most one added button renders exactly as Lasso's
   box does today (ADR-6 baselines).
 
@@ -33,7 +33,7 @@ day (section 5). **Gate 4 given by the user 2026-11-13** ("Approve, start 14H").
 - **Elsewhere:** quick edit (`url-quick-detail.php`) has the secondary's URL and text; tables map "Primary Button" and
   "Secondary Button" (`class-table-mapping.php`); Display has two colours and two default texts per type, and the
   "Primary button" / "Secondary button" element toggles (F16).
-- **Analytics:** `Lasso Display Primary Click` and `Lasso Display Secondary Click` (C3 AC1).
+- **Analytics:** `affibloom_primary_click` and `affibloom_secondary_click` (C3 AC1; renamed 2026-11-14).
 - **This site:** 60 of 254 products have a second button: men's / women's versions of a shoe (25 "Buy Now Men's
   Shoe", 21 "Buy Now Women's Shoe", 5 more), another shop (Mizuno, Walmart, "Check Price On All Volleyball"). Hosts:
   Amazon 51, ShareASale 4, Mizuno (Impact) 4, Walmart 1. Three posts box the same product twice.
@@ -57,8 +57,8 @@ day (section 5). **Gate 4 given by the user 2026-11-13** ("Approve, start 14H").
   `data-lasso-button="<n>"` with its own target and rel; hidden without a URL or when linking to the current page; the
   "Primary button" element toggle shows or hides the first, "Secondary button" the rest. The "Button" display type's
   `button_type="primary"` means the first, `"secondary"` the second.
-- **B5 Clicks:** each counts for the product (F12); GA gets `Lasso Display Primary Click` for the first button and
-  `Lasso Display Secondary Click` for the others, with the button's text (D3, D7).
+- **B5 Clicks:** each counts for the product (F12); GA gets `affibloom_primary_click` for the first button and
+  `affibloom_secondary_click` for the others, with the button's text (D3, D7).
 - **B6 Unchanged from Lasso:** quick edit keeps the default button and the first added one (Lasso's two); the "Button" display type and `button_type` choose
   between primary and secondary; the tables' "Secondary Button" column is the secondary; `secondary_url` /
   `secondary_text` shortcode overrides apply to button 2; link health checks the primary URL, as Lasso's.
@@ -74,8 +74,7 @@ day (section 5). **Gate 4 given by the user 2026-11-13** ("Approve, start 14H").
 
 - **D1 (the user, 2026-11-13): as many buttons as needed**, with add, remove and reorder.
 - **D2 (the user): buttons 3 and up look like the secondary** — its colour, its default text, its element toggle.
-- **D3 (the user): their clicks send `Lasso Display Secondary Click`**, labelled with their own text, so existing GA
-  reports keep counting them.
+- **D3 (the user): their clicks send `affibloom_secondary_click`** (renamed 2026-11-14 from Lasso's secondary event name; no backward compatibility with Lasso's GA reports, GA starts from zero), labelled with their own text.
 - **D4 (Claude): one ordered list for buttons 2 and up** (`Product::$buttons`), replacing 14A's four `url2` fields,
   so the secondary and the extra buttons share one rule, one form row and one renderer. No Affibloom product exists on
   production yet; the Local seed tool and the migration write the new form.

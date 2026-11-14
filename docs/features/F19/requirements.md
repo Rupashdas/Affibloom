@@ -9,7 +9,7 @@ command palette, tour, bulk delete, modals) against the code Tasks 13A-13E, 16A-
 `audit-2` sections 3-4. Sections 1-9 keep their text and AC numbers; corrections are marked "(corrected 2026-11-14:
 …)"; section 8 is rewritten as an exact ownership table; section 9 gains AC11-AC14 (already tested) and AC15-AC26;
 section 10 holds the second pass's evidence, rules (R1-R40), decisions (D8-D24), "Needs the user", scope for other
-features and edge cases. **Gate 4 for Tasks 13F-13M: waiting.**
+features and edge cases. **Gate 4 for Tasks 13F-13M: given by the user 2026-11-14.**
 
 Evidence, all read in this session from the read-only reference copy `D:\lasso\lasso` (Lasso **369**), plus the
 production screenshots of Lasso **370** and the live database on this Local copy:
@@ -452,11 +452,14 @@ Settled from Lasso and the records:
 - **N1 — The tour's Chat step depends on Lasso's cloud** (Intercom, R29): leave it out (C — never). Recommendation:
   agree; and F10 should migrate `lasso_dashboard_tour_done` (it is `1` here), so the client never sees a tour they
   already dismissed.
+  → **Decided 2026-11-14:** B10: the tour's Chat step is left out; F10 migrates `lasso_dashboard_tour_done`.
 - **N2 — Two of Lasso's sort behaviours are defects and are not copied** (D10, D11): Alert's "off" sorting one load
   descending, and a search or filter silently dropping the sort for one load while the header still shows it.
   Recommendation: agree (one visible state, the one the screen shows).
+  → **Decided 2026-11-14:** D7: the user accepted the recommendation: one consistent sort state.
 - **N3 — The palette finds more than Lasso's** (D20): Lasso's code matches the name only, though its placeholder says
   "by link name or URL". Recommendation: the Dashboard's rule (nothing Lasso finds is lost).
+  → **Decided 2026-11-14:** D8: the user accepted the recommendation: the palette searches name or URL, the Dashboard's way.
 
 ### 10.4 Scope that needs a home
 

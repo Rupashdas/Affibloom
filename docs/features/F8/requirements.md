@@ -3,7 +3,7 @@
 Status: Approved with Task 6 (gate 1), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`. Checked against
 Lasso 369 on 2026-11-14 (F5 sweep); AC3-AC6 added. **The shared engine is F5**; its rules R14, R31, R61 and R70 are
 this feature's source. The rating is the product's **Primary Rating custom field** (field 1, F1 14C, D8), not a
-separate value. Gate 4 for Task 21A: waiting.
+separate value. Gate 4 for Task 21A: given by the user 2026-11-14.
 
 ## User stories
 

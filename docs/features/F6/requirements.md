@@ -2,7 +2,7 @@
 
 Status: Approved with Task 6 (gate 1), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`. Checked against
 Lasso 369 on 2026-11-14 (F5 sweep); AC3-AC6 added then. **The shared engine is F5** (`docs/features/F5/`): its rules
-R37-R41 and R60-R61 are this feature's source; F29 adds buttons 3 and up. Gate 4 for Task 19A: waiting.
+R37-R41 and R60-R61 are this feature's source; F29 adds buttons 3 and up. Gate 4 for Task 19A: given by the user 2026-11-14.
 
 ## User stories
 

@@ -11,7 +11,7 @@ for Tasks 25A-29E: waiting.
   other family and the "left behind" inventory · **25D** the report on an admin page (staging has no SSH)
 - **26A** products · **26B** products again (`--update`) · **26C** settings: General and Amazon · **26D** settings:
   Display for Single, Grid, List · **26E** custom fields · **26F** groups and their order · **26G** cloaked slugs ·
-  **26H** URL variants · **26I** comparison tables · **26J** click totals · **26K** link issues and dismissals ·
+  **26H** URL variants · **26I** comparison tables · **26J** click totals (dropped: decision E1) · **26K** link issues and dismissals ·
   **26L** Amazon tracking IDs and cached product data · **26M** saved views · **26N** opportunity flags and scan
   scope · **26O** the admin page's Run, in batches · **26P** the check against the baselines
 - **28A** conversion dry run (single boxes) · **28B** convert, stored copy, revert · **28C** bare shortcodes ·
@@ -35,7 +35,7 @@ for Tasks 25A-29E: waiting.
 | `slugs` | 26G | F24 (cloaking: the redirect of `/<slug>/`, old slugs, the rewrite prefix) |
 | `variants` | 26H | F27 (URL variants) |
 | `tables` | 26I | F25 (comparison tables), 26E, 26A |
-| `clicks` | 26J | F12 (Task 33's click store, Task 34's column) |
+| `clicks` | not migrated: decision E1 (26J dropped; start from zero) | F12 (Task 33's click store, Task 34's column) |
 | `issues` | 26K | F11 (Tasks 30-31: link checks and the Alert column) |
 | `amazon` | 26L | F17 (10F, the tracking-ID table), C1 (the product-data store; dormant without credentials) |
 | `views` | 26M | F19 (13E: saved views), F23 G5 (the Group filter), F11 (the alert tabs), F25 (the table filter) |

@@ -241,12 +241,15 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
 - **N1 A field deleted on the Fields screen while a table uses it** (R61): Lasso leaves broken cells. Recommendation:
   the Fields screen (F26) names the tables that use it in its delete question and the delete removes the field from
   them (values kept as D7). Alternative: refuse the delete while a table uses it.
+  → **Decided 2026-11-14:** D11: the user accepted the recommendation
 - **N2 Lasso baselines for the pixel checks** (AC16-AC18): the site's three tables are all Horizontal and only in a
   draft. Recommendation: capture tables 2 and 3 from staging's preview of the draft 9492 (read only, logged in) at
   1280, 768 and 390 px; for Vertical, let Claude clone table 2 on staging and switch the clone to Vertical (a write on
   staging), capture it, then delete the clone. Without that, Vertical is checked against Lasso's markup only.
+  → **Decided 2026-11-14:** F1: one approved staging session captures the baselines; the cloned Vertical table is deleted after.
 - **N3 Tables are used by no published page.** They are built in full (the user's 2026-11-13 decision). Confirm that
   Tables stays the last area (dashboard-completion plan) and is not moved earlier for this draft.
+  → **Decided 2026-11-14:** F2: the user accepted the recommendation: Tables stays the last area.
 
 ## 5. Scope that needs a home
 

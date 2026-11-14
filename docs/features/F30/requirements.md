@@ -1,7 +1,7 @@
 # F30 Display types (Grid, List, Gallery, Button, Image, SiteStripe, AI Text): requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's display types other than Single and Table (the
-Single box is F5/F16, Tasks 18-22; Table is its own sweep). Gate 4 for Tasks DT1-DT10: waiting.
+Single box is F5/F16, Tasks 18-22; Table is its own sweep). Gate 4 for Tasks DT1-DT10: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -46,7 +46,7 @@ Single box is F5/F16, Tasks 18-22; Table is its own sweep). Gate 4 for Tasks DT1
   type's task adds its case, R61)
 - **AC14** A page with any of these displays loads the display stylesheet (and the phone-layout script when the
   settings are customised); a page without one loads neither. (DT2, R9)
-- **AC15** (only if the user chooses N2 option b) The AI Text generator: Prompt, Generate, the editor, Refresh and Add
+- **AC15** (not built: decision B5) The AI Text generator: Prompt, Generate, the editor, Refresh and Add
   behave as Lasso's tab, through the user's AI provider; without a key it says so and generates nothing. (DT10,
   R44-R49)
 
@@ -144,11 +144,11 @@ right / left / spread / hug / stack / contain, no phone overrides; `show_disclos
 | R42 | **A visitor can trigger it:** with no cached text, the page view itself calls Lasso's cloud (R41) | class-lasso-shortcode.php 361-362, 1828-1860 |
 | R43 | **AI text markup:** only when the text is not empty: `<div class="lasso-container lasso-ai"><div class="lasso-ai-text-container"><div class="lasso-ai-text">` + the stored HTML **unescaped** + `</div></div></div>`; CSS `.lasso-container.lasso-ai { padding: 0 !important }`; in the block editor `.wp-block .lasso-container.lasso-ai {padding: 0 15px !important;}` | aitext.php; lasso-live 53-55; class-post-type.php 195 |
 | R44 | **AI text gate — C, never (Lasso cloud):** LaunchDarkly flag `lasso-ai-display` fetched from `https://lasso.link/api/launch-darkly/flags?<encrypted>` (licence email), cached one hour in a site transient, default off. Off: the modal hides the AI Text tile and the AJAX action answers 403 `Not allow` | class-launch-darkly.php 39-77, 107-110, 126-148; display-add.php 64-72; pages/class-ajax.php 2140-2147 |
-| R45 | **`wp_ajax_lasso_get_response_from_prompt`:** nonce `lasso_ajax` in `security`; `edit_posts` else 403 "Unauthorized."; R44's flag; `prompt`, `result` (editor HTML), `is_from_modal`, `is_add_shortcode`; success `{ response }` (empty for an empty prompt) | pages/class-ajax.php 79, 2133-2171 |
-| R46 | **The AI Text tab** (display modal): a response panel (hidden until the first answer) with a loader, a rich-text editor (bold, italic, underline, strike, link, bullet list, text colour, background, clear formatting) and **Add**; Lasso's logo; "Example Prompts" (Lasso's help site); "Prompt:" textarea (2 rows, 1000 characters, required); **Generate**, which reads **Refresh** after an answer. An empty prompt sends nothing. Closing the modal resets the button to "Generate" and clears the prompt and response | display-add.php 156-195, 301-316, 483-561 |
-| R47 | **Generate / Refresh:** the first Generate asks without editor text → the cached text, or a new one. Refresh sends the editor's HTML: if it differs from the cache it **becomes** the cached text and comes back (no new text); if unchanged, a new text is generated and cached | class-lasso-shortcode.php 1827-1842; display-add.php 483-512 |
-| R48 | **Add:** sends the editor's HTML with `is_add_shortcode` → it overwrites the cached text (with no cached text a new one is generated instead); then inserts `[lasso prompt="<prompt>"]` (the prompt is not escaped; a `"` in it breaks the shortcode) into the block, Elementor or the classic editor | display-add.php 447-481 |
-| R49 | **Editing an AI text block:** the block's "Edit Display" button shows only for single, button, image and table shortcodes, so an AI text (and a grid, list or gallery) block has none; the prompt branch of `open_url_detail_window` (reopen the tab with the prompt) is reached by no control found — UNVERIFIED (searched `lasso-gutenberg-block.js` for its callers: only the Edit Display button) | lasso-gutenberg-block.js 626-638, 679-734, 1870-1896 |
+| R45 | **Not built (decision B5, 2026-11-14: the generator is not built).** **`wp_ajax_lasso_get_response_from_prompt`:** nonce `lasso_ajax` in `security`; `edit_posts` else 403 "Unauthorized."; R44's flag; `prompt`, `result` (editor HTML), `is_from_modal`, `is_add_shortcode`; success `{ response }` (empty for an empty prompt) | pages/class-ajax.php 79, 2133-2171 |
+| R46 | **Not built (decision B5, 2026-11-14: the generator is not built).** **The AI Text tab** (display modal): a response panel (hidden until the first answer) with a loader, a rich-text editor (bold, italic, underline, strike, link, bullet list, text colour, background, clear formatting) and **Add**; Lasso's logo; "Example Prompts" (Lasso's help site); "Prompt:" textarea (2 rows, 1000 characters, required); **Generate**, which reads **Refresh** after an answer. An empty prompt sends nothing. Closing the modal resets the button to "Generate" and clears the prompt and response | display-add.php 156-195, 301-316, 483-561 |
+| R47 | **Not built (decision B5, 2026-11-14: the generator is not built).** **Generate / Refresh:** the first Generate asks without editor text → the cached text, or a new one. Refresh sends the editor's HTML: if it differs from the cache it **becomes** the cached text and comes back (no new text); if unchanged, a new text is generated and cached | class-lasso-shortcode.php 1827-1842; display-add.php 483-512 |
+| R48 | **Not built (decision B5, 2026-11-14: the generator is not built).** **Add:** sends the editor's HTML with `is_add_shortcode` → it overwrites the cached text (with no cached text a new one is generated instead); then inserts `[lasso prompt="<prompt>"]` (the prompt is not escaped; a `"` in it breaks the shortcode) into the block, Elementor or the classic editor | display-add.php 447-481 |
+| R49 | **Not built (decision B5, 2026-11-14: the generator is not built).** **Editing an AI text block:** the block's "Edit Display" button shows only for single, button, image and table shortcodes, so an AI text (and a grid, list or gallery) block has none; the prompt branch of `open_url_detail_window` (reopen the tab with the prompt) is reached by no control found — UNVERIFIED (searched `lasso-gutenberg-block.js` for its callers: only the Edit Display button) | lasso-gutenberg-block.js 626-638, 679-734, 1870-1896 |
 | R50 | **Display modal for these types** (owned by F4): tiles Single, Grid, List, Table, Button, Image, Gallery and (R44) AI Text; Button and Image open "Choose a Link" (Create a Link, "Search URLs", five a page, **Add** inserts `[lasso type="button" ref="…" id="…"]` / `[lasso type="image" …]`); Grid, List and Gallery open "Choose a Group" (Create Group, "Search groups", five a page, "1 link"/"n links", a group's name opens "Add to Group"; **Add** inserts `[lasso type="grid\|list\|gallery" category="<slug>"]`; "Add Group" in Add to Group inserts the same, or alerts "Use a Grid, List, or Gallery display to insert a group.") | display-add.php 13-155, 337-427, 694-1073, 1150-1174 |
 | R51 | **What an editor sees:** the block preview is the shortcode's HTML (`lasso_get_shortcode_content`, `edit_posts`); an empty group or a missing product previews as nothing above the shortcode field, with no message; no Edit Display for group displays | pages/class-ajax.php 1478-1511; lasso-gutenberg-block.js 489-531, 626-638 |
 | R52 | **Customize Display attributes** (the block sidebar; labels quoted): Grid — Columns, Compact, Limit ("Show just the top X Lasso Links in a group."), Product title, Product description, Badge, Brag, Show/Hide the price, Show/Hide all Fields, Show/Hide the Primary Rating, Theme, Title tag, Anchor id, Show/Hide the Disclosure; List — Bullet ("Override the bullet type. To hide the bullet use `hide`. All supported values are: decimal, alpha, roman, square, circle, hide"), Product description, price, Fields, Primary Rating, Theme, Title tag, Anchor id; Gallery — Columns ("Sets the Gallery to display five products per row. Ideal for wide layouts. This can also be set 2, 3, 4, and 5."), Limit, Anchor id; Button (R30); Image — Image url, Anchor id. Toggles: price, field, rating, disclosure | lasso-constant.php 479-661, 678-711 |
@@ -238,20 +238,24 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
   `true`/`1`/`yes`/`on`). No content on the site uses either. *Recommendation:* keep Lasso's behaviour for `[lasso]`
   content (Task 27), so migrated pages look the same, and let Affibloom's own shortcode and block do what the help
   texts say (`columns` 1-5 always applies; `compact` also takes `hide`).
+  → **Decided 2026-11-14:** D1: the user accepted the recommendation
 - **N2 AI Text needs an outside AI service** (R39-R49 depend on Lasso's cloud, C). Options: (a) render stored text
   only (D14) and offer no AI Text tile; (b) also build the generator (R46-R48: Prompt, Generate/Refresh, the editor,
   Add) through an AI provider and API key the user chooses, shipped dormant until a key is entered, like C1.
   *Recommendation:* (a) now — the site has no AI text block, no cached text, and Lasso's flag keeps the tile hidden
   unless Lasso enables it — with DT10 kept as a drafted, dormant task to start only if the user chooses (b).
+  → **Decided 2026-11-14:** B5: render stored AI text only (DT9); the generator (DT10) is not built.
 - **N3 SiteStripe embeds in content.** Lasso's scan turns SiteStripe iframes into SiteStripe displays by rewriting
   posts (R37), which Affibloom never does. *Recommendation:* when "Scan SiteStripe in post content" is on, replace a
   matched SiteStripe iframe at render time (a `the_content` filter calling F30's SiteStripe or Single renderer) — the
   same visible result without editing content; owned by the sweep for Settings → Amazon / the link scan. The setting
   is off and no post has an embed, so nothing changes on this site.
+  → **Decided 2026-11-14:** A4: the user accepted the recommendation
 - **N4 Baselines need Lasso's own render** of display types the site never used. Lasso may not be activated on the
   Local copy; staging runs Lasso. *Recommendation:* the user approves DT1 creating, on staging, one test group of four
   existing products and one draft page holding one of each display type (through wp-admin), screenshots taken at 1280
   and 390 px, then both deleted.
+  → **Decided 2026-11-14:** F1: one approved staging session; the test group and draft page are deleted after the capture.
 
 ## 5. Scope that needs a home
 

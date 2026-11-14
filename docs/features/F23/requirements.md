@@ -1,7 +1,7 @@
 # F23 Groups: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Groups (area 0 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`; progress deviation 88). Gate 4 for Tasks G1-G5: waiting.
+`affibloom-docs/plans/archive/dashboard-completion-plan.md`; progress deviation 88). Gate 4 for Tasks G1-G5: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 

@@ -20,8 +20,8 @@ gate 4 before work starts.
 - C1 (when convenient, not before launch): confirm 10+ qualifying sales in the last 30 days, create Creators API
   credentials for the `vbvault-20` account with a Full-access user, and send Credential ID, Secret and Version through a
   secure channel. Until then Affibloom uses Lasso's migrated data and the editor helpers (decision 11).
-- C3: in GA4 (Reports → Engagement → Events), check whether `Lasso Display Primary Click` appears, and say whether
-  any report or conversion uses these event names.
+- C3: in GA4 (Reports → Engagement → Events), check whether Lasso's old click events appear, and say whether
+  any report or conversion uses them. (Superseded 2026-11-14: events are renamed to `affibloom_*` and start from zero; tell the client their reports must use the new names.)
 
 ## UI/UX improvements register
 

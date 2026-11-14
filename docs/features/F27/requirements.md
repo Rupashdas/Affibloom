@@ -1,7 +1,7 @@
 # F27 URL variants: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369 (area 10 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks V1-V5: waiting.
+`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks V1-V5: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -102,6 +102,7 @@ Settled from Lasso and the records:
 
 - **N1 "That slug is already a Lasso link."** names Lasso; the wording rule makes it "That slug is already a
   product's link." Recommendation: that.
+  → **Decided 2026-11-14:** D6: the user accepted the recommendation: "That slug is already a product's link."
 
 ## 5. Scope that needs a home
 

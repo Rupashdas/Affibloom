@@ -3,7 +3,7 @@
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Fields (area 9 of
 `affibloom-docs/plans/archive/dashboard-completion-plan.md`). The product page's half was built in Task 14C (F1, deviation
 68); this document covers Lasso's whole field model, the Fields screens, and the corrections 14C's half needs.
-Gate 4 for Tasks FL1-FL5: waiting.
+Gate 4 for Tasks FL1-FL5: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -166,6 +166,7 @@ Settled by Claude from Lasso and the records:
   14C strips HTML (one-line values) and keeps plain lines. Recommendation: **keep plain text**, escaped on output —
   no value on this site holds HTML (five ratings), and raw HTML is an injection path. If formatting is wanted, allow
   `wp_kses_post` for Long Text only.
+  → **Decided 2026-11-14:** C9: the user accepted the recommendation: plain text, escaped on output.
 
 ## 5. Scope that needs a home
 

@@ -2,7 +2,7 @@
 
 Status: gates 1-2 rewritten 2026-11-14 from a sweep of Lasso 369's data model and of this copy's database (feature
 F10, widened to **everything Lasso stores**). The 2026-11-12 text (approved with Task 6; decisions in
-`docs/decisions/task-6-decisions.md`) is kept: AC1-AC3 keep their numbers and meaning. Gate 4 for Tasks 25A-29E: waiting.
+`docs/decisions/task-6-decisions.md`) is kept: AC1-AC3 keep their numbers and meaning. Gate 4 for Tasks 25A-29E: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -54,7 +54,7 @@ Task 7 turned AC1-AC3 into `tests/E2E/acceptance/F10.spec.ts`; AC4-AC32 join it 
 - **AC15** `--only=variants`: every URL variant (address or Amazon tag) of a product works as it did. (26H; R15)
 - **AC16** `--only=tables`: every comparison table exists with its products, their order, badges, columns and values,
   and `[lasso type="table" id=N]` shows it. (26I; R14)
-- **AC17** `--only=clicks`: the Dashboard's Clicks column shows each product's Lasso total. (26J; R11)
+- **AC17** (not built: decision E1: start from zero) `--only=clicks`: the Dashboard's Clicks column shows each product's Lasso total. (26J; R11)
 - **AC18** `--only=issues`: a product Lasso shows as broken or out of stock shows the same alert before Affibloom's
   first check; a dismissed notice stays dismissed. (26K; R16)
 - **AC19** `--only=amazon`: per-country tracking IDs, and each Amazon product's cached data (name, image, price,
@@ -74,14 +74,14 @@ Task 7 turned AC1-AC3 into `tests/E2E/acceptance/F10.spec.ts`; AC4-AC32 join it 
 
 **Legacy block conversion**
 
-- **AC3** Legacy blocks convert, and can be reverted. (28B; revert restores the stored content byte for byte.)
-- **AC25** `wp affibloom convert-legacy-blocks --dry-run` lists, per post, the boxes it would convert and the boxes
+- **AC3** (not built: decision A1) Legacy blocks convert, and can be reverted. (28B; revert restores the stored content byte for byte.)
+- **AC25** (not built: decision A1) `wp affibloom convert-legacy-blocks --dry-run` lists, per post, the boxes it would convert and the boxes
   that stay as they are, each with its reason; nothing is written. (28A)
-- **AC26** A bare `[lasso …]` shortcode (in a shortcode block, a paragraph or classic content) is converted by the
+- **AC26** (not built: decision A1) A bare `[lasso …]` shortcode (in a shortcode block, a paragraph or classic content) is converted by the
   same rules, or reported. (28C)
-- **AC27** Boxes of the other display types (button, image, grid, list, gallery, table) convert to their Affibloom
+- **AC27** (not built: decision A1) Boxes of the other display types (button, image, grid, list, gallery, table) convert to their Affibloom
   blocks, or stay and are reported while that block does not exist. (28D)
-- **AC28** The admin page converts and reverts, one post per request, behind the same lock and a backup tick. (28E)
+- **AC28** (not built: decision A1) The admin page converts and reverts, one post per request, behind the same lock and a backup tick. (28E)
 
 **Parity and rollback**
 
@@ -90,7 +90,7 @@ Task 7 turned AC1-AC3 into `tests/E2E/acceptance/F10.spec.ts`; AC4-AC32 join it 
 - **AC29** With Lasso off, **every link** in each guide's article has the `href` it had, and every cloaked address
   redirects as before. (29C)
 - **AC30** With Lasso off, no guide requests anything from Lasso's services. (29C)
-- **AC31** AC2 and AC29 hold again after the blocks are converted, and after the conversion is reverted. (29D)
+- **AC31** (not built: decision A1) AC2 and AC29 hold again after the blocks are converted, and after the conversion is reverted. (29D)
 - **AC32** Rollback: with Affibloom off and Lasso on again, the guides match the baselines and Lasso's fingerprint is
   unchanged. (29E)
 
@@ -145,7 +145,7 @@ The full table: `analysis.md`, "Data".
 | R8 | **What a save writes.** Meta: `lasso_custom_redirect`, `lasso_final_url`, `lasso_shortcode`, `affiliate_desc`, `price`, `lasso_custom_thumbnail`, `enable_nofollow`, `open_new_tab`, `enable_nofollow2`, `open_new_tab2`, `link_cloaking`, `custom_theme`, `disclosure_text`, `badge_text`, `buy_btn_text`, `second_btn_url`, `second_btn_text`, `show_price`, `show_disclosure`, `show_description`, `enable_sponsored`, `link_id`, `is_aff_plus`, `boosting_enabled`, `is_import_platform`, `old_genius_url`, `old_second_btn_genius_url`, `affiliate_link_type`; for Amazon `amazon_product_id`, `amazon_country`, `amazon_product_last_updated`; for other stores `extend_product_type`, `extend_product_id`, `extend_product_last_updated`. Then the `lasso_url_details` row; `url_without_arguments`; the groups and their order rows; the thumbnail (`set_post_thumbnail`, `lasso_custom_thumbnail` = its URL, `lasso_thumbnail_id`); `lasso_old_slug` when the slug changed; a row in `lasso_link_updates` when the product ID changed | class-lasso-affiliate-link.php 1412-1444, 1572-1582, 1649-1657, 1696-1830; class-lasso-db.php 4007-4081 |
 | R9 | **How Lasso reads a link for its box** (the mapping must give the same): a flag is on only when `1 === intval( meta )`; `show_price` '' means the setting; an empty button text or disclosure means the setting's; the description is shown when it is longer than 10 characters, whatever `show_description` says, and a missing `show_description` means on. An Amazon link with a cached row takes Amazon's monetized link as its destination, Amazon's price, Amazon's description when its own is empty, and Amazon's name when its title is just "Amazon". Another store's cached price is used when the link's own price is empty. Destination otherwise: `lasso_url_details.redirect_url`, healed from `lasso_custom_redirect`, then `lasso_final_url`. `rel`: `nofollow`, then `noopener` when it opens a new tab, then `sponsored`; the second button gets `sponsored` only with its own nofollow | class-lasso-affiliate-link.php 217-482 |
 | R10 | **The image:** `lasso_custom_thumbnail`; else the featured image ("large"); else `lasso_thumbnail_url`, else the attachment `lasso_thumbnail_id`, and for an Amazon link the cached Amazon image; Lasso's own placeholder file means "none"; an own-site `http://` image is served as `https://` | class-lasso-affiliate-link.php 2795-2847 |
-| R11 | **Clicks** are not recorded on the site. Once a day Lasso asks its cloud (`https://lasso.link/clicks`, with the site URL) for a total per link, sets every `lasso_url_details.clicks` to 0 and writes the totals it got. There is no per-day or per-post history locally | class-lasso-cron.php 5833-5902; models/class-url-details.php 92, 100 |
+| R11 | **Not migrated (decision E1, 2026-11-14): start from zero.** **Clicks** are not recorded on the site. Once a day Lasso asks its cloud (`https://lasso.link/clicks`, with the site URL) for a total per link, sets every `lasso_url_details.clicks` to 0 and writes the totals it got. There is no per-day or per-post history locally | class-lasso-cron.php 5833-5902; models/class-url-details.php 92, 100 |
 | R12 | **Fields.** Definitions in `lasso_fields` (name ≤ 80, type, description, order; the 9 built-ins are re-asserted on upgrade but keep an edited name). A product's fields in `lasso_field_mapping` (one row per product and field: value ≤ 1000 characters, order, visible; a new rating starts at 3.5). "Show field name" is a row in `lasso_metadata` (`Field_Mapping`, `show_field_name_<field id>`). Field 1 is the box's star rating, drawn in a fixed place | models/class-fields.php 16-24, 77-87, 109-150; class-field-mapping.php 49-56, 103-126, 169-184; class-lasso-affiliate-link.php 488-498 |
 | R13 | **Groups:** taxonomy `lasso-cat`; order in `lasso_category_order` (link, group slug, position) | F23 requirements R1, R12; models/class-category-order.php 43-48 |
 | R14 | **Tables:** `lasso_table_details` (title, style `Row` or `Column`, theme, show title, horizontal headers; "show field name" in `lasso_metadata`), `lasso_table_mapping` (a product in a table: order, own title, title visible, badge), `lasso_table_field_group` (per table and product: a column group, a field, order), `lasso_table_field_group_detail` (the value per product, field and group: text; a button as JSON `{button_text, url}`; an image as a URL). A placed table is the shortcode `[lasso type="table" id=<table id>]` | models/class-table-*.php (DDL); models/class-metadata.php 87-120 |
@@ -226,23 +226,29 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
    is not a feature that runs: an administrator starts it, per post or for all, with a stored copy, a revision and a
    revert, and nothing breaks if it is never run (Task 27 keeps rendering the old blocks). The alternative is to drop
    Tasks 28A-28E and AC3 and leave the old blocks in place for good.
+   → **Decided 2026-11-14:** A1: register Lasso's block name `affiliate-plugin/lasso` (Task ED6) and convert nothing; Tasks 28A-28E and AC3, AC25-AC28 are dropped; ADR-003 revised.
 2. **Click history cannot be migrated.** Lasso keeps only a total per link, fetched from its cloud (2,839 clicks
    here); days and posts exist only in Lasso's cloud, which Affibloom may not call. *Recommendation:* carry each
    total as an opening figure ("before Affibloom") so the Clicks column does not restart at zero; the alternative is
    to start every product at 0.
+   → **Decided 2026-11-14:** E1 (revised the same day): start from zero; no click figures are imported (Dashboard Clicks and GA start at cutover); Task 26J is dropped; the click-totals family is not migrated.
 3. **Amazon credentials in Lasso's settings.** The old PA-API key pair is stored; the Creators API fields C1 needs are
    empty. *Recommendation:* never copy the PA-API pair (Affibloom does not use that API); copy the Creators
    credentials if a site has them (shown only as "set"); ask the client for Creators credentials, as C1 already says.
+   → **Decided 2026-11-14:** E3: the user accepted the recommendation
 4. **The 9 records with no link** each carry an ASIN in their slug (`amzn-b0f9hzl44v` …). No box, link or location
    uses them. *Recommendation:* keep skipping them and list them, so the client can add the ones still wanted; the
    alternative is to create them as Amazon products from the slug.
+   → **Decided 2026-11-14:** E4: the user accepted the recommendation
 5. **"Allow duplicate destinations"** (`check_duplicate_link`, on on the live site) is a Lasso General setting that
    Task 6 decision 2 left out, reading it as "refuse duplicates". In the source it chooses **what** counts as a
    duplicate (on: the entered link; off: the final destination). *Recommendation:* F9 builds the control (full scope)
    and the migration imports it; that reverses decision 2.
+   → **Decided 2026-11-14:** the user accepted the recommendation: F9 builds the control and the migration imports it (reverses Task 6 decision 2).
 6. **Stale Amazon values without credentials.** The cached name, image, price and Prime flag become the product's
    own values and stop refreshing at cutover until C1 has credentials. *Recommendation:* migrate them as decided
    (deviation 18), keep the site's Show Price off as it is, and say so in the admin guide.
+   → **Decided 2026-11-14:** E5: the user accepted the recommendation
 
 ## 5. Scope that needs a home
 

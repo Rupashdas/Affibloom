@@ -38,12 +38,12 @@ PATCH /affibloom/v1/settings { ga_tracking_ids, ga_click_tracking, ga_send_pagev
 
 Front end (C3B)
   ClickScript inline config gains ga: { on: ga_click_tracking }  (printed when click_tracking or ga_click_tracking)
-  clicks.js on click: GaEvent::name( button ) → Primary | Secondary | Link Click;
-      params { lasso_title, lasso_href, lasso_text, lasso_badge, event, event_type, event_category, event_label }
+  clicks.js on click: GaEvent::name( button ) → affibloom_primary_click | affibloom_secondary_click | affibloom_link_click;
+      params { affibloom_title, affibloom_href, affibloom_text, affibloom_badge, event, event_type, event_category, event_label }
       gtag function → gtag('event', name, params); else dataLayer array → push({ event: name, … });
       else ga function → ga( tracker ? 'LassoTracker.send' : 'send', 'event', title, name, href )
 
-wp_footer (C3C, if N1)
+wp_footer (C3C, built: decision C6)
   GaTag::print() when ga_click_tracking and IDs: gtag.js?id=<first> (defer) + config per ID
   { send_page_view: ga_send_pageview, anonymize_ip: ga_anonymize_ip }
 ```
@@ -51,7 +51,7 @@ wp_footer (C3C, if N1)
 ## Layers
 
 - **Domain** `Analytics\GaSettings` (value object: IDs list, three flags, `normalise()`), `Analytics\GaEventName`
-  (button → Lasso's name; pure, mirrored in JS and unit-tested against the same table).
+  (button → Affibloom's event name; pure, mirrored in JS and unit-tested against the same table).
 - **Application** `Settings\SettingsService` gains the four keys.
 - **Infrastructure** none new (the settings option).
 - **Interface** settings partial `google-analytics.php`, `assets/admin/settings.js` additions, `Front\ClickScript`
@@ -62,8 +62,8 @@ wp_footer (C3C, if N1)
 - The site's tag is delayed by LiteSpeed: clicks before the first interaction find no `gtag`; looking the library up at
   click time (requirements edge 2) catches a late tag; an earlier click is lost (as with Lasso).
 - With C3C and a correct ID beside the site's own tag, page views double when Pageview is on (N1 note).
-- Event names carry "Lasso" (N2).
-- Unverified in this copy: whether GA4 shows `Lasso Display Primary Click` today (ask the client to look; read only).
+- Event names are Affibloom's own (N2, decided 2026-11-14): GA reports and conversions built on Lasso's names stop at cutover and GA data starts from zero.
+- Whether GA4 shows Lasso's old click events today no longer matters (events renamed, decided 2026-11-14).
 
 ## Security
 

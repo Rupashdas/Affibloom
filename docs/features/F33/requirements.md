@@ -3,7 +3,7 @@
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Import subsystem (Lasso's Import screen, its AJAX,
 the import and revert jobs, the importable-links query, the notifications, the onboarding step and the WP All Import
 hook). New feature: the feature plan's exclusion "Imports from other affiliate plugins" is withdrawn (everything Lasso
-does is in scope, 2026-11-13). Gate 4 for Tasks IM1-IM20: waiting.
+does is in scope, 2026-11-13). Gate 4 for Tasks IM1-IM20: given by the user 2026-11-14.
 
 F33 is **not** F10. F10 moves Lasso's own data into Affibloom once (all families, CLI, report). F33 is Lasso's
 feature for taking links over from *other* affiliate plugins, which Affibloom offers too; **Lasso becomes one more
@@ -262,27 +262,33 @@ Settled by Claude from Lasso and the records:
    are; the shortcodes render through F31's handlers and old addresses redirect (D1, D2). Lost: the stored posts never
    name Affibloom, so with Affibloom deactivated those shortcodes fall back to the source plugin (or nothing) and old
    addresses to whatever answers them — which is the state before the import. **Recommendation: accept.**
+   → **Decided 2026-11-14:** A4: the user accepted the recommendation
 2. **Revert deletes the product (D4).** Lasso's revert hands the link back to the source plugin (it had taken its post).
    Affibloom never took it, so Revert deletes the imported product, including any edits made to it since; a product
    that an Affibloom block or shortcode already uses would leave that box empty. **Recommendation:** delete
    permanently as Lasso's "can not be undone", but refuse with F21 36E's in-use rule ("This product is used in N
    places") when Affibloom's own blocks use it.
+   → **Decided 2026-11-14:** E10: the user accepted the recommendation
 3. **Copy instead of move (D4).** Lasso changes the other plugin's posts into Lasso links (they vanish from that
    plugin). Affibloom copies; with the source plugin still active, its own prefix keeps answering its old addresses
    (the 301 of D2 takes over only once it is deactivated). **Recommendation: copy**, and say on the screen "Deactivate
    <plugin> after importing so its addresses come to Affibloom."
+   → **Decided 2026-11-14:** E10: the user accepted the recommendation
 4. **Amazon items without credentials (D9, R58).** AAWP, AmaLinks Pro and SiteStripe items that the source never
    cached import as "Amazon" with no price until C1's credentials exist. **Recommendation: import them so** (they
    still link, tagged), refresh on C1.
+   → **Decided 2026-11-14:** E11: the user accepted the recommendation
 5. **Site-specific repairs not built (R59, R19c):** the Pretty Links final-URL map, the one-off Pretty Links category
    job and the ACF sidebar rewrite serve other customers' domains (orlandolocal.com, williambeem.com, suburbiapress.com,
    gamecows.com, …) and do nothing on volleyballvault.com; the category job is covered by the import's own group
    mapping. **Recommendation: leave them out** (recorded here).
+   → **Decided 2026-11-14:** E12: the user accepted the recommendation
 6. **This site's 49 ThirstyAffiliates links.** ThirstyAffiliates is gone, but its 49 links remain and a published guide
    (3297) links to `/recommends/adidas-dame-8-all-volleyball/`, which the facts recheck lists as a 404 (Task 41 step 8).
    Importing ThirstyAffiliates (IM2) would make that address redirect to a product with the same destination.
    **Recommendation:** after IM2, import the one link the guide uses (or all 49) on staging, with the client's
    approval, and close Task 41 step 8 that way.
+   → **Decided 2026-11-14:** E13: the user accepted the recommendation
 
 ## 5. Scope that needs a home
 

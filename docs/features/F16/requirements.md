@@ -29,7 +29,7 @@ types are their own features, written next.
 - Per configuration: **theme**, **density preset and values**, **element visibility**, **layout** (desktop and an
   optional phone override), **colours and labels**.
 - Site-wide (not per type): grid **columns**, disclosure text, Show Price, the three disclosure scopes, Link from
-  Display Title, Keep Site Stripe UI, Brag mode URL and toggle, Custom CSS, Reset Settings.
+  Display Title, Keep Site Stripe UI, Brag mode URL and toggle (not built: decision B9; removed in Task 2X6), Custom CSS, Reset Settings.
 
 ## 2. Controls
 
@@ -123,7 +123,7 @@ stored in the same bucket. Hint: "Colors and button labels apply to the selected
 ### 2.6 Disclosure & behavior (site-wide)
 
 Disclosure text (textarea), Show Price, Disclosure in Single Display, Disclosure in Grids, Disclosure in Lists &
-Tables, Link from Display Title, Keep Site Stripe UI, Brag mode URL, Enable Brag Mode.
+Tables, Link from Display Title, Keep Site Stripe UI, ~~Brag mode URL, Enable Brag Mode~~ (not built: decision B9; Task 2X6 removes the controls 10E built).
 
 **Disclosure in Lists & Tables is one visible toggle writing two stored keys**, `show_disclosure_list` and
 `show_disclosure_table` (two hidden checkboxes, `display.php` 676-677). Affibloom keeps both keys, so a migrated
@@ -147,7 +147,7 @@ these keys. This list is the completeness check for the feature:
 `display_color_secondary_button`, `display_color_button_text`, `display_color_pros`, `display_color_cons`,
 `primary_button_text`, `secondary_button_text`, `show_price`, `show_disclosure`, `show_disclosure_grid`,
 `show_disclosure_list`, `show_disclosure_table`, `link_from_display_title`, `keep_site_stripe_ui`,
-`disclosure_text`, `enable_brag_mode`, `lasso_affiliate_URL`, `custom_css`, `custom_css_default`.
+`disclosure_text`, `enable_brag_mode` (not built: B9), `lasso_affiliate_URL`, `custom_css`, `custom_css_default`.
 
 Two keys belong to the display model but are **not** written here: `display_type` (the site's default display
 type, set where a display is created — the type segment only chooses which bucket is being edited) and

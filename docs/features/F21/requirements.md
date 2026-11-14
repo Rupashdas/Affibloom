@@ -239,12 +239,15 @@ Settled by Claude from Lasso and the records:
   35E checks their filters), their tied links keep the attributes stored when Lasso last scanned, because Affibloom
   will not rewrite their stores (D3). Lasso rewrote them in place (R44). **Recommendation:** accept; none is used here
   (0 recipes, cards or tables; Elementor is inactive), and 35E hooks every output filter that exists.
+  → **Decided 2026-11-14:** A5: the user accepted the recommendation
 - **N2 Lasso's display conversions in content** (R41, R45-R47): other plugins' shortcodes turned into `[lasso]`, SiteStripe
   iframes turned into a product box, a `[lasso]` in an image block turned into an image. **Recommendation:** do them at
   render time — Task 27's compatibility shortcodes draw the imported plugins' shortcodes, and 35J draws the SiteStripe
   and image-block cases (setting off and unused here).
+  → **Decided 2026-11-14:** A4: the user accepted the recommendation: render time.
 - **N3 Lasso's stamps stay in content after cutover** (2,790 anchors): stripping them (R50) is a content edit.
   **Recommendation:** keep them; they are invisible and D4 uses them.
+  → **Decided 2026-11-14:** A2: the `data-lasso-*` stamps stay in content; nothing strips them.
 
 ## 5. Scope that needs a home
 

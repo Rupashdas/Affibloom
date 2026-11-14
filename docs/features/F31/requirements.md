@@ -291,13 +291,17 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
 - **N1 `[lasso prompt]` (R15) depends on Lasso's cloud** (`https://lasso.link/chat`, LaunchDarkly `enable_ai_display`).
   Recommendation: `[lasso prompt]` prints the answer Lasso cached in its transient (none on this copy) and otherwise
   nothing; `[affibloom]` offers no `prompt`. Classified C.
+  → **Decided 2026-11-14:** B5: `[lasso prompt]` prints Lasso's cached text or nothing; no generator.
 - **N2 `title_type="h1"`.** Lasso accepts any tag and its help names H1; decision 7 accepts `h2`-`h6`. Recommendation:
   accept `h1` too (no box on the site uses it; a page with two `h1` is the editor's choice, as in Lasso).
+  → **Decided 2026-11-14:** C8: the user accepted the recommendation: `title_type="h1"` is allowed.
 - **N3 `compact="hide"`** (A45) does nothing in Lasso although its help text says so. Recommendation: keep Lasso's
   behaviour for `[lasso]` (no visible change at cutover) and let `[affibloom]` accept `true` only, with help text that
   says `true`.
+  → **Decided 2026-11-14:** D1: the user accepted the recommendation
 - **N4 Easy Affiliate Links' REST and block takeover** (R27) changes another plugin's API while it is active.
   Recommendation: build it as Lasso has it (27X6), active only when EAFL is; the site does not use EAFL.
+  → **Decided 2026-11-14:** D2: the user accepted the recommendation
 
 ## 5. Scope that needs a home
 

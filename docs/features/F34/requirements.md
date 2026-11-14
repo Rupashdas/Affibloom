@@ -3,7 +3,7 @@
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369 (every path that rewrites stored content, Post Content
 History, the content side of Revert, Fix Overwritten Links, `class-fix.php`, `pages/fix/class-hook.php` and
 `class-lasso-db-script.php`; `affibloom-docs/plans/archive/dashboard-completion-plan.md`, "Content rewriting/history/repair").
-Gate 4 for Tasks H1-H4: waiting. H3 and H4 exist only if the user approves N3.
+**Decided 2026-11-14 (the user): A1, no legacy block conversion; A2, the `data-lasso-*` stamps stay. Tasks H1-H4 are dropped: this feature has no tasks and builds nothing.** Why: History, Revert and the clean-up exist only to list and undo content changes, and Affibloom makes none (the standing rule); with no conversion (ADR-003 revised) and no stamp removal there is nothing to list or revert. The requirements below are kept as the record of what Lasso does.
 
 The standing rule is the user's: **nothing Affibloom builds ever edits post content** (deviation 52). This feature is
 the complete list of what Lasso rewrites and what each rewrite is for (section 3, B), what Affibloom does instead
@@ -19,34 +19,34 @@ if the user wants that clean-up (N3).
 - As the site owner, I know which of Lasso's rewrites Affibloom does not make and what (if anything) readers or
   editors lose by it, and I decide each loss myself.
 
-- **AC1** Affibloom → **History** lists the content changes Affibloom made (a converted post; a cleaned post when H3
+- **AC1** (not built: decision A1) Affibloom → **History** lists the content changes Affibloom made (a converted post; a cleaned post when H3
   exists), newest first, ten to a page: Post ID, Post Name (edit and view icons), Post Type, Modified date (date and
   time on two lines), Action (**View**, **Revert**); "Search History" finds by post title, spaces as wildcards; the
   column headings sort; with none, "Looks like we're coming up empty."; a page number past the last opens page 1.
   (H1, R31-R36, D5-D7)
-- **AC2** **View** opens "View Post Content History": Post Name with its edit and view links, Post ID (the post's ID),
+- **AC2** (not built: decision A1) **View** opens "View Post Content History": Post Name with its edit and view links, Post ID (the post's ID),
   Post Type, Modified Date, and "Content changed" with the difference between the content before and after the change
   (insertions and deletions marked, whole unchanged runs collapsed); an unknown or missing ID opens the History list.
   (H2, R37-R39, D8)
-- **AC3** **Revert** (on a row or on the detail page) asks "Revert this post?" ("The post's content goes back to what
+- **AC3** (not built: decision A1) **Revert** (on a row or on the detail page) asks "Revert this post?" ("The post's content goes back to what
   it was before this change. A revision of the current content is kept." / Cancel, Revert), shows
   "Saving your changes." with the bar, puts the post's content back byte for byte through `wp_update_post` (a revision
   is made), removes the change's record and says "Content reverted for “<post name>”."; the row leaves the list.
   (H2, R40-R43, D9-D11)
-- **AC4** A post edited after its change is not reverted from the screen: "“<post name>” was edited after this change.
+- **AC4** (not built: decision A1) A post edited after its change is not reverted from the screen: "“<post name>” was edited after this change.
   Revert it from WP-CLI with --force, or edit it by hand." and nothing is written; a post with a later change
   (clean-up after conversion) says "Revert the later change of this post first.". (H2, D10)
-- **AC5** History reads only Affibloom's records: Lasso's 18 `lasso_post_content_history` rows are not listed and the
+- **AC5** (not built: decision A1) History reads only Affibloom's records: Lasso's 18 `lasso_post_content_history` rows are not listed and the
   table is not touched (fingerprint unchanged). (H1, D3, N2)
-- **AC6** (only with N3) `wp affibloom lasso-attributes strip --dry-run` lists, per post, how many `data-lasso-id`,
+- **AC6** (not built: decision A2) `wp affibloom lasso-attributes strip --dry-run` lists, per post, how many `data-lasso-id`,
   `data-lasso-name` and `data-lasso-lid` attributes it would remove (and the posts it skips, with the reason); without
   `--dry-run` it removes exactly those attributes and nothing else (every other byte equal), keeps a stored copy and a
   revision per post, records the change for History, and refuses to run before the Lasso migration has finished;
   `--revert` puts each post back byte for byte. (H3, R18, D14)
-- **AC7** (only with N3) Affibloom → History → **Remove Lasso attributes** card: the dry-run figures, a backup tick
+- **AC7** (not built: decision A2) Affibloom → History → **Remove Lasso attributes** card: the dry-run figures, a backup tick
   ("I have a database backup from today"), **Remove** one post per request with progress, behind the migration lock;
   the cleaned posts appear in the History list as "Lasso attributes removed". (H4, R18, D14)
-- **AC8** No other Affibloom code path writes `post_content`: a check over `src/` finds `wp_update_post` /
+- **AC8** (not built: decision A1) No other Affibloom code path writes `post_content`: a check over `src/` finds `wp_update_post` /
   `wp_insert_post` with content, `$wpdb` writes to `posts`, and `post_content` filters only in the converter, the
   clean-up and the revert. (H1, D2)
 
@@ -286,23 +286,29 @@ Settled by Claude from Lasso and the records:
 - **N1 Lasso's history settings and purge are dropped:** the "Audit → Post Content History" toggle (R32, default on)
   and the 14-day purge (R30). **Recommendation:** drop both; Affibloom records only its own operator-run changes, and
   the copy must outlive 14 days to be a rollback (F10 D17).
+  → **Decided 2026-11-14:** D10: the user accepted the recommendation
 - **N2 Lasso's 18 history rows are not shown or revertible** (R33-R43 for Lasso's rows). **Recommendation:** accept
   (D3): every post was edited after Lasso's change, so a revert would lose those edits; the rows stay in Lasso's table
   for rollback until 9.6.
+  → **Decided 2026-11-14:** D10: the user accepted the recommendation
 - **N3 Removing Lasso's stamps from content at retirement** (roadmap 9.6, Lasso's R18 in part). It edits 180 posts
   (2,791 + 698 + 698 attributes) and conflicts with F21 N3 (keep the stamps). **Recommendation:** keep the stamps (F21
   N3) and do **not** build H3-H4 now; decide at Phase 9. If the user wants the clean-up, H3-H4 are drafted: operator
   run, after migration, stored copy, revision, revert, History.
+  → **Decided 2026-11-14:** A2: keep the stamps; no clean-up (H3-H4 dropped).
 - **N4 Monetize / unmonetize do not rewrite the post** (R11-R13): F22 must give the same reader-visible result by an
   assignment applied at render time; the editor and the stored HTML keep the old URL. **Recommendation:** accept;
   F22 owns it (section 5).
+  → **Decided 2026-11-14:** A3: monetize at render time plus "Edit in post" (F22 O10).
 - **N5 Not built because nothing rewrites:** Fix Overwritten Links (R47-R49: damage from Lasso's Hub sync, **C —
   never**; 0 candidates here), the Yoast FAQ fix on every save (R25: repairs Lasso's stamps; the FAQ here has none),
   the scan-time content, anchor and block fixes (R50-R54: they run only inside Lasso's write-back; the SUPPORT_SITES
   ones only on other customers' domains, F37 N4), and the data scripts (R55-R58: Lasso's own tables and records;
   migration reads the upgraded data as it is, F10). **Recommendation:** accept all; D15 keeps the parser tolerance.
+  → **Decided 2026-11-14:** A9: the user accepted the recommendation
 - **N6 Reverting from the screen refuses edited posts** (D10), where Lasso overwrites them (R41). **Recommendation:**
   accept; `--force` stays in WP-CLI.
+  → **Decided 2026-11-14:** D9: the user accepted the recommendation
 
 ## 5. Scope that needs a home
 

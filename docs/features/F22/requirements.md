@@ -1,7 +1,7 @@
 # F22 Opportunities: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Opportunities (area 3 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks O1-O10: waiting. The monetize action (O10) waits
+`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks O1-O10: given by the user 2026-11-14. The monetize action (O10) waits
 for the user's answer to N1.
 
 ## 1. User stories and acceptance criteria
@@ -325,17 +325,21 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
   the next save re-indexes and the opportunity goes. **(C) List only** — no action. **Recommendation: A, plus B's "Edit
   in post" as a row action**: A keeps Lasso's workflow (switch, dialog, unmonetize) and the reader's result exactly,
   and is fully reversible; B is the honest way to make the change permanent in the content. O10 is written for A.
+  → **Decided 2026-11-14:** A3: monetize at render time (a stored "this link → this product" assignment) plus "Edit in post".
 - **N2 The Amazon branch** (R70): Lasso expands `amzn.` short links (a request to Amazon's redirector) and creates a
   product through its cloud. **Recommendation:** on an Amazon row the switch opens the same Monetize dialog with
   **Create a Link** prefilled with the row's URL (F18's add flow, Amazon data dormant until C1); short links are not
   followed (Affibloom never fetches Amazon); raw Amazon links already get the site's tag at render time (F21 D14).
+  → **Decided 2026-11-14:** E16: the user accepted the recommendation
 - **N3 Unmonetize of a link that is tied by its own URL** (a post's links, R30, R72): Lasso writes the scan's
   `original_link_slug` back. Under A this would be a render-time "print the original URL" override for a tied
   anchor. **Recommendation:** offer it only when the row has an `original_url` different from its URL (450 rows here,
   F21), as an assignment with product 0; otherwise the switch of a tied row is shown on and disabled with the tooltip
   "This link is in the post's content; edit the post to change it."
+  → **Decided 2026-11-14:** E17: the user accepted the recommendation
 - **N4 Programs from a frozen catalogue?** The 15,470 programmes are Lasso's data, synced from its cloud (R79); a copy
   would never update and is Lasso's. **Recommendation:** do not build Programs (D14), as the completion plan says.
+  → **Decided 2026-11-14:** B6: the user accepted the recommendation: Program Opportunities are not built.
 
 ## 5. Scope that needs a home
 

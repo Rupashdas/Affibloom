@@ -86,7 +86,7 @@ figures, N1). They replace Phase 7's Tasks 33-34.
 | Table `{prefix}affibloom_clicks` (`day` date, `product_id`, `post_id`, `location_id` bigint unsigned, `button` varchar(8), `clicks` int unsigned; PK `(day, product_id, post_id, location_id, button)`, KEY `product_day`, KEY `location_day (location_id, day)`) | daily totals, 400 days | `lasso_url_details.clicks` (one 30-day number per product; imported by 34D as one row per product, `post_id 0`, `location_id 0`, `button 'lasso'`, `day` = last sync date) |
 | Option `affibloom_settings[click_tracking]` (bool, default true) | counting on/off | `performance_event_tracking` |
 | Transient `affibloom_c_<32 hex>` (30 s) | repeat guard | none (Lasso has none) |
-| Option `affibloom_lasso_clicks_synced_on` (Y-m-d) | the day stamp used by 34D | none; taken from production's last `lasso_cron_sync_clicks` run (cron log or `_transient`/option evidence at cutover) or the export date |
+| ~~Option `affibloom_lasso_clicks_synced_on` (Y-m-d)~~ (not built: decision E1) | the day stamp used by 34D (dropped) | none; taken from production's last `lasso_cron_sync_clicks` run (cron log or `_transient`/option evidence at cutover) or the export date |
 
 Not mapped (cloud): `js_domain`, `full_js_domain`, `connect-snippet.min.js`, `lasso_clicks_loc_*`, `stop_lasso_analytics`,
 `segment_analytics`, `lsid` cookie.
@@ -125,7 +125,7 @@ GET admin.php?page=affibloom[&orderby=clicks&order=desc|asc]; GET /affibloom/v1/
 GET /affibloom/v1/products/{id}/locations?…  (36B)  gains `clicks` per location:                    (34C)
   ClickReport::by_location( product, location IDs, 30 )
 
-wp affibloom import lasso --step=clicks  (Task 26)   reads lasso_url_details.clicks, writes 34D's rows,  (34D)
+wp affibloom import lasso --step=clicks  (NOT BUILT, decision E1: start from zero)   reads lasso_url_details.clicks, writes 34D's rows,  (34D)
   idempotent (replaces the 'lasso' rows), refuses when the Lasso table is missing
 ```
 

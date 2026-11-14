@@ -1,7 +1,7 @@
 # F37 Tools and diagnostics: requirements
 
 Status: written 2026-11-14 from a sweep of Lasso 369 (Settings → Logs, DB Status, PHP compatibility, Uninstall,
-activation, deactivation, upgrades, Permissions, licence and feature flags). Gate 4 for Tasks TL1-TL7: waiting.
+activation, deactivation, upgrades, Permissions, licence and feature flags). Gate 4 for Tasks TL1-TL7: given by the user 2026-11-14.
 
 ## 1. User stories and acceptance criteria
 
@@ -123,12 +123,16 @@ administrators, no other users with roles.
 
 - **N1 Lasso's uninstall rewrites posts** (R15, F9 R64). Recommended: not built; the Uninstall card holds Task 38's
   opt-in (an Affibloom addition — Lasso deletes nothing) and lists the posts using Affibloom with edit links.
+  → **Decided 2026-11-14:** A8: the user accepted the recommendation
 - **N2 Permissions vs decision 1.** Recommended: build Lasso's select (TL6) with the corrected mapping (Contributor
   `edit_posts`, Subscriber `read`), `PRODUCTS` and `SETTINGS` follow it, only administrators change it; live value
   Administrator keeps today's behaviour.
+  → **Decided 2026-11-14:** C3: build Lasso's select (TL6), default Administrator, with the corrected Contributor/Subscriber mapping.
 - **N3 Lasso cloud items** (R16 Stop Lasso Analytics, R24 licence activation, R28 updates, R38, R39 flag service): not
   built (rule C). Recommended: confirm.
+  → **Decided 2026-11-14:** B1: left out.
 - **N4 `SUPPORT_SITES`** fixes run only on the listed domains, none of them this site. Recommended: not built.
+  → **Decided 2026-11-14:** B7: the user accepted the recommendation
 
 ## 5. Scope that needs a home
 

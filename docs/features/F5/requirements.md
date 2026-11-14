@@ -3,7 +3,7 @@
 Status: rewritten 2026-11-14 from a sweep of Lasso 369's Single display (full-scope rule, deviation 24). The first
 version (gates 1-2 approved with Task 6, 2026-11-12, `docs/decisions/task-6-decisions.md`) held AC1 and AC2 only; both
 are kept with their numbers and meaning. **Gate 4 for Tasks 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D and 14E:
-waiting.** F6 (buttons), F7 (per-box overrides) and F8 (rating) keep their own ACs and point here for the shared engine.
+given by the user 2026-11-14 (22D dropped, decision B9).** F6 (buttons), F7 (per-box overrides) and F8 (rating) keep their own ACs and point here for the shared engine.
 
 **What this feature is:** everything that turns one product into the "Single" display a reader sees: the 8 themes and
 their 3 box layouts, every element, how the Display settings (F16) reach the markup and the CSS, the per-product
@@ -70,7 +70,7 @@ previews that render the real box. Grid, List, Gallery, Table, Button, Image and
   Disclosure is on (the site's setting is only the default); a box's `disclosure_text` forces it on. (22B; R24-R25)
 - **AC22** The timestamp shows Amazon's last update with Lasso's tooltip where Lasso shows it (never on basic links;
   classic: with a shown price; advanced: the Timestamp element). (22C; R29)
-- **AC23** With Brag mode on and a brag URL set, the box ends with the brag link. (22D; R44)
+- **AC23** (not built: decision B9) With Brag mode on and a brag URL set, the box ends with the brag link. (22D; R44)
 - **AC24** With "Keep Site Stripe UI" on, a box with `sitestripe="true"` prints Lasso's SiteStripe card. (22E; R13)
 - **AC25** Settings → Display shows the sample box for the selected type and theme at desktop and phone width with the
   unsaved settings, every element drawn and hidden live, links inert. (10D; R94-R99)
@@ -208,7 +208,7 @@ display views; `ALL` = `class-lasso-affiliate-link.php`; `Helper` = `class-helpe
 |---|---|---|
 | R42 | **Stylesheets:** `lasso-live.min.css` (41 KB: container, elements, `.mobile`, tooltip, stars, fields, copy button, SiteStripe, the 8 themes and their phone rules at 767.98 px), `lasso-table-frontend.min.css` (dependency `lasso-live`), and in advanced rendering `lasso-display-v2-frontend.css` (246 KB, dependency `lasso-live`); versions are file times. | Helper 5129-5149, 5360-5369 |
 | R43 | **`<head>` style block** (`wp_head`): `<style type="text/css">:root{--lasso-main…--lasso-cons (the Single bucket); in advanced rendering --lasso-density-* and --lasso-layout-columns}</style>` followed by the Custom CSS (`custom_css_default`), unescaped but stored through `format_css`'s character allowlist (no `<`). The same block prints on `admin_head`. | class-hook.php 59, 659-669; Helper 4337-4359, 4468-4480, 6023-6030 |
-| R44 | **Brag:** shown when (Brag mode on and a brag URL set) or **(C)** 48 hours after `lasso_end_date` (Lasso's licence); `<div class="lasso-single-brag"><a class="lasso-brag" href="<url>?utm_source=brag" target="_blank" rel="nofollow noindex"><img src="…/lasso-icon-brag.png" {lazy} alt="Lasso Brag" width="30" height="30"></a></div>`, built once per request. The box's `brag` attribute is read but has no effect on Single. | layouts; Helper 6434-6450; Html_Helper 664-690; Shortcode 268, 427-428 |
+| R44 | **Not built (decision B9, 2026-11-14: brag mode left out).** **Brag:** shown when (Brag mode on and a brag URL set) or **(C)** 48 hours after `lasso_end_date` (Lasso's licence); `<div class="lasso-single-brag"><a class="lasso-brag" href="<url>?utm_source=brag" target="_blank" rel="nofollow noindex"><img src="…/lasso-icon-brag.png" {lazy} alt="Lasso Brag" width="30" height="30"></a></div>`, built once per request. The box's `brag` attribute is read but has no effect on Single. | layouts; Helper 6434-6450; Html_Helper 664-690; Shortcode 268, 427-428 |
 | R45 | **Front-end assets** (`wp_enqueue_scripts`): Smart CSS Loading off → R42 on every front-end page; on → only when the page needs it (R46); `lasso-copy-clipboard.min.js` (footer) **in both cases**. | class-hook.php 641-652 |
 | R46 | **"Needs the CSS"** (Smart CSS Loading on): non-singular views always; a singular view when its link locations hold a Lasso display or a competitor display, or its content holds `[lasso`, `affiliate-plugin/lasso`, `lasso-display`, `lasso-display-table`, `lasso-table` or `type="table"`, or its Elementor data holds `lasso_shortcode` / `[lasso`. When not, the `<head>` block (R43) is skipped too. Label "Smart CSS Loading", help "Skip display CSS on pages without Lasso displays or tables to improve page speed. Purge page cache after enabling.", toggle "Enable Smart CSS Loading" (Settings → General). | Helper 5227-5348; class-hook.php 659-669; general.php 236-256 |
 | R47 | **Late safety net:** every box render enqueues the stylesheets (printed in the footer when late) and, when the `<head>` block was skipped, adds the `:root` block, the Custom CSS and in advanced rendering the WP-theme colour overrides (`article .lasso-display.lasso-ds-v2-frontend.<theme>` …, `!important`) inline on `lasso-live`; once per request. | Shortcode 321-324; Helper 5184-5218, 4405-4440 |
@@ -323,7 +323,7 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
   Prime flag is on. To match R20 at cutover the **migration sets the flag for every Amazon product** (Lasso shows Prime
   for all of them, 242 of 250 live boxes); the per-product switch (Affibloom's, interface spec) lets an editor turn it
   off. Correction for Task 26 (section 5).
-- **D8 Brag** (R44) without the licence rule (C): Brag mode on and a brag URL set (F16, 10E's `brag_url`). The icon and
+- **D8 Brag** (R44; not built, decision B9: brag mode is left out, no brag icon, 22D dropped) without the licence rule (C): Brag mode on and a brag URL set (F16, 10E's `brag_url`). The icon and
   its alt text: "Needs the user" N3.
 - **D9 Wording:** the comment prints `<!-- PRODUCT BOX -->`; the preview's sample secondary link is `#`; the brag alt
   follows N3; the tooltip and every other reader-facing text is Lasso's.
@@ -350,21 +350,25 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
   Under the full-scope rule the box is 8 themes × 3 layouts × the v2 engine (3,169 lines of compatibility rules), and the
   site's Additional CSS shapes today's box through 33 `.lasso-*` rules (box shadow, badge size, description size, Cutter
   rules). With `affibloom-` names those rules stop applying and the look changes at cutover unless the site's CSS is
-  rewritten. Lasso is GPL v2+, so its CSS may be ported. **Recommendation:** print Lasso's markup and class names
+  rewritten. Lasso is GPL v2+, so its CSS may be ported. **Recommendation (not taken: decision C1, ADR-6 kept):** print Lasso's markup and class names
   (`lasso-container`, `lasso-display`, `lasso-<theme>`, `lasso-box-N`, …) plus one `affibloom-box` class on the
   container, and ship Affibloom's port of Lasso's Single rules from `lasso-live.min.css` and
   `lasso-display-v2-frontend.css`. The F5-F8 specs' `.affibloom-*` selectors then move to Lasso's (the ACs keep their
   meaning; 18A changes the specs). If ADR-6 stays, 18B, 18E-18J and 22E each write their theme's CSS instead of porting
   it, and the site's Additional CSS rules are translated at cutover (Task 41).
+  → **Decided 2026-11-14:** C1: ADR-6 is kept, so the recommendation is not taken: the box uses Affibloom's own class names and stylesheet; the site's 33 `.lasso-*` Additional CSS rules are translated at cutover (Task 41).
 - **N2 Smart CSS Loading's default.** Lasso's default is off (CSS on every page; this site: off). F5 AC2 (approved
   2026-11-12) wants no CSS without a box. **Recommendation:** build both modes, default **on** in Affibloom, and let the
   migration set it on whatever Lasso stored; off stays available for themes that render boxes outside the content.
+  → **Decided 2026-11-14:** C5: Smart CSS Loading on by default; the migration switches it on.
 - **N3 The brag icon.** Lasso's brag link shows Lasso's logo (`lasso-icon-brag.png`, alt "Lasso Brag") to earn Lasso
   affiliate commissions. **Recommendation:** keep the mechanism (D8) with a neutral 30 × 30 link icon shipped by
   Affibloom and the alt text "Brag", the URL being the user's; the site has Brag mode off.
+  → **Decided 2026-11-14:** B9: brag mode is left out; no brag icon.
 - **N4 Baseline capture on staging** (D10, 18D) creates throwaway posts and products with Lasso on staging and changes
   their Display Theme; **Recommendation:** approve one staging session for it (the capture tool deletes what it
   created).
+  → **Decided 2026-11-14:** F1: one approved staging session; what the tool creates is deleted after.
 
 ## 5. Scope that needs a home
 

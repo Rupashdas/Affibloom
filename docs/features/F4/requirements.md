@@ -12,7 +12,7 @@ Tasks 23A-23G, 24A-24E, ED1-ED6, MCP1: waiting. Analysis: `analysis.md`. Tasks: 
   and change it per placement without touching the product.
 
 - **AC1** Insert block → search → Add shows the box in the editor. (23A-23C; corrected 2026-11-14: the block first
-  shows "Choose a Display Type" and **Single** leads to the search, unless the user keeps U1, N1. The meaning,
+  shows "Choose a Display Type" and **Single** leads to the search: U1 is withdrawn (decided 2026-11-14, C2). The meaning,
   insert-search-Add-see, is unchanged.)
 - **AC2** The published page shows the box. (23C)
 - **AC3** A new block shows the empty panel ("Choose a Display Type" prompt text, **Add a Display**); while the modal
@@ -225,21 +225,27 @@ Settled by Claude from Lasso and the records:
 - **N1 U1 no longer holds.** U1 (approved 2026-11-12) skipped "Choose a Display Type" because Single was the only
   display in scope. Under the full-scope rule all seven types exist, so the chooser is a real choice again.
   Recommendation: withdraw U1 and build Lasso's chooser (23A); AC1's test gains the Single click.
+  → **Decided 2026-11-14:** C2: U1 is withdrawn; Lasso's "Choose a Display Type" is restored (Task 23A).
 - **N2 Existing `affiliate-plugin/lasso` blocks.** ADR-003 converts them to Affibloom's block at cutover, which
   rewrites `post_content` of 34 posts and is now forbidden. Without Lasso's script the 248 blocks show as
   "unsupported" in the editor (they still render through Task 27's `[lasso]` handler). Recommendation: Affibloom
   registers the `affiliate-plugin/lasso` block name itself, hidden from the inserter, with Lasso's attributes and
   save format and this feature's panel, sidebar and preview (ED6); no conversion; ADR-003 is revised.
+  → **Decided 2026-11-14:** A1: register the legacy block name and edit those blocks in place (Task ED6); no conversion; ADR-003 revised.
 - **N3 Lasso's link attributes in core blocks.** 147 posts (24 image, 49 GenerateBlocks button, 1 button block) carry
   `data-lasso-*`; without R80-R82 those blocks fail validation when opened. Recommendation: keep editor-only filters
   that preserve the attributes (ED5); no content is rewritten.
+  → **Decided 2026-11-14:** the user accepted the recommendation: build ED5.
 - **N4 AI Text** depends on Lasso's AI service and flag (R56; host of `get_chatgpt_response` UNVERIFIED). Recommend
   leaving it out of the chooser (seven types); no post uses `[lasso prompt]`.
+  → **Decided 2026-11-14:** B5: the AI Text tile is left out.
 - **N5 MCP routes** (R76-R79) are called by Lasso's cloud with its signing secret; insert-display writes post content.
   Recommend building none (C — never); a future AI-agent integration would be a new, read-only design (MCP1 is a
   placeholder, not scheduled).
+  → **Decided 2026-11-14:** A10: no MCP routes; MCP1 is dropped.
 - **N6 Elementor content rewriting** (R72: after-save scan, `_elementor_data` monetize/replace) is not built (content
   rule; the link scan is the content-index feature's).
+  → **Decided 2026-11-14:** A10: Elementor content rewriting is not built.
 
 ## 5. Scope that needs a home
 

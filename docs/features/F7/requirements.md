@@ -3,7 +3,7 @@
 Status: Approved with Task 6 (gate 1), 2026-11-12. Decisions: `docs/decisions/task-6-decisions.md`. Checked against
 Lasso 369 on 2026-11-14 (F5 sweep): Lasso reads **every** Single override listed below from a box, not only the badge
 and description, so AC3-AC12 were added. **The shared engine is F5**; its rules R65-R89 are this feature's source.
-Gate 4 for Tasks 20A-20C: waiting. In content today: `badge` 113, `description` 119, `title` 34, `primary_url` 12,
+Gate 4 for Tasks 20A-20C: given by the user 2026-11-14. In content today: `badge` 113, `description` 119, `title` 34, `primary_url` 12,
 `image_url` 8, `title_url` 4, `secondary_url` 1, `title_type` 1.
 
 ## User stories

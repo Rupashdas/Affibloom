@@ -2,7 +2,7 @@
 
 Status: rewritten 2026-11-14 from a sweep of Lasso 369 (link health, the Alert column, Lasso's cron and background
 jobs). Gate 1 of 2026-11-12 (Task 6, `docs/decisions/task-6-decisions.md`) kept; AC1-AC2 keep their numbers and
-meaning, with corrections marked. Gate 4 for Tasks 30A-32E: waiting. These tasks replace Phase 6's Tasks 30-32.
+meaning, with corrections marked. Gate 4 for Tasks 30A-32E: given by the user 2026-11-14. These tasks replace Phase 6's Tasks 30-32.
 
 ## 1. User stories and acceptance criteria
 
@@ -214,14 +214,19 @@ Settled from Lasso and the records:
   405, 429, 5xx, timeouts "inconclusive". *Recommend Lasso's rule with D4's second check:* here such codes were rare (1 ×
   403, 2 × 500, 4 × 503, 1 × 400) and all cleared on later checks; a merchant answering 403 to everyone would otherwise
   never be reported.
+  → **Decided 2026-11-14:** E15: the user accepted the recommendation
 - **N2 Extend products** (7 Walmart here): stock and "not found" came from Lasso's cloud. *Recommend the plain HTTP check
   (broken only, no out of stock).*
+  → **Decided 2026-11-14:** E15: the user accepted the recommendation
 - **N3 Lasso's last Amazon results at cutover** (109 out of stock, 3 broken, checked 2026-11-09). *Recommend migrating
   them with D7's line; C1's first check clears or confirms them.*
+  → **Decided 2026-11-14:** E15: the user accepted the recommendation
 - **N4 Second button:** Lasso checks only the primary destination; Phase 6 also checked button 2. *Recommend Lasso's
   rule.*
+  → **Decided 2026-11-14:** E15: the user accepted the recommendation
 - **N5 Missed scheduled posts (inventory E13):** Lasso publishes posts that missed their schedule, hourly. *Recommend
   keeping it as Task 32F, or confirming the host's cron makes it unnecessary.*
+  → **Decided 2026-11-14:** E14: not built (a Lasso cron job, not affiliate-related).
 
 ## 5. Scope that needs a home
 
