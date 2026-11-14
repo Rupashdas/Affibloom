@@ -374,6 +374,12 @@ final class ProductService {
 		}
 
 		$amazon = AmazonUrl::from( $url );
+		if ( null === $amazon && $resolved->url !== $url->value() ) {
+			$kept = $this->kept_redirect( $url, $resolved->url, $settings );
+			if ( null !== $kept ) {
+				return $kept;
+			}
+		}
 		if ( null === $amazon ) {
 			$revived = $this->revived( array( $typed, $url ), null );
 			return new AddedLink( $revived ?? $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
@@ -387,6 +393,35 @@ final class ProductService {
 
 		$revived = $this->revived( array( $typed, $url, $stored ), $amazon );
 		return new AddedLink( $revived ?? $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
+	}
+
+	/**
+	 * A redirect link that is kept as pasted (geni.us with "Keep geni.us formatting" on) and ends at Amazon: an Amazon
+	 * product, as Lasso types it from the final URL (save_lasso_url: product_type_col from is_amazon_url( $get_final_url )),
+	 * with the ASIN and store of where it ends. The stored link is the one pasted. Null when it ends elsewhere.
+	 *
+	 * @param AffiliateUrl $url      The link as pasted.
+	 * @param string       $destination Where it ends.
+	 * @param Settings     $settings The site's settings, read once for this add.
+	 * @throws RuntimeException When the product cannot be stored.
+	 */
+	private function kept_redirect( AffiliateUrl $url, string $destination, Settings $settings ): ?AddedLink {
+		try {
+			$amazon = AmazonUrl::from( AffiliateUrl::from_string( $destination ) );
+		} catch ( InvalidField $not_a_link ) {
+			return null;
+		}
+		if ( null === $amazon ) {
+			return null;
+		}
+
+		$existing = $this->existing_amazon( $amazon, $url, $url );
+		if ( null !== $existing ) {
+			return $this->found( $existing, $url );
+		}
+
+		$revived = $this->revived( array( $url ), $amazon );
+		return new AddedLink( $revived ?? $this->products->save( $this->amazon_draft( $amazon, $url, $settings ) ), false );
 	}
 
 	/**

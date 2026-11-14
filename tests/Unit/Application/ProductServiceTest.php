@@ -313,8 +313,28 @@ final class ProductServiceTest extends TestCase {
 		$added = $this->service()->create_from_url( 'https://geni.us/abc' );
 
 		self::assertSame( 'https://geni.us/abc', $added->product->url->value() );
-		self::assertSame( 'Amazon', $added->product->name );
-		self::assertSame( ProductType::Other, $added->product->type ); // the stored link is geni.us's
+		self::assertSame( ProductType::Amazon, $added->product->type ); // it ends at Amazon, and Lasso types it so
+		self::assertSame( 'B0CPH9NPK7', $added->product->asin );
+		self::assertSame( 'us', $added->product->amazon_country );
+	}
+
+	public function test_a_kept_redirect_to_a_product_already_in_the_library_is_that_product(): void {
+		$this->service()->create_from_url( 'https://www.amazon.com/dp/B0CPH9NPK7?tag=vbvault-20' );
+		$this->fetcher = new FakePageFetcher( array( 'https://geni.us/abc' => new FetchedPage( 302, 'https://www.amazon.com/dp/B0CPH9NPK7?tag=vbvault-20', '' ) ) );
+
+		$added = $this->service()->create_from_url( 'https://geni.us/abc' );
+
+		self::assertTrue( $added->already_existed );
+		self::assertCount( 1, $this->repo->saved );
+	}
+
+	public function test_a_kept_redirect_that_ends_elsewhere_stays_other(): void {
+		$this->fetcher = new FakePageFetcher( array( 'https://geni.us/xyz' => new FetchedPage( 302, 'https://example.com/shoe', '' ) ) );
+
+		$added = $this->service()->create_from_url( 'https://geni.us/xyz' );
+
+		self::assertSame( ProductType::Other, $added->product->type );
+		self::assertSame( '', $added->product->asin );
 	}
 
 	public function test_geni_us_is_stored_as_its_destination_with_the_setting_off(): void {
