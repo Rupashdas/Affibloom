@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, unique, wp } from '../utils';
+import { saveSettings } from '../settings';
 
 // F9 Link settings (docs/features/F9/requirements.md).
 test.describe( 'F9 Link settings', () => {
@@ -31,12 +32,12 @@ test.describe( 'F9 Link settings', () => {
 		const sponsored = page.getByLabel( 'Sponsored' );
 		const before = await sponsored.isChecked();
 		await sponsored.setChecked( ! before );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		await page.reload();
 		await expect( page.getByLabel( 'Sponsored' ) ).toBeChecked( { checked: ! before } );
 
 		await page.getByLabel( 'Sponsored' ).setChecked( before ); // leave it as it was
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 	} );
 
 	const GENERAL = '/wp-admin/admin.php?page=affibloom-settings&tab=general';
@@ -183,7 +184,7 @@ test.describe( 'F9 Link settings', () => {
 		await prefix.fill( 'Re Commends!' );
 		await expect( prefix ).toHaveValue( 're-commends-' );
 		await expect( page.getByText( 'link-name/' ) ).toContainText( 're-commends/link-name/' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		expect( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) ).link_prefix ).toBe( 're-commends' );
 		await expect( page.getByLabel( 'Enable Smart CSS Loading' ) ).toBeVisible();
 		setSettings( { link_prefix: '' } );
@@ -221,7 +222,7 @@ test.describe( 'F9 Link settings', () => {
 		await page.goto( GENERAL );
 		await expect( page.locator( '.affibloom-help' ).first() ).toBeVisible();
 		await page.getByLabel( 'Disable Help Tooltips' ).setChecked( true );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		await expect( page.locator( 'body.affibloom-no-tips' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.affibloom-help' ).first() ).toBeHidden();
 		await expect( page.getByLabel( 'Disable Configure Amazon Notification' ) ).toBeVisible();
@@ -239,9 +240,52 @@ test.describe( 'F9 Link settings', () => {
 		await page.getByLabel( 'Time interval (hours)' ).fill( '2' );
 		await page.getByLabel( 'Restrict Prefix' ).setChecked( true );
 		await page.getByLabel( 'Domains' ).fill( 'https://example.com/\nnodots' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		await expect( page.getByLabel( 'Time interval (hours)' ) ).toHaveValue( '2' );
 		await expect( page.getByLabel( 'Domains' ) ).toHaveValue( 'example.com/' );
 		setSettings( { cron_interval: 0, restrict_prefix: false, keep_original_domains: [] } );
+	} );
+
+	// Lasso's save (R41, settings.js 2379-2464): the form goes by AJAX behind "Updating Your Site", then the same
+	// address loads again. Affibloom keeps its toast after the reload and leaves no notice in the address.
+	test( 'AC16 Save Changes saves behind Updating Your Site and reloads the same address', async ( { page } ) => {
+		const tabs: Array<{ tab: string; change: () => Promise<void> }> = [
+			{ tab: 'general', change: async () => page.getByLabel( 'Disable Import Notifications' ).setChecked( true ) },
+			{ tab: 'amazon', change: async () => page.getByLabel( 'Show Prime Logo In Displays' ).setChecked( ! ( await page.getByLabel( 'Show Prime Logo In Displays' ).isChecked() ) ) },
+			// The Colors panel, so the reload must also come back to that panel.
+			{ tab: 'display&panel=colors', change: async () => page.getByLabel( 'Primary button text', { exact: true } ).fill( unique( 'F9 AC16' ) ) },
+		];
+		const options = [ 'affibloom_settings', 'affibloom_display' ];
+		// An option not stored yet (the Display one after a Reset) is deleted again afterwards.
+		const stored = ( option: string ): string => {
+			try {
+				return wp( 'option', 'get', option, '--format=json' );
+			} catch {
+				return '';
+			}
+		};
+		const before = options.map( stored );
+		try {
+			for ( const { tab, change } of tabs ) {
+				const address = `/wp-admin/admin.php?page=affibloom-settings&tab=${ tab }`;
+				await page.goto( address );
+				await page.waitForLoadState( 'load' );
+				await change();
+
+				const posted = page.waitForRequest( ( request ) => request.method() === 'POST' );
+				const reloaded = page.waitForEvent( 'load' );
+				await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+				await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeVisible();
+				expect( ( await posted ).url() ).toContain( '/wp-admin/admin-ajax.php' );
+				await reloaded;
+
+				await expect( page.getByRole( 'status' ).filter( { hasText: 'Settings saved.' } ) ).toBeVisible();
+				const shown = new URL( page.url() ).searchParams;
+				new URLSearchParams( `tab=${ tab }` ).forEach( ( value, name ) => expect( shown.get( name ) ).toBe( value ) );
+				expect( shown.has( 'affibloom_notice' ) ).toBe( false );
+			}
+		} finally {
+			options.forEach( ( option, i ) => ( before[ i ] ? wp( 'option', 'update', option, before[ i ], '--format=json' ) : wp( 'option', 'delete', option ) ) );
+		}
 	} );
 } );

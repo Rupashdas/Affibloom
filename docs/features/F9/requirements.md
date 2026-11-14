@@ -178,7 +178,9 @@ Settled by Claude from Lasso and the records:
   Lasso's keys.
 - **D4 Fresh-install defaults are Lasso's** (R30): Sponsored defaults **on** (Affibloom has off: corrected); the
   import brings the site's off.
-- **D5 Save path:** the existing `admin-post.php` form (Task 9, 10F): one page load, the toast "Settings saved."
+- **D5 Save path** (superseded 2026-11-14 by progress.md deviation 104: AJAX behind "Updating Your Site", then the
+  same address again with the toast, as Lasso; admin-post stays for the form without JavaScript)**, was:** the existing
+  `admin-post.php` form (Task 9, 10F): one page load, the toast "Settings saved."
   (U6), refused fields marked. Lasso's dialog and reload give the same result; its "Error!" bars map to the
   partly-saved notice and WordPress's error page.
 - **D6 Nothing is sent anywhere on save** (R5, R7: Lasso's cloud — C).

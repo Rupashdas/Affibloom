@@ -84,6 +84,8 @@ final class AdminAssets implements Module {
 		// (Tasks 9D, 9F-9H). The General tab is the one without a tab in the address.
 		if ( str_contains( $hook_suffix, SettingsScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-settings-guard', $this->plugin_url . 'assets/admin/settings-guard.js', array( 'affibloom-admin' ), $this->version, true );
+			// Save Changes and Reset Settings by AJAX behind "Updating Your Site", then the same page again (F9 R41).
+			wp_enqueue_script( 'affibloom-settings-save', $this->plugin_url . 'assets/admin/settings-save.js', array( 'affibloom-admin' ), $this->version, true );
 			if ( '' === $tab || 'general' === $tab ) {
 				wp_enqueue_script( 'affibloom-general-settings', $this->plugin_url . 'assets/admin/general-settings.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			}

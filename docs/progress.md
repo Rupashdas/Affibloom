@@ -2252,6 +2252,33 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       `tests/E2E/fixtures/foreign-notice.php` into `wp-content/mu-plugins` for the test and removes it after; AC6 keeps the
       site's `update_plugins` transient in a test option and puts it back.
 
+104. **Settings save the Lasso way (2026-11-14; the user: "The settings pages are saving with page reload. but lasso
+    work differently. Investigate the issue and fix it.").** Outside the task list; reverses F9 decision D5. Lasso's
+    Save Changes (settings.js 2379-2464; F9 R41) sends the form by AJAX behind "Updating Your Site" and then calls
+    `location.reload()`; its Display Reset Settings (2139-2168) does the same with "Resetting Display Settings".
+    Affibloom posted the forms to admin-post.php and redirected, with no dialog. Asked which to build: the user chose
+    **"Exactly as Lasso"** (dialog, then the same address again, the toast kept) over saving with no reload at all.
+    - **Server:** `SettingsController` and `DisplayController` (save and reset) also hook `wp_ajax_<action>`, the same
+      handlers; the new `Interface/Admin/SaveAnswer::go()` redirects a plain form and answers an AJAX request with
+      `{ redirect_to }` (the address it would have redirected to). Nonces, capability checks and refused-field
+      handling are unchanged.
+    - **Browser:** `assets/admin/settings-save.js` (every Settings tab) sends a `form[data-ajax-save]` with `fetch`
+      behind admin.js's save dialog, line "Saving your changes." (Lasso's url-save.php line describes a link scan
+      Affibloom does not run, as F1 D13), then loads the answer's address; the dialog stays up until the new page
+      shows. After the load it takes `affibloom_notice` and `refused` out of the address (`history.replaceState`), so
+      the address is the editor's own and a reload does not toast again. A failure closes the dialog and shows Lasso's
+      "Try again. For some reason your settings didn't save." (reset: "Error resetting display settings.") as a red
+      toast; the edits stay; `settings-guard.js` hears `affibloom:save-failed`, guards again and drops `redirect_to`.
+      Without JavaScript the forms post to admin-post.php as before.
+    - **Templates:** the three Settings templates carry the save dialog and toast template; the forms carry
+      `data-ajax-save` and their texts.
+    - **Tests:** F9 AC16 (new: dialog, admin-ajax request, toast, clean address on General, Amazon and Display/Colors);
+      `tests/E2E/settings.ts` `saveSettings()` waits for the reload, used by F9 and F16 where a test reads the option
+      or leaves right after Save. F16 11/11, F17 5/5, F28 7/7, F9 AC16 passed. F9 AC2, AC3, AC7, AC8, AC9 and AC15 fail
+      for reasons outside the save path (AC3: the Sponsored toggle's Update Link Settings dialog covers Save; AC8: the
+      first "Dashboard" link is WordPress's; AC15: "Cron" matches two headings), seen while other sessions ran
+      Playwright on the same site; not changed here.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2282,6 +2309,13 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, settings save fix at the user's request):** Settings → General, Display (and its Reset)
+  and Amazon now save as Lasso does: AJAX behind "Updating Your Site", then the same address again with the toast;
+  deviation 104 (reverses F9 D5; the user chose "Exactly as Lasso"). Started from F9 AC16 (red: no dialog). Unit 571,
+  PHPStan clean, PHPCS clean on the changed files; F16, F17, F28 and F9 AC16 passed; dialog and toast seen in a
+  screenshot. Other sessions shared the tree and ran Playwright at the same time, so the commit holds only this
+  change's hunks. **Open:** F9 AC2, AC3, AC7, AC8, AC9, AC15 fail for reasons outside the save path.
 
 - **2026-11-14 (Claude Code, Task ON2; the same session as ON1):** the notice region, foreign notices and the update
   notice (F38 AC4-AC6); deviation 103. Started from `NoticeBoardTest`, `UpdateAvailableNoticeTest`, an `UpgradeHooks`

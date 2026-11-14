@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, setSettings, wp } from '../utils';
+import { saveSettings } from '../settings';
 
 // F16 Display system (docs/features/F16/requirements.md).
 test.describe( 'F16 Display system', () => {
@@ -52,7 +53,7 @@ test.describe( 'F16 Display system', () => {
 		await page.getByLabel( 'Theme' ).selectOption( 'Llama' );
 		await openColours( page );
 		await page.getByLabel( 'Primary button text', { exact: true } ).fill( 'Buy It' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
 		// The save brings the editor back to the tab they were on.
 		await expect( page.getByRole( 'tab', { name: 'Colors & labels' } ) ).toHaveAttribute( 'aria-selected', 'true' );
@@ -81,7 +82,7 @@ test.describe( 'F16 Display system', () => {
 		await expect( padding.locator( 'output' ) ).toHaveText( '10' ); // step 2
 		await expect( page.locator( '[data-density-hint]' ) ).toHaveText( 'Custom spacing — stepper edits will keep this preset.' );
 
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		const grid = storedDisplay().grid.density;
 		expect( grid.preset ).toBe( 'custom' );
 		expect( grid.values.padding ).toBe( 10 );
@@ -106,7 +107,7 @@ test.describe( 'F16 Display system', () => {
 		await page.getByLabel( 'Timestamp', { exact: true } ).uncheck();
 		await expect( page.locator( '[data-elements-summary]' ) ).toHaveText( '9 of 11 visible' );
 
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		const single = storedDisplay().single.elements;
 		expect( single.price ).toBe( false );
 		expect( single.timestamp ).toBe( false );
@@ -129,7 +130,7 @@ test.describe( 'F16 Display system', () => {
 		await expect( page.locator( '[data-layout-summary]' ) ).toHaveText( 'stacked · image bottom' );
 		await layoutOption( page, 'ctaWidth', 'Full width' ).check();
 
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		// Read the option only once the save has answered (the toast after the redirect), as AC1 does.
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
 		const single = storedDisplay().single.layout;
@@ -142,7 +143,7 @@ test.describe( 'F16 Display system', () => {
 		await expect( page.locator( '[data-layout-row="orientation"]' ) ).toHaveCount( 0 );
 		await layoutOption( page, 'columns', '2' ).check();
 		await expect( page.locator( '[data-layout-summary]' ) ).toHaveText( '2 col · stacked · image top' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
 		expect( storedDisplay().columns ).toBe( 2 );
 	} );
@@ -161,7 +162,7 @@ test.describe( 'F16 Display system', () => {
 		await page.getByRole( 'button', { name: 'Desktop (1280px)' } ).click();
 		await expect( layoutChecked( page, 'align' ) ).toHaveValue( 'left' ); // desktop untouched
 
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		let list = storedDisplay().list.layout;
 		expect( list.align ).toBe( 'left' );
 		expect( list.mobile ).toEqual( { align: 'center' } );
@@ -169,7 +170,7 @@ test.describe( 'F16 Display system', () => {
 		await page.getByRole( 'button', { name: 'Mobile (390px)' } ).click();
 		await page.getByRole( 'button', { name: 'Use desktop layout' } ).click();
 		await expect( page.locator( '[data-phone-note-text]' ) ).toHaveText( 'Same as desktop' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		list = storedDisplay().list.layout;
 		expect( list.mobile ).toBeUndefined();
 	} );
@@ -188,7 +189,7 @@ test.describe( 'F16 Display system', () => {
 		await openAccordion( page, 'elements' );
 		await expect( page.getByLabel( 'Disclosure', { exact: true } ) ).toBeChecked();
 
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		const flat = storedSettings();
 		expect( flat.disclosure_text ).toBe( 'We may earn a commission.' );
 		expect( flat.show_disclosure_grid ).toBe( true );
@@ -205,7 +206,7 @@ test.describe( 'F16 Display system', () => {
 		await page.goto( `${ displayTab() }&panel=colors` );
 		await openAccordion( page, 'custom-css' );
 		await page.getByLabel( 'Custom CSS', { exact: true } ).fill( '.box { color: red; }</style><script>alert(1)</script>' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 
 		const css = storedSettings().custom_css as string;
 		expect( css ).toContain( '.box { color: red; }' );
@@ -215,7 +216,7 @@ test.describe( 'F16 Display system', () => {
 	test( 'AC11 Reset Settings asks first, then restores every default', async ( { page } ) => {
 		await page.goto( displayTab( 'single' ) );
 		await page.getByLabel( 'Theme' ).selectOption( 'Money' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		setSettings( { show_price: false } );
 
 		// Saying no leaves everything as it is.
@@ -238,7 +239,7 @@ test.describe( 'F16 Display system', () => {
 		await openColours( page );
 		await page.locator( '#affibloom-display-main' ).fill( 'rgba(0,0,0,.5)' );
 		await page.locator( '#affibloom-display-background' ).fill( '#00000080' );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Settings saved' );
 
 		// The text value survives the save and the reload; the picker only shows the nearest opaque colour.
@@ -254,7 +255,7 @@ test.describe( 'F16 Display system', () => {
 		await page.goto( displayTab( 'list' ) );
 		await openColours( page );
 		await page.getByLabel( 'Secondary button text', { exact: true } ).fill( label );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await saveSettings( page );
 
 		await page.goto( displayTab( 'list' ) );
 		await openColours( page );

@@ -48,7 +48,8 @@ $preferences = array(
 		?>
 
 		<div class="affibloom-page__body">
-			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard>
+			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard
+				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
 				<input type="hidden" name="tab" value="amazon">
 				<?php wp_nonce_field( $view['action'] ); ?>
@@ -173,8 +174,10 @@ $preferences = array(
 	</div>
 
 	<?php
+	$this->render( 'admin/partials/save-modal' );
 	$this->render( 'admin/partials/unsaved-modal' );
 	$this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) );
+	$this->render( 'admin/partials/toast-template' );
 	?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

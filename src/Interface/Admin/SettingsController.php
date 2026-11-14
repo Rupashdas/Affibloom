@@ -31,6 +31,8 @@ final class SettingsController implements Module {
 	 */
 	public function register(): void {
 		add_action( 'admin_post_' . self::ACTION, array( $this, 'save' ) );
+		// Save Changes sends the form by AJAX, as Lasso does (settings-save.js); the form alone still uses admin-post.
+		add_action( 'wp_ajax_' . self::ACTION, array( $this, 'save' ) );
 	}
 
 	/**
@@ -72,8 +74,7 @@ final class SettingsController implements Module {
 		// that was refused in part stays on the tab, so the refused fields are seen (F9 edge case 8).
 		$goto = isset( $_POST['redirect_to'] ) ? self::admin_target( esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) ) : '';
 		if ( '' !== $goto && ! $refused ) {
-			wp_safe_redirect( $goto );
-			exit;
+			SaveAnswer::go( $goto );
 		}
 
 		$query = array(
@@ -90,7 +91,6 @@ final class SettingsController implements Module {
 			$query['refused'] = implode( ',', $refused );
 		}
 
-		wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php' ) ) );
-		exit;
+		SaveAnswer::go( add_query_arg( $query, admin_url( 'admin.php' ) ) );
 	}
 }

@@ -58,6 +58,15 @@
 		document.addEventListener( 'submit', function () {
 			leaving = true;
 		} );
+		// A save sent by AJAX that did not go through (settings-save.js): the changes are still unsaved, and the next
+		// plain Save Changes stays on the tab.
+		document.addEventListener( 'affibloom:save-failed', function () {
+			leaving = false;
+			var target = form.querySelector( 'input[name="redirect_to"]' );
+			if ( target ) {
+				target.remove();
+			}
+		} );
 
 		window.addEventListener( 'beforeunload', function ( event ) {
 			if ( leaving || ! changed() ) {

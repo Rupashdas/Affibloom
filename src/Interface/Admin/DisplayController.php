@@ -39,6 +39,9 @@ final class DisplayController implements Module {
 	public function register(): void {
 		add_action( 'admin_post_' . self::ACTION, array( $this, 'save' ) );
 		add_action( 'admin_post_' . self::RESET_ACTION, array( $this, 'reset' ) );
+		// Save Changes and Reset Settings go by AJAX, as Lasso's do (settings-save.js); the forms alone use admin-post.
+		add_action( 'wp_ajax_' . self::ACTION, array( $this, 'save' ) );
+		add_action( 'wp_ajax_' . self::RESET_ACTION, array( $this, 'reset' ) );
 	}
 
 	/**
@@ -65,8 +68,7 @@ final class DisplayController implements Module {
 		// The unsaved-changes guard's "Save Changes" goes on to where the reader was going (Task 9E).
 		$goto = isset( $_POST['redirect_to'] ) ? SettingsController::admin_target( esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) ) : '';
 		if ( '' !== $goto && ! $refused ) {
-			wp_safe_redirect( $goto );
-			exit;
+			SaveAnswer::go( $goto );
 		}
 
 		$this->back( $type->key(), isset( $_POST['panel'] ) && 'colors' === $_POST['panel'] ? 'colors' : 'layout', $refused ? 'partly-saved' : 'saved' );
@@ -102,8 +104,8 @@ final class DisplayController implements Module {
 	 * @param string $panel  Rail tab key.
 	 * @param string $notice Notice code.
 	 */
-	private function back( string $type, string $panel, string $notice ): void {
-		wp_safe_redirect(
+	private function back( string $type, string $panel, string $notice ): never {
+		SaveAnswer::go(
 			add_query_arg(
 				array(
 					'page'             => SettingsScreen::SLUG,
@@ -115,6 +117,5 @@ final class DisplayController implements Module {
 				admin_url( 'admin.php' )
 			)
 		);
-		exit;
 	}
 }

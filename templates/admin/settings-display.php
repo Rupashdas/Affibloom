@@ -67,7 +67,8 @@ $fields = array(
 		?>
 
 		<div class="affibloom-page__body">
-			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard>
+			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard
+				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
 				<?php wp_nonce_field( $view['action'] ); ?>
@@ -232,7 +233,9 @@ $fields = array(
 
 			<?php // A form of its own: the reset button above submits it through its form attribute. ?>
 			<form id="affibloom-display-reset" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-reset-form
-				data-confirm="<?php esc_attr_e( 'Reset all display settings to factory defaults? This cannot be undone.', 'affibloom' ); ?>">
+				data-confirm="<?php esc_attr_e( 'Reset all display settings to factory defaults? This cannot be undone.', 'affibloom' ); ?>"
+				data-ajax-save data-save-title="<?php esc_attr_e( 'Resetting Display Settings', 'affibloom' ); ?>"
+				data-failed-text="<?php esc_attr_e( 'Error resetting display settings.', 'affibloom' ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( $view['reset'] ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
 				<?php wp_nonce_field( $view['reset'], '_affibloom_reset_nonce', false ); ?>
@@ -244,8 +247,10 @@ $fields = array(
 	</div>
 
 	<?php
+	$this->render( 'admin/partials/save-modal' );
 	$this->render( 'admin/partials/unsaved-modal' );
 	$this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) );
+	$this->render( 'admin/partials/toast-template' );
 	?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>
