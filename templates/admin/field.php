@@ -21,7 +21,7 @@ $current_tab = $view['tab'];
 $products    = $view['products'];
 ?>
 <div class="wrap affibloom-admin">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'fields' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
 		<div class="affibloom-band">
@@ -92,4 +92,5 @@ $products    = $view['products'];
 	<?php $this->render( 'admin/partials/save-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

@@ -22,7 +22,7 @@ final class PluginTest extends TestCase {
 
 		self::assertNotFalse( has_action( 'admin_menu', 'Affibloom\Interface\Admin\AdminMenu->add_pages()' ) );
 		self::assertNotFalse( has_action( 'admin_enqueue_scripts', 'Affibloom\Interface\Admin\AdminAssets->enqueue()' ) );
-		self::assertNotFalse( has_action( 'admin_head', 'Affibloom\Interface\Admin\AdminMenu->hide_product_page()' ) );
+		self::assertNotFalse( has_action( 'admin_head', 'Affibloom\Interface\Admin\AdminMenu->hide_detail_pages()' ) );
 	}
 
 	public function test_boot_runs_the_upgrade_on_admin_pages_and_watches_the_version_on_init(): void {
@@ -36,20 +36,23 @@ final class PluginTest extends TestCase {
 	 * The product page is a submenu page, so WordPress checks the capability and the Dashboard stays highlighted; it
 	 * is taken out of the menu after admin_menu, as Lasso's link details page is never listed. Its guard runs on the
 	 * page's load hook, before any output, so a missing product can still be redirected. A group's page (Task G1) is
-	 * handled the same way; the Groups list is listed.
+	 * handled the same way, and so is a field's (Task FL2). The lists are listed in Lasso's order, Fields included
+	 * (Task ON1, F38 R11).
 	 */
 	public function test_the_product_page_is_registered_hidden_and_guarded(): void {
 		Functions\when( '__' )->returnArg();
 		Functions\when( 'add_menu_page' )->justReturn( 'toplevel_page_affibloom' );
-		// Dashboard, Product, Groups, Group, Fields (Task FL1), Field (Task FL2), Settings.
+		$slugs = array();
 		Functions\expect( 'add_submenu_page' )
 			->times( 7 )
 			->andReturnUsing(
-				static fn( string $parent, string $title, string $menu, string $cap, string $slug ): string => 'affibloom_page_' . $slug
+				static function ( string $parent, string $title, string $menu, string $cap, string $slug ) use ( &$slugs ): string {
+					$slugs[] = $slug;
+					return 'affibloom_page_' . $slug;
+				}
 			);
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-product' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-group' );
-		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-fields' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-field' );
 		// Brain Monkey records hooks without running them: run these two callbacks as WordPress would.
 		$run = static function ( callable $callback ): void {
@@ -60,6 +63,10 @@ final class PluginTest extends TestCase {
 
 		Plugin::boot( '/plugins/affibloom/affibloom.php' );
 
+		self::assertSame(
+			array( 'affibloom', 'affibloom-groups', 'affibloom-fields', 'affibloom-settings', 'affibloom-product', 'affibloom-group', 'affibloom-field' ),
+			$slugs
+		);
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-product', 'Affibloom\Interface\Admin\ProductScreen->guard()' ) );
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-group', 'Affibloom\Interface\Admin\GroupScreen->guard()' ) );
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-field', 'Affibloom\Interface\Admin\FieldScreen->guard()' ) );

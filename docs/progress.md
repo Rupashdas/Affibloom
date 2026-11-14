@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, TL1, TL2 (+ the one-time Lasso import button, deviation 87) | 28: 2X1-2X5, FL1-FL5, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, TL1, TL2, ON1 (+ the one-time Lasso import button, deviation 87) | 27: 2X1-2X5, FL1-FL5, 13F-13J, ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -30,6 +30,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 2a. **Tasks 9B-9L are built (2026-11-14, deviation 96); they wait for the user's signed-in F9 run** (14 tests, AC4-AC15). 9J is in Phase 5.
 2b. **Task G1 (the Groups list and a new group) is done (2026-11-14, deviation 97); F23 AC1-AC2 passed in Claude's runs.**
     **Tasks G2-G5 are built too (the user, 2026-11-14: "Let's do G2-G5", tested together; deviation 98).**
+2c. **Admin shell (the user, 2026-11-14: "Do Task ON1 and Task ON2", both in one session):** **ON1 done (deviation 101);
+    F38 AC1-AC3 passed in Claude's runs.**
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2161,6 +2163,30 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       (seen on Plugins). ON2 (the notice region) places it.
     - `tests/Integration/UpgraderTest.php` is written, not run (no wp-env, deviation 10).
 
+101. **Task ON1 (2026-11-14), navigation in Lasso's order; done, checked by Claude's own runs.** The user asked for ON1
+    and ON2 in one session ("Do Task ON1 and Task ON2"), overriding the one-task rule for this session. Differences from
+    the plan's text:
+    - **No `admin_title` filter:** the product page is registered with the title "Link Details", and WordPress builds
+      the browser title from the registered title before `admin_head` removes the page from the list, so the title
+      reads "Link Details ‹ …" without a filter (R13, D6). The other screens' titles are their menu names.
+    - **The header gets the navigation from `Template::navigation()`:** `Template` takes the `AdminNavigation` in its
+      constructor (one instance, built in `Plugin::navigation()`), so no screen passes tabs in its view; the templates
+      no longer pass `current` either: the header asks the navigation which item owns `?page=` (`AdminMenu::requested_page()`,
+      also used by the `parent_file`, `submenu_file` and `update_footer` filters).
+    - **`NavItem`'s label is a closure,** because the items are built when the plugin loads and `__()` before `init`
+      would load translations too early. `AdminNavigation::register()` refuses a key outside Lasso's list.
+    - **Fields is listed in the WordPress menu now** (Lasso's R11, AC2): FL1 had hidden it as well as leaving it out of
+      the header; F26 D13 only keeps it out of the header, which stays so (a menu item without a tab).
+    - **Also in this task:** the logo and wordmark link to the Dashboard (R1, not in the plan's table); WordPress's
+      version line is blanked on Affibloom's pages only (N6); the wordmark shows again at 375px, since the folded tabs
+      leave room for it (the 782px rule that hid it went with the tab labels' rule).
+    - **Checks:** unit 556 (`AdminNavigationTest` 6, `PluginTest` now asserts the submenu order), lint, analyse; F38
+      AC1-AC3 4 passed; `admin-shell.spec` 2 and F23 AC1 passed. `admin-design.spec` failed twice outside the header,
+      not from this task: the Dashboard's "first card over the band" check (y 578, the Dashboard's tiles and filters
+      changed since) and Settings' "Sponsored" row chip (9B-9L's new rows); its header assertions passed. F1 and F19
+      were not run: another session was changing the Dashboard and F19 in this tree at the time; F1's two header
+      lookups (`.affibloom-header__nav a` with "Settings") still match at 1280px.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2191,6 +2217,14 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Task ON1; the user asked for ON1 and ON2 in this session):** navigation in Lasso's order
+  (F38 AC1-AC3); deviation 101. Started from `AdminNavigationTest` (red: classes missing) and `F38.spec.ts` AC1-AC3
+  (red: no Menu button, the menu at 26 after Pages' neighbour, no footer). Built `NavItem`, `AdminNavigation`, the
+  menu at position 20 in Lasso's order with the highlight filters, the header from the navigation with the Menu button,
+  and the footer on all nine screens. Unit, lint, analyse clean; F38 AC1-AC3 passed; looked at 1280, 900 and 375px
+  (Groups, folded and open). Another session was working on the Dashboard in the same tree, so the commit holds only
+  this task's hunks. Next: ON2.
 
 - **2026-11-14 (Claude Code, Task TL2, same session as TL1 at the user's word "Go with TL2"):** the upgrade routine
   (F37 AC2); deviation 100. Started from unit tests for `Upgrader`, `Migrator`, `OptionLock`, `UpgradeHooks` and

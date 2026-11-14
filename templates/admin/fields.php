@@ -14,7 +14,7 @@ use Affibloom\Interface\Admin\FieldScreen;
 use Affibloom\Interface\Admin\FieldsScreen;
 ?>
 <div class="wrap affibloom-admin">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'fields' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
 		<div class="affibloom-band">
@@ -64,4 +64,5 @@ use Affibloom\Interface\Admin\FieldsScreen;
 	</div>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

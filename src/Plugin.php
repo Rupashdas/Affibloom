@@ -49,6 +49,8 @@ use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
+use Affibloom\Interface\Admin\AdminNavigation;
+use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\FieldScreen;
 use Affibloom\Interface\Admin\FieldsScreen;
@@ -62,6 +64,7 @@ use Affibloom\Interface\Admin\HelpTips;
 use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\IconController;
 use Affibloom\Interface\Admin\LassoImportController;
+use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
@@ -97,6 +100,13 @@ final class Plugin {
 	 * @var Template|null
 	 */
 	private ?Template $template = null;
+
+	/**
+	 * The screens in Lasso's order, shared by the menu and the header; built on first use.
+	 *
+	 * @var AdminNavigation|null
+	 */
+	private ?AdminNavigation $navigation = null;
 
 	/**
 	 * Settings storage, shared by every reader in a request.
@@ -215,6 +225,7 @@ final class Plugin {
 			new ProductPostType(),
 			new GroupTaxonomy(),
 			new AdminMenu(
+				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups ),
 				new SettingsScreen(
@@ -262,8 +273,25 @@ final class Plugin {
 	 * The template renderer for templates/.
 	 */
 	private function template(): Template {
-		$this->template ??= new Template( dirname( $this->file ) . '/templates' );
+		$this->template ??= new Template( dirname( $this->file ) . '/templates', $this->navigation() );
 		return $this->template;
+	}
+
+	/**
+	 * The screens in Lasso's order (F38 D1, D4). A screen's task adds its item here; Opportunities, Tables, Import and
+	 * History join when their screens are built (F22, F25, F33, F34).
+	 */
+	private function navigation(): AdminNavigation {
+		if ( null === $this->navigation ) {
+			$this->navigation = new AdminNavigation();
+			$this->navigation->register( new NavItem( 'dashboard', AdminMenu::SLUG, static fn (): string => __( 'Dashboard', 'affibloom' ), 'home', Capabilities::PRODUCTS, array( ProductScreen::SLUG ) ) );
+			$this->navigation->register( new NavItem( 'groups', GroupsScreen::SLUG, static fn (): string => __( 'Groups', 'affibloom' ), 'layers', Capabilities::PRODUCTS, array( GroupScreen::SLUG ) ) );
+			// A menu item only: Lasso's header has no Fields tab (F26 D13).
+			$this->navigation->register( new NavItem( 'fields', FieldsScreen::SLUG, static fn (): string => __( 'Fields', 'affibloom' ), 'list', Capabilities::PRODUCTS, array( FieldScreen::SLUG ) ) );
+			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS ) );
+		}
+
+		return $this->navigation;
 	}
 
 	/**

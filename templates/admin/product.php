@@ -30,7 +30,7 @@ $soon_tabs   = array(
 );
 ?>
 <div class="wrap affibloom-admin">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page affibloom-product-page">
 		<div class="affibloom-band">
@@ -314,4 +314,5 @@ $soon_tabs   = array(
 	?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

@@ -53,7 +53,7 @@ $fields = array(
 );
 ?>
 <div class="wrap affibloom-admin affibloom-admin--display">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'settings' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
 		<?php
@@ -247,4 +247,5 @@ $fields = array(
 	$this->render( 'admin/partials/unsaved-modal' );
 	$this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) );
 	?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

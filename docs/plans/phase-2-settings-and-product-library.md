@@ -257,7 +257,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 
 **Admin shell (F38)** — ON3-ON4 are in Phase 5, ON5-ON9 in Phase 8; ON10 is dropped as a duplicate of 9E
 
-- [ ] Task ON1: Navigation in Lasso's order — header, WordPress menu, titles, footer
+- [x] Task ON1: Navigation in Lasso's order — header, WordPress menu, titles, footer
 - [ ] Task ON2: The notice region, foreign notices, and the update notice
 
 **Amazon product data (C1)** — dormant where the Creators API credentials are needed; C1E and C1H are in Phase 7,
@@ -6018,13 +6018,13 @@ The WordPress menu shows **Affibloom** after Pages (position 20) with Dashboard,
 `src/Interface/Admin/AdminMenu.php`, `src/Plugin.php`, `templates/admin/partials/header.php`, the four screen
 templates, `assets/admin/{admin.js,admin.css}`, `docs/ui/design-system.md` (Menu button, footer).
 
-- [ ] **Step 1: Failing tests.** AC1 (tabs and current state on Dashboard, product page, Settings tabs; Menu button
+- [x] **Step 1: Failing tests.** AC1 (tabs and current state on Dashboard, product page, Settings tabs; Menu button
   at 375 px), AC2 (menu position after Pages, order, highlight on a product page, titles), AC3 (footer text). Unit:
   order, current group per page slug. Expected red: menu at 26, no footer.
-- [ ] **Step 2: `AdminNavigation` and `NavItem`;** the Dashboard and Settings items registered in `Plugin`.
-- [ ] **Step 3: `AdminMenu`, header, footer, titles.**
-- [ ] **Step 4: Run and look.** F38 AC1-AC3 and F19/F1 specs (header changed); by hand 1280/375.
-- [ ] **Step 5: Commit** — "Order the header and menu as Lasso's, add the footer version".
+- [x] **Step 2: `AdminNavigation` and `NavItem`;** the Dashboard and Settings items registered in `Plugin`.
+- [x] **Step 3: `AdminMenu`, header, footer, titles.**
+- [x] **Step 4: Run and look.** F38 AC1-AC3 and F19/F1 specs (header changed); by hand 1280/375.
+- [x] **Step 5: Commit** — "Order the header and menu as Lasso's, add the footer version".
 
 ---
 

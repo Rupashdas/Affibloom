@@ -18,7 +18,7 @@ $card_data = array(
 );
 ?>
 <div class="wrap affibloom-admin">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'settings' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
 		<?php
@@ -80,4 +80,5 @@ $card_data = array(
 	$this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) );
 	$this->render( 'admin/partials/toast-template' );
 	?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

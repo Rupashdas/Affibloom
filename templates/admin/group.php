@@ -21,7 +21,7 @@ $heading     = $is_new ? __( 'Add a New Group', 'affibloom' ) : $group->name;
 $gid         = $is_new ? 0 : $group->id;
 ?>
 <div class="wrap affibloom-admin">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'groups' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
 		<div class="affibloom-band">
@@ -186,4 +186,5 @@ $gid         = $is_new ? 0 : $group->id;
 	<?php endif; ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

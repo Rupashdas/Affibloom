@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface;
 
+use Affibloom\Interface\Admin\AdminNavigation;
 use InvalidArgumentException;
 
 /**
@@ -19,9 +20,17 @@ final class Template {
 	/**
 	 * Builds the renderer.
 	 *
-	 * @param string $dir Absolute path of templates/.
+	 * @param string          $dir        Absolute path of templates/.
+	 * @param AdminNavigation $navigation The screens in Lasso's order, which every screen's header lists (Task ON1).
 	 */
-	public function __construct( private string $dir ) {}
+	public function __construct( private string $dir, private AdminNavigation $navigation ) {}
+
+	/**
+	 * The screens in Lasso's order, for the header partial, so no screen has to pass them in its view.
+	 */
+	public function navigation(): AdminNavigation {
+		return $this->navigation;
+	}
 
 	/**
 	 * Prints a template. Inside it, $view holds the values and $this renders partials.

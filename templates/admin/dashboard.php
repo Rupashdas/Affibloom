@@ -19,7 +19,7 @@ $placeholder = sprintf(
 );
 ?>
 <div class="wrap affibloom-admin">
-	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
+	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
 		<div class="affibloom-band">
@@ -133,4 +133,5 @@ $placeholder = sprintf(
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

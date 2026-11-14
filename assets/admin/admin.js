@@ -148,6 +148,41 @@
 	}
 
 	/**
+	 * The header's Menu button (Task ON1, F38 R6): below 992px it folds the tabs into a panel under the bar. A click
+	 * toggles it; Escape or a click elsewhere folds it and Escape gives the focus back; widening the window past the
+	 * breakpoint folds it too, so the button's state never says "open" for a panel that is not there.
+	 */
+	var navToggle = document.querySelector( '[data-affibloom-nav-toggle]' );
+	var nav = navToggle ? document.getElementById( navToggle.getAttribute( 'aria-controls' ) ) : null;
+
+	function setNav( open ) {
+		nav.classList.toggle( 'is-open', open );
+		navToggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+	}
+
+	if ( nav ) {
+		navToggle.addEventListener( 'click', function () {
+			setNav( 'false' === navToggle.getAttribute( 'aria-expanded' ) );
+		} );
+		document.addEventListener( 'click', function ( event ) {
+			if ( nav.classList.contains( 'is-open' ) && ! event.target.closest( '[data-affibloom-nav-toggle], #' + nav.id ) ) {
+				setNav( false );
+			}
+		} );
+		document.addEventListener( 'keydown', function ( event ) {
+			if ( 'Escape' === event.key && nav.classList.contains( 'is-open' ) ) {
+				setNav( false );
+				navToggle.focus();
+			}
+		} );
+		window.matchMedia( '(min-width: 992px)' ).addEventListener( 'change', function ( query ) {
+			if ( query.matches ) {
+				setNav( false );
+			}
+		} );
+	}
+
+	/**
 	 * Menus (design system, "Menu"): a button with `aria-controls` and `aria-expanded` shows the menu card under it;
 	 * choosing an item, Escape or a click elsewhere closes it.
 	 */

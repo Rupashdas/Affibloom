@@ -88,6 +88,7 @@
 
 /* 2. Header: navy bar, logo, icon-plus-label navigation */
 .affibloom-header {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 28px;
@@ -97,12 +98,38 @@
 	background: var(--affibloom-navy-900);
 	color: var(--affibloom-white);
 }
+/* The logo opens the Dashboard, as Lasso's (F38 R1). */
 .affibloom-header__brand {
 	display: flex;
 	flex: 0 0 auto;
 	align-items: center;
 	gap: 10px;
+	border-radius: var(--affibloom-radius-nav);
+	color: var(--affibloom-white);
 	font: 700 17px/24px var(--affibloom-font);
+	text-decoration: none;
+}
+.affibloom-header__brand:hover,
+.affibloom-header__brand:focus { color: var(--affibloom-white); }
+/* Menu button (Task ON1, Lasso's R6): only below 992px, where it folds the tabs into a navy panel under the bar. */
+.affibloom-admin .affibloom-header__menu-button {
+	display: none;
+	align-items: center;
+	gap: 8px;
+	height: 38px;
+	padding: 0 12px;
+	border: 0;
+	border-radius: var(--affibloom-radius-nav);
+	background: transparent;
+	color: var(--affibloom-on-navy);
+	font: 500 14px/20px var(--affibloom-font);
+	cursor: pointer;
+	transition: background-color var(--affibloom-ease), color var(--affibloom-ease);
+}
+.affibloom-admin .affibloom-header__menu-button:hover,
+.affibloom-admin .affibloom-header__menu-button[aria-expanded="true"] {
+	background: var(--affibloom-on-navy-active);
+	color: var(--affibloom-white);
 }
 .affibloom-header__logo { display: block; width: 28px; height: 28px; }
 .affibloom-header__logo-petals { fill: var(--affibloom-brand-300); }
@@ -126,6 +153,17 @@
 .affibloom-header__tab.is-active {
 	background: var(--affibloom-on-navy-active);
 	color: var(--affibloom-white);
+}
+
+/* Footer (Task ON1, Lasso's version badge, F38 R16): the version, small and quiet, centred under the column */
+.affibloom-footer {
+	max-width: var(--affibloom-content-width);
+	margin: 40px auto 0;
+	padding: 0 32px 28px;
+	box-sizing: border-box;
+	color: var(--affibloom-ink-600);
+	font: 500 12px/16px var(--affibloom-font);
+	text-align: center;
 }
 /* The screen's main action, right of the navigation: a white split button with navy text (design system, "Layout"):
    the main part and a caret that opens the menu of other ways to add */
@@ -2158,17 +2196,30 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-split__rail { order: -1; width: 100%; flex: none; border-left: 0; border-bottom: 1px solid var(--affibloom-line); }
 	.affibloom-split { min-height: 0; }
 	.affibloom-product__form { grid-template-columns: 1fr; }
+	.affibloom-header { gap: 12px; }
+	.affibloom-admin .affibloom-header__menu-button { display: inline-flex; }
+	.affibloom-header__nav {
+		position: absolute;
+		z-index: 30;
+		top: 100%;
+		right: 0;
+		left: 0;
+		display: none;
+		flex-direction: column;
+		gap: 2px;
+		padding: 8px 20px 14px;
+		background: var(--affibloom-navy-900);
+		box-shadow: var(--affibloom-shadow-card);
+	}
+	.affibloom-header__nav.is-open { display: flex; }
+	.affibloom-header__tab { padding: 10px 12px; }
 }
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
-	.affibloom-header { gap: 12px; }
-	/* The wordmark gives way to the logo on a phone: with the three tabs and "Add New Link" it pushed the page 6px
-	   past the screen (the logo still names the product, and the text stays for screen readers). */
-	.affibloom-header__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-	.affibloom-header__nav { gap: 2px; }
-	.affibloom-header__tab { padding: 7px 10px; }
-	.affibloom-header__tab-label,
+	/* The tabs are folded behind the Menu button from 991px down, so the wordmark fits next to the logo; the Menu and
+	   Add New Link buttons show their icons only (the text stays for screen readers). */
 	.affibloom-header__action-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.affibloom-admin .affibloom-header__menu-button { padding: 0 9px; }
 	.affibloom-admin .affibloom-header__action { padding: 0 10px; }
 	.affibloom-admin .affibloom-header__caret { padding: 0 7px; }
 	.affibloom-setting { flex-wrap: wrap; }

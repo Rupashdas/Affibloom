@@ -49,6 +49,7 @@ $icon_paths = array(
 	'dollar'       => '<path d="M10 3v14M13 6.6C12.6 5.6 11.5 5 10 5 8 5 6.8 6 6.8 7.4c0 3.2 6.4 1.6 6.4 5 0 1.4-1.2 2.6-3.2 2.6-1.6 0-2.8-.6-3.3-1.7"/>',
 	'list'         => '<circle cx="5" cy="6" r="1"/><circle cx="5" cy="10" r="1"/><circle cx="5" cy="14" r="1"/><path d="M8.5 6H16M8.5 10H16M8.5 14H16"/>',
 	'list-ordered' => '<path d="M8.5 6H16M8.5 10H16M8.5 14H16M4.5 4.5l1-.5v4M4 12.5h2l-2 3h2"/>',
+	'menu'         => '<path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13"/>',
 );
 
 if ( ! isset( $icon_paths[ $view['name'] ] ) ) {

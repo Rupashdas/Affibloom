@@ -91,9 +91,13 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 ## 5. Layout
 
 - **Header:** navy-900 bar, 60px. Left: the logo mark (five petals in brand-300 around a navy ring and a white dot,
-  28px) and the wordmark in white. Then the navigation (Dashboard, Settings), each an icon plus label in on-navy text,
-  8px radius; the current one white text on `rgba(255,255,255,.12)`. Right: the screen's main action as a white button
-  with navy text (`Add New Link`, from Task 11A), split as in Lasso: its caret opens a Menu of other ways to add (Task 11C).
+  28px) and the wordmark in white; together they link to the Dashboard (Task ON1). Then the navigation in Lasso's order
+  (Dashboard, Opportunities, Tables, Groups, each once its screen exists, then Settings; Task ON1), each an icon plus
+  label in on-navy text, 8px radius; the current one white text on `rgba(255,255,255,.12)`. Right: the screen's main
+  action as a white button with navy text (`Add New Link`, from Task 11A), split as in Lasso: its caret opens a Menu of
+  other ways to add (Task 11C). Below 992px the tabs fold behind the **Menu button** (see Components).
+- **Footer:** the last thing on every Affibloom page: "Version x.y.z", 12px/500 ink-600, centred under the column, 40px
+  above it and 28px below (Task ON1). WordPress's own version line is blank on Affibloom's pages.
 - **Band:** under the header, full width, `linear-gradient(120deg, navy-900, brand-600)`, padding 28px 32px 72px. It
   holds the page title, the subtitle (U10) and, on screens with sections, the section tabs (segmented control on the
   band: inactive on-band text on `rgba(255,255,255,.12)`, active white segment with ink-900 text).
@@ -109,8 +113,9 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
   actions right-aligned: secondary then primary).
 - **Settings rows:** a 40px icon chip, the setting's label (600) with its description below it in ink-600 (Lasso's
   help text, visible, linked with `aria-describedby`), the switch on the right; rows divided by `line`.
-- **Breakpoints:** 960px and below: side padding 20px. 782px (wp-admin's mobile breakpoint): the header navigation
-  shows icons only, rows stack (switch under the text), tiles stack, card footer buttons go full width.
+- **Breakpoints:** 960px and below: side padding 20px. 991px and below (Lasso's 992px point): the header's tabs fold
+  behind the Menu button. 782px (wp-admin's mobile breakpoint): the Menu and Add New Link buttons show icons only, rows
+  stack (switch under the text), tiles stack, card footer buttons go full width.
 
 ## 6. Components
 
@@ -141,6 +146,7 @@ UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:
 | **Notice** | above a page's cards, as Lasso's notifications: a white card (16px radius, card shadow) with a 4px warning-700 left edge, a 40px icon chip in warning-50 / warning-700, and the message (600, ink-900); `role="status"` (Task 14A). |
 | **Modal** | 560px, 16px radius, toast shadow, backdrop `rgba(11,42,91,.45)`; header, body, footer like cards; focus trapped and returned; Escape closes. |
 | **Menu** | a white card under its button (12px radius, card shadow, 8px padding, 300px wide, at most the screen less 32px); items 8px padded with an 8px radius, a 40px icon chip, a 600 title and a 13px ink-600 description, subtle background on hover. The button has `aria-expanded` and `aria-controls`; choosing an item, Escape or a click elsewhere closes it (Task 11C). |
+| **Menu button** | (Task ON1, Lasso's R6) the header's, only below 992px: 38px, 8px radius, a three-line icon and "Menu" in on-navy text (icon only from 782px down, the text kept for screen readers); hover and open: white text on `rgba(255,255,255,.12)`. `aria-expanded` and `aria-controls` name the navigation, which opens as a navy panel under the bar (full width, 8px 20px 14px padding, card shadow) with the tabs stacked, icon and label, 10px 12px padding. Escape or a click elsewhere folds it, Escape returning the focus to the button; widening the window past 991px folds it too. |
 | **Progress bar** | 8px track in `#E6ECF6`, full round; the fill a `brand-500` to `brand-600` gradient that widens over 300 ms; `role="progressbar"` with `aria-valuenow` (Task 11C). |
 | **Empty state** | inside a card: a 40px icon chip, a one-line message (600) and, where there is one, the primary action. |
 | **Icons** | 20×20 outline set drawn for Affibloom (stroke 1.6, round caps), inline SVG from one partial; never Lasso's icons. |
