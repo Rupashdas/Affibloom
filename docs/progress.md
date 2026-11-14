@@ -1958,6 +1958,11 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     with the reason in the dialog (`role="alert"`).
     - Checks: `composer lint` clean, `composer analyse` no errors, 432 unit tests pass; the changed partials and the editor
       settings rendered through WP-CLI. **Not run: the E2E specs and the look at 1280 and 375 px** (Step 3 stays open).
+    - **Looked at in Brave (2026-11-14, signed in by the user, product 15270, 1568 px):** the description's placeholder
+      attribute is set and the empty state draws "Enter a description" and clears when text is set; Refresh is described by
+      "Needs the Amazon API"; Remove opens "Remove this button?" with no browser dialog and Cancel keeps the button; the
+      dialog looks right. **Still not seen:** the field-failure toast and the remove-failure message (that product has no
+      field; the E2E case stubs them), the 375 px layout, and the E2E runs.
     - **Commit mix-up:** a concurrent Task 2X0 session committed part of this work in `7c73290` (`product.js`,
       `ProductEditors.php`, `F1.spec.ts`, `F29.spec.ts`, `ProductEditorsTest.php`), already pushed; history was not
       rewritten. The rest is in the 2X1 commit. `assets/admin/product-save.js` also carries an uncommitted change that is
