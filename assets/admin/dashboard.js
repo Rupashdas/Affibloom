@@ -83,6 +83,12 @@
 
 		var n = ids().length;
 		bar.hidden = 0 === n;
+		// Add to Group's picker goes back to its button when nothing is selected (Task G5).
+		var bulkGroups = bar.querySelector( '[data-bulk-groups]' );
+		if ( 0 === n && bulkGroups && ! bulkGroups.hidden ) {
+			bulkGroups.hidden = true;
+			bar.querySelector( '[data-add-to-group]' ).hidden = false;
+		}
 		countLabel.textContent = 0 === n ? '' : counted( countLabel, n, '' );
 
 		// With rows ticked, the selection bar takes the saved-view bar's place in the toolbar.
@@ -159,6 +165,7 @@
 
 	var search = document.getElementById( 'affibloom-search' );
 	var linkType = document.getElementById( 'affibloom-filter-link-type' );
+	var groupFilter = document.getElementById( 'affibloom-filter-group' );
 	var status = document.getElementById( 'affibloom-list-status' );
 	var errorTemplate = document.getElementById( 'affibloom-list-error' );
 	var sizeSelect = document.getElementById( 'affibloom-per-page' );
@@ -166,6 +173,8 @@
 	var current = {
 		s: params.get( 's' ) || '',
 		link_type: params.get( 'link_type' ) || '',
+		// The Group filter (Task G5): 0 all groups, -1 "Not in Groups", else a group's ID.
+		group: parseInt( params.get( 'group' ), 10 ) || 0,
 		paged: parseInt( params.get( 'paged' ), 10 ) || 1,
 		// The size the page was printed with (remembered per editor), so the first search keeps it.
 		per_page: sizeSelect ? parseInt( sizeSelect.value, 10 ) : 0,
@@ -181,6 +190,7 @@
 		var args = new URLSearchParams();
 		args.set( 's', list.s );
 		args.set( 'link_type', list.link_type );
+		args.set( 'group', String( list.group || 0 ) );
 		args.set( 'paged', String( list.paged ) );
 		args.set( 'per_page', String( list.per_page ) );
 		return '/affibloom/v1/dashboard/products?' + args.toString();
@@ -188,7 +198,7 @@
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, paged: 1, per_page: current.per_page };
+		var next = { s: current.s, link_type: current.link_type, group: current.group, paged: 1, per_page: current.per_page };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -213,11 +223,12 @@
 		pills.slice( 1 ).forEach( function ( pill ) {
 			if ( ! match && pill.getAttribute( 'data-view-s' ) === current.s &&
 				pill.getAttribute( 'data-view-link-type' ) === current.link_type &&
+				parseInt( pill.getAttribute( 'data-view-group' ), 10 ) === current.group &&
 				parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) === current.per_page ) {
 				match = pill;
 			}
 		} );
-		if ( ! match && pills[ 0 ] && '' === current.s && '' === current.link_type ) {
+		if ( ! match && pills[ 0 ] && '' === current.s && '' === current.link_type && 0 === current.group ) {
 			match = pills[ 0 ];
 		}
 		pills.forEach( function ( pill ) {
@@ -245,7 +256,10 @@
 		if ( linkType ) {
 			linkType.value = current.link_type;
 		}
-		var filters = current.link_type ? 1 : 0;
+		if ( groupFilter ) {
+			groupFilter.value = String( current.group );
+		}
+		var filters = ( current.link_type ? 1 : 0 ) + ( current.group ? 1 : 0 );
 		var badge = document.querySelector( '.affibloom-filters__count' );
 		if ( badge ) {
 			badge.textContent = String( filters );
@@ -278,7 +292,7 @@
 				return;
 			}
 			var data = response.data;
-			current = { s: data.term, link_type: data.link_type, paged: data.page, per_page: data.per_page };
+			current = { s: data.term, link_type: data.link_type, group: data.group, paged: data.page, per_page: data.per_page };
 
 			region.innerHTML = data.html;
 			quick.id = null; // An open quick edit went with the old rows.
@@ -361,6 +375,7 @@
 			load( {
 				s: back.get( 's' ) || '',
 				link_type: back.get( 'link_type' ) || '',
+				group: parseInt( back.get( 'group' ), 10 ) || 0,
 				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
 				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
 			}, false, false );
@@ -436,6 +451,17 @@
 			} );
 		} );
 
+		// The Group filter, as the link type is (Task G5; F23 R22).
+		if ( groupFilter ) {
+			groupFilter.addEventListener( 'change', function () {
+				guarded( function () {
+					load( listWith( { group: parseInt( groupFilter.value, 10 ) || 0 } ), true, false );
+				}, groupFilter, true, function () {
+					groupFilter.value = String( current.group );
+				} );
+			} );
+		}
+
 		// Lasso's "Reset filters": search, filters and page size back to the defaults.
 		panel.querySelector( '.affibloom-filters__reset' ).addEventListener( 'click', function ( event ) {
 			var reset = event.currentTarget;
@@ -443,7 +469,7 @@
 				if ( search ) {
 					search.value = '';
 				}
-				load( { s: '', link_type: '', paged: 1, per_page: 10 }, true, false );
+				load( { s: '', link_type: '', group: 0, paged: 1, per_page: 10 }, true, false );
 			}, reset, true );
 		} );
 	}
@@ -471,6 +497,7 @@
 					load( {
 						s: pill.getAttribute( 'data-view-s' ),
 						link_type: pill.getAttribute( 'data-view-link-type' ),
+						group: parseInt( pill.getAttribute( 'data-view-group' ), 10 ) || 0,
 						paged: 1,
 						per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
 					}, true, false );
@@ -526,7 +553,7 @@
 			wp.apiFetch( {
 				path: '/affibloom/v1/dashboard/views',
 				method: 'POST',
-				data: { name: nameField.value, s: current.s, link_type: current.link_type, per_page: current.per_page },
+				data: { name: nameField.value, s: current.s, link_type: current.link_type, group: current.group, per_page: current.per_page },
 			} ).then( function ( response ) {
 				replaceViews( response.data.html );
 				nameField.value = '';
@@ -556,11 +583,14 @@
 		var value = function ( name ) {
 			return form.elements.namedItem( name ).value;
 		};
+		// The row's groups (Task G5; F1 D28 gains `groups`): IDs of groups, names for new ones.
+		var picker = form.querySelector( '[data-group-picker]' );
 		return {
 			name: value( 'name' ),
 			url: value( 'url' ),
 			image_url: value( 'image_url' ),
 			image_id: parseInt( value( 'image_id' ), 10 ) || 0,
+			groups: picker && picker.affibloomPicker ? picker.affibloomPicker.values() : [],
 		};
 	}
 
@@ -615,6 +645,7 @@
 		var editing = template.content.firstElementChild.cloneNode( true );
 		row.after( editing );
 		row.hidden = true;
+		window.affibloomGroupPicker.init( editing );
 		quick.id = id;
 		quick.opened = JSON.stringify( quickValues( editing.querySelector( 'form' ) ) );
 		editButton( id ).setAttribute( 'aria-expanded', 'true' );
@@ -900,6 +931,69 @@
 				deletingNow( false );
 				window.affibloomModal.hide();
 				window.affibloomToast( error && error.message ? error.message : bulkDelete.dataset.failedText, true );
+			} );
+		} );
+	}
+
+	/* ---------------------------------------------------------------------------------------------------------
+	 * Add to Group on the selection bar (Task G5; F23 R23), as Lasso's (view-js.php 456-575): the button turns into the
+	 * group picker and Save Changes. The products join the chosen groups (new names become groups) and keep the ones
+	 * they have; with none chosen, "Select at least one group."; then the list is drawn again. The button goes through
+	 * the quick edit's guard, as Delete does, because the reload would wipe an open row's edits.
+	 * ------------------------------------------------------------------------------------------------------- */
+
+	var addToGroup = bar.querySelector( '[data-add-to-group]' );
+	var bulkGroups = bar.querySelector( '[data-bulk-groups]' );
+	if ( addToGroup && bulkGroups ) {
+		var bulkPicker = bulkGroups.querySelector( '[data-group-picker]' );
+		var bulkSave = bulkGroups.querySelector( '[data-bulk-groups-save]' );
+		var bulkError = bulkGroups.querySelector( '[data-bulk-groups-error]' );
+		var adding = false;
+
+		addToGroup.addEventListener( 'click', function () {
+			guarded( function () {
+				if ( ! ids().length ) {
+					return;
+				}
+				window.affibloomGroupPicker.init( bulkGroups );
+				bulkPicker.affibloomPicker.clear();
+				bulkError.textContent = '';
+				addToGroup.hidden = true;
+				bulkGroups.hidden = false;
+				bulkPicker.querySelector( 'input' ).focus();
+			}, addToGroup, false );
+		} );
+
+		bulkSave.addEventListener( 'click', function () {
+			var values = bulkPicker.affibloomPicker.values();
+			var chosen = ids();
+			if ( adding || ! chosen.length ) {
+				return;
+			}
+			if ( 0 === values.length ) {
+				bulkError.textContent = bulkGroups.dataset.noneText;
+				return;
+			}
+			adding = true;
+			bulkSave.disabled = true;
+			bulkError.textContent = '';
+			wp.apiFetch( {
+				path: '/affibloom/v1/products/groups',
+				method: 'POST',
+				data: { ids: chosen.map( function ( id ) {
+					return parseInt( id, 10 );
+				} ), groups: values },
+			} ).then( function ( response ) {
+				var updated = response.data.updated;
+				clear();
+				load( current, false, true, function () {
+					window.affibloomToast( counted( bulkGroups, updated, 'done-' ), false );
+				} );
+			} ).catch( function () {
+				bulkError.textContent = bulkGroups.dataset.failedText;
+			} ).then( function () {
+				adding = false;
+				bulkSave.disabled = false;
 			} );
 		} );
 	}

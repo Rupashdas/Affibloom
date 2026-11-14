@@ -1,6 +1,6 @@
 <?php
 /**
- * One group's page, or "Add a New Group": Lasso's group page (F23, Task G1).
+ * One group's page, or "Add a New Group": Lasso's group page (F23, Tasks G1-G4).
  *
  * @package Affibloom
  */
@@ -14,11 +14,9 @@ use Affibloom\Domain\Group\Group;
 use Affibloom\Interface\Template;
 
 /**
- * One group's page (`admin/views/groups/{header,group-details}.php`; F23 R5-R6), or "Add a New Group" when no group is
- * named. Reached from the Groups list and after a save, never from the menu.
- *
- * Task G1 builds the new-group form and the page a save lands on: the group's Details tab, read only. Task G2 makes it
- * editable and adds Delete This Group; G4 adds the Links tab.
+ * One group's page (`admin/views/groups/{header,group-details,group-urls}.php`; F23 R5-R6, R17), or "Add a New Group"
+ * when no group is named. Reached from the Groups list and after a save, never from the menu. A group opens on its Links
+ * tab (Lasso's `group-urls`); Details has the form.
  */
 final class GroupScreen {
 
@@ -48,7 +46,7 @@ final class GroupScreen {
 	 * The admin address of a group's page, or of "Add a New Group" when no ID is given.
 	 *
 	 * @param int    $id  The group's ID; 0 for a new group.
-	 * @param string $tab The tab to open ('details'); '' for the page's first tab.
+	 * @param string $tab The tab to open ('links' or 'details'); '' for the page's first tab.
 	 */
 	public static function url( int $id = 0, string $tab = '' ): string {
 		$args = array( 'page' => self::SLUG );
@@ -83,11 +81,15 @@ final class GroupScreen {
 	 * Prints the page. WordPress has already checked the capability (Capabilities::PRODUCTS, in AdminMenu).
 	 */
 	public function render(): void {
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which tab to show.
+
 		$this->template->render(
 			'admin/group',
 			array(
-				'group'  => $this->group,
-				'notice' => $this->notice->message(),
+				'group'   => $this->group,
+				'tab'     => 'details' === $tab ? 'details' : 'links',
+				'members' => null === $this->group ? array() : $this->groups->members( $this->group->id ),
+				'notice'  => $this->notice->message(),
 			)
 		);
 	}

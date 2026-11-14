@@ -177,14 +177,14 @@ final class Plugin {
 		$choices   = new IconChoices( $icons );
 		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
-		$groups    = new GroupService( new TermGroupRepository() );
+		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
 
 		return array(
 			new ProductPostType(),
 			new GroupTaxonomy(),
 			new AdminMenu(
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -202,9 +202,9 @@ final class Plugin {
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
 			new HelpTips( $settings ),
 			new DisplayController( $display, $settings ),
-			new ProductsController( $products, new ProductResource() ),
+			new ProductsController( $products, new ProductResource(), $groups ),
 			new BulkAddController( $bulk ),
-			new DashboardController( $products, $per_page, $views, $this->template() ),
+			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
 			new BulkAddCron( $bulk ),
 			new IconController( $icons ),
 			new TrackingIdController( $settings ),

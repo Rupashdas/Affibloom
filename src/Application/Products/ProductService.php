@@ -59,9 +59,10 @@ final class ProductService {
 	 * @param LinkKind   $link_kind Lasso's "Link type" filter.
 	 * @param int        $page      Page number, from 1.
 	 * @param int        $per_page  Products per page.
+	 * @param int        $group     The Group filter: 0 for all, -1 for products in no group, else a group's ID.
 	 */
-	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page ): ProductPage {
-		return $this->products->page( $term, $link_kind, $page, $per_page );
+	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): ProductPage {
+		return $this->products->page( $term, $link_kind, $page, $per_page, $group );
 	}
 
 	/**

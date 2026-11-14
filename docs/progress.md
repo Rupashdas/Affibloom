@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1, TL1 (+ the one-time Lasso import button, deviation 87) | 33: 2X1-2X5, G2-G5, FL1-FL5, TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, TL1 (+ the one-time Lasso import button, deviation 87) | 29: 2X1-2X5, FL1-FL5, TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -29,7 +29,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. **2X4, 2X5 and 2X6 are built and committed (2026-11-14, deviations 93-95; the user asked for all three in one session, overriding the one-task rule for this session); each waits for the user's signed-in run** (F2 and F18 for 2X4, F18 for 2X5, F16 for 2X6). Then Groups G1-G5.
 2a. **Tasks 9B-9L are built (2026-11-14, deviation 96); they wait for the user's signed-in F9 run** (14 tests, AC4-AC15). 9J is in Phase 5.
 2b. **Task G1 (the Groups list and a new group) is done (2026-11-14, deviation 97); F23 AC1-AC2 passed in Claude's runs.**
-    Next in the Groups area: G2 (a group's Details: edit and delete), then G3-G5.
+    **Tasks G2-G5 are built too (the user, 2026-11-14: "Let's do G2-G5", tested together; deviation 98).**
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2092,6 +2092,32 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     `.affibloom-page--wide`; the Groups templates were written with that class and now carry none. Until that change is
     committed, the committed CSS still gives them the old 1080px default.
 
+98. **Tasks G2-G5 (2026-11-14), the rest of Groups (F23); built in one session at the user's word ("Let's do G2-G5 ...
+    run the test for all these steps at once"), tested together after the last one.** G2 a group's Details (edit, slug
+    kept, Delete This Group with "Delete This Group?" and "Hold Up", the server's own 409), G3 the group picker on the
+    product page and the Dashboard's Groups column, G4 the Links tab (order by drag or Move up / Move down, Remove one or
+    the selected, Add a Link), G5 the quick edit's picker, the Group filter (in the address, the saved views and the
+    pills) and the bar's Add to Group. Differences from the plan's text:
+    - **One commit for the four tasks**, not one each: they share `GroupService`, `GroupsController`, `group.php`,
+      `groups.js` and the Dashboard files, so they cannot be told apart in the tree.
+    - **`GroupService` takes the product repository** (a group's members are shown as products), and `ProductsController`,
+      `ProductScreen`, `DashboardScreen` and `DashboardController` take `GroupService`. **`groups` is not in
+      `ProductInput`/`ProductService::update()`:** `ProductsController::update()` stores the product, then the groups
+      (a refused product save stores none); `ProductResource::full()` gets the groups as a second argument.
+    - **`ProductService::search()` / `ProductRepository::search()` are not new:** `GET /products?search=&page=&group=`
+      uses `ProductService::list()` (the Dashboard's rule), ten a page, with an `in_group` flag.
+    - **The picker lives in `assets/admin/group-picker.js`**, not `admin.js` (another session was editing it); the page's
+      groups are one `affibloom-group-choices` JSON block (`partials/group-choices.php`), printed once per page.
+    - **New classes:** `AlreadyInGroup`, `GroupInUse`, `GroupNotFound`, `GroupOrder` (rank, append, without, move);
+      `ProductRepository::page()` and `ProductService::list()` take a trailing `$group = 0` (0 all, -1 "Not in Groups",
+      else a term ID); `SavedView` has `group` and `GROUP_NOT_IN`; a saved view whose group is gone shows all groups.
+    - **A group opens on its Links tab** (the list row's link has no tab), Details after a save, as Lasso.
+    - **Not done / left for later:** a group made in the quick edit or the bar is not added to the open filter's select
+      until the page is reloaded; the Links tab's "Links n" count and the Delete button's count are kept up to date by
+      script only; Copy Shortcode stays "Coming soon" (D5).
+    - **375 px header:** the shared header pushed the page 6px past the screen; at 782px and below the wordmark is
+      visually hidden (the logo stays, the text is for screen readers), the tab gap is 2px and the header gap 12px.
+
 99. **Task TL1 (2026-11-14), activation and deactivation (F37 AC1); done, checked on Local with WP-CLI.** Differences
     from the plan's text:
     - **The coordination point is moot:** the user's `affibloom.php` edit was settled and committed in Task 2X0 (open
@@ -2149,6 +2175,11 @@ deviation 89). The items below are the Phase 0 history.
   `wp plugin activate affibloom` → `affibloom_version` 0.1.0, `affibloom_activated_at` set (autoload off); 528
   products and `affibloom_settings` unchanged. Another session's Groups work (G2-G5) was uncommitted in the same tree,
   so the commit holds only this task's hunks. Next: Task TL2 (upgrade routine).
+
+- **2026-11-14 (Claude Code, Tasks G2-G5 in one session at the user's word):** Groups finished (F23 AC3-AC10) and the
+  header's 6px overflow at 375px fixed; deviation 98. Tests were written first for all four, the code followed, and the
+  suites ran once at the end (results in the commit message and below). Another session was working in the same tree
+  (the Fields area), so the commit holds only these tasks' hunks.
 
 - **2026-11-14 (Claude Code, Task G1):** the Groups list and the new-group form (F23 AC1-AC2); deviation 97. Another
   session was working in the same tree (Tasks 9B-9L and the width change), so the commit holds only this task's hunks.

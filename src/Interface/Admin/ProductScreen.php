@@ -11,6 +11,7 @@ namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Domain\Amazon\AmazonUrl;
@@ -48,6 +49,7 @@ final class ProductScreen {
 	 *                                         back to (Task 14B).
 	 * @param FieldsService          $fields   The product's custom fields and the field library (Task 14C).
 	 * @param Notice                 $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
+	 * @param GroupService           $groups   The product's groups and the site's, for the group picker (Task G3).
 	 */
 	public function __construct(
 		private Template $template,
@@ -57,6 +59,7 @@ final class ProductScreen {
 		private SettingsService $settings,
 		private FieldsService $fields,
 		private Notice $notice,
+		private GroupService $groups,
 	) {}
 
 	/**
@@ -109,6 +112,27 @@ final class ProductScreen {
 	}
 
 	/**
+	 * The product's groups for the picker's chips.
+	 *
+	 * @return list<array{id: int, name: string}>
+	 */
+	private function chosen_groups(): array {
+		if ( null === $this->product ) {
+			return array();
+		}
+		$id     = (int) $this->product->id;
+		$chosen = array();
+		foreach ( $this->groups->for_products( array( $id ) )[ $id ] ?? array() as $group ) {
+			$chosen[] = array(
+				'id'   => $group->id,
+				'name' => $group->name,
+			);
+		}
+
+		return $chosen;
+	}
+
+	/**
 	 * Prints the page. WordPress has already checked the capability (Capabilities::PRODUCTS, in AdminMenu) and guard()
 	 * has found the product.
 	 */
@@ -149,6 +173,9 @@ final class ProductScreen {
 				'types'        => FieldType::choosable(),
 				'tracking'     => $this->tracking_offer( $site->string( 'tracking_id' ) ),
 				'notice'       => $this->notice->message(),
+				// The group picker (Task G3): the product's groups, and every group for its choices.
+				'chosen'       => $this->chosen_groups(),
+				'group_list'   => $this->groups->all(),
 			)
 		);
 	}

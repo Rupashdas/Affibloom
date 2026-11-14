@@ -109,8 +109,9 @@
 	}
 
 	/* ---------------------------------------------------------------------------------------------------------
-	 * The new-group form (Lasso's settings.js 3100-3145): an empty name is refused before anything is sent; a good
-	 * save shows "Updating Group", creates the group and opens its Details tab.
+	 * The group form (Lasso's settings.js 3100-3185): an empty name is refused before anything is sent; a good save
+	 * shows "Updating Group", stores the group (POST for a new one, PATCH for an existing one) and opens its Details
+	 * tab with "Group saved.".
 	 * ------------------------------------------------------------------------------------------------------- */
 	var form = document.getElementById( 'affibloom-group-form' );
 	if ( form && window.affibloomFieldErrors && window.affibloomSaveDialog ) {
@@ -131,8 +132,7 @@
 
 		form.addEventListener( 'submit', function ( event ) {
 			event.preventDefault();
-			// The Details tab is read only until Task G2: it has no field to send.
-			if ( ! form.elements.namedItem( 'name' ) || form.elements.namedItem( 'name' ).readOnly || sending ) {
+			if ( sending ) {
 				return;
 			}
 			errors.clear( form );
@@ -145,15 +145,62 @@
 
 			sending = true;
 			dialog.open( form.dataset.savingText, form.dataset.savingTitle );
+			var id = parseInt( form.dataset.groupId, 10 ) || 0;
 			wp.apiFetch( {
-				path: '/affibloom/v1/groups',
-				method: 'POST',
+				path: id ? '/affibloom/v1/groups/' + id : '/affibloom/v1/groups',
+				method: id ? 'PATCH' : 'POST',
 				data: { name: name, description: form.elements.namedItem( 'description' ).value },
 			} ).then( function ( response ) {
 				dialog.close( function () {
 					window.location.assign( response.data.redirect_to );
 				} );
 			} ).catch( fail );
+		} );
+	}
+
+	/* ---------------------------------------------------------------------------------------------------------
+	 * Delete This Group (Lasso's settings.js 3149-3185). A group that shows links opens "Hold Up" and nothing else; the
+	 * count is the page's, but the server checks again (D4), so a group filled meanwhile answers 409 and opens it too.
+	 * Delete asks first, then goes to the Groups list with "Successfully deleted the Group.".
+	 * ------------------------------------------------------------------------------------------------------- */
+	var remove = document.querySelector( '[data-group-delete]' );
+	var confirmModal = document.getElementById( 'affibloom-group-delete-modal' );
+	var holdUp = document.getElementById( 'affibloom-group-holdup' );
+	if ( remove && confirmModal && holdUp && window.affibloomModal ) {
+		// The button opens the question, or Hold Up straight away when the page knows the group has links.
+		remove.addEventListener( 'click', function ( event ) {
+			if ( parseInt( remove.dataset.members, 10 ) > 0 ) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				window.affibloomModal.show( holdUp, remove );
+			}
+		}, true );
+		remove.setAttribute( 'data-affibloom-open', 'affibloom-group-delete-modal' );
+
+		var confirm = confirmModal.querySelector( '[data-delete-confirm]' );
+		var label = confirm.textContent;
+		var deleting = false;
+		var busy = function ( on ) {
+			deleting = on;
+			confirm.disabled = on;
+			confirm.textContent = on ? confirm.dataset.busyLabel : label;
+		};
+		confirm.addEventListener( 'click', function () {
+			if ( deleting ) {
+				return;
+			}
+			busy( true );
+			wp.apiFetch( { path: '/affibloom/v1/groups/' + remove.dataset.groupId, method: 'DELETE' } ).then( function ( response ) {
+				window.location.assign( response.data.redirect_to );
+			} ).catch( function ( error ) {
+				busy( false );
+				window.affibloomModal.hide();
+				if ( error && 'affibloom_group_in_use' === error.code ) {
+					window.affibloomModal.show( holdUp, remove );
+				} else if ( window.affibloomToast ) {
+					window.affibloomToast( error && error.message ? error.message : confirmModal.dataset.failedText, true );
+				}
+			} );
 		} );
 	}
 }() );

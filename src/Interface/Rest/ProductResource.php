@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Domain\Group\Group;
 use Affibloom\Domain\Product\Product;
 
 /**
@@ -33,10 +34,11 @@ final class ProductResource {
 	/**
 	 * Every field as stored, for the product page to show what was saved (F1 requirements 9 S15) and for quick edit.
 	 *
-	 * @param Product $product A saved product.
+	 * @param Product     $product A saved product.
+	 * @param list<Group> $groups  The groups it is in (F23).
 	 * @return array<string, mixed>
 	 */
-	public function full( Product $product ): array {
+	public function full( Product $product, array $groups = array() ): array {
 		return $this->summary( $product ) + array(
 			'type'             => $product->type->value,
 			'asin'             => $product->asin,
@@ -56,6 +58,13 @@ final class ProductResource {
 			'sponsored'        => $product->sponsored,
 			'show_disclosure'  => $product->show_disclosure,
 			'prime'            => $product->prime,
+			'groups'           => array_map(
+				static fn( Group $group ): array => array(
+					'id'   => $group->id,
+					'name' => $group->name,
+				),
+				$groups
+			),
 		);
 	}
 }

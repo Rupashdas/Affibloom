@@ -41,7 +41,7 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	/** Newest saved first, which is this fake's stand-in for "most recently changed". */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): ProductPage {
 		$all = array_values(
 			array_filter(
 				array_reverse( $this->saved ),

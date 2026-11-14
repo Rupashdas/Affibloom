@@ -4,7 +4,7 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -15,7 +15,7 @@ $columns   = array(
 	// [ class, label, a placeholder until its task ].
 	array( 'affibloom-col-image', __( 'Image', 'affibloom' ), false ),
 	array( 'affibloom-col-name', __( 'Link Name', 'affibloom' ), false ),
-	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), true ),
+	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), false ),
 	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), true ),
 	array( 'affibloom-col-locations', __( 'Locations', 'affibloom' ), true ),
 	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), true ),
@@ -63,7 +63,15 @@ $columns   = array(
 			</thead>
 			<tbody>
 				<?php foreach ( $products->items as $product ) : ?>
-					<?php $this->render( 'admin/partials/product-row', array( 'product' => $product ) ); ?>
+					<?php
+					$this->render(
+						'admin/partials/product-row',
+						array(
+							'product' => $product,
+							'groups'  => $view['groups_of'][ (int) $product->id ] ?? array(),
+						)
+					);
+					?>
 				<?php endforeach; ?>
 			</tbody>
 		</table>

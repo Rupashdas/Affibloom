@@ -48,7 +48,15 @@ $quick_id     = 'affibloom-quick-' . $product_id;
 		<a class="affibloom-row__url" href="<?php echo esc_url( $product->url->value() ); ?>" target="_blank"
 			rel="noopener noreferrer" title="<?php echo esc_attr( $product->url->value() ); ?>"><?php echo esc_html( $product->url->value() ); ?></a>
 	</td>
-	<td class="affibloom-col-groups"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
+	<?php // The product's group names, comma-separated, the whole list as the cell's title (Lasso's view-js.php 365-366; F23 R16). ?>
+	<?php $group_names = implode( ', ', array_map( static fn( $group ): string => wp_specialchars_decode( $group->name, ENT_QUOTES ), $view['groups'] ) ); ?>
+	<td class="affibloom-col-groups" data-groups title="<?php echo esc_attr( $group_names ); ?>">
+		<?php if ( array() === $view['groups'] ) : ?>
+			<span class="affibloom-soon-cell"><span aria-hidden="true">—</span><span class="screen-reader-text"><?php esc_html_e( 'No groups', 'affibloom' ); ?></span></span>
+		<?php else : ?>
+			<span class="affibloom-groups-cell"><?php echo esc_html( $group_names ); ?></span>
+		<?php endif; ?>
+	</td>
 	<td class="affibloom-col-alert"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
 	<td class="affibloom-col-locations"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
 	<td class="affibloom-col-clicks"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
@@ -92,13 +100,25 @@ $quick_label = sprintf( __( 'Quick Edit: %s', 'affibloom' ), $product->name );
 							<input type="text" class="affibloom-input" id="<?php echo esc_attr( $quick_id ); ?>-url" name="url"
 								value="<?php echo esc_attr( $product->url->value() ); ?>" placeholder="https://www.example.com/affiliate-id">
 						</div>
-						<?php // Lasso's Groups select (several, new names added) comes with the Groups area (D24); its place and placeholder are kept. ?>
+						<?php // Lasso's Groups select (several, new names added), as the group picker (Task G5; F23 R21). ?>
 						<div class="affibloom-field">
-							<span class="affibloom-label affibloom-quick__label" id="<?php echo esc_attr( $quick_id ); ?>-groups"><?php esc_html_e( 'Groups', 'affibloom' ); ?></span>
-							<div class="affibloom-quick__placeholder" role="group" aria-labelledby="<?php echo esc_attr( $quick_id ); ?>-groups">
-								<span><?php esc_html_e( 'Select a group', 'affibloom' ); ?></span>
-								<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?>
-							</div>
+							<label class="affibloom-label affibloom-quick__label" for="<?php echo esc_attr( $quick_id ); ?>-groups"><?php esc_html_e( 'Groups', 'affibloom' ); ?></label>
+							<?php
+							$this->render(
+								'admin/partials/group-picker',
+								array(
+									'id'       => $quick_id . '-groups',
+									'label_id' => $quick_id . '-groups',
+									'groups'   => array_map(
+										static fn( $group ): array => array(
+											'id'   => $group->id,
+											'name' => $group->name,
+										),
+										$view['groups']
+									),
+								)
+							);
+							?>
 						</div>
 						<?php // The public link is the destination until link cloaking exists (D25). ?>
 						<p class="affibloom-quick__meta">

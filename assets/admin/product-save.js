@@ -124,6 +124,11 @@
 					data[ name ] = element.checked;
 				}
 			} );
+			// The group picker (Task G3): IDs of groups, names for new ones; the server stores exactly these.
+			var picker = form.querySelector( '[data-group-picker]' );
+			if ( picker && picker.affibloomPicker ) {
+				data.groups = picker.affibloomPicker.values();
+			}
 			data.image_id = parseInt( field( 'image_id' ).value, 10 ) || 0;
 			data.primary_position = parseInt( field( 'primary_position' ).value, 10 ) || 0;
 			data.buttons = extraBlocks().map( function ( block ) {
@@ -179,6 +184,11 @@
 			} );
 			field( 'image_url' ).value = data.image_url;
 			field( 'image_id' ).value = String( data.image_id );
+			// New names are groups now: the chips show the stored ones, with their IDs.
+			var picked = form.querySelector( '[data-group-picker]' );
+			if ( picked && picked.affibloomPicker && data.groups ) {
+				picked.affibloomPicker.set( data.groups );
+			}
 			rich.forEach( function ( editor ) {
 				editor.saved( Object.prototype.hasOwnProperty.call( sent, editor.name ) ? data[ editor.name ] : null );
 			} );

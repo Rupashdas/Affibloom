@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Dashboard\SavedViewService;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Product\LinkKind;
@@ -31,6 +32,7 @@ final class DashboardScreen {
 	 * @param SavedViewService   $views    This editor's saved views (Task 13E).
 	 * @param Notice             $notice   The toast after a redirect: "Product deleted." (Task 17A).
 	 * @param LassoImportService $import   The one-time Lasso import, whose card shows while it has records to bring in.
+	 * @param GroupService       $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
 	 */
 	public function __construct(
 		private Template $template,
@@ -39,6 +41,7 @@ final class DashboardScreen {
 		private SavedViewService $views,
 		private Notice $notice,
 		private LassoImportService $import,
+		private GroupService $groups,
 	) {}
 
 	/**
@@ -50,20 +53,28 @@ final class DashboardScreen {
 		$page  = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1;
 		$typed = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 		$kind  = isset( $_GET['link_type'] ) ? sanitize_key( wp_unslash( $_GET['link_type'] ) ) : '';
+		$group = isset( $_GET['group'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['group'] ) ) : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$per_page  = $this->per_page->choose( $asked );
 		$term      = SearchTerm::from_input( $typed );
 		$link_kind = LinkKind::from_input( $kind );
+		// A group that is gone (a bookmark, a saved view) falls back to all groups (F23 edge case 5).
+		$group    = $this->groups->choose_filter( $group );
+		$products = $this->products->list( $term, $link_kind, $page, $per_page, $group );
+		$ids      = array_map( static fn( $product ): int => (int) $product->id, $products->items );
 
 		$this->template->render(
 			'admin/dashboard',
 			array(
-				'products'      => $this->products->list( $term, $link_kind, $page, $per_page ),
+				'products'      => $products,
 				'term'          => $term->text(),
 				'link_kind'     => $link_kind,
+				'group'         => $group,
+				'group_list'    => $this->groups->all(),
+				'groups_of'     => $this->groups->for_products( $ids ),
 				'views'         => $this->views->list( get_current_user_id() ),
-				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
+				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group ),
 				'library'       => $this->products->count(),
 				'notice'        => $this->notice->message(),
 				'lasso_pending' => $this->import->pending(),

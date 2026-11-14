@@ -199,7 +199,7 @@ $soon_tabs   = array(
 						</button>
 					</div>
 
-					<?php // Groups: a placeholder until the Groups area (Lasso: a multi-select that can create a group). ?>
+					<?php // Groups (Task G3): Lasso's multi-select that can create a group, as the group picker (F23 D8). ?>
 					<div class="affibloom-field">
 						<div class="affibloom-field__head">
 							<label class="affibloom-label" for="affibloom-groups"><?php esc_html_e( 'Groups', 'affibloom' ); ?></label>
@@ -212,13 +212,21 @@ $soon_tabs   = array(
 									'label' => __( 'Groups', 'affibloom' ),
 								)
 							);
-							$this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) );
 							?>
 						</div>
-						<select class="affibloom-input" id="affibloom-groups" aria-describedby="affibloom-groups-help" disabled>
-							<option><?php esc_html_e( 'Select a group', 'affibloom' ); ?></option>
-						</select>
+						<?php
+						$this->render(
+							'admin/partials/group-picker',
+							array(
+								'id'           => 'affibloom-groups',
+								'groups'       => $view['chosen'],
+								'label_id'     => 'affibloom-groups-label',
+								'described_by' => 'affibloom-groups-help',
+							)
+						);
+						?>
 					</div>
+					<?php $this->render( 'admin/partials/group-choices', array( 'groups' => $view['group_list'] ) ); ?>
 
 					<?php // Custom fields (Task 14C): Lasso's dashed box with the product's fields, then "Add Custom Field". ?>
 					<div class="affibloom-product__fields" data-product-fields data-product-id="<?php echo esc_attr( (string) $product->id ); ?>"

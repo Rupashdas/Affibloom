@@ -52,12 +52,19 @@ final class AdminAssets implements Module {
 		// the quick edit (16A), whose image comes from the media library and whose toast and save dialog are admin.js's.
 		if ( 'toplevel_page_' . AdminMenu::SLUG === $hook_suffix ) {
 			wp_enqueue_media();
-			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );
+		}
+
+		// The group picker: the product page, the Dashboard's quick edit and bulk Add to Group (Tasks G3, G5).
+		if ( 'toplevel_page_' . AdminMenu::SLUG === $hook_suffix || str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-group-picker', $this->plugin_url . 'assets/admin/group-picker.js', array( 'affibloom-admin' ), $this->version, true );
 		}
 
 		// The Groups list in place, and the new-group form (Task G1). The hook suffix of both pages holds "affibloom-group".
 		if ( str_contains( $hook_suffix, GroupScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			// A group's Links tab: its order, Remove and "Add to Group" (Task G4); it stops at once on any other page.
+			wp_enqueue_script( 'affibloom-group-members', $this->plugin_url . 'assets/admin/group-members.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 		}
 
 		// The Fields list in place (Task FL1) and the field form (Task FL2); the hook suffix of both Fields pages holds
@@ -95,7 +102,7 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker' ), $this->version, true );
 			// Save Changes: the form through PATCH /products/{id}, its dialog and toasts (Task 15A).
-			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );
 		}
 
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).

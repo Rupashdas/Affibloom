@@ -215,10 +215,10 @@ they were, then the new sections in the order listed after G5.
 **Groups (F23), area 0 of `plans/archive/dashboard-completion-plan.md`** (gate 4: given 2026-11-14)
 
 - [x] Task G1: The Groups list, and a new group
-- [ ] Task G2: A group's Details — edit and delete
-- [ ] Task G3: Groups on the product page, and the Dashboard's Groups column
-- [ ] Task G4: A group's Links tab — order, remove, add
-- [ ] Task G5: Groups on the Dashboard — quick edit, filter, Add to Group
+- [x] Task G2: A group's Details — edit and delete
+- [x] Task G3: Groups on the product page, and the Dashboard's Groups column
+- [x] Task G4: A group's Links tab — order, remove, add
+- [x] Task G5: Groups on the Dashboard — quick edit, filter, Add to Group
 
 **Settings → General (F9)** — 9J (Link Index card) moves to Phase 5
 
@@ -4838,10 +4838,10 @@ list with "Successfully deleted the Group.".
 **Files:** the classes above; `templates/admin/group.php`, `templates/admin/partials/delete-modal.php` (unchanged
 markup, its third user), `assets/admin/groups.js`; tests F23 **AC3**, unit tests for update and the in-use refusal.
 
-- [ ] **Step 1: Failing tests** (AC3: edit keeps the slug; delete of an empty group; "Hold Up" for a group with a
+- [x] **Step 1: Failing tests** (AC3: edit keeps the slug; delete of an empty group; "Hold Up" for a group with a
   product attached through WP-CLI).
-- [ ] **Step 2: Routes, service, repository.**  - [ ] **Step 3: The tab and the dialogs.**
-- [ ] **Step 4: Run and look.**  - [ ] **Step 5: Commit** — "Edit and delete a group, never one in use".
+- [x] **Step 2: Routes, service, repository.**  - [x] **Step 3: The tab and the dialogs.**
+- [x] **Step 4: Run and look.**  - [x] **Step 5: Commit** — "Edit and delete a group, never one in use".
 
 ---
 
@@ -4873,9 +4873,9 @@ Changes stores the product in exactly those groups (new names become groups). Th
 `DashboardController` (the page's groups); tests F23 **AC4**, F1 AC2 and AC16 (the snapshot), F19 AC11 (the column),
 unit tests for resolve and `GroupOrder`.
 
-- [ ] **Step 1: Failing tests.**  - [ ] **Step 2: Domain, service, repository.**  - [ ] **Step 3: PATCH and the
-  resource.**  - [ ] **Step 4: The picker and the page.**  - [ ] **Step 5: The column.**
-- [ ] **Step 6: Run and look** (keyboard only; screen reader names; 375 px).  - [ ] **Step 7: Commit** — "Choose a
+- [x] **Step 1: Failing tests.**  - [x] **Step 2: Domain, service, repository.**  - [x] **Step 3: PATCH and the
+  resource.**  - [x] **Step 4: The picker and the page.**  - [x] **Step 5: The column.**
+- [x] **Step 6: Run and look** (keyboard only; screen reader names; 375 px).  - [x] **Step 7: Commit** — "Choose a
   product's groups on its page, as Lasso does".
 
 ---
@@ -4907,8 +4907,8 @@ member), **Done**.
 **Files:** the above; the list rows (G1) and the Details tab (G2) now link to the Links tab; tests F23 **AC5-AC7**, unit
 tests for `GroupOrder::move()` and the routes' refusals.
 
-- [ ] **Step 1: Failing tests.**  - [ ] **Step 2: Service and routes.**  - [ ] **Step 3: The tab, the rows, the
-  modal.**  - [ ] **Step 4: Run and look** (drag, keyboard moves, 375 px).  - [ ] **Step 5: Commit** — "Order, remove
+- [x] **Step 1: Failing tests.**  - [x] **Step 2: Service and routes.**  - [x] **Step 3: The tab, the rows, the
+  modal.**  - [x] **Step 4: Run and look** (drag, keyboard moves, 375 px).  - [x] **Step 5: Commit** — "Order, remove
   and add a group's products from its Links tab".
 
 ---
@@ -4937,8 +4937,8 @@ join the chosen groups and keep their others; none chosen → "Select at least o
 **Files:** the above; `templates/admin/partials/{product-row,filters-panel,selection-bar,saved-views}.php`,
 `assets/admin/dashboard.js`; tests F23 **AC8-AC10**, F1 AC17-AC19 and F19 AC13-AC14 rerun (the row, filters, views).
 
-- [ ] **Step 1: Failing tests.**  - [ ] **Step 2: The filter (route, repository, URL, views).**  - [ ] **Step 3: Bulk
-  Add to Group.**  - [ ] **Step 4: The quick edit's picker.**  - [ ] **Step 5: Run and look.**  - [ ] **Step 6: Commit**
+- [x] **Step 1: Failing tests.**  - [x] **Step 2: The filter (route, repository, URL, views).**  - [x] **Step 3: Bulk
+  Add to Group.**  - [x] **Step 4: The quick edit's picker.**  - [x] **Step 5: Run and look.**  - [x] **Step 6: Commit**
   — "Group products from the Dashboard, as Lasso does".
 
 ---

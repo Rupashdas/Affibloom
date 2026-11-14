@@ -11,6 +11,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Dashboard\SavedViewService;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViews;
@@ -48,12 +49,14 @@ final class DashboardController implements Module {
 	 * @param PerPage          $per_page How many products this editor sees at a time.
 	 * @param SavedViewService $views    This editor's saved views (Task 13E).
 	 * @param Template         $template Renders the partials.
+	 * @param GroupService     $groups   The Groups column and the Group filter (Task G5).
 	 */
 	public function __construct(
 		private ProductService $products,
 		private PerPage $per_page,
 		private SavedViewService $views,
 		private Template $template,
+		private GroupService $groups,
 	) {}
 
 	/**
@@ -76,6 +79,12 @@ final class DashboardController implements Module {
 				'type'    => 'string',
 				'enum'    => self::LINK_TYPES,
 				'default' => '',
+			),
+			// The Group filter (Task G5): 0 all groups, -1 "Not in Groups", else a group's ID.
+			'group'     => array(
+				'type'    => 'integer',
+				'minimum' => -1,
+				'default' => 0,
 			),
 			// 0 asks for the size this editor chose last (PerPage).
 			'per_page'  => array(
@@ -156,7 +165,9 @@ final class DashboardController implements Module {
 		$term      = SearchTerm::from_input( sanitize_text_field( (string) $request->get_param( 's' ) ) );
 		$link_kind = LinkKind::from_input( (string) $request->get_param( 'link_type' ) );
 		$per_page  = $this->per_page->choose( absint( $request->get_param( 'per_page' ) ) );
-		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page );
+		$group     = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
+		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group );
+		$ids       = array_map( static fn( $product ): int => (int) $product->id, $list->items );
 
 		return new WP_REST_Response(
 			array(
@@ -164,17 +175,19 @@ final class DashboardController implements Module {
 					'html'      => $this->template->fetch(
 						'admin/partials/product-list',
 						array(
-							'products' => $list,
-							'term'     => $term->text(),
-							'url'      => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page ),
+							'products'  => $list,
+							'term'      => $term->text(),
+							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group ),
+							'groups_of' => $this->groups->for_products( $ids ),
 						)
 					),
 					'term'      => $term->text(),
 					'link_type' => $link_kind->value,
+					'group'     => $group,
 					'page'      => $list->current(),
 					'per_page'  => $per_page,
 					'total'     => $list->total,
-					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page ),
+					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group ),
 				),
 			)
 		);
@@ -194,7 +207,8 @@ final class DashboardController implements Module {
 			sanitize_text_field( (string) $request->get_param( 'name' ) ),
 			SearchTerm::from_input( sanitize_text_field( (string) $request->get_param( 's' ) ) )->text(),
 			LinkKind::from_input( (string) $request->get_param( 'link_type' ) ),
-			$this->per_page->choose( absint( $request->get_param( 'per_page' ) ) )
+			$this->per_page->choose( absint( $request->get_param( 'per_page' ) ) ),
+			$this->groups->choose_filter( (int) $request->get_param( 'group' ) )
 		);
 
 		try {
@@ -240,6 +254,8 @@ final class DashboardController implements Module {
 							'term'      => null === $active ? '' : $active->term,
 							'link_kind' => null === $active ? LinkKind::All : $active->link_kind,
 							'per_page'  => null === $active ? 0 : $active->per_page,
+							'group'     => null === $active ? 0 : $active->group,
+							'group_ids' => array_map( static fn( $group ): int => $group->id, $this->groups->all() ),
 						)
 					),
 					'id'   => null === $active ? '' : $active->id,

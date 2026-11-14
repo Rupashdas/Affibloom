@@ -63,9 +63,18 @@ $placeholder = sprintf(
 						'term'      => $view['term'],
 						'link_kind' => $view['link_kind'],
 						'per_page'  => $products->per_page,
+						'group'     => $view['group'],
+						'group_ids' => array_map( static fn( $choice ): int => $choice->id, $view['group_list'] ),
 					)
 				);
-				$this->render( 'admin/partials/filters-panel', array( 'link_kind' => $view['link_kind'] ) );
+				$this->render(
+					'admin/partials/filters-panel',
+					array(
+						'link_kind'  => $view['link_kind'],
+						'group'      => $view['group'],
+						'group_list' => $view['group_list'],
+					)
+				);
 				?>
 			</div>
 
@@ -77,13 +86,17 @@ $placeholder = sprintf(
 				$this->render(
 					'admin/partials/product-list',
 					array(
-						'products' => $products,
-						'term'     => $view['term'],
-						'url'      => $view['url'],
+						'products'  => $products,
+						'term'      => $view['term'],
+						'url'       => $view['url'],
+						'groups_of' => $view['groups_of'],
 					)
 				);
 				?>
 			</div>
+
+			<?php // Every group picker on the page (the quick edit's, the bulk Add to Group's) reads the site's groups from here (Task G3). ?>
+			<?php $this->render( 'admin/partials/group-choices', array( 'groups' => $view['group_list'] ) ); ?>
 
 			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 			<p id="affibloom-list-status" class="screen-reader-text" role="status" aria-live="polite"></p>

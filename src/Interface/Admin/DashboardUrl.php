@@ -1,6 +1,6 @@
 <?php
 /**
- * The Dashboard's own address for a list: the search, the page and the size as query arguments.
+ * The Dashboard's own address for a list: the search, the filters, the page and the size as query arguments.
  *
  * @package Affibloom
  */
@@ -27,14 +27,18 @@ final class DashboardUrl {
 	 * @param LinkKind $link_kind The link-type filter.
 	 * @param int      $page      Page number, from 1.
 	 * @param int      $per_page  Products per page.
+	 * @param int      $group     The Group filter (Task G5): 0 for all groups, -1 for products in no group, else a group's ID.
 	 */
-	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page ): string {
+	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): string {
 		$args = array( 'page' => AdminMenu::SLUG );
 		if ( '' !== $term ) {
 			$args['s'] = $term;
 		}
 		if ( LinkKind::All !== $link_kind ) {
 			$args['link_type'] = $link_kind->value;
+		}
+		if ( 0 !== $group ) {
+			$args['group'] = $group;
 		}
 		if ( ProductService::PER_PAGE_DEFAULT !== $per_page ) {
 			$args['per_page'] = $per_page;

@@ -1,6 +1,6 @@
 <?php
 /**
- * A named list on the Dashboard: a search, the filters and a page size an editor can come back to.
+ * A saved Dashboard view.
  *
  * @package Affibloom
  */
@@ -18,6 +18,9 @@ use Affibloom\Domain\Product\LinkKind;
  */
 final class SavedView {
 
+	/** The Group filter's value for "Not in Groups" (Lasso's Dashboard_Saved_Views::GROUP_TERM_NOT_IN). */
+	public const GROUP_NOT_IN = -1;
+
 	/**
 	 * Builds the view. SavedViews checks the name.
 	 *
@@ -26,6 +29,7 @@ final class SavedView {
 	 * @param string   $term      The search text, cleaned; '' for none.
 	 * @param LinkKind $link_kind The link-type filter.
 	 * @param int      $per_page  Products per page.
+	 * @param int      $group     The Group filter: 0 for all groups, -1 for products in no group, else a group's ID (F23 R22).
 	 */
 	public function __construct(
 		public readonly string $id,
@@ -33,6 +37,7 @@ final class SavedView {
 		public readonly string $term,
 		public readonly LinkKind $link_kind,
 		public readonly int $per_page,
+		public readonly int $group = 0,
 	) {}
 
 	/**
@@ -41,8 +46,9 @@ final class SavedView {
 	 * @param string   $term      The search text, cleaned.
 	 * @param LinkKind $link_kind The link-type filter.
 	 * @param int      $per_page  Products per page.
+	 * @param int      $group     The Group filter.
 	 */
-	public function shows( string $term, LinkKind $link_kind, int $per_page ): bool {
-		return $this->term === $term && $this->link_kind === $link_kind && $this->per_page === $per_page;
+	public function shows( string $term, LinkKind $link_kind, int $per_page, int $group = 0 ): bool {
+		return $this->term === $term && $this->link_kind === $link_kind && $this->per_page === $per_page && $this->group === $group;
 	}
 }

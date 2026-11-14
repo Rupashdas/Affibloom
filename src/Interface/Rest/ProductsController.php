@@ -9,14 +9,17 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\DuplicateLink;
 use Affibloom\Application\Products\ProductNotFound;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Products\RepointRefused;
 use Affibloom\Application\Products\ValidationFailed;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\ProductScreen;
@@ -40,8 +43,9 @@ final class ProductsController implements Module {
 	 *
 	 * @param ProductService  $products         Product use cases.
 	 * @param ProductResource $product_resource Products as arrays.
+	 * @param GroupService    $groups           The groups a product is in (F23).
 	 */
-	public function __construct( private ProductService $products, private ProductResource $product_resource ) {}
+	public function __construct( private ProductService $products, private ProductResource $product_resource, private GroupService $groups ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -58,6 +62,29 @@ final class ProductsController implements Module {
 			self::NAMESPACE,
 			'/products',
 			array(
+				// The product search of "Add to Group" (F23 D10; the block's picker is its second caller): ten a page, with a
+				// flag for the products already in the group asked about.
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'search' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+					'args'                => array(
+						'search' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'page'   => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'default' => 1,
+						),
+						'group'  => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'default' => 0,
+						),
+					),
+				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create' ),
@@ -158,7 +185,14 @@ final class ProductsController implements Module {
 			'type'    => 'integer',
 			'minimum' => 0,
 		);
-		$args['buttons']          = array(
+		// The groups the product is in: IDs of groups, or names that become groups (F23 R14), stored by the groups service.
+		$args['groups']  = array(
+			'type'  => 'array',
+			'items' => array(
+				'type' => array( 'integer', 'string' ),
+			),
+		);
+		$args['buttons'] = array(
 			'type'  => 'array',
 			'items' => array(
 				'type'       => 'object',
@@ -181,7 +215,9 @@ final class ProductsController implements Module {
 	 * @return WP_REST_Response|WP_Error 200 with the product; 404 for no such product; 422 with a message per field.
 	 */
 	public function update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$input = array_intersect_key( $request->get_params(), $this->field_args() );
+		$input  = array_intersect_key( $request->get_params(), $this->field_args() );
+		$groups = array_key_exists( 'groups', $input ) ? (array) $input['groups'] : null;
+		unset( $input['groups'] );
 
 		try {
 			$product = $this->products->update( (int) $request['id'], $input );
@@ -212,7 +248,53 @@ final class ProductsController implements Module {
 			);
 		}
 
-		return new WP_REST_Response( array( 'data' => $this->product_resource->full( $product ) ) );
+		// After the product is stored: a refused save (422, 409) stores no groups either.
+		if ( null !== $groups ) {
+			$values = array();
+			foreach ( $groups as $value ) {
+				if ( is_int( $value ) || is_string( $value ) ) {
+					$values[] = is_string( $value ) ? sanitize_text_field( $value ) : $value;
+				}
+			}
+			$this->groups->set_for_product( (int) $product->id, $values );
+		}
+		$of = $this->groups->for_products( array( (int) $product->id ) );
+
+		return new WP_REST_Response( array( 'data' => $this->product_resource->full( $product, $of[ (int) $product->id ] ?? array() ) ) );
+	}
+
+	/**
+	 * GET /products?search=&page=&group=: ten products a page, by the Dashboard's search rule, each with whether it is in
+	 * the group asked about (the "Add to Group" dialog, F23 R20).
+	 *
+	 * @param WP_REST_Request $request Request with search, page and group.
+	 * @phpstan-param WP_REST_Request<array{search: string, page: int, group: int}> $request
+	 */
+	public function search( WP_REST_Request $request ): WP_REST_Response {
+		$term  = SearchTerm::from_input( sanitize_text_field( (string) $request['search'] ) );
+		$group = (int) $request['group'];
+		$page  = $this->products->list( $term, LinkKind::All, max( 1, (int) $request['page'] ), 10 );
+		$items = array();
+		foreach ( $page->items as $product ) {
+			$items[] = array(
+				'id'        => (int) $product->id,
+				'name'      => $product->name,
+				'url'       => $product->url->value(),
+				'image_url' => $product->image_url,
+				'in_group'  => $group > 0 && $this->groups->has_member( $group, (int) $product->id ),
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'items' => $items,
+					'total' => $page->total,
+					'page'  => $page->current(),
+					'pages' => $page->pages(),
+				),
+			)
+		);
 	}
 
 	/**

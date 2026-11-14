@@ -24,6 +24,9 @@ $icon_paths = array(
 	'check'        => '<path d="M5 10.5 8.5 14 15 6.5"/>',
 	'close'        => '<path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/>',
 	'chevron-down' => '<path d="M6 8l4 4 4-4"/>',
+	'chevron-up'   => '<path d="M6 12l4-4 4 4"/>',
+	// A group's rows drag by it (Task G4): two columns of three dots.
+	'grip'         => '<circle cx="7.5" cy="5" r="1.2"/><circle cx="12.5" cy="5" r="1.2"/><circle cx="7.5" cy="10" r="1.2"/><circle cx="12.5" cy="10" r="1.2"/><circle cx="7.5" cy="15" r="1.2"/><circle cx="12.5" cy="15" r="1.2"/>',
 	'layers'       => '<path d="M10 3.5 3.5 7 10 10.5 16.5 7z"/><path d="M3.5 10 10 13.5 16.5 10M3.5 13 10 16.5 16.5 13"/>',
 	'pencil'       => '<path d="M12.5 4.5l3 3L7 16H4v-3z"/><path d="M11 6l3 3"/>',
 	'refresh'      => '<path d="M15.5 8A6 6 0 0 0 4.7 6.5M4.5 12a6 6 0 0 0 10.8 1.5"/><path d="M15.5 3.5V8H11M4.5 16.5V12H9"/>',

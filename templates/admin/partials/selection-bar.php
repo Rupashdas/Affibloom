@@ -33,9 +33,28 @@ $deleted_many = _n( '%s product deleted.', '%s products deleted.', 2, 'affibloom
 		<?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?>
 		<span><?php esc_html_e( 'Delete', 'affibloom' ); ?></span>
 	</button>
-	<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" aria-disabled="true"
-		aria-describedby="affibloom-soon-note" title="<?php esc_attr_e( 'Add to Group: coming soon', 'affibloom' ); ?>">
+	<?php // Lasso's Add to Group (view-js.php 456-575, Task G5): the button turns into the group picker and Save Changes. ?>
+	<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-add-to-group>
 		<?php $this->render( 'admin/partials/icon', array( 'name' => 'folder' ) ); ?>
 		<span><?php esc_html_e( 'Add to Group', 'affibloom' ); ?></span>
 	</button>
+	<span class="affibloom-selection__groups" data-bulk-groups hidden
+		data-none-text="<?php esc_attr_e( 'Select at least one group.', 'affibloom' ); ?>"
+		data-failed-text="<?php esc_attr_e( 'Could not add links to groups. Please try again.', 'affibloom' ); ?>"
+		data-done-one="<?php /* translators: %s: how many products were added to groups. */ echo esc_attr( _n( '%s product added to groups.', '%s products added to groups.', 1, 'affibloom' ) ); ?>"
+		data-done-many="<?php echo esc_attr( _n( '%s product added to groups.', '%s products added to groups.', 2, 'affibloom' ) ); ?>">
+		<label class="screen-reader-text" for="affibloom-bulk-groups"><?php esc_html_e( 'Groups', 'affibloom' ); ?></label>
+		<?php
+		$this->render(
+			'admin/partials/group-picker',
+			array(
+				'id'       => 'affibloom-bulk-groups',
+				'label_id' => 'affibloom-bulk-groups',
+				'groups'   => array(),
+			)
+		);
+		?>
+		<button type="button" class="affibloom-button affibloom-button--small affibloom-button--primary" data-bulk-groups-save><?php esc_html_e( 'Save Changes', 'affibloom' ); ?></button>
+		<span class="affibloom-field__error" data-bulk-groups-error role="alert"></span>
+	</span>
 </div>

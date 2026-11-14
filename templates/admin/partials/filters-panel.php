@@ -8,7 +8,7 @@
  * column leave no room for a 280px side panel without squeezing the Link Name.
  *
  * @package Affibloom
- * @var array{link_kind: \Affibloom\Domain\Product\LinkKind} $view
+ * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,11 +23,10 @@ $link_types = array(
 );
 $pending    = array(
 	// [ id, label, Lasso's first option ].
-	array( 'affibloom-filter-group', __( 'Group', 'affibloom' ), __( 'All groups', 'affibloom' ) ),
 	array( 'affibloom-filter-placements', __( 'Placements', 'affibloom' ), __( 'Any placement', 'affibloom' ) ),
 	array( 'affibloom-filter-table', __( 'Comparison table', 'affibloom' ), __( 'Any', 'affibloom' ) ),
 );
-$active     = LinkKind::All === $view['link_kind'] ? 0 : 1;
+$active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['group'] ? 0 : 1 );
 ?>
 <div class="affibloom-filters">
 	<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-filters__toggle"
@@ -47,15 +46,17 @@ $active     = LinkKind::All === $view['link_kind'] ? 0 : 1;
 		</div>
 
 		<div class="affibloom-filters__body">
-			<?php foreach ( array_slice( $pending, 0, 1 ) as $field ) : ?>
-				<div class="affibloom-filters__field">
-					<label class="affibloom-filters__label" for="<?php echo esc_attr( $field[0] ); ?>"><?php echo esc_html( $field[1] ); ?>
-						<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?></label>
-					<select id="<?php echo esc_attr( $field[0] ); ?>" class="affibloom-select" disabled aria-describedby="affibloom-soon-note">
-						<option><?php echo esc_html( $field[2] ); ?></option>
-					</select>
-				</div>
-			<?php endforeach; ?>
+			<?php // Lasso's Group filter (dashboard.php 158-165, Task G5): all groups, "Not in Groups", then every group. ?>
+			<div class="affibloom-filters__field">
+				<label class="affibloom-filters__label" for="affibloom-filter-group"><?php esc_html_e( 'Group', 'affibloom' ); ?></label>
+				<select id="affibloom-filter-group" class="affibloom-select" name="group">
+					<option value="0" <?php selected( 0, $view['group'] ); ?>><?php esc_html_e( 'All groups', 'affibloom' ); ?></option>
+					<option value="-1" <?php selected( -1, $view['group'] ); ?>><?php esc_html_e( 'Not in Groups', 'affibloom' ); ?></option>
+					<?php foreach ( $view['group_list'] as $choice ) : ?>
+						<option value="<?php echo esc_attr( (string) $choice->id ); ?>" <?php selected( $choice->id, $view['group'] ); ?>><?php echo esc_html( wp_specialchars_decode( $choice->name, ENT_QUOTES ) ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
 
 			<div class="affibloom-filters__field">
 				<label class="affibloom-filters__label" for="affibloom-filter-link-type"><?php esc_html_e( 'Link type', 'affibloom' ); ?></label>
@@ -66,7 +67,7 @@ $active     = LinkKind::All === $view['link_kind'] ? 0 : 1;
 				</select>
 			</div>
 
-			<?php foreach ( array_slice( $pending, 1 ) as $field ) : ?>
+			<?php foreach ( $pending as $field ) : ?>
 				<div class="affibloom-filters__field">
 					<label class="affibloom-filters__label" for="<?php echo esc_attr( $field[0] ); ?>"><?php echo esc_html( $field[1] ); ?>
 						<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?></label>

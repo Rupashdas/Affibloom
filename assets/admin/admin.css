@@ -2006,6 +2006,126 @@ body.affibloom-has-modal { overflow: hidden; }
 /* A group's form: the fields keep a readable measure inside the wide card. */
 .affibloom-group__fields { display: grid; gap: 20px; max-width: 760px; padding-top: 28px; padding-bottom: 28px; }
 .affibloom-group .affibloom-card__foot { justify-content: flex-end; align-items: center; }
+.affibloom-group__footer { display: flex; align-items: center; justify-content: flex-start; padding: 20px 4px 0; }
+
+/*
+ * 10b. A group's Links tab (F23 G4; design system, "Group member row"): one card holding the rows in the group's order.
+ * A row: grip, tick, Move up / Move down, a 50px picture, the name (600), the description (13px, two lines at most)
+ * and Remove. A dragged row lifts (shadow, brand-50); a ticked one is brand-50 like the Dashboard's.
+ */
+.affibloom-members__list { margin: 0; padding: 0; list-style: none; }
+.affibloom-members__empty { margin: 0; padding: 40px var(--affibloom-space-card); color: var(--affibloom-ink-600); text-align: center; }
+.affibloom-member {
+	display: grid;
+	grid-template-columns: 20px 20px auto 50px minmax(120px, 1fr) minmax(0, 2fr) auto;
+	align-items: center;
+	gap: 14px;
+	margin: 0;
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--affibloom-line);
+	background: var(--affibloom-white);
+}
+.affibloom-member:last-child { border-bottom: 0; }
+.affibloom-member.is-selected { background: var(--affibloom-brand-50); }
+.affibloom-member.is-dragging { position: relative; z-index: 2; background: var(--affibloom-brand-50); box-shadow: var(--affibloom-shadow-card); }
+.affibloom-member__grip { display: grid; place-items: center; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
+.affibloom-member.is-dragging .affibloom-member__grip { cursor: grabbing; }
+.affibloom-member__moves { display: inline-flex; gap: 2px; }
+.affibloom-admin .affibloom-icon-button {
+	display: inline-grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-nav);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-700);
+	cursor: pointer;
+}
+.affibloom-admin .affibloom-icon-button:hover:not(:disabled) { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+.affibloom-admin .affibloom-icon-button:disabled { opacity: 0.4; cursor: not-allowed; }
+.affibloom-admin .affibloom-icon-button:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+.affibloom-member__image .affibloom-thumb { width: 50px; height: 50px; }
+.affibloom-admin .affibloom-member__name { overflow: hidden; color: var(--affibloom-ink-900); font: 600 15px/22px var(--affibloom-font); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-admin .affibloom-member__name:hover { text-decoration: underline; }
+.affibloom-member__description { display: -webkit-box; overflow: hidden; color: var(--affibloom-ink-700); font-size: 13px; line-height: 18px; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.affibloom-members .affibloom-selection { margin-bottom: 12px; }
+
+/* The group picker (F23 D8): a field of chips with the box among them, and a listbox under it. */
+.affibloom-picker { position: relative; }
+.affibloom-picker__chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	min-height: 38px;
+	margin: 0;
+	padding: 4px 8px;
+	box-sizing: border-box;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	list-style: none;
+	cursor: text;
+}
+.affibloom-picker__chips:focus-within { border-color: var(--affibloom-brand-600); box-shadow: 0 0 0 3px rgba(30, 91, 184, 0.18); }
+.affibloom-picker__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin: 0;
+	padding: 2px 4px 2px 10px;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-brand-50);
+	color: var(--affibloom-brand-600);
+	font: 600 13px/20px var(--affibloom-font);
+}
+.affibloom-picker__remove { display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: var(--affibloom-radius-full); background: none; color: inherit; cursor: pointer; }
+.affibloom-picker__remove:hover { background: rgba(30, 91, 184, 0.16); }
+.affibloom-picker__remove:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 1px; }
+.affibloom-picker__remove .affibloom-icon { width: 12px; height: 12px; }
+.affibloom-picker__entry { flex: 1 1 120px; margin: 0; min-width: 80px; }
+.affibloom-admin .affibloom-picker__input { width: 100%; min-height: 28px; padding: 0 4px; border: 0; background: none; box-shadow: none; font-size: 14px; }
+.affibloom-admin .affibloom-picker__input:focus { border: 0; outline: 0; box-shadow: none; }
+.affibloom-picker__list {
+	position: absolute;
+	z-index: 20;
+	top: calc(100% + 4px);
+	right: 0;
+	left: 0;
+	max-height: 220px;
+	margin: 0;
+	padding: 4px;
+	overflow-y: auto;
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+	list-style: none;
+}
+.affibloom-picker__option { margin: 0; padding: 8px 10px; border-radius: var(--affibloom-radius-nav); color: var(--affibloom-ink-900); font-size: 14px; cursor: pointer; }
+.affibloom-picker__option:hover,
+.affibloom-picker__option.is-active { background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
+
+/* The Dashboard's Groups column and Add to Group (bulk). */
+.affibloom-groups-cell { display: -webkit-box; overflow: hidden; color: var(--affibloom-ink-700); font-size: 13px; line-height: 18px; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.affibloom-selection__groups { display: inline-flex; flex: 1 1 320px; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 240px; }
+.affibloom-selection__groups[hidden] { display: none; }
+.affibloom-selection__groups .affibloom-picker { flex: 1 1 200px; }
+.affibloom-selection__groups .affibloom-picker__chips { min-height: 32px; padding: 1px 6px; }
+
+/* "Add to Group" dialog: the results, each with its Add button. */
+.affibloom-add-to-group .affibloom-modal__panel { max-width: 560px; }
+.affibloom-add-results { max-height: 340px; margin: 12px 0 0; padding: 0; overflow-y: auto; list-style: none; }
+.affibloom-add-results__item { display: flex; align-items: center; gap: 12px; margin: 0; padding: 10px 0; border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-add-results__image { flex: 0 0 40px; }
+.affibloom-add-results__text { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; font-size: 13px; line-height: 18px; }
+.affibloom-add-results__text strong { overflow: hidden; color: var(--affibloom-ink-900); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-add-results__text span { overflow: hidden; color: var(--affibloom-ink-600); text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-add-results__none { padding: 16px 0; color: var(--affibloom-ink-600); }
+.affibloom-add-pages { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 13px; }
+.affibloom-add-pages[hidden] { display: none; }
 
 @media (max-width: 960px) {
 	.affibloom-header,
@@ -2022,7 +2142,12 @@ body.affibloom-has-modal { overflow: hidden; }
 }
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
-	.affibloom-header { gap: 16px; }
+	.affibloom-header { gap: 12px; }
+	/* The wordmark gives way to the logo on a phone: with the three tabs and "Add New Link" it pushed the page 6px
+	   past the screen (the logo still names the product, and the text stays for screen readers). */
+	.affibloom-header__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.affibloom-header__nav { gap: 2px; }
+	.affibloom-header__tab { padding: 7px 10px; }
 	.affibloom-header__tab-label,
 	.affibloom-header__action-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 	.affibloom-admin .affibloom-header__action { padding: 0 10px; }
@@ -2055,6 +2180,10 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-table--groups .affibloom-col-name { width: 34%; }
 	.affibloom-table--groups .affibloom-col-links { width: 64px; }
 	.affibloom-table--groups .affibloom-row__name { white-space: normal; overflow-wrap: anywhere; }
+	/* A group's rows stack: grip, tick and moves on the first line, the picture and name next, Remove last. */
+	.affibloom-member { grid-template-columns: 20px 20px auto 50px minmax(0, 1fr); row-gap: 8px; }
+	.affibloom-member__description { grid-column: 2 / -1; }
+	.affibloom-member > .affibloom-button { grid-column: 2 / -1; justify-self: start; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -476,8 +476,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param LinkKind   $link_kind Lasso's "Link type" filter: Amazon's products, the others', or all (Task 13E).
 	 * @param int        $page      Page number, from 1.
 	 * @param int        $per_page  Products per page.
+	 * @param int        $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0 ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -511,6 +512,25 @@ final class PostTypeProductRepository implements ProductRepository {
 				array(
 					'key'     => '_affibloom_type',
 					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
+
+		// Lasso's Group filter (dashboard.php 158-165): one group's products, or the products in no group.
+		if ( -1 === $group ) {
+			$list['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- a handful of groups, a few hundred posts.
+				array(
+					'taxonomy' => GroupTaxonomy::NAME,
+					'operator' => 'NOT EXISTS',
+				),
+			);
+		} elseif ( $group > 0 ) {
+			$list['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- as above.
+				array(
+					'taxonomy'         => GroupTaxonomy::NAME,
+					'field'            => 'term_id',
+					'terms'            => array( $group ),
+					'include_children' => false,
 				),
 			);
 		}

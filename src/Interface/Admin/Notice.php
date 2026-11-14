@@ -40,6 +40,8 @@ final class Notice {
 			'deleted'          => __( 'Product deleted.', 'affibloom' ),
 			// After a new group is saved, on its Details tab (Task G1, F23 D11): U6's plain wording for Lasso's toast.
 			'group-saved'      => __( 'Group saved.', 'affibloom' ),
+			// On the Groups list after Delete This Group (Task G2): Lasso's words.
+			'group-deleted'    => __( 'Successfully deleted the Group.', 'affibloom' ),
 			// After a field is saved from the Fields screen (Task FL2, F26 D18): U6's plain wording for Lasso's toast.
 			'field-saved'      => __( 'Field saved.', 'affibloom' ),
 			// On the Fields list after Delete This Field (Task FL3): Lasso's words.
