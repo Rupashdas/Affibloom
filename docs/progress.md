@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D (+ the one-time Lasso import button, deviation 87) | 35: 2X1-2X5, G1-G5, FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1 (+ the one-time Lasso import button, deviation 87) | 34: 2X1-2X5, G2-G5, FL1-FL5, TL1-TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -28,6 +28,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    resumes task by task in the phase files' order.
 2. **Tasks 2X0 and 2X3 are done; 2X2 is done (the user ticked it on 2026-11-14 with the quiet double F1 run not achieved: other sessions shared the tree)**; 2X1 awaits the user's run. **2X4, 2X5 and 2X6 are built and committed (2026-11-14, deviations 93-95; the user asked for all three in one session, overriding the one-task rule for this session); each waits for the user's signed-in run** (F2 and F18 for 2X4, F18 for 2X5, F16 for 2X6). Then Groups G1-G5.
 2a. **Tasks 9B-9L are built (2026-11-14, deviation 96); they wait for the user's signed-in F9 run** (14 tests, AC4-AC15). 9J is in Phase 5.
+2b. **Task G1 (the Groups list and a new group) is done (2026-11-14, deviation 97); F23 AC1-AC2 passed in Claude's runs.**
+    Next in the Groups area: G2 (a group's Details: edit and delete), then G3-G5.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2015,6 +2017,12 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       "Continue Anyway" with `data-continue="1"`; typing in the field, closing the dialog or submitting puts "Add Link"
       back (Lasso does the same on change, paste and keypress). Bulk-mode errors do not use it (Lasso's `!form_add_link_is_text_area()`).
     - New F18 case (route stub answers the POST with 500). Not run: the spec needs a sign-in; it loads (`--list`).
+96. **Claude runs the signed-in specs itself (the user, 2026-11-14).** With the saved session and
+    `.local/no-login.config.ts` (no sign-in is typed). 2X4-2X6: F2, F16 and F18 pass, 31 tests (1 skipped, the Phase 3
+    box test). My new "Continue Anyway" case first failed because its route stub missed the REST URL (it now matches
+    `/affibloom/v1/products` with or without a query). Two full runs also showed failures that passed alone: another
+    session's unfinished Groups work in the same tree briefly broke the site (a WordPress critical error), and runs
+    overlapped. So the "waiting for the user's run" notes in deviations 93-95 are settled; no browser look at 375 px yet.
 95. **Task 2X6 (2026-11-14), brag mode removed; built, waiting for the user's F16 run.** The two controls, the keys
     `enable_brag_mode` and `brag_url` (defaults and the Display tab's field list) and the old test are gone; a posted
     value is not stored, and a value already stored is not read, so the next save drops it. `SettingsService`'s `url`
@@ -2052,6 +2060,38 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     - **Plugin.php and AdminAssets.php** were committed with only this task's hunks; the other sessions' uncommitted
       changes in them stay uncommitted.
 
+97. **Task G1 (2026-11-14), the Groups list and a new group; done, checked by Claude's own runs.** Built outside-in from
+    `tests/E2E/acceptance/F23.spec.ts` (AC1, AC2: five tests). The header has Lasso's **Groups** tab after Dashboard, the
+    menu lists Groups (a group's page is registered hidden and guarded, as the product page is), the list is Lasso's
+    (Name, Description cut at 237 characters, Links = published members, newest first, ten a page, "Search Groups" with
+    spaces as wildcards, Lasso's empty state) and redraws in place through `GET /groups`; **Add New Group** saves through
+    `POST /groups` with "Updating Group" and opens the new group's Details tab with "Group saved.". Differences from the
+    plan's text:
+    - **No `GroupInvalid`:** the two refusals are the existing `InvalidField` (field `name`, reasons `group_name_required`
+      and `group_name_taken`), which `FieldError` already turns into the 422 the contract describes; a second exception
+      type would have no caller that tells them apart.
+    - **`GroupService::get()` and `GroupRepository::find()` come from G2 into G1**, and the Details tab is built **read
+      only** with its Save Changes switched off ("Soon"): AC2 ends on the group's Details tab, so the page a save lands
+      on had to exist. G2 makes it editable and adds Delete This Group.
+    - **The save dialog's title is a parameter:** `affibloomSaveDialog.open( text, title )` (admin.js) so it can say
+      Lasso's "Updating Group"; its default is still "Updating Your Site".
+    - **Lasso's cut counts characters, not bytes** (`Group::list_description()`; Lasso's SQL `LENGTH` counts bytes and
+      can cut a multibyte character in half). The list prints descriptions escaped (Lasso prints them raw).
+    - **A group's name is found through `term_exists()`**, which also compares the slug the name would make, as
+      `wp_insert_term()` refuses on it; a refusal that gets past the check (`create()` null) shows the same sentence.
+    - **The Groups list has no page-size select** (Lasso's is ten a page): its footer is the range and the page links.
+    - **`PluginTest` changed:** the menu now has five submenu pages, two of them removed from the menu (product, group).
+    - **F23.spec.ts waits for the page's load** after the click on Add New Group: a click on a link does not wait for the
+      page's scripts, and the form is sent by one of them (a first run failed on it twice, then passed five times in a row).
+    - **Playwright runs by Claude shared `test-results/` with another session's and failed once** ("no such file ...
+      .playwright-artifacts"); later runs used `--output=<scratchpad>`.
+    Checks: 466 unit tests, `composer lint` and `composer analyse` clean on this task's files (the rest of the tree was
+    mid-edit by another session at the time); F23 5 passed twice in a row; F19 and `admin-shell` 15 passed, 1 skipped (the
+    header changed); looked at 1280 and 375 px (list, new-group form with its error, Details tab with the toast).
+    **Content width:** another session's uncommitted change makes 1320px the default for every screen and removes
+    `.affibloom-page--wide`; the Groups templates were written with that class and now carry none. Until that change is
+    committed, the committed CSS still gives them the old 1080px default.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2083,6 +2123,12 @@ deviation 89). The items below are the Phase 0 history.
 
 ## Session log
 
+- **2026-11-14 (Claude Code, Task G1):** the Groups list and the new-group form (F23 AC1-AC2); deviation 97. Another
+  session was working in the same tree (Tasks 9B-9L and the width change), so the commit holds only this task's hunks.
+  Started from `F23.spec.ts`, then the domain (`Group`, `GroupPage`, `GroupRepository`), `GroupService`, the taxonomy
+  and repository, the screens, the REST route and the script. 466 unit tests, lint and PHPStan clean on this task's
+  files; F23 passed twice in a row; F19 and `admin-shell` passed. **Open:** the user's own run of F23 if wanted. Next:
+  Task G2 (a group's Details: edit and delete).
 - **2026-11-14 (Claude Code, Tasks 9B-9L in one session at the user's word; two other sessions were working on 2X4-2X6 and
   G1 in the same tree):** Settings → General rebuilt in Lasso's two-column structure with all of F9's cards except the
   Link Index (9J, Phase 5), Permissions and Uninstall (F37). Deviation 96. One commit; the other sessions' changes were
@@ -2094,8 +2140,7 @@ deviation 89). The items below are the Phase 0 history.
   redirect to Amazon is an Amazon product; 2X5 `48ef102` a bulk run records and skips any failing link, and the add
   button reads "Continue Anyway" after a server error (retries the same link, the user's choice); 2X6 `4e34621` brag
   mode removed. Each started from a failing unit test; 456 unit tests, `composer lint` and `composer analyse` clean.
-  Deviations 93-95. **Open: the user's signed-in runs** (F2 and F18, then F16), where the new F18 and F16 cases run for
-  the first time, and the look at Settings → Display. Next: Groups G1-G5.
+  Deviations 93-95. Run by Claude afterwards (deviation 96): F2, F16 and F18 pass with the new cases. Next: Groups G1-G5.
 - **2026-11-14 (Claude Code, Task 2X2):** F1 AC2 now changes every field the page shows (name, Primary URL, button text and
   both toggles, the added button's URL, text and toggles and its position, badge, theme, image URL with Apply, price,
   Show Price, description, disclosure, Show Disclosure, Sponsored), saves, reloads, and checks the page and the stored

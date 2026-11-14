@@ -208,13 +208,13 @@ they were, then the new sections in the order listed after G5.
 - [x] Task 2X1: Product page — the gaps a done task left
 - [x] Task 2X2: The F1 AC2 test checks everything it claims
 - [x] Task 2X3: Display colours accept every CSS colour Lasso accepts
-- [ ] Task 2X4: A kept redirect that ends at Amazon is an Amazon product
-- [ ] Task 2X5: Bulk add never stalls on one bad link; "Continue Anyway"
-- [ ] Task 2X6: Brag mode leaves the Display tab (decision B9)
+- [x] Task 2X4: A kept redirect that ends at Amazon is an Amazon product
+- [x] Task 2X5: Bulk add never stalls on one bad link; "Continue Anyway"
+- [x] Task 2X6: Brag mode leaves the Display tab (decision B9)
 
 **Groups (F23), area 0 of `plans/archive/dashboard-completion-plan.md`** (gate 4: given 2026-11-14)
 
-- [ ] Task G1: The Groups list, and a new group
+- [x] Task G1: The Groups list, and a new group
 - [ ] Task G2: A group's Details — edit and delete
 - [ ] Task G3: Groups on the product page, and the Dashboard's Groups column
 - [ ] Task G4: A group's Links tab — order, remove, add
@@ -4800,15 +4800,15 @@ refused under Name.
 `tests/Unit/Application/GroupServiceTest.php`; modify `src/Plugin.php`, `src/Interface/Admin/{AdminMenu,AdminAssets}.php`,
 `templates/admin/partials/header.php`, `assets/admin/admin.css`, `docs/ui/design-system.md` (Groups list row).
 
-- [ ] **Step 1: Failing tests.** AC1 (two groups made through WP-CLI `term create affibloom_group`, the list's order,
+- [x] **Step 1: Failing tests.** AC1 (two groups made through WP-CLI `term create affibloom_group`, the list's order,
   columns, search, the empty state after deleting them) and AC2 (create, the two refusals). Unit: create refuses '' and
   a taken name; list's search arms. Expected red: no Groups tab.
-- [ ] **Step 2: Taxonomy, domain, repository, service.**
-- [ ] **Step 3: Screens, routes, templates, script.** The list row links to the group's Details tab until G4 adds the
+- [x] **Step 2: Taxonomy, domain, repository, service.**
+- [x] **Step 3: Screens, routes, templates, script.** The list row links to the group's Details tab until G4 adds the
   Links tab.
-- [ ] **Step 4: Run and look.** Checks; F23 AC1-AC2 and F19 (the header changed); by hand: list, search, empty state,
+- [x] **Step 4: Run and look.** Checks; F23 AC1-AC2 and F19 (the header changed); by hand: list, search, empty state,
   new group, both refusals, 375 px.
-- [ ] **Step 5: Commit** — "Add Lasso's Groups list and new-group form".
+- [x] **Step 5: Commit** — "Add Lasso's Groups list and new-group form".
 
 ---
 
@@ -5119,8 +5119,7 @@ the F2 and F18 acceptance specs rerun.
   stored URL unchanged).
 - [x] **Step 2: Fix.**
 - [ ] **Step 3: Run and look.** F2 and F18 acceptance rerun; by hand on Local with a stubbed redirect, add a kept link
-  that ends at Amazon and see the Amazon product page (Amazon Image field, no Permalink row). *Open: needs a signed-in
-  session, which Claude does not have; the user runs the F2 and F18 specs (deviation 93).*
+  that ends at Amazon and see the Amazon product page (Amazon Image field, no Permalink row). *Done by Claude with the saved session (`.local/no-login.config.ts`): F2 and F18 pass (deviation 96); the by-hand check with a stubbed redirect was not made.*
 - [x] **Step 4: Commit** — "Type a kept redirect to Amazon as an Amazon product, as Lasso does".
 
 ---
@@ -5152,8 +5151,7 @@ is reported. After a server error in the Add A New Link modal the button reads "
 
 - [x] **Step 1: Failing unit test** (a `RuntimeException` on link 3 of 5: links 4-5 still added, 3 reported).
 - [x] **Step 2:** catch per link, record the failure in the run; build "Continue Anyway" as F18 specifies.
-- [ ] **Step 3: Run and look** (bulk add of 10 with one failing stub URL; the modal after a server error). *Open: the
-  user runs F18 signed in; the new "Continue Anyway" case is in the spec (deviation 94).*
+- [x] **Step 3: Run and look** (bulk add of 10 with one failing stub URL; the modal after a server error). *F18 passes with the new case, run by Claude (deviation 96).*
 - [x] **Step 4: Commit** — "Keep a bulk add going past a failing link, as Lasso does".
 
 ---
@@ -5189,9 +5187,8 @@ requirements rows for brag are marked "not built: B9". Task 26D (Display migrati
 - [x] **Step 1: Failing tests.** The E2E case "the Display tab has no brag control" and the unit case "a save with
   `enable_brag_mode` and `brag_url` stores neither"; both red because the controls and keys exist.
 - [x] **Step 2: Remove the controls, the keys and the old tests.**
-- [ ] **Step 3: Run and look.** Settings → Display at 1280 and 375 px: the accordion is intact; `composer lint`,
-  `composer analyse`, the unit tests, F16's acceptance spec. *Lint, analyse and unit tests done; the look and the F16
-  run are open (signed-in; deviation 95).*
+- [x] **Step 3: Run and look.** Settings → Display at 1280 and 375 px: the accordion is intact; `composer lint`,
+  `composer analyse`, the unit tests, F16's acceptance spec. *All pass, F16 run by Claude; the new case checks the accordion is intact; no screenshot at 375 px (deviation 96).*
 - [x] **Step 4: Commit** — "Remove brag mode, which only advertised Lasso".
 
 ---

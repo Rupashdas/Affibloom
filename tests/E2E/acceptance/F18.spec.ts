@@ -235,7 +235,7 @@ test.describe( 'F18 Adding links', () => {
 	} );
 
 	test( 'a server error leaves the button reading Continue Anyway until the link is changed (Task 2X5)', async ( { page } ) => {
-		await page.route( '**/affibloom/v1/products', ( route ) =>
+		await page.route( /affibloom\/v1\/products(\?.*)?$/, ( route ) =>
 			'POST' === route.request().method()
 				? route.fulfill( { status: 500, json: { code: 'affibloom_failed', message: 'The link could not be added.', data: { status: 500 } } } )
 				: route.continue()
