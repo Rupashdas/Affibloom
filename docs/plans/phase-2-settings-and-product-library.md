@@ -207,7 +207,7 @@ they were, then the new sections in the order listed after G5.
 - [x] Task 2X0: PHP 8.3 and WordPress 7.1.4 everywhere (decision F7)
 - [ ] Task 2X1: Product page — the gaps a done task left
 - [ ] Task 2X2: The F1 AC2 test checks everything it claims
-- [ ] Task 2X3: Display colours accept every CSS colour Lasso accepts
+- [x] Task 2X3: Display colours accept every CSS colour Lasso accepts
 - [ ] Task 2X4: A kept redirect that ends at Amazon is an Amazon product
 - [ ] Task 2X5: Bulk add never stalls on one bad link; "Continue Anyway"
 - [ ] Task 2X6: Brag mode leaves the Display tab (decision B9)
@@ -5088,7 +5088,7 @@ value saves and shows again).
 - [x] **Step 1: Failing unit tests** in `DisplaySettingsServiceTest` (rgb, rgba, hsl if Lasso accepts it — check
   `admin/views/settings/display.php` and Lasso's save sanitiser first and follow it exactly; 8-digit hex).
 - [x] **Step 2:** widen `clean_colour()`; `display-settings.js` keeps the text value when the picker cannot show it.
-- [ ] **Step 3: Run and look.** Type both forms in a Display colour on Local, save, reload; F16's Display spec reruns.
+- [x] **Step 3: Run and look.** Type both forms in a Display colour on Local, save, reload; F16's Display spec reruns.
 - [x] **Step 4: Commit** — "Accept every colour form Lasso's Display settings accept".
 
 ---

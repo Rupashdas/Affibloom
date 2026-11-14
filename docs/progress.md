@@ -1972,8 +1972,8 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       rewritten. The rest is in the 2X1 commit. `assets/admin/product-save.js` also carries an uncommitted change that is
       not this task's (`disclosure` removed from its `TEXTS` list): left alone.
 
-92. **Task 2X3 (2026-11-14), Display colours accept every CSS colour Lasso accepts; built, waiting for the user's
-    signed-in run.** Lasso's colour fields are plain text inputs (`admin/views/settings/display.php` 598-634) and its save
+92. **Task 2X3 (2026-11-14), Display colours accept every CSS colour Lasso accepts; done, the user's F16 run
+    passed.** Lasso's colour fields are plain text inputs (`admin/views/settings/display.php` 598-634) and its save
     path (`Helper::canonicalize_display_colors`) does not validate: it stores the string as typed, and its Spectrum
     picker writes hex, `rgb()`, `rgba()` and `hsl()`. `clean_colour()` therefore keeps: hex of 3, 4, 6 or 8 digits;
     `rgb()`/`rgba()`/`hsl()`/`hsla()` with numbers, percentages or degrees (comma or space separated, optional
@@ -1986,8 +1986,8 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     its header comment changed. Red first: 9 of the new 19 unit cases failed (the accepted forms were refused).
     - Checks: `composer lint` clean, `composer analyse` no errors, 451 unit tests pass; through WP-CLI the real service
       saved `RGBA(0,0,0,.5)` as `rgba(0,0,0,.5)` and `#00000080` as typed, and refused `rgb(0,0,0);x` (the test option
-      was deleted afterwards). **Not run: the new F16 case ("Edge case 7") and the typed-in-the-page check** (the
-      browser pane was signed out; Claude does not sign in on `.local`). Step 3 stays open until the user's run.
+      was deleted afterwards). The browser pane was signed out (Claude does not sign in on `.local`), so the
+      user ran F16 signed in (2026-11-14): 10 passed, 1 skipped (the Phase 3 box test), including the new "Edge case 7" case.
     - Other sessions have uncommitted work in this tree (2X1): the 2X3 commit holds only its own files.
 
 ## Open decisions (ask the user; record the answer here)
@@ -2023,7 +2023,7 @@ deviation 89). The items below are the Phase 0 history.
 
 - **2026-11-14 (Claude Code, Task 2X3):** Display colours accept hex of 3/4/6/8 digits, `rgb()`/`rgba()`/`hsl()`/`hsla()`
   and keywords, as Lasso's colour fields do (deviation 92). Lint, PHPStan, 451 unit tests green; saved through the real
-  service by WP-CLI. Waiting for the user's signed-in F16 run (new "Edge case 7" case); Step 3 stays open until then.
+  service by WP-CLI. The user's signed-in F16 run passed (10 passed, 1 skipped): Task 2X3 done.
   Next: 2X4 (2X2 is tests only and also open).
 - **2026-11-14 (Claude Code, Task 2X1):** the four product-page gaps built and checked by lint, PHPStan, 432 unit tests and
   a WP-CLI render (deviation 91). Waiting for the user's signed-in run of F1 (AC5, AC7, AC10) and F29 and a look at the
