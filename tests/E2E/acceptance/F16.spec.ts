@@ -15,8 +15,6 @@ test.describe( 'F16 Display system', () => {
 		show_disclosure_table: true,
 		link_from_display_title: true,
 		keep_site_stripe_ui: false,
-		enable_brag_mode: false,
-		brag_url: '',
 		custom_css: '',
 	};
 
@@ -264,5 +262,15 @@ test.describe( 'F16 Display system', () => {
 		await expect( page.locator( '#affibloom-display-secondary_button_text' ) ).toHaveValue( label );
 		await expect( page.getByRole( 'button', { name: 'Icon for Secondary button text: Amazon' } ) ).toBeVisible();
 		await expect( page.getByLabel( 'Secondary button text', { exact: true } ) ).toHaveValue( 'Buy Now' );
+	} );
+
+	test( 'the Display tab has no brag control (decision B9, Task 2X6)', async ( { page } ) => {
+		await page.goto( displayTab() );
+		await openColours( page );
+
+		// The rest of the accordion is there, so the absence below is not an empty page.
+		await expect( page.getByLabel( 'Disclosure text' ) ).toBeVisible();
+		await expect( page.getByText( 'Brag', { exact: false } ) ).toHaveCount( 0 );
+		await expect( page.locator( '[name="settings[enable_brag_mode]"], [name="settings[brag_url]"]' ) ).toHaveCount( 0 );
 	} );
 } );

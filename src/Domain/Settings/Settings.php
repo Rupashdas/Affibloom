@@ -33,9 +33,6 @@ final class Settings {
 		'show_disclosure_list'            => true,
 		'show_disclosure_table'           => true,
 		'keep_site_stripe_ui'             => false,
-		'enable_brag_mode'                => false,
-		// Lasso's default is its own affiliate sign-up page; Affibloom starts empty (open decision, progress.md).
-		'brag_url'                        => '',
 		'custom_css'                      => '',
 		// Amazon: Lasso's factory defaults (admin/lasso-constant.php 111-160; docs/features/F17).
 		'tracking_id'                     => '',

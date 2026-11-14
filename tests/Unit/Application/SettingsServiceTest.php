@@ -83,12 +83,13 @@ final class SettingsServiceTest extends TestCase {
 		self::assertStringNotContainsString( '<', $css ); // Lasso's format_css allowlist: "</style>" can never be written
 	}
 
-	public function test_a_brag_url_must_be_a_link_or_empty(): void {
-		$repo    = $this->repository();
-		$service = new SettingsService( $repo );
+	public function test_brag_mode_is_not_stored_even_when_it_is_sent(): void {
+		$repo = $this->repository();
+		( new SettingsService( $repo ) )->update_tab( 'display', array( 'enable_brag_mode' => '1', 'brag_url' => 'https://example.com/join' ) );
 
-		self::assertSame( array(), array_intersect( array( 'brag_url' ), $service->update_tab( 'display', array( 'brag_url' => '' ) ) ) );
-		self::assertContains( 'brag_url', $service->update_tab( 'display', array( 'brag_url' => 'javascript:alert(1)' ) ) );
+		$stored = $repo->get()->to_array();
+		self::assertArrayNotHasKey( 'enable_brag_mode', $stored ); // decision B9: Affibloom has no brag mode
+		self::assertArrayNotHasKey( 'brag_url', $stored );
 	}
 
 	public function test_resetting_the_display_tab_restores_its_defaults_only(): void {

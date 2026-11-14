@@ -5,8 +5,7 @@
  * Lasso's controls, order and help texts (admin/views/settings/display.php 639-735). These settings are not per
  * display type; they post as `settings[…]` and are saved with the other site-wide settings. Help texts that name
  * Lasso ("your clickable Lasso Link", "Lasso renders…", "customize Lasso") describe the same behaviour without the
- * product name, and the Brag mode URL describes what the field does (Lasso's text advertises its own affiliate
- * programme). What the brag icon shows is an open decision (progress.md, deviation 24).
+ * product name. Lasso's Brag mode (its own logo, linking to its affiliate sign-up) is left out: decision B9.
  *
  * @package Affibloom
  * @var array{settings: \Affibloom\Domain\Settings\Settings} $view
@@ -60,37 +59,6 @@ $toggles  = array(
 				)
 			);
 		}
-		?>
-
-		<div class="affibloom-field affibloom-field--spaced">
-			<div class="affibloom-field__head">
-				<label class="affibloom-label" for="affibloom-setting-brag_url"><?php esc_html_e( 'Brag mode URL', 'affibloom' ); ?></label>
-				<?php
-				$this->render(
-					'admin/partials/help',
-					array(
-						'id'    => 'affibloom-setting-brag_url-help',
-						'text'  => __( 'The link the brag icon in your displays points to.', 'affibloom' ),
-						'label' => __( 'Brag mode URL', 'affibloom' ),
-					)
-				);
-				?>
-			</div>
-			<input type="url" class="affibloom-input" id="affibloom-setting-brag_url" name="settings[brag_url]"
-				value="<?php echo esc_attr( $settings->string( 'brag_url' ) ); ?>" placeholder="<?php esc_attr_e( 'Your affiliate URL', 'affibloom' ); ?>"
-				aria-describedby="affibloom-setting-brag_url-help">
-		</div>
-		<?php
-		// Lasso shows no help text here.
-		$this->render(
-			'admin/partials/switch-row',
-			array(
-				'id'      => 'affibloom-setting-enable_brag_mode',
-				'name'    => 'settings[enable_brag_mode]',
-				'label'   => __( 'Enable Brag Mode', 'affibloom' ),
-				'checked' => $settings->bool( 'enable_brag_mode' ),
-			)
-		);
 		?>
 	</div>
 </details>

@@ -18,7 +18,7 @@ use Affibloom\Module;
  * Saves the Display screen and resets it (admin-post.php).
  *
  * The screen edits two stores, as Lasso's does: the per-type display model, and the site-wide display settings
- * (disclosure, Show Price, Site Stripe, brag mode, Custom CSS), which live with the other settings.
+ * (disclosure, Show Price, Site Stripe, Custom CSS), which live with the other settings.
  */
 final class DisplayController implements Module {
 

@@ -36,8 +36,6 @@ final class SettingsService {
 			'show_disclosure_table'   => 'bool',
 			'link_from_display_title' => 'bool',
 			'keep_site_stripe_ui'     => 'bool',
-			'brag_url'                => 'url',
-			'enable_brag_mode'        => 'bool',
 			'custom_css'              => 'css',
 		),
 		'amazon'  => array(
@@ -229,26 +227,6 @@ final class SettingsService {
 	}
 
 	/**
-	 * A link, or nothing. Anything that is not an http(s) link is refused.
-	 *
-	 * @param mixed $raw Raw value.
-	 */
-	private function clean_url( mixed $raw ): ?string {
-		if ( ! is_string( $raw ) ) {
-			return null;
-		}
-
-		$value = trim( $raw );
-		if ( '' === $value ) {
-			return '';
-		}
-
-		$url = esc_url_raw( $value, array( 'http', 'https' ) );
-
-		return '' === $url ? null : $url;
-	}
-
-	/**
 	 * Custom CSS through Lasso's own allowlist (Helper::format_css): it is printed inside a style element, so `<`
 	 * is removed and `</style>` can never be written; the characters CSS needs stay.
 	 *
@@ -271,7 +249,6 @@ final class SettingsService {
 			// A ticked checkbox sends "1"; an unticked one sends nothing. true/"true"/"on" cover other callers (Task 26).
 			'bool'       => in_array( $raw, array( true, 1, '1', 'on', 'true', 'yes' ), true ),
 			'text'       => is_string( $raw ) && strlen( trim( $raw ) ) <= 500 ? sanitize_text_field( $raw ) : null,
-			'url'        => $this->clean_url( $raw ),
 			'css'        => is_string( $raw ) ? self::clean_css( $raw ) : null,
 			'tracking_id'  => is_string( $raw ) && ( '' === trim( $raw ) || self::is_tracking_id( trim( $raw ) ) ) ? trim( $raw ) : null,
 			'tracking_ids' => $this->clean_tracking_ids( $raw ),
