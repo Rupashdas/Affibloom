@@ -26,7 +26,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Gate 4 given for the whole plan** (the user, 2026-11-14 walkthrough; answers in `open-decisions.md`). Building
    resumes task by task in the phase files' order.
-2. **Task 2X0 is done** (2026-11-14, deviation 90). **Next: Task 2X1** (product page gaps), then 2X2-2X6, then Groups G1-G5.
+2. **Tasks 2X0 and 2X3 are done; 2X2 is written and passes, its quiet double F1 run is still open**; 2X1 awaits the user's run. Then 2X4-2X6, then Groups G1-G5.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2021,6 +2021,17 @@ deviation 89). The items below are the Phase 0 history.
 
 ## Session log
 
+- **2026-11-14 (Claude Code, Task 2X2):** F1 AC2 now changes every field the page shows (name, Primary URL, button text and
+  both toggles, the added button's URL, text and toggles and its position, badge, theme, image URL with Apply, price,
+  Show Price, description, disclosure, Show Disclosure, Sponsored), saves, reloads, and checks the page and the stored
+  meta (one `wp post meta list` call, so the case stays well inside its minute). Green on the built code, no bug found.
+  Shown to fail: with `disclosure` dropped from `product-save.js`'s sent fields the case went red on the disclosure
+  box ("Before." instead of the new text); the file was restored. The test change itself was committed inside the 2X1
+  session's `9a6edf3`, which swept `F1.spec.ts` in. **Step 2 is only partly met:** two full F1 runs ran while another
+  session was running Playwright and editing code in the same tree (`test-results/` clobbered, ENOENT trace errors);
+  each run had different failures (AC14/AC16/AC21/AC10, then AC16/AC18/AC8/AC21/AC22), none in AC2, and none from
+  anything this task changed. A quiet double run is still to do; the order check was not meaningful (this case only
+  touches its own product).
 - **2026-11-14 (Claude Code, Task 2X3):** Display colours accept hex of 3/4/6/8 digits, `rgb()`/`rgba()`/`hsl()`/`hsla()`
   and keywords, as Lasso's colour fields do (deviation 92). Lint, PHPStan, 451 unit tests green; saved through the real
   service by WP-CLI. The user's signed-in F16 run passed (10 passed, 1 skipped): Task 2X3 done.

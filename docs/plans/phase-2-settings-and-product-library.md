@@ -5052,13 +5052,13 @@ toggles after the reload. Tests only.
 
 **Files:** modify `tests/E2E/acceptance/F1.spec.ts`.
 
-- [ ] **Step 1: The extended test.** Extend F1 AC2 to set and re-read every field 14A-14H show; run it against the
+- [x] **Step 1: The extended test.** Extend F1 AC2 to set and re-read every field 14A-14H show; run it against the
   built code (expected green; a red result is a real bug: fix it in this task and record a deviation). To show it can
   fail, break one field's save by hand (for example, drop the price from the form) and see the case go red, then
   restore it.
 - [ ] **Step 2: Run and look.** Run the whole F1 file twice in a row; both runs pass and the library's order is the
   same after both.
-- [ ] **Step 3: Commit** — "Check every product field after a save in F1 AC2".
+- [x] **Step 3: Commit** — "Check every product field after a save in F1 AC2".
 
 ---
 
