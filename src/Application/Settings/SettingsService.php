@@ -11,6 +11,7 @@ namespace Affibloom\Application\Settings;
 
 use InvalidArgumentException;
 use LogicException;
+use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Settings\PerformanceMode;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
@@ -82,6 +83,8 @@ final class SettingsService {
 			'keep_genius_formatting'          => 'bool',
 			'scan_sitestripe_in_post_content' => 'bool',
 			'days_before_out_of_stock_alerts' => 'days',
+			// The Product Data API card's Default Tracking ID (C1 R17, D2).
+			'default_country'                 => 'country',
 		),
 	);
 
@@ -418,6 +421,7 @@ final class SettingsService {
 			'tracking_ids' => $this->clean_tracking_ids( $raw ),
 			// Lasso's number field takes 0-30 (amazon.php: min="0" max="30").
 			'days'         => self::clean_days( $raw ),
+			'country'      => is_string( $raw ) && Marketplace::is_country( $raw ) ? $raw : null,
 			'ga_ids'           => is_string( $raw ) && strlen( $raw ) <= 200 ? trim( sanitize_text_field( $raw ) ) : null,
 			'slug'             => self::clean_slug( $raw ),
 			'performance_mode' => is_string( $raw ) && PerformanceMode::is_mode( $raw ) ? $raw : null,

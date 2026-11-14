@@ -84,6 +84,8 @@ final class Settings {
 		'keep_genius_formatting'          => true,
 		'scan_sitestripe_in_post_content' => false,
 		'days_before_out_of_stock_alerts' => 0,
+		// Amazon: the Product Data API card's Default Tracking ID (C1 R17, D2; Lasso's amazon_default_tracking_country).
+		'default_country'                 => 'us',
 	);
 
 	/**

@@ -3,10 +3,10 @@
  * Settings → Amazon, in Lasso's structure (the user, 2026-11-13): two columns of cards, Amazon Associates Accounts
  * on the left, Auto-Monetize Amazon Links and Amazon Preferences on the right, switches left of their labels with
  * "?" help tips, and Save at the bottom right. Affibloom's colours and type. Controls, order and help texts:
- * docs/features/F17/requirements.md. The Product Data API card comes with task C1, its first reader.
+ * docs/features/F17/requirements.md. The Product Data API card (C1A) sits under Amazon Associates Accounts, as in Lasso.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, settings: \Affibloom\Domain\Settings\Settings, action: string, notice: string, refused: list<string>} $view
+ * @var array{tab: string, tabs: list<string>, settings: \Affibloom\Domain\Settings\Settings, action: string, notice: string, failed: bool, refused: list<string>, api: array{state: string, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -103,6 +103,16 @@ $preferences = array(
 								</div>
 							</div>
 						</div>
+
+						<?php
+						$this->render(
+							'admin/partials/amazon-api-card',
+							array(
+								'settings' => $settings,
+								'api'      => $view['api'],
+							)
+						);
+						?>
 					</div>
 
 					<div class="affibloom-columns__column">
@@ -176,7 +186,13 @@ $preferences = array(
 	<?php
 	$this->render( 'admin/partials/save-modal' );
 	$this->render( 'admin/partials/unsaved-modal' );
-	$this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) );
+	$this->render(
+		'admin/partials/toast',
+		array(
+			'message' => $view['notice'],
+			'failed'  => $view['failed'],
+		)
+	);
 	$this->render( 'admin/partials/toast-template' );
 	?>
 	<?php $this->render( 'admin/partials/footer' ); ?>

@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Interface\Messages;
+
 /**
  * The toast message after a redirect (?affibloom_notice=…). Shared by the Settings tabs, the Display screen, the
  * product page and the Dashboard.
@@ -19,9 +21,7 @@ final class Notice {
 	 * The message for the notice code in the query, or '' when there is none.
 	 */
 	public function message(): string {
-		$code = isset( $_GET['affibloom_notice'] ) ? sanitize_key( wp_unslash( $_GET['affibloom_notice'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
-
-		return match ( $code ) {
+		return match ( $this->code() ) {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
@@ -49,8 +49,25 @@ final class Notice {
 			// The one-time Lasso import (the user, 2026-11-13); the counts ride along in the query.
 			'lasso-imported'   => $this->imported(),
 			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),
+			// Save Changes on the Amazon tab could not validate the credentials (C1 R23, without Lasso's licence sentence).
+			'amazon-unverified-kept'    => __( 'Settings were saved, but Creators API credentials could not be validated.', 'affibloom' ) . ' ' . Messages::for_reason( 'amazon_unavailable' ) . ' ' . __( 'Your saved credentials were kept; try again when the service is available.', 'affibloom' ),
+			'amazon-unverified-cleared' => __( 'Settings were saved, but Creators API credentials could not be validated.', 'affibloom' ) . ' ' . Messages::for_reason( 'amazon_rejected' ),
 			default        => '',
 		};
+	}
+
+	/**
+	 * Whether the toast reports something that did not work, so it shows the cross (R23's warning).
+	 */
+	public function failed(): bool {
+		return str_starts_with( $this->code(), 'amazon-unverified-' );
+	}
+
+	/**
+	 * The notice code in the query, or ''.
+	 */
+	private function code(): string {
+		return isset( $_GET['affibloom_notice'] ) ? sanitize_key( wp_unslash( $_GET['affibloom_notice'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 	}
 
 	/**

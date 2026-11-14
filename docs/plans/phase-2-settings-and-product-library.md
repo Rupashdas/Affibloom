@@ -265,7 +265,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 **Amazon product data (C1)** — dormant where the Creators API credentials are needed; C1E and C1H are in Phase 7,
 C1F and C1G in Phase 3
 
-- [ ] Task C1A: The Product Data API card and Validate
+- [x] Task C1A: The Product Data API card and Validate
 - [ ] Task C1B: The catalogue client
 - [ ] Task C1C: Filling a new Amazon product on add
 - [ ] Task C1D: Refresh on the product page
@@ -6100,17 +6100,17 @@ and shows "Validated". Save Changes validates unverified credentials (R23 wordin
 | `partials/amazon-api-card.php`; `default_country` in `Settings` | `settings-amazon.php` |
 
 **Files:** create the above, `tests/Unit/Domain/Amazon/{MarketplaceTest,CredentialsTest}.php`,
-`tests/Unit/Application/CredentialsServiceTest.php`, `tests/E2E/mu/amazon-stub.php`, `tests/fixtures/amazon/token*.json`;
+`tests/Unit/Application/CredentialsServiceTest.php`, `tests/E2E/amazon-stub.php` (inside the plugin, loaded on a local site only: progress.md deviation 110), `tests/fixtures/amazon/token*.json`;
 modify `Plugin.php`, `SettingsController.php`, `templates/admin/settings-amazon.php`, `assets/admin/amazon-settings.js`,
 `tests/E2E/acceptance/C1.spec.ts` (AC3, AC5, AC7 card, AC8), `docs/ui/design-system.md` (state chip).
 
-- [ ] **Step 1: Failing tests.** AC8's four messages and the state chip; AC5 (secret never in the source, REST, export);
+- [x] **Step 1: Failing tests.** AC8's four messages and the state chip; AC5 (secret never in the source, REST, export);
   AC3 (nothing else saved). Expected red: no card.
-- [ ] **Step 2: Domain and repository** (signature, missing fields, token endpoints by Version).
-- [ ] **Step 3: Token client, service, route.**
-- [ ] **Step 4: Card and script.**
-- [ ] **Step 5: Run and look.**
-- [ ] **Step 6: Commit** — "Add the Amazon Product Data API card and Validate, as Lasso has them".
+- [x] **Step 2: Domain and repository** (signature, missing fields, token endpoints by Version).
+- [x] **Step 3: Token client, service, route.**
+- [x] **Step 4: Card and script.**
+- [x] **Step 5: Run and look.**
+- [x] **Step 6: Commit** — "Add the Amazon Product Data API card and Validate, as Lasso has them".
 
 ---
 

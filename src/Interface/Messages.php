@@ -55,6 +55,10 @@ final class Messages {
 			// WordPress refuses, where Lasso shows its generic failure bar (F23 D3).
 			'group_name_required' => __( 'Name is required.', 'affibloom' ),
 			'group_name_taken'    => __( 'A group with this name already exists.', 'affibloom' ),
+			// The Product Data API card's Validate (C1 R21): Lasso's words.
+			'amazon_validated'    => __( 'Amazon Creators API credentials verified successfully.', 'affibloom' ),
+			'amazon_rejected'     => __( 'Invalid Amazon Creators API credentials.', 'affibloom' ),
+			'amazon_unavailable'  => __( 'Service temporarily unavailable.', 'affibloom' ),
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}

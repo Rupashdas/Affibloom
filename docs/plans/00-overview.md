@@ -277,7 +277,7 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | 13J | F19 | done `2c9a0da` |
 | ON1 | F38 | open |
 | ON2 | F38 | open |
-| C1A | C1 | open |
+| C1A | C1 | done (deviation 110) |
 | C1B | C1 | open |
 | C1C | C1 | open |
 | C1D | C1 | open |
@@ -635,7 +635,7 @@ decision C3, TL6); `INSERT_BOXES` is `edit_posts`. Responses follow the global c
 | PATCH | `/settings` (General arms: link defaults, link index, GA, performance), POST `/settings/link-defaults/apply`, `/settings/override`, `/settings/general` | SETTINGS | settings saved without reload, "Update Link Settings", override all | F9 9D-9L; F21 35D, 35G; C3A; F11 32C | planned |
 | GET, POST | `/link-index`, `/link-index/rebuild` (and `/link-index/status`) | SETTINGS | link index status and rebuild | F21 35G; F9 9J, 9L | planned |
 | POST | `/clicks` `{ product \| lasso, post, button }` | public | click counter; always 204 | F12 33A | planned |
-| POST | `/amazon/validate` | SETTINGS | validate Creators credentials | C1A | planned |
+| POST | `/amazon/validate` | SETTINGS | validate Creators credentials | C1A | built |
 | GET, POST | `/amazon/bulk-sync`, POST `/amazon/bulk-sync/dismiss`, GET `/amazon/search` | PRODUCTS | bulk Amazon sync; search tab of Add A New Link | C1I, C1M | planned |
 | POST | `/notices/sitestripe/dismiss` | PRODUCTS | SiteStripe notice | C1N | planned |
 | GET, POST | `/amazon-import`, `/amazon-import/dismiss` | PRODUCTS | auto-monetize import status and notice | F35 AM4 | planned |

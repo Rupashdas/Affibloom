@@ -1,6 +1,7 @@
 /**
  * Settings → Amazon: Lasso's live tracking-ID check, the whitelist as removable tags, and the whitelist disabled
- * while Allow Multiple Tracking IDs is off (docs/features/F17/requirements.md).
+ * while Allow Multiple Tracking IDs is off (docs/features/F17/requirements.md), and the Product Data API card's
+ * Validate (C1A).
  *
  * The server applies the same rules, so the form is correct without this script: the whitelist is then a plain
  * field of IDs separated by spaces.
@@ -182,7 +183,66 @@
 		return draw;
 	}
 
+	/**
+	 * The Product Data API card's Validate (C1 R19-R22): checks the typed credentials with POST /amazon/validate (a blank
+	 * Credential ID or Secret means the stored one), shows Lasso's message under the fields and the card's new state.
+	 * The button is disabled with a spinner while Amazon is asked.
+	 *
+	 * @param {HTMLElement} card The card.
+	 */
+	function apiCard( card ) {
+		var button = card.querySelector( '[data-api-validate]' );
+		var message = card.querySelector( '[data-api-message]' );
+		var chip = card.querySelector( '[data-api-state]' );
+		var states = JSON.parse( card.dataset.states );
+		var value = function ( id ) {
+			return document.getElementById( id ).value;
+		};
+		var show = function ( text, tone, state ) {
+			message.textContent = text;
+			message.className = 'affibloom-api-card__message' + ( tone ? ' is-' + tone : '' );
+			if ( state && states[ state ] ) {
+				chip.className = 'affibloom-state affibloom-state--' + state;
+				chip.textContent = states[ state ];
+			}
+		};
+
+		button.addEventListener( 'click', function () {
+			button.disabled = true;
+			button.classList.add( 'is-busy' );
+			show( card.dataset.validatingText, '' );
+
+			window.wp.apiFetch( {
+				path: '/affibloom/v1/amazon/validate',
+				method: 'POST',
+				data: {
+					credential_id: value( 'affibloom-api-credential_id' ),
+					secret: value( 'affibloom-api-secret' ),
+					partner_tag: value( 'affibloom-api-partner_tag' ),
+					version: value( 'affibloom-api-version' ),
+					country: value( 'affibloom-setting-default_country' ),
+				},
+			} )
+				.then( function ( answer ) {
+					show( answer.data.message, 'success', answer.data.state );
+				} )
+				.catch( function ( error ) {
+					var known = error && error.code && 0 === error.code.indexOf( 'affibloom_' );
+					show( known ? error.message : card.dataset.failedText, 'error', known && error.data ? error.data.state : '' );
+				} )
+				.finally( function () {
+					button.disabled = false;
+					button.classList.remove( 'is-busy' );
+				} );
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
+		var card = document.querySelector( '[data-amazon-api]' );
+		if ( card && window.wp && window.wp.apiFetch ) {
+			apiCard( card );
+		}
+
 		var tag = document.getElementById( 'affibloom-setting-tracking_id' );
 		var list = document.querySelector( '[data-tag-list]' );
 		var multiple = document.getElementById( 'affibloom-setting-multiple_tracking_ids' );

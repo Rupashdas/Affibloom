@@ -2017,6 +2017,8 @@
 .affibloom-toast__icon .affibloom-icon { width: 16px; height: 16px; stroke-width: 2.2; }
 /* The failure toast (Task 15A): the same card, a white cross on danger-700 (6.6:1). */
 .affibloom-toast--error .affibloom-toast__icon { background: var(--affibloom-danger-700); color: var(--affibloom-white); }
+/* A failure says what to do next, so it stays longer (C1 R23's warning is two sentences). */
+.affibloom-toast--error { animation-duration: 9s; }
 .affibloom-toast__icon[hidden] { display: none; }
 @keyframes affibloom-toast {
 	0% { opacity: 0; transform: translateY(8px); }
@@ -2383,4 +2385,53 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-admin *::after { transition: none; }
 	.affibloom-toast { animation: none; }
 	.affibloom-quick__card { animation: none; }
+}
+
+/* Settings → Amazon: the Product Data API card (C1A; Lasso's amazon-api-card, in Aurora's look). */
+.affibloom-api-card__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.affibloom-api-card .affibloom-card__body--fields { display: flex; flex-direction: column; gap: 20px; }
+.affibloom-api-card__intro { margin: -4px 0 0; color: var(--affibloom-ink-700); font-size: 13px; line-height: 20px; }
+.affibloom-api-card__intro a { color: var(--affibloom-brand-600); font-weight: 600; }
+.affibloom-api-card__pair { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.affibloom-api-card__actions { display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
+.affibloom-api-card__message { flex: 1 1 auto; min-height: 20px; margin: 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 20px; }
+.affibloom-api-card__message.is-success { color: var(--affibloom-success-700); font-weight: 600; }
+.affibloom-api-card__message.is-error { color: var(--affibloom-danger-700); font-weight: 600; }
+.affibloom-api-card__actions .affibloom-button { flex: 0 0 auto; min-width: 112px; }
+
+/* State chip (design system, "State chip"): a full-round tinted pill saying how something stands. */
+.affibloom-state {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 10px;
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-segment-bg);
+	color: var(--affibloom-ink-700);
+	font: 600 12px/18px var(--affibloom-font);
+	white-space: nowrap;
+}
+.affibloom-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.affibloom-state--saved { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
+.affibloom-state--validated { background: var(--affibloom-success-50); color: var(--affibloom-success-700); }
+
+/* A button waiting for an answer: disabled, with a spinner before its text (C1A Validate). */
+.affibloom-button.is-busy { display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: progress; }
+.affibloom-button.is-busy::before {
+	content: "";
+	width: 14px;
+	height: 14px;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	animation: affibloom-spin 700ms linear infinite;
+}
+@keyframes affibloom-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.affibloom-button.is-busy::before { animation-duration: 2s; }
+}
+@media (max-width: 782px) {
+	.affibloom-api-card__pair { grid-template-columns: 1fr; gap: 12px; }
+	.affibloom-api-card__actions { flex-wrap: wrap; }
+	.affibloom-api-card__actions .affibloom-button { width: 100%; }
 }

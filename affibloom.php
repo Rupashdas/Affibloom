@@ -51,6 +51,12 @@ if ( ! is_readable( __DIR__ . '/vendor/autoload.php' ) ) {
 
 require __DIR__ . '/vendor/autoload.php';
 
+// Test only (C1): the acceptance tests' recorded Amazon answers. Loaded on a local site only (production and staging
+// are not "local"), and even there it acts only while a test has switched it on.
+if ( 'local' === wp_get_environment_type() && is_readable( __DIR__ . '/tests/E2E/amazon-stub.php' ) ) {
+	require __DIR__ . '/tests/E2E/amazon-stub.php';
+}
+
 register_activation_hook( __FILE__, array( Affibloom\Plugin::class, 'activate' ) );
 register_deactivation_hook( __FILE__, array( Affibloom\Plugin::class, 'deactivate' ) );
 

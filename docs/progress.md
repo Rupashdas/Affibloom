@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0-2X6, 8, 9, 9A, 9B-9I, 9K, 9L, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13J, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2 (+ the one-time Lasso import button, deviation 87) | 11: C1A-C1D, C1I, C1K-C1P (C1J is no code) | **In progress.** Audited 2026-11-15 (deviation 107): everything but C1 is built, recorded and passes its acceptance tests; C1 is next |
+| 2 | Settings and product library | 2X0-2X6, 8, 9, 9A, 9B-9I, 9K, 9L, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13J, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2 (+ the one-time Lasso import button, deviation 87) | 10: C1B-C1D, C1I, C1K-C1P (C1J is no code) | **In progress.** Audited 2026-11-15 (deviation 107): everything but C1 is built, recorded and passes its acceptance tests; C1A done 2026-11-15 (deviation 110); C1B is next |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -28,8 +28,9 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
    and 375 px looks made, Display's clipped Button alignment fixed, and the product page's squeezed Button Text
    (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
-2. **Next task: C1A** (the Product Data API card and Validate), then the rest of C1 in the phase file's order
-   (C1B-C1D, C1I, C1K-C1P), then Phase 2's exit check and the user's sign-off.
+2. **C1A done (2026-11-15, deviation 110). Next task: C1B** (the catalogue client, `wp affibloom amazon get`), paused
+   at the user's word until another session's work is applied; then C1C, C1D, C1I, C1K-C1P, then Phase 2's exit check
+   and the user's sign-off.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    **`tools/reset-local.sh` is not safe to run as it stands:** `.local/snapshot.sql` dates from 2026-11-12, before the
@@ -2384,6 +2385,37 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     General and Amazon at 375 and 1280 px; Display (no columns) keeps its rule. Looked at 375 and 1280 px.
     - Checks: F17 5/5, F16 11 passed and 1 skipped, F9 14 passed and 1 skipped (quiet runs; the skips are Phase 3); no PHP changed.
 
+110. **Task C1A: the Product Data API card and Validate (2026-11-15).** The user asked for C1A-C1P in one session (an
+    exception to the one-task rule, the user's choice), then paused the run after C1A because another session has work
+    to apply first. Built as planned (R16-R25, D2-D4, D16), with these departures:
+    - **The Amazon stub lives in the plugin, not in mu-plugins (the user, 2026-11-15).** `tests/E2E/amazon-stub.php` is
+      loaded by `affibloom.php` only when `wp_get_environment_type()` is `local` (production and staging are not), and
+      acts only while the option `affibloom_test_amazon_stub` names a scenario (`ok`, `reject`, `unavailable`,
+      `throttle`); it counts what it answers in `affibloom_test_amazon_requests` (AC7's "nothing sent"). The plan's
+      `tests/E2E/mu/amazon-stub.php` and copying into `wp-content/mu-plugins` are dropped.
+    - **`AmazonCatalog::verify()` instead of `token()`:** Validate must always ask Amazon (Lasso's verify_credentials()
+      never reads its cache), so C1A has an uncached check; the token cache (R8) comes with C1B, its first reader.
+      `CatalogError` (planned for C1B) is created now, because the check is its first thrower (AuthFailed, HttpError).
+    - **Words live in the Interface:** `CredentialsNotValidated` carries a reason (`amazon_missing`, `_rejected`,
+      `_unavailable`); `Messages` and `AmazonController` hold Lasso's sentences. Save Changes' R23 warnings are two
+      notice codes (`amazon-unverified-kept`, `-cleared`); the toast partial gained the failure look for them, and a
+      failure toast now stays 9 s instead of 4 s (R23's warning is two sentences).
+    - **No "Learn" links** (Lasso's help site; no Lasso branding): the intro's link goes to Amazon's Associates
+      Central (`affiliate-program.amazon.com`).
+    - **`default_country` was never built in 12A** (the plan's "depends on F2 12A's `default_country` reader"): C1A
+      adds the setting (default `us`, saved with the tab, Lasso's 18 stores). `AmazonUrl::from_bare_asin()` still goes
+      to amazon.com; making it read the setting is not in C1A's text and is left for the user to place.
+    - **C1 AC2 was a stale test:** since Task 14A's endings, an Amazon add stays on the Dashboard with the new row on top
+      (Lasso's), so AC2 now checks the stored product, not a product page. AC3 and AC5 read the old
+      `amazon_api_*` keys in `affibloom_settings` and were rewritten for `affibloom_amazon_credentials`.
+    - **The C1 spec puts the site's own credentials back:** while C1A was checked, credentials that look real (not
+      validated) appeared in `affibloom_amazon_credentials`, entered outside this session. The spec now saves the option
+      and the Default Tracking ID before the run and restores them after (checked: identical afterwards); a copy is in
+      `.local/credentials-backup-2026-11-15.json` (gitignored).
+    - Checks: C1 6 passed, 3 skipped (AC1, AC4: C1C/C1D; AC6: Phase 7), red first (no card; AC2's stale ending);
+      unit 589 (Marketplace, Credentials, CredentialsService new); lint and PHPStan clean. Looked at 1280 and 375 px
+      (fields were cramped at first; now 20px apart); no sideways scroll.
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2414,6 +2446,12 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-15 (Claude Code, Task C1A, at the user's word "All of C1 here", paused after C1A at the user's word):**
+  Settings → Amazon has the Product Data API card (Default Tracking ID, Credential ID, Secret, Partner tag, Version,
+  Validate, the state chip); `POST /amazon/validate`; Save Changes validates unvalidated credentials (R23); the
+  secret and Credential ID are never printed. Deviation 110 (stub inside the plugin at the user's request). C1 6
+  passed, 3 skipped; unit 589; lint and PHPStan clean; looked at 1280 and 375 px. **Next: C1B, when the user says go.**
 
 - **2026-11-15 (Claude Code, the Settings card gaps, at the user's word):** cards in a Settings column were 56px apart
   (an old card-after-card margin on top of the column's gap), 28px where the columns meet; now 28px everywhere on

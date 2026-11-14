@@ -612,7 +612,7 @@
 		host.appendChild( element );
 		window.setTimeout( function () {
 			element.remove();
-		}, 4500 );
+		}, failed ? 9500 : 4500 );
 	}
 
 	/**

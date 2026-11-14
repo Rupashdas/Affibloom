@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
@@ -26,12 +27,14 @@ use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Application\Shell\NoticeBoard;
 use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
+use Affibloom\Infrastructure\Http\CreatorsApiCatalog;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
 use Affibloom\Infrastructure\Schema\Migrator;
 use Affibloom\Infrastructure\WordPress\CronRegistry;
 use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
+use Affibloom\Infrastructure\WordPress\OptionCredentialsRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaFieldUsage;
@@ -73,6 +76,7 @@ use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Admin\TrackingIdController;
+use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
 use Affibloom\Interface\Rest\FieldsController;
@@ -238,6 +242,7 @@ final class Plugin {
 		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
+		$amazon    = new CredentialsService( new OptionCredentialsRepository(), new CreatorsApiCatalog(), $this->settings_repository() );
 		$upgrader  = self::upgrader();
 
 		return array(
@@ -252,7 +257,8 @@ final class Plugin {
 					$settings,
 					new DisplayScreen( $this->template(), $display, $settings, $notice, $choices ),
 					$notice,
-					$detection
+					$detection,
+					$amazon
 				),
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
@@ -260,7 +266,8 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
-			new SettingsController( $settings ),
+			new SettingsController( $settings, $amazon ),
+			new AmazonController( $amazon ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
 			new HelpTips( $settings ),
 			new DisplayController( $display, $settings ),
