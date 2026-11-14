@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, TL1, TL2, ON1 (+ the one-time Lasso import button, deviation 87) | 27: 2X1-2X5, FL1-FL5, 13F-13J, ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL4, TL1, TL2, ON1 (+ the one-time Lasso import button, deviation 87) | 23: 2X1-2X5, FL5, 13F-13J, ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -32,6 +32,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
     **Tasks G2-G5 are built too (the user, 2026-11-14: "Let's do G2-G5", tested together; deviation 98).**
 2c. **Admin shell (the user, 2026-11-14: "Do Task ON1 and Task ON2", both in one session):** **ON1 done (deviation 101);
     F38 AC1-AC3 passed in Claude's runs.**
+2d. **Fields: FL1-FL4 are done** (committed `89ef637`, `b366954`, `ba6e821`, `e05a9c7` on 2026-11-14; recorded
+    afterwards, see the session log). F26 13/13 and F1 AC10 passed in Claude's runs. **Next for Fields: FL5.**
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
 4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    The Local copy still needs a reset before the next full test run.
@@ -2217,6 +2219,17 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, records for Tasks FL1-FL4; the user: "Run F26 and update the records for FL1-FL4"):**
+  FL1-FL4 had been built and pushed earlier the same day (`89ef637` Fields list, `b366954` new field, `ba6e821` edit
+  and delete, `e05a9c7` Links tab) without plan ticks, a session-log entry or deviation notes. This session only
+  checked them and wrote the records; no code changed. F26 `tests/E2E/acceptance/F26.spec.ts`: **13 passed** (AC1-AC5,
+  AC2's product-page case). A first run failed 7 cases on `ENOENT` trace files only, because another session's F16 run
+  cleared `test-results` at the same time; the rerun used its own `--output` and `--trace=off`. F1 AC10 (both cases)
+  passed. `composer test:unit` 556 OK, `composer analyse` and `composer lint` clean (run on the shared working tree,
+  which also held the ON1/ON2 session's uncommitted files). Ticked FL1-FL4 and their steps in the phase file.
+  **Not recovered:** any differences from the plan's text made while building FL1-FL4 (none were recorded) and the
+  by-hand look at 1280/900/375 px, which this session did not repeat. Next for Fields: FL5.
 
 - **2026-11-14 (Claude Code, Task ON1; the user asked for ON1 and ON2 in this session):** navigation in Lasso's order
   (F38 AC1-AC3); deviation 101. Started from `AdminNavigationTest` (red: classes missing) and `F38.spec.ts` AC1-AC3

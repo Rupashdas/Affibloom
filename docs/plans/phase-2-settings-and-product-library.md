@@ -235,10 +235,10 @@ they were, then the new sections in the order listed after G5.
 
 **Fields (F26)**
 
-- [ ] Task FL1: The Fields list, with the whole field model
-- [ ] Task FL2: A new field from the Fields screen
-- [ ] Task FL3: A field's Details — edit and delete
-- [ ] Task FL4: A field's Links tab
+- [x] Task FL1: The Fields list, with the whole field model
+- [x] Task FL2: A new field from the Fields screen
+- [x] Task FL3: A field's Details — edit and delete
+- [x] Task FL4: A field's Links tab
 - [ ] Task FL5: The product page's field rows, corrected to Lasso's rules
 
 **Activation and the upgrade routine (F37 part)** — moved here from Phase 6; URL variants V1-V5 moved to Phase 5
@@ -5567,14 +5567,14 @@ FL3; until then the row is plain text).
 `FieldsController::library()` (uses `for_products()`), `templates/admin/partials/field-modal.php`, `admin.css`,
 `docs/ui/design-system.md` (Fields list row).
 
-- [ ] **Step 1: Failing tests.** AC1 (the ten rows, search "pri rat", the empty state, Manage Fields opens the list).
+- [x] **Step 1: Failing tests.** AC1 (the ten rows, search "pri rat", the empty state, Manage Fields opens the list).
   Unit: built-ins with a rename, table-only out of `for_products()`, the flat option shape. Expected red: no page.
-- [ ] **Step 2: Domain and repository.**
-- [ ] **Step 3: Service, usage count.**
-- [ ] **Step 4: Screen, route, templates, script.**
-- [ ] **Step 5: Run and look.** F26 AC1, F1 AC10 (the library still lists Primary Rating, Pros, Cons and the editor's
+- [x] **Step 2: Domain and repository.**
+- [x] **Step 3: Service, usage count.**
+- [x] **Step 4: Screen, route, templates, script.**
+- [x] **Step 5: Run and look.** F26 AC1, F1 AC10 (the library still lists Primary Rating, Pros, Cons and the editor's
   own, not the table built-ins); by hand at 1280/375 px.
-- [ ] **Step 6: Commit** — "Add Lasso's Fields list with every built-in field".
+- [x] **Step 6: Commit** — "Add Lasso's Fields list with every built-in field".
 
 ---
 
@@ -5602,11 +5602,11 @@ Description, Save Changes; no tabs, no delete. Save shows "Updating Field"; succ
 **Files:** the above; tests F26 **AC2**, unit tests for the title and description rules; `product-fields.js` shows
 "Title is required." for the dialog's empty title (same message).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Rules and route.**
-- [ ] **Step 3: Screen and form.**
-- [ ] **Step 4: Run and look** (F1 AC10 rerun).
-- [ ] **Step 5: Commit** — "Create a field from the Fields screen".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Rules and route.**
+- [x] **Step 3: Screen and form.**
+- [x] **Step 4: Run and look** (F1 AC10 rerun).
+- [x] **Step 5: Commit** — "Create a field from the Fields screen".
 
 ---
 
@@ -5637,12 +5637,12 @@ name). Delete: in use → "Hold Up" (Ok); unused → "Delete This Field?" → De
 **Files:** the above; tests F26 **AC3-AC4** (Hold Up with a product attached through WP-CLI; a direct DELETE → 409; a
 built-in rename keeps type and description; a type change keeps a product's value), unit tests for the refusals.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain and service.**
-- [ ] **Step 3: Routes.**
-- [ ] **Step 4: The tab and the dialogs.**
-- [ ] **Step 5: Run and look.**
-- [ ] **Step 6: Commit** — "Edit and delete a field, never a built-in or one in use".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain and service.**
+- [x] **Step 3: Routes.**
+- [x] **Step 4: The tab and the dialogs.**
+- [x] **Step 5: Run and look.**
+- [x] **Step 6: Commit** — "Edit and delete a field, never a built-in or one in use".
 
 ---
 
@@ -5667,11 +5667,11 @@ open this tab.
 
 **Files:** the above; FL1's row link; tests F26 **AC5**.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Query and service.**
-- [ ] **Step 3: The tab.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "List the products that use a field".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Query and service.**
+- [x] **Step 3: The tab.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "List the products that use a field".
 
 ---
 
