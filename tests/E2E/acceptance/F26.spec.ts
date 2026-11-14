@@ -445,4 +445,104 @@ test.describe( 'F26 Fields', () => {
 		await dialog.getByRole( 'button', { name: 'Create Field' } ).click();
 		await expect( dialog.getByText( 'Title is required.' ) ).toBeVisible();
 	} );
+
+	// Task FL5: the product page's rows as Lasso's lasso_save_field_positions stores them (R26, D9-D12).
+	const productRows = ( page: Page ) => page.locator( '[data-field-row]' );
+	const stored = ( product: number ) =>
+		JSON.parse( wp( 'post', 'meta', 'get', String( product ), '_affibloom_fields', '--format=json' ) ) as Array< { field: number; value: string } >;
+	// wp.apiFetch sends a PUT as a POST with X-HTTP-Method-Override.
+	const fieldsSaved = ( page: Page ) =>
+		page.waitForResponse(
+			( r ) =>
+				/affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+(\/|%2F)fields/.test( r.url() ) &&
+				'PUT' === ( r.request().headers()[ 'x-http-method-override' ] ?? r.request().method() )
+		);
+
+	test( 'AC6 a value is stored with its lines cleaned, a long one is refused under its row, a renamed built-in shows its name', async ( { page } ) => {
+		const own = unique( 'F26 Sizes' );
+		seedFields( { fields: [ { id: 100, name: own, type: 'bulleted_list', description: 'One size per line.' } ], names: { 2: 'Good points' } } );
+		const id = createProduct( { name: unique( 'F26 AC6' ) } );
+		made.push( id );
+		giveFields( id, [ 1, 2, 100 ] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+
+		// A renamed built-in shows its new name on its row.
+		await expect( page.locator( '[data-field-row][data-field-id="2"]' ).getByLabel( 'Good points', { exact: true } ) ).toBeVisible();
+
+		// Each line trimmed, the blank ones dropped, on the server.
+		const sizes = page.locator( '[data-field-row][data-field-id="100"]' ).getByLabel( own, { exact: true } );
+		await sizes.fill( '   38  \n\n  \n 39\t\n' );
+		const first = fieldsSaved( page );
+		await sizes.blur();
+		expect( ( await first ).status() ).toBe( 200 );
+		expect( stored( id ).find( ( row ) => 100 === row.field )?.value ).toBe( '38\n39' );
+		await page.reload();
+		await expect( sizes ).toHaveValue( '38\n39' );
+
+		// Over 1,000 characters: refused under its row, nothing stored; a good value clears the message.
+		await sizes.fill( 'x'.repeat( 1001 ) );
+		const long = fieldsSaved( page );
+		await sizes.blur();
+		expect( ( await long ).status() ).toBe( 422 );
+		const row = page.locator( '[data-field-row][data-field-id="100"]' );
+		await expect( row.getByText( 'Keep this value under 1,000 characters.' ) ).toBeVisible();
+		await expect( sizes ).toHaveAttribute( 'aria-invalid', 'true' );
+		expect( stored( id ).find( ( one ) => 100 === one.field )?.value ).toBe( '38\n39' );
+		await sizes.fill( 'x'.repeat( 1000 ) );
+		const exact = fieldsSaved( page );
+		await sizes.blur();
+		expect( ( await exact ).status() ).toBe( 200 );
+		await expect( row.getByText( 'Keep this value under 1,000 characters.' ) ).toHaveCount( 0 );
+		await expect( sizes ).not.toHaveAttribute( 'aria-invalid', 'true' );
+
+		// The library finds "pri rat" (spaces as wildcards).
+		await page.getByRole( 'button', { name: 'Add Custom Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByRole( 'tab', { name: 'Add from library' } ).click();
+		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'pri rat' );
+		await expect( dialog.locator( '.affibloom-field-library__item' ) ).toHaveCount( 1 );
+		await expect( dialog.locator( '.affibloom-field-library__item' ) ).toContainText( 'Primary Rating' );
+	} );
+
+	test( 'AC7 the rows are dragged or moved into a new order, Primary Rating first, and the order is kept', async ( { page } ) => {
+		seedFields( { fields: [ { id: 100, name: unique( 'F26 Sizes' ), type: 'text', description: '' } ] } );
+		const id = createProduct( { name: unique( 'F26 AC7' ) } );
+		made.push( id );
+		giveFields( id, [ 1, 2, 3, 100 ] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await page.waitForLoadState( 'load' );
+		const order = async () => ( await productRows( page ).evaluateAll( ( all ) => all.map( ( row ) => Number( ( row as HTMLElement ).dataset.fieldId ) ) ) );
+
+		// Primary Rating has no grip: its place is fixed.
+		await expect( productRows( page ).first().locator( '[data-grip]' ) ).toHaveCount( 0 );
+
+		const drag = async ( from: number, to: number ) => {
+			// The rows sit below the fold; the mouse works in the viewport.
+			await page.locator( '[data-field-list]' ).scrollIntoViewIfNeeded();
+			const grip = productRows( page ).nth( from ).locator( '[data-grip]' );
+			const start = await grip.boundingBox();
+			const target = await productRows( page ).nth( to ).boundingBox();
+			const done = fieldsSaved( page );
+			await page.mouse.move( start!.x + start!.width / 2, start!.y + start!.height / 2 );
+			await page.mouse.down();
+			await page.mouse.move( start!.x + 4, target!.y + 2, { steps: 12 } );
+			await page.mouse.up();
+			expect( ( await done ).status() ).toBe( 200 );
+		};
+
+		// The last row dragged above Pros; then dragged above Primary Rating, it stops under it.
+		await drag( 3, 1 );
+		expect( await order() ).toEqual( [ 1, 100, 2, 3 ] );
+		await drag( 3, 0 );
+		expect( await order() ).toEqual( [ 1, 3, 100, 2 ] );
+		expect( stored( id ).map( ( row ) => row.field ) ).toEqual( [ 1, 3, 100, 2 ] );
+
+		// Move down still works, and both orders hold after a reload.
+		const moved = fieldsSaved( page );
+		await productRows( page ).nth( 1 ).getByRole( 'button', { name: /^Move .* down$/ } ).click();
+		expect( ( await moved ).status() ).toBe( 200 );
+		expect( await order() ).toEqual( [ 1, 100, 3, 2 ] );
+		await page.reload();
+		expect( await order() ).toEqual( [ 1, 100, 3, 2 ] );
+	} );
 } );

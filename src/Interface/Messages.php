@@ -49,6 +49,8 @@ final class Messages {
 			// title, where Lasso says nothing; and the description's 1,000 characters (F26 D8).
 			'field_title_required'   => __( 'Title is required.', 'affibloom' ),
 			'field_description_long' => __( 'Keep the description under 1,000 characters.', 'affibloom' ),
+			// A product's field value: lasso_field_mapping holds 1,000 characters (Task FL5, F26 D9).
+			'field_value_long'       => __( 'Keep this value under 1,000 characters.', 'affibloom' ),
 			// Groups (Task G1): Lasso's own "Name is required." (settings.js 3100-3145), and a sentence for the name
 			// WordPress refuses, where Lasso shows its generic failure bar (F23 D3).
 			'group_name_required' => __( 'Name is required.', 'affibloom' ),

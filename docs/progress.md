@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL4, TL1, TL2, ON1, ON2, 13F-13J (+ the one-time Lasso import button, deviation 87) | 17: 2X1-2X5, FL5, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5 and FL5 (deviation 89; 13F-13H done, deviation 102) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2, 13F-13J (+ the one-time Lasso import button, deviation 87) | 16: 2X1-2X5, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5 (deviation 89; FL5 done, deviation 105; 13F-13H done, deviation 102) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -32,8 +32,9 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
     **Tasks G2-G5 are built too (the user, 2026-11-14: "Let's do G2-G5", tested together; deviation 98).**
 2c. **Admin shell (the user, 2026-11-14: "Do Task ON1 and Task ON2", both in one session):** **ON1 done (deviation 101);
     ON2 done (deviation 103); F38 AC1-AC6 passed in Claude's runs.** ON3-ON4 are Phase 5, ON5-ON9 Phase 8.
-2d. **Fields: FL1-FL4 are done** (committed `89ef637`, `b366954`, `ba6e821`, `e05a9c7` on 2026-11-14; recorded
-    afterwards, see the session log). F26 13/13 and F1 AC10 passed in Claude's runs. **Next for Fields: FL5.**
+2d. **Fields: FL1-FL5 are done; F26 (all seven ACs) is complete in Phase 2.** FL1-FL4 committed `89ef637`, `b366954`,
+    `ba6e821`, `e05a9c7`; **FL5 (the product page's field rows) done 2026-11-14, deviation 105**: F26 15/15, F1 AC10
+    and F23 AC5 (the shared drag) passed in Claude's runs. Fields in displays and tables wait for Phase 3 and F25.
 2c. **Tasks 13F-13J (the Dashboard's second pass, F19) are done (2026-11-14, deviation 102; the user asked for all
     five in one session).** F19 AC4 and AC10-AC20 passed in Claude's runs; a quiet full F19 run is still owed (other
     sessions ran Playwright in the same copy at the time). Local holds upgrade step 1 (`affibloom_db_version` 1).
@@ -2279,6 +2280,20 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       first "Dashboard" link is WordPress's; AC15: "Cron" matches two headings), seen while other sessions ran
       Playwright on the same site; not changed here.
 
+105. **Task FL5 (2026-11-14), the product page's field rows corrected to Lasso's rules (F26 AC6-AC7); done, checked by
+    Claude's own runs.** Built outside-in from F26 AC6-AC7 (red: the padded lines stored as typed, no grip), then
+    `FieldValueTest` and a `ProductFieldsTest` case (red: no `FieldValue`). Differences from the plan's text:
+    (a) **The drag is shared code:** the field rows are the second pointer-events drag, so Groups' drag was taken out of
+    `group-members.js` into `assets/admin/drag-rows.js` (`window.affibloomDragRows`), which both pages now load; the
+    plan's file list names only `product-fields.js`. F23 AC5 (the group drag) and AC10 passed after the change.
+    (b) **The reason code is `field_value_long`**, not the analysis's `too_long`, after FL2's `field_description_long`;
+    the answer is as planned: 422 `affibloom_invalid_field`, `data.fields["rows.<field>"]` = "Keep this value under
+    1,000 characters.". One long value refuses the whole save (nothing stored), as `update()` stores all rows at once.
+    (c) Renamed built-ins on the rows and the wildcard library search were already right since FL1/FL3; FL5 only adds
+    their AC6 checks. (d) While a row is dragged, the Move buttons' disabled states update on the drop, not during
+    the drag. (e) Test detail: `wp.apiFetch` sends PUT as POST with `X-HTTP-Method-Override`, so AC6-AC7 wait on that
+    header; the drag test scrolls the list into view first (the rows are below the fold at 1280x900).
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2309,6 +2324,14 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Task FL5, a session started from another):** the product page's field rows now store each
+  value with its lines trimmed and blank lines dropped (`Domain\Fields\FieldValue`), refuse a value over 1,000
+  characters with 422 and the words under its row, and are dragged by a grip (Primary Rating has none) as well as
+  moved by the buttons; deviation 105. Lint (project), PHPStan level 6 and 571 unit tests clean; F26 15/15, F1 AC10
+  (2) and F23 AC5 and AC10 passed; rows seen at 1280, 900 and 375 px with a refused value, mid-drag and the keyboard
+  move. A check product (16160) was made and deleted after a backup (`.local/backup-2026-11-14-before-fl5-check.sql`).
+  Other sessions shared the tree, so the commit holds only FL5's hunks.
 
 - **2026-11-14 (Claude Code, settings save fix at the user's request):** Settings → General, Display (and its Reset)
   and Amazon now save as Lasso does: AJAX behind "Updating Your Site", then the same address again with the toast;

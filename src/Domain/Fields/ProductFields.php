@@ -139,10 +139,12 @@ final class ProductFields {
 
 	/**
 	 * The list as the editor left it: the rows' order, values and toggles (Lasso's lasso_save_field_positions). Only
-	 * fields the product has are kept (an update never adds one), each once; a rating is kept as Lasso's box keeps it.
+	 * fields the product has are kept (an update never adds one), each once; every value is cleaned as Lasso's save
+	 * cleans it (FieldValue), and a rating is kept as Lasso's box keeps it.
 	 *
 	 * @param FieldLibrary       $library The fields, for each one's type.
 	 * @param list<ProductField> $rows    The rows, in the order shown.
+	 * @throws \Affibloom\Domain\InvalidField When a value is longer than 1,000 characters: nothing is kept.
 	 */
 	public function update( FieldLibrary $library, array $rows ): self {
 		$kept = array();
@@ -151,7 +153,8 @@ final class ProductFields {
 			if ( null === $field || null === $this->find( $row->field_id ) ) {
 				continue;
 			}
-			$value  = FieldType::Rating === $field->type ? self::rating( $row->value ) : $row->value;
+			$value  = FieldValue::accepted( $row->field_id, $row->value );
+			$value  = FieldType::Rating === $field->type ? self::rating( $value ) : $value;
 			$kept[] = new ProductField( $row->field_id, $value, $row->visible, self::RATING_ID === $row->field_id && $row->show_name );
 		}
 

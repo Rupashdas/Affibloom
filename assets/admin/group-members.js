@@ -178,50 +178,15 @@
 		saveOrder();
 	} );
 
-	// Dragging by the grip, with pointer events: the row follows the pointer through its neighbours.
-	var dragging = null;
-
-	list.addEventListener( 'pointerdown', function ( event ) {
-		var grip = event.target.closest( '[data-grip]' );
-		if ( ! grip || ( 0 !== event.button && 'mouse' === event.pointerType ) ) {
-			return;
-		}
-		event.preventDefault();
-		dragging = grip.closest( '.affibloom-member' );
-		dragging.classList.add( 'is-dragging' );
-		grip.setPointerCapture( event.pointerId );
+	// Dragging by the grip, with pointer events (drag-rows.js).
+	window.affibloomDragRows( list, {
+		row: '.affibloom-member',
+		movable: rows,
+		dropped: function () {
+			refresh();
+			saveOrder();
+		},
 	} );
-	list.addEventListener( 'pointermove', function ( event ) {
-		if ( ! dragging ) {
-			return;
-		}
-		var others = rows().filter( function ( row ) {
-			return row !== dragging;
-		} );
-		var before = null;
-		others.some( function ( row ) {
-			var box = row.getBoundingClientRect();
-			if ( event.clientY < box.top + box.height / 2 ) {
-				before = row;
-				return true;
-			}
-			return false;
-		} );
-		if ( before !== dragging.nextElementSibling ) {
-			list.insertBefore( dragging, before );
-		}
-	} );
-	function drop() {
-		if ( ! dragging ) {
-			return;
-		}
-		dragging.classList.remove( 'is-dragging' );
-		dragging = null;
-		refresh();
-		saveOrder();
-	}
-	list.addEventListener( 'pointerup', drop );
-	list.addEventListener( 'pointercancel', drop );
 
 	refresh();
 

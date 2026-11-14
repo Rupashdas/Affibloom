@@ -64,7 +64,8 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, GroupScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			// A group's Links tab: its order, Remove and "Add to Group" (Task G4); it stops at once on any other page.
-			wp_enqueue_script( 'affibloom-group-members', $this->plugin_url . 'assets/admin/group-members.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
+			wp_enqueue_script( 'affibloom-group-members', $this->plugin_url . 'assets/admin/group-members.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows' ), $this->version, true );
 		}
 
 		// The Fields list in place (Task FL1) and the field form (Task FL2); the hook suffix of both Fields pages holds
@@ -100,8 +101,9 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
 			wp_enqueue_media();
 			wp_enqueue_script( 'affibloom-product', $this->plugin_url . 'assets/admin/product.js', array( 'affibloom-admin' ), $this->version, true );
-			// Custom fields: the rows and the "Add Field" dialog (Task 14C).
-			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			// Custom fields: the rows and the "Add Field" dialog (Task 14C); the rows are dragged too (Task FL5).
+			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
+			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker' ), $this->version, true );
 			// Save Changes: the form through PATCH /products/{id}, its dialog and toasts (Task 15A).
 			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );

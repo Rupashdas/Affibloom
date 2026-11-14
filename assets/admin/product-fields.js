@@ -1,8 +1,8 @@
 /* global wp */
 /**
  * Custom fields on the product page (F1, Task 14C). Every change is stored as it is made, as Lasso's page does: a value
- * when it changes (on leaving its box), a switch when it is turned, the order when a row moves; adding and removing a
- * field redraw the rows. The "Add Field" dialog: "Create new" stores a field and opens the library, as Lasso's does;
+ * when it changes (on leaving its box), a switch when it is turned, the order when a row is dragged or moved (Task FL5);
+ * adding and removing a field redraw the rows. A value the server refuses is named under its row (Task FL5). The "Add Field" dialog: "Create new" stores a field and opens the library, as Lasso's does;
  * "Add from library" searches by name, ten a page, and adds one. Opening and closing the dialogs is admin.js's.
  */
 ( function () {
@@ -44,6 +44,34 @@
 			window.affibloomToast( problem && problem.message ? problem.message : fallback, true );
 		};
 
+		/**
+		 * The words under a row's box: the server's refusal ("rows.<field>"), or none.
+		 *
+		 * @param {HTMLElement} row     The row.
+		 * @param {string}      message The words; '' clears them.
+		 */
+		var rowError = function ( row, message ) {
+			var note = row.querySelector( '[data-field-value-error]' );
+			var input = row.querySelector( '[data-field-value]' );
+			var described = ( input.getAttribute( 'aria-describedby' ) || '' ).split( ' ' ).filter( function ( id ) {
+				return id && id !== note.id;
+			} );
+			note.textContent = message;
+			note.hidden = '' === message;
+			input.classList.toggle( 'is-invalid', '' !== message );
+			if ( '' === message ) {
+				input.removeAttribute( 'aria-invalid' );
+			} else {
+				input.setAttribute( 'aria-invalid', 'true' );
+				described.push( note.id );
+			}
+			if ( described.length ) {
+				input.setAttribute( 'aria-describedby', described.join( ' ' ) );
+			} else {
+				input.removeAttribute( 'aria-describedby' );
+			}
+		};
+
 		/** The order, values and switches, as the page shows them (Lasso's lasso_save_field_positions). */
 		var save = function () {
 			return wp.apiFetch( {
@@ -60,8 +88,21 @@
 						};
 					} ),
 				},
+			} ).then( function () {
+				rows().forEach( function ( row ) {
+					rowError( row, '' );
+				} );
 			} ).catch( function ( problem ) {
-				failed( problem, box.dataset.saveFailed );
+				// A refused value (over 1,000 characters) is named under its row; nothing was stored.
+				var fields = problem && problem.data && problem.data.fields ? problem.data.fields : {};
+				var named = rows().filter( function ( row ) {
+					var message = fields[ 'rows.' + row.dataset.fieldId ] || '';
+					rowError( row, message );
+					return '' !== message;
+				} );
+				if ( 0 === named.length ) {
+					failed( problem, box.dataset.saveFailed );
+				}
 			} );
 		};
 
@@ -75,6 +116,20 @@
 				row.querySelector( '[data-field-move="down"]' ).disabled = movable.length - 1 === position;
 			} );
 		};
+
+		// Dragging a row by its grip (drag-rows.js); Primary Rating has none, so it stays first.
+		window.affibloomDragRows( list, {
+			row: '[data-field-row]',
+			movable: function () {
+				return rows().filter( function ( row ) {
+					return row.querySelector( '[data-grip]' );
+				} );
+			},
+			dropped: function () {
+				ends();
+				save();
+			},
+		} );
 
 		list.addEventListener( 'change', function ( event ) {
 			if ( event.target.matches( '[data-field-value], [data-field-visible], [data-field-show-name]' ) ) {

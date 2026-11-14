@@ -5,7 +5,9 @@
  * field name in your display."), the value in the control its kind needs, then Move up, Move down and Remove. The
  * rating box shows its stars, as Lasso's does. product-fields.js stores each change as it is made.
  *
- * Lasso reorders its rows by dragging; here the same reordering is two buttons, which also work from the keyboard.
+ * Lasso reorders its rows by dragging; here a row is dragged by its grip, or moved by two buttons, which also work from
+ * the keyboard (Task FL5, F26 D12). Primary Rating has neither: its place is fixed. A value the server refuses (over
+ * 1,000 characters) is named in the line under the box.
  *
  * @package Affibloom
  * @var array{field: \Affibloom\Domain\Fields\Field, row: \Affibloom\Domain\Fields\ProductField, first: bool, last: bool} $view
@@ -20,12 +22,18 @@ $row      = $view['row'];
 $value_id = 'affibloom-field-' . $field->id;
 $help_id  = $value_id . '-help';
 $fixed    = FieldType::Rating === $field->type && 1 === $field->id;
+$error_id = $value_id . '-error';
 $describe = '' !== $field->description ? ' aria-describedby="' . esc_attr( $help_id ) . '"' : '';
 /* translators: %s: a field's name. */
 $remove_label = sprintf( __( 'Remove %s', 'affibloom' ), $field->name );
 ?>
 <div class="affibloom-field-row" data-field-row data-field-id="<?php echo esc_attr( (string) $field->id ); ?>" data-field-name="<?php echo esc_attr( $field->name ); ?>">
 	<div class="affibloom-field-row__head">
+		<?php if ( ! $fixed ) : ?>
+			<span class="affibloom-field-row__grip" data-grip aria-hidden="true" title="<?php esc_attr_e( 'Drag to reorder', 'affibloom' ); ?>">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'grip' ) ); ?>
+			</span>
+		<?php endif; ?>
 		<label class="affibloom-label" for="<?php echo esc_attr( $value_id ); ?>"><?php echo esc_html( $field->name ); ?></label>
 		<?php
 		if ( '' !== $field->description ) {
@@ -79,4 +87,5 @@ $remove_label = sprintf( __( 'Remove %s', 'affibloom' ), $field->name );
 				value="<?php echo esc_attr( $row->value ); ?>" placeholder="<?php echo esc_attr( $field->description ); ?>"<?php echo $describe; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above. ?>>
 		<?php endif; ?>
 	</div>
+	<p class="affibloom-field__error" id="<?php echo esc_attr( $error_id ); ?>" data-field-value-error hidden></p>
 </div>

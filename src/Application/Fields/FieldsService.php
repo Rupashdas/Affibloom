@@ -224,6 +224,7 @@ final class FieldsService {
 	 *
 	 * @param int                $product The product's ID.
 	 * @param list<ProductField> $rows    The rows, in the order shown.
+	 * @throws InvalidField When a value is longer than 1,000 characters; nothing is stored.
 	 */
 	public function update( int $product, array $rows ): ?ProductFields {
 		$fields = $this->products->fields( $product );

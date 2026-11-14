@@ -4,6 +4,7 @@ namespace Affibloom\Tests\Unit\Domain\Fields;
 use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\ProductField;
 use Affibloom\Domain\Fields\ProductFields;
+use Affibloom\Domain\InvalidField;
 use PHPUnit\Framework\TestCase;
 
 final class ProductFieldsTest extends TestCase {
@@ -80,6 +81,19 @@ final class ProductFieldsTest extends TestCase {
 		self::assertFalse( $updated->find( 3 )?->visible );
 		self::assertSame( "Grippy\nLight", $updated->find( 2 )?->value );
 		self::assertTrue( $updated->find( 1 )?->show_name );
+	}
+
+	/** Every value is cleaned as Lasso's save cleans it, and one over 1,000 characters stops the whole save (F26 D9, D10). */
+	public function test_an_update_cleans_each_value_and_refuses_a_long_one(): void {
+		$fields = ProductFields::from_array( array() )
+			->attach( $this->library->find( 2 ) )
+			->attach( $this->library->find( 3 ) );
+
+		$updated = $fields->update( $this->library, array( new ProductField( 2, " Grippy \n\n Light ", true, false ) ) );
+		self::assertSame( "Grippy\nLight", $updated->find( 2 )?->value );
+
+		$this->expectException( InvalidField::class );
+		$fields->update( $this->library, array( new ProductField( 2, 'ok', true, false ), new ProductField( 3, str_repeat( 'x', 1001 ), true, false ) ) );
 	}
 
 	/** An update cannot add a field: only attach() does (Lasso's add and its save are separate requests). */

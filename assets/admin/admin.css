@@ -1852,6 +1852,12 @@
 .affibloom-admin .affibloom-input--rating { flex: 0 0 76px; }
 .affibloom-field-row__head { flex-wrap: wrap; }
 .affibloom-field-row__actions { display: flex; align-items: center; gap: 4px; }
+/* Task FL5: the grip a row is dragged by (none on Primary Rating, whose place is fixed); a dragged row lifts as a group's
+ * Links row does (brand-50, the card shadow); a refused value's words sit under the box. */
+.affibloom-field-row__grip { display: grid; place-items: center; margin-left: -4px; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
+.affibloom-field-row.is-dragging { position: relative; z-index: 2; background: var(--affibloom-brand-50); box-shadow: var(--affibloom-shadow-card); }
+.affibloom-field-row.is-dragging .affibloom-field-row__grip { cursor: grabbing; }
+.affibloom-field-row > .affibloom-field__error { margin: -4px 0 0; }
 /* Lasso's stars: five, filled to the rating. */
 .affibloom-stars {
 	--rating: 0;

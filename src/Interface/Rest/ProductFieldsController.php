@@ -129,7 +129,9 @@ final class ProductFieldsController implements Module {
 
 	/**
 	 * PUT /products/{id}/fields: the order, values and toggles (Lasso's lasso_save_field_positions). A value is cleaned
-	 * as its kind needs: several lines for long text and lists, one line otherwise.
+	 * as its kind needs: several lines for long text and lists, one line otherwise; then each line is trimmed and blank
+	 * lines go (F26 D10). A value over 1,000 characters refuses the save with 422, the words under its row
+	 * ("rows.<field>", D9).
 	 *
 	 * @param WP_REST_Request $request Request with "id" and "rows".
 	 * @phpstan-param WP_REST_Request<array{id: int, rows: list<array{field?: int, value?: string, visible?: bool, show_name?: bool}>}> $request
@@ -149,7 +151,11 @@ final class ProductFieldsController implements Module {
 			);
 		}
 
-		$fields = $this->fields->update( (int) $request['id'], $rows );
+		try {
+			$fields = $this->fields->update( (int) $request['id'], $rows );
+		} catch ( InvalidField $error ) {
+			return FieldError::from( $error );
+		}
 		if ( null === $fields ) {
 			return self::missing();
 		}

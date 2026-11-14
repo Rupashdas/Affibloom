@@ -239,7 +239,7 @@ they were, then the new sections in the order listed after G5.
 - [x] Task FL2: A new field from the Fields screen
 - [x] Task FL3: A field's Details — edit and delete
 - [x] Task FL4: A field's Links tab
-- [ ] Task FL5: The product page's field rows, corrected to Lasso's rules
+- [x] Task FL5: The product page's field rows, corrected to Lasso's rules
 
 **Activation and the upgrade routine (F37 part)** — moved here from Phase 6; URL variants V1-V5 moved to Phase 5
 
@@ -5698,11 +5698,11 @@ be dragged (Primary Rating stays first) as well as moved by the buttons; the ord
 
 **Files:** the above; `ProductFieldsController::update()`; tests F26 **AC6-AC7**, F1 AC10 rerun, `FieldValueTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: `FieldValue` and the route.**
-- [ ] **Step 3: Drag.**
-- [ ] **Step 4: Run and look** (keyboard and pointer, 375 px).
-- [ ] **Step 5: Commit** — "Clean field values and
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: `FieldValue` and the route.**
+- [x] **Step 3: Drag.**
+- [x] **Step 4: Run and look** (keyboard and pointer, 375 px).
+- [x] **Step 5: Commit** — "Clean field values and
   drag field rows, as Lasso does".
 
 ---
