@@ -14,6 +14,7 @@ use Affibloom\Domain\Product\BulkRun;
 use Affibloom\Domain\Product\BulkRunRepository;
 use Closure;
 use RuntimeException;
+use Throwable;
 
 /**
  * Bulk add (F18 section 8): up to ten links, each added as a single link would be, in the background so the editor
@@ -111,13 +112,18 @@ final class BulkAddService {
 				return;
 			}
 
+			$failed = null;
 			try {
 				$this->products->create_from_url( $link );
 			} catch ( InvalidField | RuntimeException $skipped ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Lasso skips a link it cannot add, silently.
 				unset( $skipped );
+			} catch ( Throwable $unexpected ) {
+				// Anything else must not stall the run: the link is recorded in the run and the others go on.
+				$failed = $link;
+				unset( $unexpected );
 			}
 
-			$run = $run->advanced();
+			$run = $run->advanced( $failed );
 			$this->runs->save( $run );
 
 			if ( null !== $run->next() && ( $this->clock )() >= $deadline ) {

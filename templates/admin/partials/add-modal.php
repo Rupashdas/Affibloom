@@ -23,6 +23,7 @@ $add_remaining = __( 'Remaining links: %d', 'affibloom' );
 			data-message-failed="<?php esc_attr_e( 'The link could not be added. Please try again.', 'affibloom' ); ?>"
 			data-message-running="<?php echo esc_attr( Messages::for_reason( 'bulk_running' ) ); ?>"
 			data-label-busy="<?php esc_attr_e( 'Adding…', 'affibloom' ); ?>"
+			data-label-continue="<?php esc_attr_e( 'Continue Anyway', 'affibloom' ); ?>"
 			data-title-single="<?php esc_attr_e( 'Add A New Link', 'affibloom' ); ?>"
 			data-title-bulk="<?php esc_attr_e( 'Bulk Add Links', 'affibloom' ); ?>"
 			data-intro-single="<?php esc_attr_e( 'Enter the affiliate link you would like to track.', 'affibloom' ); ?>"

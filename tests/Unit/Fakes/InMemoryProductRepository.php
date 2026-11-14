@@ -19,7 +19,15 @@ final class InMemoryProductRepository implements ProductRepository {
 
 	private int $next_id = 100;
 
+	/** Thrown by the save of the Nth new product (1-based; 0 = never): a failure the real repository can have. */
+	public ?\Throwable $failure = null;
+	public int $fail_at         = 0;
+	private int $new_saves      = 0;
+
 	public function save( Product $product ): Product {
+		if ( null === $product->id && null !== $this->failure && $this->fail_at === ++$this->new_saves ) {
+			throw $this->failure;
+		}
 		if ( null !== $product->id && null !== $this->get( $product->id ) ) {
 			// An update, as wp_update_post(): the same product, now the most recently changed (the end of the list).
 			$this->saved   = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $product->id ) );

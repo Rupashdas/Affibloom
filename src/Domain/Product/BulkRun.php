@@ -27,12 +27,14 @@ final class BulkRun {
 	 * @param int          $total      Links in the run.
 	 * @param int          $done       Links handled so far, added or skipped.
 	 * @param int          $started_at Unix time the run started.
+	 * @param list<string> $failed     Links that raised an unexpected error and were passed over, in order.
 	 */
 	private function __construct(
 		public readonly array $pending,
 		public readonly int $total,
 		public readonly int $done,
 		public readonly int $started_at,
+		public readonly array $failed = array(),
 	) {}
 
 	/**
@@ -73,15 +75,23 @@ final class BulkRun {
 
 	/**
 	 * The run after the next link has been handled.
+	 *
+	 * @param string|null $failed The link, when adding it raised an unexpected error: it is recorded and passed over.
 	 */
-	public function advanced(): self {
-		return new self( array_slice( $this->pending, 1 ), $this->total, $this->done + 1, $this->started_at );
+	public function advanced( ?string $failed = null ): self {
+		return new self(
+			array_slice( $this->pending, 1 ),
+			$this->total,
+			$this->done + 1,
+			$this->started_at,
+			null === $failed ? $this->failed : array( ...$this->failed, $failed )
+		);
 	}
 
 	/**
 	 * For storage.
 	 *
-	 * @return array{pending: list<string>, total: int, done: int, started_at: int}
+	 * @return array{pending: list<string>, total: int, done: int, started_at: int, failed: list<string>}
 	 */
 	public function to_array(): array {
 		return array(
@@ -89,6 +99,7 @@ final class BulkRun {
 			'total'      => $this->total,
 			'done'       => $this->done,
 			'started_at' => $this->started_at,
+			'failed'     => $this->failed,
 		);
 	}
 
@@ -103,6 +114,8 @@ final class BulkRun {
 			return null;
 		}
 
-		return new self( array_map( 'strval', $data['pending'] ), (int) $data['total'], (int) $data['done'], (int) $data['started_at'] );
+		$failed = isset( $data['failed'] ) && is_array( $data['failed'] ) && array_is_list( $data['failed'] ) ? array_map( 'strval', $data['failed'] ) : array();
+
+		return new self( array_map( 'strval', $data['pending'] ), (int) $data['total'], (int) $data['done'], (int) $data['started_at'], $failed );
 	}
 }

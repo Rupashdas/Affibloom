@@ -36,6 +36,21 @@ final class BulkRunTest extends TestCase {
 		self::assertFalse( $run->is_running( self::NOW ) );
 	}
 
+	public function test_a_link_that_failed_is_recorded_and_still_counts_as_handled(): void {
+		$run = BulkRun::start( array( 'a.example/1', 'a.example/2' ), self::NOW )->advanced( 'a.example/1' );
+
+		self::assertSame( array( 'a.example/1' ), $run->failed );
+		self::assertSame( 1, $run->done );
+		self::assertSame( 'a.example/2', $run->next() );
+		self::assertEquals( $run, BulkRun::from_array( $run->to_array() ) );
+	}
+
+	public function test_a_stored_run_without_a_failed_list_has_none(): void {
+		$run = BulkRun::from_array( array( 'pending' => array( 'a.example/2' ), 'total' => 2, 'done' => 1, 'started_at' => self::NOW ) );
+
+		self::assertSame( array(), $run->failed );
+	}
+
 	public function test_percent_is_rounded(): void {
 		$run = BulkRun::start( array( 'a.example/1', 'a.example/2', 'a.example/3' ), self::NOW )->advanced();
 

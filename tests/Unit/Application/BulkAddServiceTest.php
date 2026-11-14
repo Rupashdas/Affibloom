@@ -108,6 +108,23 @@ final class BulkAddServiceTest extends TestCase {
 		self::assertSame( array( 'running' => false, 'percent' => 100 ), $this->service()->progress() );
 	}
 
+	public function test_a_link_that_throws_is_recorded_and_the_run_goes_on(): void {
+		$this->service()->start( array( 'https://a.example/1', 'https://a.example/2', 'https://a.example/3', 'https://a.example/4', 'https://a.example/5' ) );
+		// The third link's save fails with an error that is neither a refused field nor a runtime error.
+		$this->products->failure = new \LogicException( 'boom' );
+		$this->products->fail_at = 3;
+
+		$this->service()->process();
+
+		self::assertSame( array( 'https://a.example/3' ), $this->runs->run->failed );
+		self::assertSame(
+			array( 'https://a.example/1', 'https://a.example/2', 'https://a.example/4', 'https://a.example/5' ),
+			array_map( static fn( Product $p ): string => $p->url->value(), $this->products->saved )
+		);
+		self::assertSame( 5, $this->runs->run->done );
+		self::assertSame( array( 'running' => false, 'percent' => 100 ), $this->service()->progress() );
+	}
+
 	public function test_a_bare_asin_line_is_added_as_an_amazon_product(): void {
 		$this->service()->start( array( 'B0C1234567' ) );
 

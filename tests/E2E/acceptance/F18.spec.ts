@@ -234,6 +234,27 @@ test.describe( 'F18 Adding links', () => {
 		await expect( dialog.getByText( 'URL is incorrect.' ) ).toBeHidden();
 	} );
 
+	test( 'a server error leaves the button reading Continue Anyway until the link is changed (Task 2X5)', async ( { page } ) => {
+		await page.route( '**/affibloom/v1/products', ( route ) =>
+			'POST' === route.request().method()
+				? route.fulfill( { status: 500, json: { code: 'affibloom_failed', message: 'The link could not be added.', data: { status: 500 } } } )
+				: route.continue()
+		);
+		const dialog = await openAdd( page );
+		await dialog.getByLabel( 'URL' ).fill( 'https://www.example.com/f18-continue' );
+		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
+
+		const button = dialog.locator( '#affibloom-add-submit' );
+		await expect( dialog.getByText( 'The link could not be added.' ) ).toBeVisible();
+		await expect( button ).toHaveText( 'Continue Anyway' );
+		await expect( button ).toHaveAttribute( 'data-continue', '1' );
+
+		// Typing a different link puts the usual button back, as in Lasso.
+		await dialog.getByLabel( 'URL' ).type( 'x' );
+		await expect( button ).toHaveText( 'Add Link' );
+		await expect( button ).not.toHaveAttribute( 'data-continue', /.*/ );
+	} );
+
 	test( 'the dialog closes with Escape, is cleared, and gives the focus back', async ( { page } ) => {
 		const dialog = await openAdd( page );
 		await dialog.getByLabel( 'URL' ).fill( 'https://www.example.com/x' );

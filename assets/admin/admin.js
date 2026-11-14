@@ -254,9 +254,21 @@
 			control().classList.add( 'is-invalid' );
 			control().setAttribute( 'aria-invalid', 'true' );
 		};
+		// After a server error Lasso's button reads "Continue Anyway" (data-continue=1) until the link is changed;
+		// here the click sends the same link again (the user's choice, 2026-11-14).
+		var setContinue = function ( on ) {
+			if ( on ) {
+				submit.setAttribute( 'data-continue', '1' );
+				label.textContent = text( 'label-continue' );
+			} else if ( submit.hasAttribute( 'data-continue' ) ) {
+				submit.removeAttribute( 'data-continue' );
+				label.textContent = idleLabel;
+			}
+		};
 		var clearError = function () {
 			error.textContent = '';
 			error.hidden = true;
+			setContinue( false );
 			[ field, lines ].forEach( function ( input ) {
 				input.classList.remove( 'is-invalid' );
 				input.removeAttribute( 'aria-invalid' );
@@ -266,6 +278,9 @@
 			control().disabled = isBusy;
 			submit.disabled = isBusy;
 			label.textContent = isBusy ? text( 'label-busy' ) : idleLabel;
+			if ( ! isBusy ) {
+				submit.removeAttribute( 'data-continue' );
+			}
 		};
 
 		var updateCount = function () {
@@ -384,6 +399,7 @@
 					var fields = failure && failure.data && failure.data.fields;
 					busy( false );
 					showError( ( fields && fields.url ) || ( failure && failure.message ) || text( 'message-failed' ) );
+					setContinue( true );
 					field.focus();
 				} );
 		};
