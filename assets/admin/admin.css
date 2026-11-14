@@ -834,6 +834,9 @@
  */
 .affibloom-columns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--affibloom-space-section); align-items: start; }
 .affibloom-columns__column { display: flex; flex-direction: column; gap: var(--affibloom-space-section); min-width: 0; }
+/* The column's gap spaces its cards: the Settings rule above (a card after a card) would double it to 56px, against 28px
+   where the stacked columns meet. */
+.affibloom-columns__column > .affibloom-card + .affibloom-card { margin-top: 0; }
 .affibloom-form-actions { display: flex; justify-content: flex-end; margin-top: var(--affibloom-space-section); }
 .affibloom-columns .affibloom-card__body--fields > .affibloom-toggle-row + .affibloom-toggle-row { margin-top: 10px; }
 .affibloom-field + .affibloom-toggle-row { margin-top: 16px; }

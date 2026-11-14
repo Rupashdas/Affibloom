@@ -27,7 +27,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 1. **Phase 2 audit done (2026-11-15, deviation 107).** The records were reconciled and the open checks run:
    the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
    and 375 px looks made, Display's clipped Button alignment fixed, and the product page's squeezed Button Text
-   (deviation 108). Not changed: Settings → General's uneven gaps at 375 px (seen, recorded in deviation 107).
+   (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
 2. **Next task: C1A** (the Product Data API card and Validate), then the rest of C1 in the phase file's order
    (C1B-C1D, C1I, C1K-C1P), then Phase 2's exit check and the user's sign-off.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
@@ -2362,7 +2362,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       sign-in; "Next up" 4). The copy holds the test data of these runs (saved views "AC9 view-…", "F1 AC10 …" fields
       and products). **Seen, not changed:** at 1280 px the product page's Button 1 row squeezed the Button Text field
       to about 55px beside the Primary Destination URL (fixed the same day, deviation 108); Settings → General's cards leave uneven gaps when the columns
-      stack at 375 px.
+      stack at 375 px (fixed the same day, deviation 109).
 
 108. **The product page's Button Text no longer squeezed (2026-11-15; the user: "Yes, fix it", after deviation 107 named
     it).** Lasso's button row is the link and the button text side by side, 8 : 4 (`url-details.php` 201, 208), in the
@@ -2374,6 +2374,15 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
     the block is wide enough: a 726px pair at 900px), the row stays side by side as Lasso's. At 1280px the words now get 279px. Both block types (Button 1 and an added
     button) checked at 1280, 900 and 375 px; no sideways scroll. No markup or script changed.
     - Checks: F28 6/6, F29 2/2 and F1 27/27 passed (quiet runs); no PHP changed, so lint, PHPStan and the unit tests stand as in deviation 107.
+
+109. **Even gaps between Settings cards (2026-11-15; the user: "also fix the uneven card gaps at 375px").** Measured: on
+    General and Amazon, cards in one column were 56px apart, but 28px where the stacked columns meet. Cause: Task 9's
+    `.affibloom-settings .affibloom-card + .affibloom-card { margin-top: 28px }` (written before the two columns of
+    7c) adds to the column's own 28px flex gap. So it was not only a phone fault: inside each column the gap was 56px at
+    every width. **Change (`admin.css`):** `.affibloom-columns__column > .affibloom-card + .affibloom-card` has no top
+    margin, so the column's gap (`--affibloom-space-section`) alone spaces its cards. Measured after: every gap 28px on
+    General and Amazon at 375 and 1280 px; Display (no columns) keeps its rule. Looked at 375 and 1280 px.
+    - Checks: F17 5/5, F16 11 passed and 1 skipped, F9 14 passed and 1 skipped (quiet runs; the skips are Phase 3); no PHP changed.
 
 ## Open decisions (ask the user; record the answer here)
 
@@ -2405,6 +2414,10 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-15 (Claude Code, the Settings card gaps, at the user's word):** cards in a Settings column were 56px apart
+  (an old card-after-card margin on top of the column's gap), 28px where the columns meet; now 28px everywhere on
+  General and Amazon. Deviation 109. F17 5/5, F16 11 passed and 1 skipped, F9 14 passed and 1 skipped (quiet runs; the skips are Phase 3); no PHP changed.
 
 - **2026-11-15 (Claude Code, the product page's Button Text, at the user's word):** the link and the button text stack
   when the button block is too narrow for both (a container query on the buttons list), so Button Text is no longer
