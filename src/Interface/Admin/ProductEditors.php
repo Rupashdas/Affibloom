@@ -48,19 +48,25 @@ final class ProductEditors {
 		foreach ( array( 'toolbar2', 'toolbar3', 'toolbar4' ) as $row ) {
 			$init[ $row ] = '';
 		}
-		// Lasso's price editor is one line; TinyMCE's own minimum (100px) and WordPress's growing editor would make it more.
-		if ( 'affibloom_price' === $editor_id ) {
-			$init['min_height']       = 40;
-			$init['height']           = 40;
-			$init['wp_autoresize_on'] = false;
-		}
-		// Lasso's Quill description says "Enter a description" while empty. TinyMCE 4.9 has no placeholder of its own, so the
-		// words travel as a setting and a style inside the editor draws them; product.js toggles the class and the attribute.
+		// Lasso's Quill editors say "Enter a description" and "$99.99" while empty. TinyMCE 4.9 has no placeholder of its own,
+		// so the words travel as a setting and a style inside the editor draws them; product.js toggles the class and the
+		// attribute.
+		$style = 'body.affibloom-empty::before { content: attr(data-placeholder); color: #6b7280; position: absolute; pointer-events: none; }';
 		if ( 'affibloom_description' === $editor_id ) {
-			$init['placeholder']   = __( 'Enter a description', 'affibloom' );
-			$init['content_style'] = ( isset( $init['content_style'] ) && is_string( $init['content_style'] ) ? $init['content_style'] . ' ' : '' )
-				. 'body.affibloom-empty::before { content: attr(data-placeholder); color: #6b7280; position: absolute; pointer-events: none; }';
+			$init['placeholder'] = __( 'Enter a description', 'affibloom' );
 		}
+		// Lasso's price editor is one line the size of its other inputs. TinyMCE's own minimum (100px) and WordPress's growing
+		// editor would make it taller, and the editor's stylesheets (WordPress's and the theme's) give the body a margin and a
+		// larger font that overflow one line; the style matches .affibloom-input (36px inside its 1px border, 14px/20px text).
+		// Single quotes only: WordPress prints each setting into the page's script as key:"value" without escaping.
+		if ( 'affibloom_price' === $editor_id ) {
+			$init['min_height']       = 36;
+			$init['height']           = 36;
+			$init['wp_autoresize_on'] = false;
+			$init['placeholder']      = '$99.99';
+			$style                   .= " html body#tinymce { margin: 0; padding: 8px 12px; color: #14213d; font: 400 14px/20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; } html body#tinymce > p { margin: 0; }";
+		}
+		$init['content_style'] = ( isset( $init['content_style'] ) && is_string( $init['content_style'] ) ? $init['content_style'] . ' ' : '' ) . $style;
 
 		return $init;
 	}

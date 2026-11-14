@@ -104,7 +104,8 @@ $editor = static fn( int $height ): array => array(
 		</div>
 	</div>
 
-	<div class="affibloom-product__pair affibloom-product__pair--even">
+	<?php // Lasso's Badge Text and Price share a label row and an input row, so their boxes line up when Price's row wraps. ?>
+	<div class="affibloom-product__pair affibloom-product__pair--even<?php echo $is_amazon ? '' : ' affibloom-product__pair--boxes-aligned'; ?>">
 		<?php
 		$this->render(
 			'admin/partials/field-text',
@@ -119,7 +120,7 @@ $editor = static fn( int $height ): array => array(
 			)
 		);
 		?>
-		<div class="affibloom-field affibloom-price">
+		<div class="affibloom-field affibloom-price<?php echo $is_amazon ? '' : ' affibloom-price--rich'; ?>">
 			<div class="affibloom-field__head">
 				<label class="affibloom-label" for="<?php echo $is_amazon ? 'affibloom-price' : 'affibloom_price'; ?>"><?php esc_html_e( 'Price', 'affibloom' ); ?></label>
 				<?php

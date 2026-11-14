@@ -70,10 +70,10 @@
 	}
 
 	/**
-	 * Lasso's description box says "Enter a description" while it is empty (Task 2X1). TinyMCE 4.9 has no placeholder, so
-	 * the page's editor setting `placeholder` (ProductEditors) is copied to the editor body as `data-placeholder`, and the
-	 * class `affibloom-empty` is on the body while the editor holds nothing; the style that draws the words is the
-	 * editor's own (also ProductEditors), so they never become content.
+	 * Lasso's description and price boxes say "Enter a description" and "$99.99" while empty (Task 2X1). TinyMCE 4.9 has
+	 * no placeholder, so each editor's setting `placeholder` (ProductEditors) is copied to the editor body as
+	 * `data-placeholder`, and the class `affibloom-empty` is on the body while the editor holds nothing; the style that
+	 * draws the words is the editor's own (also ProductEditors), so they never become content.
 	 *
 	 * @param {Object} editor The TinyMCE editor.
 	 */
@@ -92,19 +92,44 @@
 		}
 	}
 
+	/**
+	 * The page's editors get the inputs' focus border. Their text is inside an iframe, and a focused iframe does not
+	 * count for :focus-within on its parents, so the editor's own focus and blur set a class on its .affibloom-editor box.
+	 *
+	 * @param {Object} editor The TinyMCE editor.
+	 */
+	function focusBorder( editor ) {
+		var box = editor.getElement().closest( '.affibloom-editor' );
+		if ( ! box ) {
+			return;
+		}
+		editor.on( 'focus', function () {
+			box.classList.add( 'affibloom-editor--focus' );
+		} );
+		editor.on( 'blur', function () {
+			box.classList.remove( 'affibloom-editor--focus' );
+		} );
+	}
+
+	/**
+	 * One of the page's editors: its placeholder, if it has one, and its focus border.
+	 *
+	 * @param {Object} editor The TinyMCE editor.
+	 */
+	function setUpEditor( editor ) {
+		if ( editor.getParam( 'placeholder' ) ) {
+			placeholder( editor );
+		}
+		focusBorder( editor );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var kit = document.querySelector( '[data-share-kit]' );
 		if ( window.tinymce ) {
 			// An editor may already exist when this runs, or arrive after it.
-			window.tinymce.editors.forEach( function ( editor ) {
-				if ( 'affibloom_description' === editor.id ) {
-					placeholder( editor );
-				}
-			} );
+			window.tinymce.editors.forEach( setUpEditor );
 			window.tinymce.on( 'AddEditor', function ( event ) {
-				if ( 'affibloom_description' === event.editor.id ) {
-					placeholder( event.editor );
-				}
+				setUpEditor( event.editor );
 			} );
 		}
 		if ( kit ) {

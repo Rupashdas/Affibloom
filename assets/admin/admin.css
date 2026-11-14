@@ -1779,6 +1779,55 @@
 .affibloom-admin .affibloom-editor .wp-editor-container { border: 0; }
 .affibloom-admin .affibloom-editor .mce-panel { border: 0; background: var(--affibloom-white); }
 .affibloom-admin .affibloom-editor .mce-toolbar-grp { border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-editor--focus { border-color: var(--affibloom-brand-600); } /* product.js: the editor has focus */
+/* Lasso's price row (url-details.php 351-401): the format buttons sit beside "Price ?" in the label row, the Show Price
+ * switch on the right, and the box below is one line like the inputs. WordPress's editor wrappers and the head step aside
+ * (display: contents), so the label, help, toolbar, switch and box are items of the field's one wrapping row; when the
+ * column is narrow the switch wraps under the toolbar, as Lasso's flex-wrap row does. The DOM is untouched, so TinyMCE's
+ * buttons keep their events. */
+.affibloom-price--rich { flex-flow: row wrap; align-items: center; column-gap: 4px; }
+.affibloom-price--rich .affibloom-field__head,
+.affibloom-price--rich .affibloom-editor,
+.affibloom-price--rich .wp-editor-wrap,
+.affibloom-price--rich .wp-editor-container,
+.affibloom-price--rich .mce-tinymce,
+.affibloom-price--rich .mce-tinymce > .mce-container-body { display: contents; }
+.affibloom-price--rich .mce-top-part { order: 1; margin: -4px 0 -4px 2px; } /* 32px buttons in the 24px label row */
+.affibloom-price--rich .mce-top-part::before { display: none; }
+.affibloom-admin .affibloom-price--rich .mce-toolbar-grp { padding: 0; border: 0; background: transparent; }
+.affibloom-admin .affibloom-price--rich .mce-toolbar .mce-btn-group { padding: 0; }
+.affibloom-admin .affibloom-price--rich .mce-toolbar .mce-btn-group .mce-btn { margin: 0; }
+.affibloom-admin .affibloom-price--rich .mce-toolbar .mce-btn button { padding: 2px 1px; }
+.affibloom-admin .affibloom-price--rich .mce-toolbar .mce-ico { width: 16px; height: 16px; font-size: 16px; line-height: 16px; }
+.affibloom-admin .affibloom-price--rich .mce-toolbar .mce-colorbutton .mce-open { padding-left: 2px; }
+.affibloom-price--rich .affibloom-price__show { order: 2; }
+.affibloom-price--rich .affibloom-price__show .affibloom-toggle-row { gap: 4px; }
+/* Lasso's switch here is only the "?" and the toggle, which keeps the row on one line; the words stay for screen readers
+ * (wp-admin's .screen-reader-text rules). */
+.affibloom-price--rich .affibloom-toggle-row__label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	border: 0;
+	white-space: nowrap;
+}
+.affibloom-price--rich .mce-edit-area {
+	order: 3;
+	flex: 1 0 100%;
+	box-sizing: border-box;
+	overflow: hidden;
+	border: 1px solid var(--affibloom-control-line) !important; /* TinyMCE's inline border-width: 1px 0 0 */
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+}
+.affibloom-price--rich .affibloom-editor--focus .mce-edit-area { border-color: var(--affibloom-brand-600) !important; }
+.affibloom-price--rich .mce-edit-area iframe { display: block; }
+/* The price row may wrap to two lines; Badge Text's box then sits on the bottom line with Price's, as Lasso's rows do. */
+.affibloom-product__pair--boxes-aligned > .affibloom-field:not(.affibloom-price) { justify-content: space-between; }
 .affibloom-product__switches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
 
 /* 7j. Custom fields on the product page (Task 14C): Lasso's dashed box holding the rows, each row a white sub-card
