@@ -2061,8 +2061,11 @@ body.affibloom-has-modal { overflow: hidden; }
 .affibloom-row__link::after { content: ""; position: absolute; inset: 0; }
 .affibloom-row__link:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
 /* A group's form: the card itself keeps a readable measure (760px of fields plus the card's padding), so the fields
- * fill it with no empty white space beside them. */
-#affibloom-group-form { max-width: calc(760px + 2 * var(--affibloom-space-card)); }
+ * fill it with no empty white space beside them. It sits in the middle of the page, and Delete This Group below it
+ * lines up with its left edge, as does "Add a New Group" in the band above (band and body share the gutters). */
+#affibloom-group-form,
+#affibloom-group-form + .affibloom-group__footer,
+.affibloom-band__inner--group-form { max-width: calc(760px + 2 * var(--affibloom-space-card)); margin-right: auto; margin-left: auto; }
 .affibloom-group__fields { display: grid; gap: 20px; padding-top: 28px; padding-bottom: 28px; }
 .affibloom-group .affibloom-card__foot { justify-content: flex-end; align-items: center; }
 .affibloom-group__footer { display: flex; align-items: center; justify-content: flex-start; padding: 20px 4px 0; }
