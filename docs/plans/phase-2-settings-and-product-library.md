@@ -205,7 +205,7 @@ they were, then the new sections in the order listed after G5.
 **Corrections from the code audits (2026-11-14) and the user's decisions**
 
 - [x] Task 2X0: PHP 8.3 and WordPress 7.1.4 everywhere (decision F7)
-- [ ] Task 2X1: Product page — the gaps a done task left
+- [x] Task 2X1: Product page — the gaps a done task left
 - [ ] Task 2X2: The F1 AC2 test checks everything it claims
 - [x] Task 2X3: Display colours accept every CSS colour Lasso accepts
 - [ ] Task 2X4: A kept redirect that ends at Amazon is an Amazon product
@@ -5028,7 +5028,7 @@ tests `tests/E2E/acceptance/F1.spec.ts` (new cases for the four behaviours), uni
 - [x] **Step 1: Failing tests** (placeholder visible; Refresh reason in the accessible name/description; Remove dialog;
   a field save answered 500 by a route stub shows an error).
 - [x] **Step 2: Build the four fixes.**
-- [ ] **Step 3: Run and look** (1280 and 375 px, keyboard, screen reader names). *Open: the browser pane was signed out and Claude does not sign in; the user runs the F1 and F29 specs and looks (deviation 91).*
+- [x] **Step 3: Run and look** (1280 and 375 px, keyboard, screen reader names). *Done 2026-11-14: F1 and F29 specs green (the user's runs), looked at in Brave at desktop width; the 375 px look could not be made (the extension's window resize did not change the viewport), so it is still owed (deviation 91).*
 - [x] **Step 4: Commit** — "Finish the product page's description, Refresh, button and field details".
 
 ---

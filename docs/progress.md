@@ -1969,7 +1969,7 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       link, which has no Remove; fixed to Button 2 and awaiting a rerun.
     - **Rerun:** AC2, AC14 and AC12 passed (the trace-file errors were environmental). AC10's dialog half passed; its
       failure stub let PUT and DELETE through, because `wp.apiFetch` sends them as POST with `X-HTTP-Method-Override`;
-      the stub now reads that header (a test fault, not a code fault). Awaiting one more run of AC10.
+      the stub now reads that header (a test fault, not a code fault). AC10 then passed (the user's run): **Task 2X1 is done.** The 375 px look is still owed (a resize through the Brave extension did not change the viewport).
     - **Commit mix-up:** a concurrent Task 2X0 session committed part of this work in `7c73290` (`product.js`,
       `ProductEditors.php`, `F1.spec.ts`, `F29.spec.ts`, `ProductEditorsTest.php`), already pushed; history was not
       rewritten. The rest is in the 2X1 commit. `assets/admin/product-save.js` also carries an uncommitted change that is
@@ -2039,9 +2039,9 @@ deviation 89). The items below are the Phase 0 history.
   and keywords, as Lasso's colour fields do (deviation 92). Lint, PHPStan, 451 unit tests green; saved through the real
   service by WP-CLI. The user's signed-in F16 run passed (10 passed, 1 skipped): Task 2X3 done.
   Next: 2X4 (2X2 is tests only and also open).
-- **2026-11-14 (Claude Code, Task 2X1):** the four product-page gaps built and checked by lint, PHPStan, 432 unit tests and
-  a WP-CLI render (deviation 91). Waiting for the user's signed-in run of F1 (AC5, AC7, AC10) and F29 and a look at the
-  page; Step 3 of the task stays open until then. Next: 2X2.
+- **2026-11-14 (Claude Code, Task 2X1):** the four product-page gaps built and checked by lint, PHPStan, 432 unit tests, a
+  WP-CLI render, a look in Brave and the user's F1 and F29 runs, all green after two test-stub fixes (deviation 91). Done;
+  only the 375 px look is owed. Next: 2X2.
 - **2026-11-14 (Claude Code, Task 2X0):** PHP 8.3 and WordPress 7.1.4 made the minimums everywhere (deviation 90); lint, PHPStan and 431 unit tests green; re-activated on Local (PHP 8.3.36). Committed and pushed.
 - **2026-11-14 (Claude Code, full planning pass):** the user asked for all planning and documentation of Phases 1-9 to
   be finished before any more building (deviation 89). Lasso's surface inventoried and swept in 21 subsystem sweeps;
