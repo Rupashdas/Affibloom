@@ -32,7 +32,7 @@ $soon_tabs   = array(
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
 
-	<div class="affibloom-page affibloom-page--wide affibloom-product-page">
+	<div class="affibloom-page affibloom-product-page">
 		<div class="affibloom-band">
 			<div class="affibloom-band__inner">
 				<h1 class="affibloom-page__title affibloom-product__title" id="affibloom-product-title">

@@ -44,7 +44,7 @@
 	--affibloom-shadow-toast: 0 12px 32px rgba(16, 24, 40, 0.25);
 	--affibloom-shadow-segment: 0 1px 3px rgba(16, 24, 40, 0.12);
 	--affibloom-ease: 150ms ease;
-	--affibloom-content-width: 1080px;
+	--affibloom-content-width: 1320px;
 	/*
 	 * Space (the user, 2026-11-13: "make all admin pages spacious"). Lasso's own screens use 24px inside a row and
 	 * 48px around a section; these give every screen that room: the page's side gutters, the gap between cards and
@@ -240,13 +240,6 @@
 }
 .affibloom-list-error .affibloom-button { margin-top: 12px; }
 .affibloom-list .affibloom-card:focus { outline: none; }
-
-/*
- * A wide page: the Dashboard's eight columns get 1320px, Lasso's own container width on large screens (Bootstrap's
- * .container at 1400px and up). The band and the body read the same token, so the title stays over the table.
- * Settings keep 1080px, where a wider row would carry a switch far from its label.
- */
-.affibloom-page--wide { --affibloom-content-width: 1320px; }
 
 /* A band with something on its right, as the Dashboard's search beside its title (Lasso's title row). */
 .affibloom-band__inner--split {

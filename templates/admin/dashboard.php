@@ -23,8 +23,7 @@ $placeholder = sprintf(
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header', array( 'current' => 'dashboard' ) ); ?>
 
-	<?php // 1320px, Lasso's container width on large screens (the user, 2026-11-13); Settings keep 1080px. ?>
-	<div class="affibloom-page affibloom-page--wide">
+	<div class="affibloom-page">
 		<div class="affibloom-band">
 			<div class="affibloom-band__inner affibloom-band__inner--split">
 				<div class="affibloom-band__text">
