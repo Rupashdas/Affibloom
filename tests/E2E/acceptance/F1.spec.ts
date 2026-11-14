@@ -994,7 +994,9 @@ test.describe( 'F1 Product library', () => {
 			dialog.getByRole( 'button', { name: 'Add Primary Rating' } ).click(),
 		] );
 		await page.route( /affibloom(\/|%2F)v1(\/|%2F)products(\/|%2F)\d+(\/|%2F)fields/, ( route ) => {
-			if ( 'POST' === route.request().method() ) {
+			// wp.apiFetch sends PUT and DELETE as a POST carrying X-HTTP-Method-Override: the real method is in that header.
+			const request = route.request();
+			if ( 'POST' === ( request.headers()[ 'x-http-method-override' ] ?? request.method() ) ) {
 				return route.continue();
 			}
 			return route.fulfill( {

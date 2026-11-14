@@ -1967,6 +1967,9 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       AC2, AC14 and AC12 ended with Playwright's own `ENOENT` on its trace files in `test-results` (no assertion failed;
       to be rerun alone). The new AC10 case timed out on a fault in the test: it clicked "Remove Button 1", the main
       link, which has no Remove; fixed to Button 2 and awaiting a rerun.
+    - **Rerun:** AC2, AC14 and AC12 passed (the trace-file errors were environmental). AC10's dialog half passed; its
+      failure stub let PUT and DELETE through, because `wp.apiFetch` sends them as POST with `X-HTTP-Method-Override`;
+      the stub now reads that header (a test fault, not a code fault). Awaiting one more run of AC10.
     - **Commit mix-up:** a concurrent Task 2X0 session committed part of this work in `7c73290` (`product.js`,
       `ProductEditors.php`, `F1.spec.ts`, `F29.spec.ts`, `ProductEditorsTest.php`), already pushed; history was not
       rewritten. The rest is in the 2X1 commit. `assets/admin/product-save.js` also carries an uncommitted change that is
