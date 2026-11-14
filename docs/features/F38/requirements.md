@@ -2,7 +2,7 @@
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's admin shell — navigation, menu, footer, notices,
 education boxes, help, the onboarding wizard, the product tour and the command palette (new feature F38; analysis in
-`analysis.md`; tasks in the phase files in `affibloom-docs/plans/` (task index in `00-overview.md`); ON10 dropped as a duplicate of F9 9E). Gate 4 for Tasks ON1-ON10: given by the user 2026-11-14.
+`analysis.md`; tasks in the phase files in `docs/plans/` (task index in `00-overview.md`); ON10 dropped as a duplicate of F9 9E). Gate 4 for Tasks ON1-ON10: given by the user 2026-11-14.
 
 The shell belongs to no single screen. Screens fill it: each screen's task adds its own nav tab and menu entry
 (F23 G1 already plans Groups'), and each feature writes its own notices on the framework built here.

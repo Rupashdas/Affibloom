@@ -111,7 +111,7 @@ Nothing new. `POST /affibloom/v1/products` and the modal are unchanged; the stor
   before an Amazon store).
 - Protected attribution links are stored untouched, so Amazon's own attribution is not broken.
 
-## 6. Tasks (gate 3, `affibloom-docs/plans/phase-2-settings-and-product-library.md`)
+## 6. Tasks (gate 3, `docs/plans/phase-2-settings-and-product-library.md`)
 
 | Task | Entry point | Builds |
 |---|---|---|

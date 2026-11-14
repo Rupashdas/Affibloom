@@ -3,7 +3,7 @@
 Status: gates 1-2 rewritten 2026-11-14 from a sweep of Lasso 369's editor subsystem (the Gutenberg block, the display
 modals, the Classic editor, Elementor, Rank Math, AMP and the MCP routes). Replaces the thin Task 6 version
 (approved 2026-11-12, `docs/decisions/task-6-decisions.md`); AC1-AC2 keep their numbers and meaning. Gate 4 for
-Tasks 23A-23G, 24A-24E, ED1-ED6, MCP1: waiting. Analysis: `analysis.md`. Tasks: the phase files in `affibloom-docs/plans/` (task index in `00-overview.md`).
+Tasks 23A-23G, 24A-24E, ED1-ED6, MCP1: waiting. Analysis: `analysis.md`. Tasks: the phase files in `docs/plans/` (task index in `00-overview.md`).
 
 ## 1. User stories and acceptance criteria
 

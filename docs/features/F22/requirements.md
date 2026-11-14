@@ -1,7 +1,7 @@
 # F22 Opportunities: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Opportunities (area 3 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks O1-O10: given by the user 2026-11-14. The monetize action (O10) waits
+`docs/plans/archive/dashboard-completion-plan.md`). Gate 4 for Tasks O1-O10: given by the user 2026-11-14. The monetize action (O10) waits
 for the user's answer to N1.
 
 ## 1. User stories and acceptance criteria

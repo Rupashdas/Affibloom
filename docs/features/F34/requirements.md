@@ -2,7 +2,7 @@
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369 (every path that rewrites stored content, Post Content
 History, the content side of Revert, Fix Overwritten Links, `class-fix.php`, `pages/fix/class-hook.php` and
-`class-lasso-db-script.php`; `affibloom-docs/plans/archive/dashboard-completion-plan.md`, "Content rewriting/history/repair").
+`class-lasso-db-script.php`; `docs/plans/archive/dashboard-completion-plan.md`, "Content rewriting/history/repair").
 **Decided 2026-11-14 (the user): A1, no legacy block conversion; A2, the `data-lasso-*` stamps stay. Tasks H1-H4 are dropped: this feature has no tasks and builds nothing.** Why: History, Revert and the clean-up exist only to list and undo content changes, and Affibloom makes none (the standing rule); with no conversion (ADR-003 revised) and no stamp removal there is nothing to list or revert. The requirements below are kept as the record of what Lasso does.
 
 The standing rule is the user's: **nothing Affibloom builds ever edits post content** (deviation 52). This feature is

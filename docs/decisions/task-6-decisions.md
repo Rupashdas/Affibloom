@@ -111,7 +111,7 @@ change.
   keys still stored by Lasso return 403 "deprecated". Amazon's Associates Program Policies: the license "does not
   include … any use of data mining, robots, or similar data gathering and extraction tools"; product content is obtained
   "by making calls to Creators API or PA API"; API images may be kept only as links, "for up to 24 hours", and other API
-  content refreshed within 24 hours. (Full write-up: `affibloom-docs/reports/2026-11-12-lasso-amazon-product-data.md`.)
+  content refreshed within 24 hours. (Full write-up: `docs/reports/2026-11-12-lasso-amazon-product-data.md`.)
 - **Decision.** No page reading, scraping service or Lasso cloud. Instead:
   1. **Existing products** keep the titles and images Lasso already fetched: the migration copies them (Task 26, ADR-2).
   2. **New Amazon products** get editor help with no request to Amazon: a starting name from the link's slug

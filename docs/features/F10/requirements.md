@@ -110,7 +110,7 @@ each query reads; `classes/class-lasso-cron.php` 120-200 (the cron list), 5833-5
 `get_option` / `Helper::update_option`, `*_user_meta`, `*_term_meta`, `*_transient`, `MetaData::update_metadata`,
 `lasso_delete`, and each settings key of table F.
 
-Affibloom, read: `affibloom-docs/plans/00-overview.md` (decisions, "API and data contract"), Phase 5 (Tasks 25, 26,
+Affibloom, read: `docs/plans/00-overview.md` (decisions, "API and data contract"), Phase 5 (Tasks 25, 26,
 28, 29), `progress.md` deviations 11, 16, 18, 24, 87, `docs/decisions/ADR-001…003.md`, every
 `docs/features/*/analysis.md` "Data" section, `src/Application/Migration/*`, `src/Domain/Migration/*`,
 `src/Infrastructure/Lasso/WpLassoSource.php`, `src/Infrastructure/WordPress/*` (stored keys), `src/Domain/Product/Product.php`,

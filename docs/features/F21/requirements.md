@@ -1,7 +1,7 @@
 # F21 Content link index and render-time link attributes: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's link index (area 1 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`; the where-used half is F12's "Locations" sections). Gate 4 for
+`docs/plans/archive/dashboard-completion-plan.md`; the where-used half is F12's "Locations" sections). Gate 4 for
 Tasks 35A-35J: waiting. These tasks replace Phase 7's Task 35.
 
 ## 1. User stories and acceptance criteria

@@ -1,7 +1,7 @@
 # F25 Comparison tables: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Tables (area 8 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`; the user's decision 2026-11-13: in scope). Gate 4 for Tasks
+`docs/plans/archive/dashboard-completion-plan.md`; the user's decision 2026-11-13: in scope). Gate 4 for Tasks
 T1-T17: waiting.
 
 ## 1. User stories and acceptance criteria

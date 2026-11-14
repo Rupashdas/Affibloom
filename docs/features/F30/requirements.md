@@ -74,8 +74,8 @@ there).
 
 Affibloom documents checked against the source: `docs/features/F16/{requirements,analysis}.md`, `src/Domain/Display/`,
 `docs/features/F23/requirements.md` (R24, D5, D12, section 5) and `analysis.md`, the "From the Groups sweep" note in
-`affibloom-docs/plans/phase-3-product-box-rendering.md`, `affibloom-docs/reports/2026-11-13-lasso-full-scope-audit.md`
-(Findings 1, 5, 7), `affibloom-docs/reference/feature-plan.md` (withdrawn exclusions).
+`docs/plans/phase-3-product-box-rendering.md`, `docs/reports/2026-11-13-lasso-full-scope-audit.md`
+(Findings 1, 5, 7), `docs/reference/feature-plan.md` (withdrawn exclusions).
 
 **This copy, 2026-11-14:** no post or page uses Grid, List, Gallery, Button, Image, SiteStripe or AI Text: 35 posts
 hold about 251 `[lasso]` displays, all Single except 2 Tables in one draft (no `category`, `categories`, `prompt`,

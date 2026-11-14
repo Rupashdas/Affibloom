@@ -1,7 +1,7 @@
 # F26 Fields: requirements
 
 Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369's Fields (area 9 of
-`affibloom-docs/plans/archive/dashboard-completion-plan.md`). The product page's half was built in Task 14C (F1, deviation
+`docs/plans/archive/dashboard-completion-plan.md`). The product page's half was built in Task 14C (F1, deviation
 68); this document covers Lasso's whole field model, the Fields screens, and the corrections 14C's half needs.
 Gate 4 for Tasks FL1-FL5: given by the user 2026-11-14.
 
