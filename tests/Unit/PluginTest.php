@@ -28,17 +28,20 @@ final class PluginTest extends TestCase {
 	/**
 	 * The product page is a submenu page, so WordPress checks the capability and the Dashboard stays highlighted; it
 	 * is taken out of the menu after admin_menu, as Lasso's link details page is never listed. Its guard runs on the
-	 * page's load hook, before any output, so a missing product can still be redirected.
+	 * page's load hook, before any output, so a missing product can still be redirected. A group's page (Task G1) is
+	 * handled the same way; the Groups list is listed.
 	 */
 	public function test_the_product_page_is_registered_hidden_and_guarded(): void {
 		Functions\when( '__' )->returnArg();
 		Functions\when( 'add_menu_page' )->justReturn( 'toplevel_page_affibloom' );
+		// Dashboard, Product, Groups, Group, Settings.
 		Functions\expect( 'add_submenu_page' )
-			->times( 3 )
+			->times( 5 )
 			->andReturnUsing(
 				static fn( string $parent, string $title, string $menu, string $cap, string $slug ): string => 'affibloom_page_' . $slug
 			);
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-product' );
+		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-group' );
 		// Brain Monkey records hooks without running them: run these two callbacks as WordPress would.
 		$run = static function ( callable $callback ): void {
 			$callback();
@@ -49,5 +52,6 @@ final class PluginTest extends TestCase {
 		Plugin::boot( '/plugins/affibloom/affibloom.php' );
 
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-product', 'Affibloom\Interface\Admin\ProductScreen->guard()' ) );
+		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-group', 'Affibloom\Interface\Admin\GroupScreen->guard()' ) );
 	}
 }

@@ -548,11 +548,17 @@
 			dialog.setAttribute( 'aria-describedby', repointing ? 'affibloom-repoint-text' : 'affibloom-save-text' );
 		},
 		/**
-		 * @param {string} text The line under the bar.
+		 * @param {string} text  The line under the bar.
+		 * @param {string} title The dialog's name when it is not "Updating Your Site" (Lasso's "Updating Group").
 		 */
-		open: function ( text ) {
+		open: function ( text, title ) {
 			var modal = saveDialog.modal();
 			var bar = modal.querySelector( '[data-save-bar]' );
+			var heading = modal.querySelector( '#affibloom-save-title' );
+			if ( ! heading.dataset.defaultTitle ) {
+				heading.dataset.defaultTitle = heading.textContent;
+			}
+			heading.textContent = title || heading.dataset.defaultTitle;
 			saveDialog.panel( false );
 			modal.querySelector( '[data-save-text]' ).textContent = text;
 			bar.style.width = '0';

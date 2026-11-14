@@ -24,11 +24,15 @@ final class AdminMenu implements Module {
 	 * @param DashboardScreen $dashboard The Dashboard screen.
 	 * @param ProductScreen   $product   The product page (Task 14A).
 	 * @param SettingsScreen  $settings  The Settings screen.
+	 * @param GroupsScreen    $groups    The Groups list (Task G1).
+	 * @param GroupScreen     $group     One group, or a new one (Task G1).
 	 */
 	public function __construct(
 		private DashboardScreen $dashboard,
 		private ProductScreen $product,
 		private SettingsScreen $settings,
+		private GroupsScreen $groups,
+		private GroupScreen $group,
 	) {}
 
 	/**
@@ -73,6 +77,27 @@ final class AdminMenu implements Module {
 		if ( false !== $product_hook ) {
 			add_action( 'load-' . $product_hook, array( $this->product, 'guard' ) );
 		}
+		// Lasso's nav order: Dashboard, then Groups (F23 D9; Opportunities and Tables come with their areas).
+		add_submenu_page(
+			self::SLUG,
+			__( 'Groups', 'affibloom' ),
+			__( 'Groups', 'affibloom' ),
+			Capabilities::PRODUCTS,
+			GroupsScreen::SLUG,
+			array( $this->groups, 'render' )
+		);
+		// One group's page, like the product page: registered for the capability check and the guard, listed nowhere.
+		$group_hook = add_submenu_page(
+			self::SLUG,
+			__( 'Group', 'affibloom' ),
+			__( 'Group', 'affibloom' ),
+			Capabilities::PRODUCTS,
+			GroupScreen::SLUG,
+			array( $this->group, 'render' )
+		);
+		if ( false !== $group_hook ) {
+			add_action( 'load-' . $group_hook, array( $this->group, 'guard' ) );
+		}
 		add_submenu_page(
 			self::SLUG,
 			__( 'Settings', 'affibloom' ),
@@ -84,10 +109,11 @@ final class AdminMenu implements Module {
 	}
 
 	/**
-	 * The product page is reached from the Dashboard, never from the menu, as Lasso's link details page. Removed
-	 * after admin_menu, so the page stays registered (reachable, capability-checked) but is not listed.
+	 * The product page and a group's page are reached from their lists, never from the menu, as Lasso's link details
+	 * page. Removed after admin_menu, so the pages stay registered (reachable, capability-checked) but are not listed.
 	 */
 	public function hide_product_page(): void {
 		remove_submenu_page( self::SLUG, ProductScreen::SLUG );
+		remove_submenu_page( self::SLUG, GroupScreen::SLUG );
 	}
 }

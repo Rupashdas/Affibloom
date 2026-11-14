@@ -38,6 +38,8 @@ final class Notice {
 			'repointed'        => __( 'Success! Locations now show this link.', 'affibloom' ),
 			// On the Dashboard after Delete This Link (Task 17A, F1 D37); Lasso's redirect says nothing.
 			'deleted'          => __( 'Product deleted.', 'affibloom' ),
+			// After a new group is saved, on its Details tab (Task G1, F23 D11): U6's plain wording for Lasso's toast.
+			'group-saved'      => __( 'Group saved.', 'affibloom' ),
 			// The one-time Lasso import (the user, 2026-11-13); the counts ride along in the query.
 			'lasso-imported'   => $this->imported(),
 			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),

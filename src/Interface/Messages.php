@@ -44,6 +44,10 @@ final class Messages {
 			'invalid_name' => __( 'Give the field a title of 1 to 80 characters.', 'affibloom' ),
 			'invalid_type' => __( 'Choose a field type.', 'affibloom' ),
 			'not_found'    => __( 'That field does not exist.', 'affibloom' ),
+			// Groups (Task G1): Lasso's own "Name is required." (settings.js 3100-3145), and a sentence for the name
+			// WordPress refuses, where Lasso shows its generic failure bar (F23 D3).
+			'group_name_required' => __( 'Name is required.', 'affibloom' ),
+			'group_name_taken'    => __( 'A group with this name already exists.', 'affibloom' ),
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}

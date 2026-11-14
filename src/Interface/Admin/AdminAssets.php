@@ -53,6 +53,11 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 		}
 
+		// The Groups list in place, and the new-group form (Task G1). The hook suffix of both pages holds "affibloom-group".
+		if ( str_contains( $hook_suffix, GroupScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+		}
+
 		// Each settings tab's own controls.
 		$tab     = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to load only.
 		$scripts = array(

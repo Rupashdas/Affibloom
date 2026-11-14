@@ -1982,6 +1982,38 @@
 body.affibloom-has-modal { overflow: hidden; }
 
 /* 10. Smaller screens (wp-admin breakpoints) */
+/*
+ * 10. Groups (F23, Task G1; docs/ui/design-system.md, "Groups list"). The list is the Dashboard's card and table with
+ * three columns (Name, Description, Links) and a footer with the range and the page links; the whole row opens the
+ * group through the name's link stretched over it. The band's right side holds the search and Add New Group, a white
+ * button on the gradient as the header's is.
+ */
+.affibloom-band__actions { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; }
+.affibloom-admin .affibloom-button--on-band,
+.affibloom-admin .affibloom-button--on-band:focus {
+	height: 42px;
+	border-color: transparent;
+	background: var(--affibloom-white);
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+	color: var(--affibloom-navy-900);
+}
+.affibloom-admin .affibloom-button--on-band:hover { background: var(--affibloom-brand-50); color: var(--affibloom-navy-900); }
+.affibloom-admin .affibloom-band__actions .affibloom-band__search .affibloom-search { padding-right: 16px; }
+.affibloom-table.affibloom-table--groups { min-width: 0; }
+.affibloom-table--groups .affibloom-col-name { width: 30%; }
+.affibloom-table--groups .affibloom-col-links { width: 110px; text-align: center; }
+.affibloom-table--groups th.affibloom-col-links .affibloom-th { align-items: center; }
+.affibloom-table--groups td.affibloom-col-links { color: var(--affibloom-ink-900); font-weight: 700; }
+.affibloom-table--groups td.affibloom-col-description { color: var(--affibloom-ink-700); font-size: 14px; line-height: 21px; overflow-wrap: anywhere; }
+.affibloom-table--groups tbody tr { position: relative; cursor: pointer; }
+.affibloom-admin .affibloom-row__link { text-decoration: none; }
+.affibloom-admin .affibloom-row__link:hover { text-decoration: underline; }
+.affibloom-row__link::after { content: ""; position: absolute; inset: 0; }
+.affibloom-row__link:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
+/* A group's form: the fields keep a readable measure inside the wide card. */
+.affibloom-group__fields { display: grid; gap: 20px; max-width: 760px; padding-top: 28px; padding-bottom: 28px; }
+.affibloom-group .affibloom-card__foot { justify-content: flex-end; align-items: center; }
+
 @media (max-width: 960px) {
 	.affibloom-header,
 	.affibloom-band { padding-right: 20px; padding-left: 20px; }
@@ -2025,6 +2057,11 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-product__pair { grid-template-columns: 1fr; }
 	.affibloom-product__switches { grid-template-columns: 1fr; }
 	.affibloom-product__card { padding: 20px; }
+	/* Groups: three columns fit a phone, the description wraps and the Links count keeps a narrow column. */
+	.affibloom-band__actions { justify-content: flex-start; }
+	.affibloom-table--groups .affibloom-col-name { width: 34%; }
+	.affibloom-table--groups .affibloom-col-links { width: 64px; }
+	.affibloom-table--groups .affibloom-row__name { white-space: normal; overflow-wrap: anywhere; }
 }
 
 @media (prefers-reduced-motion: reduce) {

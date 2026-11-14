@@ -12,6 +12,7 @@ namespace Affibloom;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\BulkAddService;
@@ -23,6 +24,7 @@ use Affibloom\Application\Settings\LinkDefaultsService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
+use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
@@ -32,6 +34,7 @@ use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
+use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
@@ -39,6 +42,8 @@ use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
+use Affibloom\Interface\Admin\GroupScreen;
+use Affibloom\Interface\Admin\GroupsScreen;
 use Affibloom\Interface\Admin\PerPage;
 use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Admin\DisplayController;
@@ -54,6 +59,7 @@ use Affibloom\Interface\Admin\TrackingIdController;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
 use Affibloom\Interface\Rest\FieldsController;
+use Affibloom\Interface\Rest\GroupsController;
 use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
@@ -137,9 +143,11 @@ final class Plugin {
 		$choices   = new IconChoices( $icons );
 		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
+		$groups    = new GroupService( new TermGroupRepository() );
 
 		return array(
 			new ProductPostType(),
+			new GroupTaxonomy(),
 			new AdminMenu(
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice ),
@@ -149,7 +157,9 @@ final class Plugin {
 					new DisplayScreen( $this->template(), $display, $settings, $notice, $choices ),
 					$notice,
 					$detection
-				)
+				),
+				new GroupsScreen( $this->template(), $groups, $notice ),
+				new GroupScreen( $this->template(), $groups, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),
@@ -164,6 +174,7 @@ final class Plugin {
 			new TrackingIdController( $settings ),
 			new LassoImportController( $import ),
 			new FieldsController( $fields ),
+			new GroupsController( $groups, $this->template() ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),
 		);

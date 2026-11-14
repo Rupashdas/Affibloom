@@ -13,6 +13,10 @@ defined( 'ABSPATH' ) || exit;
 $header_tabs = array(
 	'dashboard' => array( __( 'Dashboard', 'affibloom' ), admin_url( 'admin.php?page=affibloom' ), 'home' ),
 );
+// Lasso's nav order (F23 D9): Dashboard, Groups, then Settings (Opportunities and Tables come with their areas).
+if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::PRODUCTS ) ) {
+	$header_tabs['groups'] = array( __( 'Groups', 'affibloom' ), admin_url( 'admin.php?page=affibloom-groups' ), 'layers' );
+}
 if ( current_user_can( \Affibloom\Interface\Admin\Capabilities::SETTINGS ) ) {
 	$header_tabs['settings'] = array( __( 'Settings', 'affibloom' ), admin_url( 'admin.php?page=affibloom-settings' ), 'settings' );
 }
