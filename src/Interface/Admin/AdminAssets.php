@@ -43,6 +43,8 @@ final class AdminAssets implements Module {
 		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array(), $this->version );
 		// The General tab's own parts, and "Disable Help Tooltips" (Tasks 9B-9K), which reaches every screen.
 		wp_enqueue_style( 'affibloom-settings-general', $this->plugin_url . 'assets/admin/settings-general.css', array( 'affibloom-admin' ), $this->version );
+		// The Fields screens and the product page's field rows (Tasks FL1-FL5).
+		wp_enqueue_style( 'affibloom-fields', $this->plugin_url . 'assets/admin/fields.css', array( 'affibloom-admin' ), $this->version );
 		// Help tips, Save-when-changed, modals and "Add A New Link". wp-api-fetch carries the REST root and nonce in wp-admin.
 		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
 
@@ -56,6 +58,12 @@ final class AdminAssets implements Module {
 		// The Groups list in place, and the new-group form (Task G1). The hook suffix of both pages holds "affibloom-group".
 		if ( str_contains( $hook_suffix, GroupScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+		}
+
+		// The Fields list in place (Task FL1).
+		if ( str_contains( $hook_suffix, FieldsScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-fields', $this->plugin_url . 'assets/admin/fields.js', array( 'affibloom-in-place-list' ), $this->version, true );
 		}
 
 		// Each settings tab's own controls.

@@ -14,6 +14,8 @@ use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\FieldPage;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\Fields\FieldType;
+use Affibloom\Domain\Fields\FieldUsage;
+use Affibloom\Domain\Fields\FieldUsageRepository;
 use Affibloom\Domain\Fields\ProductField;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\InvalidField;
@@ -32,10 +34,15 @@ final class FieldsService {
 	/**
 	 * Builds the service.
 	 *
-	 * @param FieldRepository   $library  The field definitions.
-	 * @param ProductRepository $products The products, for their fields.
+	 * @param FieldRepository      $library  The field definitions.
+	 * @param ProductRepository    $products The products, for their fields.
+	 * @param FieldUsageRepository $usage    How many products have each field (the Fields list's Usage column).
 	 */
-	public function __construct( private FieldRepository $library, private ProductRepository $products ) {}
+	public function __construct(
+		private FieldRepository $library,
+		private ProductRepository $products,
+		private FieldUsageRepository $usage,
+	) {}
 
 	/**
 	 * The whole library, for drawing a product's fields with their names and types.
@@ -45,13 +52,24 @@ final class FieldsService {
 	}
 
 	/**
-	 * One page of the "Add from library" tab.
+	 * One page of the "Add from library" tab: the fields a product can take, which leaves out the six that comparison
+	 * tables fill (F26 R24, D2).
 	 *
 	 * @param string $search What was typed.
 	 * @param int    $page   From 1.
 	 */
 	public function library( string $search, int $page ): FieldPage {
-		return $this->library->load()->search( $search, $page, self::PER_PAGE );
+		return $this->library->load()->search( $search, $page, self::PER_PAGE, true );
+	}
+
+	/**
+	 * One page of the Fields list (F26 R7-R9): every field, searched by name, with how many products have each.
+	 *
+	 * @param string $search What was typed in "Search Fields".
+	 * @param int    $page   From 1.
+	 */
+	public function list( string $search, int $page ): FieldListing {
+		return new FieldListing( $this->library->load()->search( $search, $page, self::PER_PAGE ), $this->usage->usage() );
 	}
 
 	/**

@@ -146,7 +146,7 @@ final class ProductScreen {
 				// Custom fields (Task 14C): the product's rows, every definition, and the kinds the dialog offers.
 				'fields'       => $this->fields->fields( (int) $this->product->id ) ?? ProductFields::from_array( array() ),
 				'library'      => $this->fields->all(),
-				'types'        => FieldType::cases(),
+				'types'        => FieldType::choosable(),
 				'tracking'     => $this->tracking_offer( $site->string( 'tracking_id' ) ),
 				'notice'       => $this->notice->message(),
 			)

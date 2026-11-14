@@ -28,6 +28,7 @@ use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
+use Affibloom\Infrastructure\WordPress\PostMetaFieldUsage;
 use Affibloom\Infrastructure\WordPress\OptionIconRepository;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
@@ -42,6 +43,7 @@ use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
+use Affibloom\Interface\Admin\FieldsScreen;
 use Affibloom\Interface\Admin\GroupScreen;
 use Affibloom\Interface\Admin\GroupsScreen;
 use Affibloom\Interface\Admin\PerPage;
@@ -141,7 +143,7 @@ final class Plugin {
 		$views     = new SavedViewService( new UserMetaSavedViewRepository() );
 		$icons     = new IconService( new OptionIconRepository(), new SiteCssIcons() );
 		$choices   = new IconChoices( $icons );
-		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository() );
+		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups    = new GroupService( new TermGroupRepository() );
 
@@ -159,7 +161,8 @@ final class Plugin {
 					$detection
 				),
 				new GroupsScreen( $this->template(), $groups, $notice ),
-				new GroupScreen( $this->template(), $groups, $notice )
+				new GroupScreen( $this->template(), $groups, $notice ),
+				new FieldsScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),
@@ -173,7 +176,7 @@ final class Plugin {
 			new IconController( $icons ),
 			new TrackingIdController( $settings ),
 			new LassoImportController( $import ),
-			new FieldsController( $fields ),
+			new FieldsController( $fields, $this->template() ),
 			new GroupsController( $groups, $this->template() ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),

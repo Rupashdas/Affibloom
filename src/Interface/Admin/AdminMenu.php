@@ -26,6 +26,7 @@ final class AdminMenu implements Module {
 	 * @param SettingsScreen  $settings  The Settings screen.
 	 * @param GroupsScreen    $groups    The Groups list (Task G1).
 	 * @param GroupScreen     $group     One group, or a new one (Task G1).
+	 * @param FieldsScreen    $fields    The Fields list (Task FL1).
 	 */
 	public function __construct(
 		private DashboardScreen $dashboard,
@@ -33,6 +34,7 @@ final class AdminMenu implements Module {
 		private SettingsScreen $settings,
 		private GroupsScreen $groups,
 		private GroupScreen $group,
+		private FieldsScreen $fields,
 	) {}
 
 	/**
@@ -98,6 +100,15 @@ final class AdminMenu implements Module {
 		if ( false !== $group_hook ) {
 			add_action( 'load-' . $group_hook, array( $this->group, 'guard' ) );
 		}
+		// The Fields list, like a group's page, is reached from a link ("Manage Fields"), never from the menu (F26 D13).
+		add_submenu_page(
+			self::SLUG,
+			__( 'Fields', 'affibloom' ),
+			__( 'Fields', 'affibloom' ),
+			Capabilities::PRODUCTS,
+			FieldsScreen::SLUG,
+			array( $this->fields, 'render' )
+		);
 		add_submenu_page(
 			self::SLUG,
 			__( 'Settings', 'affibloom' ),
@@ -109,11 +120,12 @@ final class AdminMenu implements Module {
 	}
 
 	/**
-	 * The product page and a group's page are reached from their lists, never from the menu, as Lasso's link details
+	 * The product page, a group's page and the Fields list are reached from their lists, never from the menu, as Lasso's link details
 	 * page. Removed after admin_menu, so the pages stay registered (reachable, capability-checked) but are not listed.
 	 */
 	public function hide_product_page(): void {
 		remove_submenu_page( self::SLUG, ProductScreen::SLUG );
 		remove_submenu_page( self::SLUG, GroupScreen::SLUG );
+		remove_submenu_page( self::SLUG, FieldsScreen::SLUG );
 	}
 }

@@ -3,13 +3,15 @@
  * "Add Field" (F1, Task 14C; Lasso's modals/field-create.php): the tabs "Create new" (Field Title, Field Type,
  * Description, "Create Field") and "Add from library" (a search and ten fields a page, each with Add). Creating a field
  * stores it and opens the library, as Lasso's does; adding one stores it on the product and closes the dialog.
- * "Manage Fields" (Lasso's Fields screen) is the Fields area's, so it says "Coming soon".
+ * "Manage Fields" (Lasso's Fields screen) opens the Fields list in a new tab (Task FL1).
  *
  * @package Affibloom
  * @var array{types: list<\Affibloom\Domain\Fields\FieldType>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
+
+use Affibloom\Interface\Admin\FieldsUrl;
 
 $title_help = __( 'Ideal title for use in things like a comparison table header.', 'affibloom' );
 ?>
@@ -18,10 +20,10 @@ $title_help = __( 'Ideal title for use in things like a comparison table header.
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-field-modal-title">
 		<div class="affibloom-modal__head">
 			<h2 id="affibloom-field-modal-title" class="affibloom-modal__title"><?php esc_html_e( 'Add Field', 'affibloom' ); ?></h2>
-			<span class="affibloom-field-modal__manage" aria-disabled="true">
+			<a class="affibloom-field-modal__manage" href="<?php echo esc_url( FieldsUrl::to( '', 1 ) ); ?>" target="_blank" rel="noopener">
 				<?php esc_html_e( 'Manage Fields', 'affibloom' ); ?>
-				<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?>
-			</span>
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'new-tab' ) ); ?>
+			</a>
 			<button type="button" class="affibloom-modal__close" data-affibloom-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
 			</button>

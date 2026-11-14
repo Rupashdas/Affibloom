@@ -34,9 +34,9 @@ final class PluginTest extends TestCase {
 	public function test_the_product_page_is_registered_hidden_and_guarded(): void {
 		Functions\when( '__' )->returnArg();
 		Functions\when( 'add_menu_page' )->justReturn( 'toplevel_page_affibloom' );
-		// Dashboard, Product, Groups, Group, Settings.
+		// Dashboard, Product, Groups, Group, Fields (Task FL1), Settings.
 		Functions\expect( 'add_submenu_page' )
-			->times( 5 )
+			->times( 6 )
 			->andReturnUsing(
 				static fn( string $parent, string $title, string $menu, string $cap, string $slug ): string => 'affibloom_page_' . $slug
 			);

@@ -1,0 +1,40 @@
+/*
+ * Fields (F26): the Fields list and, from Task FL2, a field's page. Aurora's tokens; Lasso's arrangement (a table with
+ * Name, Type and Usage). Kept in its own file so the Fields screens do not share a stylesheet that other tasks edit.
+ */
+
+/* The Fields list: Name (bold, its description under it), Type (an icon), Usage (a number). */
+.affibloom-table.affibloom-table--fields { min-width: 0; }
+.affibloom-table--fields .affibloom-col-type { width: 110px; text-align: center; }
+.affibloom-table--fields .affibloom-col-usage { width: 110px; text-align: center; }
+.affibloom-table--fields th.affibloom-col-type .affibloom-th,
+.affibloom-table--fields th.affibloom-col-usage .affibloom-th { align-items: center; }
+.affibloom-table--fields td.affibloom-col-usage { color: var(--affibloom-ink-900); font-weight: 700; }
+.affibloom-table--fields td.affibloom-col-name { overflow-wrap: anywhere; }
+.affibloom-table--fields .affibloom-row__name { display: block; }
+.affibloom-row__description { display: block; margin-top: 2px; color: var(--affibloom-ink-600); font-size: 13px; line-height: 19px; }
+.affibloom-type-icon {
+	display: inline-grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--affibloom-radius-nav);
+	background: var(--affibloom-brand-50);
+	color: var(--affibloom-brand-600);
+}
+.affibloom-type-icon .affibloom-icon { width: 18px; height: 18px; }
+
+/* A button that is not ready yet keeps its place and says so (design system, "Soon"). */
+.affibloom-admin .affibloom-button--soon { cursor: default; opacity: 0.85; }
+.affibloom-button--soon .affibloom-soon { margin-left: 4px; }
+
+/* "Manage Fields" in the Add Field dialog: a link that opens the Fields list in a new tab. */
+.affibloom-admin .affibloom-field-modal__manage { color: var(--affibloom-brand-600); font-weight: 600; text-decoration: none; }
+.affibloom-admin .affibloom-field-modal__manage:hover { text-decoration: underline; }
+.affibloom-admin .affibloom-field-modal__manage:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+.affibloom-field-modal__manage .affibloom-icon { width: 14px; height: 14px; }
+
+@media (max-width: 782px) {
+	.affibloom-table--fields .affibloom-col-type,
+	.affibloom-table--fields .affibloom-col-usage { width: 72px; }
+}

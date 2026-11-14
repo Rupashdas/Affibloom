@@ -57,14 +57,72 @@ final class FieldLibraryTest extends TestCase {
 			[ $library ] = $library->create( 'Size ' . $i, FieldType::Text, '' );
 		}
 
-		$first = $library->search( '', 1, 10 );
+		// The product page's library leaves out the six table built-ins (F26 D2): 3 + 12 fields.
+		$first = $library->search( '', 1, 10, true );
 		self::assertSame( 15, $first->total );
 		self::assertSame( array( 1, 2, 3 ), array_slice( array_map( static fn( Field $f ): int => $f->id, $first->items ), 0, 3 ) );
 		self::assertCount( 10, $first->items );
-		self::assertCount( 5, $library->search( '', 2, 10 )->items );
+		self::assertCount( 5, $library->search( '', 2, 10, true )->items );
 
-		self::assertSame( 12, $library->search( 'SIZE', 1, 10 )->total );
-		self::assertSame( array( 'Pros' ), array_map( static fn( Field $f ): string => $f->name, $library->search( 'pro', 1, 10 )->items ) );
+		self::assertSame( 12, $library->search( 'SIZE', 1, 10, true )->total );
+		self::assertSame( array( 'Pros' ), array_map( static fn( Field $f ): string => $f->name, $library->search( 'pro', 1, 10, true )->items ) );
+	}
+
+	/** Lasso's nine built-ins, with their IDs and kinds, and the six that tables fill (F26 R2, D2). */
+	public function test_there_are_nine_built_in_fields_and_six_are_table_only(): void {
+		$library = FieldLibrary::from_array( array() );
+		$all     = $library->all();
+
+		self::assertSame( array( 1, 2, 3, 99989, 99990, 99991, 99992, 99993, 99994 ), array_map( static fn( Field $f ): int => $f->id, $all ) );
+		$table = array_values( array_map( static fn( Field $f ): int => $f->id, array_filter( $all, static fn( Field $f ): bool => $f->table_only ) ) );
+		self::assertSame( array( 99989, 99990, 99991, 99992, 99993, 99994 ), $table );
+		self::assertSame( FieldType::Label, $library->find( 99994 )?->type );
+		self::assertSame( 'Prices automatically update every 24 hours with integrations like Amazon.', $library->find( 99994 )?->description );
+		self::assertFalse( FieldType::Label->is_choosable() );
+		self::assertCount( 7, FieldType::choosable() );
+		self::assertSame( FieldType::Text, FieldType::choosable()[0] );
+	}
+
+	/** A built-in's own title is read, kept beside the created fields, and an invalid one is ignored (F26 R2, edge case 7). */
+	public function test_a_built_in_fields_title_can_be_renamed(): void {
+		$library = FieldLibrary::from_array( array(), array( 1 => 'Our Rating', 2 => '  Good things ', 3 => '', 99994 => 'Cost', 7 => 'Not a field', 99990 => 'Product name' ) );
+
+		self::assertSame( 'Our Rating', $library->find( 1 )?->name );
+		self::assertSame( 'Good things', $library->find( 2 )?->name );
+		self::assertSame( 'Cons', $library->find( 3 )?->name );
+		self::assertSame( 'Cost', $library->find( 99994 )?->name );
+		// A title equal to the default is not a rename; an ID that is not built in has no title to give.
+		self::assertSame(
+			array(
+				1     => 'Our Rating',
+				2     => 'Good things',
+				99994 => 'Cost',
+			),
+			$library->names()
+		);
+		self::assertTrue( $library->find( 99994 )?->table_only );
+	}
+
+	/** "pri rat" finds Primary Rating: each space is a wildcard, the words in order, in any case (F26 R8, D11). */
+	public function test_a_search_matches_the_words_in_order_with_spaces_as_wildcards(): void {
+		$library = FieldLibrary::from_array( array() );
+
+		self::assertSame( array( 'Primary Rating' ), array_map( static fn( Field $f ): string => $f->name, $library->search( 'pri rat', 1, 10 )->items ) );
+		self::assertSame( 0, $library->search( 'rat pri', 1, 10 )->total );
+		self::assertSame( 2, $library->search( 'BUTTON', 1, 10 )->total );
+		self::assertSame( 9, $library->search( '   ', 1, 10 )->total );
+		// "%" is the character it is.
+		self::assertSame( 0, $library->search( 'pri%', 1, 10 )->total );
+	}
+
+	public function test_a_page_knows_its_range(): void {
+		$library = FieldLibrary::from_array( array() );
+
+		$second = $library->search( '', 2, 4 );
+		self::assertSame( 5, $second->first() );
+		self::assertSame( 8, $second->last() );
+		self::assertSame( 9, $library->search( '', 9, 4 )->last() );
+		self::assertSame( 0, $library->search( 'zzz', 1, 4 )->first() );
 	}
 
 	public function test_stored_rows_that_are_not_fields_are_skipped(): void {

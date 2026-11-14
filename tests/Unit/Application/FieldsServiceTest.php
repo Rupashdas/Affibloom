@@ -9,6 +9,7 @@ use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\Settings;
+use Affibloom\Tests\Unit\Fakes\InMemoryFieldUsage;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +34,7 @@ final class FieldsServiceTest extends TestCase {
 	}
 
 	private function service(): FieldsService {
-		return new FieldsService( $this->library, $this->products );
+		return new FieldsService( $this->library, $this->products, new InMemoryFieldUsage( $this->products ) );
 	}
 
 	public function test_a_created_field_is_stored_and_found_in_the_library(): void {
@@ -61,6 +62,26 @@ final class FieldsServiceTest extends TestCase {
 		self::assertSame( 'Grippy', $service->fields( $this->product )?->find( 2 )?->value );
 
 		self::assertSame( array( 2 ), $service->detach( $this->product, 1 )?->ids() );
+	}
+
+	/** The Fields list: every field with how many products have it; the dialog's library leaves the table fields out. */
+	public function test_the_list_counts_each_fields_products_and_the_library_leaves_out_table_fields(): void {
+		$service = $this->service();
+		$service->attach( $this->product, 1 );
+		$service->attach( $this->product, 2 );
+		$other = (int) $this->products->save( Product::draft( 'Boot', AffiliateUrl::from_string( 'https://www.example.com/boot' ), Settings::from_array( array() ) ) )->id;
+		$service->attach( $other, 1 );
+
+		$listing = $service->list( '', 1 );
+		self::assertSame( 9, $listing->page->total );
+		self::assertSame( 2, $listing->usage->of( 1 ) );
+		self::assertSame( 1, $listing->usage->of( 2 ) );
+		self::assertSame( 0, $listing->usage->of( 3 ) );
+
+		self::assertSame( 3, $service->library( '', 1 )->total );
+		self::assertSame( 1, $service->list( 'pri rat', 1 )->page->total );
+		self::assertSame( 0, $service->library( 'price', 1 )->total );
+		self::assertSame( 1, $service->list( 'price', 1 )->page->total );
 	}
 
 	public function test_an_unknown_field_is_refused_and_a_missing_product_is_null(): void {
