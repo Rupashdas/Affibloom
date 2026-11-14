@@ -1,5 +1,7 @@
 # Interface specification
 
+> **Partly out of date (2026-11-14).** Written before the full-scope rule (2026-11-13). Where it conflicts with `docs/features/F1, F9, F16-F19, F23, F38/requirements.md` or the phase plans, those win. Known stale parts: the header lists only Dashboard and Settings (navigation is now F38's: Dashboard, Opportunities, Tables, Groups, Settings); the overview-tiles and Columns rows say features are "excluded" or "left out" (Groups, Shortcode, Share kit); section 2 lacks the dashboard, fields, groups and repoint routes and says Delete moves to the trash (the product page deletes for good, F1 D33); the section 4 validation table (`invalid_url`, `/dp/<ASIN>` only, `_affibloom_url2`) predates F18, F2 and F29; the section 5 settings table uses the old Display keys; the Editor row assumes U1.
+
 Status: Proposed (approved together with the rest of Task 6)
 Date: 2026-11-12
 

@@ -146,3 +146,86 @@ Nothing is written except that one preference. The screen is read-only.
 - Everything the templates print is escaped: `esc_html` for the name, `esc_url` for the link and the page links
   through `wp_kses_post` (`paginate_links()` returns markup).
 - The product's destination link opens in a new tab with `rel="noopener noreferrer"`, as Lasso's row does.
+
+## Second pass — 2026-11-14
+
+TASKS
+- 13F The list keeps every argument without JavaScript; ?post_id=  (Phase 2, now)        R30; D17, D24; AC15
+- 13G The search finds added buttons' links only (14H correction) (Phase 2, now)        D4; AC16
+- 13H AC4 and AC10 tests that run on a full library (test-only correction) (Phase 2)     AC4, AC10
+- 13I Stable order and counts that follow the list (Phase 2, now)                       R19, R33; D9, D18; AC17, AC18
+- 13J Saved views and the panel as Lasso's (Phase 2, now)                               R12-R17; D13-D16; AC19, AC20
+- 13K Sort the list by a column header, Alert first (Phase 6, after F11 31A)           R1-R11; D8-D12; AC21-AC23
+- 13L The command palette, Ctrl+Shift+L (Phase 2 end, after G4)                         R20-R27; D19-D22; AC24, AC25
+- 13M The Dashboard tour (Phase 2 end, after G1 and 13J)                                R28, R29; D23; AC26
+
+DEPENDS ON
+- Built: 13A-13E, 16A-16C (guard), 17B (bulk delete), 14H (buttons). F23 G1 (Groups nav), G4 (GET /products?search=).
+- F11 30A (open issue rows) and 31A (Alert cell) before 13K. F12 34A and F21 36A add their sort arms after 13K.
+- F11 31B (tab), G5 (group), F21 36D (placements), F25 T16 (comparison table) add their argument to the same
+  DashboardUrl / list route / SavedView / Reset / no-JS hidden inputs that 13F and 13K generalise.
+
+DATA
+| Affibloom | Lasso | Notes |
+| user meta affibloom_saved_views (built) + keys orderby, order (13K) | lasso_dashboard_saved_views: order_by, order_type | 26M migrates; detection_date→alert, count→locations, clicks→clicks, post_modified/''→none |
+| user meta affibloom_per_page (built) | sessionStorage lasso_dashboard_page_size | |
+| localStorage affibloom_filters_open '1'/'0' (13J) | localStorage lasso_dashboard_filters_panel_open | per browser |
+| post meta _affibloom_button_url, one row per added button's URL (13G) | post meta second_btn_url | derived on save from _affibloom_buttons |
+| option affibloom_dashboard_tour_done '1' (13M), autoload no | option lasso_dashboard_tour_done | F10 should migrate (N1) |
+| — | localStorage lasso_pagination, #page-N hash | replaced by paged= (13D) |
+
+ENTRY POINTS AND REQUEST PATHS
+- GET admin.php?page=affibloom[&s][&link_type][&paged][&per_page][&orderby&order][&post_id]
+  → DashboardScreen::render() → ListOrder::from_input (13K), post_id (13F) → ProductService::list(ListQuery)
+  → ProductRepository::page() → PostTypeProductRepository (WP_Query + posts_where search + posts_orderby arm)
+  → templates/admin/dashboard.php (forms with hidden list args 13F; sortable header links 13K).
+- GET /affibloom/v1/dashboard/products (built 13D) gains orderby (enum alert|locations|clicks|''), order (enum asc|desc|''),
+  post_id (integer ≥0); answer gains library (13I), orderby, order (13K). 400 rest_invalid_param on a bad enum.
+  Capabilities::PRODUCTS.
+- POST /affibloom/v1/dashboard/views (built) gains orderby, order (13K). DELETE /dashboard/views/{id}: unknown id →
+  404 affibloom_not_found "Saved view not found." (13J).
+- GET /affibloom/v1/products?search=&page=&per_page=10 (G4; 13L is the second caller) answer per item: id, name,
+  link, thumbnail, edit_url (13L adds the fields G4 lacks).
+- POST /affibloom/v1/dashboard/tour → 200 { data: { done: true } } (13M); PRODUCTS; REST nonce.
+- Keyboard Ctrl/Cmd+Shift+L on any admin screen where AdminAssets enqueues palette.js for a PRODUCTS user (13L).
+
+LAYERS
+- Domain: Product\ListOrder (column enum Modified|Alert|Locations|Clicks, direction; from_input(); next(column):
+  Lasso's cycle R2; is_default()) — no WordPress. Product\ListQuery (term, link kind, page, per page, order,
+  post_id) — introduced when 13K adds the sixth list argument (second use of the argument bundle in route and
+  screen). Dashboard\SavedView gains ListOrder (13K). Dashboard\TourSteps (step ids + texts, filter by present
+  targets is JS) only if the server renders the steps (13M decides: data in PHP via wp_localize_script).
+- Application: ProductService::list(ListQuery); ProductService::count() (built) used in the list answer (13I);
+  SavedViewService::delete() throws ViewNotFound (13J); DashboardTourService::done()/dismiss() over a
+  TourRepository (OptionTourRepository).
+- Infrastructure: PostTypeProductRepository::page() orderby clause (posts_clauses filter scoped by a query var, as
+  search_filter): modified → post_modified DESC, ID DESC; alert → F11's issue join, NULLs last; save() writes
+  _affibloom_button_url (13G).
+- Interface: DashboardScreen, DashboardController, DashboardUrl::to(ListQuery), partials product-list (header links),
+  pager/search/filters forms (hidden args), saved-views, filters-panel (Apply in .no-js), dashboard.js (load() list
+  args, sort clicks, counts, pills, panel storage), assets/admin/palette.js + partials/palette.php (13L),
+  assets/admin/tour.js + Rest\DashboardTourController (13M); AdminAssets enqueues palette on every admin screen for
+  PRODUCTS users.
+
+RISKS
+- Sort arms with joins (alert, locations, clicks) inside WP_Query: use posts_clauses scoped to the query var, never
+  global; each arm adds ID DESC. Large libraries: LEFT JOIN on indexed post IDs; 263 rows here.
+- Five features add list arguments; without one ListQuery/DashboardUrl every form and test drifts again (13E's bug).
+- The palette loads on editor screens: keep it tiny (no dependencies but wp-api-fetch), lazy-build the dialog, never
+  bind the shortcut while the focus is in a text field (R21).
+- 13G changes stored meta: existing Local test products need the seed tool re-run; no site has Affibloom data
+  before migration (F10 writes through save()).
+- Tour targets change with later screens: look up targets at start, skip missing ones.
+
+SECURITY
+- Every route PRODUCTS; REST nonce via wp.apiFetch. orderby/order/link_type enums at the route; the screen maps
+  unknown values to the default (sanitize_key, allowlist). ORDER BY built only from the enum map, never from input.
+- Palette and tour texts are escaped by textContent; result URLs set with esc_url on the server and as href only.
+- The tour option is site-wide; only PRODUCTS users can set it.
+
+TESTS
+- Unit: ListOrderTest (cycle R2 incl. Alert off, from_input fallbacks), SavedViewsTest (order stored), ButtonUrls
+  derivation, DashboardTourService, SearchTerm unchanged.
+- Integration (WP test suite, when available): ProductListTest gains ties and orderby arms.
+- E2E F19.spec.ts: AC15 (javaScriptEnabled: false context), AC16-AC26; AC4 and AC10 rewritten (13H); F12/F21 rerun
+  F19 AC21-AC23 shape for their columns.

@@ -205,7 +205,7 @@ Settled by the user's earlier rules:
 
 - **Custom fields beyond the product page:** Lasso's Fields screen (rename, delete, reorder definitions; the
   `DETAILS` field on this copy) and the box rendering Pros, Cons and other fields. 14C builds the definitions and the
-  product page's rows; **a Fields area** is added to `plans/dashboard-completion-plan.md` for the screen, and Phase 3's
+  product page's rows; **a Fields area** is added to `plans/archive/dashboard-completion-plan.md` for the screen, and Phase 3's
   box tasks render the fields.
 - **URL variants** (`lasso_url_variants`, 0 rows here): the Variants tab, its add/search toolbar and the Dashboard
   search arm (F19 D4). Local, no credentials: **a Variants area** is added to the completion plan.

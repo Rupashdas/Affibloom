@@ -1,5 +1,7 @@
 # Task 6 decisions
 
+> **Partly out of date (2026-11-14).** Written before the full-scope rule (2026-11-13). Where it conflicts with `docs/features/F4, F10, F23, F31, F35/requirements.md` or the phase plans, those win. Known stale parts: decision 4 ("no shortcode of its own": F31 adds `[affibloom]`); decision 8 (two affiliate networks: F35 detects all 32); decision 10 (Groups stay out: built as F23, with no withdrawal note here); the reasons given for U1, U2 and U5.
+
 Date: 2026-11-12. Status: **Decided.** The user delegated these decisions with an order of evidence: (1) the
 project's records (feature plan, inventory, analysis, plan), (2) research into Lasso and how the live site uses it,
 (3) for UI/UX, the documented requirements and Lasso's behaviour, with sensible improvements where they conflict

@@ -1,5 +1,7 @@
 # Workflows: the top tasks in Lasso, counted
 
+> **Partly out of date (2026-11-14).** Written before the full-scope rule (2026-11-13). Where it conflicts with `docs/features/F4, F38/requirements.md` or the phase plans, those win. Known stale parts: section 4 says "Single is the only type built" and assumes U1 (all seven display types are in scope; U1 is in question, open decision C2); the section 3 wording for U2 and U4 predates the register's final decisions.
+
 Counted on the live Lasso 370 screens (2026-11-12) and Lasso's source. A "step" is one click, one keystroke
 sequence into one field, or one page load the user waits for. Affibloom keeps each workflow at the same
 number of steps or fewer; any difference is a register item (U1–U7).

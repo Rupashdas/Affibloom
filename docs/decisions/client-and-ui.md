@@ -1,5 +1,7 @@
 # Client points and UI/UX improvements
 
+> **Partly out of date (2026-11-14).** Written before the full-scope rule (2026-11-13). Where it conflicts with `docs/features/F4, F35, F38/requirements.md` or the phase plans, those win. Known stale parts: client point 2 ("the two networks": F35 covers all 32); the U1, U2 and U9 rows; no rows for U11 and U12 (they are in the roadmap's register).
+
 Date: 2026-11-12
 
 ## Client points (feature plan, "Points to confirm before development")

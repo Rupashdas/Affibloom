@@ -1,5 +1,7 @@
 # Screen inventory (UI audit, roadmap 1.7)
 
+> **Partly out of date (2026-11-14).** Written before the full-scope rule (2026-11-13). Where it conflicts with `docs/features/F1, F9, F16-F19, F22, F23, F25-F27, F38/requirements.md` or the phase plans, those win. Known stale parts: almost every "Left out" row is now built or planned: header tabs, counters, saved views and filters, Groups, Shortcode, Share kit, the Opportunities and Variants tabs, Custom Field, Display Theme, Price, the whole Display editor, Amazon preferences, the General sections.
+
 Every element on Lasso's admin screens, with its help text (the hover tooltip, `data-tooltip` in
 `admin/views/**`), marked **Kept**, **Left out** (with the excluded feature it belongs to) or **Changed** (with
 its register item or the spec change in `docs/spec/interface.md`). Screens: the live Lasso 370 captures in
