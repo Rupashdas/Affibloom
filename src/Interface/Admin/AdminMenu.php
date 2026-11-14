@@ -27,6 +27,7 @@ final class AdminMenu implements Module {
 	 * @param GroupsScreen    $groups    The Groups list (Task G1).
 	 * @param GroupScreen     $group     One group, or a new one (Task G1).
 	 * @param FieldsScreen    $fields    The Fields list (Task FL1).
+	 * @param FieldScreen     $field     One field, or a new one (Task FL2).
 	 */
 	public function __construct(
 		private DashboardScreen $dashboard,
@@ -35,6 +36,7 @@ final class AdminMenu implements Module {
 		private GroupsScreen $groups,
 		private GroupScreen $group,
 		private FieldsScreen $fields,
+		private FieldScreen $field,
 	) {}
 
 	/**
@@ -109,6 +111,15 @@ final class AdminMenu implements Module {
 			FieldsScreen::SLUG,
 			array( $this->fields, 'render' )
 		);
+		// One field's page, or "Add a New Field": registered for the capability check, listed nowhere.
+		add_submenu_page(
+			self::SLUG,
+			__( 'Field', 'affibloom' ),
+			__( 'Field', 'affibloom' ),
+			Capabilities::PRODUCTS,
+			FieldScreen::SLUG,
+			array( $this->field, 'render' )
+		);
 		add_submenu_page(
 			self::SLUG,
 			__( 'Settings', 'affibloom' ),
@@ -120,12 +131,13 @@ final class AdminMenu implements Module {
 	}
 
 	/**
-	 * The product page, a group's page and the Fields list are reached from their lists, never from the menu, as Lasso's link details
+	 * The product page, a group's page and the Fields screens are reached from their lists, never from the menu, as Lasso's link details
 	 * page. Removed after admin_menu, so the pages stay registered (reachable, capability-checked) but are not listed.
 	 */
 	public function hide_product_page(): void {
 		remove_submenu_page( self::SLUG, ProductScreen::SLUG );
 		remove_submenu_page( self::SLUG, GroupScreen::SLUG );
 		remove_submenu_page( self::SLUG, FieldsScreen::SLUG );
+		remove_submenu_page( self::SLUG, FieldScreen::SLUG );
 	}
 }

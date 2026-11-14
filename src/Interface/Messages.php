@@ -44,6 +44,10 @@ final class Messages {
 			'invalid_name' => __( 'Give the field a title of 1 to 80 characters.', 'affibloom' ),
 			'invalid_type' => __( 'Choose a field type.', 'affibloom' ),
 			'not_found'    => __( 'That field does not exist.', 'affibloom' ),
+			// The Fields area (Task FL2): Lasso's "Title is required." (settings.js 3191-3241), now also under the dialog's
+			// title, where Lasso says nothing; and the description's 1,000 characters (F26 D8).
+			'field_title_required'   => __( 'Title is required.', 'affibloom' ),
+			'field_description_long' => __( 'Keep the description under 1,000 characters.', 'affibloom' ),
 			// Groups (Task G1): Lasso's own "Name is required." (settings.js 3100-3145), and a sentence for the name
 			// WordPress refuses, where Lasso shows its generic failure bar (F23 D3).
 			'group_name_required' => __( 'Name is required.', 'affibloom' ),

@@ -60,8 +60,9 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 		}
 
-		// The Fields list in place (Task FL1).
-		if ( str_contains( $hook_suffix, FieldsScreen::SLUG ) ) {
+		// The Fields list in place (Task FL1) and the field form (Task FL2); the hook suffix of both Fields pages holds
+		// "affibloom-field".
+		if ( str_contains( $hook_suffix, FieldScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-fields', $this->plugin_url . 'assets/admin/fields.js', array( 'affibloom-in-place-list' ), $this->version, true );
 		}

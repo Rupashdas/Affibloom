@@ -148,4 +148,64 @@ test.describe( 'F26 Fields', () => {
 		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'price' );
 		await expect( dialog.locator( '.affibloom-field-library__item' ) ).toHaveCount( 0 );
 	} );
+
+	test( 'AC2 Add New Field: the form, both refusals, then the save opens the list with "Field saved."', async ( { page } ) => {
+		seedFields();
+		const title = unique( 'F26 Weight' );
+
+		await page.goto( LIST );
+		await page.getByRole( 'link', { name: 'Add New Field' } ).click();
+		await expect( page.getByRole( 'heading', { name: 'Add a New Field', level: 1 } ) ).toBeVisible();
+		// A click on a link does not wait for the page's scripts, and the form is sent by one of them.
+		await page.waitForLoadState( 'load' );
+
+		// A new field has no tabs and nothing to delete; the seven choosable types come in Lasso's order, Short Text first.
+		await expect( page.locator( '.affibloom-tabs' ) ).toHaveCount( 0 );
+		await expect( page.getByRole( 'button', { name: 'Delete This Field' } ) ).toHaveCount( 0 );
+		expect( await page.getByLabel( 'Field Type' ).locator( 'option' ).allInnerTexts() ).toEqual( [
+			'Short Text', 'Copy to Clipboard', 'Long Text', 'Number', 'Rating', 'Bulleted List', 'Numbered List',
+		] );
+		await expect( page.getByLabel( 'Field Type' ) ).toHaveValue( 'text' );
+		await expect( page.getByLabel( 'Field Title' ) ).toHaveAttribute( 'placeholder', 'Size, Weight, Year, etc...' );
+		await expect( page.getByLabel( 'Description' ) ).toHaveAttribute( 'placeholder', 'Describe how you use this field.' );
+
+		// An empty title is refused under it, and nothing is stored.
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByText( 'Title is required.' ) ).toBeVisible();
+		expect( wp( 'eval', `echo count( (array) ( get_option( "${ OPTION }" )["fields"] ?? array() ) );` ) ).toBe( '0' );
+
+		// A title over 80 characters is refused with 14C's message.
+		await page.getByLabel( 'Field Title' ).fill( 'x'.repeat( 81 ) );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByText( 'Give the field a title of 1 to 80 characters.' ) ).toBeVisible();
+		expect( wp( 'eval', `echo count( (array) ( get_option( "${ OPTION }" )["fields"] ?? array() ) );` ) ).toBe( '0' );
+
+		// A good save shows "Updating Field", creates the field and lands on the list with the toast.
+		await page.route( /affibloom(\/|%2F)v1(\/|%2F)fields(\?|$)/, async ( route ) => {
+			await new Promise( ( done ) => setTimeout( done, 700 ) );
+			await route.continue();
+		} );
+		await page.getByLabel( 'Field Title' ).fill( title );
+		await page.getByLabel( 'Field Type' ).selectOption( { label: 'Bulleted List' } );
+		await page.getByLabel( 'Description' ).fill( 'One weight per line.' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByRole( 'dialog', { name: 'Updating Field' } ) ).toBeVisible();
+
+		await expect( page ).toHaveURL( /page=affibloom-fields&affibloom_notice=field-saved/, { timeout: 20000 } );
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Field saved.' );
+		await expect( rows( page ).locator( '.affibloom-row__name', { hasText: title } ) ).toBeVisible();
+		const stored = JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) );
+		expect( stored.fields.map( ( f: { name: string; type: string; description: string } ) => [ f.name, f.type, f.description ] ) ).toEqual( [ [ title, 'bulleted_list', 'One weight per line.' ] ] );
+	} );
+
+	test( 'AC2 the product page\'s Create new tab gives the same "Title is required."', async ( { page } ) => {
+		seedFields();
+		const id = createProduct( { name: unique( 'F26 dialog' ) } );
+		made.push( id );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await page.getByRole( 'button', { name: 'Add Custom Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByRole( 'button', { name: 'Create Field' } ).click();
+		await expect( dialog.getByText( 'Title is required.' ) ).toBeVisible();
+	} );
 } );

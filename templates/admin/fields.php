@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Interface\Admin\FieldScreen;
 use Affibloom\Interface\Admin\FieldsScreen;
 ?>
 <div class="wrap affibloom-admin">
@@ -29,12 +30,10 @@ use Affibloom\Interface\Admin\FieldsScreen;
 						<input type="search" id="affibloom-fields-search" class="affibloom-input affibloom-search" name="s"
 							value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php esc_attr_e( 'Search Fields', 'affibloom' ); ?>">
 					</form>
-					<?php // Until Task FL2 builds the form, the button is a placeholder that says so. ?>
-					<span class="affibloom-button affibloom-button--on-band affibloom-button--soon" aria-disabled="true">
+					<a class="affibloom-button affibloom-button--on-band" href="<?php echo esc_url( FieldScreen::url() ); ?>">
 						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
 						<span><?php esc_html_e( 'Add New Field', 'affibloom' ); ?></span>
-						<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?>
-					</span>
+					</a>
 				</div>
 			</div>
 		</div>

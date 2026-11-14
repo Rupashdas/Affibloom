@@ -34,14 +34,16 @@ final class PluginTest extends TestCase {
 	public function test_the_product_page_is_registered_hidden_and_guarded(): void {
 		Functions\when( '__' )->returnArg();
 		Functions\when( 'add_menu_page' )->justReturn( 'toplevel_page_affibloom' );
-		// Dashboard, Product, Groups, Group, Fields (Task FL1), Settings.
+		// Dashboard, Product, Groups, Group, Fields (Task FL1), Field (Task FL2), Settings.
 		Functions\expect( 'add_submenu_page' )
-			->times( 6 )
+			->times( 7 )
 			->andReturnUsing(
 				static fn( string $parent, string $title, string $menu, string $cap, string $slug ): string => 'affibloom_page_' . $slug
 			);
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-product' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-group' );
+		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-fields' );
+		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-field' );
 		// Brain Monkey records hooks without running them: run these two callbacks as WordPress would.
 		$run = static function ( callable $callback ): void {
 			$callback();

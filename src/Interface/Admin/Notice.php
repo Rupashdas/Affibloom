@@ -40,6 +40,8 @@ final class Notice {
 			'deleted'          => __( 'Product deleted.', 'affibloom' ),
 			// After a new group is saved, on its Details tab (Task G1, F23 D11): U6's plain wording for Lasso's toast.
 			'group-saved'      => __( 'Group saved.', 'affibloom' ),
+			// After a field is saved from the Fields screen (Task FL2, F26 D18): U6's plain wording for Lasso's toast.
+			'field-saved'      => __( 'Field saved.', 'affibloom' ),
 			// The one-time Lasso import (the user, 2026-11-13); the counts ride along in the query.
 			'lasso-imported'   => $this->imported(),
 			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),

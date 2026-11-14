@@ -188,7 +188,12 @@ final class FieldsController implements Module {
 			return FieldError::from( $error );
 		}
 
-		return new WP_REST_Response( array( 'data' => self::field( $field ) ), 201 );
+		// The Fields screen's form goes to the list with the toast (Lasso's behaviour, F26 D18); the product page's dialog
+		// ignores the address and shows its library.
+		$data                = self::field( $field );
+		$data['redirect_to'] = add_query_arg( 'affibloom_notice', 'field-saved', FieldsUrl::to( '', 1 ) );
+
+		return new WP_REST_Response( array( 'data' => $data ), 201 );
 	}
 
 	/**

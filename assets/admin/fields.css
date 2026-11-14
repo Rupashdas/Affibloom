@@ -38,3 +38,7 @@
 	.affibloom-table--fields .affibloom-col-type,
 	.affibloom-table--fields .affibloom-col-usage { width: 72px; }
 }
+
+/* A field's form (Lasso's field-details.php): Title and Type side by side, Description below; a readable measure inside the wide card. */
+.affibloom-fieldform__fields { display: grid; gap: 20px; max-width: 760px; padding-top: 28px; padding-bottom: 28px; }
+.affibloom-fieldpage .affibloom-card__foot { justify-content: flex-end; align-items: center; }

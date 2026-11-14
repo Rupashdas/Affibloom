@@ -43,6 +43,7 @@ use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\DashboardScreen;
+use Affibloom\Interface\Admin\FieldScreen;
 use Affibloom\Interface\Admin\FieldsScreen;
 use Affibloom\Interface\Admin\GroupScreen;
 use Affibloom\Interface\Admin\GroupsScreen;
@@ -162,7 +163,8 @@ final class Plugin {
 				),
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
-				new FieldsScreen( $this->template(), $fields, $notice )
+				new FieldsScreen( $this->template(), $fields, $notice ),
+				new FieldScreen( $this->template(), $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),
