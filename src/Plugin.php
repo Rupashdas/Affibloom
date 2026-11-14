@@ -23,8 +23,10 @@ use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\LinkDefaultsService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
+use Affibloom\Infrastructure\Schema\Migrator;
 use Affibloom\Infrastructure\WordPress\CronRegistry;
 use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
@@ -32,6 +34,7 @@ use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaFieldUsage;
 use Affibloom\Infrastructure\WordPress\OptionIconRepository;
+use Affibloom\Infrastructure\WordPress\OptionLock;
 use Affibloom\Infrastructure\WordPress\OptionPluginState;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
@@ -42,6 +45,7 @@ use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
+use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
@@ -72,6 +76,7 @@ use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Rest\SettingsRestController;
 use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
+use Affibloom\Interface\UpgradeHooks;
 use Affibloom\Module;
 
 /**
@@ -122,21 +127,42 @@ final class Plugin {
 	 * Activation hook (register_activation_hook in affibloom.php).
 	 */
 	public static function activate(): void {
-		self::lifecycle()->activate();
+		self::lifecycle( self::upgrader() )->activate();
 	}
 
 	/**
 	 * Deactivation hook (register_deactivation_hook in affibloom.php).
 	 */
 	public static function deactivate(): void {
-		self::lifecycle()->deactivate();
+		self::lifecycle( self::upgrader() )->deactivate();
 	}
 
 	/**
-	 * What activation and deactivation do. It needs none of the request's modules, so it is built on its own.
+	 * What activation, deactivation and a version change do. It needs none of the request's other modules, so the
+	 * activation hooks build it on its own.
+	 *
+	 * @param Upgrader $upgrader The pending steps.
 	 */
-	private static function lifecycle(): Lifecycle {
-		return new Lifecycle( self::cron_registry(), new OptionPluginState(), AFFIBLOOM_VERSION );
+	private static function lifecycle( Upgrader $upgrader ): Lifecycle {
+		return new Lifecycle( self::cron_registry(), new OptionPluginState(), $upgrader, AFFIBLOOM_VERSION );
+	}
+
+	/**
+	 * The upgrade routine: Lasso's five-minute lock, and the numbered steps.
+	 */
+	private static function upgrader(): Upgrader {
+		return new Upgrader( new OptionLock( 'affibloom_upgrade_lock', 5 * 60 ), new Migrator( self::schema_steps() ) );
+	}
+
+	/**
+	 * The schema and data steps by number. Append a step with the next number; never renumber or remove one, because
+	 * affibloom_db_version records the last number a site finished. None yet: the first is C1C's
+	 * affibloom_amazon_products table.
+	 *
+	 * @return array<int, callable(): void>
+	 */
+	private static function schema_steps(): array {
+		return array();
 	}
 
 	/**
@@ -178,6 +204,7 @@ final class Plugin {
 		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
+		$upgrader  = self::upgrader();
 
 		return array(
 			new ProductPostType(),
@@ -213,6 +240,8 @@ final class Plugin {
 			new GroupsController( $groups, $this->template() ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),
+			new UpgradeHooks( $upgrader, self::lifecycle( $upgrader ) ),
+			new UpgradeCommand( $upgrader ),
 		);
 	}
 

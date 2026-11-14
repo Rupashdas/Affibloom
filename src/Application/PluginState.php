@@ -15,11 +15,21 @@ namespace Affibloom\Application;
 interface PluginState {
 
 	/**
-	 * Stores the plugin version and the time of this activation.
+	 * The plugin version this site last ran; '' before the first activation.
+	 */
+	public function stored_version(): string;
+
+	/**
+	 * Stores the running plugin version.
 	 *
 	 * @param string $version The running plugin version.
 	 */
-	public function record_activation( string $version ): void;
+	public function record_version( string $version ): void;
+
+	/**
+	 * Stores the time of this activation.
+	 */
+	public function record_activation_time(): void;
 
 	/**
 	 * Rebuilds the site's rewrite rules on the next request.

@@ -25,6 +25,13 @@ final class PluginTest extends TestCase {
 		self::assertNotFalse( has_action( 'admin_head', 'Affibloom\Interface\Admin\AdminMenu->hide_product_page()' ) );
 	}
 
+	public function test_boot_runs_the_upgrade_on_admin_pages_and_watches_the_version_on_init(): void {
+		Plugin::boot( '/plugins/affibloom/affibloom.php' );
+
+		self::assertSame( 10, has_action( 'admin_init', 'Affibloom\Interface\UpgradeHooks->upgrade()' ) );
+		self::assertSame( 20, has_action( 'init', 'Affibloom\Interface\UpgradeHooks->watch_version()' ) );
+	}
+
 	/**
 	 * The product page is a submenu page, so WordPress checks the capability and the Dashboard stays highlighted; it
 	 * is taken out of the menu after admin_menu, as Lasso's link details page is never listed. Its guard runs on the

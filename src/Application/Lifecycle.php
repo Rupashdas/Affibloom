@@ -1,6 +1,6 @@
 <?php
 /**
- * What activating and deactivating the plugin does (F37 D1).
+ * What activating, deactivating and updating the plugin does (F37 D1, D2).
  *
  * @package Affibloom
  */
@@ -9,9 +9,12 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application;
 
+use Affibloom\Application\Upgrade\Upgrader;
+
 /**
- * What activating and deactivating the plugin does (F37 D1): as Lasso's activator and deactivator, for what
- * Affibloom has. Neither removes products, settings or any other data; that is left to uninstalling.
+ * What activating, deactivating and updating the plugin does (F37 D1, D2): as Lasso's activator, deactivator and
+ * version check, for what Affibloom has. None of it removes products, settings or any other data; that is left to
+ * uninstalling.
  */
 final class Lifecycle {
 
@@ -20,19 +23,24 @@ final class Lifecycle {
 	 *
 	 * @param Schedules   $schedules Every Affibloom WP-Cron hook.
 	 * @param PluginState $state     The plugin's own records and the site's rewrite rules.
+	 * @param Upgrader    $upgrader  The pending schema and data steps.
 	 * @param string      $version   The running plugin version (AFFIBLOOM_VERSION).
 	 */
 	public function __construct(
 		private Schedules $schedules,
 		private PluginState $state,
+		private Upgrader $upgrader,
 		private string $version
 	) {}
 
 	/**
-	 * Records the version and the activation time, then rebuilds the rewrite rules.
+	 * Records the version and the activation time, runs the pending steps, then rebuilds the rewrite rules. A failed
+	 * step does not stop the activation: the next admin page runs it again and says why it failed.
 	 */
 	public function activate(): void {
-		$this->state->record_activation( $this->version );
+		$this->state->record_version( $this->version );
+		$this->state->record_activation_time();
+		$this->upgrader->run();
 		$this->state->flush_rewrite_rules();
 	}
 
@@ -42,5 +50,17 @@ final class Lifecycle {
 	public function deactivate(): void {
 		$this->schedules->clear();
 		$this->state->flush_rewrite_rules();
+	}
+
+	/**
+	 * After a zip with a new version replaced the plugin (no activation runs then): rebuilds the rewrite rules once
+	 * and stores the version (Lasso's R27).
+	 */
+	public function watch_version(): void {
+		if ( $this->state->stored_version() === $this->version ) {
+			return;
+		}
+		$this->state->flush_rewrite_rules();
+		$this->state->record_version( $this->version );
 	}
 }

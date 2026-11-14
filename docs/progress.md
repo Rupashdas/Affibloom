@@ -13,7 +13,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, TL1 (+ the one-time Lasso import button, deviation 87) | 29: 2X1-2X5, FL1-FL5, TL2, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
+| 2 | Settings and product library | 2X0, 8, 9, 9A, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13E, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, TL1, TL2 (+ the one-time Lasso import button, deviation 87) | 28: 2X1-2X5, FL1-FL5, 13F-13J, ON1-ON2, C1A-C1P (Phase 2 part) | **In progress.** Verified: everything done is built as recorded, except the corrections now planned as 2X1-2X5, 13F-13H, FL5 (deviation 89) |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -2136,6 +2136,31 @@ follows is fixed (deviation 41) and the copy is back at the snapshot.
       wp-env, deviation 10).
     - **Not in TL1:** the Migrator step on activation and the version watch are TL2's.
 
+100. **Task TL2 (2026-11-14), the upgrade routine (F37 AC2); done, checked on Local.** Differences from the plan's text:
+    - **`Infrastructure\Schema\Table` is not built yet:** nothing calls it until C1C's `affibloom_amazon_products`
+      (the rule "nothing is created before it has a caller"); C1C builds it, with dbDelta and wp_posts' collation
+      (F37 analysis). TL2 builds `Migrator` and its numbered steps only; `Plugin::schema_steps()` is empty for now.
+    - **The classes, by layer:** Application `Upgrade\{Upgrader, UpgradeResult, StepFailed}` and two ports,
+      `Upgrade\UpgradeLock` (`Infrastructure\WordPress\OptionLock`, option `affibloom_upgrade_lock` holding its expiry,
+      not autoloaded, 5 minutes, as Lasso's `lasso_db_migration_lock_v2`) and `Upgrade\Migrations`
+      (`Infrastructure\Schema\Migrator`, option `affibloom_db_version`). Interface `UpgradeHooks` (`admin_init`, not AJAX or
+      cron; `init` at 20 for the version watch) and `Cli\UpgradeCommand`. The version watch is
+      `Lifecycle::watch_version()`; `PluginState` gained `stored_version()` and `record_version()`, and
+      `record_activation()` became `record_version()` + `record_activation_time()`.
+    - **Each step is recorded as it finishes** (Lasso records its version once at the end): a failed step keeps the
+      version of the last step that finished, is retried on the next run, and the steps before it do not run again.
+      Any `Throwable` from a step becomes `StepFailed`.
+    - **`pending()` is checked before the lock,** so an admin page with nothing to do writes no option.
+    - **A failed step does not break the page** (Lasso's `finally` lets the error through): the lock is released, and
+      `UpgradeHooks` shows an error notice to users with `Capabilities::SETTINGS` ("Affibloom could not finish updating
+      its data (step n: error). It will try again on the next admin page."). `wp affibloom upgrade` exits 1 with the step.
+    - **PHPStan reads a hand-written `tests/stubs/wp-cli.php`** (`scanFiles` in `phpstan.neon.dist`) for the three
+      `WP_CLI` methods: `php-stubs/wp-cli-stubs` cannot be installed (Packagist unreachable, environment.md).
+    - **Open, for ON2:** on Affibloom's own screens every `admin_notices` notice (this one too) is moved by core's
+      `common.js` into a hidden modal's heading, because the screens have no `.wp-header-end`; it shows on core screens
+      (seen on Plugins). ON2 (the notice region) places it.
+    - `tests/Integration/UpgraderTest.php` is written, not run (no wp-env, deviation 10).
+
 ## Open decisions (ask the user; record the answer here)
 
 **From 2026-11-14 the open decisions are listed in [`open-decisions.md`](open-decisions.md)** (the full planning pass,
@@ -2166,6 +2191,15 @@ deviation 89). The items below are the Phase 0 history.
   recorded as ADRs in Task 6.
 
 ## Session log
+
+- **2026-11-14 (Claude Code, Task TL2, same session as TL1 at the user's word "Go with TL2"):** the upgrade routine
+  (F37 AC2); deviation 100. Started from unit tests for `Upgrader`, `Migrator`, `OptionLock`, `UpgradeHooks` and
+  `UpgradeCommand` (red: classes missing). 544 unit tests, `composer lint` and `composer analyse` clean. On Local
+  (backup `app/affibloom-backup-2026-11-14-before-tl2.sql`) with a temporary probe step, removed after: two admin page
+  loads ran step 1 once, lock released; `wp affibloom upgrade` said "Nothing to do", and after `affibloom_db_version`
+  was reset it ran step 1; a failing step 2 kept the version at 1, released the lock, showed the notice on Plugins and
+  made the command exit 1; a stored version of 0.0.9 was flushed (a marker rule disappeared) and replaced by 0.1.0 on
+  the next request, and an unchanged version did not flush. Probe options deleted, rewrite rules flushed. Next: 13F.
 
 - **2026-11-14 (Claude Code, Task TL1):** activation and deactivation (F37 AC1); deviation 99. Started from
   `tests/Unit/LifecycleHooksTest.php` (red: no `Plugin::activate()`/`deactivate()`), then `Lifecycle`, its two ports,

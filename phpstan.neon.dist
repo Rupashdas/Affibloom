@@ -4,6 +4,8 @@ includes:
 parameters:
 	level: 6
 	phpVersion: 80300
+	scanFiles:
+		- tests/stubs/wp-cli.php
 	paths:
 		- affibloom.php
 		- src

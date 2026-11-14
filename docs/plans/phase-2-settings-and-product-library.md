@@ -244,7 +244,7 @@ they were, then the new sections in the order listed after G5.
 **Activation and the upgrade routine (F37 part)** — moved here from Phase 6; URL variants V1-V5 moved to Phase 5
 
 - [x] Task TL1: Activation and deactivation
-- [ ] Task TL2: Upgrade routine
+- [x] Task TL2: Upgrade routine
 
 **Dashboard, second pass (F19)** — 13K (sorting) is in Phase 7; 13L (command palette) and 13M (tour) are dropped as
 duplicates of F38 ON9 and ON8 (Phase 8)
@@ -5774,14 +5774,14 @@ the same.
 `src/Infrastructure/Schema/Table.php`, `src/Interface/Cli/UpgradeCommand.php`, `tests/Integration/UpgraderTest.php`;
 modify `src/Application/Lifecycle.php`, `src/Plugin.php`.
 
-- [ ] **Step 1: Failing integration tests** (lock: a second request skips and a stale lock older than 5 minutes is
+- [x] **Step 1: Failing integration tests** (lock: a second request skips and a stale lock older than 5 minutes is
   cleared; steps run in order; a failed step keeps the version and releases the lock). Expected red: no `Upgrader`.
-- [ ] **Step 2: Schema classes** (`Migrator`, `Table`; no table yet, the tests use a fake step).
-- [ ] **Step 3: `Upgrader`, the version watch and the hooks** (`admin_init`, `Lifecycle::activate()`, `init`).
-- [ ] **Step 4: `wp affibloom upgrade`.**
-- [ ] **Step 5: Run and look.** Change the stored `affibloom_db_version` on Local, open an admin page: the step runs
+- [x] **Step 2: Schema classes** (`Migrator`, `Table`; no table yet, the tests use a fake step). `Table` waits for C1C, its first caller (progress.md, deviation 100).
+- [x] **Step 3: `Upgrader`, the version watch and the hooks** (`admin_init`, `Lifecycle::activate()`, `init`).
+- [x] **Step 4: `wp affibloom upgrade`.**
+- [x] **Step 5: Run and look.** Change the stored `affibloom_db_version` on Local, open an admin page: the step runs
   once and the version is recorded; run `wp affibloom upgrade` and see "nothing to do".
-- [ ] **Step 6: Commit:** "Run schema steps once after an update".
+- [x] **Step 6: Commit:** "Run schema steps once after an update".
 
 ---
 
