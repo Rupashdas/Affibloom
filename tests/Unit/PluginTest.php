@@ -55,5 +55,6 @@ final class PluginTest extends TestCase {
 
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-product', 'Affibloom\Interface\Admin\ProductScreen->guard()' ) );
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-group', 'Affibloom\Interface\Admin\GroupScreen->guard()' ) );
+		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-field', 'Affibloom\Interface\Admin\FieldScreen->guard()' ) );
 	}
 }

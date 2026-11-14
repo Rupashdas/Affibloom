@@ -115,6 +115,48 @@ final class FieldLibraryTest extends TestCase {
 		self::assertSame( 0, $library->search( 'pri%', 1, 10 )->total );
 	}
 
+	/** A built-in is renamed, never retyped; a rename back to the default is no rename; the title's rules apply (F26 D4). */
+	public function test_renaming_a_built_in_changes_only_its_title(): void {
+		$library = FieldLibrary::from_array( array() )->rename( 99990, '  Title ' );
+
+		self::assertSame( 'Title', $library->find( 99990 )?->name );
+		self::assertSame( FieldType::ProductName, $library->find( 99990 )?->type );
+		self::assertSame( 'Product name.', $library->find( 99990 )?->description );
+		self::assertSame( array( 99990 => 'Title' ), $library->names() );
+		self::assertSame( array(), $library->rename( 99990, 'Product name' )->names() );
+		// An ID that is not built in is left alone.
+		self::assertSame( array( 99990 => 'Title' ), $library->rename( 4, 'Nope' )->names() );
+
+		$this->expectException( InvalidField::class );
+		$library->rename( 1, '   ' );
+	}
+
+	public function test_a_title_over_80_characters_is_refused_on_rename(): void {
+		$this->expectException( InvalidField::class );
+		FieldLibrary::from_array( array() )->rename( 1, str_repeat( 'a', 81 ) );
+	}
+
+	public function test_a_created_field_is_changed_and_deleted_but_a_built_in_is_not(): void {
+		[ $library ] = FieldLibrary::from_array( array() )->create( 'Sizes', FieldType::Text, 'Before.' );
+
+		$changed = $library->update( 100, ' Weight ', FieldType::Number, ' After. ' );
+		self::assertSame( 'Weight', $changed->find( 100 )?->name );
+		self::assertSame( FieldType::Number, $changed->find( 100 )?->type );
+		self::assertSame( 'After.', $changed->find( 100 )?->description );
+		// A built-in is not changed through update().
+		self::assertSame( 'Pros', $changed->update( 2, 'Other', FieldType::Text, 'x' )->find( 2 )?->name );
+
+		self::assertNull( $changed->delete( 100 )->find( 100 ) );
+		self::assertSame( 'Primary Rating', $changed->delete( 1 )->find( 1 )?->name );
+		// Deleting the last field leaves the next ID free to be reused only from 100 on.
+		self::assertSame( 100, $changed->delete( 100 )->create( 'Again', FieldType::Text, '' )[1]->id );
+	}
+
+	public function test_a_description_over_1000_characters_is_refused(): void {
+		$this->expectException( InvalidField::class );
+		FieldLibrary::from_array( array() )->create( 'Sizes', FieldType::Text, str_repeat( 'a', 1001 ) );
+	}
+
 	public function test_a_page_knows_its_range(): void {
 		$library = FieldLibrary::from_array( array() );
 

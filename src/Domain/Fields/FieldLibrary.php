@@ -178,6 +178,62 @@ final class FieldLibrary {
 	}
 
 	/**
+	 * A library with a built-in field under another title. The title is the one thing a save changes on a built-in field: its
+	 * kind and description are never taken from the request (F26 D4), which fixes Lasso's bug of writing the select's value
+	 * into the type (R16). The default title is no rename; another ID is ignored.
+	 *
+	 * @param int    $id   The built-in field's ID.
+	 * @param string $name The new title, 1-80 characters.
+	 * @throws InvalidField When the title breaks its rule.
+	 */
+	public function rename( int $id, string $name ): self {
+		foreach ( self::BUILT_IN as [ $built_in, $default ] ) {
+			if ( $built_in !== $id ) {
+				continue;
+			}
+			$title = ( new Field( $id, trim( $name ), FieldType::Text, '' ) )->name; // The title's rules, in one place.
+			$names = $this->names;
+			if ( $title === $default ) {
+				unset( $names[ $id ] );
+			} else {
+				$names[ $id ] = $title;
+			}
+
+			return new self( $this->created, $names );
+		}
+
+		return $this;
+	}
+
+	/**
+	 * A library with a created field changed: title, kind and description (a changed kind keeps every product's stored
+	 * value: values are kept by field, read under the new kind, F26 R17). A built-in or unknown ID changes nothing.
+	 *
+	 * @param int       $id          The field's ID.
+	 * @param string    $name        The new title, 1-80 characters.
+	 * @param FieldType $type        The new kind.
+	 * @param string    $description The new description, at most 1,000 characters.
+	 * @throws InvalidField When the title or the description breaks its rule.
+	 */
+	public function update( int $id, string $name, FieldType $type, string $description ): self {
+		$changed = array();
+		foreach ( $this->created as $field ) {
+			$changed[] = $field->id === $id ? new Field( $id, trim( $name ), $type, trim( $description ) ) : $field;
+		}
+
+		return new self( $changed, $this->names );
+	}
+
+	/**
+	 * A library without a created field. A built-in or unknown ID changes nothing.
+	 *
+	 * @param int $id The field's ID.
+	 */
+	public function delete( int $id ): self {
+		return new self( array_values( array_filter( $this->created, static fn( Field $field ): bool => $field->id !== $id ) ), $this->names );
+	}
+
+	/**
 	 * One page of fields whose name holds the words typed, in any case, in that order: Lasso's `field_name LIKE %…%` with
 	 * each space a wildcard (F26 R8, D11), so "pri rat" finds Primary Rating. `%` and `_` are ordinary characters here.
 	 *

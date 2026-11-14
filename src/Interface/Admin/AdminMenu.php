@@ -112,7 +112,7 @@ final class AdminMenu implements Module {
 			array( $this->fields, 'render' )
 		);
 		// One field's page, or "Add a New Field": registered for the capability check, listed nowhere.
-		add_submenu_page(
+		$field_hook = add_submenu_page(
 			self::SLUG,
 			__( 'Field', 'affibloom' ),
 			__( 'Field', 'affibloom' ),
@@ -120,6 +120,9 @@ final class AdminMenu implements Module {
 			FieldScreen::SLUG,
 			array( $this->field, 'render' )
 		);
+		if ( false !== $field_hook ) {
+			add_action( 'load-' . $field_hook, array( $this->field, 'guard' ) );
+		}
 		add_submenu_page(
 			self::SLUG,
 			__( 'Settings', 'affibloom' ),

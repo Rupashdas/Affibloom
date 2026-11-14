@@ -2,8 +2,12 @@
 namespace Affibloom\Tests\Unit\Application;
 
 use Affibloom\Application\Fields\FieldsService;
+use Affibloom\Application\Fields\FieldBuiltIn;
+use Affibloom\Application\Fields\FieldInUse;
+use Affibloom\Application\Fields\FieldNotFound;
 use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\FieldRepository;
+use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Fields\ProductField;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -82,6 +86,68 @@ final class FieldsServiceTest extends TestCase {
 		self::assertSame( 1, $service->list( 'pri rat', 1 )->page->total );
 		self::assertSame( 0, $service->library( 'price', 1 )->total );
 		self::assertSame( 1, $service->list( 'price', 1 )->page->total );
+	}
+
+	/** A built-in takes only its title; the type and description in the request are ignored (F26 D4, fixes Lasso's R16). */
+	public function test_saving_a_built_in_field_changes_only_its_title(): void {
+		$field = $this->service()->edit( 99990, 'Title', 'text', 'Other words.' );
+
+		self::assertSame( 'Title', $field->name );
+		self::assertSame( FieldType::ProductName, $field->type );
+		self::assertSame( 'Product name.', $field->description );
+		self::assertSame( 'Title', $this->service()->get( 99990 )?->name );
+	}
+
+	public function test_saving_an_own_field_changes_all_three_and_keeps_a_products_value(): void {
+		$service = $this->service();
+		$field   = $service->create( 'Sizes', 'text', 'Before.' );
+		$service->attach( $this->product, $field->id );
+		$service->update( $this->product, array( new ProductField( $field->id, '38', true, false ) ) );
+
+		$changed = $service->edit( $field->id, 'Weight', 'number', 'After.' );
+
+		self::assertSame( array( 'Weight', FieldType::Number, 'After.' ), array( $changed->name, $changed->type, $changed->description ) );
+		self::assertSame( '38', $service->fields( $this->product )?->find( $field->id )?->value );
+	}
+
+	public function test_a_type_a_field_cannot_be_changed_to_is_refused(): void {
+		$field = $this->service()->create( 'Sizes', 'text', '' );
+
+		$this->expectException( InvalidField::class );
+		$this->service()->edit( $field->id, 'Sizes', 'label', '' );
+	}
+
+	public function test_saving_a_field_that_does_not_exist_is_refused(): void {
+		$this->expectException( FieldNotFound::class );
+		$this->service()->edit( 4242, 'Nope', 'text', '' );
+	}
+
+	public function test_a_field_a_product_has_is_never_deleted_and_neither_is_a_built_in(): void {
+		$service = $this->service();
+		$field   = $service->create( 'Sizes', 'text', '' );
+		$service->attach( $this->product, $field->id );
+
+		try {
+			$service->delete( $field->id );
+			self::fail( 'A field in use was deleted.' );
+		} catch ( FieldInUse ) {
+			self::assertNotNull( $service->get( $field->id ) );
+		}
+		try {
+			$service->delete( 1 );
+			self::fail( 'A built-in field was deleted.' );
+		} catch ( FieldBuiltIn ) {
+			self::assertNotNull( $service->get( 1 ) );
+		}
+
+		$service->detach( $this->product, $field->id );
+		$service->delete( $field->id );
+		self::assertNull( $service->get( $field->id ) );
+	}
+
+	public function test_deleting_a_field_that_does_not_exist_is_refused(): void {
+		$this->expectException( FieldNotFound::class );
+		$this->service()->delete( 4242 );
 	}
 
 	public function test_an_unknown_field_is_refused_and_a_missing_product_is_null(): void {

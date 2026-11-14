@@ -164,7 +164,7 @@ final class Plugin {
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
 				new FieldsScreen( $this->template(), $fields, $notice ),
-				new FieldScreen( $this->template(), $notice )
+				new FieldScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings ),

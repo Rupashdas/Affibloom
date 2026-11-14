@@ -9,6 +9,9 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Fields\FieldBuiltIn;
+use Affibloom\Application\Fields\FieldInUse;
+use Affibloom\Application\Fields\FieldNotFound;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Domain\Fields\Field;
 use Affibloom\Domain\InvalidField;
@@ -47,6 +50,7 @@ final class FieldsController implements Module {
 	 * Registers the routes.
 	 */
 	public function routes(): void {
+		$this->field_routes();
 		register_rest_route(
 			ProductsController::NAMESPACE,
 			'/fields/list',
@@ -112,6 +116,44 @@ final class FieldsController implements Module {
 							'sanitize_callback' => 'sanitize_textarea_field',
 						),
 					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Registers the routes of one field (Task FL3): its Details and its deletion.
+	 */
+	private function field_routes(): void {
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/fields/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+					'args'                => array(
+						'name'        => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'type'        => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'description' => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_textarea_field',
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete' ),
+					'permission_callback' => array( $this, 'can_manage' ),
 				),
 			)
 		);
@@ -194,6 +236,53 @@ final class FieldsController implements Module {
 		$data['redirect_to'] = add_query_arg( 'affibloom_notice', 'field-saved', FieldsUrl::to( '', 1 ) );
 
 		return new WP_REST_Response( array( 'data' => $data ), 201 );
+	}
+
+	/**
+	 * PATCH /fields/{id}: a field's Details (Lasso's `lasso_store_field` with a field ID). A built-in field takes only its
+	 * title (F26 D4).
+	 *
+	 * @param WP_REST_Request $request Request with "id", "name", "type" and "description".
+	 * @phpstan-param WP_REST_Request<array{id: string, name: string, type: string, description: string}> $request
+	 */
+	public function update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		try {
+			$field = $this->fields->edit( (int) $request['id'], (string) $request['name'], (string) $request['type'], (string) $request['description'] );
+		} catch ( FieldNotFound ) {
+			return self::missing();
+		} catch ( InvalidField $error ) {
+			return FieldError::from( $error );
+		}
+
+		return new WP_REST_Response( array( 'data' => self::field( $field ) ) );
+	}
+
+	/**
+	 * DELETE /fields/{id}: deletes a field (Lasso's `lasso_delete_field`, which checks nothing). A built-in field and one a
+	 * product has are 409, whatever the page showed (F26 D5); a good delete answers with the Fields list's address.
+	 *
+	 * @param WP_REST_Request $request Request with "id".
+	 * @phpstan-param WP_REST_Request<array{id: string}> $request
+	 */
+	public function delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		try {
+			$this->fields->delete( (int) $request['id'] );
+		} catch ( FieldNotFound ) {
+			return self::missing();
+		} catch ( FieldBuiltIn ) {
+			return new WP_Error( 'affibloom_field_built_in', __( "This is a built-in field, so it can't be deleted.", 'affibloom' ), array( 'status' => 409 ) );
+		} catch ( FieldInUse ) {
+			return new WP_Error( 'affibloom_field_in_use', __( "You can't delete a Field if there are Links using it. Remove all Links using this Field first.", 'affibloom' ), array( 'status' => 409 ) );
+		}
+
+		return new WP_REST_Response( array( 'data' => array( 'redirect_to' => add_query_arg( 'affibloom_notice', 'field-deleted', FieldsUrl::to( '', 1 ) ) ) ) );
+	}
+
+	/**
+	 * 404 for a field that does not exist.
+	 */
+	private static function missing(): WP_Error {
+		return new WP_Error( 'affibloom_not_found', __( 'That field does not exist.', 'affibloom' ), array( 'status' => 404 ) );
 	}
 
 	/**

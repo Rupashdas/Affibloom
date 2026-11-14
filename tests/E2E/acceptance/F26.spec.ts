@@ -7,6 +7,7 @@ import { blockTrackers, createProduct, unique, wp } from '../utils';
 // (products that have the field, any status); "Search Fields" matches the name with spaces as wildcards.
 
 const LIST = '/wp-admin/admin.php?page=affibloom-fields';
+const FIELD = '/wp-admin/admin.php?page=affibloom-field';
 const OPTION = 'affibloom_fields';
 
 type Seed = { fields?: Array< { id: number; name: string; type: string; description: string } >; names?: Record< number, string > };
@@ -196,6 +197,164 @@ test.describe( 'F26 Fields', () => {
 		await expect( rows( page ).locator( '.affibloom-row__name', { hasText: title } ) ).toBeVisible();
 		const stored = JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) );
 		expect( stored.fields.map( ( f: { name: string; type: string; description: string } ) => [ f.name, f.type, f.description ] ) ).toEqual( [ [ title, 'bulleted_list', 'One weight per line.' ] ] );
+	} );
+
+	test( 'AC3 a built-in field: only its title changes, and every list shows the new name', async ( { page } ) => {
+		seedFields();
+		await page.goto( `${ FIELD }&id=1&tab=details` );
+		await expect( page.getByRole( 'heading', { name: 'Primary Rating', level: 1 } ) ).toBeVisible();
+		await page.waitForLoadState( 'load' );
+
+		// Type and description are locked, the note says why, and there is nothing to delete.
+		await expect( page.getByLabel( 'Field Title' ) ).toHaveValue( 'Primary Rating' );
+		await expect( page.getByLabel( 'Field Type' ) ).toBeDisabled();
+		await expect( page.getByLabel( 'Field Type' ) ).toHaveValue( 'rating' );
+		await expect( page.getByLabel( 'Description' ) ).toBeDisabled();
+		await expect( page.getByLabel( 'Description' ) ).toHaveValue( 'Editor Rating. Position in display is fixed.' );
+		await expect( page.getByText( 'Note: This is a built-in field and only the title is editable.' ) ).toBeVisible();
+		await expect( page.getByRole( 'button', { name: 'Delete This Field' } ) ).toHaveCount( 0 );
+
+		// A new title is saved with "Updating Field" and the toast; the page keeps its tab and takes the new name.
+		await page.route( /affibloom(\/|%2F)v1(\/|%2F)fields(\/|%2F)1(\?|$)/, async ( route ) => {
+			await new Promise( ( done ) => setTimeout( done, 700 ) );
+			await route.continue();
+		} );
+		await page.getByLabel( 'Field Title' ).fill( 'Our Rating' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByRole( 'dialog', { name: 'Updating Field' } ) ).toBeVisible();
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Field saved.', { timeout: 20000 } );
+		await expect( page.getByRole( 'heading', { name: 'Our Rating', level: 1 } ) ).toBeVisible();
+		expect( JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) ).names ).toEqual( { 1: 'Our Rating' } );
+
+		// Lasso's save also wrote the select's value into a built-in's type (R16); here a built-in keeps type and description,
+		// even when the request sends others (Product name has no option in the select at all).
+		const sent = await page.evaluate( async () => {
+			const api = ( window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { data: { type: string; description: string } } > } } ).wp;
+			return ( await api.apiFetch( { path: '/affibloom/v1/fields/99990', method: 'PATCH', data: { name: 'Title', type: 'text', description: 'Other words.' } } ) ).data;
+		} );
+		expect( sent.type ).toBe( 'product_name' );
+		expect( sent.description ).toBe( 'Product name.' );
+
+		// The Fields list and the product page's library show the new name.
+		await page.goto( LIST );
+		await expect( rows( page ).nth( 0 ).locator( '.affibloom-row__name' ) ).toHaveText( 'Our Rating' );
+		await expect( rows( page ).nth( 4 ).locator( '.affibloom-row__name' ) ).toHaveText( 'Title' );
+		await expect( rows( page ).nth( 4 ).getByRole( 'img', { name: 'Product name' } ) ).toBeVisible();
+		const id = createProduct( { name: unique( 'F26 renamed' ) } );
+		made.push( id );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await page.getByRole( 'button', { name: 'Add Custom Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByRole( 'tab', { name: 'Add from library' } ).click();
+		await expect( dialog.getByRole( 'button', { name: 'Add Our Rating' } ) ).toBeVisible();
+	} );
+
+	test( 'AC3 the editor\'s own field: all three change, and a changed type keeps a product\'s value', async ( { page } ) => {
+		const title = unique( 'F26 Own' );
+		seedFields( { fields: [ { id: 8100, name: title, type: 'text', description: 'Before.' } ] } );
+		const product = createProduct( { name: unique( 'F26 keeps' ) } );
+		made.push( product );
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_fields', JSON.stringify( [ { field: 8100, value: '38', visible: true, show_name: false } ] ), '--format=json' );
+
+		await page.goto( `${ FIELD }&id=8100&tab=details` );
+		await page.waitForLoadState( 'load' );
+		await expect( page.getByLabel( 'Field Type' ) ).toBeEnabled();
+		await expect( page.getByLabel( 'Description' ) ).toBeEnabled();
+		await expect( page.getByText( 'Note: This is a built-in field' ) ).toHaveCount( 0 );
+		await expect( page.getByRole( 'button', { name: 'Delete This Field' } ) ).toBeVisible();
+
+		// An empty title is refused under it.
+		await page.getByLabel( 'Field Title' ).fill( '' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByText( 'Title is required.' ) ).toBeVisible();
+
+		await page.getByLabel( 'Field Title' ).fill( `${ title } renamed` );
+		await page.getByLabel( 'Field Type' ).selectOption( { label: 'Number' } );
+		await page.getByLabel( 'Description' ).fill( 'After.' );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Field saved.', { timeout: 20000 } );
+		await expect( page.getByRole( 'heading', { name: `${ title } renamed`, level: 1 } ) ).toBeVisible();
+
+		const stored = JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) );
+		expect( stored.fields ).toEqual( [ { id: 8100, name: `${ title } renamed`, type: 'number', description: 'After.' } ] );
+		const rowsStored = JSON.parse( wp( 'post', 'meta', 'get', String( product ), '_affibloom_fields', '--format=json' ) );
+		expect( rowsStored[ 0 ].value ).toBe( '38' );
+
+		// The form reads back what was saved after a reload.
+		await page.reload();
+		await expect( page.getByLabel( 'Field Type' ) ).toHaveValue( 'number' );
+		await expect( page.getByLabel( 'Description' ) ).toHaveValue( 'After.' );
+	} );
+
+	test( 'AC4 Delete This Field: a field in use shows Hold Up and stays, an unused one is deleted after a question', async ( { page } ) => {
+		const used = unique( 'F26 Used' );
+		const spare = unique( 'F26 Spare' );
+		seedFields( {
+			fields: [
+				{ id: 8101, name: used, type: 'text', description: '' },
+				{ id: 8102, name: spare, type: 'text', description: '' },
+			],
+		} );
+		const product = createProduct( { name: unique( 'F26 uses' ) } );
+		made.push( product );
+		giveFields( product, [ 8101 ] );
+		const api = ( path: string, method: string ) =>
+			page.evaluate( async ( [ p, m ] ) => {
+				const wpApi = ( window as unknown as { wp: { apiFetch: ( o: object ) => Promise< unknown > } } ).wp;
+				try {
+					await wpApi.apiFetch( { path: p, method: m } );
+					return 'ok';
+				} catch ( error ) {
+					return ( error as { code: string } ).code;
+				}
+			}, [ path, method ] );
+
+		// In use: "Hold Up", and nothing is deleted.
+		await page.goto( `${ FIELD }&id=8101&tab=details` );
+		await page.waitForLoadState( 'load' );
+		await page.getByRole( 'button', { name: 'Delete This Field' } ).click();
+		const hold = page.getByRole( 'dialog', { name: 'Hold Up' } );
+		await expect( hold ).toContainText( "You can't delete a Field if there are Links using it. Remove all Links using this Field first." );
+		await hold.getByRole( 'button', { name: 'Ok' } ).click();
+		await expect( hold ).toBeHidden();
+		// A direct request is refused too, and so is deleting a built-in.
+		expect( await api( '/affibloom/v1/fields/8101', 'DELETE' ) ).toBe( 'affibloom_field_in_use' );
+		expect( await api( '/affibloom/v1/fields/1', 'DELETE' ) ).toBe( 'affibloom_field_built_in' );
+		expect( await api( '/affibloom/v1/fields/5555', 'DELETE' ) ).toBe( 'affibloom_not_found' );
+		expect( JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) ).fields ).toHaveLength( 2 );
+
+		// Unused: the question, Cancel keeps it, Delete shows "Deleting Field" and lands on the list with the toast.
+		await page.goto( `${ FIELD }&id=8102&tab=details` );
+		await page.waitForLoadState( 'load' );
+		await page.getByRole( 'button', { name: 'Delete This Field' } ).click();
+		const ask = page.getByRole( 'dialog', { name: 'Delete This Field?' } );
+		await expect( ask ).toContainText( "If deleted, you won't be able to get it back." );
+		await ask.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( ask ).toBeHidden();
+		expect( JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) ).fields ).toHaveLength( 2 );
+
+		await page.route( /affibloom(\/|%2F)v1(\/|%2F)fields(\/|%2F)8102(\?|$)/, async ( route ) => {
+			await new Promise( ( done ) => setTimeout( done, 700 ) );
+			await route.continue();
+		} );
+		await page.getByRole( 'button', { name: 'Delete This Field' } ).click();
+		await ask.getByRole( 'button', { name: 'Delete', exact: true } ).click();
+		await expect( page.getByRole( 'dialog', { name: 'Deleting Field' } ) ).toBeVisible();
+		await expect( page ).toHaveURL( /page=affibloom-fields&affibloom_notice=field-deleted/, { timeout: 20000 } );
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Successfully deleted the Field.' );
+		await expect( rows( page ).locator( '.affibloom-row__name', { hasText: spare } ) ).toHaveCount( 0 );
+		await expect( rows( page ).locator( '.affibloom-row__name', { hasText: used } ) ).toHaveCount( 1 );
+		expect( JSON.parse( wp( 'option', 'get', OPTION, '--format=json' ) ).fields.map( ( f: { name: string } ) => f.name ) ).toEqual( [ used ] );
+	} );
+
+	test( 'AC3 a field that does not exist goes back to the list; a list row opens its field', async ( { page } ) => {
+		seedFields();
+		await page.goto( `${ FIELD }&id=987654` );
+		await expect( page ).toHaveURL( /page=affibloom-fields$/ );
+
+		await rows( page ).nth( 1 ).getByRole( 'link', { name: 'Pros' } ).click();
+		await expect( page ).toHaveURL( /page=affibloom-field&id=2/ );
+		await expect( page.getByRole( 'heading', { name: 'Pros', level: 1 } ) ).toBeVisible();
 	} );
 
 	test( 'AC2 the product page\'s Create new tab gives the same "Title is required."', async ( { page } ) => {

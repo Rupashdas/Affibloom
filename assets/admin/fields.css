@@ -35,6 +35,9 @@
 .affibloom-field-modal__manage .affibloom-icon { width: 14px; height: 14px; }
 
 @media (max-width: 782px) {
+	/* Save Changes fills the width on a phone (admin.css), so Delete This Field goes under it instead of beside it. */
+	.affibloom-fieldpage .affibloom-card__foot--split { flex-direction: column-reverse; align-items: stretch; gap: 12px; }
+	.affibloom-fieldpage .affibloom-card__foot--split .affibloom-link-button { justify-content: center; }
 	.affibloom-table--fields .affibloom-col-type,
 	.affibloom-table--fields .affibloom-col-usage { width: 72px; }
 }
@@ -42,3 +45,14 @@
 /* A field's form (Lasso's field-details.php): Title and Type side by side, Description below; a readable measure inside the wide card. */
 .affibloom-fieldform__fields { display: grid; gap: 20px; max-width: 760px; padding-top: 28px; padding-bottom: 28px; }
 .affibloom-fieldpage .affibloom-card__foot { justify-content: flex-end; align-items: center; }
+.affibloom-fieldpage .affibloom-card__foot--split { justify-content: space-between; }
+.affibloom-fieldform__note { margin: 0; padding: 12px 14px; border-radius: var(--affibloom-radius-nav); background: var(--affibloom-brand-50); color: var(--affibloom-ink-700); font-size: 13px; line-height: 19px; }
+.affibloom-fieldform__fields .affibloom-input:disabled { background: var(--affibloom-subtle); color: var(--affibloom-ink-600); cursor: not-allowed; }
+.affibloom-link-button .affibloom-icon { width: 16px; height: 16px; }
+
+/* A row of the Fields list opens its field: the name is the link and stretches over the row (as Groups' rows do). */
+.affibloom-table--fields tbody tr { position: relative; cursor: pointer; }
+.affibloom-admin .affibloom-table--fields .affibloom-row__link { text-decoration: none; }
+.affibloom-admin .affibloom-table--fields .affibloom-row__link:hover { text-decoration: underline; }
+.affibloom-table--fields .affibloom-row__link::after { content: ""; position: absolute; inset: 0; }
+.affibloom-table--fields .affibloom-row__link:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }

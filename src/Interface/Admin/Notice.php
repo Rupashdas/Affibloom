@@ -42,6 +42,8 @@ final class Notice {
 			'group-saved'      => __( 'Group saved.', 'affibloom' ),
 			// After a field is saved from the Fields screen (Task FL2, F26 D18): U6's plain wording for Lasso's toast.
 			'field-saved'      => __( 'Field saved.', 'affibloom' ),
+			// On the Fields list after Delete This Field (Task FL3): Lasso's words.
+			'field-deleted'    => __( 'Successfully deleted the Field.', 'affibloom' ),
 			// The one-time Lasso import (the user, 2026-11-13); the counts ride along in the query.
 			'lasso-imported'   => $this->imported(),
 			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),

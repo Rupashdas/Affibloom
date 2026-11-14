@@ -93,6 +93,81 @@ final class FieldsService {
 	}
 
 	/**
+	 * One field, or null when there is none (a field's page, F26 R12).
+	 *
+	 * @param int $id The field's ID.
+	 */
+	public function get( int $id ): ?Field {
+		return $this->library->load()->find( $id );
+	}
+
+	/**
+	 * How many products have this field, in any status: what the Delete This Field button and rule go by.
+	 *
+	 * @param int $id The field's ID.
+	 */
+	public function usage_of( int $id ): int {
+		return $this->usage->usage()->of( $id );
+	}
+
+	/**
+	 * Saves a field's Details (F26 R15-R17). A built-in field takes only its title; the kind and the description in the
+	 * request are ignored (D4). A created field takes all three, and a changed kind touches no product's value.
+	 *
+	 * @param int    $id          The field's ID.
+	 * @param string $name        The title, 1-80 characters.
+	 * @param string $type        One of FieldType's choosable values; ignored for a built-in field.
+	 * @param string $description The description; ignored for a built-in field.
+	 * @throws FieldNotFound When there is no such field.
+	 * @throws InvalidField  When the title, the kind or the description breaks its rule.
+	 */
+	public function edit( int $id, string $name, string $type, string $description ): Field {
+		$library = $this->library->load();
+		$field   = $library->find( $id );
+		if ( null === $field ) {
+			throw new FieldNotFound( 'No such field.' );
+		}
+
+		if ( $field->built_in ) {
+			$library = $library->rename( $id, $name );
+		} else {
+			$kind = FieldType::tryFrom( $type );
+			if ( null === $kind || ! $kind->is_choosable() ) {
+				throw new InvalidField( 'type', 'invalid_type' );
+			}
+			$library = $library->update( $id, $name, $kind, $description );
+		}
+		$this->library->save( $library );
+
+		return $library->find( $id ) ?? $field;
+	}
+
+	/**
+	 * Deletes a field, never a built-in one and never one a product has (F26 R18, D5): the server checks at this moment,
+	 * where Lasso's checks nothing. No stored value is left behind to be orphaned.
+	 *
+	 * @param int $id The field's ID.
+	 * @throws FieldNotFound When there is no such field.
+	 * @throws FieldBuiltIn  When it is one of the built-in fields.
+	 * @throws FieldInUse    When a product has it.
+	 */
+	public function delete( int $id ): void {
+		$library = $this->library->load();
+		$field   = $library->find( $id );
+		if ( null === $field ) {
+			throw new FieldNotFound( 'No such field.' );
+		}
+		if ( $field->built_in ) {
+			throw new FieldBuiltIn( 'A built-in field cannot be deleted.' );
+		}
+		if ( $this->usage->usage()->of( $id ) > 0 ) {
+			throw new FieldInUse( 'A product has this field.' );
+		}
+
+		$this->library->save( $library->delete( $id ) );
+	}
+
+	/**
 	 * A product's fields, or null when it is not a published product.
 	 *
 	 * @param int $product The product's ID.
