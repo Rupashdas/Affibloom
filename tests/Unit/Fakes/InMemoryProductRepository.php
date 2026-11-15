@@ -190,6 +190,15 @@ final class InMemoryProductRepository implements ProductRepository {
 		$this->saved                         = array_values( array_filter( $this->saved, static fn( Product $saved ): bool => $saved->id !== $product->id ) );
 	}
 
+	/** A product saved or gone (trashed, retired) exists; a deleted one does not. */
+	public function repointed_to( int $id ): ?int {
+		if ( isset( $this->gone[ $id ] ) ) {
+			return $this->retired[ $id ] ?? 0;
+		}
+
+		return null === $this->get( $id ) ? null : 0;
+	}
+
 	/** @var array<int, Product> Trashed and retired products, by ID: what find_deleted() can find and revive() brings back. */
 	public array $gone = array();
 

@@ -544,6 +544,21 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The product a product was repointed to, whatever its status (Task 18A).
+	 *
+	 * @param int $id A product's ID.
+	 * @return int|null The target's ID, 0 when it points nowhere, null when no product with this ID exists.
+	 */
+	public function repointed_to( int $id ): ?int {
+		$post = get_post( $id );
+		if ( ! $post instanceof WP_Post || ProductPostType::NAME !== $post->post_type ) {
+			return null;
+		}
+
+		return max( 0, (int) get_post_meta( $id, '_affibloom_repointed_to', true ) );
+	}
+
+	/**
 	 * The product page's delete (Task 17A), as Lasso's lasso_delete_post: wp_delete_post( id, true ) skips the trash and
 	 * removes the post with its meta and term relationships. WordPress answers false or null when it refuses.
 	 *
@@ -825,6 +840,9 @@ final class PostTypeProductRepository implements ProductRepository {
 			features: self::features( $meta( 'features' ) ),
 			old_genius_url: $meta( 'old_genius_url' ),
 			old_genius_url2: $meta( 'old_genius_url2' ),
+			// '' (never stored) means on, and any other value counts as PHP's truth, as Lasso reads show_description.
+			show_description: '' === $meta( 'show_description' ) ? null : '0' !== $meta( 'show_description' ),
+			slug: $post->post_name,
 		);
 	}
 

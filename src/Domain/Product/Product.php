@@ -53,6 +53,9 @@ final class Product {
 	 * @param string       $old_genius_url  The last geni.us link given as the Primary URL (Lasso's old_genius_url, C1K).
 	 * @param string       $old_genius_url2 The last geni.us link given to the second button, the first added one (Lasso's
 	 *                                      old_second_btn_genius_url).
+	 * @param bool|null    $show_description Show the description in the box; null when never stored, which Lasso reads
+	 *                                       as on (Lasso's show_description; F5 R22).
+	 * @param string       $slug            The product's slug (its post name); the box's `affibloom-url-<slug>` class.
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -80,6 +83,8 @@ final class Product {
 		public readonly array $features = array(),
 		public readonly string $old_genius_url = '',
 		public readonly string $old_genius_url2 = '',
+		public readonly ?bool $show_description = null,
+		public readonly string $slug = '',
 	) {}
 
 	/**

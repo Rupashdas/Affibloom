@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { blockTrackers, boxBlock, createProduct, newPostWith, type ProductFields } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp, type ProductFields } from '../utils';
 
 // F5 Box design (docs/features/F5/requirements.md).
 // Baselines: tests/fixtures/baselines/variants/<variant>-<desktop|mobile>.png (Task 5). playwright.config.ts
@@ -40,6 +40,103 @@ function productFrom( b: Box ): ProductFields {
 	};
 }
 
+// The site's Display settings for Single (F5 requirements, "This copy, 2026-11-14"), as Settings → Display stores them,
+// and the site's settings the box reads. AC3 and AC4 draw boxes with these, as the live boxes were drawn.
+function useSiteDisplay(): void {
+	const single = {
+		theme: 'Lab',
+		palette: {
+			main: '#000000', title: '#000000', background: '#ffffff', button: '#5e3f8c', secondary_button: '#5e3f8c',
+			button_text: '#ffffff', pros: '#0e4a0e', cons: '#4a0e0e',
+			primary_button_text: '<span class="amazon-icon"></span> Buy Now',
+			secondary_button_text: '<span class="pricetag-icon"></span> Check Price',
+			badge_text: '',
+		},
+		elements: { badge: true, image: true, title: true, price: false, prime: true, desc: true, proscons: false, primary: true, secondary: true, timestamp: false },
+		density: { preset: 'spacious', values: {} },
+		layout: { orientation: 'side-by-side', imagePosition: 'left', align: 'left', buttonAlign: 'spread', ctaWidth: 'full', mobileOverflow: 'stack', imageFit: 'contain' },
+	};
+	wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single } ), '--format=json' );
+	setSettings( {
+		show_price: false,
+		show_disclosure: true,
+		link_from_display_title: true,
+		show_prime: true,
+		disclosure_text: 'We earn a commission if you make a purchase, at no additional cost to you.',
+	} );
+}
+
+// Lasso's names in a captured box and the Affibloom names that replace them (ADR-6; the table in docs/ui/tokens.md,
+// "Product box"). Attributes left out: `decoding` (WordPress adds it), `data-lasso-link` (Lasso's cloud, D3),
+// `data-layout-d-*` (copied by the phone script at run time) and `data-lasso-id` (a box placed by the block has no
+// link location, where Lasso falls back to the product ID).
+const RENAMED_ATTRIBUTES: Record< string, string > = {
+	'data-lasso-box-trackable': 'data-affibloom-box-trackable',
+	'data-lasso-lid': 'data-affibloom-id',
+	'data-lasso-name': 'data-affibloom-name',
+};
+const IGNORED_ATTRIBUTES = /^(decoding|data-lasso-link|data-lasso-id|data-layout-d-.*)$/;
+
+type Tree = { tag: string; attrs: [ string, string ][]; children: ( Tree | string )[] };
+
+/**
+ * A box's DOM as a comparable tree: the live box (lassoHtml null) or a captured Lasso box with Lasso's names
+ * translated; values that hold IDs become placeholders, text has its whitespace collapsed, comments are dropped.
+ */
+async function boxTree( page: Page, lassoHtml: string | null ): Promise< Tree > {
+	return page.evaluate(
+		( { html, renamed, ignored } ) => {
+			const translate = ( token: string ): string => {
+				const special: Record< string, string > = { 'lasso-ds-v2-frontend': 'affibloom-advanced', 'lasso-container': 'affibloom-box', clear: 'affibloom-clear' };
+				return special[ token ] ?? token.replace( /^lasso-/, 'affibloom-' );
+			};
+			const value = ( name: string, raw: string, lasso: boolean ): string => {
+				if ( name === 'class' ) {
+					return raw.split( /\s+/ ).filter( Boolean ).map( ( t ) => ( lasso ? translate( t ) : t ) )
+						.map( ( t ) => ( t.startsWith( 'affibloom-url-' ) ? 'affibloom-url-SLUG' : t ) ).join( ' ' );
+				}
+				if ( name === 'style' ) {
+					return ( lasso ? raw.replace( /--lasso-/g, '--affibloom-' ) : raw ).replace( /\s+/g, ' ' ).trim();
+				}
+				if ( name === 'id' && /^(lasso|affibloom)-anchor-id-\d+-\w+$/.test( raw ) ) {
+					return 'ANCHOR';
+				}
+				return name === 'data-affibloom-id' || name === 'data-lasso-lid' ? 'ID' : raw;
+			};
+			const walk = ( el: Element, lasso: boolean ): Tree => {
+				const attrs: [ string, string ][] = [];
+				for ( const a of Array.from( el.attributes ) ) {
+					if ( lasso && new RegExp( ignored ).test( a.name ) ) {
+						continue;
+					}
+					const name = lasso ? renamed[ a.name ] ?? a.name.replace( /^data-v2-hide-/, 'data-hide-' ) : a.name;
+					attrs.push( [ name, value( a.name, a.value, lasso ) ] );
+				}
+				attrs.sort( ( x, y ) => x[ 0 ].localeCompare( y[ 0 ] ) );
+				const children: ( Tree | string )[] = [];
+				for ( const child of Array.from( el.childNodes ) ) {
+					if ( child.nodeType === Node.ELEMENT_NODE ) {
+						children.push( walk( child as Element, lasso ) );
+					} else if ( child.nodeType === Node.TEXT_NODE ) {
+						const text = ( child.textContent ?? '' ).replace( /\s+/g, ' ' ).trim();
+						if ( text ) {
+							children.push( text );
+						}
+					}
+				}
+				return { tag: el.tagName.toLowerCase(), attrs, children };
+			};
+			if ( html === null ) {
+				return walk( document.querySelector( '.affibloom-box' ) as Element, false );
+			}
+			const template = document.createElement( 'template' );
+			template.innerHTML = html;
+			return walk( template.content.firstElementChild as Element, true );
+		},
+		{ html: lassoHtml, renamed: RENAMED_ATTRIBUTES, ignored: IGNORED_ATTRIBUTES.source }
+	);
+}
+
 test.describe( 'F5 Box design', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
@@ -67,5 +164,61 @@ test.describe( 'F5 Box design', () => {
 
 		await page.goto( newPostWith( '<!-- wp:paragraph --><p>No box here.</p><!-- /wp:paragraph -->' ) );
 		expect( ( await assets() ).filter( ( url ) => url.includes( 'affibloom' ) ) ).toEqual( [] );
+	} );
+
+	// AC3: the three Lab examples print Lasso's markup, element for element, under Affibloom's names. The product's
+	// button text is left empty, so the Single type's label (with the site's icon span) shows, as on the live boxes.
+	for ( const variant of [ 'amazon', 'other', 'no-description' ] ) {
+		test( `AC3 the ${ variant } box prints Lasso's markup`, async ( { page } ) => {
+			useSiteDisplay();
+			const example = boxes.find( pick[ variant ] ) as Box;
+			const id = createProduct( { ...productFrom( example ), button_text: '', sponsored: '0' } );
+			await page.goto( newPostWith( boxBlock( id ) ) );
+
+			const lasso = readFileSync( `tests/fixtures/baselines/variants/${ variant }.html`, 'utf8' );
+			expect( await boxTree( page, null ) ).toEqual( await boxTree( page, lasso ) );
+			// The comment that marks the box (D9).
+			expect( await page.content() ).toContain( '<!-- PRODUCT BOX -->' );
+		} );
+	}
+
+	test( 'AC3 a missing, draft or retired product prints nothing; a repointed one prints its target', async ( { page } ) => {
+		useSiteDisplay();
+		const draft = createProduct( { name: 'F5 AC3 draft' } );
+		wp( 'post', 'update', String( draft ), '--post_status=draft' );
+		const target = createProduct( { name: 'F5 AC3 target' } );
+		const retired = createProduct( { name: 'F5 AC3 retired' } );
+		wp( 'post', 'meta', 'update', String( retired ), '_affibloom_repointed_to', String( target ) );
+		wp( 'post', 'update', String( retired ), '--post_status=affibloom_retired' );
+
+		await page.goto( newPostWith( boxBlock( 999999999 ) + boxBlock( draft ) ) );
+		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 0 );
+
+		await page.goto( newPostWith( boxBlock( retired ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( 'F5 AC3 target' );
+	} );
+
+	// AC4: Lasso's attribute order on every link, and its rel and target tables (R38, R39).
+	const RELS: [ ProductFields, string, string ][] = [
+		[ { new_tab: '1', nofollow: '1', sponsored: '0' }, 'nofollow noopener', '_blank' ],
+		[ { new_tab: '0', nofollow: '1', sponsored: '1' }, 'nofollow sponsored', '_self' ],
+		[ { new_tab: '1', nofollow: '0', sponsored: '1' }, 'noopener sponsored', '_blank' ],
+		[ { new_tab: '0', nofollow: '0', sponsored: '0' }, '', '_self' ],
+	];
+	test( "AC4 every link carries Lasso's attributes in Lasso's order, with rel and target by Lasso's rules", async ( { page } ) => {
+		useSiteDisplay();
+		for ( const [ flags, rel, target ] of RELS ) {
+			const id = createProduct( { name: 'F5 AC4', ...flags } );
+			await page.goto( newPostWith( boxBlock( id ) ) );
+			const links = page.locator( '.affibloom-box a' );
+			await expect( links ).toHaveCount( 3 ); // image, title, button 1
+			for ( const link of await links.all() ) {
+				const names = await link.evaluate( ( a ) => Array.from( a.attributes ).map( ( x ) => x.name ).filter( ( n ) => n !== 'class' ) );
+				expect( names ).toEqual( [ 'target', 'href', 'data-affibloom-box-trackable', 'data-affibloom-id', 'data-affibloom-name', 'title', 'rel' ] );
+				await expect( link ).toHaveAttribute( 'rel', rel );
+				await expect( link ).toHaveAttribute( 'target', target );
+				await expect( link ).toHaveAttribute( 'data-affibloom-id', String( id ) );
+			}
+		}
 	} );
 } );

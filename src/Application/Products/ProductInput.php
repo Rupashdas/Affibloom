@@ -27,10 +27,10 @@ final class ProductInput {
 	private const SWITCHES = array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' );
 
 	/** Badge and button texts: the site's icon spans and nothing else (Lasso's get_icon_markup_wp_kses_allowed_html). */
-	private const ICON_MARKUP = array( 'span' => array( 'class' => true ) );
+	public const ICON_MARKUP = array( 'span' => array( 'class' => true ) );
 
 	/** Lasso's get_price_field_wp_kses_allowed_html: the price editor's tags, each with style and class. */
-	private const PRICE_TAGS = array(
+	public const PRICE_TAGS = array(
 		'br'     => array(),
 		'p'      => array(
 			'style' => true,

@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "affibloom/product-box",
+	"title": "Product box",
+	"category": "widgets",
+	"description": "Shows one product's box.",
+	"textdomain": "affibloom",
+	"attributes": {
+		"productId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false
+	}
+}

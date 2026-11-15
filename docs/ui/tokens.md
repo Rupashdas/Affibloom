@@ -63,3 +63,41 @@ WordPress core's `.wrap h1` (23px, weight 400) outranks a single class, so page-
 - Cards: white, `--affibloom-radius`, about 20 px padding; on Settings, two columns side by side.
 - Dashboard rows about 80 px tall; image thumbnail 40 px square.
 - Bootstrap 4 spacing scale (`.p-4`, `.mb-3` …), which the plan's CSS kit reproduces with its own classes.
+
+## Product box
+
+The reader-facing box (Phase 3) keeps the site's current look and Lasso's markup, under Affibloom's names (ADR-6,
+decision C1; deviation 132). Task 41 translates the site's `.lasso-*` Additional CSS rules with this table.
+
+| Lasso | Affibloom | Where |
+|---|---|---|
+| `lasso-container` | `affibloom-box` | the outer `div` (with the anchor `id`) |
+| `lasso-anchor-id-<product>-<link>` | `affibloom-anchor-id-<product>-<link or uniqid>` | the outer `div`'s `id` |
+| `<!-- LASSO DISPLAY BOX (https://getlasso.co) -->` | `<!-- PRODUCT BOX -->` | first child (F5 D9) |
+| `lasso-display` | `affibloom-display` | the wrapper |
+| `lasso-<theme>` (`lasso-lab`, …) | `affibloom-<theme>` | the wrapper |
+| `lasso-url-<slug>` | `affibloom-url-<slug>` | the wrapper |
+| `lasso-ds-v2-frontend` | `affibloom-advanced` | the wrapper, advanced rendering |
+| `data-v2-hide-<element>` | `data-hide-<element>` | the wrapper |
+| `data-layout-*`, `data-layout-m-*`, `data-density-*` | unchanged | the wrapper |
+| `--lasso-<name>` | `--affibloom-<name>` | the wrapper's `style`, `:root` |
+| `lasso-badge`, `lasso-badge-text` | `affibloom-badge`, `affibloom-badge-text` | |
+| `lasso-box-1` … `lasso-box-6` | `affibloom-box-1` … `affibloom-box-6` | |
+| `lasso-image`, `lasso-image-no-lazy` | `affibloom-image`, `affibloom-image-no-lazy` | |
+| `lasso-title` | `affibloom-title` | |
+| `lasso-price`, `lasso-price-value` | `affibloom-price`, `affibloom-price-value` | |
+| `discount-price`, `latest-price` | `affibloom-discount-price`, `affibloom-latest-price` | |
+| `lasso-amazon-prime` | `affibloom-amazon-prime` | |
+| `clear` | `affibloom-clear` | |
+| `lasso-description` | `affibloom-description` | |
+| `lasso-button-1`, `lasso-button-2` | `affibloom-button-1`, `affibloom-button-2` | |
+| `lasso-disclosure`, `lasso-date` | `affibloom-disclosure`, `affibloom-date` | |
+| `data-lasso-box-trackable` | `data-affibloom-box-trackable` | links |
+| `data-lasso-lid` (the product) | `data-affibloom-id` | links (F12's click key) |
+| `data-lasso-id` (link location) | not printed; F21's `data-affibloom-location` | links |
+| `data-lasso-name` | `data-affibloom-name` | links |
+| `data-lasso-button` | `data-affibloom-btn` | buttons 2 and up (19A, F12) |
+| `data-lasso-link` | not printed (Lasso's cloud, F5 D3) | |
+
+Icon spans in button and badge texts (`amazon-icon`, `pricetag-icon`, …) are the site's own and keep their names.
+Measured values (sizes, spacing) are added here by Tasks 18B-22E.

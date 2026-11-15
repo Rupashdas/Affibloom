@@ -164,6 +164,15 @@ interface ProductRepository {
 	public function retire( Product $product, int $to ): void;
 
 	/**
+	 * The product a product was repointed to, whatever its status (Lasso's front end reads
+	 * lasso_repointed_to_lasso_id so), for the box's resolver (Task 18A).
+	 *
+	 * @param int $id A product's ID.
+	 * @return int|null The target's ID, 0 when it points nowhere, null when no product with this ID exists.
+	 */
+	public function repointed_to( int $id ): ?int;
+
+	/**
 	 * Deletes a stored product for good, with everything stored on it (the product page's delete, Task 17A).
 	 *
 	 * @param int $id A stored product's ID.

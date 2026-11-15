@@ -65,6 +65,9 @@ final class Settings {
 		'show_disclosure_table'           => true,
 		'keep_site_stripe_ui'             => false,
 		'custom_css'                      => '',
+		// The picture a box shows for a product without one (Lasso's default_thumbnail); '' means Affibloom's own
+		// (F5 D14: Lasso's points into its plugin folder, which goes when Lasso is deleted).
+		'default_thumbnail'               => '',
 		// Amazon: Lasso's factory defaults (admin/lasso-constant.php 111-160; docs/features/F17).
 		'tracking_id'                     => '',
 		'multiple_tracking_ids'           => true,

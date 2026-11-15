@@ -16,6 +16,8 @@ use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
 use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
 use Affibloom\Application\Amazon\PriceRefreshService;
 use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Box\BoxBuilder;
+use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Amazon\AmazonSearchService;
 use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsService;
@@ -98,6 +100,8 @@ use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Admin\TrackingIdController;
+use Affibloom\Interface\Block\ProductBoxBlock;
+use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
@@ -337,6 +341,14 @@ final class Plugin {
 		return array(
 			new ProductPostType(),
 			new GroupTaxonomy(),
+			new ProductBoxBlock(
+				dirname( $this->file ) . '/blocks/product-box',
+				new RepointResolver( new PostTypeProductRepository() ),
+				$display,
+				$this->settings_repository(),
+				new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp' ),
+				new BoxHtml( dirname( $this->file ) . '/templates/front' )
+			),
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),

@@ -98,7 +98,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 **F5-F8, the Single box, with buttons, overrides, rating, fields, price, disclosure (run order):**
 
-- [ ] Task 18A: The box reaches a reader — markup, elements and links
+- [x] Task 18A: The box reaches a reader — markup, elements and links
 - [ ] Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
 - [ ] Task 18C: Where the box's assets load
 - [ ] Task 18D: Lasso's baselines for every theme and state
@@ -263,15 +263,21 @@ Lasso's link attributes. A missing, draft or retired product prints nothing (a r
 `DescriptionRuleTest`, `DisplayPresentationTest`, `BoxBuilderTest`; modify `src/Plugin.php`, `F5.spec.ts` (AC3, AC4,
 selectors to Lasso's classes plus `.affibloom-box`), `F6-F8.spec.ts` selectors.
 
-- [ ] **Step 1: Failing tests.** AC3: build the amazon, other and no-description example products, compare the box DOM
+- [x] **Step 1: Failing tests.** AC3: build the amazon, other and no-description example products, compare the box DOM
   with `variants/*.html` (normalised; `decoding`, `data-lasso-link`, `data-layout-d-*` ignored). AC4: attribute order
   and rel/target tables. Expected red: the block is not registered.
-- [ ] **Step 2: Domain** with unit tests: `LinkAttributes` (Lasso's rel tables, secondary sponsored only with
+- [x] **Step 2: Domain** with unit tests: `LinkAttributes` (Lasso's rel tables, secondary sponsored only with
   NoFollow 2, unset flag = off), `DescriptionRule` (R22 without writing), `LayoutFamily`.
-- [ ] **Step 3: `DisplayPresentation`** (R54: attributes, phone attributes, hide flags, inline properties).
-- [ ] **Step 4: Builder, view, template, block.** Escaping per D4; comment `<!-- PRODUCT BOX -->`.
-- [ ] **Step 5: Run and look** (view source beside `variants/amazon.html`).
-- [ ] **Step 6: Commit** — "Render the Single product box with Lasso's markup".
+- [x] **Step 3: `DisplayPresentation`** (R54: attributes, phone attributes, hide flags, inline properties).
+- [x] **Step 4: Builder, view, template, block.** Escaping per D4; comment `<!-- PRODUCT BOX -->`.
+- [x] **Step 5: Run and look** (view source beside `variants/amazon.html`).
+- [x] **Step 6: Commit** — "Render the Single product box with Lasso's markup".
+
+*Note (2026-11-16):* ADR-6 names throughout, data attributes and properties too (deviation 132; table in
+`docs/ui/tokens.md`); the F5 spec asserts them, F6-F8 already did. Always the advanced wrapper (classic is 18K); theme =
+Single's, then the product's (the box's is 18E); every theme prints box-3 until 18E/18F. Added `RepointResolver`,
+`ProductRepository::repointed_to()`, `Product::$slug`, `$show_description`. Checked: unit 736, phpcs, the page source
+beside `variants/amazon.html` (same elements, attributes and order), 1280 px (unstyled until 18B).
 
 ---
 

@@ -137,6 +137,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 129. Lean working method (the user, 2026-11-15): few records, few test runs, no save/restore or backups on Local.
 - 130. Tests per task cut to ~20 s (the user, 2026-11-15): no red run; lint, analyse and Playwright once per batch.
 - 131. The user tests each batch by hand from Claude's guide; Playwright only at the phase exit; PHPStan cache in `.local/`; English.
+- 132. Task 18A (2026-11-16): the box's data attributes and properties get Affibloom names too (`data-affibloom-id`, `data-hide-*`, `--affibloom-*`); table in tokens.md.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2702,3 +2703,15 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     hand; reported problems are fixed as "Fix <what> (<task ID>)". Playwright ACs are still written per task and run at
     the phase exit check or on request. PHPStan's `tmpDir` moved to `.local/phpstan` (cold 31 s, warm 4 s), so a
     cleared system temp folder no longer costs a full analysis. Claude talks in English from now on.
+
+132. **Task 18A (2026-11-16): the box's Affibloom names, beyond the class names.** ADR-6 also renames Lasso's data
+    attributes and properties, so later tasks use these: `data-lasso-lid` → `data-affibloom-id` (the product, F12's
+    click key), `data-lasso-name` → `data-affibloom-name`, `data-lasso-box-trackable` → `data-affibloom-box-trackable`,
+    `data-v2-hide-<el>` → `data-hide-<el>`, `--lasso-*` → `--affibloom-*`, `lasso-ds-v2-frontend` →
+    `affibloom-advanced`, `lasso-container` → `affibloom-box`, `clear` → `affibloom-clear`; `data-layout-*` and
+    `data-density-*` keep Lasso's names. Lasso's `data-lasso-id` (link location) is not printed: F21's
+    `data-affibloom-location` takes its place where a location is known; 19A's `data-lasso-button` is F12's
+    `data-affibloom-btn`. Full table: `docs/ui/tokens.md`, "Product box". The F5 spec asserts these names (the plan's
+    "Lasso's classes plus `.affibloom-box`" predates decision C1). Also: `RepointResolver` (Application\Box) and
+    `ProductRepository::repointed_to()` hold the repoint walk 18S1 reuses; `Product` gained `show_description` and
+    `slug`; until 18E/18F every theme prints the 3-box template.
