@@ -50,10 +50,27 @@ const SITE_CSS = [
 	'.affibloom-badge{font-size:1em!important;padding-top:15px!important;padding-bottom:16px!important}',
 	'@media (max-width:767.98px){.affibloom-badge{font-size:.8em!important}}',
 	'.affibloom-display{box-shadow:7px 7px 20px -5px rgba(0,0,0,.75)!important}',
-	'.affibloom-badge::after{content:" ";display:block;left:15px;bottom:-22px;margin-top:-18px;margin-right:307px;margin-left:-18px;' +
-		'background-color:#193010;color:#193010;border-bottom-left-radius:100px;' +
-		'background-image:linear-gradient(211deg,var(--accent-hover),rgba(20,20,20,.29));position:absolute;height:20px;border-width:0;width:10px}',
+	// Not the site's `.lasso-badge::after` corner: a stray `}` before it in the Additional CSS makes browsers drop that
+	// rule, so readers never see it (measured on the live box, Fix of 18B).
 ].join( '\n' );
+
+// Where each baseline box starts on its guide page (px from the top, Local, 2026-11-16; the variants recaptured that day
+// are byte-identical to Task 5's). Text rasterises by its sub-pixel offset: the same box drawn at .594 instead of .172
+// differs in 2 % of its pixels at 390 px, where the fonts are fluid. AC1 moves the box to the same fraction.
+const BASELINE_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
+	amazon: { desktop: 19494.563, mobile: 31649.719 },
+	other: { desktop: 7293.297, mobile: 10818.172 },
+	'no-description': { desktop: 18032.469, mobile: 33108.891 },
+};
+
+/** Shifts the box down by less than a pixel (a layout offset), so its top has the baseline's fractional part. */
+async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< void > {
+	await page.locator( '.affibloom-box' ).evaluate( ( el, target ) => {
+		const now = el.getBoundingClientRect().top + window.scrollY;
+		const shift = ( ( ( target % 1 ) - ( now % 1 ) ) % 1 + 1 ) % 1;
+		Object.assign( ( el as HTMLElement ).style, { position: 'relative', top: `${ shift }px` } );
+	}, baselineTop );
+}
 
 // The site's Display settings for Single (F5 requirements, "This copy, 2026-11-14"), as Settings → Display stores them,
 // and the site's settings the box reads. AC3 and AC4 draw boxes with these, as the live boxes were drawn.
@@ -168,6 +185,7 @@ test.describe( 'F5 Box design', () => {
 				await page.setViewportSize( { width, height: 900 } );
 				await page.goto( path );
 				await page.addStyleTag( { content: SITE_CSS } );
+				await onBaselineSubpixel( page, BASELINE_TOP[ variant ][ name ] );
 				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'variants', `${ variant }-${ name }.png` ] );
 			}
 		} );

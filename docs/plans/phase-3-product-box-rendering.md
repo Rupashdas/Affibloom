@@ -317,6 +317,11 @@ ADR-6's names (no other theme, group display, stars or fields yet). The allowlis
 within 1-3 px of today's live box; AC1 (run once) is off by 7 % because the 2026-11-12 PNGs predate Lasso 370:
 deviation 135.
 
+*Fix (2026-11-16, after 18D):* AC1 passes for all three examples at 1280 and 390 px, with Lasso on and off. Two Lab
+rules of Lasso's v2 file were missed: the buttons' row `margin-top` (the 16 px of deviation 135) and the square tag in
+the corner (badge `top: 0`, `right: 0`, 4 px radius, no `::after`); other advanced badges keep `top: -18px`. AC1 drops
+the site's badge corner (browsers drop it: a stray `}`) and moves the box to its baseline's sub-pixel offset.
+
 ---
 
 ### Task 18C: Where the box's assets load

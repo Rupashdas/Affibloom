@@ -192,7 +192,18 @@ article .affibloom-display.affibloom-advanced.affibloom-lab :is(.affibloom-title
 	display: inline-block !important;
 	background-color: var(--affibloom-main) !important;
 	color: var(--affibloom-button-text) !important;
-	top: 0 !important; /* Lasso 370 on the live site (369 had -18px), which the baselines show. */
+	top: -18px !important;
+}
+/* Lasso's square tag in Lab's inner corner (lines 1420-1438): Lab has no border or shadow, so the ribbon's offset and
+   folded hook would float in empty space. Flow shares the rule (Task 18E). */
+.affibloom-display.affibloom-advanced.affibloom-lab:not(.affibloom-grid-row *) > .affibloom-badge {
+	left: auto !important;
+	right: 0 !important;
+	top: 0 !important;
+	border-radius: 4px;
+}
+.affibloom-display.affibloom-advanced.affibloom-lab:not(.affibloom-grid-row *) > .affibloom-badge::after {
+	display: none !important;
 }
 .affibloom-advanced.affibloom-display,
 .affibloom-box .affibloom-advanced.affibloom-display {
@@ -218,7 +229,10 @@ article .affibloom-display.affibloom-advanced.affibloom-lab :is(.affibloom-title
 .affibloom-advanced[data-layout-align="left"] .affibloom-disclosure {
 	text-align: left;
 }
-.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-lab .affibloom-box-1 .affibloom-image {
+/* Lasso's stacked spacing (#5891, lines 1311-1315): the image at the bottom keeps a gap above it, and the buttons'
+   row keeps one above it in either orientation (not inside a grid row). */
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-lab .affibloom-box-1 .affibloom-image,
+.affibloom-display.affibloom-advanced[data-layout-orientation].affibloom-lab:not(.affibloom-grid-row *) .affibloom-box-2 {
 	margin-top: var(--affibloom-density-space-between) !important;
 }
 @media (max-width: 767.98px) {
