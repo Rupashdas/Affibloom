@@ -104,10 +104,14 @@ add_filter(
 
 		if ( str_ends_with( $path, '/getItems' ) ) {
 			$asin = strtoupper( (string) ( $body['itemIds'][0] ?? '' ) );
-			// ASINs starting B0NOTFOUND and B0OUTSTOCK stand for Amazon's other answers; any other is found and in stock.
+			// ASINs starting B0NOTFOUND and B0OUTSTOCK stand for Amazon's other answers; the three ASINs recorded live
+			// (C1Q1) get Amazon's real answer; any other is found and in stock.
 			$file = array(
 				'B0NOTFOUND' => 'getItems-empty.json',
 				'B0OUTSTOCK' => 'getItems-oos.json',
+				'B000IXRCTQ' => 'live-B000IXRCTQ-all.json',
+				'B0DHLWFD84' => 'live-B0DHLWFD84-all.json',
+				'B0F7RNL68R' => 'live-B0F7RNL68R-all.json',
 			)[ substr( $asin, 0, 10 ) ] ?? 'getItems-ok.json';
 
 			return $answer(

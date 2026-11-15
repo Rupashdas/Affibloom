@@ -502,6 +502,13 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( answer.failed ).toBe( true );
 		expect( answer.out ).toContain( '--all and --resources need --raw' );
 
+		// Every relevant field (C1Q2), from Amazon's real answer for B000IXRCTQ, recorded in C1Q1.
+		answer = get( 'B000IXRCTQ' );
+		expect( answer.failed ).toBe( false );
+		for ( const line of [ 'Price: $32.97', 'List price: $42.99 (LIST_PRICE)', 'Seller: Amazon.com (New, buy box)', 'Brand: Tachikara', 'Category: Indoor Volleyballs (#4); #1401 overall', 'Parent ASIN: B000IXRDWW', 'Images: 8' ] ) {
+			expect( answer.out ).toContain( line );
+		}
+
 		// Another store: asked by its marketplace.
 		expect( get( 'B0STUBITEM', '--country=gb' ).out ).toContain( 'URL: https://www.amazon.co.uk/dp/B0STUBITEM' );
 
