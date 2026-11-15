@@ -4,6 +4,33 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, revert to `21f7d03`, at the user's word):** `main` was reset to `21f7d03` and
+  force-pushed (the user chose a hard reset over a restore commit). The 16 commits after it (`b50079f`..`3a71ed8`)
+  are off `main` and GitHub; they are kept only on the local branch `backup/before-revert-to-21f7d03`. Taken out:
+  - **Code:** the first try of **C1B** (`3a2be33`, `111d207`: the Creators API client, `wp affibloom amazon get`,
+    the Amazon card's saved-login and save-warning fixes), **C1C** (`9974c8a`: name and image on add, the
+    `Table` class, the Amazon products table), **C1D** (`cfd9d32`: Refresh) and the single-add redirect change
+    (`a5a52c7`). None of it was ticked in the phase file at `21f7d03`; C1B, C1C and C1D stay open, **Batch 2.1 is next**.
+  - **Process:** the side-work agents (`b50079f`), the two lanes and `local-wp.sh`'s checkout lookup (`10b0353`,
+    `72e3bc4`, `b4abda8`), the test-data sweep and its revert (`d0c2825`, `00f2835`), their log entries
+    (`e490358`, `247f7b7`, `c4022f0`, `c2ebe96`) and the undo of the records split and batches (`3a71ed8`). So
+    the split records and **one batch per session** (`plans/batches.md`) stand, as at `21f7d03`. Outside the repo,
+    the web-root `CLAUDE.md`, the live `.claude/commands/` and the memory note were brought back in line with that.
+  - **The Local database was not reverted** (no backup was asked for or made): `affibloom_db_version` is **2** and
+    `wp_affibloom_amazon_products` exists with 21 rows, both from the reverted C1C. The code at `21f7d03` knows only
+    step 1, so nothing runs. **When C1C is redone,** its table step must still run on this copy: drop the table and
+    set the version back to 1 (after a backup, the user's call), or check that the step's columns match the
+    leftover table. The Amazon credentials and Partner tag saved since C1A are still stored.
+  - **Library on the Local copy (2026-11-15, after the revert):** 205 published products and 54 in the trash (252
+    were seeded). The dropped log entries said every product was set to `trash` at about 05:52, by a cause not
+    known, and that the seeded library was later put back from
+    `app/affibloom-backup-2026-11-15-before-c1c.sql` and 1,088 test products deleted by hand; two seeded
+    products (15283, 15520) were removed for good by C1's run. Restoring the library is the user's call.
+  - Checks on the reverted code: `composer lint` clean, `composer analyse` no errors, unit **589 passed** (as C1A
+    left it). The records checked against the code: C1A built and ticked, nothing of C1B-C1P ticked, every path
+    named in `progress.md`, `environment.md`, `batches.md`, the commands and `CLAUDE.md` exists. No E2E run.
+    Docs only, no new code.
+
 - **2026-11-15 (Claude Code, faster implementation, at the user's request):** `progress.md` split into `progress.md`,
   `deviations.md` and `progress-log.md` (`29a4cae`); `/next-task` reads only the current task's section. Then, at the
   user's word ("let's do change 2, batching small tasks"), one batch per session: `plans/batches.md` holds the rules
