@@ -27,14 +27,16 @@ final class SyncOutcome {
 	public const INCOMPLETE   = 'incomplete';
 	public const UNVERIFIED   = 'unverified';
 	public const SYNCED       = 'synced';
+	public const THROTTLED    = 'throttled';
 
 	/**
 	 * Use the named constructors.
 	 *
-	 * @param string $kind   BulkSyncRun::SUCCEEDED, SKIPPED or FAILED.
-	 * @param string $reason One of the constants.
+	 * @param string $kind        BulkSyncRun::SUCCEEDED, SKIPPED or FAILED.
+	 * @param string $reason      One of the constants.
+	 * @param int    $retry_after For THROTTLED, Amazon's wait in seconds; else 0.
 	 */
-	private function __construct( public readonly string $kind, public readonly string $reason ) {}
+	private function __construct( public readonly string $kind, public readonly string $reason, public readonly int $retry_after = 0 ) {}
 
 	/**
 	 * It worked.
@@ -59,5 +61,14 @@ final class SyncOutcome {
 	 */
 	public static function failed( string $reason ): self {
 		return new self( BulkSyncRun::FAILED, $reason );
+	}
+
+	/**
+	 * Amazon asked to wait (C1Q6b): not an outcome of the product, which waits; the run resumes after the wait.
+	 *
+	 * @param int $seconds Amazon's wait.
+	 */
+	public static function throttled( int $seconds ): self {
+		return new self( BulkSyncRun::FAILED, self::THROTTLED, max( 1, $seconds ) );
 	}
 }

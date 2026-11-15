@@ -4,6 +4,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q6b done, at "Start C1Q6b"):** deviation 128. Ten ASINs per request in bulk sync and the
+  job; the stub's isolation order fixed. C1Q0-C1Q6 all done. AC2 times out on Local, also on C1Q6a (environment).
+
 - **2026-11-15 (Claude Code, C1Q6a done, at "Start C1Q6"):** deviation 127. C1Q6 split; the guard keeps every
   Amazon call inside Amazon's limits (429 wait, 1/s, daily quota, job reserve). Unit 671; C1 tests passed. Next C1Q6b.
 

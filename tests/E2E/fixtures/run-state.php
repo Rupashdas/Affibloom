@@ -240,6 +240,15 @@ if ( 'save' === $affibloom_action ) {
 	if ( ! is_dir( dirname( $affibloom_state_file ) ) ) {
 		mkdir( dirname( $affibloom_state_file ), 0700, true );
 	}
+	// The scheduled Amazon refresh must not start in the background during a run (C1Q6b): the bulk sync tests spawn
+	// WP-Cron, and a refresh pass holds one of Local's two PHP workers for 20 seconds. The plugin schedules it again an
+	// hour out on the next request.
+	wp_clear_scheduled_hook( 'affibloom_amazon_refresh' );
+	wp_clear_scheduled_hook( 'affibloom_amazon_refresh_pass' );
+	// A leftover bulk sync or bulk add pass from an earlier run is not the run's to do either: its event only wakes a
+	// job that a test starts again itself.
+	wp_clear_scheduled_hook( 'affibloom_amazon_bulk_sync' );
+	wp_clear_scheduled_hook( 'affibloom_bulk_add' );
 	$affibloom_json = wp_json_encode( affibloom_e2e_read_state() );
 	if ( false === $affibloom_json || false === file_put_contents( $affibloom_state_file, $affibloom_json ) ) {
 		WP_CLI::error( 'run-state: could not write .local/e2e-run-state.json.' );

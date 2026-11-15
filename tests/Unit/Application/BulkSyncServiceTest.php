@@ -82,8 +82,10 @@ final class BulkSyncServiceTest extends TestCase {
 		};
 		$this->job = new class() implements BackgroundJob {
 			public int $dispatched = 0;
-			public function dispatch(): void {
+			public int $delay      = 0;
+			public function dispatch( int $delay = 0 ): void {
 				++$this->dispatched;
+				$this->delay = $delay;
 			}
 		};
 
@@ -283,5 +285,33 @@ final class BulkSyncServiceTest extends TestCase {
 	/** @return array{string, string} */
 	private static function pair( \Affibloom\Application\Amazon\SyncOutcome $outcome ): array {
 		return array( $outcome->kind, $outcome->reason );
+	}
+
+	public function test_a_run_asks_amazon_for_ten_products_at_a_time(): void {
+		$service = $this->service();
+		for ( $i = 0; $i < 12; $i++ ) {
+			$asin = sprintf( 'B0%08d', $i );
+			$this->amazon_product( 'Amazon', $asin );
+			$this->item( $asin );
+		}
+		$service->start();
+		while ( null !== $this->runs->get()?->next() ) {
+			$service->process();
+		}
+
+		self::assertSame( array( 10, 2 ), array_map( 'count', $this->amazon->batches ) );
+		self::assertSame( 0, $this->amazon->asked );
+		self::assertSame( 12, $this->runs->get()?->counts['succeeded'] ?? null );
+	}
+
+	public function test_a_throttled_amazon_pauses_the_run_for_its_wait_without_failing_products(): void {
+		$service = $this->service();
+		$this->amazon_product( 'Amazon', 'B0AAAAAAA1' );
+		$this->amazon->throttled = 90;
+		$service->start();
+		$service->process();
+
+		self::assertSame( array( 1, 90 ), array( $this->runs->get()?->counts['failed'] === 0 ? 1 : 0, $this->job->delay ) );
+		self::assertSame( 1, count( $this->runs->get()?->pending ?? array() ), 'the product waits' );
 	}
 }

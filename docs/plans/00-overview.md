@@ -290,7 +290,7 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | C1Q4b | C1 | done (deviation 125) |
 | C1Q5 | C1 | done (deviation 126) |
 | C1Q6a | C1 | done (deviation 127) |
-| C1Q6b | C1 | open (deviation 127) |
+| C1Q6b | C1 | done (deviation 128) |
 | C1J | C1 | open |
 | C1K | C1 | open |
 | C1L | C1 | open |

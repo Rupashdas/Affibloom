@@ -123,6 +123,10 @@ final class PriceRefreshService {
 			}
 
 			try {
+				// Ten rows of this store in one request (C1Q6b), when the next one was not fetched ahead.
+				if ( ! $this->data->is_prefetched( $item['asin'], $item['country'] ) ) {
+					$this->data->prefetch( array_slice( array_values( array_filter( $run->queue, static fn( array $row ): bool => $row['country'] === $item['country'] ) ), 0, 10 ) );
+				}
 				$done = $this->data->refresh_row( $item['asin'], $item['country'], $item['link'] );
 			} catch ( Throwable $unexpected ) {
 				unset( $unexpected );

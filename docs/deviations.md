@@ -133,6 +133,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 125. Task C1Q4b (2026-11-15): hourly `affibloom_amazon_refresh`, Lasso's batch, fixed queue, 20 s passes; no Locations arm or 404 issue yet.
 - 126. Task C1Q5 (2026-11-15): the Amazon Data card (titled so, not "Details"), stored row only, read-only, outside the form.
 - 127. Task C1Q6 split; C1Q6a (2026-11-15): `GuardedCatalog` (429 wait, one call a second, 8,640 a day), Throttled kind, the job's reserve.
+- 128. Task C1Q6b (2026-11-15): `items()` (ten ASINs a request), prefetch for bulk sync and the job, throttled bulk sync waits; stub and run-state fixes; AC2 fails on C1Q6a too.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2661,3 +2662,16 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     bulk sync still marks each item failed while throttled (C1Q6b). Checks: unit 671 red first (one older test moved
     from a 429 to a 400 example); C1Q6a E2E red then green, C1 AC1, AC2, AC8 x2 green; lint, PHPStan clean (a dead 429
     branch removed); a live call counted on Local. The tests' `stub()` clears the ledger.
+
+128. **Task C1Q6b: ten ASINs per request (2026-11-15).** `AmazonCatalog::items()` (one getItems for up to ten ASINs of a
+    store; per-item errors such as ItemNotAccessible and left-out ASINs are missing, read as not found), guarded and
+    counted once. `AmazonDataService::prefetch()` keeps the answers for `sync()` and `refresh_row()`; the job and bulk sync
+    fetch the next ten (same store; bulk sync only products without stored data) when the next one was not fetched yet,
+    so they spend a tenth of the requests; their one-a-second pacing is kept. A throttled bulk sync no longer fails
+    products: `SyncOutcome::throttled()` and `BackgroundJob::dispatch( $delay )` resume the run after Amazon's wait. The
+    hourly event's first run is now an hour after it is scheduled. Found and fixed: the stub's C1Q0 isolation check sat
+    after its counter and its "unavailable"/"throttle" answers (it counted passed requests and answered anyone in those
+    two modes); the stub answers every ASIN of a request; a test run's save clears Affibloom's background events (a
+    refresh started by WP-Cron during a run held one of Local's two workers). Checks: unit 675 red first; C1 spec 16 of 18
+    passed, then AC8 passed alone; **AC2 times out on Local and fails the same on the C1Q6a commit** (run with this work
+    stashed), so it is the environment (WP-Cron work of other plugins due on page loads), not this task; lint, PHPStan clean.

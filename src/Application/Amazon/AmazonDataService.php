@@ -12,6 +12,7 @@ namespace Affibloom\Application\Amazon;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Amazon\Asin;
+use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\CredentialsRepository;
 use Affibloom\Domain\Amazon\Marketplace;
@@ -68,7 +69,7 @@ final class AmazonDataService {
 
 		$now = gmdate( 'Y-m-d H:i:s' );
 		try {
-			$item = $this->catalog->item( $credentials, $item_asin, $country );
+			$item = $this->item_for( $credentials, $item_asin, $country );
 		} catch ( CatalogError $error ) {
 			if ( CatalogError::NOT_FOUND !== $error->kind ) {
 				return false;
@@ -85,6 +86,75 @@ final class AmazonDataService {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Items fetched ahead (C1Q6b), by "ASIN|country": the item, or null when Amazon did not give it. Used once.
+	 *
+	 * @var array<string, CatalogItem|null>
+	 */
+	private array $prefetched = array();
+
+	/**
+	 * Asks Amazon for up to ten items per store in one request each (C1Q6b) and keeps the answers for sync() and
+	 * refresh_row(), so a job of many products spends a tenth of the requests. Items already kept are not asked again.
+	 *
+	 * @param list<array{asin: string, country: string}> $wanted The ASINs and stores, in order.
+	 * @throws CatalogError When a request fails as a whole (Throttled among them).
+	 */
+	public function prefetch( array $wanted ): void {
+		$credentials = $this->usable();
+		if ( null === $credentials ) {
+			return;
+		}
+
+		$by_country = array();
+		foreach ( $wanted as $row ) {
+			$asin = Asin::from( $row['asin'] );
+			if ( null !== $asin && ! $this->is_prefetched( $asin->value, $row['country'] ) ) {
+				$by_country[ $row['country'] ][ $asin->value ] = $asin;
+			}
+		}
+		foreach ( $by_country as $country => $asins ) {
+			foreach ( array_chunk( array_values( $asins ), 10 ) as $chunk ) {
+				$found = $this->catalog->items( $credentials, $chunk, (string) $country );
+				foreach ( $chunk as $asin ) {
+					$this->prefetched[ $asin->value . '|' . $country ] = $found[ $asin->value ] ?? null;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Whether an item's answer is kept from prefetch().
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 */
+	public function is_prefetched( string $asin, string $country ): bool {
+		return array_key_exists( strtoupper( $asin ) . '|' . $country, $this->prefetched );
+	}
+
+	/**
+	 * One item: the answer kept from prefetch() (used once), else a request.
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param Asin        $asin        The item.
+	 * @param string      $country     The store's country code.
+	 * @throws CatalogError NotFound for an item Amazon did not give, or as the request throws.
+	 */
+	private function item_for( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
+		$key = $asin->value . '|' . $country;
+		if ( ! array_key_exists( $key, $this->prefetched ) ) {
+			return $this->catalog->item( $credentials, $asin, $country );
+		}
+		$item = $this->prefetched[ $key ];
+		unset( $this->prefetched[ $key ] );
+		if ( null === $item ) {
+			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
+		}
+
+		return $item;
 	}
 
 	/**
@@ -130,8 +200,11 @@ final class AmazonDataService {
 			return SyncOutcome::failed( SyncOutcome::FAILED );
 		}
 		try {
-			$item = $this->catalog->item( $credentials, $asin, $country );
+			$item = $this->item_for( $credentials, $asin, $country );
 		} catch ( CatalogError $error ) {
+			if ( CatalogError::THROTTLED === $error->kind ) {
+				return SyncOutcome::throttled( $error->retry_after );
+			}
 			return SyncOutcome::failed( CatalogError::NOT_FOUND === $error->kind ? SyncOutcome::NOT_FOUND : SyncOutcome::FAILED );
 		}
 

@@ -15,7 +15,10 @@ namespace Affibloom\Application\Products;
 interface BackgroundJob {
 
 	/**
-	 * Makes sure the job runs soon. Calling it again while it is waiting does no harm.
+	 * Makes sure the job runs soon, or after a delay (C1Q6b: Amazon's wait). Calling it again while it is waiting does
+	 * no harm.
+	 *
+	 * @param int $delay Seconds to wait first; 0 for now.
 	 */
-	public function dispatch(): void;
+	public function dispatch( int $delay = 0 ): void;
 }

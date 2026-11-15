@@ -37,6 +37,18 @@ interface AmazonCatalog {
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem;
 
 	/**
+	 * Up to ten items of one store in one request (C1Q6b; Amazon counts it once): the ones Amazon gave, by ASIN. An ASIN
+	 * Amazon could not give (not found, ItemNotAccessible) is left out.
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param list<Asin>  $asins       One to ten ASINs.
+	 * @param string      $country     The store's country code.
+	 * @return array<string, CatalogItem>
+	 * @throws CatalogError AuthFailed, HttpError, ApiError or Throttled for the whole request.
+	 */
+	public function items( Credentials $credentials, array $asins, string $country ): array;
+
+	/**
 	 * Amazon's answer for one item exactly as received (C1Q1, for recording real answers): status and body.
 	 *
 	 * @param Credentials       $credentials Configured credentials.

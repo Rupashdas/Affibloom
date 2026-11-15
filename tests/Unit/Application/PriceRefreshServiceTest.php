@@ -65,7 +65,7 @@ final class PriceRefreshServiceTest extends TestCase {
 		};
 		$job = new class( $test ) implements BackgroundJob {
 			public function __construct( private PriceRefreshServiceTest $test ) {}
-			public function dispatch(): void {
+			public function dispatch( int $delay = 0 ): void {
 				$this->test->dispatched();
 			}
 		};
@@ -200,7 +200,26 @@ final class PriceRefreshServiceTest extends TestCase {
 
 		$service->tick();
 
-		self::assertSame( 3, $this->amazon->asked );
+		self::assertSame( array( 3 ), array_map( 'count', $this->amazon->batches ), 'one request for the three rows the quota leaves' );
 		self::assertNull( $this->run );
+	}
+
+	public function test_the_job_asks_amazon_for_ten_rows_at_a_time(): void {
+		$service = $this->service();
+		for ( $i = 0; $i < 25; $i++ ) {
+			$asin = sprintf( 'B0%08d', $i );
+			$this->item( $asin );
+			$this->due[] = array( 'asin' => $asin, 'country' => 'us', 'link' => 'l' );
+		}
+		$this->now -= 100; // A long budget: the run is not cut short here.
+
+		$service->tick();
+		while ( null !== $this->run ) {
+			$service->process();
+		}
+
+		self::assertSame( array( 10, 10, 5 ), array_map( 'count', $this->amazon->batches ) );
+		self::assertSame( 0, $this->amazon->asked, 'no single requests' );
+		self::assertSame( '$32.97', $this->rows->find( 'B000000024', 'us' )?->price );
 	}
 }

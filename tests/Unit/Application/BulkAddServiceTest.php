@@ -43,7 +43,7 @@ final class BulkAddServiceTest extends TestCase {
 		};
 		$this->job = new class() implements BackgroundJob {
 			public int $dispatched = 0;
-			public function dispatch(): void {
+			public function dispatch( int $delay = 0 ): void {
 				++$this->dispatched;
 			}
 		};

@@ -85,6 +85,19 @@ final class GuardedCatalog implements AmazonCatalog {
 	}
 
 	/**
+	 * Up to ten items in one request, inside the wait, the pace and the quota (counted once, as Amazon counts it).
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param list<Asin>  $asins       One to ten ASINs.
+	 * @param string      $country     The store's country code.
+	 * @return array<string, CatalogItem>
+	 * @throws CatalogError When throttled, or as the Creators API throws.
+	 */
+	public function items( Credentials $credentials, array $asins, string $country ): array {
+		return $this->guarded( fn() => $this->inner->items( $credentials, $asins, $country ), true );
+	}
+
+	/**
 	 * Amazon's answer as received, inside the wait, the pace and the quota.
 	 *
 	 * @param Credentials       $credentials Configured credentials.

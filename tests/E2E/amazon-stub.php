@@ -57,6 +57,11 @@ add_filter(
 		if ( '' === $scenario || ! $amazon ) {
 			return $pre;
 		}
+		// Only the suite's own requests are answered (C1Q0, deviation 119): a token request for one of its test Credential
+		// IDs, or a catalogue request with the stub's token. A person's Validate during a run reaches Amazon.
+		if ( ! affibloom_e2e_is_stub_request( $args, $host ) ) {
+			return $pre;
+		}
 
 		update_option( 'affibloom_test_amazon_requests', (int) get_option( 'affibloom_test_amazon_requests', 0 ) + 1, false );
 
@@ -82,11 +87,6 @@ add_filter(
 		if ( 'throttle' === $scenario ) {
 			return $answer( 429, 'error-429.json' );
 		}
-		// Only the suite's own requests are answered (C1Q0, deviation 119): a token request for one of its test Credential
-		// IDs, or a catalogue request with the stub's token. A person's Validate during a run reaches Amazon.
-		if ( ! affibloom_e2e_is_stub_request( $args, $host ) ) {
-			return $pre;
-		}
 
 		// The token hosts (Login with Amazon and Cognito).
 		if ( 'creatorsapi.amazon' !== $host ) {
@@ -103,25 +103,38 @@ add_filter(
 		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
 
 		if ( str_ends_with( $path, '/getItems' ) ) {
-			$asin = strtoupper( (string) ( $body['itemIds'][0] ?? '' ) );
-			// ASINs starting B0NOTFOUND and B0OUTSTOCK stand for Amazon's other answers; the three ASINs recorded live
-			// (C1Q1) get Amazon's real answer; any other is found and in stock.
-			$file = array(
-				'B0NOTFOUND' => 'getItems-empty.json',
-				'B0OUTSTOCK' => 'getItems-oos.json',
-				'B000IXRCTQ' => 'live-B000IXRCTQ-all.json',
-				'B0DHLWFD84' => 'live-B0DHLWFD84-all.json',
-				'B0F7RNL68R' => 'live-B0F7RNL68R-all.json',
-			)[ substr( $asin, 0, 10 ) ] ?? 'getItems-ok.json';
+			// Each ASIN asked (up to ten, C1Q6b) gets its own answer: ASINs starting B0NOTFOUND are not found (left out,
+			// as Amazon leaves them out), B0OUTSTOCK is out of stock, the three ASINs recorded live (C1Q1) get Amazon's
+			// real answer; any other is found and in stock.
+			$items = array();
+			foreach ( (array) ( $body['itemIds'] ?? array() ) as $asked ) {
+				$asin = strtoupper( (string) $asked );
+				$file = array(
+					'B0NOTFOUND' => 'getItems-empty.json',
+					'B0OUTSTOCK' => 'getItems-oos.json',
+					'B000IXRCTQ' => 'live-B000IXRCTQ-all.json',
+					'B0DHLWFD84' => 'live-B0DHLWFD84-all.json',
+					'B0F7RNL68R' => 'live-B0F7RNL68R-all.json',
+				)[ substr( $asin, 0, 10 ) ] ?? 'getItems-ok.json';
+				$one  = json_decode(
+					$answer(
+						200,
+						$file,
+						array(
+							'{{ASIN}}'        => $asin,
+							'{{MARKETPLACE}}' => (string) ( $body['marketplace'] ?? 'www.amazon.com' ),
+						)
+					)['body'],
+					true
+				);
+				foreach ( (array) ( $one['itemsResult']['items'] ?? array() ) as $item ) {
+					$items[] = $item;
+				}
+			}
 
-			return $answer(
-				200,
-				$file,
-				array(
-					'{{ASIN}}'        => $asin,
-					'{{MARKETPLACE}}' => (string) ( $body['marketplace'] ?? 'www.amazon.com' ),
-				)
-			);
+			$response         = $answer( 200, 'getItems-empty.json' );
+			$response['body'] = (string) wp_json_encode( array() === $items ? array() : array( 'itemsResult' => array( 'items' => $items ) ) );
+			return $response;
 		}
 
 		return $answer( 404, 'error-401.json' );

@@ -123,6 +123,25 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	 * @throws CatalogError AuthFailed (no token), HttpError (no answer), ApiError (an error answer), NotFound (no item).
 	 */
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
+		$body  = $this->answer( $credentials, array( $asin ), $country );
+		$items = $body['itemsResult']['items'] ?? array();
+		if ( ! is_array( $items ) || ! isset( $items[0] ) || ! is_array( $items[0] ) ) {
+			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
+		}
+
+		return CatalogItem::from_creators( $items[0] );
+	}
+
+	/**
+	 * The getItems answer for one to ten ASINs (R9), the token first; the decoded answer, or the request's error (R13).
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param list<Asin>  $asins       The ASINs.
+	 * @param string      $country     The store's country code.
+	 * @return array<array-key, mixed>
+	 * @throws CatalogError AuthFailed (no token), HttpError (no answer), Throttled (429), ApiError (an error answer).
+	 */
+	private function answer( Credentials $credentials, array $asins, string $country ): array {
 		try {
 			$token = $this->token( $credentials );
 		} catch ( CatalogError $error ) {
@@ -134,7 +153,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 			throw new CatalogError( CatalogError::AUTH_FAILED, 'Could not obtain Creators API access token.' );
 		}
 
-		$response = $this->get_items( $credentials, $token, $asin, $country, self::RESOURCES );
+		$response = $this->get_items( $credentials, $token, $asins, $country, self::RESOURCES );
 
 		if ( is_wp_error( $response ) ) {
 			throw new CatalogError( CatalogError::HTTP_ERROR, $response->get_error_message() );
@@ -152,12 +171,29 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 			throw new CatalogError( CatalogError::API_ERROR, $message );
 		}
 
-		$items = $body['itemsResult']['items'] ?? array();
-		if ( ! is_array( $items ) || ! isset( $items[0] ) || ! is_array( $items[0] ) ) {
-			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
+		return $body;
+	}
+
+	/**
+	 * Up to ten items of one store in one getItems request (C1Q6b). Per-item errors in a 200 answer (ItemNotAccessible)
+	 * and ASINs Amazon leaves out are missing from the result; the request's own errors are thrown as item() throws them.
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param list<Asin>  $asins       One to ten ASINs.
+	 * @param string      $country     The store's country code.
+	 * @return array<string, CatalogItem> By ASIN, upper case.
+	 * @throws CatalogError AuthFailed, HttpError, ApiError or Throttled.
+	 */
+	public function items( Credentials $credentials, array $asins, string $country ): array {
+		$body  = $this->answer( $credentials, $asins, $country );
+		$found = array();
+		foreach ( is_array( $body['itemsResult']['items'] ?? null ) ? $body['itemsResult']['items'] : array() as $item ) {
+			if ( is_array( $item ) && is_string( $item['asin'] ?? null ) && '' !== $item['asin'] ) {
+				$found[ strtoupper( $item['asin'] ) ] = CatalogItem::from_creators( $item );
+			}
 		}
 
-		return CatalogItem::from_creators( $items[0] );
+		return $found;
 	}
 
 	/**
@@ -172,7 +208,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	 * @throws CatalogError AuthFailed (no token) or HttpError (no answer).
 	 */
 	public function raw( Credentials $credentials, Asin $asin, string $country, ?array $resources ): array {
-		$response = $this->get_items( $credentials, $this->token( $credentials ), $asin, $country, $resources ?? self::ALL_RESOURCES );
+		$response = $this->get_items( $credentials, $this->token( $credentials ), array( $asin ), $country, $resources ?? self::ALL_RESOURCES );
 		if ( is_wp_error( $response ) ) {
 			throw new CatalogError( CatalogError::HTTP_ERROR, $response->get_error_message() );
 		}
@@ -184,16 +220,16 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	}
 
 	/**
-	 * POST getItems for one ASIN (R9): the token, the store's marketplace, the partner tag and the resources asked for.
+	 * POST getItems (R9): the token, up to ten ASINs, the store's marketplace, the partner tag and the resources.
 	 *
 	 * @param Credentials  $credentials Configured credentials.
 	 * @param string       $token       A valid access token.
-	 * @param Asin         $asin        The item.
+	 * @param list<Asin>   $asins       One to ten items.
 	 * @param string       $country     The store's country code.
 	 * @param list<string> $resources   The resource paths.
 	 * @return array<string, mixed>|\WP_Error The response.
 	 */
-	private function get_items( Credentials $credentials, string $token, Asin $asin, string $country, array $resources ) {
+	private function get_items( Credentials $credentials, string $token, array $asins, string $country, array $resources ) {
 		$marketplace = Marketplace::host( $country );
 
 		return wp_remote_post(
@@ -207,7 +243,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 				),
 				'body'    => (string) wp_json_encode(
 					array(
-						'itemIds'     => array( $asin->value ),
+						'itemIds'     => array_map( static fn( Asin $asin ): string => $asin->value, $asins ),
 						'itemIdType'  => 'ASIN',
 						'marketplace' => $marketplace,
 						'partnerTag'  => $credentials->partner_tag,

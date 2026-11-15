@@ -207,4 +207,22 @@ final class CreatorsApiCatalogTest extends TestCase {
 			self::assertSame( array( CatalogError::THROTTLED, $seconds ), array( $error->kind, $error->retry_after ) );
 		}
 	}
+
+	public function test_items_asks_up_to_ten_asins_in_one_request_and_leaves_out_the_ones_amazon_could_not_give(): void {
+		$ok   = json_decode( self::fixture( 'getItems-ok.json' ), true );
+		$item = $ok['itemsResult']['items'][0];
+		$body = array(
+			'itemsResult' => array( 'items' => array( array( 'asin' => 'B0AAAAAAAA' ) + $item, array( 'asin' => 'B0BBBBBBBB' ) + $item ) ),
+			'errors'      => array( array( 'code' => 'ItemNotAccessible', 'message' => 'The ItemId B0CCCCCCCC is not accessible through the Creators API.' ) ),
+		);
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 200, (string) json_encode( $body ) ) );
+		$asins = array_map( array( Asin::class, 'from' ), array( 'B0AAAAAAAA', 'B0BBBBBBBB', 'B0CCCCCCCC', 'B0DDDDDDDD' ) );
+
+		$found = ( new CreatorsApiCatalog() )->items( self::credentials(), $asins, 'gb' );
+
+		self::assertSame( array( 'B0AAAAAAAA', 'B0BBBBBBBB' ), array_keys( $found ) );
+		self::assertSame( 'Mikasa V200W Official Game Volleyball', $found['B0BBBBBBBB']->title );
+		self::assertSame( array( 'B0AAAAAAAA', 'B0BBBBBBBB', 'B0CCCCCCCC', 'B0DDDDDDDD' ), json_decode( $this->sent[1][1]['body'], true )['itemIds'] );
+		self::assertCount( 2, $this->sent, 'one token, one getItems' );
+	}
 }

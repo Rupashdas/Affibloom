@@ -12,6 +12,7 @@ namespace Affibloom\Application\Amazon;
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Domain\Amazon\BulkSyncRun;
+use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Amazon\BulkSyncRunRepository;
 use Affibloom\Domain\Amazon\PendingAmazonSync;
 use Affibloom\Domain\Product\PlaceholderName;
@@ -183,10 +184,18 @@ final class BulkSyncService {
 			}
 
 			try {
+				$this->prefetch( $run->pending );
 				$outcome = $this->sync( $id );
+			} catch ( CatalogError $throttled ) {
+				$outcome = SyncOutcome::throttled( $throttled->retry_after );
 			} catch ( Throwable $unexpected ) {
 				unset( $unexpected );
 				$outcome = SyncOutcome::failed( SyncOutcome::FAILED );
+			}
+			// Amazon asked to wait (C1Q6b): the product waits too, and the run resumes after the wait.
+			if ( SyncOutcome::THROTTLED === $outcome->reason ) {
+				$this->job->dispatch( $outcome->retry_after );
+				return;
 			}
 			$run = $run->advanced( $outcome->kind, $outcome->reason, gmdate( 'Y-m-d H:i:s', (int) ( $this->clock )() ) );
 			$this->runs->save( $run );
@@ -198,6 +207,45 @@ final class BulkSyncService {
 			if ( ( $this->clock )() >= $deadline ) {
 				$this->job->dispatch();
 				return;
+			}
+		}
+	}
+
+	/**
+	 * Fetches ahead (C1Q6b) when the next product needs Amazon and was not fetched yet: the next ten pending products
+	 * with an ASIN and no stored data, in one request per store.
+	 *
+	 * @param list<int> $pending The run's pending products, in order.
+	 * @throws CatalogError When the request fails as a whole; anything but Throttled is left to sync()'s own request.
+	 */
+	private function prefetch( array $pending ): void {
+		$wanted = array();
+		foreach ( $pending as $id ) {
+			$product = $this->library->get( $id );
+			if ( null === $product || '' === $product->asin || null !== $this->data->stored( $product ) ) {
+				if ( array() === $wanted ) {
+					return; // The next product needs no request.
+				}
+				continue;
+			}
+			$country = '' === $product->amazon_country ? Marketplace::DEFAULT_COUNTRY : $product->amazon_country;
+			if ( array() === $wanted && $this->data->is_prefetched( $product->asin, $country ) ) {
+				return;
+			}
+			$wanted[] = array(
+				'asin'    => $product->asin,
+				'country' => $country,
+			);
+			if ( 10 === count( $wanted ) ) {
+				break;
+			}
+		}
+
+		try {
+			$this->data->prefetch( $wanted );
+		} catch ( CatalogError $error ) {
+			if ( CatalogError::THROTTLED === $error->kind ) {
+				throw $error;
 			}
 		}
 	}

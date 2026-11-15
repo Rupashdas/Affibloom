@@ -43,6 +43,26 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 	/** Answer item calls with a 429 and this wait, in seconds; 0 for none. */
 	public int $throttled = 0;
 
+	/** @var list<list<string>> The ASINs of each items() call. */
+	public array $batches = array();
+
+	public function items( Credentials $credentials, array $asins, string $country ): array {
+		$this->batches[] = array_map( static fn( Asin $asin ): string => $asin->value, $asins );
+		if ( $this->failing ) {
+			throw new CatalogError( CatalogError::HTTP_ERROR, 'down' );
+		}
+		if ( $this->throttled > 0 ) {
+			throw new CatalogError( CatalogError::THROTTLED, 'Request was denied due to request throttling.', '', $this->throttled );
+		}
+		$found = array();
+		foreach ( $asins as $asin ) {
+			if ( isset( $this->items[ $asin->value ] ) ) {
+				$found[ $asin->value ] = $this->items[ $asin->value ];
+			}
+		}
+		return $found;
+	}
+
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
 		++$this->asked;
 		if ( $this->throttled > 0 ) {

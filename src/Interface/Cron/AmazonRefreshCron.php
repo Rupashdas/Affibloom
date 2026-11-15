@@ -46,12 +46,13 @@ final class AmazonRefreshCron implements Module {
 	}
 
 	/**
-	 * Keeps the hourly event in step with "Update Amazon pricing daily".
+	 * Keeps the hourly event in step with "Update Amazon pricing daily". The first run is an hour after the event is
+	 * scheduled (C1Q6b), so switching it on starts no batch of Amazon calls at once.
 	 */
 	public function schedule(): void {
 		$scheduled = false !== wp_next_scheduled( self::HOOK );
 		if ( $this->refresh->enabled() && ! $scheduled ) {
-			wp_schedule_event( time(), 'hourly', self::HOOK );
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', self::HOOK );
 		} elseif ( ! $this->refresh->enabled() && $scheduled ) {
 			wp_clear_scheduled_hook( self::HOOK );
 		}
