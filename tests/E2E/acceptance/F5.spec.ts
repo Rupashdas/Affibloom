@@ -63,6 +63,14 @@ const BASELINE_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'no-description': { desktop: 18032.469, mobile: 33108.891 },
 };
 
+/**
+ * The text of every style element (matched by `selector`) holding Affibloom's `:root` block, read in the page:
+ * Playwright's text matching (`hasText`) skips what is inside <style> and <script>, so a locator never finds one.
+ */
+async function rootBlocks( page: Page, selector: string ): Promise< string[] > {
+	return page.evaluate( ( sel ) => [ ...document.querySelectorAll( sel ) ].map( ( el ) => el.textContent ?? '' ).filter( ( text ) => text.includes( ':root{--affibloom-main' ) ), selector );
+}
+
 /** Shifts the box down by less than a pixel (a layout offset), so its top has the baseline's fractional part. */
 async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< void > {
 	await page.locator( '.affibloom-box' ).evaluate( ( el, target ) => {
@@ -99,9 +107,10 @@ function useSiteDisplay(): void {
 }
 
 // Lasso's names in a captured box and the Affibloom names that replace them (ADR-6; the table in docs/ui/tokens.md,
-// "Product box"). Attributes left out: `decoding` (WordPress adds it), `data-lasso-link` (Lasso's cloud, D3),
-// `data-layout-d-*` (copied by the phone script at run time) and `data-lasso-id` (a box placed by the block has no
-// link location, where Lasso falls back to the product ID).
+// "Product box"). Attributes left out, on both sides, as none is the plugin's markup: `decoding` (WordPress adds it),
+// `data-lasso-link` (Lasso's cloud, D3; while Lasso is active it stamps every Amazon link on a page, Affibloom's too),
+// `data-layout-d-*` (copied by the phone script at run time, Lasso's and Affibloom's since 18C) and `data-lasso-id` (a
+// box placed by the block has no link location, where Lasso falls back to the product ID).
 const RENAMED_ATTRIBUTES: Record< string, string > = {
 	'data-lasso-box-trackable': 'data-affibloom-box-trackable',
 	'data-lasso-lid': 'data-affibloom-id',
@@ -138,7 +147,7 @@ async function boxTree( page: Page, lassoHtml: string | null ): Promise< Tree > 
 			const walk = ( el: Element, lasso: boolean ): Tree => {
 				const attrs: [ string, string ][] = [];
 				for ( const a of Array.from( el.attributes ) ) {
-					if ( lasso && new RegExp( ignored ).test( a.name ) ) {
+					if ( new RegExp( ignored ).test( a.name ) ) {
 						continue;
 					}
 					const name = lasso ? renamed[ a.name ] ?? a.name.replace( /^data-v2-hide-/, 'data-hide-' ) : a.name;
@@ -200,16 +209,22 @@ test.describe( 'F5 Box design', () => {
 		expect( sheets.some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
 		expect( sheets.some( ( href ) => href.includes( 'affibloom/assets/front/box-layout.css' ) ) ).toBe( true );
 
-		// One style element in <head>: the :root block of the Single type (R43), then the Custom CSS.
-		const head = await page.locator( 'head style' ).filter( { hasText: ':root{--affibloom-main' } ).textContent();
-		expect( head ).toContain( '--affibloom-button: #5e3f8c;' );
-		expect( head ).toContain( '}\n.affibloom-title { letter-spacing: 3px; }' );
+		try {
+			// One style element in <head>: the :root block of the Single type, each value `!important` as Lasso prints
+			// it (R43), then the Custom CSS.
+			const head = await rootBlocks( page, 'head style' );
+			expect( head ).toHaveLength( 1 );
+			expect( head[ 0 ] ).toContain( '--affibloom-button: #5e3f8c !important;' );
+			expect( head[ 0 ] ).toContain( '}\n.affibloom-title { letter-spacing: 3px; }' );
 
-		const title = page.locator( '.affibloom-title' );
-		await expect( title ).toHaveCSS( 'letter-spacing', '3px' );
-		await expect( title ).toHaveCSS( 'color', 'rgb(0, 0, 0)' );
-		await expect( page.locator( '.affibloom-button-1' ) ).toHaveCSS( 'background-color', 'rgb(94, 63, 140)' );
-		setSettings( { custom_css: '' } );
+			const title = page.locator( '.affibloom-title' );
+			await expect( title ).toHaveCSS( 'letter-spacing', '3px' );
+			await expect( title ).toHaveCSS( 'color', 'rgb(0, 0, 0)' );
+			await expect( page.locator( '.affibloom-button-1' ) ).toHaveCSS( 'background-color', 'rgb(94, 63, 140)' );
+		} finally {
+			// Never left behind: it would change every box drawn after it (AC1's titles).
+			setSettings( { custom_css: '' } );
+		}
 	} );
 
 	// AC6 (Task 18C): Lasso's loading rules. AC2 above is Smart CSS Loading on, the default (decision C5).
@@ -220,16 +235,19 @@ test.describe( 'F5 Box design', () => {
 
 		// Off: every front-end page loads the box CSS, with the <head> block.
 		setSettings( { smart_css: false } );
-		await page.goto( noBox );
-		expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
-		await expect( page.locator( 'style' ).filter( { hasText: ':root{--affibloom-main' } ) ).toHaveCount( 1 );
-		setSettings( { smart_css: true } );
+		try {
+			await page.goto( noBox );
+			expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
+			expect( await rootBlocks( page, 'style' ) ).toHaveLength( 1 );
+		} finally {
+			setSettings( { smart_css: true } ); // The default; never left off for the tests after.
+		}
 
 		// On: a box the detector cannot see (a synced pattern) still gets its CSS and the :root block, once.
 		const pattern = wp( 'post', 'create', '--post_type=wp_block', '--post_status=publish', '--post_title=F5 AC6 pattern', `--post_content=${ boxBlock( id ) }`, '--porcelain' );
 		await page.goto( newPostWith( `<!-- wp:block {"ref":${ pattern }} /-->` ) );
 		expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
-		await expect( page.locator( 'style' ).filter( { hasText: ':root{--affibloom-main' } ) ).toHaveCount( 1 );
+		expect( await rootBlocks( page, 'style' ) ).toHaveLength( 1 );
 		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 1 );
 
 		// The phone layout (R48): below 768px the wrapper takes its data-layout-m-* values, and gives them back above.
@@ -307,7 +325,15 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
-	// AC4: Lasso's attribute order on every link, and its rel and target tables (R38, R39).
+	// AC4: Lasso's attribute order on every link, and its rel and target tables (R38, R39). The box prints Lasso's `rel`;
+	// then the site's Rank Math (Link_Attributes, on the_content) adds `noopener` to every external link without it, as
+	// it does to Lasso's boxes on the live site. `afterRankMath` is that step, so the test reads what a reader gets.
+	const afterRankMath = ( rel: string ): string => {
+		if ( '' === rel ) {
+			return 'noopener';
+		}
+		return rel.split( ' ' ).includes( 'noopener' ) ? rel : `${ rel } noopener`;
+	};
 	const RELS: [ ProductFields, string, string ][] = [
 		[ { new_tab: '1', nofollow: '1', sponsored: '0' }, 'nofollow noopener', '_blank' ],
 		[ { new_tab: '0', nofollow: '1', sponsored: '1' }, 'nofollow sponsored', '_self' ],
@@ -324,7 +350,7 @@ test.describe( 'F5 Box design', () => {
 			for ( const link of await links.all() ) {
 				const names = await link.evaluate( ( a ) => Array.from( a.attributes ).map( ( x ) => x.name ).filter( ( n ) => n !== 'class' ) );
 				expect( names ).toEqual( [ 'target', 'href', 'data-affibloom-box-trackable', 'data-affibloom-id', 'data-affibloom-name', 'title', 'rel' ] );
-				await expect( link ).toHaveAttribute( 'rel', rel );
+				await expect( link ).toHaveAttribute( 'rel', afterRankMath( rel ) );
 				await expect( link ).toHaveAttribute( 'target', target );
 				await expect( link ).toHaveAttribute( 'data-affibloom-id', String( id ) );
 			}

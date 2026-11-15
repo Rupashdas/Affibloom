@@ -36,9 +36,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 1. **Now: Batch 3.4 (18E, 18F, 18G)**, when the user gives the word. Batch 3.3 done 2026-11-16 (18D): Lasso's
    Single boxes for every theme and state are in `tests/fixtures/baselines/themes/` (247 boxes), drawn on Local with
    Lasso 370 (deviation 137: Lasso is unlicensed on staging). Same session, fix of 18B: F5 AC1 passes (two missed Lab
-   rules; deviation 135's "old baselines" cause was wrong). **Open:** F5 AC3 (3), AC5 and AC6 fail on the code of
-   Batch 3.2 (AC5: no `:root` block in `<head>`; AC3: 40 more lines than Lasso's markup); a failing AC5 leaves its test
-   Custom CSS behind (`letter-spacing: 3px` on titles). Lint, analyse, unit 747 pass.
+   rules; deviation 135's "old baselines" cause was wrong). The other F5 failures were the tests (style text, run-time
+   attributes, Rank Math's `noopener`): all 12 F5 tests pass, Lasso on and off. Lint, analyse, unit 747 pass.
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only
    unit tests, `phpcs` and a look (~20 s); at a batch's end lint, analyse and unit tests, then a manual test guide for
    the user; Playwright only at the phase exit; no red run; no save/restore, backup or reset on Local (dummy data).

@@ -279,6 +279,10 @@ Single's, then the product's (the box's is 18E); every theme prints box-3 until 
 `ProductRepository::repointed_to()`, `Product::$slug`, `$show_description`. Checked: unit 736, phpcs, the page source
 beside `variants/amazon.html` (same elements, attributes and order), 1280 px (unstyled until 18B).
 
+*Fix (2026-11-16, after 18D):* AC3 ignores the run-time attributes (`decoding`, `data-lasso-link`, `data-layout-d-*`)
+on both sides, since 18C's phone script copies the layout keys on Affibloom's box too; AC4 expects the `noopener` the
+site's Rank Math adds to every external link in content (to Lasso's boxes too). The box's markup did not change.
+
 ---
 
 ### Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
@@ -360,6 +364,10 @@ so no keys were added. `BoxHtml` calls `late_enqueue()` for every box; AC6's lat
 detector cannot see it). Seen on Local: a no-box post gets no box assets, a pattern box gets them once. The `<head>`
 block now marks each value `!important`, as Lasso's does (18B missed it). The admin CSS (R52) and the copy script
 moved: deviation 136.
+
+*Fix (2026-11-16, after 18D):* AC5 and AC6 read the style elements' text in the page (Playwright's `hasText` skips
+<style>, so they never matched) and expect Lasso's `!important` values; both reset `custom_css` and `smart_css` in
+`finally`, so a failure leaves no setting behind. The plugin was right; all 12 F5 tests pass, Lasso on and off.
 
 ---
 
