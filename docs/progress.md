@@ -37,7 +37,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
    and 375 px looks made, Display's clipped Button alignment fixed, and the product page's squeezed Button Text
    (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
-2. **C1A done (deviation 110); Batch 2.1 under way: C1B done (deviation 112), C1C and C1D next**; then C1I,
+2. **C1A done (deviation 110); C1B done (deviation 112). Batch 2.1 stopped early after C1B (rule 4, long context);
+   next: C1C and C1D as the rest of Batch 2.1**, when the user says go; then C1I,
    C1K-C1P, then Phase 2's exit check and the user's sign-off. The site's Amazon credentials are empty (cause unknown,
    deviation 112); restoring them is the user's call. A first try of C1B-C1D was reverted on 2026-11-15
    (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day:
