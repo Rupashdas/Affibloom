@@ -138,3 +138,10 @@ Everything **not** listed here was settled from Lasso's source and the project r
 | F9 | **Groups G1-G5:** gate 4 given with the whole plan. |
 | Gate 4 | **Given for the whole plan**, effective once these answers were applied (2026-11-14). |
 | Every other item in tables A-F without a row above | **Took its recommendation** (the user accepted every remaining recommendation, 2026-11-14). |
+
+## Later answers (the user)
+
+| Item | Answer |
+|---|---|
+| Add Link ending (2026-11-16) | **Every single add opens the product's page, Amazon links too**, as Lasso does ("when adding single products in lasso, after adding its opening that product page"). Deviation 133. |
+| Reordering on the product page (2026-11-16) | **Drag only, like Lasso:** buttons, custom fields and features lose Move up / Move down; a grip drags each row (Arrow Up / Down from the keyboard), accepting that WCAG 2.2 SC 2.5.7 is not met. **The drag looks like Trello's** (tilted card, grey slot, rows slide aside). Deviation 134. |
