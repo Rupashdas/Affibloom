@@ -35,10 +35,11 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Now: Batch 2.4 (C1O, C1P).** Batch 2.3 is done 2026-11-15 (C1M Amazon search tab, C1N SiteStripe notice; lint,
    analyse, AC15 and AC19 pass). Then Phase 2's exit check (the full suite) and the user's sign-off.
-2. **Lean method from 2026-11-15 (deviations 129, 130):** few records (phase-file ticks and *Notes*); per task only
-   unit tests, `phpcs` and a look (~20 s); lint, analyse and Playwright once per batch; no red run; no save/restore,
-   backup or reset on Local (its database is dummy data). Rules: `CLAUDE.md`, `plans/batches.md`.
-3. Open, environment: C1 AC2 times out on Local (also on C1Q6a); Local runs only two PHP workers (hard-coded).
+2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only
+   unit tests, `phpcs` and a look (~20 s); at a batch's end lint, analyse and unit tests, then a manual test guide for
+   the user; Playwright only at the phase exit; no red run; no save/restore, backup or reset on Local (dummy data).
+   Rules: `CLAUDE.md`, `plans/batches.md`.
+3. Open, environment: C1 AC2 times out on Local (also on C1Q6a); Local's PHP workers raised from 2 to 4 (its `PhpService.js` patched 2026-11-15, backup `.bak`; an update of Local undoes it; not yet seen running).
 4. Open, the user's call: the site's Amazon credentials are empty (deviation 112); C1 Creators API credentials and
    the optional GA4 check from the client.
 5. Standing rules: Affibloom works with no Lasso dependency and no Lasso branding (2026-11-14); one batch per session

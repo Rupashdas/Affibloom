@@ -136,6 +136,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 128. Task C1Q6b (2026-11-15): `items()` (ten ASINs a request), prefetch for bulk sync and the job, throttled bulk sync waits; stub and run-state fixes; AC2 fails on C1Q6a too.
 - 129. Lean working method (the user, 2026-11-15): few records, few test runs, no save/restore or backups on Local.
 - 130. Tests per task cut to ~20 s (the user, 2026-11-15): no red run; lint, analyse and Playwright once per batch.
+- 131. The user tests each batch by hand from Claude's guide; Playwright only at the phase exit; PHPStan cache in `.local/`; English.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2693,3 +2694,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     tests, `phpcs` on the changed files and one look at the changed screen. `composer lint`, `composer analyse` and the
     batch's Playwright ACs run once, at the batch's end; a failure there is fixed and committed as "Fix <what>
     (<task ID>)". Full suite at a phase's exit, as before. Rules in `CLAUDE.md`, `batches.md` rule 5, `next-task`.
+
+131. **The user tests each batch by hand (the user, 2026-11-15).** A batch's end still took long, almost all of it in
+    Playwright (each `wp()` call loads WordPress through Git Bash, 1.3–2.3 s) and the 375/1280 px screenshots; lint,
+    PHPStan and the unit tests take about 10 s together with warm caches. At a batch's end only those three run; then
+    Claude gives a numbered manual test guide (screen, action, expected result, a 375 px check) and the user tests by
+    hand; reported problems are fixed as "Fix <what> (<task ID>)". Playwright ACs are still written per task and run at
+    the phase exit check or on request. PHPStan's `tmpDir` moved to `.local/phpstan` (cold 31 s, warm 4 s), so a
+    cleared system temp folder no longer costs a full analysis. Claude talks in English from now on.

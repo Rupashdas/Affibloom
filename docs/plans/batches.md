@@ -13,21 +13,24 @@ Lean method of 2026-11-15 (the user, deviation 129): few records, few test runs,
    separate red run, deviation 130), then code inward; the checks of rule 5; the step and task ticks in the phase file (plus a 1–3 line
    *Note* under the task when something differed from the plan); **its own commit** (the plan's message) and push. A
    task is finished before the next one starts; no work for two tasks shares a commit.
-3. **Explain in Bangla, briefly, per task:** before it, what it builds and how it is checked; after it, what changed
+3. **Explain in English, briefly, per task:** before it, what it builds and how it is checked; after it, what changed
    and what you saw. The user's "go" is asked once, at the start of the batch.
 4. **Stop the batch early**, after committing whatever task is complete, when:
    - a check fails and its cause cannot be fixed inside the task;
    - a task needs a change that alters a later task in the batch, or needs the user's answer or by-hand check;
    - the session's context is getting long (finish the current task first).
    Say which tasks are left; they become the next batch.
-5. **Checks: as few as needed (deviation 130).** No separate red run: a test is written first and run after the code.
+5. **Checks: as few as needed (deviations 130, 131).** No separate red run: a test is written first and run after the code.
    - **Per task (~20 s of commands):** the unit tests (`composer test:unit`, or `vendor/bin/phpunit --filter <Test>`),
-     `vendor/bin/phpcs <files>` on the changed files, and one look in the browser at the screen the task changed
-     (`tools/shot.cjs` or the browser pane). The task's Playwright AC is written, not run.
-   - **At a batch's end, once:** `composer lint`, `composer analyse`, and the batch's Playwright ACs together
-     (`-g "<AC>|<AC>"`), plus the 375 px and 1280 px looks on the changed screens. A failure is fixed in its own task's
-     code and committed as "Fix <what> (<task ID>)". A test is run twice only to chase a flaky one.
-   - **At a phase's exit check:** the full suite, once.
+     `vendor/bin/phpcs <files>` on the changed files, and one look in the browser at 1280 px at the screen the task
+     changed (`tools/shot.cjs` or the browser pane). The task's Playwright AC is written, not run.
+   - **At a batch's end (~2–3 minutes):** `composer lint && composer analyse && composer test:unit` in one command
+     (~10 s with warm caches). No Playwright and no 375/1280 px screenshots: the user tests by hand.
+   - **The manual test guide**, in chat after the batch's summary: numbered steps, each with the screen (menu path or
+     URL), what to do and what to expect; the last step a 375 px check (F12 → device toolbar) of the changed screens;
+     about 5 minutes in all. A problem the user reports is fixed and committed as "Fix <what> (<task ID>)".
+   - **Playwright:** the phase's ACs all together at its exit check, or any time the user asks. A test is run twice only
+     to chase a flaky one.
    - **The Local database is dummy data:** runs change it freely; no backup, save/restore or reset around them.
 6. **Records.** Per task only the phase file (ticks and the optional *Note*). A numbered deviation in `deviations.md`
    (at most ~10 lines, plus its index line) only when the plan's design or a later task changes. `progress.md`: one

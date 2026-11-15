@@ -2,7 +2,7 @@
 description: End an Affibloom session — bring progress and plan ticks up to date
 ---
 
-Wrap up this Affibloom session (lean method, deviation 129). Talk to the user in Bangla, briefly.
+Wrap up this Affibloom session (lean method, deviation 129). Talk to the user in English, briefly.
 
 1. `git status` and `git log` in `wp-content/plugins/affibloom`: list anything uncommitted or unpushed and ask the
    user what to do with it.
