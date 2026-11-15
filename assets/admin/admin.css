@@ -1621,6 +1621,20 @@
 .affibloom-notice--error .affibloom-chip { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
 .affibloom-notice--update { border-left-color: var(--affibloom-brand-600); }
 .affibloom-notice--update .affibloom-chip { background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
+/* The bulk Amazon sync banner (Task C1I): an update notice with a second line, the summary, and its button before the
+   ×; below 600px the button and × go under the words. */
+.affibloom-bulk-sync { flex-wrap: wrap; transition: opacity 0.4s ease; }
+.affibloom-bulk-sync.is-leaving { opacity: 0; }
+.affibloom-bulk-sync__body { flex: 1 1 0; min-width: 0; }
+.affibloom-bulk-sync__count,
+.affibloom-bulk-sync__reason,
+.affibloom-bulk-sync__summary { margin: 2px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 20px; }
+.affibloom-bulk-sync__summary { margin-top: 8px; color: var(--affibloom-ink-900); overflow-wrap: anywhere; }
+.affibloom-bulk-sync__actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; margin-left: auto; }
+.affibloom-admin .affibloom-bulk-sync__actions .affibloom-notice__close { margin-left: 0; }
+@media (max-width: 599px) {
+	.affibloom-bulk-sync__actions { flex-basis: 100%; justify-content: space-between; }
+}
 .affibloom-admin .affibloom-notice__link { color: var(--affibloom-brand-600); font-weight: 700; text-decoration: underline; }
 .affibloom-admin .affibloom-notice__link:hover { color: var(--affibloom-navy-900); }
 .affibloom-admin .affibloom-notice__close {

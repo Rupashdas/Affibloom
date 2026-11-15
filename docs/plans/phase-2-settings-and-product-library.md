@@ -269,7 +269,7 @@ C1F and C1G in Phase 3
 - [x] Task C1B: The catalogue client
 - [x] Task C1C: Filling a new Amazon product on add
 - [x] Task C1D: Refresh on the product page
-- [ ] Task C1I: Bulk Amazon sync
+- [x] Task C1I: Bulk Amazon sync
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [ ] Task C1K: Keep Geni.us Formatting on add and save
 - [ ] Task C1L: The cloud-only switches labelled
@@ -6225,12 +6225,12 @@ replaced; failure shows R35's message.
 
 **Files:** the above; `C1.spec.ts` AC14.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Pending query and service.**
-- [ ] **Step 3: Cron and routes.**
-- [ ] **Step 4: Banner and script.**
-- [ ] **Step 5: Run and look.**
-- [ ] **Step 6: Commit** — "Sync Amazon data for products that have none".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Pending query and service.**
+- [x] **Step 3: Cron and routes.**
+- [x] **Step 4: Banner and script.**
+- [x] **Step 5: Run and look.**
+- [x] **Step 6: Commit** — "Sync Amazon data for products that have none".
 
 ---
 

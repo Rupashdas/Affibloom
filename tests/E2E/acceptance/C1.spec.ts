@@ -82,6 +82,28 @@ function cacheRow( asin: string, country: string ): Record< string, string > | n
 	return JSON.parse( json ) as Record< string, string > | null;
 }
 
+/** A new published Amazon product with no stored Amazon data, so pending bulk sync (R40); returns its ID. */
+function amazonPending( name: string, asin = randomAsin() ): number {
+	return createProduct( { name, type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20` } );
+}
+
+/**
+ * Leaves only these products pending bulk sync: every other pending product gets a stored row (one with an ASIN) or
+ * becomes a draft (one without). The run's own restore puts the rows and the statuses back.
+ */
+function isolatePending( keep: number[] ): void {
+	wp( 'eval-file', 'tests/E2E/fixtures/isolate-amazon-pending.php', JSON.stringify( keep ) );
+}
+
+/** Removes the signed-in user's bulk sync dismissal (user meta `affibloom_bulk_sync_dismissed`): users are not restored. */
+function clearDismissal(): void {
+	try {
+		wp( 'user', 'meta', 'delete', 'vvadmin', 'affibloom_bulk_sync_dismissed' );
+	} catch {
+		// None stored.
+	}
+}
+
 async function openCard( page: Page ) {
 	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
 	return page.getByRole( 'region', { name: 'Amazon Product Data API' } );
@@ -335,6 +357,75 @@ test.describe( 'C1 Amazon product data', () => {
 		await expect( page.getByRole( 'region', { name: 'Amazon Product Data API' } ).getByText( 'Validated', { exact: true } ) ).toBeVisible();
 		expect( stored().secret ).toBe( valid.secret );
 		setSettings( { default_country: 'us' } );
+	} );
+
+	test( 'AC7 without credentials the bulk sync banner shows the count with its button disabled (C1I)', async ( { page } ) => {
+		credentials( null );
+		stub( 'ok' );
+		clearDismissal();
+		const ids = [ amazonPending( 'Amazon' ), amazonPending( 'Amazon' ) ];
+		isolatePending( ids );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const banner = page.getByRole( 'region', { name: 'Bulk Amazon sync' } );
+		await expect( banner ).toContainText( '2 Amazon links are ready to sync product data.' );
+		const sync = banner.getByRole( 'button', { name: 'Sync Amazon data' } );
+		await expect( sync ).toBeDisabled();
+		await expect( sync ).toHaveAccessibleDescription( 'Needs the Amazon API' );
+		expect( requests() ).toBe( 0 );
+		for ( const id of ids ) {
+			wp( 'post', 'delete', String( id ), '--force' );
+		}
+	} );
+
+	test( 'AC14 bulk sync fills the products that have no Amazon data, and × hides it until the set changes (C1I)', async ( { page } ) => {
+		credentials( valid );
+		stub( 'ok' );
+		clearDismissal();
+		const found = amazonPending( 'Amazon' );
+		const missing = amazonPending( 'Gone', 'B0NOTFOUND' + Math.floor( Math.random() * 1e6 ) );
+		// An Amazon short link that never resolved (the live site's three): this copy blocks outside requests, so it stays.
+		const short = createProduct( { name: 'Short link', type: 'amazon', url: `https://amzn.to/${ Math.random().toString( 36 ).slice( 2, 9 ) }` } );
+		isolatePending( [ found, missing, short ] );
+
+		// The banner is on every Affibloom page, Settings too.
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		const banner = page.getByRole( 'region', { name: 'Bulk Amazon sync' } );
+		await expect( banner ).toContainText( '3 Amazon links are ready to sync product data.' );
+		const sync = banner.getByRole( 'button', { name: /Sync Amazon data|Starting…|Syncing…/ } );
+		await expect( sync ).toBeEnabled();
+		await sync.click();
+		await expect( sync ).toHaveText( /^Syncing… \d+%$/, { timeout: 15_000 } );
+		await expect( sync ).toBeDisabled();
+
+		const summary = banner.locator( '[data-bulk-sync-summary]' );
+		await expect( summary ).toContainText( 'Sync complete.', { timeout: 40_000 } );
+		await expect( summary ).toContainText( 'Succeeded: 1' );
+		await expect( summary ).toContainText( 'Skipped: 0' );
+		await expect( summary ).toContainText( 'Failed: 2' );
+		await expect( summary ).toContainText( `Failures: #${ missing }: Amazon product not found. | #${ short }: Could not resolve Amazon ASIN.` );
+		await expect( sync ).toHaveText( 'Sync Amazon data' );
+
+		// The found product took Amazon's data: its placeholder name, its image link, and a stored row.
+		expect( wp( 'post', 'get', String( found ), '--field=post_title' ) ).toBe( 'Mikasa V200W Official Game Volleyball' );
+		expect( meta( found, 'image_url' ) ).toBe( 'https://m.media-amazon.com/images/I/71stubLarge.jpg' );
+		expect( cacheRow( meta( found, 'asin' ), 'us' ) ).toMatchObject( { name: 'Mikasa V200W Official Game Volleyball', source: 'creators' } );
+
+		// The two failures are still pending; × hides the banner for this user until that set changes.
+		await page.reload();
+		await expect( banner ).toContainText( '2 Amazon links are ready to sync product data.' );
+		await banner.getByRole( 'button', { name: 'Dismiss' } ).click();
+		await expect( banner ).toBeHidden();
+		await page.reload();
+		await expect( page.locator( '#affibloom-notices' ) ).toBeAttached();
+		await expect( banner ).toBeHidden();
+		const another = amazonPending( 'Amazon' );
+		await page.reload();
+		await expect( banner ).toContainText( '3 Amazon links are ready to sync product data.' );
+
+		for ( const id of [ found, missing, short, another ] ) {
+			wp( 'post', 'delete', String( id ), '--force' );
+		}
+		clearDismissal();
 	} );
 
 	test( 'AC9 wp affibloom amazon get prints the item, or the error code and message', () => {

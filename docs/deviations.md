@@ -121,6 +121,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 113. Task C1C (2026-11-15), Amazon data on add: the table (Affibloom's column names, no last_updated index yet), the Table class, NotFound keeps the starting name, R34 on read; run-state restores Affibloom's tables and leaves the schema version.
 - 114. Task C1D (2026-11-15), Refresh on the product page: image as meta only, placeholder rename on the server, the page keeps a typed name; the image row wraps.
 - 115. Narrower batch-end runs and shorter records (2026-11-15; the user: "All three"); Local's PHP workers are hard-coded.
+- 116. Task C1I (2026-11-15), bulk Amazon sync: pending without Lasso's last-updated arm (229 here until Task 26 copies the rows), a placeholder counts as no name, REST + WP-Cron.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2534,3 +2535,14 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     Records: a deviation at most ~10 lines, a session-log entry at most ~4 (this file's header). **Not done: more PHP
     workers.** On Windows Local starts two `php-cgi.exe`, hard-coded in its `PhpService.js` (`requiredPorts`), so
     `www.conf` does not apply; patching Local's files (overwritten by its updates) is the user's call. Docs only.
+
+116. **Task C1I: bulk Amazon sync (2026-11-15).** As R40-R44 and D12, with these differences:
+    - **Pending** has no arm for Lasso's `amazon_product_last_updated`: a stored row with a name for the ASIN and the
+      product's store is the record of having Amazon's data, so no `_affibloom_amazon_synced` meta is made. On this copy
+      229 are pending (Affibloom's table is empty) where Lasso counts 3; Task 26's copy of Lasso's rows brings it to 3.
+    - **Name:** Lasso sets the title only when empty; an Affibloom product always has one, so a placeholder counts as
+      empty (as Refresh). No forced re-save of every synced product. "Failed to persist" folds into "verify".
+    - Words without "Lasso" (D16): "Invalid product ID."; no start lock (the running check, as bulk add); the banner's
+      reason line "Needs the Amazon API" is shown, not only described. `can_refresh()` became `can_ask_amazon()`.
+    - Checks: AC7 banner and AC14 red first (no pending query), then green; unit 643; lint, PHPStan clean; by hand at
+      1280 and 375 px (the chip sat above the words at 375 px; fixed).

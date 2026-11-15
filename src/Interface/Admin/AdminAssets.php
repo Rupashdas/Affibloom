@@ -47,6 +47,8 @@ final class AdminAssets implements Module {
 		wp_enqueue_style( 'affibloom-fields', $this->plugin_url . 'assets/admin/fields.css', array( 'affibloom-admin' ), $this->version );
 		// Help tips, Save-when-changed, modals and "Add A New Link". wp-api-fetch carries the REST root and nonce in wp-admin.
 		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
+		// The bulk Amazon sync banner in the notice region of every screen (Task C1I); it stops at once without the banner.
+		wp_enqueue_script( 'affibloom-amazon-bulk-sync', $this->plugin_url . 'assets/admin/amazon-bulk-sync.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 
 		// The Dashboard's own script: selection (Task 13C), the list without reloads (13D), filters and views (13E), and
 		// the quick edit (16A), whose image comes from the media library and whose toast and save dialog are admin.js's.

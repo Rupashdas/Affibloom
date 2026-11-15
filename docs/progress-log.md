@@ -4,6 +4,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, Batch 2.2, Task C1I, at the user's "Let's complete batch 2.2"):** bulk Amazon sync
+  (deviation 116): pending query, run option, WP-Cron passes at one product a second, REST routes, the banner in the
+  notice region. AC7 banner and AC14 red then green; unit 643; lint, PHPStan clean; by hand at 1280 and 375 px.
+
 - **2026-11-15 (Claude Code, narrower checks, at the user's word "All three"):** deviation 115. Batch-end runs only
   the tests covering the change (`-g`); whole specs only at a phase exit; deviations capped at ~10 lines, log entries
   at ~4. More PHP workers is not a setting (hard-coded in Local); patching Local is the user's call.

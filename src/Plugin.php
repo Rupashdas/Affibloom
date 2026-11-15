@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom;
 
 use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
@@ -36,6 +37,7 @@ use Affibloom\Infrastructure\Schema\Table;
 use Affibloom\Infrastructure\WordPress\CronRegistry;
 use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
+use Affibloom\Infrastructure\WordPress\OptionBulkSyncRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionCredentialsRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
@@ -46,20 +48,24 @@ use Affibloom\Infrastructure\WordPress\OptionPluginState;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PluginUpdates;
 use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
+use Affibloom\Infrastructure\WordPress\PostMetaPendingAmazonSync;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
 use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
 use Affibloom\Infrastructure\WordPress\TermGroupRepository;
+use Affibloom\Infrastructure\WordPress\UserMetaBannerDismissals;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\UpgradeCommand;
+use Affibloom\Interface\Cron\AmazonBulkSyncCron;
 use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\AdminNavigation;
+use Affibloom\Interface\Admin\AmazonNotices;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\FieldScreen;
@@ -134,6 +140,20 @@ final class Plugin {
 	 * @var UpgradeHooks|null
 	 */
 	private ?UpgradeHooks $upgrade_hooks = null;
+
+	/**
+	 * Bulk Amazon sync: a module's and the notice board's (its banner); built on first use.
+	 *
+	 * @var BulkSyncService|null
+	 */
+	private ?BulkSyncService $bulk_sync = null;
+
+	/**
+	 * Amazon's data on products, shared by the add flow, the product page and bulk sync; built on first use.
+	 *
+	 * @var AmazonDataService|null
+	 */
+	private ?AmazonDataService $amazon_data = null;
 
 	/**
 	 * Settings storage, shared by every reader in a request.
@@ -215,7 +235,32 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS );
+	}
+
+	/**
+	 * Amazon's data on products (C1C, C1D, C1I).
+	 */
+	private function amazon_data(): AmazonDataService {
+		$this->amazon_data ??= new AmazonDataService( new OptionCredentialsRepository(), new CreatorsApiCatalog(), new TableAmazonProductRepository(), new PostTypeProductRepository() );
+		return $this->amazon_data;
+	}
+
+	/**
+	 * Bulk Amazon sync (C1I): its job runs as the cron module's event; its links are followed as the add flow follows them.
+	 */
+	private function bulk_sync(): BulkSyncService {
+		$this->bulk_sync ??= new BulkSyncService(
+			new PostMetaPendingAmazonSync(),
+			new OptionBulkSyncRunRepository(),
+			new UserMetaBannerDismissals(),
+			new WpCronBackgroundJob( AmazonBulkSyncCron::HOOK ),
+			$this->amazon_data(),
+			new PostTypeProductRepository(),
+			new LinkNormaliser( new LinkResolver( new WpPageFetcher() ), $this->settings_repository() ),
+			$this->settings_repository()
+		);
+		return $this->bulk_sync;
 	}
 
 	/**
@@ -242,7 +287,7 @@ final class Plugin {
 		$resolver  = new LinkResolver( new WpPageFetcher() );
 		$links     = new LinkNormaliser( $resolver, $this->settings_repository() );
 		$catalog   = new CreatorsApiCatalog();
-		$data      = new AmazonDataService( new OptionCredentialsRepository(), $catalog, new TableAmazonProductRepository(), new PostTypeProductRepository() );
+		$data      = $this->amazon_data();
 		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
 		$bulk      = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$per_page  = new PerPage();
@@ -277,7 +322,7 @@ final class Plugin {
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings, $amazon ),
-			new AmazonController( $amazon, $data ),
+			new AmazonController( $amazon, $data, $this->bulk_sync() ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
 			new HelpTips( $settings ),
 			new DisplayController( $display, $settings ),
@@ -285,6 +330,7 @@ final class Plugin {
 			new BulkAddController( $bulk ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
 			new BulkAddCron( $bulk ),
+			new AmazonBulkSyncCron( $this->bulk_sync() ),
 			new IconController( $icons ),
 			new TrackingIdController( $settings ),
 			new LassoImportController( $import ),
@@ -316,14 +362,16 @@ final class Plugin {
 	}
 
 	/**
-	 * The notices for the region under the header (F38 D8, D10), in this order: the update notice, then a failed
-	 * upgrade. C1, F11, F21 and F33 add their providers here. A provider that fails is reported to the debug log.
+	 * The notices for the region under the header (F38 D8, D10), in this order: the update notice, a failed upgrade,
+	 * then C1's (the bulk Amazon sync banner). F11, F21 and F33 add their providers here. A provider that fails is
+	 * reported to the debug log.
 	 */
 	private function notice_board(): NoticeBoard {
 		$this->notice_board ??= new NoticeBoard(
 			array(
 				new UpdateAvailableNotice( new PluginUpdates( plugin_basename( $this->file ) ) ),
 				$this->upgrade_hooks(),
+				new AmazonNotices( $this->bulk_sync() ),
 			),
 			static function ( Throwable $error ): void {
 				wp_trigger_error( '', 'Affibloom skipped a notice: ' . $error->getMessage(), E_USER_WARNING );

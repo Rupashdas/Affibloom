@@ -281,7 +281,7 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | C1B | C1 | open |
 | C1C | C1 | done (deviation 113) |
 | C1D | C1 | done (deviation 114) |
-| C1I | C1 | open |
+| C1I | C1 | done (deviation 116) |
 | C1J | C1 | open |
 | C1K | C1 | open |
 | C1L | C1 | open |
@@ -636,7 +636,7 @@ decision C3, TL6); `INSERT_BOXES` is `edit_posts`. Responses follow the global c
 | GET, POST | `/link-index`, `/link-index/rebuild` (and `/link-index/status`) | SETTINGS | link index status and rebuild | F21 35G; F9 9J, 9L | planned |
 | POST | `/clicks` `{ product \| lasso, post, button }` | public | click counter; always 204 | F12 33A | planned |
 | POST | `/amazon/validate` | SETTINGS | validate Creators credentials | C1A | built |
-| GET, POST | `/amazon/bulk-sync`, POST `/amazon/bulk-sync/dismiss`, GET `/amazon/search` | PRODUCTS | bulk Amazon sync; search tab of Add A New Link | C1I, C1M | planned |
+| GET, POST | `/amazon/bulk-sync`, POST `/amazon/bulk-sync/dismiss`, GET `/amazon/search` | PRODUCTS | bulk Amazon sync; search tab of Add A New Link | C1I, C1M | bulk sync built (C1I); search planned |
 | POST | `/notices/sitestripe/dismiss` | PRODUCTS | SiteStripe notice | C1N | planned |
 | GET, POST | `/amazon-import`, `/amazon-import/dismiss` | PRODUCTS | auto-monetize import status and notice | F35 AM4 | planned |
 | GET | `/jobs`; POST `/jobs/run-due` | PRODUCTS / SETTINGS | Automations popover; cron health check | F38 ON3; F11 32D, 32E | planned |
@@ -670,7 +670,7 @@ each feature's analysis lists its own.
 | Cron | `affibloom_daily` (03:00) | link check start, click retention, log pruning | F11 30A; F12 33C; F37 TL3 | planned |
 | Cron | `affibloom_link_check_batch`, `affibloom_link_check_product` | link check batches | F11 30A, 30B | planned |
 | Cron | `affibloom_link_index_batch`, `affibloom_link_index_daily` | link index | F21 35F | planned |
-| Cron | `affibloom_amazon_refresh` (hourly), `affibloom_amazon_bulk_sync`, `affibloom_genius_cleanup` | Amazon data jobs | C1E, C1I, C1P | planned |
+| Cron | `affibloom_amazon_refresh` (hourly), `affibloom_amazon_bulk_sync`, `affibloom_genius_cleanup` | Amazon data jobs | C1E, C1I, C1P | bulk sync built (C1I); rest planned |
 | Cron | `affibloom_auto_detect`, `affibloom_auto_detect_daily`, `affibloom_amazon_import` | auto-monetization | F35 C2C, AM1 | planned |
 | Cron | `affibloom_import_batch` | bulk import | F33 IM3 | planned |
 | Actions | `affibloom_link_issue_detected`, `affibloom_link_index_indexed`, `affibloom_before_link_redirect`, `affibloom_box_failed` (and the earlier `affibloom_legacy_box_failed`) | extension points | F11, F21, F24, F31 | planned |

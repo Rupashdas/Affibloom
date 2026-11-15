@@ -10,9 +10,12 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Amazon\BulkSyncRefused;
+use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsNotValidated;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Amazon\RefreshFailed;
+use Affibloom\Application\Amazon\SyncOutcome;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Messages;
 use Affibloom\Module;
@@ -25,7 +28,8 @@ use WP_REST_Server;
  * REST routes for Amazon. The first is the Product Data API card's Validate (C1A; Lasso's
  * lasso_verify_amazon_creators_credentials, R19-R22): it checks the typed credentials and answers with the message and
  * the card's new state. Its answers never carry the Secret or the Credential ID (AC5). The second is the product page's
- * Refresh (C1D; Lasso's upload_thumbnail for an Amazon product, R35).
+ * Refresh (C1D; Lasso's upload_thumbnail for an Amazon product, R35). The last three are the bulk sync banner's: status,
+ * start and dismiss (C1I; Lasso's lasso_bulk_sync_amazon_* AJAX actions, R42).
  */
 final class AmazonController implements Module {
 
@@ -34,8 +38,9 @@ final class AmazonController implements Module {
 	 *
 	 * @param CredentialsService $credentials The card's use cases.
 	 * @param AmazonDataService  $data        Amazon's data on products (Refresh).
+	 * @param BulkSyncService    $sync        Bulk Amazon sync (the banner's routes, C1I).
 	 */
-	public function __construct( private CredentialsService $credentials, private AmazonDataService $data ) {}
+	public function __construct( private CredentialsService $credentials, private AmazonDataService $data, private BulkSyncService $sync ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -85,6 +90,102 @@ final class AmazonController implements Module {
 				),
 			)
 		);
+
+		// The bulk sync banner (C1I; Lasso's lasso_bulk_sync_amazon_* AJAX actions, R42).
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/amazon/bulk-sync',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'bulk_sync_status' ),
+					'permission_callback' => array( $this, 'can_edit_products' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'bulk_sync_start' ),
+					'permission_callback' => array( $this, 'can_edit_products' ),
+				),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/amazon/bulk-sync/dismiss',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'bulk_sync_dismiss' ),
+				'permission_callback' => array( $this, 'can_edit_products' ),
+			)
+		);
+	}
+
+	/**
+	 * GET /amazon/bulk-sync: how the last run stands (Lasso's _status).
+	 */
+	public function bulk_sync_status(): WP_REST_Response {
+		return new WP_REST_Response( array( 'data' => self::sync_status( $this->sync->status() ) ) );
+	}
+
+	/**
+	 * POST /amazon/bulk-sync: 202 with the new run's status; 409 while one runs or without credentials; 400 when nothing
+	 * is pending, in Lasso's words (R42).
+	 */
+	public function bulk_sync_start(): WP_REST_Response|WP_Error {
+		try {
+			$status = $this->sync->start();
+		} catch ( BulkSyncRefused $refused ) {
+			[ $code, $message ] = match ( $refused->reason ) {
+				BulkSyncRefused::RUNNING => array( 409, __( 'Bulk Amazon sync is already running.', 'affibloom' ) ),
+				BulkSyncRefused::NOTHING => array( 400, __( 'No Amazon links need syncing.', 'affibloom' ) ),
+				default                  => array( 409, __( 'Needs the Amazon API', 'affibloom' ) ),
+			};
+			return new WP_Error( 'affibloom_bulk_sync_' . $refused->reason, $message, array( 'status' => $code ) );
+		}
+
+		return new WP_REST_Response( array( 'data' => self::sync_status( $status ) ), 202 );
+	}
+
+	/**
+	 * POST /amazon/bulk-sync/dismiss: 204; the banner stays hidden for this person until the pending set changes.
+	 */
+	public function bulk_sync_dismiss(): WP_REST_Response {
+		$this->sync->dismiss( get_current_user_id() );
+
+		return new WP_REST_Response( null, 204 );
+	}
+
+	/**
+	 * A run's status for the banner's script, its failures in Lasso's words (R44).
+	 *
+	 * @param array{running: bool, percent: int, total: int, counts: array{succeeded: int, skipped: int, failed: int}, failures: list<array{id: int, reason: string}>, completed: bool, pending: int} $status From BulkSyncService.
+	 * @return array<string, mixed>
+	 */
+	private static function sync_status( array $status ): array {
+		$status['failures'] = array_map(
+			static fn( array $failure ): array => array(
+				'id'      => $failure['id'],
+				'message' => self::sync_reason( $failure['reason'] ),
+			),
+			$status['failures']
+		);
+
+		return $status;
+	}
+
+	/**
+	 * Lasso's words for why a product did not sync (sync_amazon_metadata_for_post; "Lasso" left out, D16).
+	 *
+	 * @param string $reason A SyncOutcome reason.
+	 */
+	private static function sync_reason( string $reason ): string {
+		return match ( $reason ) {
+			SyncOutcome::INVALID    => __( 'Invalid product ID.', 'affibloom' ),
+			SyncOutcome::UNRESOLVED => __( 'Could not resolve Amazon ASIN.', 'affibloom' ),
+			SyncOutcome::NOT_FOUND  => __( 'Amazon product not found.', 'affibloom' ),
+			SyncOutcome::INCOMPLETE => __( 'Amazon sync returned incomplete product data.', 'affibloom' ),
+			SyncOutcome::UNVERIFIED => __( 'Amazon sync failed to verify persisted product data.', 'affibloom' ),
+			default                 => __( 'Amazon sync failed.', 'affibloom' ),
+		};
 	}
 
 	/**

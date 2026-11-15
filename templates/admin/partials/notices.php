@@ -14,7 +14,9 @@ defined( 'ABSPATH' ) || exit;
 	<div id="affibloom-notices" class="affibloom-notices" aria-live="polite">
 		<?php
 		foreach ( $view['notices'] as $shell_notice ) {
-			$this->render( 'admin/partials/shell-notice', array( 'notice' => $shell_notice ) );
+			// The bulk Amazon sync banner has a button and a summary of its own (C1I); every other notice is words.
+			$shell_partial = \Affibloom\Interface\Admin\AmazonNotices::BULK_SYNC === $shell_notice->key ? 'admin/partials/amazon-bulk-sync' : 'admin/partials/shell-notice';
+			$this->render( $shell_partial, array( 'notice' => $shell_notice ) );
 		}
 		?>
 	</div>

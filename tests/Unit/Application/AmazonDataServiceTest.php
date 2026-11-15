@@ -240,7 +240,7 @@ final class AmazonDataServiceTest extends TestCase {
 		self::assertSame( RefreshFailed::NO_IMAGE, $this->refused( fn() => $service->refresh( $this->stored( 'Amazon' ) ) )->reason );
 
 		$unset = $this->service( false );
-		self::assertFalse( $unset->can_refresh() );
+		self::assertFalse( $unset->can_ask_amazon() );
 		self::assertSame( RefreshFailed::NOT_CONFIGURED, $this->refused( fn() => $unset->refresh( $this->stored( 'Amazon' ) ) )->reason );
 		self::assertSame( array(), $this->amazon->verified );
 	}

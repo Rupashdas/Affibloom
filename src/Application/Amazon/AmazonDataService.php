@@ -48,10 +48,73 @@ final class AmazonDataService {
 	) {}
 
 	/**
-	 * Whether Refresh can ask Amazon: the credentials are configured (R1, D4). The product page enables its button by it.
+	 * Whether Amazon can be asked: the credentials are configured (R1, D4). The product page's Refresh and the bulk sync
+	 * banner's button are enabled by it.
 	 */
-	public function can_refresh(): bool {
+	public function can_ask_amazon(): bool {
 		return $this->credentials->get()->configured();
+	}
+
+	/**
+	 * Bulk sync for one Amazon product with an ASIN (Lasso's sync_amazon_metadata_for_post, R44): the stored row for
+	 * its ASIN and store when it has a name ("Amazon data already present."), else Amazon's answer, stored and read
+	 * back. Either way the product takes the image link when it has no image, and Amazon's title when its name is a
+	 * placeholder (Lasso: when it has none; an Affibloom product always has one, decision 11).
+	 *
+	 * @param Product $product A stored Amazon product.
+	 */
+	public function sync( Product $product ): SyncOutcome {
+		$asin = Asin::from( $product->asin );
+		if ( null === $asin ) {
+			return SyncOutcome::failed( SyncOutcome::UNRESOLVED );
+		}
+		$country = self::country( $product );
+
+		$stored = $this->products->find( $asin->value, $country );
+		if ( null !== $stored && '' !== $stored->name ) {
+			$this->apply( $product, $stored );
+			return SyncOutcome::succeeded( SyncOutcome::PRESENT );
+		}
+
+		$credentials = $this->credentials->get();
+		if ( ! $credentials->configured() ) {
+			return SyncOutcome::failed( SyncOutcome::FAILED );
+		}
+		try {
+			$item = $this->catalog->item( $credentials, $asin, $country );
+		} catch ( CatalogError $error ) {
+			return SyncOutcome::failed( CatalogError::NOT_FOUND === $error->kind ? SyncOutcome::NOT_FOUND : SyncOutcome::FAILED );
+		}
+
+		$data = AmazonProduct::from_item( $item, $asin, $country, $product->url->value(), gmdate( 'Y-m-d H:i:s' ) );
+		// Lasso's "incomplete" is a title or image missing, which is also what its table refuses (complete()).
+		if ( ! $data->complete() ) {
+			return SyncOutcome::failed( SyncOutcome::INCOMPLETE );
+		}
+		$this->products->save( $data );
+		$stored = $this->products->find( $asin->value, $country );
+		if ( null === $stored || '' === $stored->name ) {
+			return SyncOutcome::failed( SyncOutcome::UNVERIFIED );
+		}
+
+		$this->apply( $product, $stored );
+		return SyncOutcome::succeeded( SyncOutcome::SYNCED );
+	}
+
+	/**
+	 * Gives a product a stored row's image link when it has no image (Lasso's should_apply_amazon_sync_custom_thumbnail:
+	 * no featured image and no custom one), and the row's name when its own is a placeholder.
+	 *
+	 * @param Product       $product A stored Amazon product.
+	 * @param AmazonProduct $data    Its stored row.
+	 */
+	private function apply( Product $product, AmazonProduct $data ): void {
+		if ( 0 === $product->image_id && '' === $product->image_url && AmazonProduct::is_image_link( $data->image ) ) {
+			$product = $this->library->set_image( $product, $data->image );
+		}
+		if ( '' !== $data->name && PlaceholderName::is( $product->name ) ) {
+			$this->library->rename( $product, $data->name );
+		}
 	}
 
 	/**
