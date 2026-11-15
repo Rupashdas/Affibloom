@@ -578,6 +578,60 @@ test.describe( 'C1 Amazon product data', () => {
 		clearDismissal();
 	} );
 
+	test( 'AC17 with Keep Geni.us Formatting off a geni.us link is stored as where it leads and kept as the old link (C1K)', async ( { page } ) => {
+		credentials( null );
+		stub( 'ok' ); // The stub answers https://geni.us/<code> with a 301 to https://www.amazon.com/dp/B0<CODE>.
+		const code = () => Math.random().toString( 36 ).slice( 2, 10 );
+		const leadsTo = ( c: string ) => `https://www.amazon.com/dp/B0${ c.toUpperCase().padEnd( 8, 'X' ).slice( 0, 8 ) }?tag=vbvault-20`;
+		const before = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		const made: number[] = [];
+		const addGenius = async ( link: string ): Promise< number > => {
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			await page.getByRole( 'button', { name: 'Add New Link' } ).click();
+			const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
+			await dialog.getByLabel( 'URL' ).fill( link );
+			await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
+			await expect( dialog ).toBeHidden( { timeout: 20_000 } );
+			const id = Number( wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_old_genius_url', `--meta_value=${ link }`, '--field=ID' ).split( /\s+/ )[ 0 ] );
+			made.push( id );
+			return id;
+		};
+		try {
+			setSettings( { tracking_id: 'vbvault-20', keep_genius_formatting: false } );
+
+			// Added: stored as where it leads, the geni.us link kept.
+			const first = code();
+			const added = await addGenius( `https://geni.us/${ first }` );
+			expect( meta( added, 'url' ) ).toBe( leadsTo( first ) );
+			expect( meta( added, 'type' ) ).toBe( 'amazon' );
+
+			// Saved: the Primary URL and the second button (the first added one), each with its old link.
+			const id = createProduct( { name: 'Geni.us save', url: 'https://www.example.com/c1k', buttons: [ { url: 'https://www.example.com/c1k-2', text: 'Two' } ] } );
+			made.push( id );
+			const [ primary, second ] = [ code(), code() ];
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+			await page.locator( '#affibloom-url' ).fill( `https://geni.us/${ primary }` );
+			await page.getByLabel( 'Additional Destination URL' ).first().fill( `https://geni.us/${ second }` );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( /saved/i );
+			expect( meta( id, 'url' ) ).toBe( leadsTo( primary ) );
+			expect( meta( id, 'old_genius_url' ) ).toBe( `https://geni.us/${ primary }` );
+			const buttons = JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_buttons', '--format=json' ) ) as Array< { url: string } >;
+			expect( buttons[ 0 ].url ).toBe( leadsTo( second ) );
+			expect( meta( id, 'old_genius_url2' ) ).toBe( `https://geni.us/${ second }` );
+
+			// On: stored as pasted (and still kept as the old link, as Lasso records it either way).
+			setSettings( { keep_genius_formatting: true } );
+			const kept = `https://geni.us/${ code() }`;
+			expect( meta( await addGenius( kept ), 'url' ) ).toBe( kept );
+		} finally {
+			setSettings( { keep_genius_formatting: before.keep_genius_formatting ?? true } );
+			for ( const id of made.filter( ( made ) => made > 0 ) ) {
+				wp( 'post', 'delete', String( id ), '--force' );
+			}
+		}
+	} );
+
 	test( 'AC9 wp affibloom amazon get prints the item, or the error code and message', () => {
 		/** Runs the command; its output, or its error output when it fails. */
 		const get = ( ...args: string[] ): { failed: boolean; out: string } => {

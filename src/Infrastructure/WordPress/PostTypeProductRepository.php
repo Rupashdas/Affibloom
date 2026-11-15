@@ -72,6 +72,8 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_prime'            => self::flag( $product->prime ),
 				// A JSON list of bullets (C1Q4; the user asked for JSON).
 				'_affibloom_features'         => (string) wp_json_encode( $product->features ),
+				'_affibloom_old_genius_url'   => $product->old_genius_url,
+				'_affibloom_old_genius_url2'  => $product->old_genius_url2,
 			),
 		);
 		$buttons = $product->buttons->to_array();
@@ -794,6 +796,8 @@ final class PostTypeProductRepository implements ProductRepository {
 			prime: '1' === $meta( 'prime' ),
 			image_id: (int) $meta( 'image_id' ),
 			features: self::features( $meta( 'features' ) ),
+			old_genius_url: $meta( 'old_genius_url' ),
+			old_genius_url2: $meta( 'old_genius_url2' ),
 		);
 	}
 

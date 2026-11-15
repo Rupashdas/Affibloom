@@ -200,4 +200,24 @@ final class ProductServiceLinkTest extends TestCase {
 			self::assertSame( array( 'url' => 'invalid_url' ), $refused->errors );
 		}
 	}
+
+	public function test_with_keep_genius_formatting_off_a_genius_link_is_stored_as_where_it_leads_and_kept_as_the_old_one(): void {
+		$product       = $this->stored();
+		$this->fetcher = new FakePageFetcher( array( 'https://geni.us/abc123' => new FetchedPage( 200, 'https://www.example.com/where-it-leads', '' ) ) );
+
+		$saved = $this->service( array( 'keep_genius_formatting' => false ) )->update( (int) $product->id, array( 'url' => 'https://geni.us/abc123' ) );
+
+		self::assertSame( 'https://www.example.com/where-it-leads', $saved->url->value() );
+		self::assertSame( 'https://geni.us/abc123', $saved->old_genius_url );
+	}
+
+	public function test_with_keep_genius_formatting_on_a_genius_link_is_stored_as_typed_and_still_kept_as_the_old_one(): void {
+		$product = $this->stored();
+
+		$saved = $this->service( array( 'keep_genius_formatting' => true ) )->update( (int) $product->id, array( 'url' => 'https://geni.us/abc123' ) );
+
+		self::assertSame( 'https://geni.us/abc123', $saved->url->value() );
+		self::assertSame( 'https://geni.us/abc123', $saved->old_genius_url );
+		self::assertSame( array(), $this->fetcher->asked );
+	}
 }

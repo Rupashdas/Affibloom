@@ -197,4 +197,12 @@ final class ProductInputTest extends TestCase {
 		);
 		self::assertSame( array( 'features' => array() ), $this->input()->changes( array( 'features' => 'not a list' ) ) );
 	}
+
+	public function test_a_genius_link_on_the_second_button_is_kept_as_its_old_one_and_other_links_are_not(): void {
+		$genius = $this->input()->changes( array( 'buttons' => array( array( 'url' => ' https://geni.us/two ', 'text' => 'Two' ) ) ) );
+		$other  = $this->input()->changes( array( 'buttons' => array( array( 'url' => 'https://www.example.com/two', 'text' => 'Two' ) ) ) );
+
+		self::assertSame( 'https://geni.us/two', $genius['old_genius_url2'] );
+		self::assertArrayNotHasKey( 'old_genius_url2', $other );
+	}
 }

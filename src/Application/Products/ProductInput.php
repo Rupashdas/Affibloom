@@ -10,6 +10,8 @@ declare( strict_types=1 );
 namespace Affibloom\Application\Products;
 
 use Affibloom\Domain\Display\Theme;
+use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Button;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\PriceHtml;
@@ -112,6 +114,11 @@ final class ProductInput {
 		}
 		if ( array_key_exists( 'buttons', $input ) ) {
 			$changes['buttons'] = $this->buttons( $input['buttons'], $input['primary_position'] ?? 0 );
+			// Lasso's old_second_btn_genius_url: the second button (the first added one) given a geni.us link (C1K).
+			$second = is_array( $input['buttons'] ) && is_array( $input['buttons'][0] ?? null ) ? trim( self::scalar( $input['buttons'][0]['url'] ?? '' ) ) : '';
+			if ( self::is_geni_us( $second ) ) {
+				$changes['old_genius_url2'] = $second;
+			}
 		}
 		if ( array_key_exists( 'image_url', $input ) || array_key_exists( 'image_id', $input ) ) {
 			$changes += self::image( $input['image_url'] ?? '', $input['image_id'] ?? 0 );
@@ -146,6 +153,19 @@ final class ProductInput {
 		}
 
 		return $features;
+	}
+
+	/**
+	 * Whether a typed link is a geni.us link (AffiliateUrl::is_geni_us()); something that is not a link is not.
+	 *
+	 * @param string $raw The field as typed.
+	 */
+	private static function is_geni_us( string $raw ): bool {
+		try {
+			return '' !== $raw && AffiliateUrl::from_string( $raw )->is_geni_us();
+		} catch ( InvalidField $not_a_link ) {
+			return false;
+		}
 	}
 
 	/**

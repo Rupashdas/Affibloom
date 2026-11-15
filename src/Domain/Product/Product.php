@@ -50,6 +50,9 @@ final class Product {
 	 * @param int          $image_id        The image's media library item, when it was picked there; 0 otherwise.
 	 * @param list<string> $features        The product's feature bullets, in order (C1Q4: Amazon's on add and Refresh,
 	 *                                      editable; separate from the description; not shown in displays yet).
+	 * @param string       $old_genius_url  The last geni.us link given as the Primary URL (Lasso's old_genius_url, C1K).
+	 * @param string       $old_genius_url2 The last geni.us link given to the second button, the first added one (Lasso's
+	 *                                      old_second_btn_genius_url).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -75,6 +78,8 @@ final class Product {
 		public readonly bool $prime = false,
 		public readonly int $image_id = 0,
 		public readonly array $features = array(),
+		public readonly string $old_genius_url = '',
+		public readonly string $old_genius_url2 = '',
 	) {}
 
 	/**

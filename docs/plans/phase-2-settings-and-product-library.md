@@ -280,7 +280,7 @@ C1F and C1G in Phase 3
 - [x] Task C1Q6a: Throttling, retry and the daily quota
 - [x] Task C1Q6b: Ten ASINs per request; per-item errors
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
-- [ ] Task C1K: Keep Geni.us Formatting on add and save
+- [x] Task C1K: Keep Geni.us Formatting on add and save
 - [ ] Task C1L: The cloud-only switches labelled
 - [ ] Task C1M: The Amazon search tab in Add A New Link
 - [ ] Task C1N: The SiteStripe notice
@@ -6355,10 +6355,14 @@ button).
 
 **Files:** modify `LinkResolver.php`, `ProductService.php`; tests a unit test, `C1.spec.ts` AC17 (stubbed redirect).
 
-- [ ] **Step 1: Failing tests** (unit; AC17 with a stubbed redirect).
-- [ ] **Step 2: Resolver.**
-- [ ] **Step 3: Run and look** (add and save a stubbed geni.us link with the switch off, then on).
-- [ ] **Step 4: Commit** — "Store geni.us links as their destination when the setting says so".
+- [x] **Step 1: Failing tests** (unit; AC17 with a stubbed redirect).
+- [x] **Step 2: Resolver.**
+- [x] **Step 3: Run and look** (add and save a stubbed geni.us link with the switch off, then on).
+- [x] **Step 4: Commit** — "Store geni.us links as their destination when the setting says so".
+
+*Note (2026-11-15):* following a geni.us link with the switch off was already built (`LinkNormaliser`, 11D/15A/15B),
+so no `GeniusLinks` class: C1K adds only the old links, `_affibloom_old_genius_url` and `…_url2`, kept as Lasso keeps
+them, with the switch on as well. Checked: unit tests, and a save on Local with the stub, switch off then on.
 
 ---
 

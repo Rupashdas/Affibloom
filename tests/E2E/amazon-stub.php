@@ -52,7 +52,23 @@ add_filter(
 	static function ( $pre, $args, $url ) {
 		$scenario = get_option( 'affibloom_test_amazon_stub', '' );
 		$host     = (string) wp_parse_url( $url, PHP_URL_HOST );
-		$amazon   = 'creatorsapi.amazon' === $host || str_ends_with( $host, '.amazoncognito.com' )
+
+		// geni.us (C1K): while any scenario is set, https://geni.us/<code> answers 301 to the Amazon product
+		// B0<CODE, upper case, padded with X to eight>, where the page fetcher stops (an Amazon store link).
+		if ( '' !== $scenario && 'geni.us' === $host ) {
+			$code = strtoupper( substr( str_pad( trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' ), 8, 'X' ), 0, 8 ) );
+			return array(
+				'headers'  => array( 'location' => 'https://www.amazon.com/dp/B0' . $code ),
+				'body'     => '',
+				'response' => array(
+					'code'    => 301,
+					'message' => 'Moved Permanently',
+				),
+				'cookies'  => array(),
+				'filename' => null,
+			);
+		}
+		$amazon = 'creatorsapi.amazon' === $host || str_ends_with( $host, '.amazoncognito.com' )
 			|| in_array( $host, array( 'api.amazon.com', 'api.amazon.co.uk', 'api.amazon.co.jp' ), true );
 		if ( '' === $scenario || ! $amazon ) {
 			return $pre;

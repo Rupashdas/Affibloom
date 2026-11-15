@@ -171,7 +171,7 @@ final class ProductService {
 
 		$changed = $product->with( $changes );
 		if ( null !== $typed ) {
-			$changed = $this->with_link( $changed, $product, $typed );
+			$changed = self::with_genius( $this->with_link( $changed, $product, $typed ), $typed );
 		}
 
 		return $this->products->save( $changed );
@@ -405,7 +405,7 @@ final class ProductService {
 		}
 		if ( null === $amazon ) {
 			$revived = $this->revived( array( $typed, $url ), null );
-			return new AddedLink( $revived ?? $this->products->save( Product::draft( $resolved->title, $url, $settings ) ), false );
+			return new AddedLink( $revived ?? $this->products->save( self::with_genius( Product::draft( $resolved->title, $url, $settings ), $typed ) ), false );
 		}
 
 		$stored   = $this->rules->tagged( $amazon, $settings );
@@ -415,7 +415,18 @@ final class ProductService {
 		}
 
 		$revived = $this->revived( array( $typed, $url, $stored ), $amazon );
-		return new AddedLink( $revived ?? $this->products->save( $this->amazon_draft( $amazon, $stored, $settings ) ), false );
+		return new AddedLink( $revived ?? $this->products->save( self::with_genius( $this->amazon_draft( $amazon, $stored, $settings ), $typed ) ), false );
+	}
+
+	/**
+	 * A product given a geni.us link, with that link kept as its old one (Lasso's old_genius_url, R62, C1K): Lasso records
+	 * it whenever a geni.us link is added or saved as the Primary URL, whether it is stored as typed or as where it leads.
+	 *
+	 * @param Product      $product The product to store.
+	 * @param AffiliateUrl $typed   The Primary URL as given.
+	 */
+	private static function with_genius( Product $product, AffiliateUrl $typed ): Product {
+		return $typed->is_geni_us() ? $product->with( array( 'old_genius_url' => $typed->value() ) ) : $product;
 	}
 
 	/**
@@ -466,7 +477,7 @@ final class ProductService {
 		}
 
 		$revived = $this->revived( array( $url ), $amazon );
-		return new AddedLink( $revived ?? $this->products->save( $this->amazon_draft( $amazon, $url, $settings ) ), false );
+		return new AddedLink( $revived ?? $this->products->save( self::with_genius( $this->amazon_draft( $amazon, $url, $settings ), $url ) ), false );
 	}
 
 	/**
