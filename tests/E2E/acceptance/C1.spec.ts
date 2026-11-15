@@ -727,6 +727,42 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( requests() ).toBe( searched + 2 );
 	} );
 
+	test( 'AC19 the SiteStripe notice shows while Auto-Monetization is off, until its × dismisses it for the site (C1N)', async ( { page } ) => {
+		const settings = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		const reset = () => {
+			try {
+				wp( 'option', 'delete', 'affibloom_sitestripe_notice' );
+			} catch {
+				// Not dismissed.
+			}
+		};
+		const notice = page.locator( '#affibloom-notices .affibloom-notice' ).filter( { hasText: 'Migrating from Amazon SiteStripe?' } );
+		try {
+			reset();
+			setSettings( { auto_monetize_amazon: true } );
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			await expect( page.getByRole( 'heading', { name: 'Dashboard' } ) ).toBeVisible();
+			await expect( notice ).toHaveCount( 0 );
+
+			setSettings( { auto_monetize_amazon: false } );
+			await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+			await expect( notice ).toContainText( 'Migrating from Amazon SiteStripe? Turn on Auto Amazon to auto-migrate all your SiteStripe links within 24-48 hours!' );
+			await expect( notice.getByRole( 'link', { name: 'Turn on Auto Amazon' } ) ).toHaveAttribute( 'href', /page=affibloom-settings&tab=amazon/ );
+
+			const dismissed = page.waitForResponse( ( response ) => response.url().includes( 'notices/sitestripe/dismiss' ) );
+			await notice.getByRole( 'button', { name: 'Dismiss this notice' } ).click();
+			expect( ( await dismissed ).status() ).toBe( 204 );
+			await expect( notice ).toHaveCount( 0 );
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			await expect( page.getByRole( 'heading', { name: 'Dashboard' } ) ).toBeVisible();
+			await expect( notice ).toHaveCount( 0 );
+			expect( wp( 'option', 'get', 'affibloom_sitestripe_notice' ) ).toBe( '0' );
+		} finally {
+			reset();
+			setSettings( { auto_monetize_amazon: settings.auto_monetize_amazon ?? false } );
+		}
+	} );
+
 	test( 'AC9 wp affibloom amazon get prints the item, or the error code and message', () => {
 		/** Runs the command; its output, or its error output when it fails. */
 		const get = ( ...args: string[] ): { failed: boolean; out: string } => {

@@ -74,6 +74,7 @@ use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\AdminNavigation;
 use Affibloom\Interface\Admin\AmazonNotices;
+use Affibloom\Interface\Admin\SiteStripeNotice;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\FieldScreen;
@@ -402,7 +403,7 @@ final class Plugin {
 
 	/**
 	 * The notices for the region under the header (F38 D8, D10), in this order: the update notice, a failed upgrade,
-	 * then C1's (the bulk Amazon sync banner). F11, F21 and F33 add their providers here. A provider that fails is
+	 * then C1's (the bulk Amazon sync banner, the SiteStripe notice). F11, F21 and F33 add their providers here. A provider that fails is
 	 * reported to the debug log.
 	 */
 	private function notice_board(): NoticeBoard {
@@ -411,6 +412,7 @@ final class Plugin {
 				new UpdateAvailableNotice( new PluginUpdates( plugin_basename( $this->file ) ) ),
 				$this->upgrade_hooks(),
 				new AmazonNotices( $this->bulk_sync() ),
+				new SiteStripeNotice( $this->settings_repository() ),
 			),
 			static function ( Throwable $error ): void {
 				wp_trigger_error( '', 'Affibloom skipped a notice: ' . $error->getMessage(), E_USER_WARNING );

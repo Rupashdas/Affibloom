@@ -41,6 +41,12 @@ final class NoticeText {
 				),
 				'action' => '',
 			),
+			// Lasso's auto-amazon.php (C1 R72), the link on "Turn on Auto Amazon".
+			'sitestripe'       => array(
+				/* translators: %s: the "Turn on Auto Amazon" link. */
+				'text'   => __( 'Migrating from Amazon SiteStripe? %s to auto-migrate all your SiteStripe links within 24-48 hours!', 'affibloom' ),
+				'action' => __( 'Turn on Auto Amazon', 'affibloom' ),
+			),
 			default            => array(
 				'text'   => '',
 				'action' => '',

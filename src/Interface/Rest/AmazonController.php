@@ -22,6 +22,7 @@ use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Amazon\SearchPage;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\Admin\SiteStripeNotice;
 use Affibloom\Interface\Messages;
 use Affibloom\Module;
 use WP_Error;
@@ -35,7 +36,8 @@ use WP_REST_Server;
  * the card's new state. Its answers never carry the Secret or the Credential ID (AC5). The second is the product page's
  * Refresh (C1D; Lasso's upload_thumbnail for an Amazon product, R35). The last three are the bulk sync banner's: status,
  * start and dismiss (C1I; Lasso's lasso_bulk_sync_amazon_* AJAX actions, R42). The search is Add A New Link's Amazon
- * tab (C1M; Lasso's lasso_pro_marketplace_search, R69, on the Creators API).
+ * tab (C1M; Lasso's lasso_pro_marketplace_search, R69, on the Creators API). The last dismisses the SiteStripe notice
+ * for the site (C1N; Lasso's lasso_disable_auto_amazon_notification, R72).
  */
 final class AmazonController implements Module {
 
@@ -115,6 +117,17 @@ final class AmazonController implements Module {
 				),
 			)
 		);
+		// The SiteStripe notice's × (C1N; Lasso: manage_options, R72).
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			SiteStripeNotice::DISMISS_ROUTE,
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'sitestripe_dismiss' ),
+				'permission_callback' => array( $this, 'can_change_settings' ),
+			)
+		);
+
 		// Add A New Link's Amazon tab (C1M; Lasso: edit_posts, R69).
 		register_rest_route(
 			ProductsController::NAMESPACE,
@@ -143,6 +156,15 @@ final class AmazonController implements Module {
 				'permission_callback' => array( $this, 'can_edit_products' ),
 			)
 		);
+	}
+
+	/**
+	 * POST /notices/sitestripe/dismiss: 204; the notice stays hidden for everyone (C1N).
+	 */
+	public function sitestripe_dismiss(): WP_REST_Response {
+		SiteStripeNotice::dismiss();
+
+		return new WP_REST_Response( null, 204 );
 	}
 
 	/**

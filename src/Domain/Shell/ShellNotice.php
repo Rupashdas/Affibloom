@@ -13,7 +13,8 @@ use InvalidArgumentException;
 
 /**
  * A notice in the region under the header of every Affibloom page (F38 D8, D10): what it says (a key the Interface
- * layer puts into words, with its values), its tone, where its link goes, and whether it has a ×.
+ * layer puts into words, with its values), its tone, where its link goes, whether it has a ×, and the REST route that
+ * remembers a × (C1N's SiteStripe notice; '' for a × that only hides it on this page).
  */
 final class ShellNotice {
 
@@ -35,6 +36,7 @@ final class ShellNotice {
 	 * @param list<int|string> $args        Values the words need (a step number, an error).
 	 * @param string           $action_url  Where its link goes; '' when it has none.
 	 * @param bool             $dismissible Whether it has a × (most of Lasso's do; the update notice does not).
+	 * @param string           $dismiss_path The REST path (under /wp-json) its × posts to, or ''.
 	 * @throws InvalidArgumentException When the tone is not one of the region's.
 	 */
 	public function __construct(
@@ -43,6 +45,7 @@ final class ShellNotice {
 		public readonly array $args = array(),
 		public readonly string $action_url = '',
 		public readonly bool $dismissible = true,
+		public readonly string $dismiss_path = '',
 	) {
 		if ( ! in_array( $tone, self::TONES, true ) ) {
 			throw new InvalidArgumentException( 'A notice needs one of the region\'s tones.' );

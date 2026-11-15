@@ -1,7 +1,8 @@
 <?php
 /**
  * One notice in the region under the header (design system, "Notice"; Task ON2): an icon chip in the tone's colour,
- * the words, the link where the words have %s, and a × when the notice has one. The region's script template
+ * the words, the link where the words have %s, and a × when the notice has one (posting to the notice's route, when it
+ * has one, so the dismissal is kept). The region's script template
  * (partials/notices.php) holds the same markup, so a notice a script adds looks the same.
  *
  * @package Affibloom
@@ -33,7 +34,8 @@ $shell_parts = '' !== $shell_notice->action_url ? explode( '%s', $shell_words['t
 		<?php endif; ?>
 	</p>
 	<?php if ( $shell_notice->dismissible ) : ?>
-		<button type="button" class="affibloom-notice__close" data-affibloom-dismiss aria-label="<?php esc_attr_e( 'Dismiss this notice', 'affibloom' ); ?>">
+		<button type="button" class="affibloom-notice__close" data-affibloom-dismiss aria-label="<?php esc_attr_e( 'Dismiss this notice', 'affibloom' ); ?>"
+			<?php echo '' !== $shell_notice->dismiss_path ? 'data-dismiss-path="' . esc_attr( $shell_notice->dismiss_path ) . '"' : ''; ?>>
 			<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
 		</button>
 	<?php endif; ?>

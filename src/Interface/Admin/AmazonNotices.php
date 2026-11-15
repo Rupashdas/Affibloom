@@ -16,7 +16,8 @@ use Affibloom\Domain\Shell\ShellNotice;
 /**
  * C1's notices in the region under the header of every Affibloom page (Task ON2's NoticeBoard). The first is the bulk
  * Amazon sync banner (C1I; Lasso's #lasso-bulk-sync-amazon-banner, R41): the pending count, whether a run is going,
- * and whether Amazon can be asked; partials/amazon-bulk-sync.php draws it. C1N's SiteStripe notice joins it.
+ * and whether Amazon can be asked; partials/amazon-bulk-sync.php draws it. C1N's SiteStripe notice is its own
+ * provider (SiteStripeNotice), drawn as any other notice.
  */
 final class AmazonNotices implements NoticeProvider {
 

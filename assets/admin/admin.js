@@ -226,6 +226,10 @@
 		}
 		var item = close.closest( '.affibloom-notice' );
 		var next = item.nextElementSibling ? item.nextElementSibling.querySelector( '[data-affibloom-dismiss]' ) : null;
+		// A notice whose dismissal is kept (C1N) tells the server; it is hidden at once either way.
+		if ( close.hasAttribute( 'data-dismiss-path' ) ) {
+			wp.apiFetch( { path: close.getAttribute( 'data-dismiss-path' ), method: 'POST', parse: false } ).catch( function () {} );
+		}
 		item.remove();
 		if ( next ) {
 			next.focus();

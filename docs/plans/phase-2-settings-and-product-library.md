@@ -283,7 +283,7 @@ C1F and C1G in Phase 3
 - [x] Task C1K: Keep Geni.us Formatting on add and save
 - [x] Task C1L: The cloud-only switches labelled
 - [x] Task C1M: The Amazon search tab in Add A New Link
-- [ ] Task C1N: The SiteStripe notice
+- [x] Task C1N: The SiteStripe notice
 - [ ] Task C1O: Amazon data when the primary URL changes
 - [ ] Task C1P: The geni.us clean-up job
 
@@ -6454,10 +6454,16 @@ is dismissed (×); its link goes to the Amazon tab; the dismissal is site-wide.
 
 **Files:** the above; `C1.spec.ts` AC19.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Notice and route.**
-- [ ] **Step 3: Run and look** at 1280 and 375 px.
-- [ ] **Step 4: Commit** — "Show Lasso's SiteStripe notice".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Notice and route.**
+- [x] **Step 3: Run and look** at 1280 and 375 px.
+- [x] **Step 4: Commit** — "Show Lasso's SiteStripe notice".
+
+*Note (2026-11-15):* the notice is its own provider, `Interface\Admin\SiteStripeNotice`, drawn by the shared
+`shell-notice.php` instead of a `sitestripe-notice.php`: `ShellNotice` gained `dismiss_path`, and a × that has one posts
+to it (admin.js), so later kept dismissals need no partial. Shown only to people with the settings capability, who
+may dismiss it (Lasso: manage_options); the option is "0" once dismissed. Checked: 693 unit tests, phpcs, the notice at
+1280 and 375 px, × → 204 and still hidden after a reload.
 
 ---
 
