@@ -104,7 +104,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [ ] Task 18D: Lasso's baselines for every theme and state
 - [x] Task 18E: The 2-box themes and theme resolution
 - [x] Task 18F: The 6-box themes (Cactus, Money)
-- [ ] Task 18G: Llama
+- [x] Task 18G: Llama
 - [ ] Task 18H: Layout controls and the phone override on the box
 - [ ] Task 18I: Density and typography on the box
 - [ ] Task 19A: Every button of the product in the box
@@ -489,10 +489,15 @@ beside Lasso's boxes: equal at 1280 and 390 px, the 2-box themes and Lab still e
 
 **Files:** modify `assets/front/box.css`, `tests/E2E/acceptance/F5.spec.ts` (AC10).
 
-- [ ] **Step 1: Failing test (AC10).**
-- [ ] **Step 2: CSS.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Draw Lasso's Llama theme".
+- [x] **Step 1: Failing test (AC10).**
+- [x] **Step 2: CSS.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Draw Lasso's Llama theme".
+
+*Note (2026-11-16):* AC10 checks `plain` and `badge` (deviation 138). Besides `lasso-live`'s Llama rules, Lasso's v2 file
+lists Llama beside Lab in nearly every Lab rule, so 18B's Lab rules in `box-layout.css` gained their Llama part (not
+the badge reserve, Lab's corner tag and button-row gap, or the left-image badge padding, which Lasso keeps Lab's).
+Checked beside Lasso's boxes: Llama and the other seven themes equal at 1280 and 390 px. Unit 754.
 
 ---
 

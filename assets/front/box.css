@@ -3,10 +3,11 @@
  * (767.98px and below, and the preview's `.mobile`).
  *
  * Written for Affibloom's class names (ADR-6; the class map is docs/ui/tokens.md, "Product box") from the rules of
- * Lasso 369's admin/assets/css/lasso-live.min.css (GPL v2 or later) that a Single box uses: Lab (18B), the 2-box
- * themes (18E), the 6-box themes (18F); Llama comes with 18G, stars with 21A, fields and Pros & Cons with 21B, the copy button with 21C, SiteStripe with 22E, and
- * the group displays with DT2-DT8. Readers must see the box Lasso drew, so values are kept as Lasso has them and
- * checked against its baselines (tests/fixtures/baselines/variants, 1 %).
+ * Lasso 369's admin/assets/css/lasso-live.min.css (GPL v2 or later) that a Single box uses: the 8 themes (Lab 18B,
+ * the 2-box themes 18E, the 6-box themes 18F, Llama 18G); stars come with 21A, fields and Pros & Cons with 21B, the
+ * copy button with 21C, SiteStripe with 22E, and the group displays with DT2-DT8. Readers must see the box Lasso drew,
+ * so values are kept as Lasso has them and checked against its baselines (tests/fixtures/baselines/variants and
+ * themes, 1 %).
  *
  * @package Affibloom
  */
@@ -859,6 +860,95 @@ a.affibloom-button-2:hover {
 .affibloom-money.mobile .affibloom-title {
 	font-size: 1.3rem !important;
 	line-height: 1.7rem;
+}
+
+/* Llama (Task 18G): the 3-box layout (templates/front/box-3.php) with its own look. */
+.affibloom-box .affibloom-llama {
+	border: 1px solid #f3f3f3 !important;
+	padding: 30px !important;
+	border-radius: 0;
+	box-shadow: 0 0 30px rgba(0,0,0,0.1) !important;
+}
+.affibloom-llama .affibloom-image {
+	float: right;
+	width: 200px;
+	margin: 0 0 15px 15px;
+}
+.affibloom-llama .affibloom-box-1,
+.affibloom-llama .affibloom-box-3 {
+	padding: 0 !important;
+}
+.affibloom-llama .affibloom-box-2 {
+	border-top: 1px solid #dedede;
+	padding: 15px 0 0 0 !important;
+	text-align: right;
+}
+.affibloom-llama .affibloom-button-1 {
+	margin: 0 0 10px 0 !important;
+}
+.affibloom-llama .affibloom-title,
+.affibloom-llama .affibloom-price,
+.affibloom-llama .affibloom-description {
+	margin: 0 0 15px 0 !important;
+}
+.affibloom-llama a.affibloom-button-1,
+.affibloom-llama a.affibloom-button-2 {
+	display: inline-block;
+	padding: 15px 25px;
+	border-radius: 0;
+	box-shadow: none !important;
+}
+.affibloom-llama .affibloom-disclosure,
+.affibloom-llama .affibloom-date {
+	display: inline;
+}
+@media (max-width: 767.98px) {
+	.affibloom-llama {
+		padding: 20px;
+		text-align: center !important;
+	}
+	.affibloom-llama .affibloom-box-1,
+	.affibloom-llama .affibloom-box-2,
+	.affibloom-llama .affibloom-box-3,
+	.affibloom-llama .affibloom-box-4,
+	.affibloom-llama .affibloom-box-5,
+	.affibloom-llama .affibloom-box-6 {
+		-ms-flex: 0 0 100% !important;
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+		text-align: center !important;
+	}
+	.affibloom-llama .affibloom-title {
+		font-size: 20px !important;
+	}
+	.affibloom-llama .affibloom-image {
+		float: none;
+		width: 100% !important;
+		margin: 0 0 10px 0 !important;
+	}
+}
+.affibloom-llama.mobile {
+	padding: 20px;
+	text-align: center !important;
+}
+.affibloom-llama.mobile .affibloom-box-1,
+.affibloom-llama.mobile .affibloom-box-2,
+.affibloom-llama.mobile .affibloom-box-3,
+.affibloom-llama.mobile .affibloom-box-4,
+.affibloom-llama.mobile .affibloom-box-5,
+.affibloom-llama.mobile .affibloom-box-6 {
+	-ms-flex: 0 0 100% !important;
+	flex: 0 0 100% !important;
+	max-width: 100% !important;
+	text-align: center !important;
+}
+.affibloom-llama.mobile .affibloom-title {
+	font-size: 20px !important;
+}
+.affibloom-llama.mobile .affibloom-image {
+	float: none;
+	width: 100% !important;
+	margin: 0 0 10px 0 !important;
 }
 .affibloom-box .affibloom-box-1 h1 a.affibloom-title,
 .affibloom-box .affibloom-box-1 h2 a.affibloom-title,

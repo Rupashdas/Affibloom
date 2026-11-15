@@ -83,6 +83,8 @@ const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'Flow-badge': { desktop: 7567.109, mobile: 7026.234 },
 	'Geek-plain': { desktop: 9956.984, mobile: 9422.188 },
 	'Geek-badge': { desktop: 10387.734, mobile: 9797.859 },
+	'Llama-plain': { desktop: 16884.484, mobile: 15268.719 },
+	'Llama-badge': { desktop: 17409, mobile: 15656.391 },
 	'Splash-plain': { desktop: 23985.688, mobile: 21101.219 },
 	'Splash-badge': { desktop: 24384.266, mobile: 21470.891 },
 };
@@ -433,6 +435,20 @@ test.describe( 'F5 Box design', () => {
 			await expect( page.locator( '.affibloom-display > .affibloom-box-6' ) ).toHaveCount( 1 );
 		} );
 	}
+
+	// AC10 (Task 18G): Llama draws Lasso's 3-box card (R6) with its own look and matches its baselines.
+	test( "@local AC10 Llama prints the 3-box layout and matches its baselines", async ( { page } ) => {
+		useSiteDisplay();
+		for ( const state of [ 'plain', 'badge' ] as const ) {
+			const path = newPostWith( boxBlock( themeProduct( state, 'Llama' ) ) );
+			await page.goto( path );
+			const display = page.locator( '.affibloom-display.affibloom-llama' );
+			await expect( display.locator( '> .affibloom-box-1 > a.affibloom-image + a.affibloom-title + .affibloom-price + .affibloom-clear' ) ).toHaveCount( 1 );
+			await expect( display.locator( '> .affibloom-box-2 > a.affibloom-button-1' ) ).toHaveCount( 1 );
+			await expect( display.locator( '> .affibloom-box-3 > .affibloom-disclosure + .affibloom-date' ) ).toHaveCount( 1 );
+			await matchesThemeBaseline( page, path, `Llama-${ state }` );
+		}
+	} );
 
 	// AC8: a product's Display Theme in any casing works; an unknown one draws Cactus (R3). The box's own `theme` is the
 	// block attribute of Task 20B (unit-tested in ThemeResolverTest until then).
