@@ -46,8 +46,8 @@ const range = ( page: Page ) => page.locator( '.affibloom-pager__range' );
 
 /** Types a term in the Dashboard's search box and presses Enter, as Lasso searches on Enter. */
 async function search( page: Page, term: string ): Promise< void > {
-	await page.getByLabel( 'Search' ).fill( term );
-	await page.getByLabel( 'Search' ).press( 'Enter' );
+	await page.getByLabel( 'Search', { exact: true } ).fill( term );
+	await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
 }
 
 test.describe( 'F19 Dashboard list', () => {
@@ -116,7 +116,7 @@ test.describe( 'F19 Dashboard list', () => {
 		await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( id ) );
 
 		await page.reload();
-		await expect( page.getByLabel( 'Search' ) ).toHaveValue( word );
+		await expect( page.getByLabel( 'Search', { exact: true } ) ).toHaveValue( word );
 		await expect( rows( page ) ).toHaveCount( 1 );
 	} );
 
@@ -221,7 +221,7 @@ test.describe( 'F19 Dashboard list', () => {
 
 		await page.goBack();
 		await expect( rows( page ) ).toHaveCount( 25 );
-		await expect( page.getByLabel( 'Search' ) ).toHaveValue( '' );
+		await expect( page.getByLabel( 'Search', { exact: true } ) ).toHaveValue( '' );
 	} );
 
 	test( 'AC13 the Link type filter shows Amazon products only, and the Filters button counts it', async ( { page } ) => {
@@ -287,8 +287,8 @@ test.describe( 'F19 Dashboard list', () => {
 			await expect( page.locator( `tr[data-product-id="${ other }"]` ) ).toHaveCount( 0 );
 
 			// A search keeps the filter.
-			await page.getByLabel( 'Search' ).fill( tail );
-			await page.getByLabel( 'Search' ).press( 'Enter' );
+			await page.getByLabel( 'Search', { exact: true } ).fill( tail );
+			await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
 			await expect( page ).toHaveURL( /link_type=amazon/ );
 			await expect( rows( page ) ).toHaveCount( 1 );
 			await expect( rows( page ).first() ).toHaveAttribute( 'data-product-id', String( amazon ) );
@@ -377,7 +377,7 @@ test.describe( 'F19 Dashboard list', () => {
 		// not "count - 1": other runs may add products to this copy meanwhile.)
 		await expect( page.locator( `tr[data-product-id="${ id }"]` ) ).toHaveCount( 0 );
 		await expect.poll( async () => ( await tile.innerText() ).trim() ).toBe( shown( total() ) );
-		await expect( page.getByLabel( 'Search' ) ).toHaveAttribute( 'placeholder', `Search all ${ ( await tile.innerText() ).trim() } links…` );
+		await expect( page.getByLabel( 'Search', { exact: true } ) ).toHaveAttribute( 'placeholder', `Search all ${ ( await tile.innerText() ).trim() } links…` );
 	} );
 
 	test( 'AC19 the active pill clicked again, or the active view deleted, brings back All links', async ( { page } ) => {

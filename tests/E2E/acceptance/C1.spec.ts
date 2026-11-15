@@ -26,15 +26,15 @@ type Credentials = { credential_id: string; secret: string; partner_tag: string;
 
 /** Stores the Creators API credentials as the card would (null removes them). */
 function credentials( values: Credentials | null ): void {
-	if ( null === values ) {
-		try {
-			wp( 'option', 'delete', 'affibloom_amazon_credentials' );
-		} catch {
-			// Already absent.
-		}
-		return;
+	// Removed, then added: `option update` fails ("Could not update option") when the stored value is already the same.
+	try {
+		wp( 'option', 'delete', 'affibloom_amazon_credentials' );
+	} catch {
+		// Already absent.
 	}
-	wp( 'option', 'update', 'affibloom_amazon_credentials', JSON.stringify( { verified_signature: '', ...values } ), '--format=json', '--autoload=no' );
+	if ( null !== values ) {
+		wp( 'option', 'add', 'affibloom_amazon_credentials', JSON.stringify( { verified_signature: '', ...values } ), '--format=json', '--autoload=no' );
+	}
 }
 
 /** The stored credentials. */
@@ -65,7 +65,7 @@ async function addAmazon( page: Page, input: string ): Promise< number > {
 	await page.goto( '/wp-admin/admin.php?page=affibloom' );
 	await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 	const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-	await dialog.getByLabel( 'URL' ).fill( input );
+	await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( input );
 	await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 	await expect( dialog ).toBeHidden( { timeout: 20_000 } );
 	const asin = input.match( /\/dp\/([A-Z0-9]+)/i )?.[ 1 ] ?? input;
@@ -630,7 +630,7 @@ test.describe( 'C1 Amazon product data', () => {
 			await page.goto( '/wp-admin/admin.php?page=affibloom' );
 			await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 			const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-			await dialog.getByLabel( 'URL' ).fill( link );
+			await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( link );
 			await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 			await expect( dialog ).toBeHidden( { timeout: 20_000 } );
 			const id = Number( wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_old_genius_url', `--meta_value=${ link }`, '--field=ID' ).split( /\s+/ )[ 0 ] );

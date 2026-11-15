@@ -25,7 +25,7 @@ test.describe( 'F2 Amazon links', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-		await dialog.getByLabel( 'URL' ).fill( input );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( input );
 		// An Amazon add ends as Lasso's does: the Dashboard reloads, with no message (url-add.php, its is_amazon branch).
 		// Wait for that load under the test's own timeout: a slow Local copy can take a while to serve it.
 		const reloaded = page.waitForEvent( 'framenavigated' );

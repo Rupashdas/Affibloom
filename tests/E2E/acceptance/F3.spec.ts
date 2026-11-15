@@ -15,7 +15,7 @@ test.describe( 'F3 Other merchant links', () => {
 		// Shaped like the site's Mizuno links through Impact (tests/fixtures/inventory/products.json).
 		const link = `https://mizunousa.sjv.io/c/3512787/565706/9383?subId1=${ unique( 'f3' ) }&u=https%3A%2F%2Fusa.mizuno.com%2Fp%3Fx%3D1`;
 		const dialog = await openAdd( page );
-		await dialog.getByLabel( 'URL' ).fill( link );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( link );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 		await page.waitForURL( /page=affibloom-product&id=\d+/ );
 		await expect( page.getByLabel( 'Primary Destination URL' ) ).toHaveValue( link );
@@ -23,7 +23,7 @@ test.describe( 'F3 Other merchant links', () => {
 
 	test( 'AC2 an invalid URL is refused with a message', async ( { page } ) => {
 		const dialog = await openAdd( page );
-		await dialog.getByLabel( 'URL' ).fill( 'not a link' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( 'not a link' );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 		await expect( dialog.getByText( 'This is not a valid link.' ) ).toBeVisible();
 		await expect( page ).toHaveURL( /page=affibloom(&|$)/ );

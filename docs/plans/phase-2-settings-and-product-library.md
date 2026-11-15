@@ -6558,6 +6558,12 @@ Amazon stub where C1 needs Amazon) and **the user signs it off**:
 - **C1:** AC1-AC5, AC7 (card, page, banner, tab), AC8, AC9, AC14-AC20. Moves: AC6 and AC10 (C1E) to Phase 7, AC11
   (C1F) and AC12 (C1G) to Phase 3, AC13 (C1H) to Phase 7.
 - The unit tests, `composer lint` and `composer analyse` of every task above pass.
+*Exit check run 2026-11-15:* lint, analyse and unit pass; the 11 Phase 2 specs (F1, F2, F3, F9, F16, F18, F19, F23,
+F26, F38, C1): 153 pass, 2 fixme (F9 AC2, F16 AC9: Phase 3). The first run failed 46, all in the tests: C1M's Amazon tab
+made the dialog's `getByLabel('URL')` and the Dashboard's `getByLabel('Search')` ambiguous; C1I's Bulk Amazon sync banner
+counted as a notice in F18 and F38; F1 AC7 assumed no credentials on Local; C1's `credentials()` failed on an unchanged
+value. Fixed in the specs; F18 AC10 and F19 AC5 then failed once with Local timeouts and passed alone.
+
 - **Sign-off:** the user runs the Dashboard, the product page, Groups, Fields, Settings → General, Display
   and Amazon on Local and signs off, as Phases 0 and 1 were. Phase 3 does not start before that.
 

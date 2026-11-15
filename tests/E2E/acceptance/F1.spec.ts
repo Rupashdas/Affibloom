@@ -1,6 +1,27 @@
 import { test, expect } from '@playwright/test';
 import { blockTrackers, createProduct, setSettings, unique, wp } from '../utils';
 
+/**
+ * Runs a check with no Creators API credentials stored (Refresh disabled, "Needs the Amazon API"), then puts back
+ * whatever was stored, exactly: Local may hold the site's own credentials.
+ */
+async function withoutCredentials( check: () => Promise< void > ): Promise< void > {
+	let saved: string | null = null;
+	try {
+		saved = wp( 'option', 'get', 'affibloom_amazon_credentials', '--format=json' );
+		wp( 'option', 'delete', 'affibloom_amazon_credentials' );
+	} catch {
+		// None stored.
+	}
+	try {
+		await check();
+	} finally {
+		if ( saved ) {
+			wp( 'option', 'add', 'affibloom_amazon_credentials', saved, '--format=json', '--autoload=no' );
+		}
+	}
+}
+
 // F1 Product library (docs/features/F1/requirements.md).
 test.describe( 'F1 Product library', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
@@ -9,7 +30,7 @@ test.describe( 'F1 Product library', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-		await dialog.getByLabel( 'URL' ).fill( `https://www.example.com/${ unique( 'f1-ac1' ) }` );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( `https://www.example.com/${ unique( 'f1-ac1' ) }` );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 		await page.waitForURL( /page=affibloom-product&id=\d+/ );
 		await expect( page.getByLabel( 'Name', { exact: true } ) ).toBeVisible();
@@ -418,7 +439,7 @@ test.describe( 'F1 Product library', () => {
 		const row = page.locator( `tr[data-product-id="${ id }"]` );
 		const form = page.locator( `tr[data-quick-edit-for="${ id }"]` );
 		const nameField = form.getByLabel( 'Name', { exact: true } );
-		const search = page.getByLabel( 'Search' );
+		const search = page.getByLabel( 'Search', { exact: true } );
 		const pageTwo = page.locator( '.affibloom-pagination a', { hasText: /^2$/ } );
 		const settingsLink = page.locator( '.affibloom-header__nav a', { hasText: 'Settings' } );
 		const edit = async () => {
@@ -536,8 +557,8 @@ test.describe( 'F1 Product library', () => {
 		const name = unique( 'F1 AC3' );
 		const id = createProduct( { name } );
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
-		await page.getByLabel( 'Search' ).fill( name );
-		await page.getByLabel( 'Search' ).press( 'Enter' );
+		await page.getByLabel( 'Search', { exact: true } ).fill( name );
+		await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
 		await expect( page.locator( `tr[data-product-id="${ id }"]` ) ).toBeVisible();
 	} );
 
@@ -615,16 +636,18 @@ test.describe( 'F1 Product library', () => {
 
 	test( 'AC7 an Amazon product has no Permalink or cloaking, an Amazon Image field and a read-only price', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F1 AC7' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC7XYZ?tag=vbvault-20', asin: 'B0F1AC7XYZ', price: '$198.03' } );
-		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await withoutCredentials( async () => {
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 
-		await expect( page.locator( '#affibloom-permalink' ) ).toHaveCount( 0 );
-		await expect( page.locator( '#affibloom-cloaking' ) ).toHaveCount( 0 );
-		await expect( page.getByLabel( 'Amazon Image' ) ).toBeVisible();
-		await expect( page.getByRole( 'button', { name: 'Refresh' } ) ).toBeDisabled();
-		await expect( page.locator( '#affibloom-price' ) ).toHaveAttribute( 'readonly', '' );
-		await expect( page.locator( '#affibloom-price' ) ).toHaveValue( '$198.03' );
-		await expect( page.getByText( 'Amazon prices updated via' ) ).toBeVisible();
-		await expect( page.locator( '#affibloom-prime' ) ).toBeVisible();
+			await expect( page.locator( '#affibloom-permalink' ) ).toHaveCount( 0 );
+			await expect( page.locator( '#affibloom-cloaking' ) ).toHaveCount( 0 );
+			await expect( page.getByLabel( 'Amazon Image' ) ).toBeVisible();
+			await expect( page.getByRole( 'button', { name: 'Refresh' } ) ).toBeDisabled();
+			await expect( page.locator( '#affibloom-price' ) ).toHaveAttribute( 'readonly', '' );
+			await expect( page.locator( '#affibloom-price' ) ).toHaveValue( '$198.03' );
+			await expect( page.getByText( 'Amazon prices updated via' ) ).toBeVisible();
+			await expect( page.locator( '#affibloom-prime' ) ).toBeVisible();
+		} );
 	} );
 
 	test( 'AC6 adding a non-Amazon link that exists opens that product with Lasso\'s warning', async ( { page } ) => {
@@ -633,7 +656,7 @@ test.describe( 'F1 Product library', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-		await dialog.getByLabel( 'URL' ).fill( link );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( link );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 
 		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ id }(&|$)` ) );
@@ -910,7 +933,7 @@ test.describe( 'F1 Product library', () => {
 		expect( status( gone ) ).toBe( 'trash' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const add = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-		await add.getByLabel( 'URL' ).fill( url );
+		await add.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( url );
 		await add.getByRole( 'button', { name: 'Add Link' } ).click();
 		await page.waitForURL( new RegExp( `page=affibloom-product&id=${ gone }$` ) );
 		await expect( page.locator( '#affibloom-name' ) ).toHaveValue( name );
@@ -957,13 +980,15 @@ test.describe( 'F1 Product library', () => {
 
 	test( 'AC7 the disabled Refresh button gives its reason to a screen reader, not through a title alone', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F1 AC7 refresh' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC7RFS?tag=vbvault-20', asin: 'B0F1AC7RFS' } );
-		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await withoutCredentials( async () => {
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 
-		const refresh = page.getByRole( 'button', { name: 'Refresh' } );
-		await expect( refresh ).toBeDisabled();
-		await expect( refresh ).toHaveAttribute( 'aria-describedby', 'affibloom-refresh-reason' );
-		await expect( page.locator( '#affibloom-refresh-reason' ) ).toHaveText( 'Needs the Amazon API' );
-		await expect( refresh ).toHaveAccessibleDescription( 'Needs the Amazon API' );
+			const refresh = page.getByRole( 'button', { name: 'Refresh' } );
+			await expect( refresh ).toBeDisabled();
+			await expect( refresh ).toHaveAttribute( 'aria-describedby', 'affibloom-refresh-reason' );
+			await expect( page.locator( '#affibloom-refresh-reason' ) ).toHaveText( 'Needs the Amazon API' );
+			await expect( refresh ).toHaveAccessibleDescription( 'Needs the Amazon API' );
+		} );
 	} );
 
 	test( 'AC10 Remove on an added button asks in the page\'s own dialog; a failed field save or remove says so', async ( { page } ) => {

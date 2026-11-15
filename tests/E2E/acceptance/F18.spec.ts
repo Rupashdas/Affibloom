@@ -34,7 +34,7 @@ test.describe( 'F18 Adding links', () => {
 	async function opened( page: Page, shown: string ) {
 		await page.waitForURL( /page=affibloom-product&id=\d+/, { timeout: 20_000 } );
 		await expect( page.locator( '#affibloom-url' ) ).toHaveValue( new RegExp( shown ) );
-		await expect( page.locator( '.affibloom-notice' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' ) /* the Bulk Amazon sync banner (C1I) is not the add's notice */ ).toHaveCount( 0 );
 	}
 
 	/** IDs of the products whose primary link is exactly this one. */
@@ -48,10 +48,10 @@ test.describe( 'F18 Adding links', () => {
 		const sub = unique( 'f18' );
 		const link = `https://mizuno.pxf.io/c/123/456/789?u=https%3A%2F%2Fmizunousa.com%2Fwave&subId1=${ sub }`;
 		const dialog = await openAdd( page );
-		await expect( dialog.getByLabel( 'URL' ) ).toBeFocused();
+		await expect( dialog.getByRole( 'textbox', { name: 'URL', exact: true } ) ).toBeFocused();
 
-		await dialog.getByLabel( 'URL' ).fill( link );
-		await dialog.getByLabel( 'URL' ).press( 'Enter' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( link );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).press( 'Enter' );
 
 		await opened( page, sub );
 		const ids = productsWithLink( link );
@@ -62,7 +62,7 @@ test.describe( 'F18 Adding links', () => {
 
 	async function add( page: Page, link: string ) {
 		const dialog = await openAdd( page );
-		await dialog.getByLabel( 'URL' ).fill( link );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( link );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 	}
 
@@ -82,7 +82,7 @@ test.describe( 'F18 Adding links', () => {
 
 		// Lasso opens the existing product's page with its warning (Task 14A).
 		await page.waitForURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
-		await expect( page.locator( '.affibloom-notice' ) ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
+		await expect( page.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' ) /* the Bulk Amazon sync banner (C1I) is not the add's notice */ ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
 		expect( productsWithLink( link ) ).toHaveLength( 1 );
 	} );
 
@@ -94,7 +94,7 @@ test.describe( 'F18 Adding links', () => {
 		await add( page, variant );
 
 		await page.waitForURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
-		await expect( page.locator( '.affibloom-notice' ) ).toContainText( 'This product already exists.' );
+		await expect( page.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' ) /* the Bulk Amazon sync banner (C1I) is not the add's notice */ ).toContainText( 'This product already exists.' );
 		expect( productsWithLink( variant ) ).toHaveLength( 0 );
 	} );
 
@@ -111,8 +111,8 @@ test.describe( 'F18 Adding links', () => {
 	test( 'AC6 Shift + Enter turns the field into the bulk textarea, and the counter falls', async ( { page } ) => {
 		const first = `https://www.example.com/${ unique( 'f18-ac6a' ) }`;
 		const dialog = await openAdd( page );
-		await dialog.getByLabel( 'URL' ).fill( first );
-		await dialog.getByLabel( 'URL' ).press( 'Shift+Enter' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( first );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).press( 'Shift+Enter' );
 
 		const second = `https://www.example.com/${ unique( 'f18-ac6b' ) }`;
 		const third = `https://www.example.com/${ unique( 'f18-ac6c' ) }`;
@@ -192,8 +192,8 @@ test.describe( 'F18 Adding links', () => {
 		try {
 			setSettings( { nofollow: false, sponsored: true } );
 			const dialog = await openAdd( page );
-			await dialog.getByLabel( 'URL' ).fill( link );
-			await dialog.getByLabel( 'URL' ).press( 'Enter' );
+			await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( link );
+			await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).press( 'Enter' );
 			await opened( page, link.split( '/' ).pop() as string );
 
 			const [ id ] = productsWithLink( link );
@@ -226,11 +226,11 @@ test.describe( 'F18 Adding links', () => {
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 
 		await expect( dialog.getByText( 'URL is incorrect.' ) ).toBeVisible();
-		await expect( dialog.getByLabel( 'URL' ) ).toHaveAttribute( 'aria-invalid', 'true' );
+		await expect( dialog.getByRole( 'textbox', { name: 'URL', exact: true } ) ).toHaveAttribute( 'aria-invalid', 'true' );
 		expect( requests ).toBe( 0 );
 
 		// Typing clears the message, as in Lasso.
-		await dialog.getByLabel( 'URL' ).type( 'h' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).type( 'h' );
 		await expect( dialog.getByText( 'URL is incorrect.' ) ).toBeHidden();
 	} );
 
@@ -241,7 +241,7 @@ test.describe( 'F18 Adding links', () => {
 				: route.continue()
 		);
 		const dialog = await openAdd( page );
-		await dialog.getByLabel( 'URL' ).fill( 'https://www.example.com/f18-continue' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( 'https://www.example.com/f18-continue' );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 
 		const button = dialog.locator( '#affibloom-add-submit' );
@@ -250,20 +250,20 @@ test.describe( 'F18 Adding links', () => {
 		await expect( button ).toHaveAttribute( 'data-continue', '1' );
 
 		// Typing a different link puts the usual button back, as in Lasso.
-		await dialog.getByLabel( 'URL' ).type( 'x' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).type( 'x' );
 		await expect( button ).toHaveText( 'Add Link' );
 		await expect( button ).not.toHaveAttribute( 'data-continue', /.*/ );
 	} );
 
 	test( 'the dialog closes with Escape, is cleared, and gives the focus back', async ( { page } ) => {
 		const dialog = await openAdd( page );
-		await dialog.getByLabel( 'URL' ).fill( 'https://www.example.com/x' );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( 'https://www.example.com/x' );
 		await page.keyboard.press( 'Escape' );
 
 		await expect( dialog ).toBeHidden();
 		await expect( page.getByRole( 'button', { name: 'Add New Link' } ) ).toBeFocused();
 
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
-		await expect( dialog.getByLabel( 'URL' ) ).toHaveValue( '' );
+		await expect( dialog.getByRole( 'textbox', { name: 'URL', exact: true } ) ).toHaveValue( '' );
 	} );
 } );

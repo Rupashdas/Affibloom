@@ -16,8 +16,8 @@ test.describe( 'F11 Broken-link alerts', () => {
 		wp( 'affibloom', 'check-links', `--product=${ id }` );
 
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
-		await page.getByLabel( 'Search' ).fill( name );
-		await page.getByLabel( 'Search' ).press( 'Enter' );
+		await page.getByLabel( 'Search', { exact: true } ).fill( name );
+		await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
 		await expect( page.locator( `tr[data-product-id="${ id }"] .affibloom-alert-broken` ) ).toBeVisible();
 
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
@@ -32,8 +32,8 @@ test.describe( 'F11 Broken-link alerts', () => {
 		wp( 'affibloom', 'check-links', `--product=${ id }` );
 
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
-		await page.getByLabel( 'Search' ).fill( name );
-		await page.getByLabel( 'Search' ).press( 'Enter' );
+		await page.getByLabel( 'Search', { exact: true } ).fill( name );
+		await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
 		const row = page.locator( `tr[data-product-id="${ id }"]` );
 		await expect( row ).toBeVisible();
 		await expect( row.locator( '.affibloom-alert-broken' ) ).toHaveCount( 0 );

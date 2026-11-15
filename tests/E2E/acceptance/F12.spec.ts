@@ -19,8 +19,8 @@ test.describe( 'F12 Clicks and where used', () => {
 		expect( ( await counted ).status() ).toBe( 204 );
 
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
-		await page.getByLabel( 'Search' ).fill( name );
-		await page.getByLabel( 'Search' ).press( 'Enter' );
+		await page.getByLabel( 'Search', { exact: true } ).fill( name );
+		await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
 		await expect( page.locator( `tr[data-product-id="${ id }"] td.affibloom-clicks` ) ).toHaveText( '1' );
 	} );
 

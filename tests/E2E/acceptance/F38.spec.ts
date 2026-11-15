@@ -160,7 +160,9 @@ test.describe( 'F38 Admin shell', () => {
 	test( 'AC5 a script adds notices to one region under the header, newest last', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
 		const region = page.locator( '#affibloom-notices' );
-		const notices = region.locator( '.affibloom-notice' );
+		// The Bulk Amazon sync banner (C1I) may show on any Affibloom page while Amazon products are pending; it is not
+		// one of the script's notices.
+		const notices = region.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' );
 		await expect( notices ).toHaveCount( 0 );
 
 		await page.evaluate( () => {
@@ -204,7 +206,7 @@ test.describe( 'F38 Admin shell', () => {
 		try {
 			for ( const url of [ DASHBOARD, '/wp-admin/admin.php?page=affibloom-fields', '/wp-admin/admin.php?page=affibloom-settings' ] ) {
 				await page.goto( url );
-				const notice = page.locator( '#affibloom-notices .affibloom-notice--update' );
+				const notice = page.locator( '#affibloom-notices .affibloom-notice--update:not(.affibloom-bulk-sync)' );
 				await expect( notice, url ).toHaveText( 'There\'s a new version available. Update now.' );
 				await expect( notice.getByRole( 'link', { name: 'Update now' } ), url ).toHaveAttribute(
 					'href',
@@ -222,6 +224,6 @@ test.describe( 'F38 Admin shell', () => {
 		}
 
 		await page.goto( DASHBOARD );
-		await expect( page.locator( '#affibloom-notices .affibloom-notice--update' ) ).toHaveCount( 0 );
+		await expect( page.locator( '#affibloom-notices .affibloom-notice--update:not(.affibloom-bulk-sync)' ) ).toHaveCount( 0 );
 	} );
 } );

@@ -11,7 +11,7 @@ test.describe( 'F9 Link settings', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-		await dialog.getByLabel( 'URL' ).fill( `https://www.example.com/${ unique( 'f9-ac1' ) }` );
+		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( `https://www.example.com/${ unique( 'f9-ac1' ) }` );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 		await page.waitForURL( /page=affibloom-product&id=\d+/ );
 		await expect( page.getByLabel( 'New Window / Tab' ).first() ).not.toBeChecked();
@@ -103,7 +103,7 @@ test.describe( 'F9 Link settings', () => {
 			await page.goto( '/wp-admin/admin.php?page=affibloom' );
 			await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 			const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
-			await dialog.getByLabel( 'URL' ).fill( `https://merchant.example/${ path }?ref=${ query }` );
+			await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( `https://merchant.example/${ path }?ref=${ query }` );
 			await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 			await page.waitForURL( /page=affibloom-product&id=\d+/ );
 			return new URL( page.url() ).searchParams.get( 'id' );
