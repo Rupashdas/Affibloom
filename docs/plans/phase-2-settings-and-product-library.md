@@ -267,7 +267,7 @@ C1F and C1G in Phase 3
 
 - [x] Task C1A: The Product Data API card and Validate
 - [x] Task C1B: The catalogue client
-- [ ] Task C1C: Filling a new Amazon product on add
+- [x] Task C1C: Filling a new Amazon product on add
 - [ ] Task C1D: Refresh on the product page
 - [ ] Task C1I: Bulk Amazon sync
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
@@ -6168,11 +6168,11 @@ title and image link; without, or when Amazon fails, as today.
 **Files:** the above; `ProductService.php`, `Plugin.php`, schema install; `C1.spec.ts` AC1 (un-fixme), AC2;
 `tests/Unit/Application/AmazonDataServiceTest.php`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Table and repository.**
-- [ ] **Step 3: fill() in add.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Fill a new Amazon product's name and image from Amazon".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Table and repository.**
+- [x] **Step 3: fill() in add.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Fill a new Amazon product's name and image from Amazon".
 
 ---
 

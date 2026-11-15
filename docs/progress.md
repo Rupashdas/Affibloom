@@ -22,7 +22,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 |---|---|---|---|---|
 | 0 | Foundation and tooling | 1-3 | — | **Done**, signed off 2026-11-12 (CI never ran: deviation 10; the integration suite has never run) |
 | 1 | Behaviour specs and baselines | 4-7 | — | **Done**, signed off 2026-11-12 |
-| 2 | Settings and product library | 2X0-2X6, 8, 9, 9A, 9B-9I, 9K, 9L, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13J, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2 (+ the one-time Lasso import button, deviation 87) | 9: C1C, C1D, C1I, C1K-C1P (C1J is no code) | **In progress.** Audited 2026-11-15 (deviation 107): everything but C1 is built, recorded and passes its acceptance tests; C1A done 2026-11-15 (deviation 110); C1B done (deviation 112); C1C is next |
+| 2 | Settings and product library | 2X0-2X6, 8, 9, 9A, 9B-9I, 9K, 9L, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13J, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2 (+ the one-time Lasso import button, deviation 87) | 8: C1D, C1I, C1K-C1P (C1J is no code) | **In progress.** Audited 2026-11-15 (deviation 107): everything but C1 is built, recorded and passes its acceptance tests; C1A done 2026-11-15 (deviation 110); C1B done (deviation 112); C1C done (deviation 113); C1D is next |
 | 3 | Product displays | — | 50: 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22E, 10D, 14E, C1F-C1G, 18S1-18S12, 18S14, DT1-DT10 | Planned |
 | 4 | Editors | — | 18: 23A-23G, 24A-24E, ED1-ED5, MCP1 | Planned |
 | 5 | Lasso compatibility and migration | — | 92: 25A-26P (core), 35A-35J and 9J (link index), ON3-ON4, 27A-27X8, ED6, CL1-CL11, V1-V5, 28A-28E, H1-H4, IM1-IM19 (not IM11, IM18), 29A-29E (not 29C) | Planned |
@@ -37,12 +37,13 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
    and 375 px looks made, Display's clipped Button alignment fixed, and the product page's squeezed Button Text
    (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
-2. **C1A done (deviation 110); C1B done (deviation 112). Batch 2.1 stopped early after C1B (rule 4, long context);
-   next: C1C and C1D as the rest of Batch 2.1**, when the user says go; then C1I,
+2. **C1A done (deviation 110); C1B done (deviation 112); C1C done (deviation 113, the Amazon products table at
+   `affibloom_db_version` 2). Next: C1D, the rest of Batch 2.1**; then C1I,
    C1K-C1P, then Phase 2's exit check and the user's sign-off. The site's Amazon credentials are empty (cause unknown,
    deviation 112); restoring them is the user's call. A first try of C1B-C1D was reverted on 2026-11-15
-   (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day:
-   `affibloom_db_version` 1, no C1C table, the library re-seeded to Lasso's 254 products.
+   (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day (the
+   library re-seeded to Lasso's 254 products); C1C's redo made its table again (backup
+   `app/affibloom-backup-2026-11-15-before-c1c-redo.sql`).
 3. **Faster checks (2026-11-15, deviation 111):** test tiers in `plans/batches.md` rule 5 (per task only its own
    acceptance tests; feature specs per batch; full suite per phase). Playwright runs now restore the site themselves.
    F23 AC5's reload race fixed (F23 14/14). Open: Local's two PHP workers (the user's call).

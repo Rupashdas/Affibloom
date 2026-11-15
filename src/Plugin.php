@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Display\DisplaySettingsService;
@@ -31,6 +32,7 @@ use Affibloom\Infrastructure\Http\CreatorsApiCatalog;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
 use Affibloom\Infrastructure\Schema\Migrator;
+use Affibloom\Infrastructure\Schema\Table;
 use Affibloom\Infrastructure\WordPress\CronRegistry;
 use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
@@ -47,6 +49,7 @@ use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
+use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
 use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
@@ -201,6 +204,10 @@ final class Plugin {
 			1 => static function (): void {
 				( new PostTypeProductRepository() )->index_all_button_urls();
 			},
+			// Task C1C: Amazon's data per ASIN and store (C1 D5).
+			2 => static function (): void {
+				( new Table( TableAmazonProductRepository::TABLE, TableAmazonProductRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 
@@ -234,7 +241,9 @@ final class Plugin {
 		$notice    = new Notice();
 		$resolver  = new LinkResolver( new WpPageFetcher() );
 		$links     = new LinkNormaliser( $resolver, $this->settings_repository() );
-		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links );
+		$catalog   = new CreatorsApiCatalog();
+		$data      = new AmazonDataService( new OptionCredentialsRepository(), $catalog, new TableAmazonProductRepository() );
+		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
 		$bulk      = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$per_page  = new PerPage();
 		$views     = new SavedViewService( new UserMetaSavedViewRepository() );
@@ -243,7 +252,6 @@ final class Plugin {
 		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
-		$catalog   = new CreatorsApiCatalog();
 		$amazon    = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
 		$upgrader  = self::upgrader();
 

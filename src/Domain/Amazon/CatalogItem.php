@@ -25,6 +25,7 @@ final class CatalogItem {
 	 * @param string       $title           Its title, or ''.
 	 * @param string       $image           Its image link, or ''.
 	 * @param string       $price           Its display price ("$69.95"), or ''.
+	 * @param string       $currency        The price's ISO currency ("USD"), or ''.
 	 * @param string       $savings         The display saving ("$10.04"), or ''.
 	 * @param int          $savings_percent The saving in per cent, or 0.
 	 * @param string       $basis           The display price the saving is from ("$79.99"), or ''.
@@ -37,6 +38,7 @@ final class CatalogItem {
 		public readonly string $title,
 		public readonly string $image,
 		public readonly string $price,
+		public readonly string $currency,
 		public readonly string $savings,
 		public readonly int $savings_percent,
 		public readonly string $basis,
@@ -74,6 +76,7 @@ final class CatalogItem {
 			self::text( $item, 'itemInfo', 'title', 'displayValue' ),
 			$image,
 			$display,
+			self::text( $price, 'money', 'currency' ),
 			self::text( $price, 'savings', 'money', 'displayAmount' ),
 			is_numeric( $percent ) ? (int) $percent : 0,
 			self::text( $price, 'savingBasis', 'money', 'displayAmount' ),

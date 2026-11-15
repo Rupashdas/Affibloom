@@ -1,6 +1,8 @@
 <?php
 namespace Affibloom\Tests\Unit\Application;
 
+use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
+
 use Affibloom\Application\Products\FetchedPage;
 use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Application\Products\LinkResolver;
@@ -33,7 +35,7 @@ final class ProductServiceTest extends TestCase {
 		$resolver   = new LinkResolver( $this->fetcher );
 		$repository = new InMemorySettingsRepository( $settings );
 		$links      = new LinkNormaliser( $resolver, $repository );
-		return new ProductService( $this->repo, $resolver, $repository, new ProductInput( $links ), $links );
+		return new ProductService( $this->repo, $resolver, $repository, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon() );
 	}
 
 	/**

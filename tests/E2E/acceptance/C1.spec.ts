@@ -62,10 +62,24 @@ async function addAmazon( page: Page, input: string ): Promise< number > {
 	await dialog.getByLabel( 'URL' ).fill( input );
 	await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
 	await expect( dialog ).toBeHidden( { timeout: 20_000 } );
-	const asin = input.match( /[A-Z0-9]{10}/i )?.[ 0 ] ?? input;
+	const asin = input.match( /\/dp\/([A-Z0-9]+)/i )?.[ 1 ] ?? input;
 	const ids = wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_asin', `--meta_value=${ asin.toUpperCase() }`, '--field=ID', '--orderby=ID', '--order=DESC' );
 	expect( ids ).toMatch( /^\d+/ );
 	return Number( ids.split( /\s+/ )[ 0 ] );
+}
+
+/** An ASIN no earlier run used ("B0" and eight letters or digits), so no product or stored data matches it. */
+function randomAsin(): string {
+	return 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase().padEnd( 8, 'X' );
+}
+
+/** The stored Amazon data for an ASIN on a store (`{prefix}affibloom_amazon_products`), or null. */
+function cacheRow( asin: string, country: string ): Record< string, string > | null {
+	const json = wp(
+		'eval',
+		`global $wpdb; echo wp_json_encode( $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}affibloom_amazon_products WHERE asin = %s AND country = %s", "${ asin }", "${ country }" ), ARRAY_A ) );`
+	);
+	return JSON.parse( json ) as Record< string, string > | null;
 }
 
 async function openCard( page: Page ) {
@@ -99,15 +113,48 @@ test.describe( 'C1 Amazon product data', () => {
 
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
-	test.fixme( 'AC1 with valid credentials, an added Amazon link takes its name and image from Amazon (C1C)', () => {} );
-
-	test( 'AC2 without credentials, adding an Amazon link still works', async ( { page } ) => {
-		credentials( null );
+	test( 'AC1 with valid credentials, an added Amazon link takes its name and image from Amazon (C1C)', async ( { page } ) => {
+		credentials( valid );
+		stub( 'ok' );
 		setSettings( { tracking_id: 'vbvault-20' } );
-		const asin = 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase().padEnd( 8, 'X' );
-		const id = await addAmazon( page, asin );
-		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).not.toBe( '' );
+		const asin = randomAsin();
+		const id = await addAmazon( page, `https://www.amazon.com/some-slug-words/dp/${ asin }` );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( 'Mikasa V200W Official Game Volleyball' );
+		// The image is kept as a link to Amazon, never downloaded (R30).
+		expect( meta( id, 'image_url' ) ).toBe( 'https://m.media-amazon.com/images/I/71stubLarge.jpg' );
+		expect( cacheRow( asin, 'us' ) ).toMatchObject( { name: 'Mikasa V200W Official Game Volleyball', price: '$69.95', out_of_stock: '0', source: 'creators' } );
+
+		// A second product with the same ASIN on that store reuses the stored data and asks Amazon nothing (R32).
+		wp( 'post', 'delete', String( id ), '--force' );
+		stub( 'ok' );
+		const again = await addAmazon( page, asin );
+		expect( wp( 'post', 'get', String( again ), '--field=post_title' ) ).toBe( 'Mikasa V200W Official Game Volleyball' );
+		expect( requests() ).toBe( 0 );
+		wp( 'post', 'delete', String( again ), '--force' );
+	} );
+
+	test( 'AC2 without credentials, or when Amazon fails, adding an Amazon link still works', async ( { page } ) => {
+		setSettings( { tracking_id: 'vbvault-20' } );
+		const starting = ( asin: string ) => `https://www.amazon.com/Starting-Name-Words/dp/${ asin }`;
+
+		// No credentials: today's starting name from the link, no image, and nothing asked.
+		credentials( null );
+		stub( 'ok' );
+		let id = await addAmazon( page, starting( randomAsin() ) );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( 'Starting Name Words' );
 		expect( meta( id, 'image_url' ) ).toBe( '' );
+		expect( requests() ).toBe( 0 );
+
+		// Credentials, but Amazon does not answer, or has no such product: the same, and no error stops the editor.
+		credentials( valid );
+		for ( const [ scenario, asin ] of [ [ 'unavailable', randomAsin() ], [ 'ok', 'B0NOTFOUND' + Math.floor( Math.random() * 10 ) ] ] ) {
+			stub( scenario );
+			id = await addAmazon( page, starting( asin ) );
+			expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( 'Starting Name Words' );
+			expect( meta( id, 'image_url' ) ).toBe( '' );
+			expect( requests() ).toBeGreaterThan( 0 );
+			wp( 'post', 'delete', String( id ), '--force' );
+		}
 	} );
 
 	test( 'AC3 Validate reports whether the credentials work, without saving anything else', async ( { page } ) => {

@@ -118,6 +118,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 110. Task C1A: the Product Data API card and Validate (2026-11-15).
 - 111. Faster checks: test tiers, faster WP-CLI, one-call setup, automatic restore after runs (2026-11-15; the user: "Steps 1–6").
 - 112. Task C1B (2026-11-15), the catalogue client behind `wp affibloom amazon get`; built from the reverted first try; savings read unverified.
+- 113. Task C1C (2026-11-15), Amazon data on add: the table (Affibloom's column names, no last_updated index yet), the Table class, NotFound keeps the starting name, R34 on read; run-state restores Affibloom's tables and leaves the schema version.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2441,3 +2442,50 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       missing); then AC9 passed; unit 610 (Asin, Availability, CatalogItem, CreatorsApiCatalog with the fixtures,
       AmazonCommand); lint and PHPStan clean. By hand: `wp affibloom amazon get B00JMB3FHS` says "Not set up" (exit 1),
       `--country=xx` lists the stores, `wp help affibloom amazon get` shows the usage.
+
+113. **Task C1C: filling a new Amazon product on add (2026-11-15).** Batch 2.1, at the user's "Go". Built from the
+    reverted first try (`9974c8a`, on `backup/before-revert-to-21f7d03`), read through, the tests brought in first and
+    seen red. As planned (R26-R28, R30, R32, R34, D5, D7; AC1, AC2), with these departures:
+    - **`Infrastructure\Schema\Table` is built here** (TL2 left it for its first caller, deviation 100): dbDelta, the
+      table takes `wp_posts`' character set and collation (read from `information_schema`), and a table still missing
+      after dbDelta fails the step, so the Migrator retries it. Upgrade step 2 creates `{prefix}affibloom_amazon_products`;
+      on Local it ran by itself on the first admin request of the test run (backup
+      `app/affibloom-backup-2026-11-15-before-c1c-redo.sql`).
+    - **Columns:** Lasso's, under Affibloom's names (`asin`, `name`, `price`, `image` for `amazon_id`,
+      `default_product_name`, `latest_price`, `default_image`; Task 26 maps them), `currency` kept, `is_manual` as
+      `source` (D5); the image and both links are `text` (Lasso: varchar 10000, which a utf8mb4 row cannot hold);
+      savings and basis are display strings ("$10.04") as the Creators answer gives them (deviation 112); `base_url` is
+      the store's `/dp/<ASIN>` page, `monetized_url` the product's stored link. `CatalogItem` gains the price's currency.
+      **No `last_updated` index** (the first try had one): nothing reads by it until C1E's job, which adds it.
+    - **NotFound keeps the starting name** (decision 11's name from the link), where Lasso names the product "Amazon":
+      Lasso has no starting name, and "Amazon" would replace a better one. Any failure (no credentials, unavailable,
+      throttled, refused, not found) leaves the product as before C1C (AC2). The 404 link issue is C1H's (Phase 7).
+    - **Stored data is reused without credentials** (R32 reuses the row before any request), so after Task 26 copies
+      Lasso's 501 rows, a re-added ASIN gets its name and image without the API. A reused row is stored again with the
+      new link (R32).
+    - **An item without an image** names the product but is not stored (R27 refuses the row). A row is stored with any
+      http(s) or `data:` image (R27); a product takes only an https image. A "0" price is stored as none (R27). The row
+      is kept under the ASIN that was asked for, not the one Amazon answers with (a variation's parent would make every
+      later add of that ASIN miss). `is_prime` (history only, R14) is carried, and a newer row keeps the older one's.
+    - **R34 is in `ProductService::get()`** (the product page): a product named exactly "Amazon" takes the stored name
+      and keeps it, as Lasso writes `post_title` while reading. A product with no store reads the `us` row, as `fill()`
+      does (one helper; the first try read the empty store there). The box (Phase 3) reads products another way;
+      Task 18's reader should call the same rule.
+    - **`ProductService` takes `AmazonDataService`** as a sixth constructor argument; the ProductService tests get one
+      with no credentials (`InMemoryAmazonProducts::without_amazon()`).
+    - **Bulk add** can now spend up to two Creators requests per Amazon link (token, cached; item) inside its time
+      budget, unpaced, as Lasso's add. Noted, not changed.
+    - **The test run's restore (deviation 111) is extended** (`tests/E2E/fixtures/run-state.php`): it saved and put back
+      `affibloom_db_version`, so after the run the version read 1 while step 2's table stayed; and it left the rows a run
+      added to the table. Now the schema's options (`affibloom_db_version`, `affibloom_upgrade_lock`) are neither saved
+      nor restored, and every `{prefix}affibloom_*` table gets its saved rows back (the run's deleted). Checked by hand
+      (a row added after `save` was gone after `restore`, the version stayed 2). The version was set to 2 by hand once,
+      to match the table the first run made.
+    - **C1 spec:** AC1 was `test.fixme`; it adds through the modal with the stub, checks the name, the image link and the
+      stored row, then re-adds the ASIN and sees no request. AC2 covers no credentials, an unavailable Amazon and a
+      not-found ASIN. `addAmazon()` reads the ASIN after `/dp/`.
+    - Checks: AC1 red first (the name from the slug, "some slug words"), AC2 red (no request reached Amazon); then both
+      passed; unit 624 (AmazonDataService, ProductServiceAmazon new); lint and PHPStan clean. By hand: an add through
+      `POST /affibloom/v1/products` with the stub took Amazon's name and image link, one request; the product page at
+      1280 and 375 px shows them. Seen, not C1C's: the Amazon Image field is narrow beside Apply and Refresh (C1D works
+      on that control).

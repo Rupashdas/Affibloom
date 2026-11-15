@@ -4,6 +4,14 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, Batch 2.1 continued, Tasks C1C and C1D, at the user's "Go"):** **C1C** (deviation 113):
+  a new Amazon product takes Amazon's name and image link on add, from the stored row for its ASIN and store or the
+  Creators API; `{prefix}affibloom_amazon_products` through upgrade step 2 and the new `Schema\Table`; R34 on the
+  product page. Built from the reverted first try, read through; the uncalled `last_updated` index dropped, the store
+  default shared. The test-run restore now covers Affibloom's tables and leaves the schema version. AC1, AC2 red then
+  green; unit 624; lint, PHPStan clean; by hand at 1280 and 375 px. Backup
+  `app/affibloom-backup-2026-11-15-before-c1c-redo.sql`.
+
 - **2026-11-15 (Claude Code, Batch 2.1, Task C1B, at the user's word "Start Batch 2.1"):** `wp affibloom amazon get`
   and the catalogue client (getItems, token cache, Lasso's errors), built from the reverted first try's code, read
   through and tests red first; its C1A save fix and `111d207` left out. Deviation 112. AC9 passed; unit 610; lint and

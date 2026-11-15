@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Products;
 
+use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -37,6 +38,7 @@ final class ProductService {
 	 * @param SettingsRepository $settings Site settings (keep_genius_formatting, the link defaults, the Amazon tag rule).
 	 * @param ProductInput       $input    The product page's field rules (Task 15A).
 	 * @param LinkNormaliser     $rules    The link rules the add flow and the product page share.
+	 * @param AmazonDataService  $amazon   What a new Amazon product takes from Amazon (C1C).
 	 */
 	public function __construct(
 		private ProductRepository $products,
@@ -44,6 +46,7 @@ final class ProductService {
 		private SettingsRepository $settings,
 		private ProductInput $input,
 		private LinkNormaliser $rules,
+		private AmazonDataService $amazon,
 	) {}
 
 	/** Products per Dashboard page on a fresh install: Lasso's default (Lasso_Helper::get_dashboard_page_size_options). */
@@ -74,12 +77,20 @@ final class ProductService {
 	}
 
 	/**
-	 * The published product with this ID, or null (the product page, Task 14A).
+	 * The published product with this ID, or null (the product page, Task 14A). A product named exactly "Amazon" takes
+	 * the name stored for its ASIN and store, and keeps it (Lasso renames it while reading it, R34; C1C).
 	 *
 	 * @param int $id Post ID.
+	 * @throws RuntimeException When the new name cannot be stored.
 	 */
 	public function get( int $id ): ?Product {
-		return $id > 0 ? $this->products->get( $id ) : null;
+		$product = $id > 0 ? $this->products->get( $id ) : null;
+		if ( null === $product || 'Amazon' !== $product->name ) {
+			return $product;
+		}
+
+		$name = $this->amazon->stored_name( $product );
+		return '' === $name ? $product : $this->products->rename( $product, $name );
 	}
 
 	/**
@@ -506,7 +517,7 @@ final class ProductService {
 
 	/**
 	 * A new Amazon product (save_lasso_url()'s Amazon fields): named from its link, typed Amazon; with an ASIN, the
-	 * ASIN and its store; a search page, its search key.
+	 * ASIN and its store, and Amazon's name and image when they can be had; a search page, its search key.
 	 *
 	 * @param AmazonUrl    $amazon   Its link, as an Amazon link.
 	 * @param AffiliateUrl $stored   The link to store.
@@ -515,7 +526,7 @@ final class ProductService {
 	private function amazon_draft( AmazonUrl $amazon, AffiliateUrl $stored, Settings $settings ): Product {
 		$asin = $amazon->asin();
 
-		return Product::draft( $amazon->starting_name(), $stored, $settings )->with(
+		$draft = Product::draft( $amazon->starting_name(), $stored, $settings )->with(
 			array(
 				'type'           => ProductType::Amazon,
 				'asin'           => $asin,
@@ -523,5 +534,8 @@ final class ProductService {
 				'search_key'     => $amazon->search_key(),
 			)
 		);
+
+		// With an ASIN, Amazon's name and image when its data can be had (C1C, R32); else the name from the link.
+		return $this->amazon->fill( $draft );
 	}
 }

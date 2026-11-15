@@ -58,7 +58,9 @@
   backup, credentials copy or `reset-local.sh` is needed around a run. If a run is killed before its teardown, the
   next run restores the leftover first; by hand: `bash tools/local-wp.sh eval-file tests/E2E/fixtures/run-state.php restore`.
   Not restored: edits to posts that existed before the run, users, comments. Before 2026-11-15 the suite left its
-  data (a run on 2026-11-12 left 37 products, 26 posts and a test secret). Never run two Playwright runs at once:
+  data (a run on 2026-11-12 left 37 products, 26 posts and a test secret). Since C1C (deviation 113) it also puts back
+  the rows of Affibloom's own tables (`{prefix}affibloom_*`) and leaves `affibloom_db_version` and
+  `affibloom_upgrade_lock` alone (the schema follows the code, not the run). Never run two Playwright runs at once:
   they share `test-results/` and break each other's traces.
 - **Running tests (deviation 111):** from the plugin folder,
   `node node_modules/@playwright/test/cli.js test -c .local/no-login.config.ts <spec> -g "<AC or task>" -x --reporter=line`

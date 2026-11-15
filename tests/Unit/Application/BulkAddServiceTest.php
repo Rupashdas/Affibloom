@@ -1,6 +1,8 @@
 <?php
 namespace Affibloom\Tests\Unit\Application;
 
+use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
+
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Products\BulkAddRunning;
 use Affibloom\Application\Products\BulkAddService;
@@ -54,7 +56,7 @@ final class BulkAddServiceTest extends TestCase {
 		$resolver = new LinkResolver( new FakePageFetcher() );
 		$settings = new InMemorySettingsRepository();
 		$links    = new LinkNormaliser( $resolver, $settings );
-		return new ProductService( $this->products, $resolver, $settings, new ProductInput( $links ), $links );
+		return new ProductService( $this->products, $resolver, $settings, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon() );
 	}
 
 	private function service(): BulkAddService {
