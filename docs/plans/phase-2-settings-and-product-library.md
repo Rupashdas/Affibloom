@@ -6564,7 +6564,7 @@ made the dialog's `getByLabel('URL')` and the Dashboard's `getByLabel('Search')`
 counted as a notice in F18 and F38; F1 AC7 assumed no credentials on Local; C1's `credentials()` failed on an unchanged
 value. Fixed in the specs; F18 AC10 and F19 AC5 then failed once with Local timeouts and passed alone.
 
-- **Sign-off:** the user runs the Dashboard, the product page, Groups, Fields, Settings → General, Display
+- **Sign-off:** *signed off by the user 2026-11-15.* The user runs the Dashboard, the product page, Groups, Fields, Settings → General, Display
   and Amazon on Local and signs off, as Phases 0 and 1 were. Phase 3 does not start before that.
 
 ## Coverage
