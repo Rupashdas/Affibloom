@@ -44,6 +44,7 @@ use Affibloom\Infrastructure\Http\WpPageFetcher;
 use Affibloom\Infrastructure\Lasso\WpLassoSource;
 use Affibloom\Infrastructure\Schema\Migrator;
 use Affibloom\Infrastructure\Schema\Table;
+use Affibloom\Infrastructure\WordPress\BoxDetector;
 use Affibloom\Infrastructure\WordPress\CronRegistry;
 use Affibloom\Infrastructure\WordPress\GroupTaxonomy;
 use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
@@ -317,27 +318,28 @@ final class Plugin {
 	 * @return list<Module>
 	 */
 	private function modules(): array {
-		$detection = new WpDetectionChoices();
-		$settings  = new SettingsService( $this->settings_repository(), $detection );
-		$display   = new DisplaySettingsService( new OptionDisplaySettingsRepository(), $this->settings_repository() );
-		$notice    = new Notice();
-		$resolver  = new LinkResolver( new WpPageFetcher() );
-		$links     = new LinkNormaliser( $resolver, $this->settings_repository() );
-		$catalog   = $this->catalog();
-		$data      = $this->amazon_data();
-		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
-		$bulk      = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
-		$genius    = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );
-		$per_page  = new PerPage();
-		$views     = new SavedViewService( new UserMetaSavedViewRepository() );
-		$icons     = new IconService( new OptionIconRepository(), new SiteCssIcons() );
-		$choices   = new IconChoices( $icons );
-		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
-		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
-		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
-		$amazon    = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
-		$search    = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
-		$upgrader  = self::upgrader();
+		$detection  = new WpDetectionChoices();
+		$settings   = new SettingsService( $this->settings_repository(), $detection );
+		$display    = new DisplaySettingsService( new OptionDisplaySettingsRepository(), $this->settings_repository() );
+		$notice     = new Notice();
+		$resolver   = new LinkResolver( new WpPageFetcher() );
+		$links      = new LinkNormaliser( $resolver, $this->settings_repository() );
+		$catalog    = $this->catalog();
+		$data       = $this->amazon_data();
+		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
+		$bulk       = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
+		$genius     = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );
+		$per_page   = new PerPage();
+		$views      = new SavedViewService( new UserMetaSavedViewRepository() );
+		$icons      = new IconService( new OptionIconRepository(), new SiteCssIcons() );
+		$choices    = new IconChoices( $icons );
+		$fields     = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
+		$import     = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
+		$groups     = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
+		$amazon     = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
+		$search     = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
+		$upgrader   = self::upgrader();
+		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector() );
 
 		return array(
 			new ProductPostType(),
@@ -348,9 +350,9 @@ final class Plugin {
 				$display,
 				$this->settings_repository(),
 				new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp' ),
-				new BoxHtml( dirname( $this->file ) . '/templates/front' )
+				new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets )
 			),
-			new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), $display, $this->settings_repository() ),
+			$box_assets,
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),

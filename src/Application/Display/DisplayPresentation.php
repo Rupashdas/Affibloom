@@ -113,11 +113,18 @@ final class DisplayPresentation {
 	 * wrapper's, for the boxes' own CSS and the editor's Custom CSS, which key on them. Lasso takes the colours from
 	 * the Single type, so this is called with the Single type's settings.
 	 *
-	 * @param DisplayConfig $config  The Single type's settings.
-	 * @param int           $columns The grid's column count.
+	 * @param DisplayConfig $config    The Single type's settings.
+	 * @param int           $columns   The grid's column count.
+	 * @param bool          $important Each value `!important`, as Lasso's `<head>` block and late net print it (not on AMP,
+	 *                                 which allows no `!important`).
 	 */
-	public static function root( DisplayConfig $config, int $columns ): string {
-		return ':root{' . implode( '', self::properties( $config, $columns ) ) . '}';
+	public static function root( DisplayConfig $config, int $columns, bool $important ): string {
+		$declarations = self::properties( $config, $columns );
+		if ( $important ) {
+			$declarations = array_map( static fn( string $line ): string => substr( $line, 0, -1 ) . ' !important;', $declarations );
+		}
+
+		return ':root{' . implode( '', $declarations ) . '}';
 	}
 
 	/**

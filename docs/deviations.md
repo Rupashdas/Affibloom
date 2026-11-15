@@ -141,6 +141,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 133. Add Link (2026-11-16, the user): every single add opens the product's page, Amazon too; deviation 56's Amazon reload was a dead Lasso branch.
 - 134. Product page (2026-11-16, the user): buttons, custom fields and features reorder by dragging a grip only, as Lasso; Move up/down removed.
 - 135. Task 18B (2026-11-16): the `variants/` baselines predate Lasso 370 (live badge `top: 0`); 18D recaptures them; AC1 adds the site's CSS.
+- 136. Task 18C (2026-11-16): box CSS in the admin (R52) moves to the previews 10D/14E; the copy script to 21C.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2748,3 +2749,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     to the page, as Task 41 will translate it (`SITE_CSS` in `F5.spec.ts`; the description rule is not in the site's
     Additional CSS, so Task 40's list must look for it in the theme settings). `Infrastructure\WordPress\CustomCss` is
     `Domain\Settings\CustomCss` (pure allowlist). Left: the button with the site's icon is 3 px taller than live.
+
+136. **Task 18C (2026-11-16): two of Lasso's loading rules move to the tasks that need them.** (1) **R52, the box CSS
+    on every admin page:** the admin already uses `.affibloom-image` and `.affibloom-price` for its own fields, and
+    the box's unscoped rules would restyle them; the previews (Tasks 10D, 14E) load the box CSS on their screens,
+    scoped to the preview. (2) **Lasso's copy-to-clipboard script on every page (R45):** with no behaviour until the
+    Copy to Clipboard field exists it would be an empty file, so Task 21C adds `copy-clipboard.js` and its loading;
+    until then F5 AC2 holds with no Affibloom script at all on a page without a box. Also: Jetpack's
+    `jetpack_photon_skip_for_url` is set once a box is drawn, as Lasso's shortcode does; the AMP CSS is
+    `assets/front/box-amp.css` (Lasso's `lasso-amp.css`, Single Lab rules), printed on `amp_post_template_css`.

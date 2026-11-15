@@ -100,7 +100,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 - [x] Task 18A: The box reaches a reader — markup, elements and links
 - [x] Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
-- [ ] Task 18C: Where the box's assets load
+- [x] Task 18C: Where the box's assets load
 - [ ] Task 18D: Lasso's baselines for every theme and state
 - [ ] Task 18E: The 2-box themes and theme resolution
 - [ ] Task 18F: The 6-box themes (Cactus, Money)
@@ -343,12 +343,18 @@ Lasso); off, every page loads it; a box in a widget still gets its CSS late; pho
 
 **Files:** create `src/Infrastructure/WordPress/BoxDetector.php`, `assets/front/{box-layout.js,copy-clipboard.js,box-amp.css}`, `tests/Unit/Infrastructure/BoxDetectorTest.php`; modify `src/Interface/Front/{BoxAssets,BoxHtml}.php`, the settings class (`smart_css_loading`, `fontawesome_js_svg`), `src/Plugin.php`, `tests/E2E/acceptance/F5.spec.ts` (AC2, AC6).
 
-- [ ] **Step 1: Failing tests:** AC2 (Smart on), AC6 (off loads everywhere; late enqueue in a widget; phone swap at
+- [x] **Step 1: Failing tests:** AC2 (Smart on), AC6 (off loads everywhere; late enqueue in a widget; phone swap at
   390 px). Unit: `BoxDetectorTest`.
-- [ ] **Step 2: Detector and late enqueue.**
-- [ ] **Step 3: Scripts and the small hooks.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Load the box's assets by Lasso's rules".
+- [x] **Step 2: Detector and late enqueue.**
+- [x] **Step 3: Scripts and the small hooks.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Load the box's assets by Lasso's rules".
+
+*Note (2026-11-16):* the settings already existed as `smart_css` (default on) and `fontawesome_svg` (General sweep),
+so no keys were added. `BoxHtml` calls `late_enqueue()` for every box; AC6's late case is a synced pattern (the
+detector cannot see it). Seen on Local: a no-box post gets no box assets, a pattern box gets them once. The `<head>`
+block now marks each value `!important`, as Lasso's does (18B missed it). The admin CSS (R52) and the copy script
+moved: deviation 136.
 
 ---
 

@@ -1,0 +1,336 @@
+/**
+ * The product box on AMP pages (F5 R50, D13; Task 18C): printed inline through `amp_post_template_css`, which allows no
+ * external stylesheet and no `!important`. BoxAssets rewrites the relative image addresses to absolute ones.
+ *
+ * Written for Affibloom's class names (ADR-6) from the rules of Lasso 369's admin/assets/css/lasso-amp.css (GPL v2 or
+ * later) that a Single Lab box uses; the other themes come with Tasks 18E-18G.
+ *
+ * @package Affibloom
+ */
+
+.affibloom-box * {
+	box-sizing: border-box;
+}
+.affibloom-box {
+	box-sizing: border-box;
+	position: relative;
+	width: 100%;
+	padding: 0 15px;
+	margin: 30px auto;
+	overflow: initial;
+}
+.affibloom-display {
+	box-sizing: border-box;
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-wrap: wrap;
+	flex-wrap: wrap;
+	margin: 0 -15px;
+	font-family: inherit;
+	background-color: var(--affibloom-background);
+}
+.affibloom-display a,
+.affibloom-display a:hover {
+	text-decoration: none;
+	font-weight: bold;
+	opacity: 1;
+}
+.affibloom-display a:hover {
+	transition: .25s ease;
+}
+.affibloom-image img {
+	display: inline-block;
+	max-width: 100%;
+	height: auto;
+	max-height: 350px;
+	width: inherit;
+	object-fit: contain;
+	box-shadow: none;
+}
+.affibloom-box-1,
+.affibloom-box-2,
+.affibloom-box-3 {
+	box-sizing: border-box;
+	position: relative;
+}
+.affibloom-badge {
+	position: absolute;
+	top: -18px;
+	left: -10px;
+	display: inline-block;
+	background-color: var(--affibloom-main);
+	color: var(--affibloom-button-text);
+	z-index: 500;
+	padding: 10px 15px;
+	font-size: 1rem;
+	line-height: 1rem;
+	font-weight: 700;
+	box-shadow: 2px 2px 2px 0 rgba(0,0,0,.14);
+	max-width: 100%;
+}
+.affibloom-badge-text {
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.affibloom-badge::after {
+	content: " ";
+	display: block;
+	position: absolute;
+	left: -10px;
+	bottom: -7px;
+	border-color: rgba(0,0,0,0) var(--affibloom-main) rgba(0,0,0,0) rgba(0,0,0,0);
+	border-style: inset solid inset inset;
+	border-width: 0 10px 7px;
+	filter: brightness(50%);
+}
+.affibloom-title,
+a.affibloom-title {
+	display: block;
+	font-size: 30px;
+	line-height: 1.25;
+	margin: 10px 0 10px 0;
+	box-shadow: none;
+	color: var(--affibloom-title);
+	font-weight: bold;
+}
+.affibloom-price {
+	font-size: 16px;
+	font-weight: bold;
+	margin: 0 0 10px 0;
+	vertical-align: middle;
+}
+.affibloom-price-value {
+	display: inline;
+	margin-right: 10px;
+}
+.affibloom-price strike {
+	font-weight: normal;
+	margin-right: 5px;
+}
+.affibloom-amazon-prime {
+	display: inline-block;
+	background: url('images/prime.png');
+	width: 50px;
+	height: 15px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.affibloom-amazon-info {
+	display: inline-block;
+	background: url('images/info.svg');
+	margin-left: 3px;
+	width: 12px;
+	height: 12px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+	vertical-align: middle;
+	cursor: pointer;
+	position: relative;
+}
+.affibloom-description {
+	font-size: 16px;
+	overflow-wrap: anywhere;
+}
+.affibloom-description p {
+	margin: 0 0 10px 0;
+}
+.affibloom-description ul,
+.affibloom-description ol {
+	margin: 0 0 10px 10px;
+	padding: 0 0 0 40px;
+	list-style: inherit;
+	text-align: left;
+}
+.affibloom-description li {
+	margin: 0 0 5px 0;
+	display: list-item;
+	list-style-type: initial;
+	font-size: initial;
+}
+.affibloom-image {
+	text-align: center;
+	padding: 0 0 10px 0;
+}
+a.affibloom-button-1,
+a.affibloom-button-2 {
+	font-size: 15px;
+	padding: 10px 15px;
+	background: var(--affibloom-button);
+	color: var(--affibloom-button-text);
+	margin: 0 10px 10px 0;
+	text-align: center;
+	line-height: initial;
+}
+a.affibloom-button-1>span,
+a.affibloom-button-1>img,
+a.affibloom-button-1>svg,
+a.affibloom-button-1>i,
+a.affibloom-button-2>span,
+a.affibloom-button-2>img,
+a.affibloom-button-2>svg,
+a.affibloom-button-2>i {
+	margin-top: -1em;
+}
+a.affibloom-button-2 {
+	background: var(--affibloom-secondary-button);
+}
+a.affibloom-button-1:hover,
+a.affibloom-button-2:hover {
+	background: var(--affibloom-button);
+	color: var(--affibloom-button-text);
+	transition: .25s ease;
+}
+a.affibloom-button-2:hover {
+	background: var(--affibloom-secondary-button);
+}
+.affibloom-disclosure,
+.affibloom-date {
+	font-size: 12px;
+	font-style: italic;
+	color: #5f6368eb;
+	display: inline;
+}
+.affibloom-disclosure span {
+	line-height: 1.2rem;
+	margin: 0;
+}
+.affibloom-box-1,
+.affibloom-box-2,
+.affibloom-box-3 {
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+	max-width: 100%;
+	text-align: center;
+}
+.affibloom-box-2 {
+	margin-bottom: 15px;
+	padding: 0 0 0 15px;
+}
+a.affibloom-button-1,
+a.affibloom-button-2 {
+	display: inline-block;
+	padding: 15px 25px;
+	border-radius: 100px;
+	box-shadow: 0 3px 6px rgba(0,0,0,0.20);
+}
+a.affibloom-button-2 {
+	float: none;
+}
+a.affibloom-button-1:hover,
+a.affibloom-button-2:hover {
+	box-shadow: none;
+	transform: translateY(3px);
+}
+.affibloom-disclosure,
+.affibloom-date {
+	padding: 10px 0 0 0;
+}
+.affibloom-image.image-style img {
+	height: auto;
+	max-height: inherit;
+	width: auto;
+	position: inherit;
+}
+a.affibloom-button-2 {
+	margin: 0 0 10px 0;
+	float: inherit;
+}
+.affibloom-lab .affibloom-badge {
+	left: auto;
+	right: -10px;
+}
+.affibloom-lab .affibloom-badge::after {
+	left: auto;
+	right: 0;
+	border-width: 0 0 7px 10px;
+	border-color: rgba(0,0,0,0) var(--affibloom-main);
+}
+.affibloom-lab a.affibloom-button-1,
+.affibloom-lab a.affibloom-button-2 {
+	display: inline-block;
+	padding: 15px 25px;
+	border-radius: 5px;
+	box-shadow: 0 5px 10px 0 rgba(0,0,0,0.2);
+}
+:root {
+	--green: #22baa0;
+	--red: #e06470;
+}
+.oldest-updated {
+	display: block;
+	text-align: right;
+	font-style: italic;
+	padding: 15px 8px;
+	font-size: 14px;
+}
+.description-content {
+	overflow-wrap: anywhere;
+}
+.tb-vt .affibloom-price-value {
+	font-size: 18px;
+}
+.tb-vt .affibloom-price {
+	margin: 0;
+	text-align: center;
+}
+.btn-container {
+	margin-bottom: 0;
+	padding: 5px 0;
+}
+.btn-container a {
+	margin-bottom: 0;
+}
+.btn-container a.btn {
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: 0;
+	width: auto;
+}
+.mobile-box {
+	margin: 0 0 30px;
+}
+.has-bm {
+	border: 1px solid var(--affibloom-main);
+}
+.has-bm .badge {
+	background: var(--affibloom-main);
+	color: var(--affibloom-button-text);
+	display: inline-block;
+	width: 100%;
+	text-align: center;
+	padding: 12px 0;
+	font-size: 20px;
+	font-weight: bold;
+}
+.mb-i-wp {
+	padding: 30px;
+	box-shadow: 0 0 30px rgb(0 0 0 / 10%);
+}
+.mb-i-wp .title a {
+	color: var(--affibloom-title);
+	font-weight: bold;
+}
+.mb-i-chl {
+	padding: 5px 0;
+	text-align: center;
+}
+.mb-i-chl:last-child {
+	border-bottom: 0;
+}
+.tb-vt-mb {
+	display: block;
+}
+.tb-vt-mb a.product-name {
+	font-weight: bold;
+}
+.tb-vt-mb .affibloom-price-value {
+	font-size: 20px;
+	line-height: 1.75;
+}
+.tb-vt-mb .field-value p {
+	margin-bottom: 1rem;
+}

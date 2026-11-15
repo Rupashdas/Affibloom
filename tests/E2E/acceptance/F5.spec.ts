@@ -193,6 +193,37 @@ test.describe( 'F5 Box design', () => {
 		setSettings( { custom_css: '' } );
 	} );
 
+	// AC6 (Task 18C): Lasso's loading rules. AC2 above is Smart CSS Loading on, the default (decision C5).
+	test( "AC6 assets follow Lasso's loading rules: Smart CSS off, the late enqueue, the phone layout", async ( { page } ) => {
+		const sheets = async () => page.evaluate( () => [ ...document.querySelectorAll< HTMLLinkElement >( 'link[rel="stylesheet"]' ) ].map( ( l ) => l.href ) );
+		const noBox = newPostWith( '<!-- wp:paragraph --><p>No box here.</p><!-- /wp:paragraph -->' );
+		const id = createProduct( { name: 'F5 AC6 box' } );
+
+		// Off: every front-end page loads the box CSS, with the <head> block.
+		setSettings( { smart_css: false } );
+		await page.goto( noBox );
+		expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
+		await expect( page.locator( 'style' ).filter( { hasText: ':root{--affibloom-main' } ) ).toHaveCount( 1 );
+		setSettings( { smart_css: true } );
+
+		// On: a box the detector cannot see (a synced pattern) still gets its CSS and the :root block, once.
+		const pattern = wp( 'post', 'create', '--post_type=wp_block', '--post_status=publish', '--post_title=F5 AC6 pattern', `--post_content=${ boxBlock( id ) }`, '--porcelain' );
+		await page.goto( newPostWith( `<!-- wp:block {"ref":${ pattern }} /-->` ) );
+		expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
+		await expect( page.locator( 'style' ).filter( { hasText: ':root{--affibloom-main' } ) ).toHaveCount( 1 );
+		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 1 );
+
+		// The phone layout (R48): below 768px the wrapper takes its data-layout-m-* values, and gives them back above.
+		useSiteDisplay();
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		const wrapper = page.locator( '.affibloom-display' );
+		await page.setViewportSize( { width: 390, height: 900 } );
+		await expect( wrapper ).toHaveAttribute( 'data-layout-button-align', 'center' );
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await expect( wrapper ).toHaveAttribute( 'data-layout-button-align', 'spread' );
+		await expect( page.locator( 'body' ) ).toHaveClass( /affibloom-v\d/ );
+	} );
+
 	test( 'AC2 a page with no box loads no plugin CSS or JS', async ( { page } ) => {
 		const assets = async () =>
 			page.evaluate( () => [ ...document.querySelectorAll< HTMLLinkElement | HTMLScriptElement >( 'link[rel="stylesheet"], script[src]' ) ].map( ( el ) => ( 'href' in el ? el.href : el.src ) ) );

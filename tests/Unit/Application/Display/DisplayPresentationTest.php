@@ -97,7 +97,7 @@ final class DisplayPresentationTest extends TestCase {
 	 * The page's :root block (R43): the same properties as the wrapper's style, in Lasso's form (no spaces between).
 	 */
 	public function test_the_root_block_holds_the_wrapper_properties(): void {
-		$root = DisplayPresentation::root( self::site(), 3 );
+		$root = DisplayPresentation::root( self::site(), 3, false );
 
 		self::assertStringStartsWith( ':root{--affibloom-main: #000000;--affibloom-title: #000000;--affibloom-button: #5e3f8c;', $root );
 		self::assertStringContainsString( '--affibloom-density-padding: 26px;', $root );
@@ -106,5 +106,15 @@ final class DisplayPresentationTest extends TestCase {
 			str_replace( ' --', '--', DisplayPresentation::wrapper( self::site(), 3, true )['style'] ),
 			substr( $root, 6, -1 )
 		);
+	}
+
+	/**
+	 * Lasso's <head> block and late net print each value !important (Helper::get_lasso_display_css_variables( true )).
+	 */
+	public function test_the_root_block_can_mark_each_value_important(): void {
+		$root = DisplayPresentation::root( self::site(), 3, true );
+
+		self::assertStringStartsWith( ':root{--affibloom-main: #000000 !important;--affibloom-title: #000000 !important;', $root );
+		self::assertStringEndsWith( '--affibloom-layout-columns: 3 !important;}', $root );
 	}
 }
