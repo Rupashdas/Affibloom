@@ -142,6 +142,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 134. Product page (2026-11-16, the user): buttons, custom fields and features reorder by dragging a grip only, as Lasso; Move up/down removed.
 - 135. Task 18B (2026-11-16): the `variants/` baselines predate Lasso 370 (live badge `top: 0`); 18D recaptures them; AC1 adds the site's CSS.
 - 136. Task 18C (2026-11-16): box CSS in the admin (R52) moves to the previews 10D/14E; the copy script to 21C.
+- 137. Task 18D (2026-11-16): baselines drawn on Local with Lasso 370 (staging's Lasso is unlicensed); shortcode cells; variants unchanged, so deviation 135's cause is wrong: AC1's gap is Affibloom's CSS.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2758,3 +2759,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     until then F5 AC2 holds with no Affibloom script at all on a page without a box. Also: Jetpack's
     `jetpack_photon_skip_for_url` is set once a box is drawn, as Lasso's shortcode does; the AMP CSS is
     `assets/front/box-amp.css` (Lasso's `lasso-amp.css`, Single Lab rules), printed on `amp_post_template_css`.
+
+137. **Task 18D (2026-11-16): the baselines are drawn on Local with Lasso 370, by box attributes.** Lasso is not
+    activated on staging (every Lasso screen shows "Let's Get Started", so Display settings cannot be read or saved
+    there) and production is read only, so the user copied Lasso 370 from staging into Local's `plugins/lasso`
+    (active). Each matrix cell is `[lasso id=… theme=… <attributes>]` in a post (no product's Display Theme is set);
+    `tools/lasso-capture.php` saves each group's settings through Lasso's own code and undoes everything after
+    (`lasso_settings` compared, `display_errors` off for the run: Local shows PHP warnings, Lasso 370 raises one for an
+    attribute rating). 247 boxes in `themes/<group>/` (PNGs 22.1 MB). **Deviation 135 corrected:** the seven variants
+    recaptured with Lasso 370 are byte-identical to Task 5's (staging's differ only by its 1 px wider column), so the
+    old baselines were right and F5 AC1's 7 % (Affibloom 518 px against Lasso's 534 px) is in Affibloom's 18B CSS.

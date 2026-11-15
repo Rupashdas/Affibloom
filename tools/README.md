@@ -10,6 +10,7 @@ Developer scripts. They run against the Local copy of the site and are never shi
 | `local-icon-links.php` | Repoints the two button icon links the snapshot's CSS breaks (Full review, YouTube; F28 D4), with `youtube-icon.svg`; `reset-local.sh` runs it after each reset, and it does nothing once the links are right |
 | `inventory.php` | Read-only inventory of the site's Lasso usage → `tests/fixtures/inventory/*.json` (Task 4) |
 | `baselines.config.ts`, `baselines.spec.ts` | Captures how Lasso's boxes look and what they contain → `tests/fixtures/baselines/` (Task 5) |
+| `baselines-themes.spec.ts`, `baselines-themes-matrix.ts`, `lasso-capture.php` | Captures Lasso's Single box for every theme and state on Local (Lasso 370) → `tests/fixtures/baselines/themes/`, and the seven `variants/` PNGs again (Task 18D) |
 
 ## Inventory (Task 4)
 
@@ -113,3 +114,46 @@ licence key in its field. So the admin screens in `tests/fixtures/baselines/admi
 **Not captured** (each needs a write on production, and Lasso is unlicensed on Local): the block editor's
 "Choose a Display Type" and product search, the save toast, and "This Product Already Exists". Their wording is
 taken from Lasso's source and recorded in `docs/ui/screen-inventory.md`.
+
+## Theme baselines (Task 18D)
+
+Lasso's look for the seven themes the site does not use, and for every layout, density, element, classic and
+SiteStripe state, drawn by Lasso itself. The matrix is `baselines-themes-matrix.ts`; F5 AC7 checks that every file it
+lists exists. Lasso is not activated on staging (every Lasso screen shows "Let's Get Started", so its Display settings
+are locked) and production is read only, so the matrix is drawn on **Local with Lasso 370**, copied from staging
+into `wp-content/plugins/lasso` (deviation 137). Lasso draws its boxes on the front end unlicensed.
+
+From the plugin folder (PowerShell may refuse `npx.ps1`; use `npx.cmd`):
+
+```powershell
+# Dry run: prints what it would make and change; loads no page.
+npx.cmd playwright test -c tools/baselines.config.ts --project themes
+
+# The seven variants/ PNGs and the matrix, on Local (about 20-30 minutes).
+$env:AFFIBLOOM_CAPTURE = 'local'; npx.cmd playwright test -c tools/baselines.config.ts --project themes
+```
+
+What the Local run does, in order (`lasso-capture.php` does the WordPress side through Lasso's own code):
+
+1. Saves `lasso_settings` exactly (serialized) to `.local/lasso-capture-state.json`, checks Lasso is 370, and turns
+   PHP's `display_errors` off for the run with a must-use plugin (Local has it on; production does not show PHP
+   warnings, and Lasso 370 raises one for a rating set by attribute). A box holding a PHP message stops the run.
+2. Captures Task 5's seven `variants/` PNGs again from the live guides (deviation 135; their HTML stays Task 5's,
+   Lasso 370 prints the same markup).
+3. Makes two throwaway products (links to Local pages), seven fields "Affibloom capture <type>" and one published post
+   per settings group. Product 14727 (the `amazon` example) is only read.
+4. Per group: saves the backed-up settings with the group's change (`Setting::lasso_set_settings`), then writes each
+   box's PNGs at 1280 and 390 px and its HTML.
+5. Always, also after a failure: puts `lasso_settings` back, compares it with the backup, deletes the products, their
+   field values, the fields and the posts, and removes the state file.
+
+If step 5 reports a difference, the state file stays: `$env:AFFIBLOOM_RESTORE = '1'` with the Local command only
+undoes. A run refuses to start while the state file exists.
+
+The tool's browser loads only the site, Amazon's product images and Google Fonts; every other request is aborted.
+The site runs Mediavine ads (about 1,500 requests a guide on staging), which a capture must not load and which never
+let a page finish loading.
+
+**Why Local and not staging's pictures (2026-11-16):** the seven variants were first captured from staging, signed
+out. Local with Lasso 370 draws the same box, but the page's content column is 1 px narrower (768 against 769 px), which
+shifts the text's anti-aliasing (2 % of pixels). Affibloom's tests run on Local, so the baselines come from Local.

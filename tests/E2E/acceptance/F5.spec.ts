@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { matrixFiles, THEMES } from '../../../tools/baselines-themes-matrix';
 import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp, type ProductFields } from '../utils';
 
 // F5 Box design (docs/features/F5/requirements.md).
@@ -266,6 +267,26 @@ test.describe( 'F5 Box design', () => {
 
 		await page.goto( newPostWith( boxBlock( retired ) ) );
 		await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( 'F5 AC3 target' );
+	} );
+
+	// AC7 (Task 18D): Lasso's own Single boxes, captured on staging by tools/baselines-themes.spec.ts, are all in
+	// themes/: every file the capture matrix lists, each a PNG or a box's HTML. No page is loaded.
+	test( "AC7 Lasso's Single boxes for all 8 themes and every matrix state sit in themes/", () => {
+		const files = matrixFiles();
+		expect( THEMES ).toHaveLength( 8 );
+		for ( const theme of THEMES ) {
+			expect( files.some( ( f ) => f.includes( `/${ theme }-` ) ), `the matrix covers ${ theme }` ).toBe( true );
+		}
+		const missing = files.filter( ( f ) => ! existsSync( `tests/fixtures/baselines/${ f }` ) );
+		expect( missing, 'files the matrix lists that are not in themes/' ).toEqual( [] );
+		for ( const file of files ) {
+			const bytes = readFileSync( `tests/fixtures/baselines/${ file }` );
+			if ( file.endsWith( '.png' ) ) {
+				expect( bytes.subarray( 0, 8 ).toString( 'hex' ), `${ file } is a PNG` ).toBe( '89504e470d0a1a0a' );
+			} else {
+				expect( bytes.toString( 'utf8' ), `${ file } is a Lasso box` ).toMatch( /^<div [^>]*class="lasso-container/ );
+			}
+		}
 	} );
 
 	// AC4: Lasso's attribute order on every link, and its rel and target tables (R38, R39).

@@ -378,13 +378,17 @@ Theme and box attributes, captures desktop and phone PNG and HTML, and deletes w
 
 **Files:** create `tools/baselines-themes.spec.ts`, the matrix file, `tests/fixtures/baselines/themes/*`; modify `tools/baselines.config.ts`, `tests/E2E/acceptance/F5.spec.ts` (AC7).
 
-- [ ] **Step 1: Failing test.** AC7 asserts that every file the matrix lists exists in
+- [x] **Step 1: Failing test.** AC7 asserts that every file the matrix lists exists in
   `tests/fixtures/baselines/themes/` and is a PNG or HTML file of the stated kind. Expected red: the folder is empty.
-- [ ] **Step 2: Matrix and tool.** Write the matrix and the tool (dry run on Local without Lasso: it lists what it
+- [x] **Step 2: Matrix and tool.** Write the matrix and the tool (dry run on Local without Lasso: it lists what it
   would make and touches nothing).
-- [ ] **Step 3: The user runs it on staging;** files committed (PNG size recorded, guide PNGs stay out of git).
-- [ ] **Step 4: Run and look.** AC7 green; look at each image for loading spinners and cookie banners.
-- [ ] **Step 5: Commit** — "Capture Lasso's Single display for every theme and state".
+- [x] **Step 3: The user runs it on staging;** files committed (PNG size recorded, guide PNGs stay out of git).
+- [x] **Step 4: Run and look.** AC7 green; look at each image for loading spinners and cookie banners.
+- [x] **Step 5: Commit** — "Capture Lasso's Single display for every theme and state".
+
+*Note (2026-11-16):* drawn on Local with Lasso 370, not staging (deviation 137: Lasso unlicensed there); cells are box
+attributes, groups switch settings through `tools/lasso-capture.php`, which undoes all. 247 boxes in `themes/<group>/`,
+PNGs 22.1 MB; variants recaptured, byte-identical (deviation 135 corrected). Checked: AC7, phpcs, a look at the images.
 
 ---
 
