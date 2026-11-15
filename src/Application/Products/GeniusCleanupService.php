@@ -94,7 +94,7 @@ final class GeniusCleanupService {
 
 		try {
 			$this->service->update( $id, $input );
-		} catch ( DuplicateLink | ValidationFailed | ProductNotFound | RuntimeException $refused ) {
+		} catch ( RuntimeException $refused ) { // DuplicateLink, ValidationFailed, ProductNotFound, a storage refusal.
 			return;
 		}
 	}
