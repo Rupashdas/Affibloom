@@ -124,6 +124,18 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	/** Compared without case, as MySQL's collation does. */
+	public function genius_ids( int $before, int $limit ): array {
+		$ids = array();
+		foreach ( $this->saved as $product ) {
+			if ( str_contains( $product->url->value(), 'geni.us' ) && ( 0 === $before || $product->id < $before ) ) {
+				$ids[] = (int) $product->id;
+			}
+		}
+		rsort( $ids );
+
+		return array_slice( $ids, 0, $limit );
+	}
+
 	public function find_by_search_key( string $key ): ?Product {
 		foreach ( $this->saved as $product ) {
 			if ( '' !== $product->search_key && 0 === strcasecmp( $product->search_key, $key ) ) {

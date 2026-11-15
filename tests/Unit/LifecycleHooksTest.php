@@ -10,7 +10,9 @@ use Brain\Monkey\Functions;
  */
 final class LifecycleHooksTest extends TestCase {
 	public function test_deactivating_clears_every_affibloom_schedule_and_flushes_rewrites(): void {
-		Functions\expect( 'wp_clear_scheduled_hook' )->once()->with( 'affibloom_bulk_add' );
+		Functions\expect( 'wp_unschedule_hook' )->once()->with( 'affibloom_bulk_add' );
+		// Its events carry an argument, which wp_clear_scheduled_hook( $hook ) alone would miss (C1P).
+		Functions\expect( 'wp_unschedule_hook' )->once()->with( 'affibloom_genius_cleanup' );
 		Functions\expect( 'flush_rewrite_rules' )->once();
 		Functions\expect( 'update_option' )->never();
 		Functions\expect( 'delete_option' )->never();
@@ -29,7 +31,7 @@ final class LifecycleHooksTest extends TestCase {
 				}
 			);
 		Functions\expect( 'flush_rewrite_rules' )->once();
-		Functions\expect( 'wp_clear_scheduled_hook' )->never();
+		Functions\expect( 'wp_unschedule_hook' )->never();
 		Functions\expect( 'delete_option' )->never();
 		// A site whose schema steps are all done (step 1 is Task 13G's), so activation runs none; the steps are
 		// UpgraderTest's and MigratorTest's.

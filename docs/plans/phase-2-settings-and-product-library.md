@@ -285,7 +285,7 @@ C1F and C1G in Phase 3
 - [x] Task C1M: The Amazon search tab in Add A New Link
 - [x] Task C1N: The SiteStripe notice
 - [x] Task C1O: Amazon data when the primary URL changes
-- [ ] Task C1P: The geni.us clean-up job
+- [x] Task C1P: The geni.us clean-up job
 
 ## Cross-phase notes
 
@@ -6519,10 +6519,17 @@ as its destination, ten a run; turning it on clears the job (AC20).
 
 **Files:** the above; `C1.spec.ts` AC20.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Job.**
-- [ ] **Step 3: Run and look** (`wp cron event run`, on Local with test products).
-- [ ] **Step 4: Commit** — "Remove geni.us formatting from products when the switch is off".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Job.**
+- [x] **Step 3: Run and look** (`wp cron event run`, on Local with test products).
+- [x] **Step 4: Commit** — "Remove geni.us formatting from products when the switch is off".
+
+*Note (2026-11-15):* built as `GeniusCleanupService` (Application) behind a `GeniusCleanupSchedule` port; each run
+goes on below the lowest ID it did (the event's argument), so an unfollowable link is not looped on. The save now follows
+an unchanged geni.us link while the switch is off (Lasso's save always does), and `CronRegistry` and the schedule use
+`wp_unschedule_hook()`, since `wp_clear_scheduled_hook()` misses events with arguments (found on Local). Lasso's daily
+re-run is not built. Checked by GeniusCleanupServiceTest and on Local: three test products re-saved (primary and
+button), the on-switch cleared a queued run; AC20 written, not run.
 
 ---
 

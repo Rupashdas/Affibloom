@@ -673,6 +673,42 @@ test.describe( 'C1 Amazon product data', () => {
 		}
 	} );
 
+	test( 'AC20 turning Keep Geni.us Formatting off queues the job that re-saves geni.us products as where they lead; on clears it (C1P)', async ( { page } ) => {
+		credentials( null );
+		stub( 'ok' ); // The stub answers https://geni.us/<code> with a 301 to https://www.amazon.com/dp/B0<CODE>.
+		const code = Math.random().toString( 36 ).slice( 2, 10 );
+		const leadsTo = `https://www.amazon.com/dp/B0${ code.toUpperCase().padEnd( 8, 'X' ).slice( 0, 8 ) }?tag=vbvault-20`;
+		const before = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		const queued = () => wp( 'cron', 'event', 'list', '--hook=affibloom_genius_cleanup', '--format=count' );
+		const saveSwitch = async ( on: boolean ) => {
+			await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
+			await page.getByLabel( 'Keep Geni.us Formatting' ).setChecked( on );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ).first() ).toContainText( 'Settings saved.' );
+		};
+		setSettings( { tracking_id: 'vbvault-20', keep_genius_formatting: true } );
+		const id = createProduct( { name: 'Geni.us clean-up', url: `https://geni.us/${ code }` } );
+		try {
+			// Off: the job is queued (or has already run from the save's spawn); a run stores the link as where it leads.
+			await saveSwitch( false );
+			if ( '0' !== queued() ) {
+				wp( 'cron', 'event', 'run', 'affibloom_genius_cleanup' );
+			}
+			expect( meta( id, 'url' ) ).toBe( leadsTo );
+			expect( meta( id, 'old_genius_url' ) ).toBe( `https://geni.us/${ code }` );
+			expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( 'Geni.us clean-up' );
+
+			// On: a queued run is cleared.
+			wp( 'eval', "wp_schedule_single_event( time() + 3600, 'affibloom_genius_cleanup', array( 0 ) );" );
+			expect( queued() ).toBe( '1' );
+			await saveSwitch( true );
+			expect( queued() ).toBe( '0' );
+		} finally {
+			setSettings( { keep_genius_formatting: before.keep_genius_formatting ?? true } );
+			wp( 'post', 'delete', String( id ), '--force' );
+		}
+	} );
+
 	test( 'AC18 the three switches that needed an outside cloud say they have no effect, and keep their values (C1L)', async ( { page } ) => {
 		const before = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
 		try {

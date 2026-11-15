@@ -318,6 +318,33 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * Published products whose Primary URL holds "geni.us", highest ID first, below an ID (C1P; Lasso's
+	 * get_genius_links: LIKE '%geni.us%', newest first).
+	 *
+	 * @param int $before Only IDs below this one; 0 for no limit.
+	 * @param int $limit  At most this many.
+	 * @return list<int>
+	 */
+	public function genius_ids( int $before, int $limit ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- a job's batch, read once; WP_Query has no "ID below".
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT p.ID FROM {$wpdb->posts} AS p INNER JOIN {$wpdb->postmeta} AS m ON m.post_id = p.ID AND m.meta_key = %s WHERE p.post_type = %s AND p.post_status = 'publish' AND m.meta_value LIKE %s AND ( %d = 0 OR p.ID < %d ) ORDER BY p.ID DESC LIMIT %d",
+				'_affibloom_url',
+				ProductPostType::NAME,
+				'%' . $wpdb->esc_like( 'geni.us' ) . '%',
+				$before,
+				$before,
+				max( 1, $limit )
+			)
+		);
+
+		return array_map( 'intval', $ids );
+	}
+
+	/**
 	 * The published product whose Amazon search has this key, or null; meta_value's collation compares it without case.
 	 *
 	 * @param string $key From AmazonUrl::search_key().

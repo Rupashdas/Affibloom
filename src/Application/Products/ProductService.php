@@ -199,7 +199,9 @@ final class ProductService {
 	 */
 	private function with_link( Product $changed, Product $stored, AffiliateUrl $typed ): Product {
 		$settings = $this->settings->get();
-		if ( $typed->key() === $stored->url->key() ) {
+		// An unchanged geni.us link is still followed while "Keep geni.us formatting" is off: Lasso's save removes the
+		// cloaking every time, which is how its clean-up job works (R62, R63; C1P).
+		if ( $typed->key() === $stored->url->key() && ! ( $typed->is_geni_us() && $this->rules->follows( $typed, $settings ) ) ) {
 			$amazon = AmazonUrl::from( $stored->url );
 			return null === $amazon ? $changed : $changed->with( array( 'url' => $this->rules->tagged( $amazon, $settings ) ) );
 		}

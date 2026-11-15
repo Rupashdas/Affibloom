@@ -93,6 +93,16 @@ interface ProductRepository {
 	public function find_by_search_key( string $key ): ?Product;
 
 	/**
+	 * The IDs of published products whose Primary URL is a geni.us link, highest first, below an ID (the geni.us
+	 * clean-up job, C1P; Lasso's get_genius_links: lasso_custom_redirect LIKE '%geni.us%', lasso_id DESC).
+	 *
+	 * @param int $before Only IDs below this one; 0 for no limit.
+	 * @param int $limit  At most this many.
+	 * @return list<int>
+	 */
+	public function genius_ids( int $before, int $limit ): array;
+
+	/**
 	 * One page of the published products, most recently changed first, as Lasso orders its Dashboard
 	 * (Lasso_DB::get_dashboard_query_without_filter: ORDER BY p.post_modified DESC), the higher ID first on a tie
 	 * (F19 D9).

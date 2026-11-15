@@ -27,6 +27,7 @@ use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Lifecycle;
 use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\BulkAddService;
+use Affibloom\Application\Products\GeniusCleanupService;
 use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Application\Products\LinkResolver;
 use Affibloom\Application\Products\ProductInput;
@@ -66,10 +67,12 @@ use Affibloom\Infrastructure\WordPress\UserMetaBannerDismissals;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
+use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\AmazonBulkSyncCron;
 use Affibloom\Interface\Cron\BulkAddCron;
+use Affibloom\Interface\Cron\GeniusCleanupCron;
 use Affibloom\Interface\Admin\AdminAssets;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\AdminNavigation;
@@ -256,7 +259,7 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS );
 	}
 
 	/**
@@ -319,6 +322,7 @@ final class Plugin {
 		$data      = $this->amazon_data();
 		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
 		$bulk      = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
+		$genius    = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );
 		$per_page  = new PerPage();
 		$views     = new SavedViewService( new UserMetaSavedViewRepository() );
 		$icons     = new IconService( new OptionIconRepository(), new SiteCssIcons() );
@@ -351,7 +355,7 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
-			new SettingsController( $settings, $amazon ),
+			new SettingsController( $settings, $amazon, $genius ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
 			new HelpTips( $settings ),
@@ -361,6 +365,7 @@ final class Plugin {
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),
+			new GeniusCleanupCron( $genius ),
 			new AmazonRefreshCron(
 				new PriceRefreshService(
 					new PostMetaDueAmazonData(),

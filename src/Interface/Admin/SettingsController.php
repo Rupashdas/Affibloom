@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Amazon\CredentialsService;
+use Affibloom\Application\Products\GeniusCleanupService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Module;
 
@@ -23,10 +24,11 @@ final class SettingsController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param SettingsService    $settings    Settings use cases.
-	 * @param CredentialsService $credentials The Amazon tab's Product Data API card (C1A).
+	 * @param SettingsService      $settings    Settings use cases.
+	 * @param CredentialsService   $credentials The Amazon tab's Product Data API card (C1A).
+	 * @param GeniusCleanupService $genius      The job "Keep Geni.us Formatting" queues and clears (C1P).
 	 */
-	public function __construct( private SettingsService $settings, private CredentialsService $credentials ) {}
+	public function __construct( private SettingsService $settings, private CredentialsService $credentials, private GeniusCleanupService $genius ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -102,7 +104,12 @@ final class SettingsController implements Module {
 		// Each field is sanitised and validated by type in SettingsService.
 		$input = isset( $_POST['settings'] ) && is_array( $_POST['settings'] ) ? wp_unslash( $_POST['settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		$refused = $this->settings->update_tab( $tab, $input );
+		$keep_genius = $this->settings->current()->bool( 'keep_genius_formatting' );
+		$refused     = $this->settings->update_tab( $tab, $input );
+		if ( 'amazon' === $tab ) {
+			// Turned off: the job that re-saves geni.us products is queued; turned on: it is cleared (C1 R63).
+			$this->genius->switched( $keep_genius, $this->settings->current()->bool( 'keep_genius_formatting' ) );
+		}
 
 		// The Amazon tab's Product Data API card: its credentials have their own option, saved after the tab (whose
 		// Default Tracking ID they are validated for), and validated when they are not yet (C1 R23).

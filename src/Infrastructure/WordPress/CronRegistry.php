@@ -43,11 +43,12 @@ final class CronRegistry implements Schedules {
 	}
 
 	/**
-	 * Removes every scheduled event of every listed hook, whatever its arguments.
+	 * Removes every scheduled event of every listed hook, whatever its arguments: wp_unschedule_hook(), since
+	 * wp_clear_scheduled_hook( $hook ) removes only the events without arguments (the geni.us job's carry one, C1P).
 	 */
 	public function clear(): void {
 		foreach ( $this->hooks as $hook ) {
-			wp_clear_scheduled_hook( $hook );
+			wp_unschedule_hook( $hook );
 		}
 	}
 }
