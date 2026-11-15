@@ -258,6 +258,9 @@ test.describe( 'F23 Groups', () => {
 		const c = createProduct( { name: `${ unique( 'F23 AC5' ) } c` } );
 		attach( group, a, b, c );
 		const names = async () => ( await memberNames( page ) ).map( ( n ) => n.slice( -1 ) );
+		// Each move or drop sends the whole order (PUT …/order); the list redraws first, so a reload must wait for the
+		// save, or it shows the old order (deviation 111). wp.apiFetch sends the PUT as a POST with X-HTTP-Method-Override.
+		const orderSaved = () => page.waitForResponse( ( r ) => /affibloom\/v1\/groups\/\d+\/order/.test( r.url() ) && r.ok() );
 
 		await page.goto( `/wp-admin/admin.php?page=affibloom-group&id=${ group }` );
 		await page.waitForLoadState( 'load' );
@@ -265,8 +268,10 @@ test.describe( 'F23 Groups', () => {
 		expect( await names() ).toEqual( [ 'a', 'b', 'c' ] );
 		await expect( memberRows( page ).first().locator( '.affibloom-member__description' ) ).toHaveText( '(blank)' );
 
+		const moved = orderSaved();
 		await memberRows( page ).first().getByRole( 'button', { name: 'Move down' } ).click();
 		await expect.poll( names ).toEqual( [ 'b', 'a', 'c' ] );
+		await moved;
 		await page.reload();
 		expect( await names() ).toEqual( [ 'b', 'a', 'c' ] );
 
@@ -274,11 +279,13 @@ test.describe( 'F23 Groups', () => {
 		const grip = memberRows( page ).nth( 2 ).locator( '[data-grip]' );
 		const top = await memberRows( page ).first().boundingBox();
 		const from = await grip.boundingBox();
+		const dropped = orderSaved();
 		await page.mouse.move( from!.x + from!.width / 2, from!.y + from!.height / 2 );
 		await page.mouse.down();
 		await page.mouse.move( from!.x + 4, top!.y + 2, { steps: 12 } );
 		await page.mouse.up();
 		await expect.poll( names ).toEqual( [ 'c', 'b', 'a' ] );
+		await dropped;
 		await page.reload();
 		expect( await names() ).toEqual( [ 'c', 'b', 'a' ] );
 	} );

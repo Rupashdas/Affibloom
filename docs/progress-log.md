@@ -8,8 +8,8 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
   rule 5, `/next-task`, `CLAUDE.md`): per task only its own acceptance tests, feature specs per batch, the full suite
   per phase. Lint cache (34 s → 1.9 s), WP-CLI OPcache file cache (2.3 s → 1.3 s a call), `createProduct()` and
   `setSettings()` one call each, Playwright runs save and restore the site themselves (`run-state.php`), test 45 s and
-  click 10 s limits, `tools/shot.cjs`. Checked by hand and on three runs (site identical after each). Found: F23 AC5
-  fails on the old helpers too (a reload race in the test); Local has only two PHP workers (~16 s stalls). Backup
+  click 10 s limits, `tools/shot.cjs`. Checked by hand and on three runs (site identical after each). F23 AC5's reload
+  race fixed (waits for the order save; F23 14/14); Local has only two PHP workers (~16 s stalls). Backup
   `app/affibloom-backup-2026-11-15-before-run-state-check.sql`. **Next: Batch 2.1 (C1B, C1C, C1D), when the user says go.**
 
 - **2026-11-15 (Claude Code, the Local database brought in line with `21f7d03`, at the user's word):** the user:

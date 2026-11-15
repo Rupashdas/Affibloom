@@ -2403,8 +2403,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       user's call.
     - **`tools/shot.cjs`** replaces the one-off `.local/shot-*.cjs`: `node tools/shot.cjs "wp-admin/admin.php?page=…"
       [--widths=1280,375] [--selector=…] [--out=…]`, signed in with the saved session; says when a page scrolls sideways.
-    - **Found, not changed: F23 AC5 fails** (line 271: the page is reloaded before the Move down save has finished, so
-      the old order shows); it fails the same way with the old helpers (checked twice with them), so it is a test race,
-      not this change. F23 AC3's toast failed once in three runs. F5 fails as expected (the box is Phase 3).
+    - **F23 AC5 fixed (the user: "Yes, fix AC5"):** it reloaded the page before the Move down save had finished, so
+      the old order showed; it failed the same way with the old helpers (a test race, not this change). It now waits
+      for the order save (`POST …/groups/<id>/order`, which wp.apiFetch sends for a PUT) before each reload: AC5 3/3,
+      F23 14/14. F23 AC3's toast failed once in three runs. F5 fails as expected (the box is Phase 3).
     - Records: `environment.md` (tooling, Known issues), `batches.md`, `/next-task` (both copies), `CLAUDE.md`'s quality
       bar, and the memory note on running tests.

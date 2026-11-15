@@ -43,8 +43,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    `affibloom_db_version` 1, no C1C table, the library re-seeded to Lasso's 254 products.
 3. **Faster checks (2026-11-15, deviation 111):** test tiers in `plans/batches.md` rule 5 (per task only its own
    acceptance tests; feature specs per batch; full suite per phase). Playwright runs now restore the site themselves.
-   Open from it: F23 AC5's reload race (a test fault, fails on the old helpers too); Local's two PHP workers (the
-   user's call).
+   F23 AC5's reload race fixed (F23 14/14). Open: Local's two PHP workers (the user's call).
 4. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
    Standing rule (the user, 2026-11-15): **one batch per session**, as listed with its rules in
    [`plans/batches.md`](plans/batches.md); it replaces "one task per session". Each task still has its own commit.
