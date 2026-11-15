@@ -34,7 +34,13 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 	 */
 	public array $items = array();
 
+	/** Amazon does not answer item requests (HttpError). */
+	public bool $failing = false;
+
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
+		if ( $this->failing ) {
+			throw new CatalogError( CatalogError::HTTP_ERROR, 'down' );
+		}
 		if ( ! isset( $this->items[ $asin->value ] ) ) {
 			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
 		}

@@ -9,6 +9,10 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Interface\Cron\AmazonRefreshCron;
+use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
+use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
+use Affibloom\Application\Amazon\PriceRefreshService;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsService;
@@ -240,7 +244,7 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS );
 	}
 
 	/**
@@ -336,6 +340,15 @@ final class Plugin {
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),
+			new AmazonRefreshCron(
+				new PriceRefreshService(
+					new PostMetaDueAmazonData(),
+					new OptionRefreshRunRepository(),
+					new WpCronBackgroundJob( AmazonRefreshCron::PASS ),
+					$this->amazon_data(),
+					$this->settings_repository()
+				)
+			),
 			new IconController( $icons ),
 			new TrackingIdController( $settings ),
 			new LassoImportController( $import ),

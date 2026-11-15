@@ -85,6 +85,29 @@ PRIMARY KEY  (asin,country)";
 	}
 
 	/**
+	 * Moves a row's last-updated time on and changes nothing else.
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 * @param string $now     The time, "Y-m-d H:i:s" in UTC.
+	 */
+	public function touch( string $asin, string $country, string $now ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table; nothing caches it.
+		$wpdb->update(
+			$wpdb->prefix . self::TABLE,
+			array( 'last_updated' => $now ),
+			array(
+				'asin'    => $asin,
+				'country' => $country,
+			),
+			array( '%s' ),
+			array( '%s', '%s' )
+		);
+	}
+
+	/**
 	 * Stores a row, replacing the one for the same ASIN and store, keeping its price and image when the new ones are
 	 * empty (R27).
 	 *

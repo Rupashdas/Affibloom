@@ -28,4 +28,14 @@ interface AmazonProductRepository {
 	 * @param AmazonProduct $product The row; only a complete one (AmazonProduct::complete()) is passed.
 	 */
 	public function save( AmazonProduct $product ): void;
+
+	/**
+	 * Moves a row's last-updated time on and changes nothing else (C1Q4b; Lasso's job does this for an item Amazon has
+	 * not found, so it is not asked again for 24 hours, R39). No row, nothing happens.
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 * @param string $now     The time, "Y-m-d H:i:s" in UTC.
+	 */
+	public function touch( string $asin, string $country, string $now ): void;
 }

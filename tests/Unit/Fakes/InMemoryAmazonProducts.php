@@ -16,6 +16,13 @@ final class InMemoryAmazonProducts implements AmazonProductRepository {
 		return $this->rows[ $asin . '|' . $country ] ?? null;
 	}
 
+	public function touch( string $asin, string $country, string $now ): void {
+		$row = $this->find( $asin, $country );
+		if ( null !== $row ) {
+			$this->rows[ $asin . '|' . $country ] = new AmazonProduct( $row->asin, $row->country, $row->name, $row->price, $row->currency, $row->base_url, $row->monetized_url, $row->image, $row->out_of_stock, $row->savings_amount, $row->savings_percent, $row->savings_basis, $row->features, $row->source, $now, $row->is_prime, $row->price_amount, $row->basis_amount );
+		}
+	}
+
 	public function save( AmazonProduct $product ): void {
 		$this->rows[ $product->asin . '|' . $product->country ] = $product->over( $this->find( $product->asin, $product->country ) );
 	}

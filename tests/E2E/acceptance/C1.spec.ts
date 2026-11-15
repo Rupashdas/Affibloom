@@ -285,7 +285,42 @@ test.describe( 'C1 Amazon product data', () => {
 		// The CSV export that must not carry it either is Task 38's (not built yet).
 	} );
 
-	test.fixme( 'AC6 API data is refreshed within 24 hours and an editor\'s own name or image is kept (C1E, Phase 7)', () => {} );
+	test( "AC6 AC10 the hourly refresh updates only due Amazon data, oldest first, and keeps the editor's name and image (C1Q4b)", () => {
+		credentials( valid );
+		setSettings( { update_pricing_daily: true } );
+		/** Stores a row for an ASIN as Amazon's data of some hours ago. */
+		const row = ( asin: string, price: string, hoursAgo: number ) =>
+			wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . 'affibloom_amazon_products', array( 'asin' => '${ asin }', 'country' => 'us', 'name' => 'Stored name', 'price' => '${ price }', 'base_url' => '', 'monetized_url' => '', 'image' => 'https://m.media-amazon.com/images/I/old.jpg', 'features' => '[]', 'source' => 'creators', 'last_updated' => gmdate( 'Y-m-d H:i:s', time() - ${ hoursAgo } * 3600 ) ) );` );
+		const stale = randomAsin();
+		const fresh = randomAsin();
+		const own = createProduct( { name: 'My own name', type: 'amazon', asin: stale, url: `https://www.amazon.com/dp/${ stale }?tag=vbvault-20`, image_url: 'https://example.com/mine.jpg' } );
+		createProduct( { name: 'Fresh one', type: 'amazon', asin: fresh, url: `https://www.amazon.com/dp/${ fresh }?tag=vbvault-20` } );
+		// Only this test's rows are due: every other Amazon product gets a fresh row (C1I's fixture).
+		wp( 'eval-file', 'tests/E2E/fixtures/isolate-amazon-pending.php', JSON.stringify( [] ) );
+		row( stale, '$1.00', 48 );
+		row( fresh, '$2.00', 1 );
+		stub( 'ok' );
+
+		wp( 'eval', "do_action( 'affibloom_amazon_refresh' );" );
+
+		expect( cacheRow( stale, 'us' ) ).toMatchObject( { price: '$69.95', price_amount: '69.95', out_of_stock: '0' } );
+		expect( cacheRow( fresh, 'us' ) ).toMatchObject( { price: '$2.00' } );
+		// One item asked, the fresh one not; plus a token unless one is cached from an earlier test.
+		expect( requests() ).toBeGreaterThanOrEqual( 1 );
+		expect( requests() ).toBeLessThanOrEqual( 2 );
+		// The job writes Amazon's data only, never the product's own fields (R39, D7).
+		expect( wp( 'post', 'get', String( own ), '--field=post_title' ) ).toBe( 'My own name' );
+		expect( meta( own, 'image_url' ) ).toBe( 'https://example.com/mine.jpg' );
+
+		// Switched off: nothing is asked.
+		row( stale, '$1.00', 48 );
+		setSettings( { update_pricing_daily: false } );
+		stub( 'ok' );
+		wp( 'eval', "do_action( 'affibloom_amazon_refresh' );" );
+		expect( cacheRow( stale, 'us' ) ).toMatchObject( { price: '$1.00' } );
+		expect( requests() ).toBe( 0 );
+		setSettings( { update_pricing_daily: true } );
+	} );
 
 	test( 'AC7 with no credentials the Product Data API card says "Not set up" and nothing is sent to Amazon', async ( { page } ) => {
 		credentials( null );

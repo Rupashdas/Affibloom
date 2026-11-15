@@ -49,6 +49,45 @@ final class AmazonDataService {
 	) {}
 
 	/**
+	 * The scheduled refresh of one stored row (C1Q4b; Lasso's lasso_cron_update_amazon item, R39): fetches the item and
+	 * stores Amazon's data only, never a product's name, image, description or features (D7). A newer answer keeps the
+	 * older price when it has none (R27). Not found, or an answer Lasso would not store (no image), only moves the
+	 * row's time on, so it is not asked again for 24 hours.
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 * @param string $link    A product link for the ASIN, stored with a new row.
+	 * @return bool False when Amazon could not be asked or failed (the row is left as it was), else true.
+	 */
+	public function refresh_row( string $asin, string $country, string $link ): bool {
+		$credentials = $this->usable();
+		$item_asin   = Asin::from( $asin );
+		if ( null === $credentials || null === $item_asin ) {
+			return null !== $credentials;
+		}
+
+		$now = gmdate( 'Y-m-d H:i:s' );
+		try {
+			$item = $this->catalog->item( $credentials, $item_asin, $country );
+		} catch ( CatalogError $error ) {
+			if ( CatalogError::NOT_FOUND !== $error->kind ) {
+				return false;
+			}
+			$this->products->touch( $item_asin->value, $country, $now );
+			return true;
+		}
+
+		$data = AmazonProduct::from_item( $item, $item_asin, $country, $link, $now );
+		if ( $data->complete() ) {
+			$this->products->save( $data );
+		} else {
+			$this->products->touch( $item_asin->value, $country, $now );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Whether Amazon can be asked: the credentials are configured (R1, D4). The product page's Refresh and the bulk sync
 	 * banner's button are enabled by it.
 	 */

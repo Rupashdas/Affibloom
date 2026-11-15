@@ -130,6 +130,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 122. C1Q3 narrowed (the user, 2026-11-15): store only needed data; two numeric price columns. C1Q2's second commit noted.
 - 123. Task C1Q3 (2026-11-15): `price_amount`, `basis_amount` through upgrade step 3; AC1 extended but not seen red.
 - 124. Task C1Q4 split; C1Q4a (2026-11-15): Features field (JSON meta, editable list), filled on add, bulk sync, Refresh; C1K first try stashed.
+- 125. Task C1Q4b (2026-11-15): hourly `affibloom_amazon_refresh`, Lasso's batch, fixed queue, 20 s passes; no Locations arm or 404 issue yet.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2628,3 +2629,14 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     page: Features after Description, rows with Move up, Move down, Remove, Add Feature, labels renumbered. Checks: E2E
     AC1, AC4 (extended) and a new C1Q4 test red first, then green (two runs stalled on Local's workers and were rerun);
     unit 657, the unit checks written after the code; lint, PHPStan clean; 1280 and 375 px on the user's Lenovo product.
+
+125. **Task C1Q4b: the scheduled Amazon refresh (2026-11-15; C1E brought forward).** Hourly `affibloom_amazon_refresh`,
+    scheduled on `init` while "Update Amazon pricing daily" is on, cleared when off; passes on `affibloom_amazon_refresh_pass`
+    (both in the deactivation list). A run takes `RefreshPolicy::batch()` (R37) of the due pairs (`PostMetaDueAmazonData`:
+    published Amazon products with an ASIN, row missing or older than 24 h, oldest first, missing first) as a fixed queue
+    (option `affibloom_amazon_refresh`), so a row that cannot be refreshed is not picked again in the same run; 20 s passes,
+    one item a second. `AmazonDataService::refresh_row()` writes the stored row only (D7): not found or no image moves
+    `last_updated` on (`touch()`, R39); any other Amazon failure ends the run, rows untouched. Not yet: the Locations arm
+    (F21, stays in C1E), the 404/000 issues (C1H), back-off (C1Q6). Checks: unit 664 (policy, service) and C1 AC6/AC10 red
+    then green (its request count corrected: a cached token); lint, PHPStan clean; the event seen scheduled on Local. No
+    live run (WP-Cron is off on Local; it would spend ~20 API calls).

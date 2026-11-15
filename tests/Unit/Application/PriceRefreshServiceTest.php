@@ -1,0 +1,186 @@
+<?php
+namespace Affibloom\Tests\Unit\Application;
+
+use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Amazon\PriceRefreshService;
+use Affibloom\Application\Products\BackgroundJob;
+use Affibloom\Domain\Amazon\AmazonProduct;
+use Affibloom\Domain\Amazon\CatalogItem;
+use Affibloom\Domain\Amazon\Credentials;
+use Affibloom\Domain\Amazon\DueAmazonData;
+use Affibloom\Domain\Amazon\RefreshRun;
+use Affibloom\Domain\Amazon\RefreshRunRepository;
+use Affibloom\Tests\Unit\Domain\Amazon\CatalogItemTest;
+use Affibloom\Tests\Unit\Fakes\FakeAmazonCatalog;
+use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
+use Affibloom\Tests\Unit\Fakes\InMemoryCredentials;
+use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * The scheduled Amazon refresh (C1Q4b; Lasso's lasso_cron_update_amazon, R37-R39): which rows, how many, paced, and
+ * what a failure leaves.
+ */
+final class PriceRefreshServiceTest extends TestCase {
+	private FakeAmazonCatalog $amazon;
+	private InMemoryAmazonProducts $rows;
+	/** @var list<array{asin: string, country: string, link: string}> */
+	private array $due = array();
+	private ?RefreshRun $run = null;
+	private int $dispatched = 0;
+	/** @var list<int> */
+	private array $paused = array();
+	private float $now = 1000.0;
+
+	private function service( bool $on = true, bool $configured = true ): PriceRefreshService {
+		$this->amazon = new FakeAmazonCatalog();
+		$this->rows   = new InMemoryAmazonProducts();
+		$credentials  = $configured ? new Credentials( 'id', 'secret', 'tag-20', '3.1' ) : new Credentials();
+		$data         = new AmazonDataService( new InMemoryCredentials( $credentials ), $this->amazon, $this->rows, new InMemoryProductRepository() );
+		$test         = $this;
+
+		$due = new class( $test ) implements DueAmazonData {
+			public function __construct( private PriceRefreshServiceTest $test ) {}
+			public function count( string $before ): int {
+				return count( $this->test->due_rows() );
+			}
+			public function due( string $before, int $limit ): array {
+				return array_slice( $this->test->due_rows(), 0, $limit );
+			}
+		};
+		$runs = new class( $test ) implements RefreshRunRepository {
+			public function __construct( private PriceRefreshServiceTest $test ) {}
+			public function get(): ?RefreshRun {
+				return $this->test->stored_run();
+			}
+			public function save( ?RefreshRun $run ): void {
+				$this->test->keep( $run );
+			}
+		};
+		$job = new class( $test ) implements BackgroundJob {
+			public function __construct( private PriceRefreshServiceTest $test ) {}
+			public function dispatch(): void {
+				$this->test->dispatched();
+			}
+		};
+
+		return new PriceRefreshService(
+			$due,
+			$runs,
+			$job,
+			$data,
+			new InMemorySettingsRepository( array( 'update_pricing_daily' => $on ) ),
+			fn(): float => $this->now,
+			function ( int $seconds ): void {
+				$this->paused[] = $seconds;
+				$this->now     += $seconds;
+			}
+		);
+	}
+
+	/** @return list<array{asin: string, country: string, link: string}> */
+	public function due_rows(): array {
+		return $this->due;
+	}
+
+	public function stored_run(): ?RefreshRun {
+		return $this->run;
+	}
+
+	public function keep( ?RefreshRun $run ): void {
+		$this->run = $run;
+	}
+
+	public function dispatched(): void {
+		++$this->dispatched;
+	}
+
+	private function item( string $asin ): void {
+		$item                         = CatalogItemTest::recorded( 'live-B000IXRCTQ-all.json' );
+		$item['asin']                 = $asin;
+		$this->amazon->items[ $asin ] = CatalogItem::from_creators( $item );
+	}
+
+	private function row( string $asin, string $price ): void {
+		$this->rows->save( new AmazonProduct( $asin, 'us', 'Stored', $price, 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'creators', '2026-11-01 00:00:00' ) );
+	}
+
+	public function test_switched_off_or_without_credentials_nothing_is_asked(): void {
+		foreach ( array( array( false, true ), array( true, false ) ) as [ $on, $configured ] ) {
+			$service   = $this->service( $on, $configured );
+			$this->due = array( array( 'asin' => 'B0AAAAAAAA', 'country' => 'us', 'link' => 'l' ) );
+			$service->tick();
+			self::assertNull( $this->run );
+			self::assertSame( array(), $this->rows->rows );
+		}
+	}
+
+	public function test_a_run_refreshes_the_due_rows_in_order_one_a_second_and_writes_only_the_stored_data(): void {
+		$service = $this->service();
+		foreach ( array( 'B0AAAAAAAA', 'B0BBBBBBBB' ) as $asin ) {
+			$this->row( $asin, '$1.00' );
+			$this->item( $asin );
+			$this->due[] = array( 'asin' => $asin, 'country' => 'us', 'link' => "https://www.amazon.com/dp/$asin" );
+		}
+
+		$service->tick();
+
+		self::assertSame( array( '$32.97', 32.97 ), array( $this->rows->find( 'B0AAAAAAAA', 'us' )?->price, $this->rows->find( 'B0AAAAAAAA', 'us' )?->price_amount ) );
+		self::assertSame( '$32.97', $this->rows->find( 'B0BBBBBBBB', 'us' )?->price );
+		self::assertSame( array( 1 ), $this->paused, 'a second between two items, none after the last' );
+		self::assertNull( $this->run, 'the run ends with its queue' );
+	}
+
+	public function test_not_found_only_moves_the_rows_time_on_and_the_run_goes_on(): void {
+		$service = $this->service();
+		$this->row( 'B0NOTFOUND', '$5.00' );
+		$this->row( 'B0BBBBBBBB', '$1.00' );
+		$this->item( 'B0BBBBBBBB' );
+		$this->due = array(
+			array( 'asin' => 'B0NOTFOUND', 'country' => 'us', 'link' => 'l' ),
+			array( 'asin' => 'B0BBBBBBBB', 'country' => 'us', 'link' => 'l' ),
+		);
+
+		$service->tick();
+
+		$gone = $this->rows->find( 'B0NOTFOUND', 'us' );
+		self::assertSame( '$5.00', $gone?->price, 'the last good data is kept' );
+		self::assertNotSame( '2026-11-01 00:00:00', $gone?->last_updated, 'not asked again for 24 hours' );
+		self::assertSame( '$32.97', $this->rows->find( 'B0BBBBBBBB', 'us' )?->price );
+	}
+
+	public function test_an_amazon_failure_ends_the_run_and_leaves_the_rows_as_they_were(): void {
+		$service              = $this->service();
+		$this->amazon->answer = 'unavailable';
+		$this->amazon->failing = true;
+		$this->row( 'B0AAAAAAAA', '$1.00' );
+		$this->due = array(
+			array( 'asin' => 'B0AAAAAAAA', 'country' => 'us', 'link' => 'l' ),
+			array( 'asin' => 'B0BBBBBBBB', 'country' => 'us', 'link' => 'l' ),
+		);
+
+		$service->tick();
+
+		self::assertSame( array( '$1.00', '2026-11-01 00:00:00' ), array( $this->rows->find( 'B0AAAAAAAA', 'us' )?->price, $this->rows->find( 'B0AAAAAAAA', 'us' )?->last_updated ) );
+		self::assertNull( $this->run );
+		self::assertSame( 0, $this->dispatched );
+	}
+
+	public function test_the_batch_is_lassos_and_a_long_run_continues_in_another_pass(): void {
+		$service = $this->service();
+		for ( $i = 0; $i < 130; $i++ ) {
+			$asin = sprintf( 'B0%08d', $i );
+			$this->item( $asin );
+			$this->due[] = array( 'asin' => $asin, 'country' => 'us', 'link' => 'l' );
+		}
+
+		$service->tick();
+
+		// 130 due: a batch of 100; a pass stops after 20 seconds (one item a second) and wakes the next.
+		self::assertSame( 1, $this->dispatched );
+		self::assertNotNull( $this->run );
+		self::assertSame( 100 - 20, count( $this->run->queue ) );
+		self::assertNull( $this->rows->find( 'B0' . sprintf( '%08d', 100 ), 'us' ), 'beyond the batch' );
+	}
+}
