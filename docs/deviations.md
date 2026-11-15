@@ -1,6 +1,6 @@
 # Affibloom — deviations from the plan text
 
-Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end, with the next number.
+Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end, with the next number. Keep each new one to about 10 lines: what differs from the plan, why, and the checks (the user, 2026-11-15, deviation 115).
 
 ## Index
 
@@ -120,6 +120,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 112. Task C1B (2026-11-15), the catalogue client behind `wp affibloom amazon get`; built from the reverted first try; savings read unverified.
 - 113. Task C1C (2026-11-15), Amazon data on add: the table (Affibloom's column names, no last_updated index yet), the Table class, NotFound keeps the starting name, R34 on read; run-state restores Affibloom's tables and leaves the schema version.
 - 114. Task C1D (2026-11-15), Refresh on the product page: image as meta only, placeholder rename on the server, the page keeps a typed name; the image row wraps.
+- 115. Narrower batch-end runs and shorter records (2026-11-15; the user: "All three"); Local's PHP workers are hard-coded.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2525,3 +2526,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       (AmazonDataService refresh tests new); lint and PHPStan clean. By hand: `POST /products/{id}/amazon/refresh` with
       the stub answered the image, "$69.95", `renamed` false; the image row at 1280 and 375 px before and after the
       wrap fix.
+
+115. **Narrower batch-end runs and shorter records (2026-11-15).** C1C and C1D took ~20 min together, but the batch-end
+    check then ran all of F1 (rule 5 said "each spec of every feature the batch touched"). The user chose all three
+    speed-ups ("All three"). `batches.md` rule 5, `/next-task`, `CLAUDE.md` and the memory note now say: at a batch's
+    end, only the tests covering what the batch changed (`-g`), never whole specs; whole specs only at a phase's exit.
+    Records: a deviation at most ~10 lines, a session-log entry at most ~4 (this file's header). **Not done: more PHP
+    workers.** On Windows Local starts two `php-cgi.exe`, hard-coded in its `PhpService.js` (`requiredPorts`), so
+    `www.conf` does not apply; patching Local's files (overwritten by its updates) is the user's call. Docs only.

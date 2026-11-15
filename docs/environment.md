@@ -66,9 +66,11 @@
   `node node_modules/@playwright/test/cli.js test -c .local/no-login.config.ts <spec> -g "<AC or task>" -x --reporter=line`
   (`-g` picks the task's tests, `-x` stops at the first failure). Looks: `node tools/shot.cjs "wp-admin/admin.php?page=…"`
   (no leading `/`: Git Bash rewrites it), 1280 and 375 px by default, into `.local/shots/`.
-- **Local runs only two PHP workers** (`%APPDATA%\Local\run\XMaGBQZ-W\conf\php\php-fpm.d\www.conf`,
-  `pm.max_children = 2`). A page load sometimes waits ~16 s behind another request (2026-11-15), which is why the
-  tests have no page-load limit of their own. Raising it is a Local setting (the user's call).
+- **Local runs only two PHP workers:** on Windows it starts two `php-cgi.exe` processes (ports 10002, 10003), each
+  serving one request at a time; `pm.max_children` in `www.conf` does not apply. The count is hard-coded in Local's
+  `lightning-services/php-*/lib/PhpService.js` (`requiredPorts`: 2 on Windows), not a setting (checked 2026-11-15,
+  deviation 115). A page load sometimes waits ~16 s behind another request, which is why the tests have no page-load
+  limit of their own.
 - **`tools/local-wp.sh` keeps compiled PHP in `.local/opcache`** (2.3 s → 1.3 s a call). If WP-CLI ever acts on old
   code, delete that folder, or run with `OPCACHE_FILE_CACHE=` (empty) to turn it off.
 - **Backslashes in a `wp()` argument are lost** on the way from Node through Git Bash to Windows PHP (`x \ y`

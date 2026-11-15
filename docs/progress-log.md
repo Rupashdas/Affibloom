@@ -4,6 +4,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, narrower checks, at the user's word "All three"):** deviation 115. Batch-end runs only
+  the tests covering the change (`-g`); whole specs only at a phase exit; deviations capped at ~10 lines, log entries
+  at ~4. More PHP workers is not a setting (hard-coded in Local); patching Local is the user's call.
+
 - **2026-11-15 (Claude Code, Batch 2.1 continued, Tasks C1C and C1D, at the user's "Go"):** **C1C** (deviation 113):
   a new Amazon product takes Amazon's name and image link on add, from the stored row for its ASIN and store or the
   Creators API; `{prefix}affibloom_amazon_products` through upgrade step 2 and the new `Schema\Table`; R34 on the

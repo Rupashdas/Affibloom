@@ -24,9 +24,11 @@ This replaces "one task per session" (2026-11-14). Nothing else about how a task
    - **At a task's end:** those three in full, plus **only that task's acceptance tests**, run with
      `-g "<AC or task ID>"` (and `-x` while fixing), not the whole spec file; the by-hand look when the task changed
      what a user sees (`tools/shot.cjs`). A task whose acceptance criteria name a by-hand look still gets it.
-   - **At a batch's end:** each spec of every feature the batch touched, once, plus the looks at 375 px and 1280 px
-     on everything the batch changed.
-   - **At a phase's exit check:** the full suite, once.
+   - **At a batch's end:** only the tests that cover what the batch changed, picked with `-g`: the batch's own
+     acceptance tests together, plus the other features' tests that drive a changed entry point (e.g. a batch that
+     changes adding a product runs F1's and F18's add tests, not all of F1 and F18). Not whole spec files. Plus the
+     looks at 375 px and 1280 px on the screens the batch changed. (Narrowed by the user, 2026-11-15, deviation 115.)
+   - **At a phase's exit check:** the full suite, once. Whole feature specs run only here.
    - A test is run "twice in a row" only to chase a flaky one. Runs restore the site themselves (`run-state.php`), so
      no backup, reset or clean-up by hand around a run. Short runs go in the foreground, not the background.
 6. **Phases still run in order** (0 → 9). A phase's exit check and the user's sign-off come after its last batch.

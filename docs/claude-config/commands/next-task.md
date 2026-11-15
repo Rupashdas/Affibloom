@@ -31,15 +31,15 @@ each with its own commit), and step 8 once at the end.
    response. Run `composer lint`, `composer analyse` and `composer test:unit` as you go, and **only this task's**
    acceptance tests (`-g "<AC or task ID>"`, `-x` while fixing; `batches.md` rule 5 has the tiers). Run them in the
    foreground; a run restores the site itself, so no backup or reset around it.
-   Fix causes, never suppress. If the plan's code must change, add the deviation at the end of `deviations.md`
+   Fix causes, never suppress. If the plan's code must change, add the deviation (at most ~10 lines: what changed, why, the checks) at the end of `deviations.md`
    (next number) and its line to the index at the top.
    Skip the plan's branch, pull request and CI steps (the user's simple workflow, see `CLAUDE.md`).
 5. Run the task's entry point by hand (screen, route, command) and report what you saw (`tools/shot.cjs` for a
-   screen). The specs of the features the batch touched and the looks at 375 px and 1280 px are run once, after the
-   batch's last task; the full suite only at the phase's exit check (`batches.md`, rule 5).
+   screen). After the batch's last task: only the tests covering what the batch changed (`-g`, not whole specs) and
+   the looks at 375 px and 1280 px; whole specs and the full suite only at the phase's exit check (`batches.md`, rule 5).
 6. Tick each finished step (`- [ ]` → `- [x]`) and the task in the phase file. Update the records:
    `progress.md` (status, next up; keep it short), `deviations.md` (new deviations) and the session log at
-   the top of `progress-log.md`'s Session log.
+   the top of `progress-log.md`'s Session log (at most ~4 lines a task).
 7. Go through the checklist in `.github/pull_request_template.md` yourself and report it. Commit on
    `main` as the plan says: the user's identity, imperative message with a short why, **no
    `Co-Authored-By` trailer**. Then push to GitHub (backup).
