@@ -58,6 +58,7 @@ final class PriceRefreshService {
 	 * @param BackgroundJob        $job      What runs process() later.
 	 * @param AmazonDataService    $data     Amazon's data, one row at a time.
 	 * @param SettingsRepository   $settings "Update Amazon pricing daily".
+	 * @param GuardedCatalog       $quota    Calls left today; the run keeps GuardedCatalog::RESERVE of them (C1Q6a).
 	 * @param (Closure(): float)   $clock    Seconds now; microtime() unless a test gives another.
 	 * @param (Closure(int): void) $pause    Waits that many seconds; sleep() unless a test gives another.
 	 */
@@ -67,6 +68,7 @@ final class PriceRefreshService {
 		private BackgroundJob $job,
 		private AmazonDataService $data,
 		private SettingsRepository $settings,
+		private GuardedCatalog $quota,
 		?Closure $clock = null,
 		?Closure $pause = null,
 	) {
@@ -100,7 +102,8 @@ final class PriceRefreshService {
 		}
 
 		$cutoff = RefreshPolicy::cutoff( $now );
-		$queue  = $this->due->due( $cutoff, RefreshPolicy::batch( $this->due->count( $cutoff ) ) );
+		$room   = max( 0, $this->quota->left_today() - GuardedCatalog::RESERVE );
+		$queue  = $this->due->due( $cutoff, min( $room, RefreshPolicy::batch( $this->due->count( $cutoff ) ) ) );
 		$this->runs->save( array() === $queue ? null : new RefreshRun( $queue, $now ) );
 		$this->process();
 	}

@@ -52,7 +52,7 @@ plan lines, reviews, and staging or production work.
 | 2.1Q3 | C1Q3 |
 | 2.1Q4 | C1Q4a, C1Q4b (done; deviations 124, 125) |
 | 2.1Q5 | C1Q5 |
-| 2.1Q6 | C1Q6 |
+| 2.1Q6 | C1Q6a (done), C1Q6b (deviation 127) |
 | 2.2 | C1I, C1K, C1L |
 | 2.3 | C1M, C1N |
 | 2.4 | C1O, C1P |

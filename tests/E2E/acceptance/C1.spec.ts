@@ -9,6 +9,12 @@ import { blockTrackers, createProduct, setSettings, wp } from '../utils';
 function stub( scenario: string ): void {
 	wp( 'option', 'update', 'affibloom_test_amazon_stub', scenario );
 	wp( 'option', 'update', 'affibloom_test_amazon_requests', '0' );
+	// Each test starts with no wait and an unused day (C1Q6a's ledger), whatever an earlier test's Amazon answered.
+	try {
+		wp( 'option', 'delete', 'affibloom_amazon_rate' );
+	} catch {
+		// None stored.
+	}
 }
 
 /** How many requests reached the stubbed Amazon since stub() was called. */
@@ -442,6 +448,22 @@ test.describe( 'C1 Amazon product data', () => {
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ other }` );
 		await expect( page.getByRole( 'button', { name: 'Save Changes' } ) ).toBeVisible();
 		await expect( page.getByRole( 'region', { name: 'Amazon Data' } ) ).toHaveCount( 0 );
+	} );
+
+	test( 'C1Q6a a throttled Amazon is not asked again until its wait is over; adds fall back meanwhile', async ( { page } ) => {
+		credentials( valid );
+		setSettings( { tracking_id: 'vbvault-20' } );
+		stub( 'throttle' );
+		const first = await addAmazon( page, `https://www.amazon.com/Starting-Name-Words/dp/${ randomAsin() }` );
+		expect( wp( 'post', 'get', String( first ), '--field=post_title' ) ).toBe( 'Starting Name Words' );
+		expect( requests() ).toBe( 1 );
+		const rate = JSON.parse( wp( 'option', 'get', 'affibloom_amazon_rate', '--format=json' ) ) as { blocked_until: number };
+		expect( rate.blocked_until ).toBeGreaterThan( Date.now() / 1000 );
+
+		// During the wait: a second add asks nothing and still works.
+		const second = await addAmazon( page, `https://www.amazon.com/Starting-Name-Words/dp/${ randomAsin() }` );
+		expect( wp( 'post', 'get', String( second ), '--field=post_title' ) ).toBe( 'Starting Name Words' );
+		expect( requests() ).toBe( 1 );
 	} );
 
 	test( "C1Q0 the stub answers only the suite's test credentials; a person's requests reach Amazon", () => {

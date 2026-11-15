@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
+use Affibloom\Application\Amazon\GuardedCatalog;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
 use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
 use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
@@ -160,6 +162,13 @@ final class Plugin {
 	private ?AmazonDataService $amazon_data = null;
 
 	/**
+	 * The Creators API inside Amazon's limits (C1Q6a), shared by every Amazon caller; built on first use.
+	 *
+	 * @var GuardedCatalog|null
+	 */
+	private ?GuardedCatalog $catalog = null;
+
+	/**
 	 * Settings storage, shared by every reader in a request.
 	 *
 	 * @var OptionSettingsRepository|null
@@ -248,10 +257,18 @@ final class Plugin {
 	}
 
 	/**
+	 * The Creators API inside Amazon's limits (C1Q6a): one guard and one record for every caller.
+	 */
+	private function catalog(): GuardedCatalog {
+		$this->catalog ??= new GuardedCatalog( new CreatorsApiCatalog(), new OptionRequestLedger() );
+		return $this->catalog;
+	}
+
+	/**
 	 * Amazon's data on products (C1C, C1D, C1I).
 	 */
 	private function amazon_data(): AmazonDataService {
-		$this->amazon_data ??= new AmazonDataService( new OptionCredentialsRepository(), new CreatorsApiCatalog(), new TableAmazonProductRepository(), new PostTypeProductRepository() );
+		$this->amazon_data ??= new AmazonDataService( new OptionCredentialsRepository(), $this->catalog(), new TableAmazonProductRepository(), new PostTypeProductRepository() );
 		return $this->amazon_data;
 	}
 
@@ -295,7 +312,7 @@ final class Plugin {
 		$notice    = new Notice();
 		$resolver  = new LinkResolver( new WpPageFetcher() );
 		$links     = new LinkNormaliser( $resolver, $this->settings_repository() );
-		$catalog   = new CreatorsApiCatalog();
+		$catalog   = $this->catalog();
 		$data      = $this->amazon_data();
 		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
 		$bulk      = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
@@ -346,7 +363,8 @@ final class Plugin {
 					new OptionRefreshRunRepository(),
 					new WpCronBackgroundJob( AmazonRefreshCron::PASS ),
 					$this->amazon_data(),
-					$this->settings_repository()
+					$this->settings_repository(),
+					$this->catalog()
 				)
 			),
 			new IconController( $icons ),

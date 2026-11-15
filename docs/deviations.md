@@ -132,6 +132,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 124. Task C1Q4 split; C1Q4a (2026-11-15): Features field (JSON meta, editable list), filled on add, bulk sync, Refresh; C1K first try stashed.
 - 125. Task C1Q4b (2026-11-15): hourly `affibloom_amazon_refresh`, Lasso's batch, fixed queue, 20 s passes; no Locations arm or 404 issue yet.
 - 126. Task C1Q5 (2026-11-15): the Amazon Data card (titled so, not "Details"), stored row only, read-only, outside the form.
+- 127. Task C1Q6 split; C1Q6a (2026-11-15): `GuardedCatalog` (429 wait, one call a second, 8,640 a day), Throttled kind, the job's reserve.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2649,3 +2650,14 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     Amazon data yet". `AmazonDataService::stored()` reads the row (no request); `stored_name()` now uses it. Checks: the
     C1Q5 E2E red then green (its value locator fixed: dt to dd by XPath); unit 665; lint, PHPStan clean; 1280 and 375 px
     on the user's Lenovo product (bottom padding fixed with the cards' `--fields` body).
+
+127. **Task C1Q6 split; C1Q6a: Amazon's limits (2026-11-15).** Split for size; C1Q6b (ten ASINs per request, per-item
+    errors) is next. `GuardedCatalog` wraps the Creators API for every caller (one instance, `Plugin::catalog()`) with a
+    `RequestLog` in the option `affibloom_amazon_rate`: after a 429 nothing goes out until Amazon's wait ends; calls are
+    at least a second apart; item calls are counted per UTC day and stop at 8,640. A new `CatalogError` kind `Throttled`
+    with `retry_after` (getItems: `retryAfterSeconds`, else Retry-After, else 60 s; token: Retry-After, else 300 s);
+    a throttled token inside an item call stays Throttled (Lasso: AuthFailed); Throttled counts as unavailable (Validate
+    keeps the credentials). The hourly refresh caps its batch at the day's calls left less a reserve of 864. Not yet:
+    bulk sync still marks each item failed while throttled (C1Q6b). Checks: unit 671 red first (one older test moved
+    from a 429 to a 400 example); C1Q6a E2E red then green, C1 AC1, AC2, AC8 x2 green; lint, PHPStan clean (a dead 429
+    branch removed); a live call counted on Local. The tests' `stub()` clears the ledger.

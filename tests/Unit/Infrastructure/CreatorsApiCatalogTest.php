@@ -41,6 +41,7 @@ final class CreatorsApiCatalogTest extends TestCase {
 		Functions\when( 'is_wp_error' )->alias( static fn( $value ): bool => is_object( $value ) );
 		Functions\when( 'wp_remote_retrieve_response_code' )->alias( static fn( array $response ): int => $response[0] );
 		Functions\when( 'wp_remote_retrieve_body' )->alias( static fn( array $response ): string => $response[1] );
+		Functions\when( 'wp_remote_retrieve_header' )->alias( static fn( array $response, string $name ): string => (string) ( $response[2][ $name ] ?? '' ) );
 	}
 
 	private static function fixture( string $file ): string {
@@ -147,8 +148,9 @@ final class CreatorsApiCatalogTest extends TestCase {
 	}
 
 	public function test_an_error_answer_keeps_amazons_message(): void {
-		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 429, self::fixture( 'error-429.json' ) ) );
-		$this->assertFailsWith( CatalogError::API_ERROR, 'Request was denied due to request throttling.' );
+		// A 429 is Throttled since C1Q6a; any other error answer keeps Amazon's message.
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 400, '{"__type":"ValidationException","message":"The partner tag is invalid."}' ) );
+		$this->assertFailsWith( CatalogError::API_ERROR, 'The partner tag is invalid.' );
 	}
 
 	public function test_an_error_answer_without_a_message_gets_lassos(): void {
@@ -174,6 +176,35 @@ final class CreatorsApiCatalogTest extends TestCase {
 			self::fail( 'no error' );
 		} catch ( CatalogError $error ) {
 			self::assertSame( array( $kind, $message ), array( $error->kind, $error->getMessage() ) );
+		}
+	}
+
+	public function test_a_429_is_throttled_with_amazons_wait(): void {
+		// getItems: retryAfterSeconds in the body, else Retry-After, else a minute.
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 429, '{"__type":"ThrottleException","message":"busy","retryAfterSeconds":7}' ) );
+		$this->assertThrottled( 7 );
+		$this->answers = array( array( 429, self::fixture( 'error-429.json' ), array( 'retry-after' => '11' ) ) );
+		$this->assertThrottled( 11 );
+		$this->answers = array( array( 429, self::fixture( 'error-429.json' ) ) );
+		$this->assertThrottled( 60 );
+
+		// The token endpoint: Retry-After, else five minutes (Amazon's documented wait), not Lasso's AuthFailed.
+		$this->transients = array();
+		$this->answers    = array( array( 429, '{"error":"too_many_requests"}' ) );
+		try {
+			( new CreatorsApiCatalog() )->item( new Credentials( 'other', 'secret', 'tag-20', '3.1' ), Asin::from( 'B0STUBITEM' ), 'gb' );
+			self::fail( 'a throttled token passed' );
+		} catch ( CatalogError $error ) {
+			self::assertSame( array( CatalogError::THROTTLED, 300 ), array( $error->kind, $error->retry_after ) );
+		}
+	}
+
+	private function assertThrottled( int $seconds ): void {
+		try {
+			$this->item();
+			self::fail( 'a 429 passed' );
+		} catch ( CatalogError $error ) {
+			self::assertSame( array( CatalogError::THROTTLED, $seconds ), array( $error->kind, $error->retry_after ) );
 		}
 	}
 }

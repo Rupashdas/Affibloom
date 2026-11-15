@@ -2,6 +2,9 @@
 namespace Affibloom\Tests\Unit\Application;
 
 use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Amazon\GuardedCatalog;
+use Affibloom\Domain\Amazon\RequestLog;
+use Affibloom\Tests\Unit\Fakes\InMemoryRequestLedger;
 use Affibloom\Application\Amazon\PriceRefreshService;
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Domain\Amazon\AmazonProduct;
@@ -32,10 +35,12 @@ final class PriceRefreshServiceTest extends TestCase {
 	/** @var list<int> */
 	private array $paused = array();
 	private float $now = 1000.0;
+	private InMemoryRequestLedger $ledger;
 
 	private function service( bool $on = true, bool $configured = true ): PriceRefreshService {
 		$this->amazon = new FakeAmazonCatalog();
 		$this->rows   = new InMemoryAmazonProducts();
+		$this->ledger = new InMemoryRequestLedger();
 		$credentials  = $configured ? new Credentials( 'id', 'secret', 'tag-20', '3.1' ) : new Credentials();
 		$data         = new AmazonDataService( new InMemoryCredentials( $credentials ), $this->amazon, $this->rows, new InMemoryProductRepository() );
 		$test         = $this;
@@ -71,6 +76,7 @@ final class PriceRefreshServiceTest extends TestCase {
 			$job,
 			$data,
 			new InMemorySettingsRepository( array( 'update_pricing_daily' => $on ) ),
+			new GuardedCatalog( $this->amazon, $this->ledger, fn(): float => $this->now, static function ( float $seconds ): void {} ),
 			fn(): float => $this->now,
 			function ( int $seconds ): void {
 				$this->paused[] = $seconds;
@@ -182,5 +188,19 @@ final class PriceRefreshServiceTest extends TestCase {
 		self::assertNotNull( $this->run );
 		self::assertSame( 100 - 20, count( $this->run->queue ) );
 		self::assertNull( $this->rows->find( 'B0' . sprintf( '%08d', 100 ), 'us' ), 'beyond the batch' );
+	}
+
+	public function test_a_run_stops_short_of_the_days_quota_keeping_a_reserve_for_people(): void {
+		$service = $this->service();
+		for ( $i = 0; $i < 130; $i++ ) {
+			$this->due[] = array( 'asin' => sprintf( 'B0%08d', $i ), 'country' => 'us', 'link' => 'l' );
+		}
+		// Three calls left before the reserve.
+		$this->ledger->log = new RequestLog( gmdate( 'Y-m-d', (int) $this->now ), GuardedCatalog::DAILY_LIMIT - GuardedCatalog::RESERVE - 3, 0.0, 0 );
+
+		$service->tick();
+
+		self::assertSame( 3, $this->amazon->asked );
+		self::assertNull( $this->run );
 	}
 }

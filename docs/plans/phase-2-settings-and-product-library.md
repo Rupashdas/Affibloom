@@ -277,7 +277,8 @@ C1F and C1G in Phase 3
 - [x] Task C1Q4a: Features field, filled on add, bulk sync and Refresh
 - [x] Task C1Q4b: Scheduled price refresh
 - [x] Task C1Q5: The Amazon Details card
-- [ ] Task C1Q6: Throttling, retry, quota and batched requests
+- [x] Task C1Q6a: Throttling, retry and the daily quota
+- [ ] Task C1Q6b: Ten ASINs per request; per-item errors
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [ ] Task C1K: Keep Geni.us Formatting on add and save
 - [ ] Task C1L: The cloud-only switches labelled
@@ -6319,7 +6320,9 @@ name, image, price and list price, saving, currency, availability, features, las
 Retry-After stores a back-off; no call until it passes (add and Refresh fall back as AC2; the job and bulk sync
 wait). A daily counter keeps the job under the quota (8,640 at the start). Bulk sync and the job ask up to 10 ASINs
 per getItems; per-item errors in a 200 answer are read per ASIN. Unit tests with 429 and partial fixtures; C1 bulk
-sync ACs unchanged. Commit — "Respect Amazon's rate limits and batch Amazon requests".
+sync ACs unchanged. Commit — "Respect Amazon's rate limits and batch Amazon requests". **Split (deviation 127):** C1Q6a (the guard:
+wait after a 429, one call a second, the day's quota, the job's reserve) done 2026-11-15; C1Q6b (ten ASINs per
+request in bulk sync and the job, per-item errors) next.
 
 ---
 

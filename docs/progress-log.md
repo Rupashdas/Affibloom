@@ -4,6 +4,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q6a done, at "Start C1Q6"):** deviation 127. C1Q6 split; the guard keeps every
+  Amazon call inside Amazon's limits (429 wait, 1/s, daily quota, job reserve). Unit 671; C1 tests passed. Next C1Q6b.
+
 - **2026-11-15 (Claude Code, C1Q5 done, at "Start C1Q5"):** deviation 126. The read-only Amazon Data card on the
   product page. Unit 665; C1Q5 E2E passed; looks at 1280 and 375 px. Next C1Q6.
 

@@ -126,7 +126,11 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 		try {
 			$token = $this->token( $credentials );
 		} catch ( CatalogError $error ) {
-			// Lasso's get_items() reports any token failure as AuthFailed.
+			// Lasso's get_items() reports any token failure as AuthFailed; a throttled token stays Throttled, so the
+			// guard waits (C1Q6a).
+			if ( CatalogError::THROTTLED === $error->kind ) {
+				throw $error;
+			}
 			throw new CatalogError( CatalogError::AUTH_FAILED, 'Could not obtain Creators API access token.' );
 		}
 
@@ -138,6 +142,11 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 
 		$status = (int) wp_remote_retrieve_response_code( $response );
 		$body   = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( 429 === $status ) {
+			// ThrottleException: Amazon's retryAfterSeconds, else Retry-After, else a minute (C1Q6a).
+			$wait = is_array( $body ) && is_numeric( $body['retryAfterSeconds'] ?? null ) ? (int) $body['retryAfterSeconds'] : self::retry_after( $response, 60 );
+			throw new CatalogError( CatalogError::THROTTLED, 'Request was denied due to request throttling.', '', $wait );
+		}
 		if ( $status >= 400 || ! is_array( $body ) ) {
 			$message = is_array( $body ) && isset( $body['message'] ) && is_string( $body['message'] ) && '' !== $body['message'] ? $body['message'] : 'Creators API getItems request failed.';
 			throw new CatalogError( CatalogError::API_ERROR, $message );
@@ -256,9 +265,14 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 		$body   = json_decode( wp_remote_retrieve_body( $response ), true );
 		$token  = is_array( $body ) && isset( $body['access_token'] ) && is_string( $body['access_token'] ) ? $body['access_token'] : '';
 
+		if ( 429 === $status ) {
+			// Login with Amazon's too_many_requests: Retry-After, else Amazon's documented 300 seconds (C1Q6a).
+			throw new CatalogError( CatalogError::THROTTLED, 'Too many token requests.', 'HTTP 429', self::retry_after( $response, 300 ) );
+		}
 		if ( '' === $token ) {
-			// Lasso's verify_credentials(): no answer, 5xx or 429 is the service; anything else is a refusal (R21).
-			$unavailable = 0 === $status || 429 === $status || $status >= 500;
+			// Lasso's verify_credentials(): no answer or 5xx is the service (429 is Throttled above); anything else is a
+			// refusal (R21).
+			$unavailable = 0 === $status || $status >= 500;
 			// Amazon's own error code (Login with Amazon and Cognito answer {"error": "invalid_client", …}), kept as a
 			// short reason for the card; only letters, digits and _ - . are kept.
 			$code   = is_array( $body ) && isset( $body['error'] ) && is_string( $body['error'] ) ? substr( (string) preg_replace( '/[^A-Za-z0-9_.-]/', '', $body['error'] ), 0, 64 ) : '';
@@ -273,5 +287,17 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 		$lifetime = isset( $body['expires_in'] ) && is_numeric( $body['expires_in'] ) ? (int) $body['expires_in'] : 3600;
 
 		return array( $token, $lifetime );
+	}
+
+	/**
+	 * A response's Retry-After in seconds, or the default.
+	 *
+	 * @param array<string, mixed> $response The response.
+	 * @param int                  $fallback Seconds when it has none.
+	 */
+	private static function retry_after( array $response, int $fallback ): int {
+		$header = wp_remote_retrieve_header( $response, 'retry-after' );
+
+		return is_string( $header ) && is_numeric( $header ) ? max( 1, (int) $header ) : $fallback;
 	}
 }

@@ -22,16 +22,18 @@ final class CatalogError extends RuntimeException {
 	public const HTTP_ERROR  = 'HttpError';
 	public const API_ERROR   = 'ApiError';
 	public const NOT_FOUND   = 'NotFound';
+	public const THROTTLED   = 'Throttled';
 
 	/**
 	 * Builds the error.
 	 *
 	 * @param string $kind   One of the constants.
 	 * @param string $detail What happened (Lasso's message, or Amazon's): for logs and the command line, never a page.
-	 * @param string $reason For a refused token, Amazon's HTTP status and error code ("HTTP 401, invalid_client"),
-	 *                       which the card shows (C1Q0); else ''.
+	 * @param string $reason      For a refused token, Amazon's HTTP status and error code ("HTTP 401, invalid_client"),
+	 *                            which the card shows (C1Q0); else ''.
+	 * @param int    $retry_after For Throttled (C1Q6a: a 429, or the guard's wait or quota), the seconds to wait; else 0.
 	 */
-	public function __construct( public readonly string $kind, string $detail, public readonly string $reason = '' ) {
+	public function __construct( public readonly string $kind, string $detail, public readonly string $reason = '', public readonly int $retry_after = 0 ) {
 		parent::__construct( $detail );
 	}
 
@@ -39,6 +41,6 @@ final class CatalogError extends RuntimeException {
 	 * Whether the service was unavailable (HttpError) rather than refusing (R21): stored data is then kept.
 	 */
 	public function unavailable(): bool {
-		return self::HTTP_ERROR === $this->kind;
+		return self::HTTP_ERROR === $this->kind || self::THROTTLED === $this->kind;
 	}
 }
