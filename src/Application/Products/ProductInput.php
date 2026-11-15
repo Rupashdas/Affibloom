@@ -117,7 +117,7 @@ final class ProductInput {
 			// Lasso's old_second_btn_genius_url: the second button (the first added one) given a geni.us link (C1K).
 			$second = is_array( $input['buttons'] ) && is_array( $input['buttons'][0] ?? null ) ? trim( self::scalar( $input['buttons'][0]['url'] ?? '' ) ) : '';
 			if ( self::is_geni_us( $second ) ) {
-				$changes['old_genius_url2'] = $second;
+				$changes['old_genius_url2'] = esc_url_raw( $second );
 			}
 		}
 		if ( array_key_exists( 'image_url', $input ) || array_key_exists( 'image_id', $input ) ) {
