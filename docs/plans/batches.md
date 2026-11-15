@@ -9,8 +9,8 @@ Lean method of 2026-11-15 (the user, deviation 129): few records, few test runs,
 
 1. **The user assigns the batch** ("Batch 3.4", or a range such as "C1B-C1D"). Claude never starts a batch, or the next
    one, without the user's word. A task not listed below is a batch of its own.
-2. **Inside a batch, tasks run one at a time, in the phase file's run order:** the outermost test first and red for the
-   right reason, then code inward; the checks of rule 5; the step and task ticks in the phase file (plus a 1–3 line
+2. **Inside a batch, tasks run one at a time, in the phase file's run order:** the outermost test is written first (no
+   separate red run, deviation 130), then code inward; the checks of rule 5; the step and task ticks in the phase file (plus a 1–3 line
    *Note* under the task when something differed from the plan); **its own commit** (the plan's message) and push. A
    task is finished before the next one starts; no work for two tasks shares a commit.
 3. **Explain in Bangla, briefly, per task:** before it, what it builds and how it is checked; after it, what changed
@@ -20,16 +20,13 @@ Lean method of 2026-11-15 (the user, deviation 129): few records, few test runs,
    - a task needs a change that alters a later task in the batch, or needs the user's answer or by-hand check;
    - the session's context is getting long (finish the current task first).
    Say which tasks are left; they become the next batch.
-5. **Checks: as few as needed.**
-   - **While coding:** the unit tests (`composer test:unit`, or `vendor/bin/phpunit --filter <Test>`), and
-     `vendor/bin/phpcs <files>` on the changed files and `vendor/bin/phpstan analyse <files> --memory-limit=1G` on the
-     changed `src/` files only (PHPStan does not cover `tests/`).
-   - **Once per task, before the commit:** `composer lint`, `composer analyse`, `composer test:unit` in full.
-   - **Playwright only when the task changes a screen or a flow:** only that task's AC (`-g "<AC>"`), until it is green
-     once. No re-runs "to be sure"; a test is run twice only to chase a flaky one. A task with no screen or flow change
-     (a rule, a stored value, a CLI) needs no Playwright run.
-   - **By hand:** one look in the browser at the screen the task changed (`tools/shot.cjs` or the browser pane).
-   - **At a batch's end:** the batch's ACs together (`-g`), and the 375 px and 1280 px looks on the changed screens.
+5. **Checks: as few as needed (deviation 130).** No separate red run: a test is written first and run after the code.
+   - **Per task (~20 s of commands):** the unit tests (`composer test:unit`, or `vendor/bin/phpunit --filter <Test>`),
+     `vendor/bin/phpcs <files>` on the changed files, and one look in the browser at the screen the task changed
+     (`tools/shot.cjs` or the browser pane). The task's Playwright AC is written, not run.
+   - **At a batch's end, once:** `composer lint`, `composer analyse`, and the batch's Playwright ACs together
+     (`-g "<AC>|<AC>"`), plus the 375 px and 1280 px looks on the changed screens. A failure is fixed in its own task's
+     code and committed as "Fix <what> (<task ID>)". A test is run twice only to chase a flaky one.
    - **At a phase's exit check:** the full suite, once.
    - **The Local database is dummy data:** runs change it freely; no backup, save/restore or reset around them.
 6. **Records.** Per task only the phase file (ticks and the optional *Note*). A numbered deviation in `deviations.md`

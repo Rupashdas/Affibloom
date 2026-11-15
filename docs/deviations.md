@@ -135,6 +135,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 127. Task C1Q6 split; C1Q6a (2026-11-15): `GuardedCatalog` (429 wait, one call a second, 8,640 a day), Throttled kind, the job's reserve.
 - 128. Task C1Q6b (2026-11-15): `items()` (ten ASINs a request), prefetch for bulk sync and the job, throttled bulk sync waits; stub and run-state fixes; AC2 fails on C1Q6a too.
 - 129. Lean working method (the user, 2026-11-15): few records, few test runs, no save/restore or backups on Local.
+- 130. Tests per task cut to ~20 s (the user, 2026-11-15): no red run; lint, analyse and Playwright once per batch.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2686,3 +2687,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     `run-state.ts` and its teardown are gone, `quiet-jobs.ts` only clears Affibloom's background events (C1Q6b's
     reason); `run-state.php` stays as an opt-in tool. Runs now leave their products, options (test Amazon
     credentials too) and drafts made by `isolate-amazon-pending.php`. Rules in `CLAUDE.md` and `batches.md`.
+
+130. **Tests per task cut to about 20 seconds (the user, 2026-11-15).** Waiting on test commands was the main delay.
+    No separate red run: the outermost test is still written first, and runs after the code. Per task only the unit
+    tests, `phpcs` on the changed files and one look at the changed screen. `composer lint`, `composer analyse` and the
+    batch's Playwright ACs run once, at the batch's end; a failure there is fixed and committed as "Fix <what>
+    (<task ID>)". Full suite at a phase's exit, as before. Rules in `CLAUDE.md`, `batches.md` rule 5, `next-task`.
