@@ -15,6 +15,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
   stored row replaced, a placeholder name renamed; the page keeps a typed name by following the server's `renamed`
   (no second copy of the placeholder list); the cramped Amazon Image row now wraps. AC4 red then green, AC7 page green;
   unit 629; lint, PHPStan clean; by hand at 1280 and 375 px.
+  **Batch check:** C1 10 passed, 1 skipped (AC6, Phase 7); F1 27 passed; F2 and F18 18 passed, 1 failed: F2 AC5
+  timed out at the 45 s limit (three adds; Local's two PHP workers), passed alone (46 s for the run); no code cause
+  (without credentials C1C adds one table read). Looks at 1280 and 375 px made in the tasks. **Batch 2.1 finished;
+  next: Batch 2.2 (C1I, C1K, C1L), when the user says go.**
 
 - **2026-11-15 (Claude Code, Batch 2.1, Task C1B, at the user's word "Start Batch 2.1"):** `wp affibloom amazon get`
   and the catalogue client (getItems, token cache, Lasso's errors), built from the reverted first try's code, read
