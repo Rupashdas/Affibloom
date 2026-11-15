@@ -41,6 +41,8 @@ savings_basis varchar(32) NOT NULL DEFAULT '',
 features text NOT NULL,
 source varchar(10) NOT NULL DEFAULT 'creators',
 last_updated datetime NOT NULL,
+price_amount decimal(12,2) DEFAULT NULL,
+basis_amount decimal(12,2) DEFAULT NULL,
 PRIMARY KEY  (asin,country)";
 
 	/**
@@ -76,7 +78,9 @@ PRIMARY KEY  (asin,country)";
 			is_array( $features ) ? array_values( array_filter( $features, 'is_string' ) ) : array(),
 			(string) $row['source'],
 			(string) $row['last_updated'],
-			'1' === (string) $row['is_prime']
+			'1' === (string) $row['is_prime'],
+			is_numeric( $row['price_amount'] ?? null ) ? (float) $row['price_amount'] : null,
+			is_numeric( $row['basis_amount'] ?? null ) ? (float) $row['basis_amount'] : null
 		);
 	}
 
@@ -111,8 +115,11 @@ PRIMARY KEY  (asin,country)";
 				'source'          => $product->source,
 				'last_updated'    => $product->last_updated,
 				'is_prime'        => $product->is_prime ? 1 : 0,
+				// NULL when Amazon gave no number ($wpdb writes a null value as NULL).
+				'price_amount'    => $product->price_amount,
+				'basis_amount'    => $product->basis_amount,
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%d' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%f', '%f' )
 		);
 	}
 }

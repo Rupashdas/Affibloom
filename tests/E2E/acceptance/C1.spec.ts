@@ -144,7 +144,7 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( 'Mikasa V200W Official Game Volleyball' );
 		// The image is kept as a link to Amazon, never downloaded (R30).
 		expect( meta( id, 'image_url' ) ).toBe( 'https://m.media-amazon.com/images/I/71stubLarge.jpg' );
-		expect( cacheRow( asin, 'us' ) ).toMatchObject( { name: 'Mikasa V200W Official Game Volleyball', price: '$69.95', out_of_stock: '0', source: 'creators' } );
+		expect( cacheRow( asin, 'us' ) ).toMatchObject( { name: 'Mikasa V200W Official Game Volleyball', price: '$69.95', out_of_stock: '0', source: 'creators', price_amount: '69.95', basis_amount: '79.99' } );
 
 		// A second product with the same ASIN on that store reuses the stored data and asks Amazon nothing (R32).
 		wp( 'post', 'delete', String( id ), '--force' );

@@ -39,7 +39,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
 2. **C1A done (deviation 110); C1B done (deviation 112); C1C done (deviation 113, the Amazon products table at
    `affibloom_db_version` 2); C1D done (deviation 114). Batch 2.1 is finished. Batch 2.2: C1I done (deviation 116; the banner counts 229 here until Task 26 copies Lasso's rows). **Now: full Amazon data, C1Q0-C1Q6
-   (deviation 117), one task at a time with the user's approval; C1Q0 done (deviations 118, 119); C1Q1 done (deviation 120: real fixtures, no ratings from Amazon); C1Q2 done (deviation 121); next C1Q3, after the user's approval.** Then C1K (an uncommitted first try is in
+   (deviation 117), one task at a time with the user's approval; C1Q0 done (deviations 118, 119); C1Q1 done (deviation 120: real fixtures, no ratings from Amazon); C1Q2 done (deviation 121); C1Q3 done (deviations 122, 123: only needed data, prices as numbers); next C1Q4, after the user's approval.** Then C1K (an uncommitted first try is in
    the working tree), C1L; then Batches 2.3 (C1M, C1N) and 2.4 (C1O, C1P), then Phase 2's exit check and the user's sign-off. The site's Amazon credentials are empty (cause unknown,
    deviation 112); restoring them is the user's call. A first try of C1B-C1D was reverted on 2026-11-15
    (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day (the

@@ -3,6 +3,7 @@ namespace Affibloom\Tests\Unit\Application;
 
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonProduct;
+use Affibloom\Domain\Amazon\Asin;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\Refusal;
@@ -63,6 +64,8 @@ final class AmazonDataServiceTest extends TestCase {
 		$row = $this->rows->find( 'B0STUBITEM', 'us' );
 		self::assertNotNull( $row );
 		self::assertSame( array( '$69.95', 'USD', false, 'creators' ), array( $row->price, $row->currency, $row->out_of_stock, $row->source ) );
+		// The numbers the discount rule compares (C1Q3).
+		self::assertSame( array( 69.95, 79.99 ), array( $row->price_amount, $row->basis_amount ) );
 		self::assertSame( 'https://www.amazon.com/dp/B0STUBITEM', $row->base_url );
 		self::assertSame( 'https://www.amazon.com/dp/B0STUBITEM?tag=vbvault-20', $row->monetized_url );
 		self::assertMatchesRegularExpression( '/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/', $row->last_updated );
@@ -256,5 +259,14 @@ final class AmazonDataServiceTest extends TestCase {
 		self::assertFalse( $service->can_ask_amazon() );
 		self::assertSame( 'Starting Name', $service->fill( self::draft() )->name );
 		self::assertSame( array(), $this->rows->rows );
+	}
+
+	public function test_a_row_without_a_price_keeps_the_older_price_and_its_number(): void {
+		$older = new AmazonProduct( 'A', 'us', 'Old', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/old.jpg', false, '', 0, '', array(), 'creators', '2026-01-01 00:00:00', false, 1.0, 2.0 );
+		$newer = AmazonProduct::from_item( CatalogItem::from_creators( CatalogItemTest::recorded( 'live-B0F7RNL68R-all.json' ) ), Asin::from( 'A' ), 'us', 'm', '2026-11-15 00:00:00' );
+
+		self::assertSame( array( null, null ), array( $newer->price_amount, $newer->basis_amount ), 'out of stock: no price' );
+		$merged = $newer->over( $older );
+		self::assertSame( array( '$1.00', 1.0, null, true ), array( $merged->price, $merged->price_amount, $merged->basis_amount, $merged->out_of_stock ) );
 	}
 }

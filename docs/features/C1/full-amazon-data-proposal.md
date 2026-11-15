@@ -76,6 +76,9 @@ once; throttling is HTTP 429 `ThrottleException` with `retryAfterSeconds`; the t
 4. **Ratings:** Amazon does not return them (C1Q1, 2026-11-15: `customerReviews` accepted, nothing returned), so the box's stars stay the Primary Rating field (F8). No
    new rating system.
 5. **Variations (Q7) excluded,** for a later phase.
+7. **Store only what is needed (the user, 2026-11-15, deviation 122).** The row keeps what a reader uses (name, image,
+   price and list price as shown and as numbers, saving, currency, stock, features, last updated); brand, model, seller,
+   condition, deal, other images, parent ASIN and category are read (C1Q2, the command prints them) but not stored.
 6. **Order:** now, before Batch 2.2's C1K and C1L: Q0 → Q1 → Q2 → Q3 → Q4 → Q5 → Q6, one task at a time, each with its
    own tests, records and commit; the user approves each next step.
 
@@ -86,7 +89,7 @@ once; throttling is HTTP 429 `ThrottleException` with `retryAfterSeconds`; the t
 | **C1Q0** Credentials kept | Settings → Amazon Save / Validate | Find why the Local credentials are empty (deviation 112); fix the cause; every clear says why. The user re-enters them if needed | the cause reproduced in a test, red then green; C1 card tests |
 | **C1Q1** Real fixtures | `wp affibloom amazon get <asin> --raw` | Every getItems resource for 3 real ASINs; answers saved, partner tag scrubbed; settles reviews and the image shape | the recorded files |
 | **C1Q2** Read everything | the same command | Full resource list; `CatalogItem` reads amounts, list price, the buy-box listing, deal, seller, condition, brand, manufacturer, model, warranty, product info, external IDs, category and rank, parent ASIN, all images | unit per group from Q1's files, partial answers |
-| **C1Q3** Store it | upgrade step 3 | Row: numeric price / list price / savings, brand, deal badge, parent ASIN, images, and a JSON `details`; mapping from `CatalogItem` | round trip; run-state restore |
+| **C1Q3** Store it | upgrade step 3 | Row gains only `price_amount` and `basis_amount` (numbers for the discount rule); mapping from `CatalogItem` | round trip; unit mapping |
 | **C1Q4** Fetch and refresh | Add A New Link, Refresh, product page, cron | Features field (meta JSON, editor list); add and Refresh fill name, image, features and the row; scheduled price refresh (hourly event, due rule, numeric prices, last good data kept) | C1 AC1/AC4 extended, new ACs, unit |
-| **C1Q5** See it | product page | Read-only **Amazon Details** card (all stored fields, last updated) | E2E AC; looks 375/1280 |
+| **C1Q5** See it | product page | Read-only **Amazon Details** card (the stored fields, last updated) | E2E AC; looks 375/1280 |
 | **C1Q6** Limits | every Creators call | Throttle back-off from `retryAfterSeconds` / Retry-After, a daily-quota guard, 10 ASINs per getItems in bulk sync and the job, per-item errors in a 200 answer | unit with 429 / partial fixtures |

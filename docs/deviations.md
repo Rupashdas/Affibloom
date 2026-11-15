@@ -127,6 +127,8 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 119. Task C1Q0 (2026-11-15): refused credentials kept and marked (not cleared, R22), the stub answers only test credentials, the run restore keeps a person's.
 - 120. Task C1Q1 (2026-11-15): real Creators API answers recorded for 3 ASINs; `--resources` added; Amazon returns no ratings.
 - 121. Task C1Q2 (2026-11-15): 25 resources asked; ItemDetails and OfferDetails; the buy-box listing read.
+- 122. C1Q3 narrowed (the user, 2026-11-15): store only needed data; two numeric price columns. C1Q2's second commit noted.
+- 123. Task C1Q3 (2026-11-15): `price_amount`, `basis_amount` through upgrade step 3; AC1 extended but not seen red.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2600,3 +2602,18 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     prints them; the stub answers the three recorded ASINs with Amazon's real answers. Checks: unit 654 red then green
     (two of my expectations corrected to the recorded values: size "Official", Amazon's dimension order); AC9 red then
     green; live `amazon get B0DHLWFD84` printed every line; lint, PHPStan clean. Nothing stored yet (C1Q3).
+
+122. **C1Q3 narrowed: store only the Amazon data that is needed (the user, 2026-11-15).** "Store only necessary data.
+    not full amazon data." The row already holds what its readers use (C1C-C1D name and image, C1F price block, C1H
+    stock, C1Q4 features and the job's last updated, Task 26 Lasso's columns); C1Q3 adds only `price_amount` and
+    `basis_amount`, the numbers C1F's discount rule compares. Brand, model, seller, condition, deal, other images,
+    parent ASIN and category are read (C1Q2) and printed by the command, not stored; C1Q5's card shows the stored fields.
+    Also: C1Q2 landed in two commits, `5fea6c6` and `829d8b5` (its AC9 check and the stub's recorded answers, after
+    the partial staging of the two files shared with the uncommitted C1K first try failed).
+
+123. **Task C1Q3: Amazon prices stored as numbers (2026-11-15).** Upgrade step 3 runs `Table::create()` again; dbDelta
+    added `price_amount` and `basis_amount` (decimal(12,2), NULL) on Local (`affibloom_db_version` 3; backup
+    `app/affibloom-backup-2026-11-15-before-c1q3.sql`); a new install gets them from step 2. `AmazonProduct` maps them
+    from `CatalogItem::$offer` (a 0 price is none, as R27); a newer row without a price keeps the older price and its
+    number. Checks: unit 655, the two new unit checks red first; C1 AC1 (its stored row now checks both numbers) passed,
+    but was **not run before the code**, so not seen red; lint, PHPStan clean; the columns checked on Local.

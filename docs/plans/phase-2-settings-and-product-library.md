@@ -273,7 +273,7 @@ C1F and C1G in Phase 3
 - [x] Task C1Q0: Amazon credentials kept (why they end up empty)
 - [x] Task C1Q1: Real Creators API answers as fixtures
 - [x] Task C1Q2: Read every relevant resource
-- [ ] Task C1Q3: Store the full Amazon data
+- [x] Task C1Q3: Store the Amazon data that is needed
 - [ ] Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
 - [ ] Task C1Q5: The Amazon Details card
 - [ ] Task C1Q6: Throttling, retry, quota and batched requests
@@ -6286,13 +6286,14 @@ warranty, colour, size, dimensions, unit count, EAN/UPC/ISBN, category and sales
 features. A missing group is empty, never an error. Unit tests per group from C1Q1's files, plus partial answers.
 Commit — "Read every relevant Creators API resource". **Done 2026-11-15 (deviation 121).**
 
-### Task C1Q3: Store the full Amazon data
+### Task C1Q3: Store the Amazon data that is needed
 
-**Entry point:** upgrade step 3 (`Table::create`, dbDelta adds columns). Row gains numeric `price_amount`,
-`basis_amount`, `savings_amount_num` (Lasso's savings were numbers), `brand`, `deal_badge`, `parent_asin`, `images`
-(JSON) and `details` (JSON: the rest); display strings stay for Lasso's formatting (R50). `AmazonProduct` maps
-`CatalogItem` to the row; a failed fetch never overwrites (R27). Tests: unit mapping; E2E round trip through WP-CLI;
-run-state restore. Commit — "Store the full Amazon data with numeric prices".
+**Narrowed (the user, 2026-11-15: "Store only necessary data. not full amazon data."; deviation 122).** **Entry point:**
+upgrade step 3 (`Table::create`; dbDelta adds the columns). The row gains `price_amount` and `basis_amount` (decimal,
+NULL when Amazon gives none), the two numbers C1F's discount rule compares (R51); everything else a reader uses is
+stored already. `AmazonProduct` maps them from `CatalogItem::$offer`; a newer row without a price keeps the older price
+and its amount (R27). Not stored: brand, model, seller, condition, deal, other images, parent ASIN, category. Tests: unit
+mapping; C1 AC1's stored row; the step on Local (backup first). Commit — "Store Amazon prices as numbers". **Done 2026-11-15 (deviation 123).**
 
 ### Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
 
@@ -6306,9 +6307,8 @@ current".
 
 ### Task C1Q5: The Amazon Details card
 
-**Entry point:** the product page of an Amazon product: a read-only card listing every stored field (brand,
-manufacturer, model, warranty, prices, savings, deal, availability, seller, condition, colour, size, dimensions,
-EAN/UPC, category, rank, parent ASIN, images, last updated); "No Amazon data yet" when there is none. E2E AC and the
+**Entry point:** the product page of an Amazon product: a read-only card listing the stored fields (deviation 122:
+name, image, price and list price, saving, currency, availability, features, last updated); "No Amazon data yet" when there is none. E2E AC and the
 375/1280 px looks. Commit — "Show the stored Amazon data on the product page".
 
 ### Task C1Q6: Throttling, retry, quota and batched requests

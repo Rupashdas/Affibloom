@@ -37,6 +37,8 @@ final class AmazonProduct {
 	 * @param bool         $is_prime        Lasso's Prime flag, history only: no fetch writes it (R14), Task 26 copies it, and
 	 *                                      a newer row keeps the older one's (over()). The box's Prime logo follows the ASIN
 	 *                                      (R46), not this.
+	 * @param float|null   $price_amount    The price as a number, or null (C1Q3: the discount rule compares numbers).
+	 * @param float|null   $basis_amount    The list or was price as a number, or null.
 	 */
 	public function __construct(
 		public readonly string $asin,
@@ -54,7 +56,9 @@ final class AmazonProduct {
 		public readonly array $features,
 		public readonly string $source,
 		public readonly string $last_updated,
-		public readonly bool $is_prime = false
+		public readonly bool $is_prime = false,
+		public readonly ?float $price_amount = null,
+		public readonly ?float $basis_amount = null
 	) {}
 
 	/**
@@ -84,7 +88,11 @@ final class AmazonProduct {
 			$item->basis,
 			$item->features,
 			'creators',
-			$now
+			$now,
+			false,
+			// A price of 0 is none, as its display string (R27).
+			0.0 === $item->offer->price_amount ? null : $item->offer->price_amount,
+			$item->offer->basis_amount
 		);
 	}
 
@@ -98,7 +106,8 @@ final class AmazonProduct {
 
 	/**
 	 * This row stored over an older one for the same ASIN and store: Lasso keeps the old price and image when the new
-	 * ones are empty, and replaces the rest (R27); the Prime flag is the older row's, since no fetch knows it (R14).
+	 * ones are empty, and replaces the rest (R27); the price's number goes with it (C1Q3). The Prime flag is the older
+	 * row's, since no fetch knows it (R14).
 	 *
 	 * @param AmazonProduct|null $older What was stored, if anything.
 	 */
@@ -123,7 +132,9 @@ final class AmazonProduct {
 			$this->features,
 			$this->source,
 			$this->last_updated,
-			$older->is_prime
+			$older->is_prime,
+			'' === $this->price ? $older->price_amount : $this->price_amount,
+			$this->basis_amount
 		);
 	}
 
@@ -149,7 +160,9 @@ final class AmazonProduct {
 			$this->features,
 			$this->source,
 			$this->last_updated,
-			$this->is_prime
+			$this->is_prime,
+			$this->price_amount,
+			$this->basis_amount
 		);
 	}
 

@@ -228,6 +228,11 @@ final class Plugin {
 			2 => static function (): void {
 				( new Table( TableAmazonProductRepository::TABLE, TableAmazonProductRepository::COLUMNS ) )->create();
 			},
+			// Task C1Q3: the price and the list price as numbers. dbDelta adds the columns to step 2's table (a new
+			// install already has them from step 2, and this changes nothing there).
+			3 => static function (): void {
+				( new Table( TableAmazonProductRepository::TABLE, TableAmazonProductRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 

@@ -4,6 +4,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q3 done, at the user's "Store only necessary data"):** deviations 122, 123. Scope
+  narrowed to what readers use; the row gains the price and list price as numbers (step 3). Unit 655; AC1 passed.
+
 - **2026-11-15 (Claude Code, C1Q2 done, at the user's "Start C1Q2"):** deviation 121. Every relevant resource asked and
   read (details, numeric offer, buy box). Unit 654; AC9 passed; live call checked. Next C1Q3 after the user's approval.
 
