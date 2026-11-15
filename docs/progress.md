@@ -45,7 +45,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    library re-seeded to Lasso's 254 products); C1C's redo made its table again (backup
    `app/affibloom-backup-2026-11-15-before-c1c-redo.sql`).
 3. **Faster checks (2026-11-15, deviation 111):** test tiers in `plans/batches.md` rule 5 (per task only its own
-   acceptance tests; feature specs per batch; full suite per phase). Playwright runs now restore the site themselves.
+   acceptance tests; at batch end only the tests covering the change; whole specs and the full suite per phase). Playwright runs now restore the site themselves.
    F23 AC5's reload race fixed. Batch-end runs narrowed and records capped (deviation 115). Open: Local's two PHP
    workers are hard-coded in Local (patching it is the user's call).
 4. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
