@@ -51,6 +51,7 @@ use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
 use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
+use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Admin\AdminAssets;
@@ -242,7 +243,8 @@ final class Plugin {
 		$fields    = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
-		$amazon    = new CredentialsService( new OptionCredentialsRepository(), new CreatorsApiCatalog(), $this->settings_repository() );
+		$catalog   = new CreatorsApiCatalog();
+		$amazon    = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
 		$upgrader  = self::upgrader();
 
 		return array(
@@ -284,6 +286,7 @@ final class Plugin {
 			new IconStyles( $icons ),
 			$this->upgrade_hooks(),
 			new UpgradeCommand( $upgrader ),
+			new AmazonCommand( $amazon, $catalog ),
 			new ForeignNotices( $this->navigation() ),
 		);
 	}

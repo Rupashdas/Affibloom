@@ -5,8 +5,9 @@
  * (wp_get_environment_type() is "local"), and even there it does nothing unless the option affibloom_test_amazon_stub
  * (the AFFIBLOOM_TEST_AMAZON_STUB switch) names a scenario:
  *
- * - "ok": tokens are granted (tests/fixtures/amazon/token.json).
- * - "reject": the token request is refused (401), as for wrong credentials.
+ * - "ok": tokens are granted (token.json); getItems answers getItems-ok.json, or getItems-empty.json (not found) for an
+ *   ASIN starting B0NOTFOUND, getItems-oos.json (out of stock) for one starting B0OUTSTOCK.
+ * - "reject": the token request and the catalogue refuse (401), as for wrong or expired credentials.
  * - "unavailable": every request answers 503.
  * - "throttle": every request answers 429.
  *
@@ -50,7 +51,7 @@ add_filter(
 			return $answer( 503, 'token-503.json' );
 		}
 		if ( 'throttle' === $scenario ) {
-			return $answer( 429, 'token-503.json' );
+			return $answer( 429, 'error-429.json' );
 		}
 
 		// The token hosts (Login with Amazon and Cognito).
@@ -58,7 +59,34 @@ add_filter(
 			return 'reject' === $scenario ? $answer( 401, 'token-401.json' ) : $answer( 200, 'token.json' );
 		}
 
-		return $answer( 404, 'token-401.json' );
+		// The catalogue. A token cached before the scenario changed still reaches it, so "reject" refuses here too.
+		if ( 'reject' === $scenario ) {
+			return $answer( 401, 'error-401.json' );
+		}
+
+		$body = json_decode( (string) ( $args['body'] ?? '' ), true );
+		$body = is_array( $body ) ? $body : array();
+		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+
+		if ( str_ends_with( $path, '/getItems' ) ) {
+			$asin = strtoupper( (string) ( $body['itemIds'][0] ?? '' ) );
+			// ASINs starting B0NOTFOUND and B0OUTSTOCK stand for Amazon's other answers; any other is found and in stock.
+			$file = array(
+				'B0NOTFOUND' => 'getItems-empty.json',
+				'B0OUTSTOCK' => 'getItems-oos.json',
+			)[ substr( $asin, 0, 10 ) ] ?? 'getItems-ok.json';
+
+			return $answer(
+				200,
+				$file,
+				array(
+					'{{ASIN}}'        => $asin,
+					'{{MARKETPLACE}}' => (string) ( $body['marketplace'] ?? 'www.amazon.com' ),
+				)
+			);
+		}
+
+		return $answer( 404, 'error-401.json' );
 	},
 	10,
 	3

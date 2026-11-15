@@ -58,7 +58,7 @@ final class CredentialsService {
 			return CredentialsState::NotSetUp;
 		}
 
-		return $stored->verified_by( $this->credentials->signature(), $this->country() ) ? CredentialsState::Validated : CredentialsState::Saved;
+		return $stored->verified_by( $this->credentials->signature(), $this->default_country() ) ? CredentialsState::Validated : CredentialsState::Saved;
 	}
 
 	/**
@@ -72,7 +72,7 @@ final class CredentialsService {
 	 */
 	public function validate( array $input, string $country ): CredentialsState {
 		$typed   = Credentials::from_array( $input )->kept_from( $this->credentials->get() );
-		$country = Marketplace::is_country( $country ) ? $country : $this->country();
+		$country = Marketplace::is_country( $country ) ? $country : $this->default_country();
 
 		$missing = $typed->missing();
 		if ( array() !== $missing ) {
@@ -82,7 +82,7 @@ final class CredentialsService {
 		$this->check( $typed );
 
 		$this->credentials->save( $typed, $typed->signature( $country ) );
-		if ( $country !== $this->country() ) {
+		if ( $country !== $this->default_country() ) {
 			$this->settings->save( $this->settings->get()->with( array( 'default_country' => $country ) ) );
 		}
 
@@ -100,7 +100,7 @@ final class CredentialsService {
 	public function save( array $input ): ?string {
 		$stored  = $this->credentials->get();
 		$posted  = Credentials::from_array( $input )->kept_from( $stored );
-		$country = $this->country();
+		$country = $this->default_country();
 
 		// Unchanged values keep their signature; it still says whether they are validated for this country.
 		$signature = $posted == $stored ? $this->credentials->signature() : ''; // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- equal values, not the same object.
@@ -139,9 +139,9 @@ final class CredentialsService {
 	}
 
 	/**
-	 * The saved Default Tracking ID country.
+	 * The saved Default Tracking ID country: the store the catalogue command asks by default.
 	 */
-	private function country(): string {
+	public function default_country(): string {
 		return $this->settings->get()->string( 'default_country' );
 	}
 }

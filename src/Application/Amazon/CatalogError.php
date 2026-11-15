@@ -13,18 +13,21 @@ use RuntimeException;
 
 /**
  * Amazon did not give what was asked for, with Lasso's error code (C1 R13): AuthFailed (no token for these
- * credentials) or HttpError (the service did not answer, or answered 5xx or 429).
+ * credentials), HttpError (the service did not answer; for a token, also 5xx or 429), ApiError (the catalogue answered
+ * with an error, Amazon's message kept) or NotFound (no such item).
  */
 final class CatalogError extends RuntimeException {
 
 	public const AUTH_FAILED = 'AuthFailed';
 	public const HTTP_ERROR  = 'HttpError';
+	public const API_ERROR   = 'ApiError';
+	public const NOT_FOUND   = 'NotFound';
 
 	/**
 	 * Builds the error.
 	 *
 	 * @param string $kind   One of the constants.
-	 * @param string $detail What happened, for logs and the command line; never shown on a page.
+	 * @param string $detail What happened (Lasso's message, or Amazon's): for logs and the command line, never a page.
 	 */
 	public function __construct( public readonly string $kind, string $detail ) {
 		parent::__construct( $detail );

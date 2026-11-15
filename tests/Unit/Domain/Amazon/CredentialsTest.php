@@ -45,4 +45,14 @@ final class CredentialsTest extends TestCase {
 		self::assertTrue( $this->full( '3.1' )->uses_login_with_amazon() );
 		self::assertFalse( $this->full( '2.3' )->uses_login_with_amazon() );
 	}
+
+	public function test_the_token_cache_key_changes_with_the_secret_and_holds_none_of_it(): void {
+		self::assertNotSame( $this->full()->cache_key(), ( new Credentials( 'id', 'other', 'tag-20', '3.1' ) )->cache_key() );
+		self::assertSame( md5( 'id|3.1|secret' ), $this->full()->cache_key() );
+	}
+
+	public function test_the_authorization_header_names_the_version_for_cognito_only(): void {
+		self::assertSame( 'Bearer t', $this->full( '3.1' )->authorization( 't' ) );
+		self::assertSame( 'Bearer t, Version 2.1', $this->full( '2.1' )->authorization( 't' ) );
+	}
 }

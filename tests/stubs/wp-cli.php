@@ -17,6 +17,8 @@ class WP_CLI {
 
 	public static function success( string $message ): void {}
 
+	public static function line( string $message = '' ): void {}
+
 	/**
 	 * @param string|\WP_Error|\Exception|\Throwable $message
 	 * @param bool|int                               $exit

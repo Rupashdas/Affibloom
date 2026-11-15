@@ -3,6 +3,8 @@ namespace Affibloom\Tests\Unit\Fakes;
 
 use Affibloom\Application\Amazon\AmazonCatalog;
 use Affibloom\Application\Amazon\CatalogError;
+use Affibloom\Domain\Amazon\Asin;
+use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
 
 /**
@@ -23,5 +25,19 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 		if ( 'unavailable' === $this->answer ) {
 			throw new CatalogError( CatalogError::HTTP_ERROR, 'down' );
 		}
+	}
+
+	/**
+	 * The item set in $items for the ASIN, or NotFound.
+	 *
+	 * @var array<string, CatalogItem>
+	 */
+	public array $items = array();
+
+	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
+		if ( ! isset( $this->items[ $asin->value ] ) ) {
+			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
+		}
+		return $this->items[ $asin->value ];
 	}
 }

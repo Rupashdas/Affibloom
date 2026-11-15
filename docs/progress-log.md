@@ -4,6 +4,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, Batch 2.1, Task C1B, at the user's word "Start Batch 2.1"):** `wp affibloom amazon get`
+  and the catalogue client (getItems, token cache, Lasso's errors), built from the reverted first try's code, read
+  through and tests red first; its C1A save fix and `111d207` left out. Deviation 112. AC9 passed; unit 610; lint and
+  PHPStan clean; by hand "Not set up" (the site's credentials are empty, found, cause unknown).
+
 - **2026-11-15 (Claude Code, faster checks, at the user's word "Steps 1–6"):** deviation 111. Test tiers (`batches.md`
   rule 5, `/next-task`, `CLAUDE.md`): per task only its own acceptance tests, feature specs per batch, the full suite
   per phase. Lint cache (34 s → 1.9 s), WP-CLI OPcache file cache (2.3 s → 1.3 s a call), `createProduct()` and

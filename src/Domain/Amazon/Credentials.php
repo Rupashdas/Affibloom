@@ -144,4 +144,22 @@ final class Credentials {
 			'scope'         => $this->uses_login_with_amazon() ? 'creatorsapi::default' : 'creatorsapi/default',
 		);
 	}
+
+	/**
+	 * What the token cache is keyed on (R8: client id, version and secret, so a changed secret never reuses a token),
+	 * hashed so the key holds no secret.
+	 */
+	public function cache_key(): string {
+		return md5( $this->credential_id . '|' . $this->version . '|' . $this->secret );
+	}
+
+	/**
+	 * The catalogue's Authorization header for a token (R9): Login with Amazon takes the token alone, Cognito also the
+	 * Version.
+	 *
+	 * @param string $token An access token.
+	 */
+	public function authorization( string $token ): string {
+		return $this->uses_login_with_amazon() ? 'Bearer ' . $token : 'Bearer ' . $token . ', Version ' . $this->version;
+	}
 }

@@ -231,4 +231,55 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( stored().secret ).toBe( valid.secret );
 		setSettings( { default_country: 'us' } );
 	} );
+
+	test( 'AC9 wp affibloom amazon get prints the item, or the error code and message', () => {
+		/** Runs the command; its output, or its error output when it fails. */
+		const get = ( ...args: string[] ): { failed: boolean; out: string } => {
+			try {
+				return { failed: false, out: wp( 'affibloom', 'amazon', 'get', ...args ) };
+			} catch ( error ) {
+				return { failed: true, out: String( ( error as { stderr?: Buffer } ).stderr ?? error ) };
+			}
+		};
+
+		// Not set up: says so, and asks Amazon nothing.
+		credentials( null );
+		stub( 'ok' );
+		let answer = get( 'B0STUBITEM' );
+		expect( answer.failed ).toBe( true );
+		expect( answer.out ).toContain( 'Not set up' );
+		expect( requests() ).toBe( 0 );
+
+		credentials( valid );
+		answer = get( 'b0stubitem' );
+		expect( answer.failed ).toBe( false );
+		expect( answer.out ).toContain( 'ASIN: B0STUBITEM' );
+		expect( answer.out ).toContain( 'Title: Mikasa V200W Official Game Volleyball' );
+		expect( answer.out ).toContain( 'Image: https://m.media-amazon.com/images/I/71stubLarge.jpg' );
+		expect( answer.out ).toContain( 'Price: $69.95' );
+		expect( answer.out ).toContain( 'Savings: $10.04 (13%) off $79.99' );
+		expect( answer.out ).toContain( 'Availability: In stock (IN_STOCK: In Stock)' );
+		expect( answer.out ).toContain( '- FIVB approved for international play' );
+		expect( answer.out ).toContain( 'URL: https://www.amazon.com/dp/B0STUBITEM' );
+
+		// Another store: asked by its marketplace.
+		expect( get( 'B0STUBITEM', '--country=gb' ).out ).toContain( 'URL: https://www.amazon.co.uk/dp/B0STUBITEM' );
+
+		answer = get( 'B0OUTSTOCK1' );
+		expect( answer.out ).toContain( 'Availability: Out of stock (OUT_OF_STOCK: Currently unavailable.)' );
+		expect( answer.out ).toContain( 'Price: —' );
+
+		answer = get( 'B0NOTFOUND1' );
+		expect( answer.failed ).toBe( true );
+		expect( answer.out ).toContain( 'NotFound: Product not found.' );
+
+		stub( 'reject' );
+		answer = get( 'B0STUBITEM' );
+		expect( answer.failed ).toBe( true );
+		expect( answer.out ).toMatch( /AuthFailed: Could not obtain Creators API access token\.|ApiError: The access token is invalid or has expired\./ );
+
+		answer = get( 'not an asin' );
+		expect( answer.failed ).toBe( true );
+		expect( answer.out ).toContain( 'InvalidAsin: ASIN is required.' );
+	} );
 } );

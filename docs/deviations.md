@@ -117,6 +117,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 109. Even gaps between Settings cards (2026-11-15; the user: "also fix the uneven card gaps at 375px").
 - 110. Task C1A: the Product Data API card and Validate (2026-11-15).
 - 111. Faster checks: test tiers, faster WP-CLI, one-call setup, automatic restore after runs (2026-11-15; the user: "Steps 1–6").
+- 112. Task C1B (2026-11-15), the catalogue client behind `wp affibloom amazon get`; built from the reverted first try; savings read unverified.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2409,3 +2410,34 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       F23 14/14. F23 AC3's toast failed once in three runs. F5 fails as expected (the box is Phase 3).
     - Records: `environment.md` (tooling, Known issues), `batches.md`, `/next-task` (both copies), `CLAUDE.md`'s quality
       bar, and the memory note on running tests.
+
+112. **Task C1B: the catalogue client, behind `wp affibloom amazon get` (2026-11-15).** Batch 2.1, at the user's word
+    ("Start Batch 2.1"). Built from the first try's code (`3a2be33`, kept on `backup/before-revert-to-21f7d03`; the
+    revert of 2026-11-15 was about process, not this code), read through line by line, the tests brought in first and
+    seen red. As planned (R7-R13, D1, D6; AC9), with these departures:
+    - **Savings are read, unverified.** Lasso's Creators client reads no savings (its discounts came from its cloud,
+      R3-R5, not used), so `CatalogItem` reads them from the same listing price (`savings.money.displayAmount`,
+      `savings.percentage`, `savingBasis.money.displayAmount`, Amazon's OffersV2 shape); no extra resource is asked
+      for. Check against a live answer when credentials work.
+    - **Normalising is in the Domain** (`CatalogItem::from_creators()`, `Availability`), tested without WordPress. The
+      client keeps the request, the token cache (R8: transient `affibloom_amazon_token_` + `Credentials::cache_key()`,
+      a hash of id, version and secret) and Lasso's errors; a failed token inside an item request is AuthFailed (Lasso).
+      The price amount and `parent_asin` (R11) are not read yet: nothing uses them before C1C.
+    - **`Asin` refuses more than Lasso:** letters and digits, 1-20 (the cache key's width); Lasso refuses only empty. The
+      command prints Lasso's "InvalidAsin: ASIN is required." for both.
+    - **"Not set up"** is the command's word for incomplete credentials (Lasso's CredentialsMissing names Lasso's
+      settings); an unknown `--country` lists the 18 stores. `CredentialsService::default_country()` is public (was
+      `country()`), read at run time.
+    - **The stub answers getItems** (`getItems-ok`; `-empty` for an ASIN starting B0NOTFOUND; `-oos` for B0OUTSTOCK) and
+      refuses the catalogue in "reject" too, as a token cached in an earlier scenario still reaches it.
+    - **Left out of the first try (not C1B's):** its fix for a save from an Amazon tab opened before the card existed
+      (it emptied the Partner tag and Version) and its follow-up commit `111d207` (the C1A review's five findings).
+      Both stay on the backup branch for the user to place.
+    - **Found:** the site's `affibloom_amazon_credentials` are empty. They were set in
+      `app/affibloom-backup-2026-11-15-before-revert-cleanup.sql` and already empty in
+      `app/affibloom-backup-2026-11-15-before-run-state-check.sql` (before any test run of this session); cause
+      unknown. Restoring them is the user's call.
+    - Checks: AC9 red first ("'amazon' is not a registered subcommand") and unit tests red (21 errors, classes
+      missing); then AC9 passed; unit 610 (Asin, Availability, CatalogItem, CreatorsApiCatalog with the fixtures,
+      AmazonCommand); lint and PHPStan clean. By hand: `wp affibloom amazon get B00JMB3FHS` says "Not set up" (exit 1),
+      `--country=xx` lists the stores, `wp help affibloom amazon get` shows the usage.

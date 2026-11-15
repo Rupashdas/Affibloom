@@ -266,7 +266,7 @@ duplicates of F38 ON9 and ON8 (Phase 8)
 C1F and C1G in Phase 3
 
 - [x] Task C1A: The Product Data API card and Validate
-- [ ] Task C1B: The catalogue client
+- [x] Task C1B: The catalogue client
 - [ ] Task C1C: Filling a new Amazon product on add
 - [ ] Task C1D: Refresh on the product page
 - [ ] Task C1I: Bulk Amazon sync
@@ -6136,10 +6136,10 @@ features, or `NotFound: Product not found.` / `AuthFailed: …`.
 **Files:** the above; `tests/fixtures/amazon/getItems-{ok,empty,oos}.json`, `error-{401,429}.json`;
 `tests/Unit/Infrastructure/CreatorsApiCatalogTest.php`, `AvailabilityTest.php`; `Plugin.php`.
 
-- [ ] **Step 1: Failing tests** (unit against fixtures; AC9 through WP-CLI with the stub).
-- [ ] **Step 2: Client and value objects.**
-- [ ] **Step 3: Command.**
-- [ ] **Step 4: Run and look.**
+- [x] **Step 1: Failing tests** (unit against fixtures; AC9 through WP-CLI with the stub).
+- [x] **Step 2: Client and value objects.**
+- [x] **Step 3: Command.**
+- [x] **Step 4: Run and look.**
 - [ ] **Step 5: Commit** — "Fetch an Amazon item through the Creators API, behind wp affibloom amazon get".
 
 ---
