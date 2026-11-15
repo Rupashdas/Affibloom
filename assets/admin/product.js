@@ -123,7 +123,85 @@
 		focusBorder( editor );
 	}
 
+	/**
+	 * The Features list (C1Q4): Add Feature, and Move up, Move down and Remove on each bullet. After every change the
+	 * labels are renumbered ("Feature 2", "Move Feature 2 up"), the first Move up and last Move down are disabled, and
+	 * an input event tells the unsaved-changes guard. list.affibloomFeatures.set( texts ) replaces the bullets (Refresh).
+	 *
+	 * @param {HTMLElement} field The field ([data-features]).
+	 */
+	function featureList( field ) {
+		var list = field.querySelector( '[data-feature-list]' );
+		var template = field.querySelector( '[data-feature-template]' );
+		var label = function ( pattern, number ) {
+			return pattern.replace( '%d', String( number ) );
+		};
+		var renumber = function () {
+			var rows = list.querySelectorAll( '[data-feature]' );
+			Array.prototype.forEach.call( rows, function ( row, index ) {
+				var number = index + 1;
+				row.querySelector( '[data-feature-text]' ).setAttribute( 'aria-label', label( list.dataset.label, number ) );
+				row.querySelector( '[data-feature-move="-1"]' ).setAttribute( 'aria-label', label( list.dataset.up, number ) );
+				row.querySelector( '[data-feature-move="1"]' ).setAttribute( 'aria-label', label( list.dataset.down, number ) );
+				row.querySelector( '[data-feature-remove]' ).setAttribute( 'aria-label', label( list.dataset.remove, number ) );
+				row.querySelector( '[data-feature-move="-1"]' ).disabled = 0 === index;
+				row.querySelector( '[data-feature-move="1"]' ).disabled = rows.length - 1 === index;
+			} );
+		};
+		var changed = function () {
+			renumber();
+			list.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+		};
+		var add = function ( text ) {
+			var row = template.content.firstElementChild.cloneNode( true );
+			row.querySelector( '[data-feature-text]' ).value = text;
+			list.appendChild( row );
+			return row;
+		};
+
+		field.querySelector( '[data-feature-add]' ).addEventListener( 'click', function () {
+			var row = add( '' );
+			changed();
+			row.querySelector( '[data-feature-text]' ).focus();
+		} );
+		list.addEventListener( 'click', function ( event ) {
+			var button = event.target.closest( 'button' );
+			var row = button ? button.closest( '[data-feature]' ) : null;
+			if ( ! row ) {
+				return;
+			}
+			if ( button.hasAttribute( 'data-feature-remove' ) ) {
+				// Focus stays in the list: the next bullet, else the one before, else Add Feature.
+				var next = row.nextElementSibling || row.previousElementSibling;
+				row.remove();
+				changed();
+				( next ? next.querySelector( '[data-feature-text]' ) : field.querySelector( '[data-feature-add]' ) ).focus();
+				return;
+			}
+			var step = parseInt( button.dataset.featureMove, 10 );
+			var other = -1 === step ? row.previousElementSibling : row.nextElementSibling;
+			if ( other ) {
+				list.insertBefore( row, -1 === step ? other : other.nextElementSibling );
+				changed();
+				button.focus();
+			}
+		} );
+		list.affibloomFeatures = {
+			set: function ( texts ) {
+				list.innerHTML = '';
+				texts.forEach( add );
+				renumber();
+			},
+		};
+		renumber();
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
+		var features = document.querySelector( '[data-features]' );
+		if ( features ) {
+			featureList( features );
+		}
+
 		var kit = document.querySelector( '[data-share-kit]' );
 		if ( window.tinymce ) {
 			// An editor may already exist when this runs, or arrive after it.
@@ -217,6 +295,12 @@
 						media.value = '0';
 						show( answer.data.image_url );
 						var saved = [ 'image_url', 'image_id' ];
+						// Amazon's bullets replace the Features list, stored at once (C1Q4).
+						var list = document.querySelector( '[data-feature-list]' );
+						if ( list && list.affibloomFeatures && answer.data.features && answer.data.features.length ) {
+							list.affibloomFeatures.set( answer.data.features );
+							saved.push( 'features' );
+						}
 						// Shown until reload: the product page's price is C1F's (it shows Amazon's stored price, Phase 3).
 						if ( price ) {
 							price.value = answer.data.price;

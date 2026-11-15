@@ -197,6 +197,66 @@ $editor = static fn( int $height ): array => array(
 		</div>
 	</div>
 
+	<?php // Features (C1Q4): the product's bullets, Amazon's on add and Refresh, kept apart from the description. ?>
+	<div class="affibloom-field" data-features>
+		<div class="affibloom-field__head">
+			<span class="affibloom-label" id="affibloom-features-label"><?php esc_html_e( 'Features', 'affibloom' ); ?></span>
+			<?php
+			$this->render(
+				'admin/partials/help',
+				array(
+					'id'    => 'affibloom-features-help',
+					'text'  => __( "The product's key points, one per line. Amazon products get Amazon's bullet points when they are added or refreshed. Not shown in displays yet.", 'affibloom' ),
+					'label' => __( 'Features', 'affibloom' ),
+				)
+			);
+			?>
+		</div>
+		<?php
+		// The labels' patterns, for product.js to number the bullets after a change.
+		/* translators: %d: a bullet's place in the list, from 1. */
+		$feature_label = __( 'Feature %d', 'affibloom' );
+		/* translators: %d: a bullet's place in the list, from 1. */
+		$feature_up = __( 'Move Feature %d up', 'affibloom' );
+		/* translators: %d: a bullet's place in the list, from 1. */
+		$feature_down = __( 'Move Feature %d down', 'affibloom' );
+		/* translators: %d: a bullet's place in the list, from 1. */
+		$feature_remove = __( 'Remove Feature %d', 'affibloom' );
+		?>
+		<ol class="affibloom-features" aria-labelledby="affibloom-features-label" data-feature-list
+			data-label="<?php echo esc_attr( $feature_label ); ?>"
+			data-up="<?php echo esc_attr( $feature_up ); ?>"
+			data-down="<?php echo esc_attr( $feature_down ); ?>"
+			data-remove="<?php echo esc_attr( $feature_remove ); ?>">
+			<?php
+			foreach ( $product->features as $index => $feature ) {
+				$this->render(
+					'admin/partials/feature-row',
+					array(
+						'text'   => $feature,
+						'number' => $index + 1,
+					)
+				);
+			}
+			?>
+		</ol>
+		<template data-feature-template>
+		<?php
+		$this->render(
+			'admin/partials/feature-row',
+			array(
+				'text'   => '',
+				'number' => 0,
+			)
+		);
+		?>
+		</template>
+		<button type="button" class="affibloom-button affibloom-button--secondary affibloom-features__add" data-feature-add>
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+			<?php esc_html_e( 'Add Feature', 'affibloom' ); ?>
+		</button>
+	</div>
+
 	<div class="affibloom-field">
 		<div class="affibloom-field__head">
 			<label class="affibloom-label" for="affibloom-disclosure"><?php esc_html_e( 'Disclosure', 'affibloom' ); ?></label>

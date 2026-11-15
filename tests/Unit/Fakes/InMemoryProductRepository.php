@@ -144,6 +144,16 @@ final class InMemoryProductRepository implements ProductRepository {
 		return $product;
 	}
 
+	public function set_features( Product $product, array $features ): Product {
+		foreach ( $this->saved as $index => $saved ) {
+			if ( $saved->id === $product->id ) {
+				$this->saved[ $index ] = $saved->with( array( 'features' => $features ) );
+				return $this->saved[ $index ];
+			}
+		}
+		return $product;
+	}
+
 	/** Re-saving makes a product the most recently changed, as wp_update_post() does: it moves to the end of the list. */
 	public function rename( Product $product, string $name ): Product {
 		foreach ( $this->saved as $index => $saved ) {

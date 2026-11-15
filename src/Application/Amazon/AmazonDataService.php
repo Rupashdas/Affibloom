@@ -122,6 +122,10 @@ final class AmazonDataService {
 		if ( 0 === $product->image_id && '' === $product->image_url && AmazonProduct::is_image_link( $data->image ) ) {
 			$product = $this->library->set_image( $product, $data->image );
 		}
+		// Features as the image: only for a product that has none (C1Q4).
+		if ( array() === $product->features && array() !== $data->features ) {
+			$product = $this->library->set_features( $product, $data->features );
+		}
 		if ( '' !== $data->name && PlaceholderName::is( $product->name ) ) {
 			$this->library->rename( $product, $data->name );
 		}
@@ -170,6 +174,10 @@ final class AmazonDataService {
 		// Lasso writes the image as post meta only, and touches the post only to rename a placeholder, so a refresh does
 		// not move the product to the top of the Dashboard.
 		$product = $this->library->set_image( $product, $item->image );
+		// Amazon's bullets replace the product's Features when Amazon gives some (C1Q4); the description is not touched.
+		if ( array() !== $item->features ) {
+			$product = $this->library->set_features( $product, $item->features );
+		}
 		$renamed = '' !== $item->title && PlaceholderName::is( $product->name );
 		if ( $renamed ) {
 			$product = $this->library->rename( $product, $item->title );
@@ -209,6 +217,9 @@ final class AmazonDataService {
 		}
 
 		$changes = array();
+		if ( array() !== $data->features ) {
+			$changes['features'] = $data->features;
+		}
 		if ( '' !== $data->name ) {
 			$changes['name'] = $data->name;
 		}

@@ -274,7 +274,8 @@ C1F and C1G in Phase 3
 - [x] Task C1Q1: Real Creators API answers as fixtures
 - [x] Task C1Q2: Read every relevant resource
 - [x] Task C1Q3: Store the Amazon data that is needed
-- [ ] Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
+- [x] Task C1Q4a: Features field, filled on add, bulk sync and Refresh
+- [ ] Task C1Q4b: Scheduled price refresh
 - [ ] Task C1Q5: The Amazon Details card
 - [ ] Task C1Q6: Throttling, retry, quota and batched requests
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
@@ -6303,7 +6304,8 @@ from the description, never copied into it. Add and Refresh store Amazon's featu
 job (R37-R39, D8; C1E brought forward) refreshes due rows only (price, stock, savings, amounts), at most the
 settings' batch, keeps the last good data on failure, writes no product field (D7). Tests: C1 AC1 and AC4
 extended, a Features AC, a job AC (stubbed cron run), unit for the due rule. Commit — "Keep Amazon features and prices
-current".
+current". **Split (deviation 124):** C1Q4a, the Features field and its filling, done 2026-11-15; C1Q4b, the
+scheduled price refresh, is next.
 
 ### Task C1Q5: The Amazon Details card
 

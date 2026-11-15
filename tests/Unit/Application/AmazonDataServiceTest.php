@@ -196,6 +196,9 @@ final class AmazonDataServiceTest extends TestCase {
 		self::assertSame( 'https://m.media-amazon.com/images/I/71stubLarge.jpg', $this->library->get( $id )?->image_url, 'saved at once' );
 		self::assertSame( '$69.95', $result['data']->price );
 		self::assertNotNull( $this->rows->find( 'B0STUBITEM', 'us' ) );
+		// Amazon's bullets replace the Features; the description is not touched (C1Q4).
+		self::assertSame( array( 'FIVB approved for international play', 'Double-layer design for a soft touch' ), $this->library->get( $id )?->features );
+		self::assertSame( '', $this->library->get( $id )?->description );
 	}
 
 	public function test_refresh_replaces_a_placeholder_name(): void {
@@ -268,5 +271,15 @@ final class AmazonDataServiceTest extends TestCase {
 		self::assertSame( array( null, null ), array( $newer->price_amount, $newer->basis_amount ), 'out of stock: no price' );
 		$merged = $newer->over( $older );
 		self::assertSame( array( '$1.00', 1.0, null, true ), array( $merged->price, $merged->price_amount, $merged->basis_amount, $merged->out_of_stock ) );
+	}
+
+	public function test_an_add_takes_amazons_features_and_leaves_the_description_alone(): void {
+		$service = $this->service();
+		$this->item();
+
+		$product = $service->fill( self::draft() );
+
+		self::assertSame( array( 'FIVB approved for international play', 'Double-layer design for a soft touch' ), $product->features );
+		self::assertSame( '', $product->description );
 	}
 }

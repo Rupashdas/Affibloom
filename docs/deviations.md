@@ -129,6 +129,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 121. Task C1Q2 (2026-11-15): 25 resources asked; ItemDetails and OfferDetails; the buy-box listing read.
 - 122. C1Q3 narrowed (the user, 2026-11-15): store only needed data; two numeric price columns. C1Q2's second commit noted.
 - 123. Task C1Q3 (2026-11-15): `price_amount`, `basis_amount` through upgrade step 3; AC1 extended but not seen red.
+- 124. Task C1Q4 split; C1Q4a (2026-11-15): Features field (JSON meta, editable list), filled on add, bulk sync, Refresh; C1K first try stashed.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2617,3 +2618,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     from `CatalogItem::$offer` (a 0 price is none, as R27); a newer row without a price keeps the older price and its
     number. Checks: unit 655, the two new unit checks red first; C1 AC1 (its stored row now checks both numbers) passed,
     but was **not run before the code**, so not seen red; lint, PHPStan clean; the columns checked on Local.
+
+124. **Task C1Q4 split; C1Q4a: the Features field (2026-11-15).** Split for size: C1Q4a here, C1Q4b (the scheduled
+    price refresh) next. Before it, the uncommitted C1K first try was stashed at the user's word (`stash@{0}`, "C1K first
+    try …"), as it changes the same four files. Product `features` (list), post meta `_affibloom_features` (JSON);
+    `ProductRepository::set_features()` writes meta only; `ProductInput` takes plain-text lines, trimmed, empties dropped;
+    the save route accepts `features`. Add takes Amazon's bullets; bulk sync fills an empty list only (as the image);
+    Refresh replaces them when Amazon gives some and the page's list follows. The description is never touched. The
+    page: Features after Description, rows with Move up, Move down, Remove, Add Feature, labels renumbered. Checks: E2E
+    AC1, AC4 (extended) and a new C1Q4 test red first, then green (two runs stalled on Local's workers and were rerun);
+    unit 657, the unit checks written after the code; lint, PHPStan clean; 1280 and 375 px on the user's Lenovo product.

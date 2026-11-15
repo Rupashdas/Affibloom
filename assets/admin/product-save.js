@@ -131,6 +131,10 @@
 			}
 			data.image_id = parseInt( field( 'image_id' ).value, 10 ) || 0;
 			data.primary_position = parseInt( field( 'primary_position' ).value, 10 ) || 0;
+			// The Features list (C1Q4): every bullet's text, in order; the server drops empty ones.
+			data.features = Array.prototype.map.call( form.querySelectorAll( '[data-feature-text]' ), function ( input ) {
+				return input.value;
+			} );
 			data.buttons = extraBlocks().map( function ( block ) {
 				return {
 					url: part( block, 'url' ).value,

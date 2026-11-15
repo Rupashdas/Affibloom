@@ -223,6 +223,7 @@ final class AmazonController implements Module {
 					'name'         => $product->name,
 					'renamed'      => $renamed,
 					'image_url'    => $product->image_url,
+					'features'     => $product->features,
 					'price'        => $data->price,
 					'out_of_stock' => $data->out_of_stock,
 					'last_updated' => $data->last_updated,

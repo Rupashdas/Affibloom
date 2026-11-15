@@ -186,13 +186,18 @@ final class ProductsController implements Module {
 			'minimum' => 0,
 		);
 		// The groups the product is in: IDs of groups, or names that become groups (F23 R14), stored by the groups service.
-		$args['groups']  = array(
+		$args['groups'] = array(
 			'type'  => 'array',
 			'items' => array(
 				'type' => array( 'integer', 'string' ),
 			),
 		);
-		$args['buttons'] = array(
+		// The Features list (C1Q4): the bullets' texts in order.
+		$args['features'] = array(
+			'type'  => 'array',
+			'items' => array( 'type' => 'string' ),
+		);
+		$args['buttons']  = array(
 			'type'  => 'array',
 			'items' => array(
 				'type'       => 'object',

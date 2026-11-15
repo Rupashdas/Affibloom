@@ -119,12 +119,33 @@ final class ProductInput {
 		if ( array_key_exists( 'price', $input ) ) {
 			$changes['price'] = wp_kses( PriceHtml::normalised( self::scalar( $input['price'] ) ), self::PRICE_TAGS );
 		}
+		if ( array_key_exists( 'features', $input ) ) {
+			$changes['features'] = self::features( $input['features'] );
+		}
 		if ( array_key_exists( 'description', $input ) ) {
 			// Lasso's save_scalar_html, then wp_encode_emoji (save_lasso_url 1379-1381).
 			$changes['description'] = wp_encode_emoji( wp_kses_post( self::scalar( $input['description'] ) ) );
 		}
 
 		return $changes;
+	}
+
+	/**
+	 * The feature bullets as sent (C1Q4): plain text each, trimmed, empty ones dropped, in the order sent.
+	 *
+	 * @param mixed $rows A list of texts.
+	 * @return list<string>
+	 */
+	private static function features( mixed $rows ): array {
+		$features = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$text = sanitize_text_field( self::scalar( $row ) );
+			if ( '' !== $text ) {
+				$features[] = $text;
+			}
+		}
+
+		return $features;
 	}
 
 	/**

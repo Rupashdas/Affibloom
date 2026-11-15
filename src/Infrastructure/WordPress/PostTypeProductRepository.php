@@ -70,6 +70,8 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_description'      => $product->description,
 				'_affibloom_disclosure'       => $product->disclosure,
 				'_affibloom_prime'            => self::flag( $product->prime ),
+				// A JSON list of bullets (C1Q4; the user asked for JSON).
+				'_affibloom_features'         => (string) wp_json_encode( $product->features ),
 			),
 		);
 		$buttons = $product->buttons->to_array();
@@ -436,6 +438,30 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * Sets a stored product's feature bullets alone (post meta only), so it keeps its place in "most recently changed".
+	 *
+	 * @param Product      $product  A stored product.
+	 * @param list<string> $features The bullets.
+	 */
+	public function set_features( Product $product, array $features ): Product {
+		update_post_meta( (int) $product->id, '_affibloom_features', wp_slash( (string) wp_json_encode( $features ) ) );
+
+		return $product->with( array( 'features' => $features ) );
+	}
+
+	/**
+	 * The feature bullets as stored (a JSON list); anything else reads as none.
+	 *
+	 * @param string $stored The meta value.
+	 * @return list<string>
+	 */
+	private static function features( string $stored ): array {
+		$list = json_decode( $stored, true );
+
+		return is_array( $list ) ? array_values( array_filter( $list, 'is_string' ) ) : array();
+	}
+
+	/**
 	 * Gives a stored product a new name, as Lasso's re-title does (wp_update_post with the title).
 	 *
 	 * @param Product $product A stored product.
@@ -767,6 +793,7 @@ final class PostTypeProductRepository implements ProductRepository {
 			disclosure: $meta( 'disclosure' ),
 			prime: '1' === $meta( 'prime' ),
 			image_id: (int) $meta( 'image_id' ),
+			features: self::features( $meta( 'features' ) ),
 		);
 	}
 

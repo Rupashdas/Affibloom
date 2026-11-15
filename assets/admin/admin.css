@@ -2240,6 +2240,12 @@ body.affibloom-has-modal { overflow: hidden; }
 }
 .affibloom-admin .affibloom-icon-button:hover:not(:disabled) { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
 .affibloom-admin .affibloom-icon-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* The product page's Features list (C1Q4): one text field per bullet, then Move up, Move down and Remove. */
+.affibloom-features { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+.affibloom-features:empty { display: none; }
+.affibloom-features__item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; }
+.affibloom-features__add { justify-self: start; }
 .affibloom-admin .affibloom-icon-button:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
 .affibloom-member__image .affibloom-thumb { width: 50px; height: 50px; }
 .affibloom-admin .affibloom-member__name { overflow: hidden; color: var(--affibloom-ink-900); font: 600 15px/22px var(--affibloom-font); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }

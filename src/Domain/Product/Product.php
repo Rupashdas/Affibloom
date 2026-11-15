@@ -48,6 +48,8 @@ final class Product {
 	 * @param string       $disclosure      The disclosure; '' means the site's text (Lasso's disclosure_text).
 	 * @param bool         $prime           Show the Prime logo (Amazon products; set by the editor until C1).
 	 * @param int          $image_id        The image's media library item, when it was picked there; 0 otherwise.
+	 * @param list<string> $features        The product's feature bullets, in order (C1Q4: Amazon's on add and Refresh,
+	 *                                      editable; separate from the description; not shown in displays yet).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -72,6 +74,7 @@ final class Product {
 		public readonly string $disclosure = '',
 		public readonly bool $prime = false,
 		public readonly int $image_id = 0,
+		public readonly array $features = array(),
 	) {}
 
 	/**

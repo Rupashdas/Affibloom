@@ -134,6 +134,15 @@ interface ProductRepository {
 	public function set_image( Product $product, string $url ): Product;
 
 	/**
+	 * Sets a stored product's feature bullets alone (Refresh and bulk sync, C1Q4), without making it the most recently
+	 * changed.
+	 *
+	 * @param Product      $product  A stored product.
+	 * @param list<string> $features The bullets.
+	 */
+	public function set_features( Product $product, array $features ): Product;
+
+	/**
 	 * Retires a product in favour of another (the repoint, Task 15C): it remembers which product it now points to, so
 	 * what draws it by its ID can draw that one instead (Lasso's lasso_repointed_to_lasso_id), and leaves the library
 	 * as retired (its own status, Lasso's lasso_delete; Task 17C), never emptied away like the trash. No post is touched.

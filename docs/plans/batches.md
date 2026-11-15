@@ -50,7 +50,7 @@ plan lines, reviews, and staging or production work.
 | 2.1Q1 | C1Q1 |
 | 2.1Q2 | C1Q2 |
 | 2.1Q3 | C1Q3 |
-| 2.1Q4 | C1Q4 |
+| 2.1Q4 | C1Q4a (done), C1Q4b (deviation 124) |
 | 2.1Q5 | C1Q5 |
 | 2.1Q6 | C1Q6 |
 | 2.2 | C1I, C1K, C1L |

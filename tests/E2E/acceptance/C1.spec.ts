@@ -144,6 +144,9 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( 'Mikasa V200W Official Game Volleyball' );
 		// The image is kept as a link to Amazon, never downloaded (R30).
 		expect( meta( id, 'image_url' ) ).toBe( 'https://m.media-amazon.com/images/I/71stubLarge.jpg' );
+		// Amazon's bullets become the product's Features; the description stays empty (C1Q4, deviation 117).
+		expect( JSON.parse( meta( id, 'features' ) ) ).toEqual( [ 'FIVB approved for international play', 'Double-layer design for a soft touch' ] );
+		expect( meta( id, 'description' ) ).toBe( '' );
 		expect( cacheRow( asin, 'us' ) ).toMatchObject( { name: 'Mikasa V200W Official Game Volleyball', price: '$69.95', out_of_stock: '0', source: 'creators', price_amount: '69.95', basis_amount: '79.99' } );
 
 		// A second product with the same ASIN on that store reuses the stored data and asks Amazon nothing (R32).
@@ -215,6 +218,9 @@ test.describe( 'C1 Amazon product data', () => {
 		await expect( page.locator( '#affibloom-price' ) ).toHaveValue( '$69.95' );
 		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'My own words' );
 		expect( meta( own, 'image_url' ) ).toBe( image );
+		// Refresh stores Amazon's bullets as the Features too (C1Q4), and the list shows them.
+		await expect( page.getByLabel( 'Feature 2', { exact: true } ) ).toHaveValue( 'Double-layer design for a soft touch' );
+		expect( JSON.parse( meta( own, 'features' ) ) ).toEqual( [ 'FIVB approved for international play', 'Double-layer design for a soft touch' ] );
 		// Nothing is left unsaved: leaving the page does not ask.
 		await page.locator( 'a[href$="admin.php?page=affibloom"]' ).first().click();
 		await page.waitForURL( /page=affibloom(&|$)/ );
@@ -348,6 +354,25 @@ test.describe( 'C1 Amazon product data', () => {
 		await expect( card.getByText( 'Validated', { exact: true } ) ).toBeVisible();
 		await expect( card.getByText( /^Amazon refused these credentials/ ) ).toBeHidden();
 		expect( stored() ).not.toHaveProperty( 'refusal' );
+	} );
+
+	test( 'C1Q4 the Features field is edited on the product page: change, add, reorder, remove, save', async ( { page } ) => {
+		const id = createProduct( { name: 'Features test', features: JSON.stringify( [ 'One', 'Two' ] ) } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await expect( page.getByLabel( 'Feature 1', { exact: true } ) ).toHaveValue( 'One' );
+		await page.getByLabel( 'Feature 2', { exact: true } ).fill( 'Two edited' );
+		await page.getByRole( 'button', { name: 'Add Feature' } ).click();
+		await page.getByLabel( 'Feature 3', { exact: true } ).fill( 'Three' );
+		await page.getByRole( 'button', { name: 'Move Feature 3 up' } ).click();
+		await page.getByRole( 'button', { name: 'Remove Feature 1' } ).click();
+		await expect( page.getByLabel( 'Feature 1', { exact: true } ) ).toHaveValue( 'Three' );
+
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+		expect( JSON.parse( meta( id, 'features' ) ) ).toEqual( [ 'Three', 'Two edited' ] );
+		await page.reload();
+		await expect( page.getByLabel( 'Feature 2', { exact: true } ) ).toHaveValue( 'Two edited' );
+		expect( meta( id, 'description' ) ).toBe( '' );
 	} );
 
 	test( "C1Q0 the stub answers only the suite's test credentials; a person's requests reach Amazon", () => {

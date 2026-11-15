@@ -189,4 +189,12 @@ final class ProductInputTest extends TestCase {
 	public function test_the_description_keeps_post_markup(): void {
 		self::assertSame( '<p>Light.</p>x', $this->input()->changes( array( 'description' => '<p>Light.</p><img src="x">x' ) )['description'] );
 	}
+
+	public function test_features_are_plain_text_lines_trimmed_with_empty_ones_dropped_in_order(): void {
+		self::assertSame(
+			array( 'features' => array( 'Three', 'Two bold gone' ) ),
+			$this->input()->changes( array( 'features' => array( '  Three ', '', 'Two <b>bold</b> gone', '   ' ) ) )
+		);
+		self::assertSame( array( 'features' => array() ), $this->input()->changes( array( 'features' => 'not a list' ) ) );
+	}
 }

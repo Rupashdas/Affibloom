@@ -4,6 +4,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q4a done, at "Start C1Q4"):** deviation 124. C1K first try stashed; the Features field
+  built and filled from Amazon. The user's Lenovo add checked: its price shows only after C1F, Prime after C1G (Phase 3).
+
 - **2026-11-15 (Claude Code, C1Q3 done, at the user's "Store only necessary data"):** deviations 122, 123. Scope
   narrowed to what readers use; the row gains the price and list price as numbers (step 3). Unit 655; AC1 passed.
 
