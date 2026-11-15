@@ -2732,4 +2732,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     Arrow Down on its focused grip. The user chose "drag only, like Lasso" over keeping small arrow buttons, knowing it
     leaves no one-click alternative to dragging (WCAG 2.2 SC 2.5.7, design-system rule 3). The group Links tab (G4)
     keeps its Move buttons. Checked by a signed-in run at 1280 px (pointer and keyboard, fields saved 200); F1, F26,
-    F29 and C1 specs updated (not run).
+    F29 and C1 specs updated (not run). **The drag looks like Trello's (the user, same day):** the held row floats
+    under the pointer, tilted 2deg with a deep shadow, a grey slot its size marks where it lands, the other rows slide
+    aside (150 ms) and the row glides into the slot on release; the page scrolls near the window's edges; no motion
+    with "reduce motion". The group Links rows share it (same `drag-rows.js`).

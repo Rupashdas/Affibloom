@@ -1903,14 +1903,26 @@
 .affibloom-field-row__actions { display: flex; align-items: center; gap: 4px; }
 /* The grip a product-page row is dragged by: buttons, custom fields (none on Primary Rating, whose place is fixed) and
  * features, as Lasso drags its rows (Task FL5; the user, 2026-11-16). A button, so Arrow Up and Arrow Down move the
- * row from the keyboard (drag-rows.js). A dragged row lifts as a group's Links row does (brand-50, the card shadow). */
+ * row from the keyboard (drag-rows.js). */
 .affibloom-admin .affibloom-grip { display: grid; flex: 0 0 auto; place-items: center; width: 24px; height: 28px; padding: 0; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
 .affibloom-admin .affibloom-grip[hidden] { display: none; }
 .affibloom-admin .affibloom-grip:hover { color: var(--affibloom-ink-700); }
 .affibloom-admin .is-dragging .affibloom-grip { cursor: grabbing; }
-.affibloom-field-row.is-dragging,
-.affibloom-button-block.is-dragging,
-.affibloom-features__item.is-dragging { position: relative; z-index: 2; background: var(--affibloom-brand-50); box-shadow: var(--affibloom-shadow-card); }
+/* The drag, as a card board's (Trello's; the user, 2026-11-16): the held row floats over the page, tilted 2deg, with a
+ * deep shadow, while a grey slot its size marks where it will land; drag-rows.js places both. */
+.affibloom-admin .is-dragging {
+	transform: rotate(2deg);
+	box-shadow: 0 2px 4px rgba(16, 24, 40, 0.10), 0 16px 32px rgba(16, 24, 40, 0.22);
+	transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.affibloom-admin .affibloom-features__item.is-dragging,
+.affibloom-admin .affibloom-member.is-dragging { background: var(--affibloom-white); }
+.affibloom-admin .affibloom-drag-slot { display: block; box-sizing: border-box; list-style: none; background: rgba(16, 24, 40, 0.07); }
+html.affibloom-is-dragging,
+html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
+@media (prefers-reduced-motion: reduce) {
+	.affibloom-admin .is-dragging { transform: none; transition: none; }
+}
 .affibloom-field-row__grip { margin-left: -4px; }
 /* A refused value's words sit under the box. */
 .affibloom-field-row > .affibloom-field__error { margin: -4px 0 0; }
@@ -2246,9 +2258,7 @@ body.affibloom-has-modal { overflow: hidden; }
 }
 .affibloom-member:last-child { border-bottom: 0; }
 .affibloom-member.is-selected { background: var(--affibloom-brand-50); }
-.affibloom-member.is-dragging { position: relative; z-index: 2; background: var(--affibloom-brand-50); box-shadow: var(--affibloom-shadow-card); }
 .affibloom-member__grip { display: grid; place-items: center; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
-.affibloom-member.is-dragging .affibloom-member__grip { cursor: grabbing; }
 .affibloom-member__moves { display: inline-flex; gap: 2px; }
 .affibloom-admin .affibloom-icon-button {
 	display: inline-grid;
