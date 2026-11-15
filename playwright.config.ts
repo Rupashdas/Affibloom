@@ -10,9 +10,9 @@ export default defineConfig( {
 	fullyParallel: false, // Tests switch plugins on the shared local site.
 	workers: 1,
 	reporter: [ [ 'list' ], [ 'html', { open: 'never' } ] ],
-	// run-state.ts first: it saves the site's state, and its teardown puts it back after the run (deviation 111).
-	globalSetup: [ './tests/E2E/run-state.ts', './tests/E2E/global-setup.ts' ],
-	globalTeardown: './tests/E2E/run-state-teardown.ts',
+	// No save or restore around a run: the Local database is dummy data (deviation 129). quiet-jobs.ts only stops
+	// Affibloom's background events, so they do not hold one of Local's two PHP workers during the run.
+	globalSetup: [ './tests/E2E/quiet-jobs.ts', './tests/E2E/global-setup.ts' ],
 	use: {
 		actionTimeout: 10_000,
 		// Local by default; CI (Task 3) sets WP_BASE_URL to its wp-env site.

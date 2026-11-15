@@ -1,6 +1,6 @@
 # Affibloom — deviations from the plan text
 
-Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end, with the next number. Keep each new one to about 10 lines: what differs from the plan, why, and the checks (the user, 2026-11-15, deviation 115).
+Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end, with the next number, **only when the plan's design or a later task changes**; small fixes go in a *Note* under the task (deviation 129). Keep each to about 10 lines: what differs, why, the checks.
 
 ## Index
 
@@ -134,6 +134,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 126. Task C1Q5 (2026-11-15): the Amazon Data card (titled so, not "Details"), stored row only, read-only, outside the form.
 - 127. Task C1Q6 split; C1Q6a (2026-11-15): `GuardedCatalog` (429 wait, one call a second, 8,640 a day), Throttled kind, the job's reserve.
 - 128. Task C1Q6b (2026-11-15): `items()` (ten ASINs a request), prefetch for bulk sync and the job, throttled bulk sync waits; stub and run-state fixes; AC2 fails on C1Q6a too.
+- 129. Lean working method (the user, 2026-11-15): few records, few test runs, no save/restore or backups on Local.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2675,3 +2676,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     refresh started by WP-Cron during a run held one of Local's two workers). Checks: unit 675 red first; C1 spec 16 of 18
     passed, then AC8 passed alone; **AC2 times out on Local and fails the same on the C1Q6a commit** (run with this work
     stashed), so it is the environment (WP-Cron work of other plugins due on page loads), not this task; lint, PHPStan clean.
+
+129. **Lean working method (the user, 2026-11-15).** Tasks took too long in records, test runs and database restores;
+    the Local database is dummy data. Records: per task only the phase file's ticks and an optional 1–3 line *Note*;
+    a numbered deviation only when the plan's design or a later task changes; `progress.md` once per batch;
+    `progress-log.md` closed. Checks: unit tests and `phpcs`/`phpstan` on changed files while coding; the full
+    lint, analyse and unit suite once per task; Playwright only for a screen or flow change, the task's AC only, green
+    once; review against the PR template once per batch. Playwright no longer saves and restores the site:
+    `run-state.ts` and its teardown are gone, `quiet-jobs.ts` only clears Affibloom's background events (C1Q6b's
+    reason); `run-state.php` stays as an opt-in tool. Runs now leave their products, options (test Amazon
+    credentials too) and drafts made by `isolate-amazon-pending.php`. Rules in `CLAUDE.md` and `batches.md`.

@@ -51,7 +51,9 @@
   `../affibloom-backup-….sql` lands in `wp-content/plugins/`, inside the web root (Tasks 12A and 12B did this;
   the files were moved to `app/`). Give the absolute path, e.g.
   `bash tools/local-wp.sh db export "C:/Users/Rupash/Local Sites/volleyballvault/app/affibloom-backup-<date>.sql"`.
-- **A Playwright run restores the Local copy itself (since 2026-11-15, deviation 111).** `tests/E2E/run-state.ts`
+- **A Playwright run no longer saves or restores the Local copy (deviation 129):** the Local database is dummy data,
+  so runs leave what they made. `globalSetup` only clears Affibloom's background events (`tests/E2E/quiet-jobs.ts`).
+  The old save/restore stays as an opt-in tool, described next. **Earlier (deviation 111):** `tests/E2E/run-state.ts`
   (first in `globalSetup`) saves the state to `.local/e2e-run-state.json`; `run-state-teardown.ts` puts it back
   after the run, failed or not: posts and terms the run made are deleted, `affibloom*` options, products' status
   and slug and the active plugins are restored, and it prints what it did ("run-state: deleted N posts …"). No
@@ -92,8 +94,8 @@ set `WP_HTTP_BLOCK_EXTERNAL` true, `DISABLE_WP_CRON` true, an empty `SENTRY_DSN`
 (`lasso_license_status`) kept its cloud jobs off. The copy still
 holds real user emails and Lasso's production data.
 - Do not run Lasso jobs on purpose; prefer read-only WP-CLI.
-- Back up the database before any write: `bash tools/local-wp.sh db export "<absolute path outside the web root>"`
-  (see the gotcha above about relative paths).
+- The Local database is dummy data (the user, 2026-11-15, deviation 129): writes need no backup. If a backup is wanted
+  anyway: `bash tools/local-wp.sh db export "<absolute path outside the web root>"`.
 
 **The WordPress MCP connector available to Claude Code is connected to production**
 (`https://volleyballvault.com`, checked 2026-11-12), not to this Local copy. Use it for reads only, never

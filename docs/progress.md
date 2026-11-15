@@ -1,12 +1,12 @@
 # Affibloom — progress
 
-Short on purpose: read this at the start of every session. Update it at the end of every task.
+Short on purpose: read this at the start of every session. Update it at the end of every batch (deviation 129).
 
 | Record | What it holds | When to read it |
 |---|---|---|
 | `progress.md` (this file) | Status by phase, next up | Every session |
 | [`deviations.md`](deviations.md) | Every deviation from the plan text, numbered, with an index | `grep` it for the task ID and the features it touches; read a deviation in full when a note names it |
-| [`progress-log.md`](progress-log.md) | Session log (newest first), early history, Phase 0 decisions | When you need the history of a task; add the session's entry at the top of its Session log |
+| [`progress-log.md`](progress-log.md) | Session log up to 2026-11-15, early history (closed, deviation 129) | Only for the history of an older task |
 | [`open-decisions.md`](open-decisions.md) | Decisions for the user | When a task touches one |
 
 "Deviation N" anywhere in the docs means item N in `deviations.md`.
@@ -33,30 +33,15 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 ## Next up
 
-1. **Phase 2 audit done (2026-11-15, deviation 107).** The records were reconciled and the open checks run:
-   the F9 test faults fixed (no code fault), F1 twice in a row, F9, F16, F19 and F23 passed, the owed by-hand checks
-   and 375 px looks made, Display's clipped Button alignment fixed, and the product page's squeezed Button Text
-   (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
-2. **C1A done (deviation 110); C1B done (deviation 112); C1C done (deviation 113, the Amazon products table at
-   `affibloom_db_version` 2); C1D done (deviation 114). Batch 2.1 is finished. Batch 2.2: C1I done (deviation 116; the banner counts 229 here until Task 26 copies Lasso's rows). **Now: full Amazon data, C1Q0-C1Q6
-   (deviation 117), one task at a time with the user's approval; C1Q0 done (deviations 118, 119); C1Q1 done (deviation 120: real fixtures, no ratings from Amazon); C1Q2 done (deviation 121); C1Q3 done (deviations 122, 123: only needed data, prices as numbers); C1Q4a done (deviation 124: Features field); C1Q4b done (deviation 125: the hourly refresh); C1Q5 done (deviation 126: Amazon Data card); C1Q6a done (deviation 127: Amazon's limits); C1Q6b done (deviation 128: ten ASINs per request). **The full Amazon data tasks are finished.** Open: C1 AC2 times out on Local (also on C1Q6a; environment). The C1K first try is in `stash@{0}`.** Then C1K (an uncommitted first try is in
-   the working tree), C1L; then Batches 2.3 (C1M, C1N) and 2.4 (C1O, C1P), then Phase 2's exit check and the user's sign-off. The site's Amazon credentials are empty (cause unknown,
-   deviation 112); restoring them is the user's call. A first try of C1B-C1D was reverted on 2026-11-15
-   (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day (the
-   library re-seeded to Lasso's 254 products); C1C's redo made its table again (backup
-   `app/affibloom-backup-2026-11-15-before-c1c-redo.sql`).
-3. **Faster checks (2026-11-15, deviation 111):** test tiers in `plans/batches.md` rule 5 (per task only its own
-   acceptance tests; at batch end only the tests covering the change; whole specs and the full suite per phase). Playwright runs now restore the site themselves.
-   F23 AC5's reload race fixed. Batch-end runs narrowed and records capped (deviation 115). Open: Local's two PHP
-   workers are hard-coded in Local (patching it is the user's call).
-4. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
-   Standing rule (the user, 2026-11-15): **one batch per session**, as listed with its rules in
-   [`plans/batches.md`](plans/batches.md); it replaces "one task per session". Each task still has its own commit.
-5. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
-   **`tools/reset-local.sh` is not safe to run as it stands:** `.local/snapshot.sql` dates from 2026-11-12, before the
-   library was seeded from Lasso (deviation 51) and before the saved sign-in Claude's runs use, so a reset would lose
-   both. The test runs of 2026-11-15 ran on the copy as it was (backup `.local/backup-2026-11-15-before-phase2-audit-runs.sql`).
-   A new snapshot is the user's call.
-6. Open, from the client: C1 Creators API credentials; the optional GA4 check.
-7. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
+1. **Now: Batch 2.2, the rest: C1K, then C1L.** C1I is done (deviation 116); C1Q0-C1Q6b are done (deviations
+   117-128). A first try of C1K is in `stash@{0}` (6 files); look at it before starting C1K. Then Batches 2.3 (C1M,
+   C1N) and 2.4 (C1O, C1P), then Phase 2's exit check (the full suite) and the user's sign-off.
+2. **Lean method from 2026-11-15 (deviation 129):** few records (phase-file ticks and *Notes*), few test runs, no
+   save/restore, backup or reset on Local (its database is dummy data). Rules: `CLAUDE.md`, `plans/batches.md`.
+3. Open, environment: C1 AC2 times out on Local (also on C1Q6a); Local runs only two PHP workers (hard-coded).
+4. Open, the user's call: the site's Amazon credentials are empty (deviation 112); C1 Creators API credentials and
+   the optional GA4 check from the client.
+5. Standing rules: Affibloom works with no Lasso dependency and no Lasso branding (2026-11-14); one batch per session
+   (2026-11-15). Lasso is inactive on Local since 2026-11-14.
+6. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
    run (no wp-env).

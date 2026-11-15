@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Whether a Credential ID is one of the suite's test IDs (C1.spec.ts: "…oa2-client.e2e", "ACCEPTANCE-ID-C1"). The
- * after-run restore (tests/E2E/fixtures/run-state.php) reads it too.
+ * opt-in restore (tests/E2E/fixtures/run-state.php) reads it too.
  *
  * @param string $credential_id A Credential ID.
  */

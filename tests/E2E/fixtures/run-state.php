@@ -1,11 +1,11 @@
 <?php
 /**
- * Saves the Local site's state before a Playwright run and puts it back after it (deviation 111), so a run needs no
- * backup, no reset and no clean-up by hand, and a failing test cannot leave its data behind.
+ * Opt-in, by hand: saves the Local site's state and puts it back later (deviation 111). Playwright runs no longer call
+ * it (the Local database is dummy data, deviation 129); use it only when a clean-up is wanted.
  *
  * Usage:
- *     wp eval-file run-state.php save      # globalSetup (tests/E2E/run-state.ts)
- *     wp eval-file run-state.php restore   # globalTeardown (tests/E2E/run-state-teardown.ts)
+ *     wp eval-file tests/E2E/fixtures/run-state.php save
+ *     wp eval-file tests/E2E/fixtures/run-state.php restore
  *
  * What is put back:
  * - every post (any type: products, posts, pages, revisions, attachments) and every term made during the run,
@@ -240,15 +240,8 @@ if ( 'save' === $affibloom_action ) {
 	if ( ! is_dir( dirname( $affibloom_state_file ) ) ) {
 		mkdir( dirname( $affibloom_state_file ), 0700, true );
 	}
-	// The scheduled Amazon refresh must not start in the background during a run (C1Q6b): the bulk sync tests spawn
-	// WP-Cron, and a refresh pass holds one of Local's two PHP workers for 20 seconds. The plugin schedules it again an
-	// hour out on the next request.
-	wp_clear_scheduled_hook( 'affibloom_amazon_refresh' );
-	wp_clear_scheduled_hook( 'affibloom_amazon_refresh_pass' );
-	// A leftover bulk sync or bulk add pass from an earlier run is not the run's to do either: its event only wakes a
-	// job that a test starts again itself.
-	wp_clear_scheduled_hook( 'affibloom_amazon_bulk_sync' );
-	wp_clear_scheduled_hook( 'affibloom_bulk_add' );
+	// No background job may run during the run (C1Q6b).
+	require __DIR__ . '/quiet-jobs.php';
 	$affibloom_json = wp_json_encode( affibloom_e2e_read_state() );
 	if ( false === $affibloom_json || false === file_put_contents( $affibloom_state_file, $affibloom_json ) ) {
 		WP_CLI::error( 'run-state: could not write .local/e2e-run-state.json.' );

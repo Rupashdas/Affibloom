@@ -1,6 +1,7 @@
 # Affibloom — progress log
 
-Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the top of the Session log.
+Moved verbatim from `progress.md` on 2026-11-15. **Closed on 2026-11-15 (deviation 129):** no new entries; a task's
+notes now go under the task in its phase file.
 
 ## Session log
 

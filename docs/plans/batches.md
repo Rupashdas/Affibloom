@@ -5,33 +5,38 @@ This replaces "one task per session" (2026-11-14). Nothing else about how a task
 
 ## Rules
 
+Lean method of 2026-11-15 (the user, deviation 129): few records, few test runs, no database resets.
+
 1. **The user assigns the batch** ("Batch 3.4", or a range such as "C1B-C1D"). Claude never starts a batch, or the next
    one, without the user's word. A task not listed below is a batch of its own.
-2. **Inside a batch, tasks run one at a time, in the phase file's run order, each in full:** the outermost test first
-   and red for the right reason, then code inward; `composer lint`, `composer analyse`, the task's tests and the check by
-   hand; the self-review against `.github/pull_request_template.md`; the step and task ticks; the records
-   (`progress.md`, `deviations.md`, `progress-log.md`); **its own commit** (the plan's message) and push. A task is
-   finished before the next one starts; no work for two tasks shares a commit.
-3. **Explain as you go, per task:** before each task, 2–3 sentences on what it builds and how it is checked; after it,
-   what changed and what the checks showed. The user's "go" is asked once, at the start of the batch.
+2. **Inside a batch, tasks run one at a time, in the phase file's run order:** the outermost test first and red for the
+   right reason, then code inward; the checks of rule 5; the step and task ticks in the phase file (plus a 1–3 line
+   *Note* under the task when something differed from the plan); **its own commit** (the plan's message) and push. A
+   task is finished before the next one starts; no work for two tasks shares a commit.
+3. **Explain in Bangla, briefly, per task:** before it, what it builds and how it is checked; after it, what changed
+   and what you saw. The user's "go" is asked once, at the start of the batch.
 4. **Stop the batch early**, after committing whatever task is complete, when:
    - a check fails and its cause cannot be fixed inside the task;
-   - a task needs a deviation that changes a later task in the batch, or needs the user's answer or by-hand check;
+   - a task needs a change that alters a later task in the batch, or needs the user's answer or by-hand check;
    - the session's context is getting long (finish the current task first).
    Say which tasks are left; they become the next batch.
-5. **Test tiers: each check as often as it is needed, no more (the user, 2026-11-15, deviation 111):**
-   - **While coding:** `composer test:unit`, `composer analyse`, `composer lint` (seconds each).
-   - **At a task's end:** those three in full, plus **only that task's acceptance tests**, run with
-     `-g "<AC or task ID>"` (and `-x` while fixing), not the whole spec file; the by-hand look when the task changed
-     what a user sees (`tools/shot.cjs`). A task whose acceptance criteria name a by-hand look still gets it.
-   - **At a batch's end:** only the tests that cover what the batch changed, picked with `-g`: the batch's own
-     acceptance tests together, plus the other features' tests that drive a changed entry point (e.g. a batch that
-     changes adding a product runs F1's and F18's add tests, not all of F1 and F18). Not whole spec files. Plus the
-     looks at 375 px and 1280 px on the screens the batch changed. (Narrowed by the user, 2026-11-15, deviation 115.)
-   - **At a phase's exit check:** the full suite, once. Whole feature specs run only here.
-   - A test is run "twice in a row" only to chase a flaky one. Runs restore the site themselves (`run-state.php`), so
-     no backup, reset or clean-up by hand around a run. Short runs go in the foreground, not the background.
-6. **Phases still run in order** (0 → 9). A phase's exit check and the user's sign-off come after its last batch.
+5. **Checks: as few as needed.**
+   - **While coding:** the unit tests (`composer test:unit`, or `vendor/bin/phpunit --filter <Test>`), and
+     `vendor/bin/phpcs <files>` on the changed files and `vendor/bin/phpstan analyse <files> --memory-limit=1G` on the
+     changed `src/` files only (PHPStan does not cover `tests/`).
+   - **Once per task, before the commit:** `composer lint`, `composer analyse`, `composer test:unit` in full.
+   - **Playwright only when the task changes a screen or a flow:** only that task's AC (`-g "<AC>"`), until it is green
+     once. No re-runs "to be sure"; a test is run twice only to chase a flaky one. A task with no screen or flow change
+     (a rule, a stored value, a CLI) needs no Playwright run.
+   - **By hand:** one look in the browser at the screen the task changed (`tools/shot.cjs` or the browser pane).
+   - **At a batch's end:** the batch's ACs together (`-g`), and the 375 px and 1280 px looks on the changed screens.
+   - **At a phase's exit check:** the full suite, once.
+   - **The Local database is dummy data:** runs change it freely; no backup, save/restore or reset around them.
+6. **Records.** Per task only the phase file (ticks and the optional *Note*). A numbered deviation in `deviations.md`
+   (at most ~10 lines, plus its index line) only when the plan's design or a later task changes. `progress.md`: one
+   "Next up" update at the batch's end. `progress-log.md` is closed. Review against
+   `.github/pull_request_template.md` once, at the batch's end.
+7. **Phases still run in order** (0 → 9). A phase's exit check and the user's sign-off come after its last batch.
 
 ## How the batches were cut
 

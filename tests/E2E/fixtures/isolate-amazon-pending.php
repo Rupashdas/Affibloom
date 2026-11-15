@@ -2,8 +2,8 @@
 /**
  * Leaves only the given products pending bulk Amazon sync (C1 AC7, AC14): `wp eval-file isolate-amazon-pending.php
  * '<json list of IDs>'`. Every other pending product with an ASIN gets a stored row for its ASIN and store, so it no
- * longer counts; one without an ASIN becomes a draft. The test run's restore (run-state.php) deletes the rows and puts
- * the statuses back.
+ * longer counts; one without an ASIN becomes a draft. Both stay after the run (the Local database is dummy data,
+ * deviation 129); run-state.php can put them back by hand.
  *
  * @package Affibloom
  */
