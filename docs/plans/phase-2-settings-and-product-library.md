@@ -6260,7 +6260,7 @@ Affibloom does clear them it says why, on the card.
 
 **Steps:**
 
-- [ ] **Step 1: Trace** every write of `affibloom_amazon_credentials` (code, tests, tools, run-state) and the backups.
+- [x] **Step 1: Trace** every write of `affibloom_amazon_credentials` (code, tests, tools, run-state) and the backups.
 - [ ] **Step 2: Failing test** reproducing the cause found.
 - [ ] **Step 3: Fix** the cause; every clear records why.
 - [ ] **Step 4: Run and look** (the card at 1280 and 375 px if it changed).

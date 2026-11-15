@@ -4,6 +4,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q0 step 1):** the cause of the empty credentials traced from MySQL's binary log
+  (deviation 118): a real token refusal cleared them at 07:46:58; at 16:51 the test stub answered the user's Validate
+  and the run's restore wrote back empty. Fix proposed; waits for the user. Nothing changed in code.
+
 - **2026-11-15 (Claude Code, full Amazon data planned, at the user's decisions):** findings and tasks C1Q0-C1Q6
   (deviation 117; `docs/features/C1/full-amazon-data-proposal.md`), before C1K; C1E's price job brought forward.
   Local's credentials found empty; C1Q0 next.

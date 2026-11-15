@@ -123,6 +123,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 115. Narrower batch-end runs and shorter records (2026-11-15; the user: "All three"); Local's PHP workers are hard-coded.
 - 116. Task C1I (2026-11-15), bulk Amazon sync: pending without Lasso's last-updated arm (229 here until Task 26 copies the rows), a placeholder counts as no name, REST + WP-Cron.
 - 117. Full Amazon product data, C1Q0-C1Q6, before C1K (the user, 2026-11-15): features field, C1E's price job brought forward, no variations.
+- 118. Task C1Q0 findings (2026-11-15): the credentials were cleared by a real token refusal (07:46:58) and by a test run around the user's Validate (16:51).
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2556,3 +2557,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     none; variations excluded. Order Q0 → Q6, the user approving each. Written in the phase file, `batches.md`
     (2.1Q0-2.1Q6) and `docs/features/C1/full-amazon-data-proposal.md`. Found while planning: an uncommitted first try of
     C1K in the working tree (6 files); left untouched, out of every Q commit.
+
+118. **Task C1Q0 findings: why the Local credentials end up empty (2026-11-15).** From MySQL's binary log (row images,
+    read masked: credential class and a short hash, never a value). One genuine Credential ID was entered at 04:09:52
+    and validated against Amazon at 05:46:13 (stub off). **07:46:58:** one lone write replaced the validated credentials
+    with the all-empty shape that only `CredentialsService::check()` writes when Amazon refuses a token (Lasso's R22);
+    Amazon's reason and the action (Validate or Save Changes) were not recorded. **16:51:23:** the user's Validate
+    landed inside a Playwright run (16:50:29-16:51:42): the stub ("ok") answered it, so "Validated" was false; a test
+    deleted the option at 16:51:38 and the run's restore wrote back its start state, empty. Proposed fix (C1Q0, waits for
+    the user): record every clear's cause and show it on the card; the stub answers only the suite's test credentials;
+    the restore keeps credentials a person changed during a run; keep the credentials on a refusal (a deviation from R22).
