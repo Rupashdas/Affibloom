@@ -28,12 +28,15 @@ each with its own commit), and step 8 once at the end.
    tasks and wait for "go"; later tasks in the batch go on without a new "go".
 4. Work outside-in, step by step, exactly as the plan says: the outermost test first (run it, confirm it
    fails for the right reason), then entry point → controller → service/domain/repository → template or
-   response. Run `composer lint`, `composer analyse` and the tests the task names that run on this machine.
+   response. Run `composer lint`, `composer analyse` and `composer test:unit` as you go, and **only this task's**
+   acceptance tests (`-g "<AC or task ID>"`, `-x` while fixing; `batches.md` rule 5 has the tiers). Run them in the
+   foreground; a run restores the site itself, so no backup or reset around it.
    Fix causes, never suppress. If the plan's code must change, add the deviation at the end of `deviations.md`
    (next number) and its line to the index at the top.
    Skip the plan's branch, pull request and CI steps (the user's simple workflow, see `CLAUDE.md`).
-5. Run the task's entry point by hand (screen, route, command) and report what you saw. The looks at 375 px
-   and 1280 px and any full-suite rerun are made once, after the batch's last task (`batches.md`, rule 5).
+5. Run the task's entry point by hand (screen, route, command) and report what you saw (`tools/shot.cjs` for a
+   screen). The specs of the features the batch touched and the looks at 375 px and 1280 px are run once, after the
+   batch's last task; the full suite only at the phase's exit check (`batches.md`, rule 5).
 6. Tick each finished step (`- [ ]` → `- [x]`) and the task in the phase file. Update the records:
    `progress.md` (status, next up; keep it short), `deviations.md` (new deviations) and the session log at
    the top of `progress-log.md`'s Session log.

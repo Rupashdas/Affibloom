@@ -98,14 +98,10 @@ export function createProduct( fields: ProductFields ): number {
 	// AffiliateUrl::key(): "&amp;" read as "&", trailing slashes dropped, lower case — for every product, Amazon's too.
 	metaInput._affibloom_url_key = all.url.replace( /&amp;/g, '&' ).replace( /\/+$/, '' ).toLowerCase();
 	const input: Record< string, unknown > = stored.length ? { ...metaInput, _affibloom_buttons: stored } : metaInput;
-	const id = Number(
-		wp( 'post', 'create', '--post_type=affibloom_product', '--post_status=publish', `--post_title=${ name }`, `--meta_input=${ JSON.stringify( input ) }`, '--porcelain' )
-	);
 	// One `_affibloom_button_url` row per added button's link, as save() writes them (Task 13G): the search reads these.
-	for ( const button of stored.filter( ( b ) => b.url.trim() !== '' ) ) {
-		wp( 'post', 'meta', 'add', String( id ), '_affibloom_button_url', button.url.trim() );
-	}
-	return id;
+	const buttonUrls = stored.map( ( b ) => b.url.trim() ).filter( ( url ) => url !== '' );
+	// One WP-CLI call for the post, its meta and the button rows (deviation 111; it was 1 + one per button).
+	return Number( wp( 'eval-file', 'tests/E2E/fixtures/create-product.php', JSON.stringify( { title: name, meta: input, button_urls: buttonUrls } ) ) );
 }
 
 /** The block markup for a product box (docs/spec/interface.md, Editor). */
@@ -121,15 +117,8 @@ export function newPostWith( content: string, title = 'Acceptance' ): string {
 
 /** Sets Affibloom settings (merged over what is stored), as Settings → Save would. */
 export function setSettings( values: Record< string, unknown > ): void {
-	const raw = ( () => {
-		try {
-			return wp( 'option', 'get', 'affibloom_settings', '--format=json' );
-		} catch {
-			return '{}';
-		}
-	} )();
-	const current = ( JSON.parse( raw || '{}' ) ?? {} ) as Record< string, unknown >;
-	wp( 'option', 'update', 'affibloom_settings', JSON.stringify( { ...current, ...values } ), '--format=json' );
+	// Read, merge and store in one WP-CLI call (deviation 111; it was `option get` + `option update`).
+	wp( 'eval-file', 'tests/E2E/fixtures/set-settings.php', JSON.stringify( values ) );
 }
 
 /** A value unique to this run, for names and links that must not collide with earlier runs. */

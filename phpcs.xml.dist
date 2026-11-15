@@ -10,6 +10,9 @@
 	<arg name="extensions" value="php"/>
 	<arg name="colors"/>
 	<arg value="sp"/>
+	<!-- Re-checks only files changed since the last run (34 s → a few seconds). The cache knows the ruleset and
+	     PHPCS version, so it starts over when either changes. .local/ is gitignored. -->
+	<arg name="cache" value=".local/phpcs-cache.json"/>
 
 	<config name="testVersion" value="8.3-"/>
 	<config name="minimum_wp_version" value="7.1.4"/>

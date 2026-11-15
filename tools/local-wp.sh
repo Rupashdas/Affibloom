@@ -32,4 +32,17 @@ export PATH="$LOCAL_PHP_DIR/ImageMagick:$LOCAL_PHP_DIR:$LOCAL_MYSQL_DIR:$PATH"
 # and DB_HOST "localhost", so without this it tries port 3306.
 export MYSQL_TCP_PORT="$LOCAL_MYSQL_PORT"
 
-exec "$LOCAL_PHP_DIR/php.exe" "$LOCAL_WP_CLI" --path="$SITE_ROOT" "$@"
+# OPcache keeps compiled PHP only for one process on the command line, so every call compiled WP-CLI, WordPress and
+# all plugins again (about 1.8 s a call). A file cache keeps them between calls (about 0.95 s; deviation 111).
+# Timestamps are still checked (opcache.validate_timestamps is on), so an edited file is compiled again.
+# The cache lives in the plugin's gitignored .local/; OPCACHE_FILE_CACHE= (empty) turns it off.
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OPCACHE_FILE_CACHE="${OPCACHE_FILE_CACHE-$PLUGIN_ROOT/.local/opcache}"
+PHP_ARGS=()
+if [ -n "$OPCACHE_FILE_CACHE" ]; then
+	mkdir -p "$OPCACHE_FILE_CACHE"
+	# php.exe needs a Windows path; cygpath is in Git Bash.
+	PHP_ARGS=( -d "opcache.file_cache=$(cygpath -w "$OPCACHE_FILE_CACHE" 2>/dev/null || echo "$OPCACHE_FILE_CACHE")" )
+fi
+
+exec "$LOCAL_PHP_DIR/php.exe" "${PHP_ARGS[@]}" "$LOCAL_WP_CLI" --path="$SITE_ROOT" "$@"

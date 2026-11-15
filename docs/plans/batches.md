@@ -19,9 +19,16 @@ This replaces "one task per session" (2026-11-14). Nothing else about how a task
    - a task needs a deviation that changes a later task in the batch, or needs the user's answer or by-hand check;
    - the session's context is getting long (finish the current task first).
    Say which tasks are left; they become the next batch.
-5. **Heavy checks once per batch, not per task:** the looks at 375 px and 1280 px and any full-suite rerun the phase
-   asks for are made after the batch's last task, on everything the batch changed; each task still runs its own
-   acceptance tests, lint, PHPStan and unit tests. A task whose acceptance criteria name a by-hand look still gets it.
+5. **Test tiers: each check as often as it is needed, no more (the user, 2026-11-15, deviation 111):**
+   - **While coding:** `composer test:unit`, `composer analyse`, `composer lint` (seconds each).
+   - **At a task's end:** those three in full, plus **only that task's acceptance tests**, run with
+     `-g "<AC or task ID>"` (and `-x` while fixing), not the whole spec file; the by-hand look when the task changed
+     what a user sees (`tools/shot.cjs`). A task whose acceptance criteria name a by-hand look still gets it.
+   - **At a batch's end:** each spec of every feature the batch touched, once, plus the looks at 375 px and 1280 px
+     on everything the batch changed.
+   - **At a phase's exit check:** the full suite, once.
+   - A test is run "twice in a row" only to chase a flaky one. Runs restore the site themselves (`run-state.php`), so
+     no backup, reset or clean-up by hand around a run. Short runs go in the foreground, not the background.
 6. **Phases still run in order** (0 → 9). A phase's exit check and the user's sign-off come after its last batch.
 
 ## How the batches were cut

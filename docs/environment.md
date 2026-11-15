@@ -51,12 +51,26 @@
   `../affibloom-backup-….sql` lands in `wp-content/plugins/`, inside the web root (Tasks 12A and 12B did this;
   the files were moved to `app/`). Give the absolute path, e.g.
   `bash tools/local-wp.sh db export "C:/Users/Rupash/Local Sites/volleyballvault/app/affibloom-backup-<date>.sql"`.
-- **After an acceptance run, reset the Local copy** (`bash tools/reset-local.sh`, about 2 minutes; it loads the
-  snapshot into `local_affibloom_staging` and swaps it in, so the site stays usable and an interrupted run
-  leaves it as it was; deviation 41). The suite writes test products,
-  posts and settings (a run on 2026-11-12 left 37 products, 26 posts and a test secret in `affibloom_settings`),
-  and a failing test stops before its own clean-up. Never run two Playwright runs at once: they share
-  `test-results/` and break each other's traces.
+- **A Playwright run restores the Local copy itself (since 2026-11-15, deviation 111).** `tests/E2E/run-state.ts`
+  (first in `globalSetup`) saves the state to `.local/e2e-run-state.json`; `run-state-teardown.ts` puts it back
+  after the run, failed or not: posts and terms the run made are deleted, `affibloom*` options, products' status
+  and slug and the active plugins are restored, and it prints what it did ("run-state: deleted N posts …"). No
+  backup, credentials copy or `reset-local.sh` is needed around a run. If a run is killed before its teardown, the
+  next run restores the leftover first; by hand: `bash tools/local-wp.sh eval-file tests/E2E/fixtures/run-state.php restore`.
+  Not restored: edits to posts that existed before the run, users, comments. Before 2026-11-15 the suite left its
+  data (a run on 2026-11-12 left 37 products, 26 posts and a test secret). Never run two Playwright runs at once:
+  they share `test-results/` and break each other's traces.
+- **Running tests (deviation 111):** from the plugin folder,
+  `node node_modules/@playwright/test/cli.js test -c .local/no-login.config.ts <spec> -g "<AC or task>" -x --reporter=line`
+  (`-g` picks the task's tests, `-x` stops at the first failure). Looks: `node tools/shot.cjs "wp-admin/admin.php?page=…"`
+  (no leading `/`: Git Bash rewrites it), 1280 and 375 px by default, into `.local/shots/`.
+- **Local runs only two PHP workers** (`%APPDATA%\Local\run\XMaGBQZ-W\conf\php\php-fpm.d\www.conf`,
+  `pm.max_children = 2`). A page load sometimes waits ~16 s behind another request (2026-11-15), which is why the
+  tests have no page-load limit of their own. Raising it is a Local setting (the user's call).
+- **`tools/local-wp.sh` keeps compiled PHP in `.local/opcache`** (2.3 s → 1.3 s a call). If WP-CLI ever acts on old
+  code, delete that folder, or run with `OPCACHE_FILE_CACHE=` (empty) to turn it off.
+- **Backslashes in a `wp()` argument are lost** on the way from Node through Git Bash to Windows PHP (`x \ y`
+  arrives as `x  y`); keep test data free of them, or pass them another way.
 - Mail: PHP sends to `localhost:10001`, which is Local's **Mailpit**, and no SMTP plugin is active, so
   `wp_mail` does not reach real people (checked 2026-11-12).
 - **Lasso v369 is installed and inactive on this copy** (deactivated 2026-11-14 at the user's request, after the backup

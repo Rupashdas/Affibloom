@@ -41,14 +41,18 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    C1K-C1P, then Phase 2's exit check and the user's sign-off. A first try of C1B-C1D was reverted on 2026-11-15
    (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day:
    `affibloom_db_version` 1, no C1C table, the library re-seeded to Lasso's 254 products.
-3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
+3. **Faster checks (2026-11-15, deviation 111):** test tiers in `plans/batches.md` rule 5 (per task only its own
+   acceptance tests; feature specs per batch; full suite per phase). Playwright runs now restore the site themselves.
+   Open from it: F23 AC5's reload race (a test fault, fails on the old helpers too); Local's two PHP workers (the
+   user's call).
+4. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
    Standing rule (the user, 2026-11-15): **one batch per session**, as listed with its rules in
    [`plans/batches.md`](plans/batches.md); it replaces "one task per session". Each task still has its own commit.
-4. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
+5. Lasso is inactive on the Local copy since 2026-11-14 (backup `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`).
    **`tools/reset-local.sh` is not safe to run as it stands:** `.local/snapshot.sql` dates from 2026-11-12, before the
    library was seeded from Lasso (deviation 51) and before the saved sign-in Claude's runs use, so a reset would lose
    both. The test runs of 2026-11-15 ran on the copy as it was (backup `.local/backup-2026-11-15-before-phase2-audit-runs.sql`).
    A new snapshot is the user's call.
-5. Open, from the client: C1 Creators API credentials; the optional GA4 check.
-6. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
+6. Open, from the client: C1 Creators API credentials; the optional GA4 check.
+7. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
    run (no wp-env).

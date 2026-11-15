@@ -116,6 +116,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 108. The product page's Button Text no longer squeezed (2026-11-15; the user: "Yes, fix it", after deviation 107 named it).
 - 109. Even gaps between Settings cards (2026-11-15; the user: "also fix the uneven card gaps at 375px").
 - 110. Task C1A: the Product Data API card and Validate (2026-11-15).
+- 111. Faster checks: test tiers, faster WP-CLI, one-call setup, automatic restore after runs (2026-11-15; the user: "Steps 1–6").
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2365,3 +2366,45 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     - Checks: C1 6 passed, 3 skipped (AC1, AC4: C1C/C1D; AC6: Phase 7), red first (no card; AC2's stale ending);
       unit 589 (Marketplace, Credentials, CredentialsService new); lint and PHPStan clean. Looked at 1280 and 375 px
       (fields were cramped at first; now 20px apart); no sideways scroll.
+
+111. **Faster checks: test tiers, faster WP-CLI, one-call setup, automatic restore after runs (2026-11-15).** The user:
+    testing took far longer than coding (runs of over an hour), so we analysed the workflow and the user chose all six
+    changes ("Steps 1–6"). Measured first: unit 1.8 s, PHPStan 2.1 s, `composer lint` 34 s, one `tools/local-wp.sh`
+    call 2.3 s; the browser suite (179 tests, one worker) is where the time goes. A tooling change; no plugin code changed.
+    - **Test tiers** (`plans/batches.md` rule 5, `/next-task` steps 4-5): while coding, unit + PHPStan + lint; at a
+      task's end, those plus **only that task's acceptance tests** (`-g "<AC or task>"`, `-x` while fixing) and the
+      by-hand look if its UI changed; at a batch's end, the specs of every feature the batch touched, once, plus the 375
+      and 1280 px looks; the full suite only at a phase's exit check. "Twice in a row" only to chase a flaky test.
+    - **Lint cache:** `phpcs.xml.dist` caches results in `.local/phpcs-cache.json`; a repeat `composer lint` 34 s → 1.9 s
+      (PHPCS's `parallel` needs pcntl, which Windows PHP lacks, so it is not set).
+    - **WP-CLI ~45% faster:** `tools/local-wp.sh` gives PHP an OPcache file cache in `.local/opcache` (CLI OPcache was
+      thrown away after every call), 2.3 s → 1.3 s a call. Checked: an edited included file is compiled again.
+      `OPCACHE_FILE_CACHE=` (empty) turns it off.
+    - **One call per setup helper:** `createProduct()` makes one call (`tests/E2E/fixtures/create-product.php`: the
+      post, its meta and the `_affibloom_button_url` rows; it was 1 + one per button) and `setSettings()` one
+      (`set-settings.php`; it was get + update). Same stored result: the input is `wp_slash()`ed as `wp post create`
+      does. Known, unchanged: backslashes in a `wp()` argument are lost between Node, Git Bash and Windows PHP (they
+      were before too).
+    - **Automatic restore** (`tests/E2E/fixtures/run-state.php`, `run-state.ts`, `run-state-teardown.ts`, first in
+      `globalSetup` and as `globalTeardown`): before a run it saves the highest post and term IDs, every `affibloom*`
+      option row, every product's status and slug, and the active plugins (`.local/e2e-run-state.json`); after it, it
+      deletes every post and term above those IDs, writes the option rows back as they were (and deletes options the
+      run added), restores the products' status and slug and the plugins. So a run needs no database backup, no
+      credentials copy and no reset, and a failing test leaves nothing. Guards: a state file that is not whole is
+      refused (a missing ID must never mean "delete every post"); a leftover from a killed run is restored before the
+      next save, but one over 6 hours old is refused for a person to decide. Not covered: edits to the meta or content
+      of posts that existed before the run, users, comments, and Affibloom tables (add them when a task makes one).
+      Checked: by hand (a product, settings, a post, a trashed product and a group, then restore: same highest ID,
+      254 published products, the same hash of every `affibloom*` option) and on three real runs.
+    - **Fail fast:** test time 60 s → 45 s and `actionTimeout` 10 s, so a missing element fails in 10 s. A 15 s
+      page-load limit was tried and dropped: **Local runs only two PHP workers** (`conf/php/php-fpm.d/www.conf`,
+      `pm.max_children = 2`) and a page load sometimes waits ~16 s behind another request (seen in F23's trace: the
+      Dashboard's document took 15.9 s; the same page takes ~1.2 s otherwise). More workers is Local's setting, the
+      user's call.
+    - **`tools/shot.cjs`** replaces the one-off `.local/shot-*.cjs`: `node tools/shot.cjs "wp-admin/admin.php?page=…"
+      [--widths=1280,375] [--selector=…] [--out=…]`, signed in with the saved session; says when a page scrolls sideways.
+    - **Found, not changed: F23 AC5 fails** (line 271: the page is reloaded before the Move down save has finished, so
+      the old order shows); it fails the same way with the old helpers (checked twice with them), so it is a test race,
+      not this change. F23 AC3's toast failed once in three runs. F5 fails as expected (the box is Phase 3).
+    - Records: `environment.md` (tooling, Known issues), `batches.md`, `/next-task` (both copies), `CLAUDE.md`'s quality
+      bar, and the memory note on running tests.
