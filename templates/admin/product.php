@@ -150,8 +150,7 @@ $soon_tabs   = array(
 					?>
 					<div class="affibloom-buttons" data-buttons
 						data-legend-format="<?php /* translators: %s: a button's place in the box, e.g. 2. */ echo esc_attr__( 'Button %s', 'affibloom' ); ?>"
-						data-up-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Move %s up', 'affibloom' ); ?>"
-						data-down-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Move %s down', 'affibloom' ); ?>"
+						data-grip-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Reorder %s', 'affibloom' ); ?>"
 						data-remove-format="<?php /* translators: %s: a button's name, e.g. Button 2. */ echo esc_attr__( 'Remove %s', 'affibloom' ); ?>">
 						<input type="hidden" name="primary_position" value="<?php echo esc_attr( (string) $position ); ?>" data-main-position>
 						<div class="affibloom-buttons__list" data-button-list>

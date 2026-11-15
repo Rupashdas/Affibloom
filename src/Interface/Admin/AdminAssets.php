@@ -98,15 +98,16 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-icon-picker', $this->plugin_url . 'assets/admin/icon-picker.js', array( 'affibloom-admin' ), $this->version, true );
 		}
 
-		// The product page's additional buttons: add, move, remove (F29, Task 14H); its image from the media library or a
+		// The product page's additional buttons: add, drag, remove (F29, Task 14H); its image from the media library or a
 		// pasted link (Task 14B).
 		if ( str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
 			wp_enqueue_media();
-			wp_enqueue_script( 'affibloom-product', $this->plugin_url . 'assets/admin/product.js', array( 'affibloom-admin' ), $this->version, true );
-			// Custom fields: the rows and the "Add Field" dialog (Task 14C); the rows are dragged too (Task FL5).
+			// Buttons, custom fields and features are put in order by dragging (Task FL5; the user, 2026-11-16).
 			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
+			wp_enqueue_script( 'affibloom-product', $this->plugin_url . 'assets/admin/product.js', array( 'affibloom-admin', 'affibloom-drag-rows' ), $this->version, true );
+			// Custom fields: the rows and the "Add Field" dialog (Task 14C).
 			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows' ), $this->version, true );
-			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker', 'affibloom-drag-rows' ), $this->version, true );
 			// Save Changes: the form through PATCH /products/{id}, its dialog and toasts (Task 15A).
 			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );
 		}

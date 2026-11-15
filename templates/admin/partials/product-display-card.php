@@ -217,16 +217,13 @@ $editor = static fn( int $height ): array => array(
 		/* translators: %d: a bullet's place in the list, from 1. */
 		$feature_label = __( 'Feature %d', 'affibloom' );
 		/* translators: %d: a bullet's place in the list, from 1. */
-		$feature_up = __( 'Move Feature %d up', 'affibloom' );
-		/* translators: %d: a bullet's place in the list, from 1. */
-		$feature_down = __( 'Move Feature %d down', 'affibloom' );
+		$feature_grip = __( 'Reorder Feature %d', 'affibloom' );
 		/* translators: %d: a bullet's place in the list, from 1. */
 		$feature_remove = __( 'Remove Feature %d', 'affibloom' );
 		?>
 		<ol class="affibloom-features" aria-labelledby="affibloom-features-label" data-feature-list
 			data-label="<?php echo esc_attr( $feature_label ); ?>"
-			data-up="<?php echo esc_attr( $feature_up ); ?>"
-			data-down="<?php echo esc_attr( $feature_down ); ?>"
+			data-grip-label="<?php echo esc_attr( $feature_grip ); ?>"
 			data-remove="<?php echo esc_attr( $feature_remove ); ?>">
 			<?php
 			foreach ( $product->features as $index => $feature ) {

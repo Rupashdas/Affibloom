@@ -9,9 +9,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$rows  = $view['fields']->all();
-$count = count( $rows );
-foreach ( $rows as $position => $row ) {
+foreach ( $view['fields']->all() as $row ) {
 	$field = $view['library']->find( $row->field_id );
 	if ( null === $field ) {
 		continue; // A field whose definition is gone (the Fields area can delete one) is not shown.
@@ -21,9 +19,6 @@ foreach ( $rows as $position => $row ) {
 		array(
 			'field' => $field,
 			'row'   => $row,
-			// Primary Rating is fixed in the first place; the others move among themselves.
-			'first' => 0 === $position || ( 1 === $position && 1 === $rows[0]->field_id ),
-			'last'  => $count - 1 === $position,
 		)
 	);
 }

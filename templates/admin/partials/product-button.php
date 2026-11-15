@@ -1,9 +1,10 @@
 <?php
 /**
  * One button block on the product page (F29, Task 14H): its link and text side by side (Lasso's 8 / 4 columns), then
- * its two toggles, in a group named "Button <n>" with Move up and Move down. The default button ("main") is the
- * product's own link, under Lasso's primary labels and 14A's ids, marked "Main link", and cannot be removed; an added
- * button has Remove. product-buttons.js shows the actions and renumbers the names when the order changes.
+ * its two toggles, in a group named "Button <n>" with a grip it is dragged by (Arrow Up / Down from the keyboard; the
+ * user, 2026-11-16: drag and drop, as Lasso's rows). The default button ("main") is the product's own link, under
+ * Lasso's primary labels and 14A's ids, marked "Main link", and cannot be removed; an added button has Remove.
+ * product-buttons.js shows the grip and the actions and renumbers the names when the order changes.
  *
  * @package Affibloom
  * @var array{main: bool, index: int|string, key: string, number: int|string, url: string, text: string, new_tab: bool, nofollow: bool, placeholder: string, choices: \Affibloom\Interface\Admin\IconChoices} $view
@@ -51,14 +52,16 @@ $toggles = array(
 );
 ?>
 <fieldset class="affibloom-product__button affibloom-button-block" data-button<?php echo $main ? ' data-main-button' : ' data-extra-button'; ?>>
+	<?php // The grip floats left of the legend; the legend is still the group's first legend, so it names the group. ?>
+	<button type="button" class="affibloom-grip affibloom-button-block__grip" data-grip hidden title="<?php esc_attr_e( 'Drag to reorder, or press Arrow Up or Arrow Down', 'affibloom' ); ?>">
+		<?php $this->render( 'admin/partials/icon', array( 'name' => 'grip' ) ); ?>
+	</button>
 	<legend class="affibloom-button-block__legend"><?php echo esc_html( $legend ); ?></legend>
 	<?php if ( $main ) : ?>
 		<?php // The product's own link stays its main link wherever its button sits (F29 D6). ?>
 		<span class="affibloom-button-block__tag" title="<?php esc_attr_e( "This button's link is the product's main link. The first button in the list is the box's primary button.", 'affibloom' ); ?>"><?php esc_html_e( 'Main link', 'affibloom' ); ?></span>
 	<?php endif; ?>
 	<span class="affibloom-button-block__actions" hidden>
-		<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-move="up"><?php esc_html_e( 'Move up', 'affibloom' ); ?></button>
-		<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-move="down"><?php esc_html_e( 'Move down', 'affibloom' ); ?></button>
 		<?php if ( ! $main ) : ?>
 			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-remove><?php esc_html_e( 'Remove', 'affibloom' ); ?></button>
 		<?php endif; ?>

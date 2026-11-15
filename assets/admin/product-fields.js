@@ -1,7 +1,7 @@
 /* global wp */
 /**
  * Custom fields on the product page (F1, Task 14C). Every change is stored as it is made, as Lasso's page does: a value
- * when it changes (on leaving its box), a switch when it is turned, the order when a row is dragged or moved (Task FL5);
+ * when it changes (on leaving its box), a switch when it is turned, the order when a row is dragged, by pointer or Arrow keys (Task FL5);
  * adding and removing a field redraw the rows. A value the server refuses is named under its row (Task FL5). The "Add Field" dialog: "Create new" stores a field and opens the library, as Lasso's does;
  * "Add from library" searches by name, ten a page, and adds one. Opening and closing the dialogs is admin.js's.
  */
@@ -106,18 +106,7 @@
 			} );
 		};
 
-		/** Move buttons: none above Primary Rating (fixed first), none past the ends. */
-		var ends = function () {
-			var movable = rows().filter( function ( row ) {
-				return row.querySelector( '[data-field-move]' );
-			} );
-			movable.forEach( function ( row, position ) {
-				row.querySelector( '[data-field-move="up"]' ).disabled = 0 === position;
-				row.querySelector( '[data-field-move="down"]' ).disabled = movable.length - 1 === position;
-			} );
-		};
-
-		// Dragging a row by its grip (drag-rows.js); Primary Rating has none, so it stays first.
+		// Dragging a row by its grip, or Arrow Up / Down on it (drag-rows.js); Primary Rating has none, so it stays first.
 		window.affibloomDragRows( list, {
 			row: '[data-field-row]',
 			movable: function () {
@@ -125,10 +114,7 @@
 					return row.querySelector( '[data-grip]' );
 				} );
 			},
-			dropped: function () {
-				ends();
-				save();
-			},
+			dropped: save,
 		} );
 
 		list.addEventListener( 'change', function ( event ) {
@@ -155,19 +141,9 @@
 		} );
 
 		list.addEventListener( 'click', function ( event ) {
-			var move = event.target.closest( '[data-field-move]' );
 			var remove = event.target.closest( '[data-field-remove]' );
 			var row = event.target.closest( '[data-field-row]' );
-			if ( move ) {
-				if ( 'up' === move.dataset.fieldMove && row.previousElementSibling ) {
-					list.insertBefore( row, row.previousElementSibling );
-				} else if ( 'down' === move.dataset.fieldMove && row.nextElementSibling ) {
-					list.insertBefore( row.nextElementSibling, row );
-				}
-				ends();
-				( move.disabled ? row.querySelector( '[data-field-move]:not([disabled])' ) : move ).focus();
-				save();
-			} else if ( remove ) {
+			if ( remove ) {
 				// Runs before admin.js opens the dialog: name the field in its question.
 				pending = row;
 				var title = removeModal.querySelector( '[data-field-remove-title]' );

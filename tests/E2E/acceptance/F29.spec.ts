@@ -45,7 +45,7 @@ test.describe( 'F29 Any number of buttons', () => {
 		await page.goto( productPage( id ) );
 		const blocks = page.locator( '[data-button]' );
 		await expect( blocks ).toHaveCount( 1 );
-		await expect( blocks.nth( 0 ).getByRole( 'button', { name: 'Move Button 1 up' } ) ).toBeDisabled();
+		await expect( blocks.nth( 0 ).getByRole( 'button', { name: 'Reorder Button 1' } ) ).toBeVisible(); // its grip
 
 		await page.getByRole( 'button', { name: 'Add Another Button' } ).click();
 		await expect( blocks ).toHaveCount( 2 );
@@ -54,7 +54,7 @@ test.describe( 'F29 Any number of buttons', () => {
 		await added.fill( 'https://www.example.com/kids' );
 
 		// The default button moves below the new one: the new one is now the first, the box's primary.
-		await blocks.nth( 0 ).getByRole( 'button', { name: 'Move Button 1 down' } ).click();
+		await blocks.nth( 0 ).getByRole( 'button', { name: 'Reorder Button 1' } ).press( 'ArrowDown' ); // the grip, from the keyboard
 		await expect( blocks.nth( 0 ).getByLabel( 'Additional Destination URL' ) ).toHaveValue( 'https://www.example.com/kids' );
 		await expect( blocks.nth( 0 ).getByLabel( 'Additional Destination URL' ) ).toHaveAttribute( 'name', 'buttons[0][url]' );
 		await expect( blocks.nth( 1 ).getByLabel( 'Primary Destination URL' ) ).toBeVisible();

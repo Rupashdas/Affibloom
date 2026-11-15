@@ -1753,6 +1753,7 @@
 	border-radius: var(--affibloom-radius-control);
 	background: var(--affibloom-subtle);
 }
+.affibloom-admin .affibloom-button-block__grip { float: left; margin: 2px 4px 12px -6px; }
 .affibloom-button-block__legend {
 	float: left;
 	margin: 6px 10px 12px 0;
@@ -1900,11 +1901,18 @@
 .affibloom-admin .affibloom-input--rating { flex: 0 0 76px; }
 .affibloom-field-row__head { flex-wrap: wrap; }
 .affibloom-field-row__actions { display: flex; align-items: center; gap: 4px; }
-/* Task FL5: the grip a row is dragged by (none on Primary Rating, whose place is fixed); a dragged row lifts as a group's
- * Links row does (brand-50, the card shadow); a refused value's words sit under the box. */
-.affibloom-field-row__grip { display: grid; place-items: center; margin-left: -4px; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
-.affibloom-field-row.is-dragging { position: relative; z-index: 2; background: var(--affibloom-brand-50); box-shadow: var(--affibloom-shadow-card); }
-.affibloom-field-row.is-dragging .affibloom-field-row__grip { cursor: grabbing; }
+/* The grip a product-page row is dragged by: buttons, custom fields (none on Primary Rating, whose place is fixed) and
+ * features, as Lasso drags its rows (Task FL5; the user, 2026-11-16). A button, so Arrow Up and Arrow Down move the
+ * row from the keyboard (drag-rows.js). A dragged row lifts as a group's Links row does (brand-50, the card shadow). */
+.affibloom-admin .affibloom-grip { display: grid; flex: 0 0 auto; place-items: center; width: 24px; height: 28px; padding: 0; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
+.affibloom-admin .affibloom-grip[hidden] { display: none; }
+.affibloom-admin .affibloom-grip:hover { color: var(--affibloom-ink-700); }
+.affibloom-admin .is-dragging .affibloom-grip { cursor: grabbing; }
+.affibloom-field-row.is-dragging,
+.affibloom-button-block.is-dragging,
+.affibloom-features__item.is-dragging { position: relative; z-index: 2; background: var(--affibloom-brand-50); box-shadow: var(--affibloom-shadow-card); }
+.affibloom-field-row__grip { margin-left: -4px; }
+/* A refused value's words sit under the box. */
 .affibloom-field-row > .affibloom-field__error { margin: -4px 0 0; }
 /* Lasso's stars: five, filled to the rating. */
 .affibloom-stars {
@@ -2260,7 +2268,7 @@ body.affibloom-has-modal { overflow: hidden; }
 /* The product page's Features list (C1Q4): one text field per bullet, then Move up, Move down and Remove. */
 .affibloom-features { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
 .affibloom-features:empty { display: none; }
-.affibloom-features__item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; }
+.affibloom-features__item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; align-items: center; border-radius: var(--affibloom-radius-control); }
 .affibloom-features__add { justify-self: start; }
 .affibloom-admin .affibloom-icon-button:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
 .affibloom-member__image .affibloom-thumb { width: 50px; height: 50px; }

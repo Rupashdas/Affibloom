@@ -504,7 +504,7 @@ test.describe( 'F26 Fields', () => {
 		await expect( dialog.locator( '.affibloom-field-library__item' ) ).toContainText( 'Primary Rating' );
 	} );
 
-	test( 'AC7 the rows are dragged or moved into a new order, Primary Rating first, and the order is kept', async ( { page } ) => {
+	test( 'AC7 the rows are dragged into a new order, Primary Rating first, and the order is kept', async ( { page } ) => {
 		seedFields( { fields: [ { id: 100, name: unique( 'F26 Sizes' ), type: 'text', description: '' } ] } );
 		const id = createProduct( { name: unique( 'F26 AC7' ) } );
 		made.push( id );
@@ -537,9 +537,9 @@ test.describe( 'F26 Fields', () => {
 		expect( await order() ).toEqual( [ 1, 3, 100, 2 ] );
 		expect( stored( id ).map( ( row ) => row.field ) ).toEqual( [ 1, 3, 100, 2 ] );
 
-		// Move down still works, and both orders hold after a reload.
+		// Arrow Down on a grip moves its row too (no Move buttons since 2026-11-16), and both orders hold after a reload.
 		const moved = fieldsSaved( page );
-		await productRows( page ).nth( 1 ).getByRole( 'button', { name: /^Move .* down$/ } ).click();
+		await productRows( page ).nth( 1 ).getByRole( 'button', { name: /^Reorder / } ).press( 'ArrowDown' );
 		expect( ( await moved ).status() ).toBe( 200 );
 		expect( await order() ).toEqual( [ 1, 100, 3, 2 ] );
 		await page.reload();

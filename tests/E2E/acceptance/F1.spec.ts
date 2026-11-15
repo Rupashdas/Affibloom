@@ -73,7 +73,7 @@ test.describe( 'F1 Product library', () => {
 		await extra.locator( '.affibloom-icon-field__words' ).fill( 'Women\'s' );
 		await extra.getByRole( 'switch', { name: 'New Window / Tab' } ).uncheck();
 		await extra.getByRole( 'switch', { name: 'NoFollow / NoIndex' } ).uncheck();
-		await extra.getByRole( 'button', { name: /Move .* up/ } ).click();
+		await extra.getByRole( 'button', { name: /^Reorder / } ).press( 'ArrowUp' ); // the grip, from the keyboard
 		await page.locator( '#affibloom-badge-words' ).fill( 'Best Overall' );
 		await page.locator( '#affibloom-theme' ).selectOption( 'Splash' );
 		await page.locator( '#affibloom-image-url' ).fill( imageUrl );

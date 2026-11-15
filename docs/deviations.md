@@ -139,6 +139,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 131. The user tests each batch by hand from Claude's guide; Playwright only at the phase exit; PHPStan cache in `.local/`; English.
 - 132. Task 18A (2026-11-16): the box's data attributes and properties get Affibloom names too (`data-affibloom-id`, `data-hide-*`, `--affibloom-*`); table in tokens.md.
 - 133. Add Link (2026-11-16, the user): every single add opens the product's page, Amazon too; deviation 56's Amazon reload was a dead Lasso branch.
+- 134. Product page (2026-11-16, the user): buttons, custom fields and features reorder by dragging a grip only, as Lasso; Move up/down removed.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2724,3 +2725,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     single add, with `is_duplicate` for a found one. `POST /products { url }` now answers that for every link; the
     Amazon tab's selections and Bulk add still end on the Dashboard (url-add.php 1600). Integration test and F2/F18 specs
     updated (not run).
+
+134. **Buttons, custom fields and features reorder by dragging, as Lasso's rows (the user, 2026-11-16).** The product
+    page's Move up / Move down buttons (14H's buttons, FL5's fields, C1Q4's features) are gone; each row has a grip
+    (`.affibloom-grip`, a button) dragged by pointer through `drag-rows.js`, which now also moves a row with Arrow Up /
+    Arrow Down on its focused grip. The user chose "drag only, like Lasso" over keeping small arrow buttons, knowing it
+    leaves no one-click alternative to dragging (WCAG 2.2 SC 2.5.7, design-system rule 3). The group Links tab (G4)
+    keeps its Move buttons. Checked by a signed-in run at 1280 px (pointer and keyboard, fields saved 200); F1, F26,
+    F29 and C1 specs updated (not run).

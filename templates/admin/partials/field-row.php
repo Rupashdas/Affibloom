@@ -2,15 +2,16 @@
 /**
  * One custom field on the product page (F1, Task 14C; Lasso's rows/field-details-row.php): its name with its
  * description as help, the "Show this field in your display by default." switch (and, for Primary Rating, "Show
- * field name in your display."), the value in the control its kind needs, then Move up, Move down and Remove. The
- * rating box shows its stars, as Lasso's does. product-fields.js stores each change as it is made.
+ * field name in your display."), the value in the control its kind needs, then Remove. The rating box shows its
+ * stars, as Lasso's does. product-fields.js stores each change as it is made.
  *
- * Lasso reorders its rows by dragging; here a row is dragged by its grip, or moved by two buttons, which also work from
- * the keyboard (Task FL5, F26 D12). Primary Rating has neither: its place is fixed. A value the server refuses (over
+ * Lasso reorders its rows by dragging; here a row is dragged by its grip, which Arrow Up and Arrow Down move from the
+ * keyboard (Task FL5; the Move up and Move down buttons went, the user 2026-11-16). Primary Rating has no grip: its
+ * place is fixed. A value the server refuses (over
  * 1,000 characters) is named in the line under the box.
  *
  * @package Affibloom
- * @var array{field: \Affibloom\Domain\Fields\Field, row: \Affibloom\Domain\Fields\ProductField, first: bool, last: bool} $view
+ * @var array{field: \Affibloom\Domain\Fields\Field, row: \Affibloom\Domain\Fields\ProductField} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -30,9 +31,10 @@ $remove_label = sprintf( __( 'Remove %s', 'affibloom' ), $field->name );
 <div class="affibloom-field-row" data-field-row data-field-id="<?php echo esc_attr( (string) $field->id ); ?>" data-field-name="<?php echo esc_attr( $field->name ); ?>">
 	<div class="affibloom-field-row__head">
 		<?php if ( ! $fixed ) : ?>
-			<span class="affibloom-field-row__grip" data-grip aria-hidden="true" title="<?php esc_attr_e( 'Drag to reorder', 'affibloom' ); ?>">
+			<?php /* translators: %s: a field's name. */ ?>
+			<button type="button" class="affibloom-grip affibloom-field-row__grip" data-grip aria-label="<?php echo esc_attr( sprintf( __( 'Reorder %s', 'affibloom' ), $field->name ) ); ?>" title="<?php esc_attr_e( 'Drag to reorder, or press Arrow Up or Arrow Down', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'grip' ) ); ?>
-			</span>
+			</button>
 		<?php endif; ?>
 		<label class="affibloom-label" for="<?php echo esc_attr( $value_id ); ?>"><?php echo esc_html( $field->name ); ?></label>
 		<?php
@@ -62,12 +64,6 @@ $remove_label = sprintf( __( 'Remove %s', 'affibloom' ), $field->name );
 			</span>
 		</span>
 		<span class="affibloom-field-row__actions">
-			<?php if ( ! $fixed ) : ?>
-				<?php /* translators: %s: a field's name. */ ?>
-				<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-field-move="up" aria-label="<?php echo esc_attr( sprintf( __( 'Move %s up', 'affibloom' ), $field->name ) ); ?>"<?php disabled( $view['first'] ); ?>><?php esc_html_e( 'Move up', 'affibloom' ); ?></button>
-				<?php /* translators: %s: a field's name. */ ?>
-				<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-field-move="down" aria-label="<?php echo esc_attr( sprintf( __( 'Move %s down', 'affibloom' ), $field->name ) ); ?>"<?php disabled( $view['last'] ); ?>><?php esc_html_e( 'Move down', 'affibloom' ); ?></button>
-			<?php endif; ?>
 			<button type="button" class="affibloom-icon-button affibloom-icon-button--danger" data-field-remove data-affibloom-open="affibloom-field-remove"
 				aria-label="<?php echo esc_attr( $remove_label ); ?>" title="<?php echo esc_attr( $remove_label ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>

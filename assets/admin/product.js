@@ -124,9 +124,9 @@
 	}
 
 	/**
-	 * The Features list (C1Q4): Add Feature, and Move up, Move down and Remove on each bullet. After every change the
-	 * labels are renumbered ("Feature 2", "Move Feature 2 up"), the first Move up and last Move down are disabled, and
-	 * an input event tells the unsaved-changes guard. list.affibloomFeatures.set( texts ) replaces the bullets (Refresh).
+	 * The Features list (C1Q4): Add Feature, and on each bullet a grip it is dragged by (drag-rows.js; Arrow Up / Down
+	 * from the keyboard; the user, 2026-11-16) and Remove. After every change the labels are renumbered ("Feature 2",
+	 * "Reorder Feature 2") and an input event tells the unsaved-changes guard. list.affibloomFeatures.set( texts ) replaces the bullets (Refresh).
 	 *
 	 * @param {HTMLElement} field The field ([data-features]).
 	 */
@@ -141,11 +141,8 @@
 			Array.prototype.forEach.call( rows, function ( row, index ) {
 				var number = index + 1;
 				row.querySelector( '[data-feature-text]' ).setAttribute( 'aria-label', label( list.dataset.label, number ) );
-				row.querySelector( '[data-feature-move="-1"]' ).setAttribute( 'aria-label', label( list.dataset.up, number ) );
-				row.querySelector( '[data-feature-move="1"]' ).setAttribute( 'aria-label', label( list.dataset.down, number ) );
+				row.querySelector( '[data-grip]' ).setAttribute( 'aria-label', label( list.dataset.gripLabel, number ) );
 				row.querySelector( '[data-feature-remove]' ).setAttribute( 'aria-label', label( list.dataset.remove, number ) );
-				row.querySelector( '[data-feature-move="-1"]' ).disabled = 0 === index;
-				row.querySelector( '[data-feature-move="1"]' ).disabled = rows.length - 1 === index;
 			} );
 		};
 		var changed = function () {
@@ -165,26 +162,23 @@
 			row.querySelector( '[data-feature-text]' ).focus();
 		} );
 		list.addEventListener( 'click', function ( event ) {
-			var button = event.target.closest( 'button' );
+			var button = event.target.closest( '[data-feature-remove]' );
 			var row = button ? button.closest( '[data-feature]' ) : null;
 			if ( ! row ) {
 				return;
 			}
-			if ( button.hasAttribute( 'data-feature-remove' ) ) {
-				// Focus stays in the list: the next bullet, else the one before, else Add Feature.
-				var next = row.nextElementSibling || row.previousElementSibling;
-				row.remove();
-				changed();
-				( next ? next.querySelector( '[data-feature-text]' ) : field.querySelector( '[data-feature-add]' ) ).focus();
-				return;
-			}
-			var step = parseInt( button.dataset.featureMove, 10 );
-			var other = -1 === step ? row.previousElementSibling : row.nextElementSibling;
-			if ( other ) {
-				list.insertBefore( row, -1 === step ? other : other.nextElementSibling );
-				changed();
-				button.focus();
-			}
+			// Focus stays in the list: the next bullet, else the one before, else Add Feature.
+			var next = row.nextElementSibling || row.previousElementSibling;
+			row.remove();
+			changed();
+			( next ? next.querySelector( '[data-feature-text]' ) : field.querySelector( '[data-feature-add]' ) ).focus();
+		} );
+		window.affibloomDragRows( list, {
+			row: '[data-feature]',
+			movable: function () {
+				return Array.prototype.slice.call( list.querySelectorAll( '[data-feature]' ) );
+			},
+			dropped: changed,
 		} );
 		list.affibloomFeatures = {
 			set: function ( texts ) {

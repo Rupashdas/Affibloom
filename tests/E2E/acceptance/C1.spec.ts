@@ -404,7 +404,7 @@ test.describe( 'C1 Amazon product data', () => {
 		await page.getByLabel( 'Feature 2', { exact: true } ).fill( 'Two edited' );
 		await page.getByRole( 'button', { name: 'Add Feature' } ).click();
 		await page.getByLabel( 'Feature 3', { exact: true } ).fill( 'Three' );
-		await page.getByRole( 'button', { name: 'Move Feature 3 up' } ).click();
+		await page.getByRole( 'button', { name: 'Reorder Feature 3' } ).press( 'ArrowUp' ); // the grip, from the keyboard
 		await page.getByRole( 'button', { name: 'Remove Feature 1' } ).click();
 		await expect( page.getByLabel( 'Feature 1', { exact: true } ) ).toHaveValue( 'Three' );
 
