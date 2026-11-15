@@ -9,8 +9,10 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Amazon\CredentialsNotValidated;
 use Affibloom\Application\Amazon\CredentialsService;
+use Affibloom\Application\Amazon\RefreshFailed;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Messages;
 use Affibloom\Module;
@@ -22,7 +24,8 @@ use WP_REST_Server;
 /**
  * REST routes for Amazon. The first is the Product Data API card's Validate (C1A; Lasso's
  * lasso_verify_amazon_creators_credentials, R19-R22): it checks the typed credentials and answers with the message and
- * the card's new state. Its answers never carry the Secret or the Credential ID (AC5).
+ * the card's new state. Its answers never carry the Secret or the Credential ID (AC5). The second is the product page's
+ * Refresh (C1D; Lasso's upload_thumbnail for an Amazon product, R35).
  */
 final class AmazonController implements Module {
 
@@ -30,8 +33,9 @@ final class AmazonController implements Module {
 	 * Builds the controller.
 	 *
 	 * @param CredentialsService $credentials The card's use cases.
+	 * @param AmazonDataService  $data        Amazon's data on products (Refresh).
 	 */
-	public function __construct( private CredentialsService $credentials ) {}
+	public function __construct( private CredentialsService $credentials, private AmazonDataService $data ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -65,6 +69,22 @@ final class AmazonController implements Module {
 				),
 			)
 		);
+
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/products/(?P<id>\d+)/amazon/refresh',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'refresh' ),
+				'permission_callback' => array( $this, 'can_edit_products' ),
+				'args'                => array(
+					'id' => array(
+						'type'     => 'integer',
+						'required' => true,
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -72,6 +92,60 @@ final class AmazonController implements Module {
 	 */
 	public function can_change_settings(): bool {
 		return current_user_can( Capabilities::SETTINGS );
+	}
+
+	/**
+	 * Only people who edit products may refresh one (the product page's capability).
+	 */
+	public function can_edit_products(): bool {
+		return current_user_can( Capabilities::PRODUCTS );
+	}
+
+	/**
+	 * POST /products/{id}/amazon/refresh: 200 with the product's name and image link and the stored price, stock and
+	 * time; 404 no such product; 422 not an Amazon product with an ASIN; 409 no credentials; 502 Amazon failed or gave
+	 * no image, with Lasso's message.
+	 *
+	 * @param WP_REST_Request $request The product's ID.
+	 * @phpstan-param WP_REST_Request<array{id: int}> $request
+	 */
+	public function refresh( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		try {
+			[ 'product' => $product, 'data' => $data, 'renamed' => $renamed ] = $this->data->refresh( (int) $request['id'] );
+		} catch ( RefreshFailed $refused ) {
+			return self::refresh_error( $refused );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'name'         => $product->name,
+					'renamed'      => $renamed,
+					'image_url'    => $product->image_url,
+					'price'        => $data->price,
+					'out_of_stock' => $data->out_of_stock,
+					'last_updated' => $data->last_updated,
+				),
+			)
+		);
+	}
+
+	/**
+	 * The error for a refused Refresh, in Lasso's words where it has them (R35).
+	 *
+	 * @param RefreshFailed $refused Why.
+	 */
+	private static function refresh_error( RefreshFailed $refused ): WP_Error {
+		[ $status, $message ] = match ( $refused->reason ) {
+			RefreshFailed::NOT_FOUND      => array( 404, __( 'This product no longer exists.', 'affibloom' ) ),
+			RefreshFailed::NOT_AMAZON     => array( 422, __( 'Refresh is for Amazon products with an ASIN.', 'affibloom' ) ),
+			RefreshFailed::NOT_CONFIGURED => array( 409, __( 'Needs the Amazon API', 'affibloom' ) ),
+			/* translators: %s: Amazon's error code, such as NotFound. */
+			RefreshFailed::FAILED         => array( 502, sprintf( __( 'Amazon fetch failed (%s).', 'affibloom' ), $refused->kind ) ),
+			default                       => array( 502, __( 'Could not fetch Amazon product image.', 'affibloom' ) ),
+		};
+
+		return new WP_Error( 'affibloom_' . $refused->reason, $message, array( 'status' => $status ) );
 	}
 
 	/**

@@ -157,6 +157,21 @@
 		var hasChanges = function () {
 			return null !== baseline && snapshot() !== baseline;
 		};
+		// Fields a control stored by itself (Refresh, C1D): what they hold now is what is stored, so only they move to the
+		// baseline; any other change still counts.
+		form.addEventListener( 'affibloom:fields-saved', function ( event ) {
+			if ( null === baseline ) {
+				return;
+			}
+			var kept = JSON.parse( baseline );
+			var now = collect();
+			event.detail.names.forEach( function ( name ) {
+				if ( Object.prototype.hasOwnProperty.call( now, name ) ) {
+					kept[ name ] = now[ name ];
+				}
+			} );
+			baseline = JSON.stringify( kept );
+		} );
 		var go = function ( href ) {
 			leaving = true;
 			window.location.assign( href );

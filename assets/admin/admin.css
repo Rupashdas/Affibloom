@@ -1786,8 +1786,10 @@
 .affibloom-image-frame__empty { display: grid; place-items: center; width: 96px; height: 96px; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); color: var(--affibloom-ink-400); }
 .affibloom-image-frame__empty .affibloom-icon { width: 36px; height: 36px; }
 .affibloom-image-frame__note { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--affibloom-ink-600); font-size: 13px; }
-.affibloom-image-field { display: flex; gap: 8px; }
-.affibloom-image-field .affibloom-input { flex: 1 1 auto; min-width: 0; }
+/* The link keeps room to be read (C1D): Apply and Refresh move to their own line when the column is narrow. */
+.affibloom-image-field { display: flex; flex-wrap: wrap; gap: 8px; }
+.affibloom-image-field .affibloom-input { flex: 1 1 12rem; min-width: 0; }
+.affibloom-image-field__actions { display: flex; flex: none; gap: 8px; }
 .affibloom-price .affibloom-field__head { flex-wrap: wrap; }
 .affibloom-price__show { margin-left: auto; }
 .affibloom-price__show .affibloom-toggle-row { min-height: 0; gap: 8px; font-size: 13px; }

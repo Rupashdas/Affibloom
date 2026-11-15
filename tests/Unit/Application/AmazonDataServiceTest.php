@@ -13,20 +13,24 @@ use Affibloom\Tests\Unit\Domain\Amazon\CatalogItemTest;
 use Affibloom\Tests\Unit\Fakes\FakeAmazonCatalog;
 use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
 use Affibloom\Tests\Unit\Fakes\InMemoryCredentials;
+use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Application\Amazon\RefreshFailed;
 use PHPUnit\Framework\TestCase;
 
 /**
- * What a new Amazon product takes from Amazon on add (C1C; R27, R32, D7; AC1, AC2).
+ * What a new Amazon product takes from Amazon on add (C1C; R27, R32, D7; AC1, AC2), and Refresh (C1D; R35; AC4).
  */
 final class AmazonDataServiceTest extends TestCase {
 	private FakeAmazonCatalog $amazon;
 	private InMemoryAmazonProducts $rows;
+	private InMemoryProductRepository $library;
 
 	private function service( bool $configured = true, string $answer = 'ok' ): AmazonDataService {
-		$this->amazon = new FakeAmazonCatalog( $answer );
-		$this->rows   = new InMemoryAmazonProducts();
+		$this->amazon  = new FakeAmazonCatalog( $answer );
+		$this->rows    = new InMemoryAmazonProducts();
+		$this->library = new InMemoryProductRepository();
 		$credentials  = $configured ? new Credentials( 'id', 'secret', 'tag-20', '3.1' ) : new Credentials();
-		return new AmazonDataService( new InMemoryCredentials( $credentials ), $this->amazon, $this->rows );
+		return new AmazonDataService( new InMemoryCredentials( $credentials ), $this->amazon, $this->rows, $this->library );
 	}
 
 	private static function draft( string $asin = 'B0STUBITEM', string $country = 'us' ): Product {
@@ -159,5 +163,85 @@ final class AmazonDataServiceTest extends TestCase {
 		self::assertNotNull( $row );
 		self::assertSame( '', $row->price );
 		self::assertSame( 'https://www.amazon.com/dp/B0STUBITEM', $row->base_url );
+	}
+
+	private function stored( string $name, int $image_id = 0 ): int {
+		return (int) $this->library->save( self::draft()->with( array( 'name' => $name, 'image_url' => 'https://example.com/old.jpg', 'image_id' => $image_id ) ) )->id;
+	}
+
+	private function refused( callable $refresh ): RefreshFailed {
+		try {
+			$refresh();
+		} catch ( RefreshFailed $refused ) {
+			return $refused;
+		}
+		self::fail( 'Refresh did not refuse' );
+	}
+
+	public function test_refresh_takes_the_image_and_keeps_the_editors_name(): void {
+		$service = $this->service();
+		$this->item();
+		$id = $this->stored( 'My own words', 42 );
+
+		$result = $service->refresh( $id );
+
+		self::assertSame( 'My own words', $result['product']->name );
+		self::assertSame( array( 'https://m.media-amazon.com/images/I/71stubLarge.jpg', 0 ), array( $result['product']->image_url, $result['product']->image_id ) );
+		self::assertSame( 'https://m.media-amazon.com/images/I/71stubLarge.jpg', $this->library->get( $id )?->image_url, 'saved at once' );
+		self::assertSame( '$69.95', $result['data']->price );
+		self::assertNotNull( $this->rows->find( 'B0STUBITEM', 'us' ) );
+	}
+
+	public function test_refresh_replaces_a_placeholder_name(): void {
+		foreach ( array( 'Amazon', '', 'Add a Link Title' ) as $placeholder ) {
+			$service = $this->service();
+			$this->item();
+			$result  = $service->refresh( $this->stored( $placeholder ) );
+			self::assertSame( 'Mikasa V200W Official Game Volleyball', $result['product']->name, "'$placeholder'" );
+			self::assertTrue( $result['renamed'] );
+		}
+	}
+
+	public function test_refresh_does_not_move_the_product_to_the_top_unless_it_renames_it(): void {
+		$service = $this->service();
+		$this->item();
+		$refreshed = $this->stored( 'My own words' );
+		$newest    = $this->stored( 'Added later' );
+
+		self::assertFalse( $service->refresh( $refreshed )['renamed'] );
+		self::assertSame( $newest, end( $this->library->saved )->id, 'Lasso writes the image as post meta only' );
+	}
+
+	public function test_refresh_always_asks_amazon_even_with_stored_data(): void {
+		$service = $this->service();
+		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'us', 'Stored', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', true, '', 0, '', array(), 'lasso', '2023-01-01 00:00:00' ) );
+		$this->item();
+
+		$data = $service->refresh( $this->stored( 'Amazon' ) )['data'];
+
+		self::assertSame( array( '$69.95', false, 'creators' ), array( $data->price, $data->out_of_stock, $data->source ) );
+	}
+
+	public function test_refresh_refusals(): void {
+		$service = $this->service();
+		self::assertSame( RefreshFailed::NOT_FOUND, $this->refused( fn() => $service->refresh( 999 ) )->reason );
+
+		$other = (int) $this->library->save( Product::draft( 'Shop', AffiliateUrl::from_string( 'https://shop.example/x' ), Settings::from_array( array() ) ) )->id;
+		self::assertSame( RefreshFailed::NOT_AMAZON, $this->refused( fn() => $service->refresh( $other ) )->reason );
+
+		$amazon  = $this->stored( 'Amazon' );
+		$refused = $this->refused( fn() => $service->refresh( $amazon ) ); // No item: NotFound.
+		self::assertSame( array( RefreshFailed::FAILED, 'NotFound' ), array( $refused->reason, $refused->kind ) );
+		self::assertSame( 'https://example.com/old.jpg', $this->library->get( $amazon )?->image_url, 'nothing changed' );
+
+		$item = CatalogItemTest::recorded( 'getItems-ok.json' );
+		unset( $item['images'] );
+		$this->amazon->items['B0STUBITEM'] = CatalogItem::from_creators( $item );
+		self::assertSame( RefreshFailed::NO_IMAGE, $this->refused( fn() => $service->refresh( $this->stored( 'Amazon' ) ) )->reason );
+
+		$unset = $this->service( false );
+		self::assertFalse( $unset->can_refresh() );
+		self::assertSame( RefreshFailed::NOT_CONFIGURED, $this->refused( fn() => $unset->refresh( $this->stored( 'Amazon' ) ) )->reason );
+		self::assertSame( array(), $this->amazon->verified );
 	}
 }

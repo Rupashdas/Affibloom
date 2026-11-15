@@ -32,7 +32,7 @@ final class ProductServiceAmazonTest extends TestCase {
 		$resolver   = new LinkResolver( new FakePageFetcher() );
 		$settings   = new InMemorySettingsRepository();
 		$links      = new LinkNormaliser( $resolver, $settings );
-		return new ProductService( $this->repo, $resolver, $settings, new ProductInput( $links ), $links, new AmazonDataService( new InMemoryCredentials(), new FakeAmazonCatalog(), $this->rows ) );
+		return new ProductService( $this->repo, $resolver, $settings, new ProductInput( $links ), $links, new AmazonDataService( new InMemoryCredentials(), new FakeAmazonCatalog(), $this->rows, $this->repo ) );
 	}
 
 	private function stored( string $name ): Product {

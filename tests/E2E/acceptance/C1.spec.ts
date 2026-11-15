@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, setSettings, wp } from '../utils';
+import { blockTrackers, createProduct, setSettings, wp } from '../utils';
 
 // C1 Amazon product data (docs/features/C1/requirements.md, AC1-AC20). Tests never call Amazon: the test-only stub
 // tests/E2E/amazon-stub.php, which affibloom.php loads on a local site only, answers the Creators API's hosts with
@@ -177,7 +177,65 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( saved.verified_signature ).toMatch( /^[0-9a-f]{64}$/ );
 	} );
 
-	test.fixme( 'AC4 Refresh updates the image and keeps the name (C1D)', () => {} );
+	test( 'AC4 Refresh updates the image and price and keeps the editor\'s name unless it is a placeholder (C1D)', async ( { page } ) => {
+		credentials( valid );
+		stub( 'ok' );
+		const amazon = ( name: string, asin: string ) =>
+			createProduct( { name, type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20`, image_url: 'https://example.com/old.jpg' } );
+		const image = 'https://m.media-amazon.com/images/I/71stubLarge.jpg';
+
+		// The editor's own name stays; the image link, preview and price come from Amazon and are stored at once.
+		const own = amazon( 'My own words', randomAsin() );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ own }` );
+		await page.getByRole( 'button', { name: 'Refresh' } ).click();
+		await expect( page.locator( '#affibloom-image-url' ) ).toHaveValue( image );
+		await expect( page.locator( '[data-image-preview]' ) ).toHaveAttribute( 'src', image );
+		await expect( page.locator( '#affibloom-price' ) ).toHaveValue( '$69.95' );
+		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'My own words' );
+		expect( meta( own, 'image_url' ) ).toBe( image );
+		// Nothing is left unsaved: leaving the page does not ask.
+		await page.locator( 'a[href$="admin.php?page=affibloom"]' ).first().click();
+		await page.waitForURL( /page=affibloom(&|$)/ );
+
+		// A placeholder name takes Amazon's title.
+		const placeholder = amazon( 'Amazon', randomAsin() );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ placeholder }` );
+		await page.getByRole( 'button', { name: 'Refresh' } ).click();
+		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'Mikasa V200W Official Game Volleyball' );
+		expect( wp( 'post', 'get', String( placeholder ), '--field=post_title' ) ).toBe( 'Mikasa V200W Official Game Volleyball' );
+
+		// A name typed and not saved yet is kept, as Lasso's page keeps it (the field is no longer a placeholder).
+		const typed = amazon( 'Amazon', randomAsin() );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ typed }` );
+		await page.getByLabel( 'Name' ).fill( 'Typed, not saved' );
+		await page.getByRole( 'button', { name: 'Refresh' } ).click();
+		await expect( page.locator( '#affibloom-image-url' ) ).toHaveValue( image );
+		await expect( page.getByLabel( 'Name' ) ).toHaveValue( 'Typed, not saved' );
+		wp( 'post', 'delete', String( typed ), '--force' );
+
+		// A failure says so in Lasso's words, and changes nothing.
+		const missing = amazon( 'Gone', 'B0NOTFOUND' + Math.floor( Math.random() * 1e6 ) );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ missing }` );
+		await page.getByRole( 'button', { name: 'Refresh' } ).click();
+		await expect( page.locator( '[data-image-error]' ) ).toHaveText( 'Amazon fetch failed (NotFound).' );
+		expect( meta( missing, 'image_url' ) ).toBe( 'https://example.com/old.jpg' );
+
+		for ( const id of [ own, placeholder, missing ] ) {
+			wp( 'post', 'delete', String( id ), '--force' );
+		}
+	} );
+
+	test( 'AC7 without credentials the product page\'s Refresh stays disabled with "Needs the Amazon API"', async ( { page } ) => {
+		credentials( null );
+		stub( 'ok' );
+		const id = createProduct( { name: 'No API', type: 'amazon', asin: randomAsin(), url: 'https://www.amazon.com/dp/B0NOAPI0001' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		const refresh = page.getByRole( 'button', { name: 'Refresh' } );
+		await expect( refresh ).toBeDisabled();
+		await expect( refresh ).toHaveAccessibleDescription( 'Needs the Amazon API' );
+		expect( requests() ).toBe( 0 );
+		wp( 'post', 'delete', String( id ), '--force' );
+	} );
 
 	test( 'AC5 the secret and Credential ID never appear in the page source or a REST response', async ( { page } ) => {
 		credentials( { ...valid, credential_id: 'ACCEPTANCE-ID-C1', secret: 'ACCEPTANCE-SECRET-C1' } );

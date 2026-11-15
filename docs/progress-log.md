@@ -11,6 +11,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
   default shared. The test-run restore now covers Affibloom's tables and leaves the schema version. AC1, AC2 red then
   green; unit 624; lint, PHPStan clean; by hand at 1280 and 375 px. Backup
   `app/affibloom-backup-2026-11-15-before-c1c-redo.sql`.
+  **C1D** (deviation 114): Refresh on the product page (`POST /products/{id}/amazon/refresh`): image link as meta,
+  stored row replaced, a placeholder name renamed; the page keeps a typed name by following the server's `renamed`
+  (no second copy of the placeholder list); the cramped Amazon Image row now wraps. AC4 red then green, AC7 page green;
+  unit 629; lint, PHPStan clean; by hand at 1280 and 375 px.
 
 - **2026-11-15 (Claude Code, Batch 2.1, Task C1B, at the user's word "Start Batch 2.1"):** `wp affibloom amazon get`
   and the catalogue client (getItems, token cache, Lasso's errors), built from the reverted first try's code, read

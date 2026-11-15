@@ -25,6 +25,6 @@ final class InMemoryAmazonProducts implements AmazonProductRepository {
 	 * before C1C. For the ProductService tests that are not about Amazon's data.
 	 */
 	public static function without_amazon(): AmazonDataService {
-		return new AmazonDataService( new InMemoryCredentials(), new FakeAmazonCatalog(), new self() );
+		return new AmazonDataService( new InMemoryCredentials(), new FakeAmazonCatalog(), new self(), new InMemoryProductRepository() );
 	}
 }

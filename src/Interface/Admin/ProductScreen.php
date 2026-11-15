@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
@@ -50,6 +51,7 @@ final class ProductScreen {
 	 * @param FieldsService          $fields   The product's custom fields and the field library (Task 14C).
 	 * @param Notice                 $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
 	 * @param GroupService           $groups   The product's groups and the site's, for the group picker (Task G3).
+	 * @param AmazonDataService      $amazon   Whether Refresh can ask Amazon (C1D).
 	 */
 	public function __construct(
 		private Template $template,
@@ -60,6 +62,7 @@ final class ProductScreen {
 		private FieldsService $fields,
 		private Notice $notice,
 		private GroupService $groups,
+		private AmazonDataService $amazon,
 	) {}
 
 	/**
@@ -167,6 +170,8 @@ final class ProductScreen {
 				'own_text'     => $this->product->disclosure === $disclosure ? '' : $this->product->disclosure,
 				'show_price'   => $this->product->show_price ?? $site->bool( 'show_price' ),
 				'amazon_tab'   => admin_url( 'admin.php?page=' . SettingsScreen::SLUG . '&tab=amazon' ),
+				// Refresh beside Amazon Image asks Amazon only while the credentials are configured (C1D).
+				'can_refresh'  => $this->amazon->can_refresh(),
 				// Custom fields (Task 14C): the product's rows, every definition, and the kinds the dialog offers.
 				'fields'       => $this->fields->fields( (int) $this->product->id ) ?? ProductFields::from_array( array() ),
 				'library'      => $this->fields->all(),

@@ -119,6 +119,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 111. Faster checks: test tiers, faster WP-CLI, one-call setup, automatic restore after runs (2026-11-15; the user: "Steps 1–6").
 - 112. Task C1B (2026-11-15), the catalogue client behind `wp affibloom amazon get`; built from the reverted first try; savings read unverified.
 - 113. Task C1C (2026-11-15), Amazon data on add: the table (Affibloom's column names, no last_updated index yet), the Table class, NotFound keeps the starting name, R34 on read; run-state restores Affibloom's tables and leaves the schema version.
+- 114. Task C1D (2026-11-15), Refresh on the product page: image as meta only, placeholder rename on the server, the page keeps a typed name; the image row wraps.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2489,3 +2490,38 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       `POST /affibloom/v1/products` with the stub took Amazon's name and image link, one request; the product page at
       1280 and 375 px shows them. Seen, not C1C's: the Amazon Image field is narrow beside Apply and Refresh (C1D works
       on that control).
+
+114. **Task C1D: Refresh on the product page (2026-11-15).** Batch 2.1, after C1C. Built from the reverted first try
+    (`cfd9d32`, on `backup/before-revert-to-21f7d03`, its review findings already fixed there), read through, the tests
+    brought in first and seen red. As planned (R35, R36, D7; AC4, AC7 page), with these departures:
+    - **What Refresh writes:** the image link as post meta only (`ProductRepository::set_image()`, new), clearing the
+      media library item, and the name through `rename()` only when the stored name is a placeholder (`PlaceholderName`),
+      as Lasso writes `lasso_custom_thumbnail` and calls `wp_update_post` only to rename. So a refreshed product keeps
+      its place in the Dashboard's "most recently changed". The stored Amazon row (price, stock, savings) is replaced
+      from the answer; Refresh always asks Amazon, even with a stored row. The answer carries `renamed`.
+    - **The page follows the server's rename** (changed from the first try, which copied Lasso's placeholder list into
+      `product.js`): the Name field takes Amazon's title only when the server renamed and the field still holds the name
+      the page loaded with (`defaultValue`), so a name typed and not saved is kept, with one copy of the rule. The
+      unsaved-changes guard counts the image fields as saved, and the name only when it was renamed
+      (`affibloom:fields-saved` in `product-save.js`).
+    - **The price Refresh shows lasts until reload:** the product page's price field shows the product's own price;
+      showing Amazon's stored price there (and in the box) is C1F's, Phase 3 (AC11).
+    - **Messages:** Lasso's "Amazon fetch failed (<code>)." for every Creators error (Amazon's own detail is not shown)
+      and "Could not fetch Amazon product image." for an answer without an https image (Lasso then still renames a
+      placeholder; here the whole refresh is refused, an edge case). 404 "This product no longer exists.", 422 "Refresh
+      is for Amazon products with an ASIN." (Lasso's name Lasso), 409 "Needs the Amazon API".
+    - **Help text:** with Refresh on, the Amazon Image tip says "Click Refresh to grab an updated image from Amazon, or
+      paste an image link and click Apply, or click the preview image to choose from your Media Library." (Lasso:
+      "Click the button below to grab an updated image from Amazon."; decision 11 keeps the field editable, so Apply
+      stays). An Amazon product without an ASIN (a search or store page) gets no Refresh and the plain help.
+    - **The enabled button needs configured credentials** (D4), not validated ones; without them it stays disabled with
+      "Needs the Amazon API" (AC7 page, 14B's button, unchanged).
+    - **The image row wraps** (`admin.css`, `.affibloom-image-field__actions`): the link field showed about six
+      characters beside Apply and Refresh at 1280 px (14B's layout, seen in C1C's look). The field now asks for 12rem
+      and the two buttons move together to their own line when the column is narrower.
+    - Not changed: `AmazonController::can_edit_products()` is one line on `Capabilities::PRODUCTS`, as
+      `ProductsController::can_manage()`; no REST-level unit test (the route is covered by AC4).
+    - Checks: AC4 red first (Refresh disabled), AC7 page already green (14B's button); then both passed; unit 629
+      (AmazonDataService refresh tests new); lint and PHPStan clean. By hand: `POST /products/{id}/amazon/refresh` with
+      the stub answered the image, "$69.95", `renamed` false; the image row at 1280 and 375 px before and after the
+      wrap fix.

@@ -268,7 +268,7 @@ C1F and C1G in Phase 3
 - [x] Task C1A: The Product Data API card and Validate
 - [x] Task C1B: The catalogue client
 - [x] Task C1C: Filling a new Amazon product on add
-- [ ] Task C1D: Refresh on the product page
+- [x] Task C1D: Refresh on the product page
 - [ ] Task C1I: Bulk Amazon sync
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [ ] Task C1K: Keep Geni.us Formatting on add and save
@@ -6196,11 +6196,11 @@ replaced; failure shows R35's message.
 **Files:** `AmazonController.php`, `AmazonDataService.php`, `templates/admin/partials/product-display-card.php`,
 `assets/admin/product.js`; `C1.spec.ts` AC4 (un-fixme), AC7 page.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Route and service.**
-- [ ] **Step 3: The button.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Refresh an Amazon product's image and price from its page".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Route and service.**
+- [x] **Step 3: The button.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Refresh an Amazon product's image and price from its page".
 
 ---
 

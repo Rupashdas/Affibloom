@@ -200,6 +200,49 @@
 			fail( '' );
 		} );
 
+		// Lasso's Refresh (C1D, R35): asks Amazon now. The answer is already stored, so it fills the image link, the
+		// preview, the read-only price and a placeholder name, and the unsaved-changes guard counts none of them.
+		var refresh = document.querySelector( '[data-image-refresh]' );
+		if ( refresh && window.wp && window.wp.apiFetch ) {
+			refresh.addEventListener( 'click', function () {
+				refresh.disabled = true;
+				refresh.classList.add( 'is-busy' );
+				fail( '' );
+				window.wp.apiFetch( { path: '/affibloom/v1/products/' + refresh.dataset.product + '/amazon/refresh', method: 'POST' } )
+					.then( function ( answer ) {
+						var name = document.getElementById( 'affibloom-name' );
+						var price = document.getElementById( 'affibloom-price' );
+						var title = document.getElementById( 'affibloom-product-title' );
+						link.value = answer.data.image_url;
+						media.value = '0';
+						show( answer.data.image_url );
+						var saved = [ 'image_url', 'image_id' ];
+						// Shown until reload: the product page's price is C1F's (it shows Amazon's stored price, Phase 3).
+						if ( price ) {
+							price.value = answer.data.price;
+						}
+						// The server renamed a placeholder name (PlaceholderName, R35). The field takes the new name only while
+						// it still holds the name the page loaded with, so a name typed and not yet saved is kept.
+						if ( answer.data.renamed && name && name.value === name.defaultValue ) {
+							name.value = answer.data.name;
+							name.defaultValue = answer.data.name;
+							if ( title ) {
+								title.textContent = answer.data.name;
+							}
+							saved.push( 'name' );
+						}
+						link.form.dispatchEvent( new CustomEvent( 'affibloom:fields-saved', { detail: { names: saved } } ) );
+					} )
+					.catch( function ( error ) {
+						fail( error && error.message && error.code && 0 === error.code.indexOf( 'affibloom_' ) ? error.message : refresh.dataset.failed );
+					} )
+					.finally( function () {
+						refresh.disabled = false;
+						refresh.classList.remove( 'is-busy' );
+					} );
+			} );
+		}
+
 		if ( window.affibloomMedia.available() ) {
 			choose.hidden = false;
 			choose.addEventListener( 'click', function () {

@@ -133,6 +133,17 @@ final class InMemoryProductRepository implements ProductRepository {
 		return null;
 	}
 
+	/** Post meta only, as update_post_meta(): the product keeps its place in the list. */
+	public function set_image( Product $product, string $url ): Product {
+		foreach ( $this->saved as $index => $saved ) {
+			if ( $saved->id === $product->id ) {
+				$this->saved[ $index ] = $saved->with( array( 'image_url' => $url, 'image_id' => 0 ) );
+				return $this->saved[ $index ];
+			}
+		}
+		return $product;
+	}
+
 	/** Re-saving makes a product the most recently changed, as wp_update_post() does: it moves to the end of the list. */
 	public function rename( Product $product, string $name ): Product {
 		foreach ( $this->saved as $index => $saved ) {

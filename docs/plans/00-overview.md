@@ -280,7 +280,7 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | C1A | C1 | done (deviation 110) |
 | C1B | C1 | open |
 | C1C | C1 | done (deviation 113) |
-| C1D | C1 | open |
+| C1D | C1 | done (deviation 114) |
 | C1I | C1 | open |
 | C1J | C1 | open |
 | C1K | C1 | open |
@@ -613,7 +613,7 @@ decision C3, TL6); `INSERT_BOXES` is `edit_posts`. Responses follow the global c
 | GET | `/products/{id}` | INSERT_BOXES | block sidebar | F4 24D | planned |
 | POST | `/products/groups` `{ ids, groups }` | PRODUCTS | bulk Add to Group | F23 G5 | planned |
 | POST | `/products/{id}/preview` | PRODUCTS | live preview of unsaved fields | F5 14E | planned |
-| POST | `/products/{id}/amazon/refresh` | PRODUCTS | refresh Amazon data | C1D | planned |
+| POST | `/products/{id}/amazon/refresh` | PRODUCTS | refresh Amazon data | C1D | built |
 | POST | `/products/{id}/alerts/dismiss` | PRODUCTS | hide the issue bar | F11 31C | planned |
 | GET, PUT | `/products/{id}/variants` | PRODUCTS | variants list, replace | F27 V1, V2 | planned |
 | GET | `/dashboard/products` | PRODUCTS | Dashboard list in place (filters, sort, group, placements, comparison table, opportunities) | F19 13A-13E; F11, F23, F27, F25, F22 | built (later arms planned) |

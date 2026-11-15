@@ -416,6 +416,26 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * Sets a stored product's image link alone, as Lasso's Refresh writes lasso_custom_thumbnail (update_post_meta): the
+	 * media library item is cleared, and the post is not touched, so the product keeps its place in "most recently
+	 * changed".
+	 *
+	 * @param Product $product A stored product.
+	 * @param string  $url     The image link.
+	 */
+	public function set_image( Product $product, string $url ): Product {
+		update_post_meta( (int) $product->id, '_affibloom_image_url', wp_slash( $url ) );
+		update_post_meta( (int) $product->id, '_affibloom_image_id', '0' );
+
+		return $product->with(
+			array(
+				'image_url' => $url,
+				'image_id'  => 0,
+			)
+		);
+	}
+
+	/**
 	 * Gives a stored product a new name, as Lasso's re-title does (wp_update_post with the title).
 	 *
 	 * @param Product $product A stored product.

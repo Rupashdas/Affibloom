@@ -10,7 +10,7 @@
  * (Task 15A, assets/admin/product-save.js).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -256,14 +256,15 @@ $soon_tabs   = array(
 				$this->render(
 					'admin/partials/product-display-card',
 					array(
-						'product'    => $product,
-						'theme'      => $view['theme'],
-						'themes'     => $view['themes'],
-						'disclosure' => $view['disclosure'],
-						'own_text'   => $view['own_text'],
-						'show_price' => $view['show_price'],
-						'amazon_tab' => $view['amazon_tab'],
-						'choices'    => $view['choices'],
+						'product'     => $product,
+						'theme'       => $view['theme'],
+						'themes'      => $view['themes'],
+						'disclosure'  => $view['disclosure'],
+						'own_text'    => $view['own_text'],
+						'show_price'  => $view['show_price'],
+						'amazon_tab'  => $view['amazon_tab'],
+						'can_refresh' => $view['can_refresh'],
+						'choices'     => $view['choices'],
 					)
 				);
 				?>

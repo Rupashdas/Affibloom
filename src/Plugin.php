@@ -242,7 +242,7 @@ final class Plugin {
 		$resolver  = new LinkResolver( new WpPageFetcher() );
 		$links     = new LinkNormaliser( $resolver, $this->settings_repository() );
 		$catalog   = new CreatorsApiCatalog();
-		$data      = new AmazonDataService( new OptionCredentialsRepository(), $catalog, new TableAmazonProductRepository() );
+		$data      = new AmazonDataService( new OptionCredentialsRepository(), $catalog, new TableAmazonProductRepository(), new PostTypeProductRepository() );
 		$products  = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
 		$bulk      = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$per_page  = new PerPage();
@@ -261,7 +261,7 @@ final class Plugin {
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -277,7 +277,7 @@ final class Plugin {
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings, $amazon ),
-			new AmazonController( $amazon ),
+			new AmazonController( $amazon, $data ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
 			new HelpTips( $settings ),
 			new DisplayController( $display, $settings ),

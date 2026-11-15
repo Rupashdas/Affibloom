@@ -5,11 +5,12 @@
  * Price, Description, Disclosure, then the toggles. Labels and help texts are Lasso's, with its product name removed.
  *
  * Placeholders until their tasks: the live preview (14E, Phase 3), Detect Opportunities (the Opportunities area),
- * Link Cloaking (link cloaking), Refresh and the Amazon price (C1). Lasso's Commission Upgrades is its cloud's and is
- * left out (deviation 52). Nothing here is stored until Save Changes (Task 15, D2).
+ * Link Cloaking (link cloaking) and the Amazon price shown from Amazon's data (C1F). Lasso's Commission Upgrades is its
+ * cloud's and is left out (deviation 52). Nothing here is stored until Save Changes (Task 15, D2), except Refresh's
+ * answer (C1D), which Lasso stores at once.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, choices: \Affibloom\Interface\Admin\IconChoices} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, choices: \Affibloom\Interface\Admin\IconChoices} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,12 +19,17 @@ use Affibloom\Domain\Product\ProductType;
 
 $product   = $view['product'];
 $is_amazon = ProductType::Amazon === $product->type;
-$image     = $product->image_url;
-// D9: Lasso's label follows the link; decision 11 keeps Amazon's editable, with Refresh waiting for C1.
+// Refresh needs an ASIN to ask for; an Amazon search or store page has none, and gets Apply only.
+$refresh = $is_amazon && '' !== $product->asin && $view['can_refresh'];
+$image   = $product->image_url;
+// D9: Lasso's label follows the link; decision 11 keeps Amazon's editable, and Refresh asks Amazon (C1D).
 $image_label = $is_amazon ? __( 'Amazon Image', 'affibloom' ) : __( 'Product Image', 'affibloom' );
-$image_help  = $is_amazon
-	? __( 'Paste the image link from Amazon and click Apply, or click the preview image to choose from your Media Library. Refresh needs the Amazon API.', 'affibloom' )
-	: __( 'Paste an image URL and click Apply, or click the preview image to choose from your Media Library.', 'affibloom' );
+$image_help  = __( 'Paste an image URL and click Apply, or click the preview image to choose from your Media Library.', 'affibloom' );
+if ( $is_amazon && '' !== $product->asin ) {
+	$image_help = $refresh
+		? __( 'Click Refresh to grab an updated image from Amazon, or paste an image link and click Apply, or click the preview image to choose from your Media Library.', 'affibloom' )
+		: __( 'Paste the image link from Amazon and click Apply, or click the preview image to choose from your Media Library. Refresh needs the Amazon API.', 'affibloom' );
+}
 // The toolbars are Lasso's, set by ProductEditors (other plugins may rewrite every editor's settings).
 $editor = static fn( int $height ): array => array(
 	'media_buttons' => false,
@@ -91,13 +97,19 @@ $editor = static fn( int $height ): array => array(
 			<span class="affibloom-image-field">
 				<input type="text" class="affibloom-input" id="affibloom-image-url" name="image_url" value="<?php echo esc_attr( $image ); ?>"
 					aria-describedby="affibloom-image-url-help affibloom-image-url-error" data-image-url>
+				<span class="affibloom-image-field__actions">
 				<button type="button" class="affibloom-button affibloom-button--secondary" data-image-apply
 					data-required="<?php esc_attr_e( 'Image URL is required.', 'affibloom' ); ?>" data-invalid="<?php esc_attr_e( 'Invalid image url.', 'affibloom' ); ?>"><?php esc_html_e( 'Apply', 'affibloom' ); ?></button>
-				<?php if ( $is_amazon ) : ?>
+				<?php if ( $refresh ) : ?>
+					<?php // Lasso's Refresh (R35): asks Amazon now; the answer is stored at once and fills the link, the preview, the price and a placeholder name (product.js). ?>
+					<button type="button" class="affibloom-button affibloom-button--secondary" data-image-refresh data-product="<?php echo esc_attr( (string) $product->id ); ?>"
+						data-failed="<?php esc_attr_e( 'Could not fetch Amazon product image.', 'affibloom' ); ?>"><?php esc_html_e( 'Refresh', 'affibloom' ); ?></button>
+				<?php elseif ( $is_amazon && '' !== $product->asin ) : ?>
 					<?php // A disabled button cannot be focused, so a title alone never reaches a keyboard or touch user: the reason is text a screen reader reads with the button. ?>
 					<button type="button" class="affibloom-button affibloom-button--secondary" disabled aria-describedby="affibloom-refresh-reason" title="<?php esc_attr_e( 'Needs the Amazon API', 'affibloom' ); ?>"><?php esc_html_e( 'Refresh', 'affibloom' ); ?></button>
 					<span class="screen-reader-text" id="affibloom-refresh-reason"><?php esc_html_e( 'Needs the Amazon API', 'affibloom' ); ?></span>
 				<?php endif; ?>
+				</span>
 			</span>
 			<p class="affibloom-field__error" id="affibloom-image-url-error" data-image-error hidden></p>
 			<input type="hidden" name="image_id" value="<?php echo esc_attr( (string) $product->image_id ); ?>" data-image-id>
