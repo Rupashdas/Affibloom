@@ -6140,7 +6140,7 @@ features, or `NotFound: Product not found.` / `AuthFailed: …`.
 - [x] **Step 2: Client and value objects.**
 - [x] **Step 3: Command.**
 - [x] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Fetch an Amazon item through the Creators API, behind wp affibloom amazon get".
+- [x] **Step 5: Commit** — "Fetch an Amazon item through the Creators API, behind wp affibloom amazon get".
 
 ---
 
