@@ -73,4 +73,13 @@ final class ProductServiceAmazonTest extends TestCase {
 
 		self::assertSame( 'Mikasa V200W', $service->get( (int) $product->id )?->name, 'as fill(): the default store, us' );
 	}
+
+	public function test_the_stored_row_is_read_for_the_products_asin_and_store(): void {
+		$this->service();
+		$data = new AmazonDataService( new InMemoryCredentials(), new FakeAmazonCatalog(), $this->rows, new InMemoryProductRepository() );
+		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'us', 'Mikasa V200W', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'lasso', '2026-11-09 00:11:00' ) );
+
+		self::assertSame( '$1.00', $data->stored( $this->stored( 'Mine' ) )?->price );
+		self::assertNull( $data->stored( $this->stored( 'Mine' )->with( array( 'asin' => '' ) ) ) );
+	}
 }

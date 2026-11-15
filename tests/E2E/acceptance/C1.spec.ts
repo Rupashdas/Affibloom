@@ -410,6 +410,40 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( meta( id, 'description' ) ).toBe( '' );
 	} );
 
+	test( 'C1Q5 an Amazon product page shows its stored Amazon data, read-only', async ( { page } ) => {
+		const asin = randomAsin();
+		const id = createProduct( { name: 'My own name', type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20` } );
+		wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . 'affibloom_amazon_products', array( 'asin' => '${ asin }', 'country' => 'us', 'name' => 'Tachikara Volley-Lite', 'price' => '$32.97', 'price_amount' => 32.97, 'currency' => 'USD', 'savings_amount' => '$10.02', 'savings_percent' => 23, 'savings_basis' => '$42.99', 'basis_amount' => 42.99, 'out_of_stock' => 0, 'base_url' => '', 'monetized_url' => '', 'image' => 'https://m.media-amazon.com/images/I/41HKmBFjQYL._SL500_.jpg', 'features' => wp_json_encode( array( 'Lightweight', 'Soft touch' ) ), 'source' => 'creators', 'last_updated' => '2026-11-15 10:00:00' ) );` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		const card = page.getByRole( 'region', { name: 'Amazon Data' } );
+		for ( const [ term, value ] of [
+			[ 'Amazon title', 'Tachikara Volley-Lite' ],
+			[ 'Price', '$32.97' ],
+			[ 'List price', '$42.99' ],
+			[ 'Saving', '$10.02 (23%)' ],
+			[ 'Currency', 'USD' ],
+			[ 'Availability', 'In stock' ],
+			[ 'Features', '2' ],
+			[ 'Source', 'Creators API' ],
+			[ 'Last updated', '2026-11-15 10:00 UTC' ],
+		] ) {
+			await expect( card.locator( `xpath=.//dt[normalize-space()="${ term }"]/following-sibling::dd[1]` ) ).toHaveText( value );
+		}
+		await expect( card.getByRole( 'img', { name: 'Amazon image' } ) ).toHaveAttribute( 'src', /41HKmBFjQYL/ );
+		// Read-only: nothing in the card is a field the product page saves.
+		await expect( card.locator( 'input, textarea, select' ) ).toHaveCount( 0 );
+
+		// An Amazon product without stored data says so; another product has no card.
+		const bare = createProduct( { name: 'No data yet', type: 'amazon', asin: randomAsin(), url: 'https://www.amazon.com/dp/B0NODATA01' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ bare }` );
+		await expect( page.getByRole( 'region', { name: 'Amazon Data' } ) ).toContainText( 'No Amazon data yet' );
+		const other = createProduct( { name: 'Not Amazon' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ other }` );
+		await expect( page.getByRole( 'button', { name: 'Save Changes' } ) ).toBeVisible();
+		await expect( page.getByRole( 'region', { name: 'Amazon Data' } ) ).toHaveCount( 0 );
+	} );
+
 	test( "C1Q0 the stub answers only the suite's test credentials; a person's requests reach Amazon", () => {
 		stub( 'ok' );
 		const token = ( clientId: string ) =>

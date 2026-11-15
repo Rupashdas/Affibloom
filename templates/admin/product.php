@@ -10,7 +10,7 @@
  * (Task 15A, assets/admin/product-save.js).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, amazon_card: bool, amazon_row: \Affibloom\Domain\Amazon\AmazonProduct|null, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -269,6 +269,13 @@ $soon_tabs   = array(
 				);
 				?>
 			</form>
+
+			<?php
+			if ( $view['amazon_card'] ) {
+				// What is stored from Amazon for this product (C1Q5), read-only and outside the form.
+				$this->render( 'admin/partials/amazon-data-card', array( 'row' => $view['amazon_row'] ) );
+			}
+			?>
 
 			<?php // Lasso's footer: Delete This Link on the left, Save Changes on the right ("Learn About This Page" is Lasso's help site). ?>
 			<div class="affibloom-product__footer">

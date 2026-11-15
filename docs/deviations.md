@@ -131,6 +131,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 123. Task C1Q3 (2026-11-15): `price_amount`, `basis_amount` through upgrade step 3; AC1 extended but not seen red.
 - 124. Task C1Q4 split; C1Q4a (2026-11-15): Features field (JSON meta, editable list), filled on add, bulk sync, Refresh; C1K first try stashed.
 - 125. Task C1Q4b (2026-11-15): hourly `affibloom_amazon_refresh`, Lasso's batch, fixed queue, 20 s passes; no Locations arm or 404 issue yet.
+- 126. Task C1Q5 (2026-11-15): the Amazon Data card (titled so, not "Details"), stored row only, read-only, outside the form.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2640,3 +2641,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     (F21, stays in C1E), the 404/000 issues (C1H), back-off (C1Q6). Checks: unit 664 (policy, service) and C1 AC6/AC10 red
     then green (its request count corrected: a cached token); lint, PHPStan clean; the event seen scheduled on Local. No
     live run (WP-Cron is off on Local; it would spend ~20 API calls).
+
+126. **Task C1Q5: the Amazon Data card (2026-11-15).** Titled "Amazon Data" (the plan said "Amazon Details"; it shows the
+    stored data only, deviation 122). An Amazon product with an ASIN gets a full-width, read-only card under the form
+    (never sent by Save Changes): Amazon title, price, list price, saving and per cent, currency, availability, image,
+    number of features, source ("Creators API" or "Imported", no Lasso name), last updated in UTC; without a row "No
+    Amazon data yet". `AmazonDataService::stored()` reads the row (no request); `stored_name()` now uses it. Checks: the
+    C1Q5 E2E red then green (its value locator fixed: dt to dd by XPath); unit 665; lint, PHPStan clean; 1280 and 375 px
+    on the user's Lenovo product (bottom padding fixed with the cards' `--fields` body).

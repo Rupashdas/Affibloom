@@ -1784,6 +1784,20 @@
 /* 7i. The product page's right card (Task 14B): the image frame (the live preview's place), two-column pairs, the
  * rich text editors in the design system's field frame, and the switches in two columns, as Lasso's. */
 .affibloom-product__card--display { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+
+/* The product page's Amazon Data card (C1Q5): the stored Amazon row, read-only, under the form. */
+.affibloom-amazon-data { margin-top: 24px; }
+.affibloom-amazon-data__empty { margin: 0; color: var(--affibloom-ink-600); }
+.affibloom-amazon-data__body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; }
+.affibloom-amazon-data__image { width: 96px; height: 96px; object-fit: contain; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
+.affibloom-amazon-data__list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 24px; margin: 0; font-size: 14px; }
+.affibloom-amazon-data__list dt { color: var(--affibloom-ink-600); font-weight: 600; }
+.affibloom-amazon-data__list dd { margin: 0; color: var(--affibloom-ink-900); overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+	.affibloom-amazon-data__body { grid-template-columns: minmax(0, 1fr); }
+	.affibloom-amazon-data__list { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+	.affibloom-amazon-data__list dd { margin-bottom: 8px; }
+}
 .affibloom-product__pair--even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .affibloom-image-frame {
 	position: relative;

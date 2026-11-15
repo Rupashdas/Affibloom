@@ -172,6 +172,9 @@ final class ProductScreen {
 				'amazon_tab'   => admin_url( 'admin.php?page=' . SettingsScreen::SLUG . '&tab=amazon' ),
 				// Refresh beside Amazon Image asks Amazon only while the credentials are configured (C1D).
 				'can_refresh'  => $this->amazon->can_ask_amazon(),
+				// The Amazon Data card (C1Q5): only for an Amazon product with an ASIN; its stored row, or null.
+				'amazon_card'  => ProductType::Amazon === $this->product->type && '' !== $this->product->asin,
+				'amazon_row'   => $this->amazon->stored( $this->product ),
 				// Custom fields (Task 14C): the product's rows, every definition, and the kinds the dialog offers.
 				'fields'       => $this->fields->fields( (int) $this->product->id ) ?? ProductFields::from_array( array() ),
 				'library'      => $this->fields->all(),

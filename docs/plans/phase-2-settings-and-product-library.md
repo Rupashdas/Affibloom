@@ -276,7 +276,7 @@ C1F and C1G in Phase 3
 - [x] Task C1Q3: Store the Amazon data that is needed
 - [x] Task C1Q4a: Features field, filled on add, bulk sync and Refresh
 - [x] Task C1Q4b: Scheduled price refresh
-- [ ] Task C1Q5: The Amazon Details card
+- [x] Task C1Q5: The Amazon Details card
 - [ ] Task C1Q6: Throttling, retry, quota and batched requests
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [ ] Task C1K: Keep Geni.us Formatting on add and save
@@ -6311,7 +6311,7 @@ scheduled price refresh, done 2026-11-15 (deviation 125).
 
 **Entry point:** the product page of an Amazon product: a read-only card listing the stored fields (deviation 122:
 name, image, price and list price, saving, currency, availability, features, last updated); "No Amazon data yet" when there is none. E2E AC and the
-375/1280 px looks. Commit — "Show the stored Amazon data on the product page".
+375/1280 px looks. Commit — "Show the stored Amazon data on the product page". **Done 2026-11-15 (deviation 126).**
 
 ### Task C1Q6: Throttling, retry, quota and batched requests
 

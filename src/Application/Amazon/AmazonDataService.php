@@ -275,9 +275,19 @@ final class AmazonDataService {
 	 * @param Product $product An Amazon product.
 	 */
 	public function stored_name( Product $product ): string {
+		return $this->stored( $product )->name ?? '';
+	}
+
+	/**
+	 * The Amazon data stored for a product's ASIN and store, or null (C1Q5: the product page's Amazon Data card; no
+	 * request to Amazon).
+	 *
+	 * @param Product $product An Amazon product.
+	 */
+	public function stored( Product $product ): ?AmazonProduct {
 		$asin = Asin::from( $product->asin );
 
-		return null === $asin ? '' : $this->products->find( $asin->value, self::country( $product ) )->name ?? '';
+		return null === $asin ? null : $this->products->find( $asin->value, self::country( $product ) );
 	}
 
 	/**

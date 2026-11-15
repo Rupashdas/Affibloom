@@ -4,6 +4,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q5 done, at "Start C1Q5"):** deviation 126. The read-only Amazon Data card on the
+  product page. Unit 665; C1Q5 E2E passed; looks at 1280 and 375 px. Next C1Q6.
+
 - **2026-11-15 (Claude Code, C1Q4b done, at "Start C1Q4b"):** deviation 125. The hourly Amazon refresh (C1E brought
   forward) refreshes due rows, cache only, keeping the last good data. Unit 664; AC6/AC10 passed. Next C1Q5.
 
