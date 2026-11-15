@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, setSettings, wp } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
 import { saveSettings } from '../settings';
 
 // F16 Display system (docs/features/F16/requirements.md).
@@ -211,6 +211,22 @@ test.describe( 'F16 Display system', () => {
 		const css = storedSettings().custom_css as string;
 		expect( css ).toContain( '.box { color: red; }' );
 		expect( css ).not.toContain( '<' );
+	} );
+
+	// AC10's front-end half (Task 18B): a value stored another way (Lasso's import) is cleaned again when printed.
+	test( 'AC10 Custom CSS reaches the front end, and cannot carry markup there', async ( { page } ) => {
+		const alerts: string[] = [];
+		page.on( 'dialog', ( dialog ) => {
+			alerts.push( dialog.message() );
+			void dialog.dismiss();
+		} );
+		setSettings( { custom_css: '.affibloom-title { letter-spacing: 5px; }</style><script>alert(1)</script>' } );
+		await page.goto( newPostWith( boxBlock( createProduct( { name: 'F16 AC10 box' } ) ) ) );
+
+		await expect( page.locator( '.affibloom-title' ) ).toHaveCSS( 'letter-spacing', '5px' );
+		expect( await page.locator( 'head script:has-text("alert(1)")' ).count() ).toBe( 0 );
+		expect( alerts ).toEqual( [] );
+		setSettings( { custom_css: '' } );
 	} );
 
 	test( 'AC11 Reset Settings asks first, then restores every default', async ( { page } ) => {

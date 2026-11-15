@@ -12,6 +12,7 @@ namespace Affibloom\Application\Settings;
 use InvalidArgumentException;
 use LogicException;
 use Affibloom\Domain\Amazon\Marketplace;
+use Affibloom\Domain\Settings\CustomCss;
 use Affibloom\Domain\Settings\PerformanceMode;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
@@ -394,16 +395,6 @@ final class SettingsService {
 	}
 
 	/**
-	 * Custom CSS through Lasso's own allowlist (Helper::format_css): it is printed inside a style element, so `<`
-	 * is removed and `</style>` can never be written; the characters CSS needs stay.
-	 *
-	 * @param string $raw Raw CSS.
-	 */
-	private static function clean_css( string $raw ): string {
-		return trim( (string) preg_replace( '~[^a-zA-Z0-9\-\_\{\}\@\#\!\;\:\.\,\s\(\)\%\[\]=*"\'\~\|\^\$/>+?&]~', '', $raw ) );
-	}
-
-	/**
 	 * Cleans one value. Null means the value is refused and the old one stays.
 	 *
 	 * @param string $type Field type from FIELDS.
@@ -416,7 +407,7 @@ final class SettingsService {
 			// A ticked checkbox sends "1"; an unticked one sends nothing. true/"true"/"on" cover other callers (Task 26).
 			'bool'       => in_array( $raw, array( true, 1, '1', 'on', 'true', 'yes' ), true ),
 			'text'       => is_string( $raw ) && strlen( trim( $raw ) ) <= 500 ? sanitize_text_field( $raw ) : null,
-			'css'        => is_string( $raw ) ? self::clean_css( $raw ) : null,
+			'css'        => is_string( $raw ) ? CustomCss::clean( $raw ) : null,
 			'tracking_id'  => is_string( $raw ) && ( '' === trim( $raw ) || self::is_tracking_id( trim( $raw ) ) ) ? trim( $raw ) : null,
 			'tracking_ids' => $this->clean_tracking_ids( $raw ),
 			// Lasso's number field takes 0-30 (amazon.php: min="0" max="30").

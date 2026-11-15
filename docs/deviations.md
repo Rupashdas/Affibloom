@@ -140,6 +140,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 132. Task 18A (2026-11-16): the box's data attributes and properties get Affibloom names too (`data-affibloom-id`, `data-hide-*`, `--affibloom-*`); table in tokens.md.
 - 133. Add Link (2026-11-16, the user): every single add opens the product's page, Amazon too; deviation 56's Amazon reload was a dead Lasso branch.
 - 134. Product page (2026-11-16, the user): buttons, custom fields and features reorder by dragging a grip only, as Lasso; Move up/down removed.
+- 135. Task 18B (2026-11-16): the `variants/` baselines predate Lasso 370 (live badge `top: 0`); 18D recaptures them; AC1 adds the site's CSS.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2736,3 +2737,14 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     under the pointer, tilted 2deg with a deep shadow, a grey slot its size marks where it lands, the other rows slide
     aside (150 ms) and the row glides into the slot on release; the page scrolls near the window's edges; no motion
     with "reduce motion". The group Links rows share it (same `drag-rows.js`).
+
+135. **Task 18B (2026-11-16): the box's baselines are out of date, and the site's own CSS is part of them.** Measured
+    element by element, Affibloom's Lab box is within 1-3 px of today's live box (517 px tall against 515), but AC1 is
+    off by 7 % (16 px shorter) against `variants/*.png` of 2026-11-12: production has since run Lasso 370, whose
+    advanced badge rule is `top: 0` (369: `-18px`); `box-layout.css` follows 370, as readers see it. **Task 18D also
+    recaptures the seven `variants/` (staging, the approved F1 session), and AC1 passes against those.** Readers' boxes
+    also carry the site's own CSS (description padding 5/10 px and its font size, badge size and its corner, the
+    display's shadow), which is the site's, not Lasso's: Affibloom's stylesheet leaves it out (ADR-6) and AC1 adds it
+    to the page, as Task 41 will translate it (`SITE_CSS` in `F5.spec.ts`; the description rule is not in the site's
+    Additional CSS, so Task 40's list must look for it in the theme settings). `Infrastructure\WordPress\CustomCss` is
+    `Domain\Settings\CustomCss` (pure allowlist). Left: the button with the site's icon is 3 px taller than live.

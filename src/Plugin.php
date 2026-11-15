@@ -101,6 +101,7 @@ use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Admin\TrackingIdController;
 use Affibloom\Interface\Block\ProductBoxBlock;
+use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
@@ -349,6 +350,7 @@ final class Plugin {
 				new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp' ),
 				new BoxHtml( dirname( $this->file ) . '/templates/front' )
 			),
+			new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), $display, $this->settings_repository() ),
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),

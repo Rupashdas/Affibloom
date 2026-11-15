@@ -103,18 +103,32 @@ final class DisplayPresentation {
 			$attributes['data-hide-disclosure'] = '1';
 		}
 
-		$attributes['style'] = self::properties( $config, $columns );
+		$attributes['style'] = implode( ' ', self::properties( $config, $columns ) );
 
 		return $attributes;
 	}
 
 	/**
-	 * The custom properties: the colours, then the density, then the column count.
+	 * The page's `:root` block (F5 R43; Lasso's Helper::build_lasso_display_css_root_block): the same properties as a
+	 * wrapper's, for the boxes' own CSS and the editor's Custom CSS, which key on them. Lasso takes the colours from
+	 * the Single type, so this is called with the Single type's settings.
+	 *
+	 * @param DisplayConfig $config  The Single type's settings.
+	 * @param int           $columns The grid's column count.
+	 */
+	public static function root( DisplayConfig $config, int $columns ): string {
+		return ':root{' . implode( '', self::properties( $config, $columns ) ) . '}';
+	}
+
+	/**
+	 * The custom properties, one `--affibloom-<name>: <value>;` each: the colours, then the density, then the column
+	 * count.
 	 *
 	 * @param DisplayConfig $config  The display type's settings.
 	 * @param int           $columns The grid's column count.
+	 * @return list<string>
 	 */
-	private static function properties( DisplayConfig $config, int $columns ): string {
+	private static function properties( DisplayConfig $config, int $columns ): array {
 		$properties = array();
 		foreach ( self::COLOURS as $key => $name ) {
 			$properties[ $name ] = $config->palette()->value( $key );
@@ -133,6 +147,6 @@ final class DisplayPresentation {
 			$declarations[] = '--affibloom-' . $name . ': ' . $value . ';';
 		}
 
-		return implode( ' ', $declarations );
+		return $declarations;
 	}
 }

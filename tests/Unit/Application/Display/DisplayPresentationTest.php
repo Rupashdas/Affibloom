@@ -92,4 +92,19 @@ final class DisplayPresentationTest extends TestCase {
 		self::assertSame( array( 'data-hide-price', 'data-hide-proscons', 'data-hide-timestamp', 'data-hide-disclosure' ), array_values( preg_grep( '/^data-hide-/', array_keys( $wrapper ) ) ) );
 		self::assertStringEndsWith( '--affibloom-layout-columns: 2;', $wrapper['style'] );
 	}
+
+	/**
+	 * The page's :root block (R43): the same properties as the wrapper's style, in Lasso's form (no spaces between).
+	 */
+	public function test_the_root_block_holds_the_wrapper_properties(): void {
+		$root = DisplayPresentation::root( self::site(), 3 );
+
+		self::assertStringStartsWith( ':root{--affibloom-main: #000000;--affibloom-title: #000000;--affibloom-button: #5e3f8c;', $root );
+		self::assertStringContainsString( '--affibloom-density-padding: 26px;', $root );
+		self::assertStringEndsWith( '--affibloom-layout-columns: 3;}', $root );
+		self::assertSame(
+			str_replace( ' --', '--', DisplayPresentation::wrapper( self::site(), 3, true )['style'] ),
+			substr( $root, 6, -1 )
+		);
+	}
 }

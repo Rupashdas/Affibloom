@@ -99,7 +99,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 **F5-F8, the Single box, with buttons, overrides, rating, fields, price, disclosure (run order):**
 
 - [x] Task 18A: The box reaches a reader — markup, elements and links
-- [ ] Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
+- [x] Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
 - [ ] Task 18C: Where the box's assets load
 - [ ] Task 18D: Lasso's baselines for every theme and state
 - [ ] Task 18E: The 2-box themes and theme resolution
@@ -305,11 +305,17 @@ applies; the `<head>` holds the `:root` colour block.
 
 **Files:** create `assets/front/box.css`, `assets/front/box-layout.css`, `assets/front/images/{prime.png,info.svg}`; create or reuse `src/Infrastructure/WordPress/CustomCss.php` (Task 10E's plan); modify `src/Interface/Front/BoxAssets.php`, `tests/E2E/acceptance/F5.spec.ts` (AC1, AC5) and the F16 spec (AC10).
 
-- [ ] **Step 1: Failing tests:** F5 AC1 (three variants), AC5. Red: unstyled box.
-- [ ] **Step 2: Port** the rules, with a header naming Lasso 369's files and lines (GPL v2+).
-- [ ] **Step 3: Assets and head block.**
-- [ ] **Step 4: Run and look** at 1280 and 390 beside the PNGs.
-- [ ] **Step 5: Commit** — "Style the box as Lasso's Lab display".
+- [x] **Step 1: Failing tests:** F5 AC1 (three variants), AC5. Red: unstyled box.
+- [x] **Step 2: Port** the rules, with a header naming Lasso 369's files and lines (GPL v2+).
+- [x] **Step 3: Assets and head block.**
+- [x] **Step 4: Run and look** at 1280 and 390 beside the PNGs.
+- [x] **Step 5: Commit** — "Style the box as Lasso's Lab display".
+
+*Note (2026-11-16):* the rules a Single Lab box uses were filtered out of Lasso 369's two files and renamed to
+ADR-6's names (no other theme, group display, stars or fields yet). The allowlist became `Domain\Settings\CustomCss`
+(no Infrastructure class: nothing in it calls WordPress), shared by the settings save and `BoxAssets`. Our box measures
+within 1-3 px of today's live box; AC1 (run once) is off by 7 % because the 2026-11-12 PNGs predate Lasso 370:
+deviation 135.
 
 ---
 

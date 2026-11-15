@@ -40,6 +40,20 @@ function productFrom( b: Box ): ProductFields {
 	};
 }
 
+// The live site's own CSS for a Single box (its Additional CSS and page CSS, read from the guide pages' inline
+// stylesheet, 2026-11-16) under Affibloom's names, as Task 41 translates it at cutover. Lasso's baselines were captured
+// with it, so AC1 adds it to the page; Affibloom's stylesheet does not carry it (ADR-6: the site's rules stay the
+// site's).
+const SITE_CSS = [
+	'.affibloom-description{font-size:calc(10px + .4vw);padding-top:5px;padding-bottom:10px}',
+	'.affibloom-badge{font-size:1em!important;padding-top:15px!important;padding-bottom:16px!important}',
+	'@media (max-width:767.98px){.affibloom-badge{font-size:.8em!important}}',
+	'.affibloom-display{box-shadow:7px 7px 20px -5px rgba(0,0,0,.75)!important}',
+	'.affibloom-badge::after{content:" ";display:block;left:15px;bottom:-22px;margin-top:-18px;margin-right:307px;margin-left:-18px;' +
+		'background-color:#193010;color:#193010;border-bottom-left-radius:100px;' +
+		'background-image:linear-gradient(211deg,var(--accent-hover),rgba(20,20,20,.29));position:absolute;height:20px;border-width:0;width:10px}',
+].join( '\n' );
+
 // The site's Display settings for Single (F5 requirements, "This copy, 2026-11-14"), as Settings → Display stores them,
 // and the site's settings the box reads. AC3 and AC4 draw boxes with these, as the live boxes were drawn.
 function useSiteDisplay(): void {
@@ -140,19 +154,44 @@ async function boxTree( page: Page, lassoHtml: string | null ): Promise< Tree > 
 test.describe( 'F5 Box design', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
-	for ( const [ variant, matches ] of Object.entries( pick ) ) {
+	// AC1 for the three Lab examples (Task 18B, AC5); second-button, badge and prime are 19A's, rating 21A's. The box
+	// is drawn with the site's Display settings, as the live boxes were.
+	for ( const variant of [ 'amazon', 'other', 'no-description' ] ) {
 		test( `@local AC1 the ${ variant } box matches its baseline on desktop and mobile`, async ( { page } ) => {
-			const example = boxes.find( matches );
+			useSiteDisplay();
+			const example = boxes.find( pick[ variant ] );
 			expect( example, `boxes.json has a ${ variant } box` ).toBeTruthy();
-			const path = newPostWith( boxBlock( createProduct( productFrom( example as Box ) ) ) );
+			const path = newPostWith( boxBlock( createProduct( { ...productFrom( example as Box ), button_text: '', sponsored: '0' } ) ) );
 
 			for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
 				await page.setViewportSize( { width, height: 900 } );
 				await page.goto( path );
+				await page.addStyleTag( { content: SITE_CSS } );
 				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'variants', `${ variant }-${ name }.png` ] );
 			}
 		} );
 	}
+
+	test( 'AC5 the stylesheets, the colour block and the Custom CSS reach the page', async ( { page } ) => {
+		useSiteDisplay();
+		setSettings( { custom_css: '.affibloom-title { letter-spacing: 3px; }' } );
+		await page.goto( newPostWith( boxBlock( createProduct( { name: 'F5 AC5 box' } ) ) ) );
+
+		const sheets = await page.evaluate( () => [ ...document.querySelectorAll< HTMLLinkElement >( 'link[rel="stylesheet"]' ) ].map( ( l ) => l.href ) );
+		expect( sheets.some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
+		expect( sheets.some( ( href ) => href.includes( 'affibloom/assets/front/box-layout.css' ) ) ).toBe( true );
+
+		// One style element in <head>: the :root block of the Single type (R43), then the Custom CSS.
+		const head = await page.locator( 'head style' ).filter( { hasText: ':root{--affibloom-main' } ).textContent();
+		expect( head ).toContain( '--affibloom-button: #5e3f8c;' );
+		expect( head ).toContain( '}\n.affibloom-title { letter-spacing: 3px; }' );
+
+		const title = page.locator( '.affibloom-title' );
+		await expect( title ).toHaveCSS( 'letter-spacing', '3px' );
+		await expect( title ).toHaveCSS( 'color', 'rgb(0, 0, 0)' );
+		await expect( page.locator( '.affibloom-button-1' ) ).toHaveCSS( 'background-color', 'rgb(94, 63, 140)' );
+		setSettings( { custom_css: '' } );
+	} );
 
 	test( 'AC2 a page with no box loads no plugin CSS or JS', async ( { page } ) => {
 		const assets = async () =>
