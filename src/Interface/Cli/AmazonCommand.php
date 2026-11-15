@@ -139,6 +139,63 @@ final class AmazonCommand implements Module {
 	}
 
 	/**
+	 * The lines for what C1Q2 reads: the listing's list price, seller and deal, and the item's details.
+	 *
+	 * @param CatalogItem $item The item.
+	 * @return list<string>
+	 */
+	private static function detail_lines( CatalogItem $item ): array {
+		$or_none = static fn( string $value ): string => '' === $value ? self::NONE : $value;
+		$offer   = $item->offer;
+		$details = $item->details;
+
+		$seller = $offer->seller;
+		if ( '' !== $seller ) {
+			$notes   = array_filter( array( $offer->condition, $offer->buy_box ? 'buy box' : '' ) );
+			$seller .= array() === $notes ? '' : ' (' . implode( ', ', $notes ) . ')';
+		}
+		$deal = $offer->deal_badge;
+		if ( '' !== $deal ) {
+			$deal .= ( '' !== $offer->deal_ends ? ', ends ' . $offer->deal_ends : '' ) . ( '' !== $offer->deal_access ? ' (' . $offer->deal_access . ')' : '' );
+		}
+		$model = $details->model;
+		if ( '' !== $details->part_number && $details->part_number !== $model ) {
+			$model = '' === $model ? 'part ' . $details->part_number : $model . ' (part ' . $details->part_number . ')';
+		} elseif ( '' !== $model ) {
+			$model .= ' (part ' . $model . ')';
+		}
+		$dimensions = array();
+		foreach ( $details->dimensions as $name => $value ) {
+			$dimensions[] = $name . ' ' . $value;
+		}
+		$category = $details->category;
+		if ( '' !== $category && null !== $details->category_rank ) {
+			$category .= ' (#' . $details->category_rank . ')';
+		}
+		if ( null !== $details->sales_rank ) {
+			$category = ( '' === $category ? '' : $category . '; ' ) . '#' . $details->sales_rank . ' overall';
+		}
+
+		return array(
+			'List price: ' . ( '' === $item->basis ? self::NONE : $item->basis . ( '' !== $offer->basis_type ? ' (' . $offer->basis_type . ')' : '' ) ),
+			'Seller: ' . $or_none( $seller ),
+			'Deal: ' . $or_none( $deal ),
+			'Brand: ' . $or_none( $details->brand ),
+			'Manufacturer: ' . $or_none( $details->manufacturer ),
+			'Model: ' . $or_none( $model ),
+			'Warranty: ' . $or_none( $details->warranty ),
+			'Colour: ' . $or_none( $details->color ),
+			'Size: ' . $or_none( $details->size ),
+			'Dimensions: ' . $or_none( implode( ', ', $dimensions ) ),
+			'EAN: ' . $or_none( implode( ', ', $details->eans ) ),
+			'UPC: ' . $or_none( implode( ', ', $details->upcs ) ),
+			'Category: ' . $or_none( $category ),
+			'Parent ASIN: ' . $or_none( $details->parent_asin ),
+			'Images: ' . count( $details->images ),
+		);
+	}
+
+	/**
 	 * What the command prints for an item, one line each.
 	 *
 	 * @param CatalogItem $item The item.
@@ -154,7 +211,7 @@ final class AmazonCommand implements Module {
 			$savings = $item->savings . ( $item->savings_percent > 0 ? ' (' . $item->savings_percent . '%)' : '' ) . ( '' !== $item->basis ? ' off ' . $item->basis : '' );
 		}
 
-		$lines = array(
+		$lines   = array(
 			'ASIN: ' . $item->asin,
 			'Title: ' . $or_none( $item->title ),
 			'Image: ' . $or_none( $item->image ),
@@ -162,8 +219,9 @@ final class AmazonCommand implements Module {
 			'Savings: ' . $savings,
 			'Availability: ' . ( $available->in_stock ? 'In stock' : 'Out of stock' ) . ( '' === $detail ? '' : ' (' . $detail . ')' ),
 			'URL: ' . $or_none( $item->url ),
-			'Features: ' . ( array() === $item->features ? self::NONE : '' ),
 		);
+		$lines   = array_merge( $lines, self::detail_lines( $item ) );
+		$lines[] = 'Features: ' . ( array() === $item->features ? self::NONE : '' );
 		foreach ( $item->features as $feature ) {
 			$lines[] = '- ' . $feature;
 		}

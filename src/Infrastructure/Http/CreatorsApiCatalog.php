@@ -31,15 +31,36 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	/** The catalogue's item request (R9). */
 	private const GET_ITEMS = 'https://creatorsapi.amazon/catalog/v1/getItems';
 
-	/** What getItems is asked to return (R9; Lasso's DEFAULT_RESOURCES). */
+	/**
+	 * What getItems is asked to return (C1Q2): Lasso's DEFAULT_RESOURCES (R9) and every other resource Affibloom reads.
+	 * Left out, as nothing reads them: contentInfo and contentRating (books, media), technicalInfo, tradeInInfo and
+	 * loyaltyPoints (Japan only).
+	 */
 	private const RESOURCES = array(
+		'browseNodeInfo.browseNodes',
+		'browseNodeInfo.browseNodes.ancestor',
+		'browseNodeInfo.browseNodes.salesRank',
+		'browseNodeInfo.websiteSalesRank',
 		'images.primary.large',
 		'images.primary.medium',
 		'images.primary.small',
-		'itemInfo.title',
+		'images.variants.large',
+		'images.variants.medium',
+		'images.variants.small',
+		'itemInfo.byLineInfo',
+		'itemInfo.classifications',
+		'itemInfo.externalIds',
 		'itemInfo.features',
-		'offersV2.listings.price',
+		'itemInfo.manufactureInfo',
+		'itemInfo.productInfo',
+		'itemInfo.title',
 		'offersV2.listings.availability',
+		'offersV2.listings.condition',
+		'offersV2.listings.dealDetails',
+		'offersV2.listings.isBuyBoxWinner',
+		'offersV2.listings.merchantInfo',
+		'offersV2.listings.price',
+		'offersV2.listings.type',
 		'parentASIN',
 	);
 

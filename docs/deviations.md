@@ -126,6 +126,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 118. Task C1Q0 findings (2026-11-15): the credentials were cleared by a real token refusal (07:46:58) and by a test run around the user's Validate (16:51).
 - 119. Task C1Q0 (2026-11-15): refused credentials kept and marked (not cleared, R22), the stub answers only test credentials, the run restore keeps a person's.
 - 120. Task C1Q1 (2026-11-15): real Creators API answers recorded for 3 ASINs; `--resources` added; Amazon returns no ratings.
+- 121. Task C1Q2 (2026-11-15): 25 resources asked; ItemDetails and OfferDetails; the buy-box listing read.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2589,3 +2590,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     accepted, nothing comes back); no deal at the time; dimensions are numbers; 5-7 variant images; seller, condition,
     buy box, parent ASIN, brand, model, EAN/UPC, category and rank present. Checks: unit 649 (raw x2, real answers
     read by today's `CatalogItem`); C1 AC9 red then green; lint, PHPStan clean.
+
+121. **Task C1Q2: read every relevant resource (2026-11-15).** `item()` asks 25 paths (Lasso's 7 and the rest Affibloom
+    reads; not contentInfo, contentRating, technicalInfo, tradeInInfo, loyaltyPoints). `CatalogItem` gains `ItemDetails`
+    (brand, manufacturer, model, part number, warranty, colour, size, unit count, dimensions "3 inches" in Amazon's order,
+    product group, EAN/UPC/ISBN, category = first ranked browse node with its rank, store-wide rank, parent ASIN, every
+    large image) and `OfferDetails` (price, list/was price and saving as numbers, basis type, seller, condition, buy box,
+    deal badge, end, access). The listing read is the buy-box winner, else the first (Lasso: the first). The command
+    prints them; the stub answers the three recorded ASINs with Amazon's real answers. Checks: unit 654 red then green
+    (two of my expectations corrected to the recorded values: size "Official", Amazon's dimension order); AC9 red then
+    green; live `amazon get B0DHLWFD84` printed every line; lint, PHPStan clean. Nothing stored yet (C1Q3).

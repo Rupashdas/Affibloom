@@ -36,6 +36,56 @@ final class CatalogItemTest extends TestCase {
 		self::assertSame( 'Currently unavailable.', $net->availability->message );
 	}
 
+	public function test_every_relevant_field_of_a_real_answer_is_read(): void {
+		$ball = CatalogItem::from_creators( self::recorded( 'live-B000IXRCTQ-all.json' ) );
+		$d    = $ball->details;
+		self::assertSame( array( 'Tachikara', 'Tachikara', 'SVMNC.GDW', 'SVMNC.GDW', '365-day Warranty, 1 time replacement' ), array( $d->brand, $d->manufacturer, $d->model, $d->part_number, $d->warranty ) );
+		self::assertSame( array( 'Gold/White', 'Sports' ), array( $d->color, $d->product_group ) );
+		self::assertSame( array( 'height' => '3 inches', 'length' => '8 inches', 'weight' => '0.45 pounds', 'width' => '6 inches' ), array_intersect_key( $d->dimensions, array_flip( array( 'height', 'length', 'width', 'weight' ) ) ) );
+		self::assertSame( array( array( '0793917111029' ), array( '793917111029' ), array() ), array( $d->eans, $d->upcs, $d->isbns ) );
+		self::assertSame( array( 'Indoor Volleyballs', 4, 1401 ), array( $d->category, $d->category_rank, $d->sales_rank ) );
+		self::assertSame( 'B000IXRDWW', $d->parent_asin );
+		self::assertSame( 'https://m.media-amazon.com/images/I/41HKmBFjQYL._SL500_.jpg', $d->images[0], 'the primary image first' );
+		self::assertCount( 8, $d->images, 'primary and 7 variants, large' );
+
+		$o = $ball->offer;
+		self::assertSame( array( 32.97, 42.99, 'LIST_PRICE', 10.02 ), array( $o->price_amount, $o->basis_amount, $o->basis_type, $o->savings_amount ) );
+		self::assertSame( array( 'Amazon.com', 'New', true ), array( $o->seller, $o->condition, $o->buy_box ) );
+		self::assertSame( array( '', '' ), array( $o->deal_badge, $o->deal_ends ) );
+	}
+
+	public function test_the_buy_box_listing_is_read_not_the_first(): void {
+		$item                         = self::recorded( 'live-B000IXRCTQ-all.json' );
+		$winner                       = $item['offersV2']['listings'][0];
+		$other                        = $winner;
+		$other['isBuyBoxWinner']      = false;
+		$other['price']['money']      = array( 'amount' => 39.5, 'currency' => 'USD', 'displayAmount' => '$39.50' );
+		$other['merchantInfo']['name'] = 'Another seller';
+		$item['offersV2']['listings'] = array( $other, $winner );
+
+		$read = CatalogItem::from_creators( $item );
+		self::assertSame( array( '$32.97', 32.97, 'Amazon.com' ), array( $read->price, $read->offer->price_amount, $read->offer->seller ) );
+	}
+
+	public function test_a_deal_is_read(): void {
+		$item = self::recorded( 'live-B000IXRCTQ-all.json' );
+		$item['offersV2']['listings'][0]['dealDetails'] = array( 'accessType' => 'ALL', 'badge' => 'Limited time deal', 'endTime' => '2026-11-20T08:00:00Z' );
+
+		$offer = CatalogItem::from_creators( $item )->offer;
+		self::assertSame( array( 'Limited time deal', '2026-11-20T08:00:00Z', 'ALL' ), array( $offer->deal_badge, $offer->deal_ends, $offer->deal_access ) );
+	}
+
+	public function test_missing_groups_are_empty_never_an_error(): void {
+		$bare = CatalogItem::from_creators( array( 'asin' => 'B0EMPTY001' ) );
+		self::assertSame( array( '', '', array(), array(), null, null, '' ), array( $bare->details->brand, $bare->details->category, $bare->details->images, $bare->details->dimensions, $bare->details->sales_rank, $bare->details->category_rank, $bare->details->parent_asin ) );
+		self::assertSame( array( null, null, null, '', '' ), array( $bare->offer->price_amount, $bare->offer->basis_amount, $bare->offer->savings_amount, $bare->offer->seller, $bare->offer->condition ) );
+
+		// Out of stock: no price, seller or condition; the item's details are still read.
+		$net = CatalogItem::from_creators( self::recorded( 'live-B0F7RNL68R-all.json' ) );
+		self::assertSame( array( null, '', '' ), array( $net->offer->price_amount, $net->offer->seller, $net->offer->condition ) );
+		self::assertSame( 'BAGAIL', $net->details->brand );
+	}
+
 	public function test_an_item_in_stock_with_a_saving(): void {
 		$item = CatalogItem::from_creators( self::recorded( 'getItems-ok.json' ) );
 		self::assertSame( 'B0STUBITEM', $item->asin );

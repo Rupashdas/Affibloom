@@ -71,6 +71,12 @@ final class CreatorsApiCatalogTest extends TestCase {
 		self::assertSame( array( 'B0STUBITEM' ), $body['itemIds'] );
 		self::assertSame( array( 'ASIN', 'www.amazon.co.uk', 'vbvault-21' ), array( $body['itemIdType'], $body['marketplace'], $body['partnerTag'] ) );
 		self::assertContains( 'offersV2.listings.availability', $body['resources'] );
+		// C1Q2: every relevant resource, not only Lasso's seven; not the book, media, trade-in or Japan-only ones.
+		self::assertCount( 25, $body['resources'] );
+		foreach ( array( 'itemInfo.byLineInfo', 'itemInfo.productInfo', 'images.variants.large', 'offersV2.listings.dealDetails', 'offersV2.listings.isBuyBoxWinner', 'browseNodeInfo.websiteSalesRank', 'parentASIN' ) as $path ) {
+			self::assertContains( $path, $body['resources'] );
+		}
+		self::assertNotContains( 'itemInfo.tradeInInfo', $body['resources'] );
 	}
 
 	public function test_the_token_is_cached_for_its_lifetime_less_a_minute_and_reused(): void {

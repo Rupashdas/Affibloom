@@ -272,7 +272,7 @@ C1F and C1G in Phase 3
 - [x] Task C1I: Bulk Amazon sync
 - [x] Task C1Q0: Amazon credentials kept (why they end up empty)
 - [x] Task C1Q1: Real Creators API answers as fixtures
-- [ ] Task C1Q2: Read every relevant resource
+- [x] Task C1Q2: Read every relevant resource
 - [ ] Task C1Q3: Store the full Amazon data
 - [ ] Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
 - [ ] Task C1Q5: The Amazon Details card
@@ -6284,7 +6284,7 @@ variations); `CatalogItem` reads amounts and display strings for price, list pri
 buy-box listing (not listing 0), availability, condition, seller, deal, brand, manufacturer, model, part number,
 warranty, colour, size, dimensions, unit count, EAN/UPC/ISBN, category and sales rank, parent ASIN, all images,
 features. A missing group is empty, never an error. Unit tests per group from C1Q1's files, plus partial answers.
-Commit — "Read every relevant Creators API resource".
+Commit — "Read every relevant Creators API resource". **Done 2026-11-15 (deviation 121).**
 
 ### Task C1Q3: Store the full Amazon data
 
