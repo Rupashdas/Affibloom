@@ -10,7 +10,7 @@
 
 - [x] Task 1: Plugin skeleton and tooling — activating Affibloom
 - [x] Task 2: Local copy of production with Lasso active
-- [x] Task 3: Continuous integration on every pull request (CI run pending, see the task's note)
+- [x] Task 3: Continuous integration on every pull request (workflow removed 2026-11-16, see the task's notes)
 
 ---
 
@@ -977,6 +977,10 @@ npm run test:integration
 Expected: `OK (2 tests, …)`. The test passes straight away, because it checks Task 1's code inside WordPress. If it fails, Task 1 is not done.
 
 - [x] **Step 2: Workflow**
+
+> **Removed 2026-11-16 (the user's decision; deviation 10).** Billing blocked every run and marked each push
+> as failed, so the workflow was disabled, its 58 runs deleted and `ci.yml` removed in `2796a8b`. The checks
+> run locally. The YAML below is kept as a record; mentions of CI elsewhere in this phase are history.
 
 `.github/workflows/ci.yml`:
 
