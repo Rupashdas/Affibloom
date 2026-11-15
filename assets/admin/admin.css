@@ -846,6 +846,8 @@
 .affibloom-admin .affibloom-input.is-invalid,
 .affibloom-tags:has(.affibloom-tags__input.is-invalid) { border-color: var(--affibloom-danger-700); }
 .affibloom-field__error { margin: 4px 0 0; color: var(--affibloom-danger-700); font-size: 13px; line-height: 18px; }
+.affibloom-toggle-row__note { margin: 2px 0 0 56px; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-columns .affibloom-card__body--fields > .affibloom-toggle-row__note + .affibloom-toggle-row { margin-top: 10px; }
 .affibloom-field__hint { margin: 4px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
 
 /* The whitelist as removable tags, as Lasso's tag list */

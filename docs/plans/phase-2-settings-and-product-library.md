@@ -281,7 +281,7 @@ C1F and C1G in Phase 3
 - [x] Task C1Q6b: Ten ASINs per request; per-item errors
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [x] Task C1K: Keep Geni.us Formatting on add and save
-- [ ] Task C1L: The cloud-only switches labelled
+- [x] Task C1L: The cloud-only switches labelled
 - [ ] Task C1M: The Amazon search tab in Add A New Link
 - [ ] Task C1N: The SiteStripe notice
 - [ ] Task C1O: Amazon data when the primary URL changes
@@ -6386,10 +6386,14 @@ in Affibloom; the stored values still show.
 
 **Files:** modify `templates/admin/settings-amazon.php`; `C1.spec.ts` AC18.
 
-- [ ] **Step 1: Failing test** (AC18: the three notes).
-- [ ] **Step 2: The notes** (per N1's answer).
-- [ ] **Step 3: Run and look** at 1280 and 375 px.
-- [ ] **Step 4: Commit** — "Say which Amazon switches needed Lasso's cloud".
+- [x] **Step 1: Failing test** (AC18: the three notes).
+- [x] **Step 2: The notes** (per N1's answer).
+- [x] **Step 3: Run and look** at 1280 and 375 px.
+- [x] **Step 4: Commit** — "Say which Amazon switches needed Lasso's cloud".
+
+*Note (2026-11-15):* the note does not name Lasso (no Lasso branding, the user, 2026-11-14): "This worked only through
+an outside cloud service and has no effect in Affibloom. Your choice is kept." It is a `note` option on
+`partials/switch-row.php`, joined to the switch's description. Checked: unit tests, phpcs, looks at 1280 and 375 px.
 
 ---
 

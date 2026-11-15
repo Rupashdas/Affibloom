@@ -632,6 +632,27 @@ test.describe( 'C1 Amazon product data', () => {
 		}
 	} );
 
+	test( 'AC18 the three switches that needed an outside cloud say they have no effect, and keep their values (C1L)', async ( { page } ) => {
+		const before = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		try {
+			setSettings( { mobile_deep_linking: true, international_click: false, commission_upgrades: true } );
+			await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
+			for ( const [ label, on ] of [ [ 'Mobile Deep Linking', true ], [ 'Send Readers to Their Local Store', false ], [ 'Commission Upgrades', true ] ] as const ) {
+				const toggle = page.getByRole( 'switch', { name: label, exact: true } );
+				await expect( toggle ).toHaveAccessibleDescription( /has no effect in Affibloom/ );
+				await expect( toggle ).toBeChecked( { checked: on } );
+			}
+			await expect( page.getByText( /has no effect in Affibloom/ ) ).toHaveCount( 3 );
+			await expect( page.getByText( /Lasso/ ) ).toHaveCount( 0 );
+		} finally {
+			setSettings( {
+				mobile_deep_linking: before.mobile_deep_linking ?? false,
+				international_click: before.international_click ?? false,
+				commission_upgrades: before.commission_upgrades ?? false,
+			} );
+		}
+	} );
+
 	test( 'AC9 wp affibloom amazon get prints the item, or the error code and message', () => {
 		/** Runs the command; its output, or its error output when it fails. */
 		const get = ( ...args: string[] ): { failed: boolean; out: string } => {

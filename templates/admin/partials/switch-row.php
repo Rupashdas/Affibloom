@@ -6,13 +6,17 @@
  * second use. Settings rows in the Aurora layout (General) use partials/toggle.php instead.
  *
  * @package Affibloom
- * @var array{id: string, name: string, label: string, checked: bool, help?: string, soon?: bool, disabled?: bool, data?: array<string, string>} $view
+ * @var array{id: string, name: string, label: string, checked: bool, help?: string, note?: string, soon?: bool, disabled?: bool, data?: array<string, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $help    = $view['help'] ?? '';
 $help_id = $view['id'] . '-help';
+// A line of text under the row, always shown (the Amazon tab's switches that needed an outside cloud, Task C1L).
+$note      = $view['note'] ?? '';
+$note_id   = $view['id'] . '-note';
+$described = trim( ( '' === $help ? '' : $help_id ) . ( '' === $note ? '' : ' ' . $note_id ) );
 // A switch whose behaviour comes later: disabled, with the "Soon" chip by its label (the product page, Task 14B).
 $soon = $view['soon'] ?? false;
 // A switch that cannot be changed for now (Google Analytics' switches while there is no Tracking ID, Task 9F), and any
@@ -27,7 +31,7 @@ foreach ( $view['data'] ?? array() as $attribute => $value ) {
 	<span class="affibloom-toggle">
 		<input type="checkbox" class="affibloom-toggle__input" role="switch" id="<?php echo esc_attr( $view['id'] ); ?>"
 			name="<?php echo esc_attr( $view['name'] ); ?>" value="1" <?php checked( $view['checked'] ); ?>
-			<?php echo '' === $help ? '' : 'aria-describedby="' . esc_attr( $help_id ) . '"'; ?><?php disabled( $disabled ); ?><?php echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above. ?>>
+			<?php echo '' === $described ? '' : 'aria-describedby="' . esc_attr( $described ) . '"'; ?><?php disabled( $disabled ); ?><?php echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above. ?>>
 		<span class="affibloom-toggle__track" aria-hidden="true"></span>
 	</span>
 	<label class="affibloom-toggle-row__label" for="<?php echo esc_attr( $view['id'] ); ?>"><?php echo esc_html( $view['label'] ); ?></label>
@@ -47,3 +51,6 @@ foreach ( $view['data'] ?? array() as $attribute => $value ) {
 	}
 	?>
 </div>
+<?php if ( '' !== $note ) : ?>
+	<p class="affibloom-toggle-row__note" id="<?php echo esc_attr( $note_id ); ?>"><?php echo esc_html( $note ); ?></p>
+<?php endif; ?>

@@ -32,6 +32,10 @@ $preferences = array(
 	'keep_genius_formatting'          => array( __( 'Keep Geni.us Formatting', 'affibloom' ), __( 'Turn this off to remove geni.us cloaking from all links.', 'affibloom' ) ),
 	'scan_sitestripe_in_post_content' => array( __( 'Scan SiteStripe in post content', 'affibloom' ), __( 'When enabled, post content is scanned for SiteStripe images, iframes, and page-builder data during link detection. Disable for faster scans if you do not use SiteStripe embeds.', 'affibloom' ) ),
 );
+
+// The three switches that worked only through an outside cloud service: kept with their values, labelled (C1L, decision B4).
+$cloud_only = array( 'commission_upgrades', 'mobile_deep_linking', 'international_click' );
+$cloud_note = __( 'This worked only through an outside cloud service and has no effect in Affibloom. Your choice is kept.', 'affibloom' );
 ?>
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header' ); ?>
@@ -151,6 +155,7 @@ $preferences = array(
 											'label'   => $label,
 											'checked' => $settings->bool( $key ),
 											'help'    => $help,
+											'note'    => in_array( $key, $cloud_only, true ) ? $cloud_note : '',
 										)
 									);
 								}
