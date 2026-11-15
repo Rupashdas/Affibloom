@@ -309,24 +309,9 @@ final class AmazonDataService {
 	 * @param Product $draft The product about to be stored.
 	 */
 	public function fill( Product $draft ): Product {
-		$asin = Asin::from( $draft->asin );
-		if ( null === $asin ) {
+		$data = $this->data_for( $draft );
+		if ( null === $data ) {
 			return $draft;
-		}
-
-		$country = self::country( $draft );
-		$data    = $this->products->find( $asin->value, $country );
-
-		if ( null !== $data ) {
-			$data = $data->linked( $draft->url->value() );
-		} else {
-			$data = $this->fetch( $asin, $country, $draft->url->value() );
-			if ( null === $data ) {
-				return $draft;
-			}
-		}
-		if ( $data->complete() ) {
-			$this->products->save( $data );
 		}
 
 		$changes = array();
@@ -341,6 +326,54 @@ final class AmazonDataService {
 		}
 
 		return $draft->with( $changes );
+	}
+
+	/**
+	 * A product whose Primary URL now leads to another ASIN (C1O; Lasso's save_lasso_url, then
+	 * apply_product_title_and_thumbnail_from_product_row, R33, D7): it takes the new item's image link always, unless a
+	 * media library image is set (F1 S6), and its title only when $rename says so (Keep Title off, or a placeholder
+	 * name). Without Amazon data for the item the product is returned as it was.
+	 *
+	 * @param Product $product The product with its new link, ASIN and store.
+	 * @param bool    $rename  Whether the name follows the new item.
+	 */
+	public function on_link_changed( Product $product, bool $rename ): Product {
+		$data = $this->data_for( $product );
+		if ( null === $data ) {
+			return $product;
+		}
+
+		$changes = array();
+		if ( $rename && '' !== $data->name ) {
+			$changes['name'] = $data->name;
+		}
+		if ( 0 === $product->image_id && AmazonProduct::is_image_link( $data->image ) ) {
+			$changes['image_url'] = $data->image;
+		}
+
+		return $product->with( $changes );
+	}
+
+	/**
+	 * Amazon's data for a product's ASIN and store: the stored row (with the product's link), else Amazon's answer; stored
+	 * when complete. Null when the product has no ASIN, or there is no stored row and Amazon cannot be asked or fails.
+	 *
+	 * @param Product $product A product about to be stored.
+	 */
+	private function data_for( Product $product ): ?AmazonProduct {
+		$asin = Asin::from( $product->asin );
+		if ( null === $asin ) {
+			return null;
+		}
+
+		$country = self::country( $product );
+		$data    = $this->products->find( $asin->value, $country );
+		$data    = null !== $data ? $data->linked( $product->url->value() ) : $this->fetch( $asin, $country, $product->url->value() );
+		if ( null !== $data && $data->complete() ) {
+			$this->products->save( $data );
+		}
+
+		return $data;
 	}
 
 	/**

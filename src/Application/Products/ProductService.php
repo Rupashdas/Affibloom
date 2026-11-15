@@ -183,8 +183,9 @@ final class ProductService {
 	 * - the same Amazon product (ASIN and store): updated in place, a typed Amazon short link kept as typed, the name,
 	 *   the image and the ASIN untouched;
 	 * - another ASIN: type, ASIN, store and search key from the new link; the name becomes the link's starting name
-	 *   (decision 11) when "Keep title when URL replaced" is off or the name is a placeholder; the image becomes the new
-	 *   product's, which is none until C1 brings Amazon data, unless a media library image is set (S6);
+	 *   (decision 11), or Amazon's title when its data can be had (C1O), when "Keep title when URL replaced" is off or the
+	 *   name is a placeholder; the image becomes the new product's Amazon image, or none without Amazon data, unless a
+	 *   media library image is set (S6);
 	 * - another shop's link: the Amazon keys go, as Lasso deletes amazon_product_id; name and image stay;
 	 * - a link another published product has, by the add flow's rules (Tasks 11B, 12B, 12C): DuplicateLink, and the
 	 *   page offers Lasso's repoint (Task 15C). The same ASIN on the same store is this product, never a duplicate;
@@ -240,16 +241,20 @@ final class ProductService {
 			'amazon_country' => $country,
 			'search_key'     => $amazon->search_key(),
 		);
-		if ( '' !== $asin ) {
-			if ( ! $settings->bool( 'keep_title_when_url_replaced' ) || PlaceholderName::is( $changed->name ) ) {
-				$changes['name'] = $amazon->starting_name();
-			}
-			if ( 0 === $changed->image_id ) {
-				$changes['image_url'] = '';
-			}
+		if ( '' === $asin ) {
+			return $changed->with( $changes );
 		}
 
-		return $changed->with( $changes );
+		$rename = ! $settings->bool( 'keep_title_when_url_replaced' ) || PlaceholderName::is( $changed->name );
+		if ( $rename ) {
+			$changes['name'] = $amazon->starting_name();
+		}
+		if ( 0 === $changed->image_id ) {
+			$changes['image_url'] = '';
+		}
+
+		// Amazon's image and, by the same rule, its title, when its data can be had (C1O, R33).
+		return $this->amazon->on_link_changed( $changed->with( $changes ), $rename );
 	}
 
 	/**

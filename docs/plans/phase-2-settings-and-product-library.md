@@ -284,7 +284,7 @@ C1F and C1G in Phase 3
 - [x] Task C1L: The cloud-only switches labelled
 - [x] Task C1M: The Amazon search tab in Add A New Link
 - [x] Task C1N: The SiteStripe notice
-- [ ] Task C1O: Amazon data when the primary URL changes
+- [x] Task C1O: Amazon data when the primary URL changes
 - [ ] Task C1P: The geni.us clean-up job
 
 ## Cross-phase notes
@@ -6487,10 +6487,14 @@ Title When URL Is Replaced" is off (AC16); without credentials only the title ru
 
 **Files:** modify `ProductService.php`, `AmazonDataService.php`; a unit test; `C1.spec.ts` AC16.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Rule.**
-- [ ] **Step 3: Run and look** (change a stubbed product's ASIN with the setting on and off).
-- [ ] **Step 4: Commit** — "Take the new Amazon product's data when a link changes".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Rule.**
+- [x] **Step 3: Run and look** (change a stubbed product's ASIN with the setting on and off).
+- [x] **Step 4: Commit** — "Take the new Amazon product's data when a link changes".
+
+*Note (2026-11-15):* the method is `on_link_changed( Product, bool $rename )` (snake_case, as the code base); ProductService
+keeps the title rule and passes it. A media library image still wins (S6). Checked by five ProductServiceAmazonTest cases
+and once on Local through the stub (name kept, image taken); AC16 written, not run.
 
 ---
 

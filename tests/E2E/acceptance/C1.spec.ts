@@ -578,6 +578,47 @@ test.describe( 'C1 Amazon product data', () => {
 		clearDismissal();
 	} );
 
+	test( 'AC16 a link changed to another ASIN takes its image, and its name only when Keep Title is off or a placeholder (C1O)', async ( { page } ) => {
+		credentials( valid );
+		stub( 'ok' );
+		const image = 'https://m.media-amazon.com/images/I/71stubLarge.jpg';
+		const title = 'Mikasa V200W Official Game Volleyball';
+		const settings = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		const made: number[] = [];
+		const replace = async ( name: string ): Promise< number > => {
+			const asin = randomAsin();
+			const id = createProduct( { name, type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20`, image_url: 'https://example.com/old.jpg' } );
+			made.push( id );
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+			await page.locator( '#affibloom-url' ).fill( `https://www.amazon.com/dp/${ randomAsin() }` );
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( /saved/i );
+			return id;
+		};
+		try {
+			// Keep Title on (the default): the editor's name stays, the image follows the new product.
+			setSettings( { keep_title_when_url_replaced: true } );
+			const kept = await replace( 'My own words' );
+			expect( meta( kept, 'image_url' ) ).toBe( image );
+			expect( wp( 'post', 'get', String( kept ), '--field=post_title' ) ).toBe( 'My own words' );
+
+			// A placeholder name takes Amazon's title even with Keep Title on.
+			const placeholder = await replace( 'Amazon' );
+			expect( wp( 'post', 'get', String( placeholder ), '--field=post_title' ) ).toBe( title );
+
+			// Keep Title off: the name follows the new product too.
+			setSettings( { keep_title_when_url_replaced: false } );
+			const renamed = await replace( 'My own words' );
+			expect( wp( 'post', 'get', String( renamed ), '--field=post_title' ) ).toBe( title );
+			expect( meta( renamed, 'image_url' ) ).toBe( image );
+		} finally {
+			setSettings( { keep_title_when_url_replaced: settings.keep_title_when_url_replaced ?? true } );
+			for ( const id of made ) {
+				wp( 'post', 'delete', String( id ), '--force' );
+			}
+		}
+	} );
+
 	test( 'AC17 with Keep Geni.us Formatting off a geni.us link is stored as where it leads and kept as the old link (C1K)', async ( { page } ) => {
 		credentials( null );
 		stub( 'ok' ); // The stub answers https://geni.us/<code> with a 301 to https://www.amazon.com/dp/B0<CODE>.
