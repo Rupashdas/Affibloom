@@ -35,4 +35,16 @@ interface AmazonCatalog {
 	 * @throws CatalogError AuthFailed, HttpError, ApiError or NotFound.
 	 */
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem;
+
+	/**
+	 * Amazon's answer for one item exactly as received (C1Q1, for recording real answers): status and body.
+	 *
+	 * @param Credentials       $credentials Configured credentials.
+	 * @param Asin              $asin        The item.
+	 * @param string            $country     The store's country code.
+	 * @param list<string>|null $resources   The resource paths to ask for; null asks every one Amazon lists.
+	 * @return array{status: int, body: string}
+	 * @throws CatalogError AuthFailed or HttpError.
+	 */
+	public function raw( Credentials $credentials, Asin $asin, string $country, ?array $resources ): array;
 }

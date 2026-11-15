@@ -492,6 +492,16 @@ test.describe( 'C1 Amazon product data', () => {
 		expect( answer.out ).toContain( '- FIVB approved for international play' );
 		expect( answer.out ).toContain( 'URL: https://www.amazon.com/dp/B0STUBITEM' );
 
+		// --raw (C1Q1): Amazon's answer as received; --all asks every official resource, --resources exactly those named.
+		for ( const extra of [ [], [ '--all' ], [ '--resources=itemInfo.title,parentASIN' ] ] ) {
+			answer = get( 'B0STUBITEM', '--raw', ...extra );
+			expect( answer.failed ).toBe( false );
+			expect( JSON.parse( answer.out ).itemsResult.items[ 0 ].itemInfo.title.displayValue ).toBe( 'Mikasa V200W Official Game Volleyball' );
+		}
+		answer = get( 'B0STUBITEM', '--all' );
+		expect( answer.failed ).toBe( true );
+		expect( answer.out ).toContain( '--all and --resources need --raw' );
+
 		// Another store: asked by its marketplace.
 		expect( get( 'B0STUBITEM', '--country=gb' ).out ).toContain( 'URL: https://www.amazon.co.uk/dp/B0STUBITEM' );
 

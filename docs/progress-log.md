@@ -4,6 +4,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q1 done, at the user's "Done, start C1Q1"):** deviation 120. Real answers for 3 ASINs
+  recorded with every resource; Amazon returns no ratings. Unit 649; AC9 passed. Next C1Q2 after the user's approval.
+
 - **2026-11-15 (Claude Code, C1Q0 done, at the user's "Keep them, mark refused"):** deviation 119. Refused credentials
   kept and marked, shown on the card, no Amazon calls while refused; the stub and the run restore never touch a
   person's credentials. Unit 646; C1 AC8 and C1Q0 tests passed. Credentials on Local still empty: the user re-enters them.

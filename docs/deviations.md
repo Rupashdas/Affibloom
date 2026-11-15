@@ -125,6 +125,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 117. Full Amazon product data, C1Q0-C1Q6, before C1K (the user, 2026-11-15): features field, C1E's price job brought forward, no variations.
 - 118. Task C1Q0 findings (2026-11-15): the credentials were cleared by a real token refusal (07:46:58) and by a test run around the user's Validate (16:51).
 - 119. Task C1Q0 (2026-11-15): refused credentials kept and marked (not cleared, R22), the stub answers only test credentials, the run restore keeps a person's.
+- 120. Task C1Q1 (2026-11-15): real Creators API answers recorded for 3 ASINs; `--resources` added; Amazon returns no ratings.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2578,3 +2579,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     person's credentials. AC8's rejection checks moved to a new C1Q0 test (AC8 hit the 45 s limit). Checks: unit 646 red
     then green; C1 AC8 x2 and both C1Q0 tests passed; lint, PHPStan clean; by hand the restore rule and the card at 1280
     and 375 px (the time kept on one line). The C1K first try's hunks stay unstaged.
+
+120. **Task C1Q1: real Creators API answers as fixtures (2026-11-15).** `wp affibloom amazon get <asin> --raw [--all |
+    --resources=<paths>]` prints Amazon's body as received (an error body too, then "HTTP n"); `--all` asks the 30 paths of
+    Amazon's getItems table; `--resources` (not in the plan) was needed to try `customerReviews` on its own.
+    `CreatorsApiCatalog::get_items()` is shared by `item()` and `raw()`. Recorded live, partner tag replaced by
+    `yourtag-20`: `live-B000IXRCTQ-all` (in stock, LIST_PRICE saving), `live-B0DHLWFD84-all` (WAS_PRICE), `live-B0F7RNL68R-all`
+    (OUT_OF_STOCK, no price), `live-B000IXRCTQ-customerReviews`. Findings: **no ratings or review counts** (the request is
+    accepted, nothing comes back); no deal at the time; dimensions are numbers; 5-7 variant images; seller, condition,
+    buy box, parent ASIN, brand, model, EAN/UPC, category and rank present. Checks: unit 649 (raw x2, real answers
+    read by today's `CatalogItem`); C1 AC9 red then green; lint, PHPStan clean.

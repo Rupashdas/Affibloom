@@ -271,7 +271,7 @@ C1F and C1G in Phase 3
 - [x] Task C1D: Refresh on the product page
 - [x] Task C1I: Bulk Amazon sync
 - [x] Task C1Q0: Amazon credentials kept (why they end up empty)
-- [ ] Task C1Q1: Real Creators API answers as fixtures
+- [x] Task C1Q1: Real Creators API answers as fixtures
 - [ ] Task C1Q2: Read every relevant resource
 - [ ] Task C1Q3: Store the full Amazon data
 - [ ] Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
@@ -6275,6 +6275,7 @@ resource when `--all`. **Needs** working credentials (C1Q0). Three real ASINs fr
 with a saving, one with a deal or another seller, one out of stock or unavailable); the answers are saved under
 `tests/fixtures/amazon/live-*.json` with the partner tag and any account data scrubbed. Settles whether
 `customerReviews` exists and the images' shape. Commit — "Record real Creators API answers as test fixtures".
+**Done 2026-11-15 (deviation 120).**
 
 ### Task C1Q2: Read every relevant resource
 

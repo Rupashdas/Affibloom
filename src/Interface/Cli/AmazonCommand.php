@@ -13,6 +13,7 @@ use Affibloom\Application\Amazon\AmazonCatalog;
 use Affibloom\Application\Amazon\CatalogError;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Domain\Amazon\Asin;
+use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Module;
@@ -56,13 +57,23 @@ final class AmazonCommand implements Module {
 	 * [--country=<cc>]
 	 * : The store's two-letter code (us, gb, de, …). Default: the Default Tracking ID in Settings → Amazon.
 	 *
+	 * [--raw]
+	 * : Print Amazon's answer exactly as received (the JSON body), for recording test fixtures (C1Q1).
+	 *
+	 * [--all]
+	 * : With --raw: ask for every getItems resource Amazon lists.
+	 *
+	 * [--resources=<paths>]
+	 * : With --raw: ask for exactly these resource paths, comma-separated.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp affibloom amazon get B00JMB3FHS
 	 *     wp affibloom amazon get B00JMB3FHS --country=gb
+	 *     wp affibloom amazon get B00JMB3FHS --raw --all
 	 *
-	 * @param list<string>          $args       The ASIN.
-	 * @param array<string, string> $assoc_args --country.
+	 * @param list<string>               $args       The ASIN.
+	 * @param array<string, string|bool> $assoc_args --country, --raw, --all, --resources.
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
 		$asin = Asin::from( $args[0] ?? '' );
@@ -70,7 +81,12 @@ final class AmazonCommand implements Module {
 			WP_CLI::error( 'InvalidAsin: ASIN is required.' );
 		}
 
-		$country = strtolower( $assoc_args['country'] ?? $this->credentials->default_country() );
+		$raw = ! empty( $assoc_args['raw'] );
+		if ( ! $raw && ( isset( $assoc_args['all'] ) || isset( $assoc_args['resources'] ) ) ) {
+			WP_CLI::error( '--all and --resources need --raw.' );
+		}
+
+		$country = strtolower( (string) ( $assoc_args['country'] ?? $this->credentials->default_country() ) );
 		if ( ! Marketplace::is_country( $country ) ) {
 			WP_CLI::error( sprintf( 'Unknown store "%s". Use one of: %s.', $country, implode( ', ', array_keys( Marketplace::names() ) ) ) );
 		}
@@ -84,6 +100,11 @@ final class AmazonCommand implements Module {
 			WP_CLI::error( sprintf( 'Refused by Amazon on %s UTC (%s): check the credentials and Validate them again in Settings → Amazon.', $refusal->at, $refusal->reason ) );
 		}
 
+		if ( $raw ) {
+			$this->print_raw( $credentials, $asin, $country, isset( $assoc_args['resources'] ) && empty( $assoc_args['all'] ) ? (string) $assoc_args['resources'] : null );
+			return;
+		}
+
 		try {
 			$item = $this->catalog->item( $credentials, $asin, $country );
 		} catch ( CatalogError $error ) {
@@ -92,6 +113,28 @@ final class AmazonCommand implements Module {
 
 		foreach ( self::lines( $item ) as $line ) {
 			WP_CLI::line( $line );
+		}
+	}
+
+	/**
+	 * Prints Amazon's answer as received; an error answer is printed too, then reported with its status.
+	 *
+	 * @param Credentials $credentials The saved credentials.
+	 * @param Asin        $asin        The item.
+	 * @param string      $country     The store.
+	 * @param string|null $paths       Comma-separated resource paths, or null for every one.
+	 */
+	private function print_raw( Credentials $credentials, Asin $asin, string $country, ?string $paths ): void {
+		$resources = null === $paths ? null : array_values( array_filter( array_map( 'trim', explode( ',', $paths ) ), static fn( string $path ): bool => '' !== $path ) );
+		try {
+			$answer = $this->catalog->raw( $credentials, $asin, $country, $resources );
+		} catch ( CatalogError $error ) {
+			WP_CLI::error( $error->kind . ': ' . $error->getMessage() );
+		}
+
+		WP_CLI::line( $answer['body'] );
+		if ( $answer['status'] >= 400 ) {
+			WP_CLI::error( 'HTTP ' . $answer['status'] );
 		}
 	}
 

@@ -73,7 +73,7 @@ once; throttling is HTTP 429 `ThrottleException` with `retryAfterSeconds`; the t
    the stored price and stock current, stores prices as numbers, keeps the last good data when a call fails, honours
    throttling and retry times and stays inside the daily quota. C1E's "Only update products with Locations" arm needs
    the link index (F21, Phase 5) and stays with C1E.
-4. **Ratings:** if Amazon does not return them (Q1 settles it), the box's stars stay the Primary Rating field (F8). No
+4. **Ratings:** Amazon does not return them (C1Q1, 2026-11-15: `customerReviews` accepted, nothing returned), so the box's stars stay the Primary Rating field (F8). No
    new rating system.
 5. **Variations (Q7) excluded,** for a later phase.
 6. **Order:** now, before Batch 2.2's C1K and C1L: Q0 → Q1 → Q2 → Q3 → Q4 → Q5 → Q6, one task at a time, each with its

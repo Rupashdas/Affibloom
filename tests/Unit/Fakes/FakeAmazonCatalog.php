@@ -40,4 +40,12 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 		}
 		return $this->items[ $asin->value ];
 	}
+
+	/** @var list<list<string>|null> The resources raw() was asked for. */
+	public array $raw = array();
+
+	public function raw( Credentials $credentials, Asin $asin, string $country, ?array $resources ): array {
+		$this->raw[] = $resources;
+		return array( 'status' => 200, 'body' => '{}' );
+	}
 }

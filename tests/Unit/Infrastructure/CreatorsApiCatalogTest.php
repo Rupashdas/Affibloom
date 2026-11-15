@@ -102,6 +102,29 @@ final class CreatorsApiCatalogTest extends TestCase {
 		$this->assertFailsWith( CatalogError::NOT_FOUND, 'Product not found.' );
 	}
 
+	public function test_raw_asks_every_official_resource_and_returns_amazons_answer_as_received(): void {
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 200, self::fixture( 'getItems-ok.json' ) ) );
+
+		$answer = ( new CreatorsApiCatalog() )->raw( self::credentials(), Asin::from( 'B0STUBITEM' ), 'gb', null );
+
+		self::assertSame( array( 'status' => 200, 'body' => self::fixture( 'getItems-ok.json' ) ), $answer );
+		$resources = json_decode( $this->sent[1][1]['body'], true )['resources'];
+		// Amazon's getItems "Resources Parameter" table (Creators API reference, 2026-11-15): 30 paths, no variations.
+		self::assertCount( 30, $resources );
+		foreach ( array( 'itemInfo.byLineInfo', 'itemInfo.manufactureInfo', 'images.variants.large', 'offersV2.listings.dealDetails', 'browseNodeInfo.websiteSalesRank', 'parentASIN' ) as $path ) {
+			self::assertContains( $path, $resources );
+		}
+	}
+
+	public function test_raw_sends_exactly_the_resources_named_and_returns_an_error_answer_too(): void {
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 400, '{"message":"bad resource"}' ) );
+
+		$answer = ( new CreatorsApiCatalog() )->raw( self::credentials(), Asin::from( 'B0STUBITEM' ), 'gb', array( 'customerReviews.count' ) );
+
+		self::assertSame( array( 'status' => 400, 'body' => '{"message":"bad resource"}' ), $answer );
+		self::assertSame( array( 'customerReviews.count' ), json_decode( $this->sent[1][1]['body'], true )['resources'] );
+	}
+
 	public function test_a_refused_token_names_amazons_status_and_error(): void {
 		$this->answers = array( array( 401, self::fixture( 'token-401.json' ) ) );
 		try {

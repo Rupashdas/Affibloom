@@ -19,6 +19,23 @@ final class CatalogItemTest extends TestCase {
 		return json_decode( $json, true )['itemsResult']['items'][0];
 	}
 
+	public function test_amazons_real_answers_are_read(): void {
+		// Recorded from the Creators API on 2026-11-15 with every resource (C1Q1); the partner tag replaced.
+		$ball = CatalogItem::from_creators( self::recorded( 'live-B000IXRCTQ-all.json' ) );
+		self::assertSame( 'B000IXRCTQ', $ball->asin );
+		self::assertStringStartsWith( 'Tachikara', $ball->title );
+		self::assertStringStartsWith( 'https://m.media-amazon.com/images/I/', $ball->image );
+		self::assertSame( array( '$32.97', '$10.02', 23, '$42.99' ), array( $ball->price, $ball->savings, $ball->savings_percent, $ball->basis ) );
+		self::assertTrue( $ball->availability->in_stock );
+		self::assertCount( 5, $ball->features );
+
+		// Out of stock: the listing has an availability and no price.
+		$net = CatalogItem::from_creators( self::recorded( 'live-B0F7RNL68R-all.json' ) );
+		self::assertSame( array( '', '' ), array( $net->price, $net->savings ) );
+		self::assertFalse( $net->availability->in_stock );
+		self::assertSame( 'Currently unavailable.', $net->availability->message );
+	}
+
 	public function test_an_item_in_stock_with_a_saving(): void {
 		$item = CatalogItem::from_creators( self::recorded( 'getItems-ok.json' ) );
 		self::assertSame( 'B0STUBITEM', $item->asin );

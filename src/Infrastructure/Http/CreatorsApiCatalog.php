@@ -43,6 +43,43 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 		'parentASIN',
 	);
 
+	/**
+	 * Every getItems resource, as Amazon's Creators API reference lists them ("Resources Parameter", read 2026-11-15;
+	 * C1Q1). `raw()` asks for them all when no list is given; the variation summary belongs to getVariations, not here.
+	 */
+	private const ALL_RESOURCES = array(
+		'browseNodeInfo.browseNodes',
+		'browseNodeInfo.browseNodes.ancestor',
+		'browseNodeInfo.browseNodes.salesRank',
+		'browseNodeInfo.websiteSalesRank',
+		'images.primary.small',
+		'images.primary.medium',
+		'images.primary.large',
+		'images.variants.small',
+		'images.variants.medium',
+		'images.variants.large',
+		'itemInfo.byLineInfo',
+		'itemInfo.classifications',
+		'itemInfo.contentInfo',
+		'itemInfo.contentRating',
+		'itemInfo.externalIds',
+		'itemInfo.features',
+		'itemInfo.manufactureInfo',
+		'itemInfo.productInfo',
+		'itemInfo.technicalInfo',
+		'itemInfo.title',
+		'itemInfo.tradeInInfo',
+		'offersV2.listings.availability',
+		'offersV2.listings.condition',
+		'offersV2.listings.dealDetails',
+		'offersV2.listings.isBuyBoxWinner',
+		'offersV2.listings.loyaltyPoints',
+		'offersV2.listings.merchantInfo',
+		'offersV2.listings.price',
+		'offersV2.listings.type',
+		'parentASIN',
+	);
+
 	/** The token cache's transient prefix (R8, D6). */
 	private const TOKEN_CACHE = 'affibloom_amazon_token_';
 
@@ -72,27 +109,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 			throw new CatalogError( CatalogError::AUTH_FAILED, 'Could not obtain Creators API access token.' );
 		}
 
-		$marketplace = Marketplace::host( $country );
-		$response    = wp_remote_post(
-			self::GET_ITEMS,
-			array(
-				'timeout' => self::TIMEOUT,
-				'headers' => array(
-					'Authorization' => $credentials->authorization( $token ),
-					'Content-Type'  => 'application/json',
-					'x-marketplace' => $marketplace,
-				),
-				'body'    => (string) wp_json_encode(
-					array(
-						'itemIds'     => array( $asin->value ),
-						'itemIdType'  => 'ASIN',
-						'marketplace' => $marketplace,
-						'partnerTag'  => $credentials->partner_tag,
-						'resources'   => self::RESOURCES,
-					)
-				),
-			)
-		);
+		$response = $this->get_items( $credentials, $token, $asin, $country, self::RESOURCES );
 
 		if ( is_wp_error( $response ) ) {
 			throw new CatalogError( CatalogError::HTTP_ERROR, $response->get_error_message() );
@@ -111,6 +128,64 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 		}
 
 		return CatalogItem::from_creators( $items[0] );
+	}
+
+	/**
+	 * Amazon's getItems answer for one item exactly as received (C1Q1: `wp affibloom amazon get --raw`, for recording
+	 * real answers as test fixtures): the HTTP status and the body, an error answer included.
+	 *
+	 * @param Credentials       $credentials Configured credentials.
+	 * @param Asin              $asin        The item.
+	 * @param string            $country     The store's country code.
+	 * @param list<string>|null $resources   The resource paths to ask for; null asks every one (ALL_RESOURCES).
+	 * @return array{status: int, body: string}
+	 * @throws CatalogError AuthFailed (no token) or HttpError (no answer).
+	 */
+	public function raw( Credentials $credentials, Asin $asin, string $country, ?array $resources ): array {
+		$response = $this->get_items( $credentials, $this->token( $credentials ), $asin, $country, $resources ?? self::ALL_RESOURCES );
+		if ( is_wp_error( $response ) ) {
+			throw new CatalogError( CatalogError::HTTP_ERROR, $response->get_error_message() );
+		}
+
+		return array(
+			'status' => (int) wp_remote_retrieve_response_code( $response ),
+			'body'   => wp_remote_retrieve_body( $response ),
+		);
+	}
+
+	/**
+	 * POST getItems for one ASIN (R9): the token, the store's marketplace, the partner tag and the resources asked for.
+	 *
+	 * @param Credentials  $credentials Configured credentials.
+	 * @param string       $token       A valid access token.
+	 * @param Asin         $asin        The item.
+	 * @param string       $country     The store's country code.
+	 * @param list<string> $resources   The resource paths.
+	 * @return array<string, mixed>|\WP_Error The response.
+	 */
+	private function get_items( Credentials $credentials, string $token, Asin $asin, string $country, array $resources ) {
+		$marketplace = Marketplace::host( $country );
+
+		return wp_remote_post(
+			self::GET_ITEMS,
+			array(
+				'timeout' => self::TIMEOUT,
+				'headers' => array(
+					'Authorization' => $credentials->authorization( $token ),
+					'Content-Type'  => 'application/json',
+					'x-marketplace' => $marketplace,
+				),
+				'body'    => (string) wp_json_encode(
+					array(
+						'itemIds'     => array( $asin->value ),
+						'itemIdType'  => 'ASIN',
+						'marketplace' => $marketplace,
+						'partnerTag'  => $credentials->partner_tag,
+						'resources'   => $resources,
+					)
+				),
+			)
+		);
 	}
 
 	/**
