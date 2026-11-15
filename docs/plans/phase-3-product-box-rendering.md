@@ -102,7 +102,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
 - [x] Task 18C: Where the box's assets load
 - [ ] Task 18D: Lasso's baselines for every theme and state
-- [ ] Task 18E: The 2-box themes and theme resolution
+- [x] Task 18E: The 2-box themes and theme resolution
 - [ ] Task 18F: The 6-box themes (Cactus, Money)
 - [ ] Task 18G: Llama
 - [ ] Task 18H: Layout controls and the phone override on the box
@@ -424,11 +424,17 @@ works; an unknown name draws Cactus.
 
 **Files:** create `src/Domain/Box/ThemeResolver.php`, `templates/front/box-2.php`, `tests/Unit/Domain/Box/ThemeResolverTest.php`; modify `src/Application/Box/BoxBuilder.php`, `src/Interface/Front/BoxHtml.php`, `assets/front/box.css`, `assets/front/box-layout.css`, `tests/E2E/acceptance/F5.spec.ts` (AC8).
 
-- [ ] **Step 1: Failing tests** (AC8, pixels per theme; unit `ThemeResolverTest`).
-- [ ] **Step 2: Resolver.**
-- [ ] **Step 3: Template and CSS.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Draw Lasso's 2-box themes".
+- [x] **Step 1: Failing tests** (AC8, pixels per theme; unit `ThemeResolverTest`).
+- [x] **Step 2: Resolver.**
+- [x] **Step 3: Template and CSS.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Draw Lasso's 2-box themes".
+
+*Note (2026-11-16):* AC8 checks `plain` and `badge` (deviation 138). The rules are the ones the browser matched on
+Lasso's own Cutter, Flow, Geek and Splash boxes on Local (Lasso 370 active), plus their `.mobile`, `:hover` and
+`::after` rules; Flow shares Lab's corner tag. Checked on one page beside Lasso's boxes: every element's box and
+styles equal at 1280 and 390 px (the site's Cutter rules, Additional CSS, added to AC8's `SITE_CSS`). The resolver
+takes the box's theme; the block passes none until 20B. Unit 754, phpcs.
 
 ---
 

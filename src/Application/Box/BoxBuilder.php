@@ -13,6 +13,7 @@ use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
 use Affibloom\Domain\Box\LayoutFamily;
+use Affibloom\Domain\Box\ThemeResolver;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Link\LinkAttributes;
@@ -45,8 +46,8 @@ final class BoxBuilder {
 	 */
 	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides ): BoxView { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- the overrides arrive with Tasks 20A-20C.
 		$config = $display->config( DisplayType::single() );
-		// R3, its first two steps: the Single type's theme, then the product's own (the box's own is Task 18E).
-		$theme = $product->theme ?? $config->theme();
+		// R3: the Single type's theme, then the product's own; a box names none until its `theme` attribute (Task 20B).
+		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, '' );
 		$id    = (int) $product->id;
 
 		// R12: Lasso prints the name through html_entity_decode; the template escapes it again.

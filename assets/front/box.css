@@ -1,10 +1,10 @@
 /**
- * The product box (F5, Task 18B): the container, its elements, the price tooltip, the Lab theme and the phone rules
+ * The product box (F5, Task 18B): the container, its elements, the price tooltip, the themes and the phone rules
  * (767.98px and below, and the preview's `.mobile`).
  *
  * Written for Affibloom's class names (ADR-6; the class map is docs/ui/tokens.md, "Product box") from the rules of
- * Lasso 369's admin/assets/css/lasso-live.min.css (GPL v2 or later) that a Single box uses: the other themes come with
- * Tasks 18E-18G, stars with 21A, fields and Pros & Cons with 21B, the copy button with 21C, SiteStripe with 22E, and
+ * Lasso 369's admin/assets/css/lasso-live.min.css (GPL v2 or later) that a Single box uses: Lab (18B), the 2-box
+ * themes (18E); the 6-box themes come with 18F, Llama with 18G, stars with 21A, fields and Pros & Cons with 21B, the copy button with 21C, SiteStripe with 22E, and
  * the group displays with DT2-DT8. Readers must see the box Lasso drew, so values are kept as Lasso has them and
  * checked against its baselines (tests/fixtures/baselines/variants, 1 %).
  *
@@ -366,6 +366,258 @@ a.affibloom-button-2:hover {
 	height: auto !important;
 	max-width: none !important;
 	max-height: none !important;
+}
+
+/* The 2-box themes (Task 18E; templates/front/box-2.php): Cutter, Flow, Geek and Splash. */
+.affibloom-box .affibloom-cutter {
+	border: 6px solid var(--affibloom-main);
+	box-shadow: 0 0 5px 0 var(--affibloom-main);
+	padding: 20px !important;
+}
+.affibloom-cutter .affibloom-box-1,
+.affibloom-cutter .affibloom-box-2 {
+	-ms-flex: 0 0 50%;
+	flex: 0 0 50%;
+	max-width: 50%;
+}
+.affibloom-cutter .affibloom-box-1 {
+	padding-left: 0 !important;
+}
+.affibloom-cutter .affibloom-box-2 {
+	padding-right: 0 !important;
+}
+.affibloom-cutter .affibloom-title {
+	text-decoration: underline !important;
+}
+.affibloom-cutter .affibloom-image {
+	display: block;
+	margin: auto;
+}
+.affibloom-cutter a.affibloom-button-1,
+.affibloom-cutter a.affibloom-button-2 {
+	display: block;
+	padding: 20px;
+	border-radius: 7px;
+	width: 100%;
+}
+.affibloom-flow .affibloom-box-1 {
+	-ms-flex: 0 0 30%;
+	flex: 0 0 30%;
+	max-width: 30%;
+	padding: 0 15px 0 0 !important;
+}
+.affibloom-flow .affibloom-box-2 {
+	-ms-flex: 0 0 70%;
+	flex: 0 0 70%;
+	max-width: 70%;
+}
+.affibloom-flow a.affibloom-button-1,
+.affibloom-flow a.affibloom-button-2 {
+	display: inline-block;
+	padding: 20px;
+	margin-bottom: 10px;
+	border-radius: 5px;
+}
+.affibloom-flow .affibloom-badge::after {
+	display: none;
+}
+.affibloom-box .affibloom-geek {
+	border-radius: 8px;
+	border: 1px solid #bdbdbd;
+	overflow: hidden;
+}
+.affibloom-geek .affibloom-box-1 {
+	-ms-flex: 0 0 40%;
+	flex: 0 0 40%;
+	max-width: 40%;
+	order: 2;
+	padding: 0 !important;
+	text-align: right;
+}
+.affibloom-geek .affibloom-box-2 {
+	-ms-flex: 0 0 60%;
+	flex: 0 0 60%;
+	max-width: 60%;
+	order: 1;
+	padding: 20px 30px 10px 30px !important;
+}
+.affibloom-geek .affibloom-image img {
+	width: 100% !important;
+	max-height: none !important;
+}
+.affibloom-geek a.affibloom-button-1,
+.affibloom-geek a.affibloom-button-2 {
+	display: block;
+	padding: 20px;
+	margin-bottom: 10px;
+	border-radius: 5px;
+	max-width: 250px;
+}
+.affibloom-box .affibloom-splash {
+	border: 1px solid #e2e2e2;
+	padding: 25px !important;
+	border-radius: 10px;
+}
+.affibloom-splash .affibloom-box-1 {
+	-ms-flex: 0 0 30% !important;
+	flex: 0 0 30% !important;
+	max-width: 30%;
+	order: 2;
+	-ms-flex-order: 2;
+	padding-right: 0 !important;
+	text-align: center;
+}
+.affibloom-splash .affibloom-box-2 {
+	-ms-flex: 0 0 70% !important;
+	flex: 0 0 70% !important;
+	max-width: 70%;
+	order: 1;
+	-ms-flex-order: 1;
+	padding-left: 0 !important;
+}
+.affibloom-splash a.affibloom-button-1,
+.affibloom-splash a.affibloom-button-2 {
+	display: inline-block;
+	background-color: var(--affibloom-button);
+	color: var(--affibloom-button-text);
+	padding: 15px 25px;
+	border-radius: 5px;
+	box-shadow: 0 5px 10px 0 rgba(0,0,0,0.2) !important;
+}
+.affibloom-splash a.affibloom-button-2 {
+	background-color: var(--affibloom-secondary-button);
+	/* Lasso's grid rule (".lasso-grid-row .lasso-splash a.lasso-button-1, .lasso-splash a.lasso-button-2") leaves this
+	   half unscoped, so Single boxes have it too. */
+	margin: 0 0 10px 0 !important;
+}
+.affibloom-splash a.affibloom-button-1:hover,
+.affibloom-splash a.affibloom-button-2:hover {
+	box-shadow: none !important;
+	transform: translateY(3px);
+}
+@media (max-width: 767.98px) {
+	.affibloom-cutter .affibloom-box-1,
+	.affibloom-cutter .affibloom-box-2 {
+		-ms-flex: 0 0 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+	}
+	.affibloom-flow {
+		text-align: center;
+	}
+	.affibloom-flow .affibloom-box-1 {
+		-ms-flex: 0 0 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-bottom: 10px;
+	}
+	.affibloom-flow .affibloom-box-2 {
+		-ms-flex: 0 0 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+	}
+	.affibloom-flow .affibloom-image img {
+		width: 100% !important;
+		max-height: none !important;
+	}
+	.affibloom-geek {
+		text-align: center;
+	}
+	.affibloom-geek .affibloom-box-1 {
+		-ms-flex: 0 0 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		order: 1;
+	}
+	.affibloom-geek .affibloom-box-2 {
+		-ms-flex: 0 0 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		order: 2;
+	}
+	.affibloom-geek .affibloom-image img {
+		width: 100% !important;
+		max-height: none !important;
+	}
+	.affibloom-geek a.affibloom-button-1,
+	.affibloom-geek a.affibloom-button-2 {
+		max-width: none;
+	}
+	.affibloom-splash .affibloom-box-1,
+	.affibloom-splash .affibloom-box-2 {
+		-ms-flex: 0 0 100% !important;
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+		text-align: center !important;
+	}
+	.affibloom-splash .affibloom-box-1 {
+		-ms-flex-order: 1;
+		order: 1;
+	}
+	.affibloom-splash .affibloom-image {
+		float: none;
+	}
+}
+.affibloom-cutter.mobile .affibloom-box-1,
+.affibloom-cutter.mobile .affibloom-box-2 {
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+	max-width: 100%;
+}
+.affibloom-flow.mobile {
+	text-align: center;
+}
+.affibloom-flow.mobile .affibloom-box-1 {
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+	max-width: 100%;
+	margin-bottom: 10px;
+}
+.affibloom-flow.mobile .affibloom-box-2 {
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+	max-width: 100%;
+}
+.affibloom-flow.mobile .affibloom-image img {
+	width: 100% !important;
+	max-height: none !important;
+}
+.affibloom-geek.mobile {
+	text-align: center;
+}
+.affibloom-geek.mobile .affibloom-box-1 {
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+	max-width: 100%;
+	order: 1;
+}
+.affibloom-geek.mobile .affibloom-box-2 {
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+	max-width: 100%;
+	order: 2;
+}
+.affibloom-geek.mobile .affibloom-image img {
+	width: 100% !important;
+	max-height: none !important;
+}
+.affibloom-geek.mobile a.affibloom-button-1,
+.affibloom-geek.mobile a.affibloom-button-2 {
+	max-width: none;
+}
+.affibloom-splash.mobile .affibloom-box-1,
+.affibloom-splash.mobile .affibloom-box-2 {
+	-ms-flex: 0 0 100% !important;
+	flex: 0 0 100% !important;
+	max-width: 100% !important;
+	text-align: center !important;
+}
+.affibloom-splash.mobile .affibloom-box-1 {
+	-ms-flex-order: 1;
+	order: 1;
+}
+.affibloom-splash.mobile .affibloom-image {
+	float: none;
 }
 .affibloom-box .affibloom-box-1 h1 a.affibloom-title,
 .affibloom-box .affibloom-box-1 h2 a.affibloom-title,

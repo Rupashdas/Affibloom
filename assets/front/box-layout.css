@@ -4,13 +4,18 @@
  * DisplayPresentation), with the phone rules at 767.98px and below. Loaded after box.css.
  *
  * Written for Affibloom's class names (ADR-6) from the rules of Lasso 369's admin/assets/css/
- * lasso-display-v2-frontend.css (GPL v2 or later) that a Single Lab box uses; the other themes' rules come with Tasks
- * 18E-18G and the group displays' with DT2-DT8. Checked against Lasso's baselines (1 %).
+ * lasso-display-v2-frontend.css (GPL v2 or later) that a Single box uses with the site's Display settings: Lab (18B) and
+ * the 2-box themes (18E); the 6-box themes come with 18F, Llama with 18G, the other layout states with 18H-18J and the
+ * group displays with DT2-DT8. Checked against Lasso's baselines (1 %).
  *
  * @package Affibloom
  */
 
-.affibloom-advanced.affibloom-lab {
+.affibloom-advanced.affibloom-cutter,
+.affibloom-advanced.affibloom-flow,
+.affibloom-advanced.affibloom-geek,
+.affibloom-advanced.affibloom-lab,
+.affibloom-advanced.affibloom-splash {
 	padding: var(--affibloom-density-padding) !important;
 }
 .affibloom-advanced .affibloom-title,
@@ -169,13 +174,13 @@ article .affibloom-display.affibloom-advanced[data-hide-title="1"] :is(.affibloo
 .affibloom-advanced[data-hide-price="1"][data-hide-prime="1"] .affibloom-price {
 	display: none !important;
 }
-article .affibloom-display.affibloom-advanced.affibloom-lab,
+article .affibloom-display.affibloom-advanced:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-lab, .affibloom-splash),
 .affibloom-advanced.affibloom-display {
 	position: relative;
 	background-color: var(--affibloom-background) !important;
 	color: var(--affibloom-title) !important;
 }
-article .affibloom-display.affibloom-advanced.affibloom-lab :is(.affibloom-title, a.affibloom-title),
+article .affibloom-display.affibloom-advanced:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-lab, .affibloom-splash) :is(.affibloom-title, a.affibloom-title),
 .affibloom-advanced .affibloom-title,
 .affibloom-advanced a.affibloom-title {
 	color: var(--affibloom-title) !important;
@@ -194,16 +199,32 @@ article .affibloom-display.affibloom-advanced.affibloom-lab :is(.affibloom-title
 	color: var(--affibloom-button-text) !important;
 	top: -18px !important;
 }
-/* Lasso's square tag in Lab's inner corner (lines 1420-1438): Lab has no border or shadow, so the ribbon's offset and
-   folded hook would float in empty space. Flow shares the rule (Task 18E). */
-.affibloom-display.affibloom-advanced.affibloom-lab:not(.affibloom-grid-row *) > .affibloom-badge {
-	left: auto !important;
-	right: 0 !important;
+/* Only the lower half of the ribbon (18px) sits inside the card, so the copy clears 20px, not the full 38px (Lasso's
+   lines 1192-1195); Flow and Lab pin a square tag instead. */
+.affibloom-display.affibloom-advanced:not(.affibloom-flow, .affibloom-lab) {
+	--affibloom-badge-reserve: 20px;
+}
+/* Lasso's square tag in the inner corner (lines 1420-1450): Flow and Lab have no border or shadow, so the ribbon's
+   offset and folded hook would float in empty space. Flow's tag sits left, Lab's right; Flow's copy clears it. */
+.affibloom-display.affibloom-advanced:is(.affibloom-flow, .affibloom-lab):not(.affibloom-grid-row *) > .affibloom-badge {
+	left: 0 !important;
+	right: auto !important;
 	top: 0 !important;
 	border-radius: 4px;
 }
-.affibloom-display.affibloom-advanced.affibloom-lab:not(.affibloom-grid-row *) > .affibloom-badge::after {
+.affibloom-display.affibloom-advanced.affibloom-lab:not(.affibloom-grid-row *) > .affibloom-badge {
+	left: auto !important;
+	right: 0 !important;
+}
+.affibloom-display.affibloom-advanced:is(.affibloom-flow, .affibloom-lab):not(.affibloom-grid-row *) > .affibloom-badge::after {
 	display: none !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1,
+.affibloom-display.affibloom-advanced[data-layout-image-position="top"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1 {
+	margin-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-2 {
+	padding-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
 }
 .affibloom-advanced.affibloom-display,
 .affibloom-box .affibloom-advanced.affibloom-display {
@@ -217,6 +238,10 @@ article .affibloom-display.affibloom-advanced.affibloom-lab :is(.affibloom-title
 .affibloom-advanced .affibloom-date {
 	display: inline !important;
 }
+.affibloom-advanced.affibloom-flow .affibloom-end,
+.affibloom-advanced.affibloom-cutter .affibloom-end,
+.affibloom-advanced.affibloom-geek .affibloom-end,
+.affibloom-advanced.affibloom-splash .affibloom-end,
 .affibloom-advanced.affibloom-lab .affibloom-box-3 {
 	width: 100%;
 	text-align: right;
@@ -379,6 +404,100 @@ article .affibloom-display.affibloom-advanced.affibloom-lab :is(.affibloom-title
 	}
 	.affibloom-advanced[data-layout-align="right"] .affibloom-date,
 	.affibloom-advanced[data-layout-align="right"] .affibloom-disclosure {
+		text-align: right !important;
+	}
+}
+
+/* The 2-box themes (Task 18E; templates/front/box-2.php): Cutter, Flow, Geek and Splash, from Lasso's lines 852-963
+   (box order by image position), 1251-1255, 1458-1535, 1643-1745 and 3017-3032. */
+.affibloom-advanced.affibloom-cutter {
+	border-color: var(--affibloom-main) !important;
+	box-shadow: 0 0 5px 0 var(--affibloom-main) !important;
+}
+.affibloom-display.affibloom-advanced:is([data-layout-image-position="left"], [data-layout-image-position="top"]):is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-1,
+.affibloom-display.affibloom-advanced:is([data-layout-image-position="right"], [data-layout-image-position="bottom"]):is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 {
+	order: -3 !important;
+}
+.affibloom-display.affibloom-advanced:is([data-layout-image-position="left"], [data-layout-image-position="top"]):is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2,
+.affibloom-display.affibloom-advanced:is([data-layout-image-position="right"], [data-layout-image-position="bottom"]):is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-1 {
+	order: -2 !important;
+}
+.affibloom-display.affibloom-advanced.affibloom-splash .affibloom-box-2 > .affibloom-end {
+	margin-top: 0 !important;
+}
+/* Flow's buttons are inline blocks: the last one keeps the 10px below it and the end row drops its own margin, so the
+   gap is the same whether the buttons share a line or stack. */
+.affibloom-display.affibloom-advanced.affibloom-flow .affibloom-box-2 > a.affibloom-button-1:last-of-type,
+.affibloom-display.affibloom-advanced.affibloom-flow .affibloom-box-2 > a.affibloom-button-2 {
+	margin-bottom: 10px !important;
+}
+.affibloom-display.affibloom-advanced.affibloom-flow .affibloom-box-2 > .affibloom-end {
+	margin-top: 0 !important;
+}
+@media (max-width: 767.98px) {
+	/* Side by side on a phone: the image floats beside the title and price, and the rest fills the width under it. */
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) {
+		display: block !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash)::after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-1 {
+		float: right !important;
+		flex: none !important;
+		width: 40% !important;
+		max-width: 40% !important;
+		margin: 0 0 8px 12px !important;
+		padding: 0 !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-image-position="left"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-1 {
+		float: left !important;
+		margin: 0 12px 8px 0 !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 {
+		display: block !important;
+		flex: none !important;
+		width: auto !important;
+		max-width: none !important;
+		padding: 0 !important;
+		margin: 0 !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 > :is(.affibloom-clear, .affibloom-description, .affibloom-fields) {
+		clear: both !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 > :is(a.affibloom-title, span.affibloom-title) {
+		display: block !important;
+		width: auto !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 .affibloom-end {
+		clear: both;
+	}
+	/* A badge: 32px above the copy, then (later, so it wins) only the ribbon's reserve where the ribbon overhangs. */
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):has(> .affibloom-badge) .affibloom-box-1 {
+		margin-top: 32px !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):has(> .affibloom-badge) .affibloom-box-2 {
+		padding-top: 32px !important;
+	}
+	.affibloom-display.affibloom-advanced:not(.affibloom-flow, .affibloom-lab, .affibloom-grid-row *) {
+		--affibloom-badge-reserve: 30px;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-geek, .affibloom-splash):has(> .affibloom-badge) .affibloom-box-1 {
+		margin-top: max(0px, calc(var(--affibloom-badge-reserve) - var(--affibloom-density-padding, 10px))) !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 > :first-child,
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 > :first-child .affibloom-title {
+		margin-top: 0 !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-button-align="left"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 {
+		text-align: left !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 {
+		text-align: center !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-button-align="right"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 {
 		text-align: right !important;
 	}
 }

@@ -60,6 +60,7 @@ export type ProductFields = Partial< {
 	button_text2: string;
 	badge: string;
 	description: string;
+	show_description: '1' | '0';
 	rating: string;
 	image_url: string;
 	new_tab: '1' | '0';

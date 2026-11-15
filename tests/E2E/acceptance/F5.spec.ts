@@ -52,7 +52,36 @@ const SITE_CSS = [
 	'.affibloom-display{box-shadow:7px 7px 20px -5px rgba(0,0,0,.75)!important}',
 	// Not the site's `.lasso-badge::after` corner: a stray `}` before it in the Additional CSS makes browsers drop that
 	// rule, so readers never see it (measured on the live box, Fix of 18B).
+	// The site's rules for Cutter (its Additional CSS, nested rules written out; read 2026-11-16), which the theme
+	// baselines carry: the 40/60 split, the title, the buttons and the end row. Its hover rules and `.lasso-cactus.lasso-cutter`
+	// (never both on one box) are left out.
+	'.affibloom-cutter .affibloom-box-1{margin:auto!important;display:block!important;flex:0 0 40%!important;max-width:40%!important}',
+	'@media (max-width:767.98px){.affibloom-cutter .affibloom-box-1{margin-top:25px!important}}',
+	'.affibloom-cutter .affibloom-box-2{flex:0 0 60%!important;max-width:60%!important}',
+	'.affibloom-cutter .affibloom-title{font-size:40px!important;text-decoration:none!important}',
+	'@media (max-width:767.98px){.affibloom-cutter .affibloom-title{font-size:30px!important}}',
+	'.affibloom-cutter a.affibloom-button-2,.affibloom-cutter a.affibloom-button-1{align-items:center;justify-content:center;border-radius:15px;' +
+		'font-size:22.5px!important;font-weight:normal!important;padding:15px 20px!important;width:auto!important}',
+	'.affibloom-cutter .affibloom-end{line-height:.7!important}',
+	'@media (max-width:767.98px){.affibloom-display.affibloom-cutter .affibloom-box-2,.affibloom-display.affibloom-cutter .affibloom-box-1' +
+		'{width:100%!important;max-width:100%!important;flex:0 0 100%!important;text-align:center!important}' +
+		'.affibloom-display.affibloom-cutter a.affibloom-button-1,.affibloom-display.affibloom-cutter a.affibloom-button-2{font-size:calc(11px + .8vw)!important}}',
 ].join( '\n' );
+
+// Where each theme baseline's box starts on the capture's `site` page (tools/baselines-themes.spec.ts), px from the top:
+// the page rebuilt on Local with Lasso 370 and measured, 2026-11-16. AC8-AC10 move the box to the same fraction, as
+// AC1 does with BASELINE_TOP. The `plain` and `badge` states only (deviation 138: the other states come with the tasks
+// that draw them).
+const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
+	'Cutter-plain': { desktop: 4049.484, mobile: 3652.344 },
+	'Cutter-badge': { desktop: 4500.234, mobile: 4052.234 },
+	'Flow-plain': { desktop: 7169.641, mobile: 6657.406 },
+	'Flow-badge': { desktop: 7567.109, mobile: 7026.234 },
+	'Geek-plain': { desktop: 9956.984, mobile: 9422.188 },
+	'Geek-badge': { desktop: 10387.734, mobile: 9797.859 },
+	'Splash-plain': { desktop: 23985.688, mobile: 21101.219 },
+	'Splash-badge': { desktop: 24384.266, mobile: 21470.891 },
+};
 
 // Where each baseline box starts on its guide page (px from the top, Local, 2026-11-16; the variants recaptured that day
 // are byte-identical to Task 5's). Text rasterises by its sub-pixel offset: the same box drawn at .594 instead of .172
@@ -80,11 +109,40 @@ async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< v
 	}, baselineTop );
 }
 
+/**
+ * The theme baselines' product (tools/baselines-themes-matrix.ts): the amazon example without a description, with the
+ * `badge` state's badge or none, and the given Display Theme (none: the Single type's).
+ */
+function themeProduct( state: 'plain' | 'badge', theme?: string ): number {
+	const example = boxes.find( pick.amazon ) as Box;
+	return createProduct( {
+		...productFrom( example ),
+		button_text: '',
+		sponsored: '0',
+		description: '',
+		show_description: '0',
+		badge: state === 'badge' ? 'Our Pick' : '',
+		...( theme ? { theme } : {} ),
+	} );
+}
+
+/** The box at `path` matches `themes/site/<cell>-<desktop|mobile>.png`, with the site's CSS, at Lasso's offset. */
+async function matchesThemeBaseline( page: Page, path: string, cell: string ): Promise< void > {
+	for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
+		await page.setViewportSize( { width, height: 900 } );
+		await page.goto( path );
+		await page.addStyleTag( { content: SITE_CSS } );
+		await onBaselineSubpixel( page, THEME_TOP[ cell ][ name ] );
+		await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'site', `${ cell }-${ name }.png` ] );
+	}
+}
+
 // The site's Display settings for Single (F5 requirements, "This copy, 2026-11-14"), as Settings → Display stores them,
-// and the site's settings the box reads. AC3 and AC4 draw boxes with these, as the live boxes were drawn.
-function useSiteDisplay(): void {
+// and the site's settings the box reads. AC3 and AC4 draw boxes with these, as the live boxes were drawn; AC8 with
+// another Single theme.
+function useSiteDisplay( theme = 'Lab' ): void {
 	const single = {
-		theme: 'Lab',
+		theme,
 		palette: {
 			main: '#000000', title: '#000000', background: '#ffffff', button: '#5e3f8c', secondary_button: '#5e3f8c',
 			button_text: '#ffffff', pros: '#0e4a0e', cons: '#4a0e0e',
@@ -323,6 +381,36 @@ test.describe( 'F5 Box design', () => {
 				expect( bytes.toString( 'utf8' ), `${ file } is a Lasso box` ).toMatch( /^<div [^>]*class="lasso-container/ );
 			}
 		}
+	} );
+
+	// AC8 (Task 18E): the 2-box themes draw Lasso's 2-box card (R8) and match their baselines, desktop and phone, with
+	// the site's Display settings. Cutter comes from the Single type's theme, the others from the product's (R3).
+	for ( const theme of [ 'Cutter', 'Flow', 'Geek', 'Splash' ] ) {
+		test( `@local AC8 ${ theme } prints the 2-box layout and matches its baselines`, async ( { page } ) => {
+			useSiteDisplay( theme === 'Cutter' ? 'Cutter' : 'Lab' );
+			try {
+				for ( const state of [ 'plain', 'badge' ] as const ) {
+					const path = newPostWith( boxBlock( themeProduct( state, theme === 'Cutter' ? undefined : theme ) ) );
+					await page.goto( path );
+					const display = page.locator( `.affibloom-display.affibloom-${ theme.toLowerCase() }` );
+					await expect( display.locator( '> .affibloom-box-1 > a.affibloom-image' ) ).toHaveCount( 1 );
+					await expect( display.locator( '> .affibloom-box-2 > a.affibloom-title + .affibloom-price + .affibloom-clear + a.affibloom-button-1 + .affibloom-end > .affibloom-disclosure' ) ).toHaveCount( 1 );
+					await expect( display.locator( '> .affibloom-box-3' ) ).toHaveCount( 0 );
+					await matchesThemeBaseline( page, path, `${ theme }-${ state }` );
+				}
+			} finally {
+				useSiteDisplay();
+			}
+		} );
+	}
+
+	// AC8: a product's Display Theme in any casing works; an unknown one draws Cactus (R3). The box's own `theme` is the
+	// block attribute of Task 20B (unit-tested in ThemeResolverTest until then).
+	test( 'AC8 a theme name in any casing works and an unknown one draws Cactus', async ( { page } ) => {
+		useSiteDisplay();
+		await page.goto( newPostWith( boxBlock( themeProduct( 'plain', 'sPLASH' ) ) + boxBlock( themeProduct( 'plain', 'Nonsense' ) ) ) );
+		await expect( page.locator( '.affibloom-display' ).nth( 0 ) ).toHaveClass( /\baffibloom-splash\b/ );
+		await expect( page.locator( '.affibloom-display' ).nth( 1 ) ).toHaveClass( /\baffibloom-cactus\b/ );
 	} );
 
 	// AC4: Lasso's attribute order on every link, and its rel and target tables (R38, R39). The box prints Lasso's `rel`;

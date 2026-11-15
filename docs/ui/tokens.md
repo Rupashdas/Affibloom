@@ -92,6 +92,7 @@ decision C1; deviation 132). Task 41 translates the site's `.lasso-*` Additional
 | `lasso-description` | `affibloom-description` | |
 | `lasso-button-1`, `lasso-button-2` | `affibloom-button-1`, `affibloom-button-2` | |
 | `lasso-disclosure`, `lasso-date` | `affibloom-disclosure`, `affibloom-date` | |
+| `lasso-end` | `affibloom-end` | the 2-box layout's disclosure and date row (18E) |
 | `data-lasso-box-trackable` | `data-affibloom-box-trackable` | links |
 | `data-lasso-lid` (the product) | `data-affibloom-id` | links (F12's click key) |
 | `data-lasso-id` (link location) | not printed; F21's `data-affibloom-location` | links |

@@ -143,6 +143,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 135. Task 18B (2026-11-16): the `variants/` baselines predate Lasso 370 (live badge `top: 0`); 18D recaptures them; AC1 adds the site's CSS.
 - 136. Task 18C (2026-11-16): box CSS in the admin (R52) moves to the previews 10D/14E; the copy script to 21C.
 - 137. Task 18D (2026-11-16): baselines drawn on Local with Lasso 370 (staging's Lasso is unlicensed); shortcode cells; variants unchanged, so deviation 135's cause is wrong: AC1's gap is Affibloom's CSS.
+- 138. F5 AC8-AC10 (the user, 2026-11-16): the theme tasks check the `plain` and `badge` baselines; two-buttons, no-image, rating, pros-cons and all-fields move to 19A, 20A, 21A, 21B.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2769,3 +2770,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     attribute rating). 247 boxes in `themes/<group>/` (PNGs 22.1 MB). **Deviation 135 corrected:** the seven variants
     recaptured with Lasso 370 are byte-identical to Task 5's (staging's differ only by its 1 px wider column), so the
     old baselines were right and F5 AC1's 7 % (Affibloom 518 px against Lasso's 534 px) is in Affibloom's 18B CSS.
+
+138. **F5 AC8-AC10 check the `plain` and `badge` theme baselines only (the user, 2026-11-16: "Yes, split them").** The
+    `themes/site/` states other than those two need features later tasks build, so each of those tasks checks its
+    state for all 8 themes, as F5 AC1's variants are already split: **19A** `two-buttons`, **20A** `no-image` (the
+    box's `image_url="hide"`), **21A** `rating`, **21B** `pros-cons` and `all-fields`. The theme tasks (18E-18G) check
+    `plain` and `badge` at 1280 and 390 px. The capture's `site` page was rebuilt once on Local with Lasso 370
+    (`tools/lasso-capture.php` setup and undo, `lasso_settings` restored) to measure where each box started; F5's
+    `THEME_TOP` holds those offsets, so the boxes rasterise at Lasso's sub-pixel positions (as AC1's `BASELINE_TOP`).

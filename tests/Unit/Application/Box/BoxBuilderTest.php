@@ -113,6 +113,16 @@ final class BoxBuilderTest extends TestCase {
 		self::assertStringContainsString( 'affibloom-cactus', $view->classes );
 	}
 
+	/**
+	 * The Single type's theme draws when the product has none (R3); Cutter is the 2-box layout (R5, Task 18E).
+	 */
+	public function test_the_display_types_theme_draws_the_2_box_layout(): void {
+		$view = self::build( null, self::display( 'Cutter' ) );
+
+		self::assertSame( LayoutFamily::TwoBox, $view->family );
+		self::assertSame( 'affibloom-display affibloom-cutter affibloom-url-adidas-ligra-8-kids affibloom-advanced', $view->classes );
+	}
+
 	public function test_the_image_title_and_buttons_link_to_the_product(): void {
 		$view = self::build();
 

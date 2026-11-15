@@ -28,8 +28,7 @@ final class BoxHtml {
 	/**
 	 * The box's HTML.
 	 *
-	 * The 2-box and 6-box templates come with their themes (Tasks 18E, 18F); until then those themes print the 3-box
-	 * markup.
+	 * The 6-box template comes with its themes (Task 18F); until then Cactus and Money print the 3-box markup.
 	 *
 	 * @param BoxView $view The box.
 	 */
