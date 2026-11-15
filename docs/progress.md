@@ -39,8 +39,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    (deviation 108), and the doubled card gaps on Settings → General and Amazon (deviation 109).
 2. **C1A done (2026-11-15, deviation 110). Next: Batch 2.1 (C1B, C1C, C1D)**, when the user says go; then C1I,
    C1K-C1P, then Phase 2's exit check and the user's sign-off. A first try of C1B-C1D was reverted on 2026-11-15
-   (`main` reset to `21f7d03`; see the session log): the Local database still has C1C's table and
-   `affibloom_db_version` 2, which C1C's redo must deal with.
+   (`main` reset to `21f7d03`; see the session log). The Local database was cleaned to match the same day:
+   `affibloom_db_version` 1, no C1C table, the library re-seeded to Lasso's 254 products.
 3. Standing rule (the user, 2026-11-14): **Affibloom works with no Lasso dependency and no Lasso branding.**
    Standing rule (the user, 2026-11-15): **one batch per session**, as listed with its rules in
    [`plans/batches.md`](plans/batches.md); it replaces "one task per session". Each task still has its own commit.

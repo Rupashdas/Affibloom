@@ -4,6 +4,24 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, the Local database brought in line with `21f7d03`, at the user's word):** the user:
+  everything in the Local database is dummy data; clean it up to match the reverted code. Backup first:
+  `app/affibloom-backup-2026-11-15-before-revert-cleanup.sql`. Done:
+  - **C1C's leftovers removed:** `wp_affibloom_amazon_products` dropped, `affibloom_db_version` set back to **1**
+    (the code's only Migrator step), so C1C's redo creates its table as step 2. The C1A stub's test options
+    (`affibloom_test_amazon_stub`, `affibloom_test_amazon_requests`) deleted; with them gone the stub stays off.
+  - **The library re-seeded:** all 259 products (205 published, 54 trashed, 6 of them test products) deleted for
+    good with their meta, then `tools/seed-from-lasso.php` run (deviation 51): **254 published**, one per non-empty
+    Lasso record (263 less the 9 empty ones, which it lists as skipped), with Lasso's dates, so the Dashboard's order is
+    the seed's again. The user said 252; that was the count left after C1's run removed two seeded products, and the
+    original seed is 254 (deviation 51), so 254 it is. F9 AC6's "new tab off on every product" went with the old rows.
+  - **Kept as they were:** the Amazon credentials and Partner tag (C1A's card), `affibloom_settings`, the fields and
+    icons, the Lasso import's "finished" option (254 imported, which the seed matches) and the finished bulk-add
+    job. Product IDs changed (now from 16925); no test, record or term points at an old ID.
+  - **Checked:** 254 published, 254 distinct `_affibloom_lasso_id`, nothing in the trash, no orphan meta or Group
+    terms, no `wp_affibloom_*` table, `Migrator::pending()` false, `GET /affibloom/v1/products` total 254. No
+    E2E run (tests make and keep their data; the user asked for a clean library). No code changed.
+
 - **2026-11-15 (Claude Code, revert to `21f7d03`, at the user's word):** `main` was reset to `21f7d03` and
   force-pushed (the user chose a hard reset over a restore commit). The 16 commits after it (`b50079f`..`3a71ed8`)
   are off `main` and GitHub; they are kept only on the local branch `backup/before-revert-to-21f7d03`. Taken out:
