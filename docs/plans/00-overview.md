@@ -647,7 +647,7 @@ decision C3, TL6); `INSERT_BOXES` is `edit_posts`. Responses follow the global c
 | GET, POST | `/link-index`, `/link-index/rebuild` (and `/link-index/status`) | SETTINGS | link index status and rebuild | F21 35G; F9 9J, 9L | planned |
 | POST | `/clicks` `{ product \| lasso, post, button }` | public | click counter; always 204 | F12 33A | planned |
 | POST | `/amazon/validate` | SETTINGS | validate Creators credentials | C1A | built |
-| GET, POST | `/amazon/bulk-sync`, POST `/amazon/bulk-sync/dismiss`, GET `/amazon/search` | PRODUCTS | bulk Amazon sync; search tab of Add A New Link | C1I, C1M | bulk sync built (C1I); search planned |
+| GET, POST | `/amazon/bulk-sync`, POST `/amazon/bulk-sync/dismiss`, GET `/amazon/search` | PRODUCTS | bulk Amazon sync; search tab of Add A New Link | C1I, C1M | bulk sync built (C1I); search built (C1M) |
 | POST | `/notices/sitestripe/dismiss` | PRODUCTS | SiteStripe notice | C1N | planned |
 | GET, POST | `/amazon-import`, `/amazon-import/dismiss` | PRODUCTS | auto-monetize import status and notice | F35 AM4 | planned |
 | GET | `/jobs`; POST `/jobs/run-due` | PRODUCTS / SETTINGS | Automations popover; cron health check | F38 ON3; F11 32D, 32E | planned |

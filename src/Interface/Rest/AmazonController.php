@@ -10,12 +10,17 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Amazon\AmazonSearchService;
 use Affibloom\Application\Amazon\BulkSyncRefused;
 use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsNotValidated;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Amazon\RefreshFailed;
+use Affibloom\Application\Amazon\SearchRefused;
 use Affibloom\Application\Amazon\SyncOutcome;
+use Affibloom\Domain\Amazon\CatalogItem;
+use Affibloom\Domain\Amazon\Marketplace;
+use Affibloom\Domain\Amazon\SearchPage;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Messages;
 use Affibloom\Module;
@@ -29,18 +34,20 @@ use WP_REST_Server;
  * lasso_verify_amazon_creators_credentials, R19-R22): it checks the typed credentials and answers with the message and
  * the card's new state. Its answers never carry the Secret or the Credential ID (AC5). The second is the product page's
  * Refresh (C1D; Lasso's upload_thumbnail for an Amazon product, R35). The last three are the bulk sync banner's: status,
- * start and dismiss (C1I; Lasso's lasso_bulk_sync_amazon_* AJAX actions, R42).
+ * start and dismiss (C1I; Lasso's lasso_bulk_sync_amazon_* AJAX actions, R42). The search is Add A New Link's Amazon
+ * tab (C1M; Lasso's lasso_pro_marketplace_search, R69, on the Creators API).
  */
 final class AmazonController implements Module {
 
 	/**
 	 * Builds the controller.
 	 *
-	 * @param CredentialsService $credentials The card's use cases.
-	 * @param AmazonDataService  $data        Amazon's data on products (Refresh).
-	 * @param BulkSyncService    $sync        Bulk Amazon sync (the banner's routes, C1I).
+	 * @param CredentialsService  $credentials The card's use cases.
+	 * @param AmazonDataService   $data        Amazon's data on products (Refresh).
+	 * @param BulkSyncService     $sync        Bulk Amazon sync (the banner's routes, C1I).
+	 * @param AmazonSearchService $search     The Amazon tab's search (C1M).
 	 */
-	public function __construct( private CredentialsService $credentials, private AmazonDataService $data, private BulkSyncService $sync ) {}
+	public function __construct( private CredentialsService $credentials, private AmazonDataService $data, private BulkSyncService $sync, private AmazonSearchService $search ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -108,6 +115,25 @@ final class AmazonController implements Module {
 				),
 			)
 		);
+		// Add A New Link's Amazon tab (C1M; Lasso: edit_posts, R69).
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/amazon/search',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'search' ),
+				'permission_callback' => array( $this, 'can_edit_products' ),
+				'args'                => array(
+					'q'    => $text,
+					'page' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'maximum' => SearchPage::LAST,
+						'default' => 1,
+					),
+				),
+			)
+		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
 			'/amazon/bulk-sync/dismiss',
@@ -116,6 +142,55 @@ final class AmazonController implements Module {
 				'callback'            => array( $this, 'bulk_sync_dismiss' ),
 				'permission_callback' => array( $this, 'can_edit_products' ),
 			)
+		);
+	}
+
+	/**
+	 * GET /amazon/search: 200 with the page's items (ASIN, title, image, price and the product page), the page and
+	 * whether another follows; empty keywords give no items and ask Amazon nothing. 409 without credentials, 503 when
+	 * Amazon is unavailable (R68's words), 502 when it answers with an error.
+	 *
+	 * @param WP_REST_Request $request The keywords and the page.
+	 * @phpstan-param WP_REST_Request<array{q: string, page: int}> $request
+	 */
+	public function search( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		try {
+			$found = $this->search->search( get_current_user_id(), sanitize_text_field( (string) $request['q'] ), (int) $request['page'] );
+		} catch ( SearchRefused $refused ) {
+			[ $status, $message ] = match ( $refused->reason ) {
+				SearchRefused::NOT_CONFIGURED => array( 409, __( 'Needs the Amazon API', 'affibloom' ) ),
+				SearchRefused::UNAVAILABLE    => array( 503, __( 'Amazon product search is temporarily unavailable.', 'affibloom' ) ),
+				default                       => array( 502, __( 'Amazon search failed. Try again.', 'affibloom' ) ),
+			};
+			return new WP_Error( 'affibloom_search_' . $refused->reason, $message, array( 'status' => $status ) );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'items'    => array_map( array( self::class, 'search_item' ), $found->items ),
+					'page'     => $found->page,
+					'has_more' => $found->has_more(),
+				),
+			)
+		);
+	}
+
+	/**
+	 * A search result as the tab draws it. The image is kept only when it is an https link (Lasso's tab shows no other).
+	 *
+	 * @param CatalogItem $item The result.
+	 * @return array{asin: string, title: string, image: string, price: string, url: string}
+	 */
+	private static function search_item( CatalogItem $item ): array {
+		$asin = strtoupper( $item->asin );
+
+		return array(
+			'asin'  => $asin,
+			'title' => '' === $item->title ? $asin : $item->title,
+			'image' => str_starts_with( $item->image, 'https://' ) ? $item->image : '',
+			'price' => $item->price,
+			'url'   => '' !== $item->url ? $item->url : 'https://' . Marketplace::host( Marketplace::DEFAULT_COUNTRY ) . '/dp/' . $asin,
 		);
 	}
 

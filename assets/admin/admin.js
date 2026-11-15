@@ -298,6 +298,12 @@
 	 * background run and follows it every 3 seconds until it is done, then goes where the server says. A run already
 	 * going locks the textarea and offers Reload, as in Lasso.
 	 *
+	 * Amazon tab (Task C1M; Lasso's Marketplace tab): opening it checks that Amazon can be asked (GET /amazon/search
+	 * with no keywords; without credentials it says "Needs the Amazon API" and the search is disabled). Search, or
+	 * typing (after 400 ms), asks for ten results a page; a row's Add Link adds that product at once. In bulk mode
+	 * each row has a checkbox instead, up to ten are kept across pages and searches, and the footer's "Add %d Links"
+	 * adds them after asking first. Opening bulk mode goes back to the URL tab, as Lasso's does.
+	 *
 	 * @param {HTMLFormElement} form The `.affibloom-add-form`.
 	 */
 	function addLink( form ) {
@@ -316,6 +322,7 @@
 		var intro = modal.querySelector( '#affibloom-add-intro' );
 		var submit = form.querySelector( '#affibloom-add-submit' );
 		var reload = form.querySelector( '.affibloom-add-form__reload' );
+		var foot = form.querySelector( '.affibloom-modal__foot' );
 		var label = submit.querySelector( '.affibloom-add-form__label' );
 		var idleLabel = label.textContent;
 		var idlePlaceholder = lines.getAttribute( 'placeholder' );
@@ -325,6 +332,18 @@
 		};
 		var bulk = false;
 		var polling = null;
+		var tab = 'url';
+		var tabs = form.querySelectorAll( '[data-add-tab]' );
+		var search = form.querySelector( '#affibloom-add-search' );
+		var searchButton = form.querySelector( '[data-add-search]' );
+		var status = form.querySelector( '[data-search-status]' );
+		var results = form.querySelector( '[data-search-results]' );
+		var pages = form.querySelector( '[data-search-pages]' );
+		var searchMax = parseInt( form.getAttribute( 'data-search-size' ), 10 );
+		var selected = [];
+		var shown = null;
+		var searchTimer = null;
+		var searches = 0;
 
 		var control = function () {
 			return bulk ? lines : field;
@@ -338,8 +357,10 @@
 		var showError = function ( message ) {
 			error.textContent = message;
 			error.hidden = false;
-			control().classList.add( 'is-invalid' );
-			control().setAttribute( 'aria-invalid', 'true' );
+			if ( 'url' === tab ) {
+				control().classList.add( 'is-invalid' );
+				control().setAttribute( 'aria-invalid', 'true' );
+			}
 		};
 		// After a server error Lasso's button reads "Continue Anyway" (data-continue=1) until the link is changed;
 		// here the click sends the same link again (the user's choice, 2026-11-14).
@@ -424,6 +445,7 @@
 			if ( bulk ) {
 				return;
 			}
+			setTab( 'url' );
 			bulk = true;
 			clearError();
 			lines.value = '' !== lines.value.trim() ? lines.value : field.value;
@@ -470,6 +492,246 @@
 				} ).catch( function () {} );
 			}, 3000 );
 		};
+
+		/* The Amazon tab (C1M). */
+		var setStatus = function ( message ) {
+			status.textContent = message;
+			status.hidden = '' === message;
+		};
+		var countLabel = function () {
+			if ( 'amazon' !== tab || ! bulk ) {
+				return;
+			}
+			label.textContent = selected.length ? text( 'label-add-count' ).replace( '%d', String( selected.length ) ) : idleLabel;
+		};
+		var isSelected = function ( asin ) {
+			return -1 !== selected.indexOf( asin );
+		};
+		var addSelected = function ( asins, button ) {
+			clearError();
+			if ( button ) {
+				button.disabled = true;
+				button.textContent = text( 'label-busy' );
+			} else {
+				busy( true );
+			}
+			wp.apiFetch( { path: '/affibloom/v1/products', method: 'POST', data: { selections: asins } } )
+				.then( function ( response ) {
+					window.location.assign( response.data.redirect_to );
+				} )
+				.catch( function ( failure ) {
+					if ( button ) {
+						button.disabled = false;
+						button.textContent = text( 'search-add' );
+					} else {
+						busy( false );
+						countLabel();
+					}
+					showError( ( failure && failure.message ) || text( 'message-failed' ) );
+				} );
+		};
+		var toggleSelected = function ( item, box ) {
+			clearError();
+			if ( isSelected( item.asin ) ) {
+				selected.splice( selected.indexOf( item.asin ), 1 );
+			} else if ( selected.length >= searchMax ) {
+				box.checked = false;
+				showError( text( 'search-max' ) );
+				return;
+			} else {
+				selected.push( item.asin );
+			}
+			box.closest( 'li' ).classList.toggle( 'is-selected', isSelected( item.asin ) );
+			countLabel();
+		};
+		var resultRow = function ( item ) {
+			var li = document.createElement( 'li' );
+			li.className = 'affibloom-add-results__item' + ( isSelected( item.asin ) ? ' is-selected' : '' );
+			var picture = document.createElement( 'span' );
+			picture.className = 'affibloom-add-results__image';
+			if ( item.image ) {
+				var img = document.createElement( 'img' );
+				img.className = 'affibloom-thumb';
+				img.src = item.image;
+				img.alt = '';
+				img.width = 40;
+				img.height = 40;
+				picture.appendChild( img );
+			}
+			var words = document.createElement( 'span' );
+			words.className = 'affibloom-add-results__text';
+			var name = document.createElement( 'strong' );
+			var link = document.createElement( 'a' );
+			link.href = item.url;
+			link.target = '_blank';
+			link.rel = 'noopener noreferrer';
+			link.textContent = item.title;
+			name.appendChild( link );
+			var detail = document.createElement( 'span' );
+			detail.textContent = item.price ? item.price + ' · ' + item.asin : item.asin;
+			words.appendChild( name );
+			words.appendChild( detail );
+			li.appendChild( picture );
+			li.appendChild( words );
+			if ( bulk ) {
+				var box = document.createElement( 'input' );
+				box.type = 'checkbox';
+				box.className = 'affibloom-check';
+				box.checked = isSelected( item.asin );
+				box.setAttribute( 'aria-label', item.title );
+				box.addEventListener( 'change', function () {
+					toggleSelected( item, box );
+				} );
+				li.appendChild( box );
+			} else {
+				var add = document.createElement( 'button' );
+				add.type = 'button';
+				add.className = 'affibloom-button affibloom-button--small affibloom-button--secondary';
+				add.textContent = text( 'search-add' );
+				add.setAttribute( 'aria-label', text( 'search-add' ) + ': ' + item.title );
+				add.addEventListener( 'click', function () {
+					addSelected( [ item.asin ], add );
+				} );
+				li.appendChild( add );
+			}
+			return li;
+		};
+		var showResults = function () {
+			results.replaceChildren();
+			pages.replaceChildren();
+			pages.hidden = true;
+			if ( ! shown ) {
+				return;
+			}
+			shown.items.forEach( function ( item ) {
+				results.appendChild( resultRow( item ) );
+			} );
+			if ( shown.page > 1 || shown.has_more ) {
+				pages.hidden = false;
+				[ [ -1, 'search-prev', shown.page > 1 ], [ 1, 'search-next', shown.has_more ] ].forEach( function ( step ) {
+					var button = document.createElement( 'button' );
+					button.type = 'button';
+					button.className = 'affibloom-button affibloom-button--small affibloom-button--secondary';
+					button.textContent = text( step[ 1 ] );
+					button.disabled = ! step[ 2 ];
+					button.addEventListener( 'click', function () {
+						runSearch( shown.page + step[ 0 ] );
+					} );
+					pages.appendChild( button );
+				} );
+				var where = document.createElement( 'span' );
+				where.textContent = String( shown.page );
+				pages.insertBefore( where, pages.lastChild );
+			}
+		};
+		var runSearch = function ( page ) {
+			var words = search.value.trim();
+			var mine = ++searches;
+			window.clearTimeout( searchTimer );
+			shown = null;
+			showResults();
+			if ( words.length < 2 ) {
+				setStatus( text( 'search-min' ) );
+				return;
+			}
+			setStatus( text( 'search-busy' ) );
+			wp.apiFetch( { path: '/affibloom/v1/amazon/search?' + new URLSearchParams( { q: words, page: String( page ) } ).toString() } )
+				.then( function ( response ) {
+					if ( mine !== searches ) {
+						return;
+					}
+					shown = response.data;
+					setStatus( shown.items.length ? '' : text( 'search-empty' ) );
+					showResults();
+				} )
+				.catch( function ( failure ) {
+					if ( mine === searches ) {
+						setStatus( ( failure && failure.message ) || text( 'search-failed' ) );
+					}
+				} );
+		};
+		var checkSearch = function () {
+			wp.apiFetch( { path: '/affibloom/v1/amazon/search' } )
+				.then( function () {
+					search.disabled = false;
+					searchButton.disabled = false;
+				} )
+				.catch( function ( failure ) {
+					search.disabled = true;
+					searchButton.disabled = true;
+					setStatus( ( failure && failure.message ) || text( 'search-failed' ) );
+				} );
+		};
+		var setTab = function ( name ) {
+			tab = name;
+			Array.prototype.forEach.call( tabs, function ( button ) {
+				var on = name === button.getAttribute( 'data-add-tab' );
+				button.classList.toggle( 'is-active', on );
+				button.setAttribute( 'aria-selected', on ? 'true' : 'false' );
+				button.tabIndex = on ? 0 : -1;
+				form.querySelector( '#' + button.getAttribute( 'aria-controls' ) ).hidden = ! on;
+			} );
+			clearError();
+			if ( 'amazon' === name ) {
+				title.textContent = text( 'title-amazon' );
+				intro.textContent = text( bulk ? 'intro-amazon-bulk' : 'intro-amazon' );
+				// A row's own Add Link adds one product; only bulk mode submits from the footer.
+				foot.hidden = ! bulk;
+				submit.hidden = false;
+				reload.hidden = true;
+				showResults();
+				countLabel();
+				checkSearch();
+				return;
+			}
+			title.textContent = text( bulk ? 'title-bulk' : 'title-single' );
+			intro.textContent = text( bulk ? 'intro-bulk' : 'intro-single' );
+			label.textContent = idleLabel;
+			foot.hidden = false;
+			submit.hidden = bulk && lines.disabled;
+			reload.hidden = ! submit.hidden;
+		};
+		var resetSearch = function () {
+			searches++;
+			window.clearTimeout( searchTimer );
+			selected = [];
+			shown = null;
+			search.value = '';
+			setStatus( '' );
+			showResults();
+		};
+
+		Array.prototype.forEach.call( tabs, function ( button ) {
+			button.addEventListener( 'click', function () {
+				if ( button.getAttribute( 'data-add-tab' ) !== tab ) {
+					setTab( button.getAttribute( 'data-add-tab' ) );
+				}
+			} );
+			// Arrow keys move between the two tabs (WAI-ARIA tabs).
+			button.addEventListener( 'keydown', function ( event ) {
+				if ( 'ArrowLeft' === event.key || 'ArrowRight' === event.key ) {
+					event.preventDefault();
+					var other = 'url' === tab ? 'amazon' : 'url';
+					setTab( other );
+					form.querySelector( '[data-add-tab="' + other + '"]' ).focus();
+				}
+			} );
+		} );
+		searchButton.addEventListener( 'click', function () {
+			runSearch( 1 );
+		} );
+		search.addEventListener( 'input', function () {
+			window.clearTimeout( searchTimer );
+			searchTimer = window.setTimeout( function () {
+				runSearch( 1 );
+			}, 400 );
+		} );
+		search.addEventListener( 'keydown', function ( event ) {
+			if ( 'Enter' === event.key ) {
+				event.preventDefault();
+				runSearch( 1 );
+			}
+		} );
 
 		var addOne = function () {
 			if ( '' === field.value.trim() ) {
@@ -564,9 +826,14 @@
 		modal.addEventListener( 'affibloom:open', function ( event ) {
 			if ( 'bulk' === event.detail.mode ) {
 				enterBulk();
+			} else if ( 'amazon' === event.detail.mode ) {
+				setTab( 'amazon' );
+				search.focus();
 			}
 		} );
 		modal.addEventListener( 'affibloom:close', function () {
+			setTab( 'url' );
+			resetSearch();
 			leaveBulk();
 			field.value = '';
 			lines.value = '';
@@ -578,7 +845,16 @@
 		form.addEventListener( 'submit', function ( event ) {
 			event.preventDefault();
 			clearError();
-			if ( bulk ) {
+			if ( 'amazon' === tab ) {
+				if ( ! bulk ) {
+					return;
+				}
+				if ( ! selected.length ) {
+					showError( text( 'search-select' ) );
+				} else if ( window.confirm( text( 'confirm-bulk' ) ) ) {
+					addSelected( selected.slice(), null );
+				}
+			} else if ( bulk ) {
 				addMany();
 			} else {
 				addOne();

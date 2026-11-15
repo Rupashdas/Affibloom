@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Amazon\AmazonSearchService;
+use Affibloom\Application\Amazon\SearchRefused;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\DuplicateLink;
 use Affibloom\Application\Products\ProductNotFound;
@@ -19,6 +21,7 @@ use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Amazon\SearchPage;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\Capabilities;
@@ -41,11 +44,12 @@ final class ProductsController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param ProductService  $products         Product use cases.
-	 * @param ProductResource $product_resource Products as arrays.
-	 * @param GroupService    $groups           The groups a product is in (F23).
+	 * @param ProductService      $products         Product use cases.
+	 * @param ProductResource     $product_resource Products as arrays.
+	 * @param GroupService        $groups           The groups a product is in (F23).
+	 * @param AmazonSearchService $search       The Amazon tab's selections (C1M).
 	 */
-	public function __construct( private ProductService $products, private ProductResource $product_resource, private GroupService $groups ) {}
+	public function __construct( private ProductService $products, private ProductResource $product_resource, private GroupService $groups, private AmazonSearchService $search ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -91,9 +95,16 @@ final class ProductsController implements Module {
 					'permission_callback' => array( $this, 'can_manage' ),
 					'args'                => array(
 						// Kept exactly as pasted: no sanitising and no length cap (Lasso has none); the domain validates it.
-						'url' => array(
-							'type'     => 'string',
-							'required' => true,
+						'url'        => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						// The Amazon tab's selected search results, by ASIN (C1M): one, or up to ten in bulk mode.
+						'selections' => array(
+							'type'     => 'array',
+							'items'    => array( 'type' => 'string' ),
+							'maxItems' => SearchPage::SIZE,
+							'default'  => array(),
 						),
 					),
 				),
@@ -385,12 +396,18 @@ final class ProductsController implements Module {
 
 	/**
 	 * POST /products: "Add A New Link" with one link. A link the site already has makes no product: 200 with
-	 * "duplicate", as Lasso sends the editor to the existing one.
+	 * "duplicate", as Lasso sends the editor to the existing one. With "selections" it adds the Amazon tab's selected
+	 * results instead.
 	 *
-	 * @param WP_REST_Request $request Request with "url".
-	 * @phpstan-param WP_REST_Request<array{url: string}> $request
+	 * @param WP_REST_Request $request Request with "url", or "selections".
+	 * @phpstan-param WP_REST_Request<array{url: string, selections: list<string>}> $request
 	 */
 	public function create( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$selections = array_values( array_map( 'strval', (array) $request['selections'] ) );
+		if ( array() !== $selections ) {
+			return $this->create_selected( $selections );
+		}
+
 		try {
 			$added = $this->products->create_from_url( (string) $request['url'] );
 		} catch ( InvalidField $error ) {
@@ -413,5 +430,41 @@ final class ProductsController implements Module {
 		}
 
 		return new WP_REST_Response( array( 'data' => $data ), $added->already_existed ? 200 : 201 );
+	}
+
+	/**
+	 * The Amazon tab's selections (C1M; Lasso's marketplace_selection(s), R71): each result's data is stored first, then
+	 * its product link is added as a pasted one would be, so it takes Amazon's name and image without a second request.
+	 * Up to ten are added at once rather than in Lasso's background run: none of them asks Amazon or fetches a page.
+	 * 201 with how many were added (found ones count) and the Dashboard, where an Amazon add goes; 400 when a selection
+	 * is not one of the person's search results.
+	 *
+	 * @param list<string> $asins The selected ASINs.
+	 */
+	private function create_selected( array $asins ): WP_REST_Response|WP_Error {
+		try {
+			$urls = $this->search->selected( get_current_user_id(), $asins );
+		} catch ( SearchRefused $refused ) {
+			return new WP_Error( 'affibloom_invalid_selection', __( 'Invalid selection. Search again and select the product.', 'affibloom' ), array( 'status' => 400 ) );
+		}
+
+		$ids = array();
+		try {
+			foreach ( $urls as $url ) {
+				$ids[] = (int) $this->products->create_from_url( $url )->product->id;
+			}
+		} catch ( InvalidField $error ) {
+			return FieldError::from( $error );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'ids'         => $ids,
+					'redirect_to' => admin_url( 'admin.php?page=' . AdminMenu::SLUG ),
+				),
+			),
+			201
+		);
 	}
 }

@@ -6,6 +6,7 @@ use Affibloom\Application\Amazon\CatalogError;
 use Affibloom\Domain\Amazon\Asin;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
+use Affibloom\Domain\Amazon\SearchPage;
 
 /**
  * Amazon as a test says it answers: accepting ("ok"), refusing ("reject", AuthFailed) or unavailable ("unavailable",
@@ -75,6 +76,26 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
 		}
 		return $this->items[ $asin->value ];
+	}
+
+	/** The page search() answers; an empty one when not set. */
+	public ?SearchPage $search = null;
+
+	/** Answer searches with an ApiError. */
+	public bool $api_error = false;
+
+	/** @var list<array{0: string, 1: int, 2: string}> The keywords, page and store of each search. */
+	public array $searched = array();
+
+	public function search( Credentials $credentials, string $keywords, int $page, string $country ): SearchPage {
+		$this->searched[] = array( $keywords, $page, $country );
+		if ( $this->failing ) {
+			throw new CatalogError( CatalogError::HTTP_ERROR, 'down' );
+		}
+		if ( $this->api_error ) {
+			throw new CatalogError( CatalogError::API_ERROR, 'bad request' );
+		}
+		return $this->search ?? new SearchPage( array(), 0, $page );
 	}
 
 	/** @var list<list<string>|null> The resources raw() was asked for. */

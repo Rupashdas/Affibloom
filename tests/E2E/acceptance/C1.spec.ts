@@ -653,6 +653,80 @@ test.describe( 'C1 Amazon product data', () => {
 		}
 	} );
 
+	test( 'AC15 the Amazon tab searches Amazon, adds one product or up to ten selected, with their data (C1M)', async ( { page } ) => {
+		const byAsin = ( asin: string ) =>
+			wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=any', '--meta_key=_affibloom_asin', `--meta_value=${ asin }`, '--field=ID' )
+				.split( /\s+/ )
+				.filter( Boolean );
+		// The stub's search results (B0SRP0000N); none of them is a product when the test starts.
+		const asins = [ 1, 2 ].flatMap( ( p ) => Array.from( { length: 10 }, ( _, n ) => `B0SR${ p }0000${ n }` ) );
+		for ( const asin of asins ) {
+			byAsin( asin ).forEach( ( id ) => wp( 'post', 'delete', id, '--force' ) );
+		}
+		setSettings( { tracking_id: 'vbvault-20', default_country: 'us' } );
+
+		// Without credentials the tab says so and searches nothing.
+		credentials( null );
+		stub( 'ok' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
+		const dialog = page.getByRole( 'dialog' );
+		await dialog.getByRole( 'tab', { name: 'Amazon' } ).click();
+		await expect( dialog.getByText( 'Needs the Amazon API' ) ).toBeVisible();
+		await expect( dialog.getByRole( 'searchbox', { name: 'Search Amazon products' } ) ).toBeDisabled();
+		expect( requests() ).toBe( 0 );
+
+		// One product: search, see title, image and price, Add Link on its row.
+		credentials( valid );
+		stub( 'ok' );
+		await page.reload();
+		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
+		await dialog.getByRole( 'tab', { name: 'Amazon' } ).click();
+		await dialog.getByRole( 'searchbox', { name: 'Search Amazon products' } ).fill( 'volleyball' );
+		await dialog.getByRole( 'button', { name: 'Search', exact: true } ).click();
+		const rows = dialog.getByRole( 'listitem' );
+		await expect( rows ).toHaveCount( 10 );
+		const first = rows.filter( { hasText: 'Stub Volleyball 1-0' } );
+		await expect( first ).toContainText( '$24.99' );
+		await expect( first.locator( 'img' ) ).toHaveAttribute( 'src', 'https://m.media-amazon.com/images/I/81stubSearch.jpg' );
+		const searched = requests();
+		await first.getByRole( 'button', { name: 'Add Link' } ).click();
+		await expect( dialog ).toBeHidden( { timeout: 20_000 } );
+		const [ id ] = byAsin( 'B0SR100000' );
+		expect( wp( 'post', 'get', id, '--field=post_title' ) ).toBe( 'Stub Volleyball 1-0' );
+		expect( meta( id, 'image_url' ) ).toBe( 'https://m.media-amazon.com/images/I/81stubSearch.jpg' );
+		expect( meta( id, 'url' ) ).toContain( 'tag=vbvault-20' );
+		expect( cacheRow( 'B0SR100000', 'us' ) ).toMatchObject( { name: 'Stub Volleyball 1-0', price: '$24.99' } );
+		// The search result filled the stored data, so the add asked Amazon nothing (R71).
+		expect( requests() ).toBe( searched );
+
+		// Bulk: ten selected across two pages, the eleventh refused, then all ten added.
+		await page.getByRole( 'button', { name: 'More ways to add links' } ).click();
+		await page.getByRole( 'button', { name: /Bulk add links/ } ).click();
+		await dialog.getByRole( 'tab', { name: 'Amazon' } ).click();
+		await dialog.getByRole( 'searchbox', { name: 'Search Amazon products' } ).fill( 'volleyball' );
+		await dialog.getByRole( 'button', { name: 'Search', exact: true } ).click();
+		await expect( rows ).toHaveCount( 10 );
+		for ( const n of [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ] ) {
+			await dialog.getByRole( 'checkbox', { name: `Stub Volleyball 1-${ n }` } ).check();
+		}
+		await dialog.getByRole( 'button', { name: 'Next page' } ).click();
+		await expect( rows.filter( { hasText: 'Stub Volleyball 2-0' } ) ).toBeVisible();
+		await dialog.getByRole( 'checkbox', { name: 'Stub Volleyball 2-0' } ).check();
+		await dialog.getByRole( 'checkbox', { name: 'Stub Volleyball 2-1' } ).click();
+		await expect( dialog.getByText( 'You can select up to 10 products.' ) ).toBeVisible();
+		await expect( dialog.getByRole( 'checkbox', { name: 'Stub Volleyball 2-1' } ) ).not.toBeChecked();
+		page.once( 'dialog', ( confirm ) => confirm.accept() );
+		await dialog.getByRole( 'button', { name: 'Add 10 Links' } ).click();
+		await expect( dialog ).toBeHidden( { timeout: 30_000 } );
+		for ( const asin of [ ...asins.slice( 1, 10 ), 'B0SR200000' ] ) {
+			expect( byAsin( asin ), asin ).toHaveLength( 1 );
+		}
+		expect( byAsin( 'B0SR200001' ) ).toHaveLength( 0 );
+		expect( wp( 'post', 'get', byAsin( 'B0SR200000' )[ 0 ], '--field=post_title' ) ).toBe( 'Stub Volleyball 2-0' );
+		expect( requests() ).toBe( searched + 2 );
+	} );
+
 	test( 'AC9 wp affibloom amazon get prints the item, or the error code and message', () => {
 		/** Runs the command; its output, or its error output when it fails. */
 		const get = ( ...args: string[] ): { failed: boolean; out: string } => {

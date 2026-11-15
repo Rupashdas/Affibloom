@@ -2344,6 +2344,25 @@ body.affibloom-has-modal { overflow: hidden; }
 .affibloom-add-pages { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 13px; }
 .affibloom-add-pages[hidden] { display: none; }
 
+/* "Add A New Link"'s URL | Amazon tabs (C1M): the segmented control, and the wider panel Lasso gives its Marketplace tab. */
+.affibloom-add-form__tabs { display: flex; margin-bottom: 16px; }
+.affibloom-add-form__tabs .affibloom-segment__item { flex: 1 1 0; border: 0; background: transparent; font: inherit; font-weight: 600; cursor: pointer; }
+.affibloom-add-form__tabs .affibloom-segment__item.is-active { background: var(--affibloom-white); }
+.affibloom-add-form__tabs .affibloom-segment__item:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 1px; }
+#affibloom-add-modal .affibloom-modal__foot[hidden] { display: none; }
+#affibloom-add-modal .affibloom-modal__panel:has(#affibloom-add-panel-amazon:not([hidden])) { max-width: 720px; }
+.affibloom-add-search { display: flex; gap: 8px; }
+.affibloom-add-search .affibloom-input { flex: 1 1 auto; min-width: 0; }
+.affibloom-add-search__status { margin: 12px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-add-search__status[hidden] { display: none; }
+#affibloom-add-panel-amazon .affibloom-add-results { max-height: 380px; }
+#affibloom-add-panel-amazon .affibloom-add-results__item { padding: 10px 8px; }
+.affibloom-add-results__item.is-selected { background: var(--affibloom-brand-50); }
+.affibloom-add-results__text strong a { color: inherit; text-decoration: none; }
+.affibloom-add-results__text strong a:hover,
+.affibloom-add-results__text strong a:focus { color: var(--affibloom-brand-600); text-decoration: underline; }
+.affibloom-add-results__item .affibloom-check { flex: 0 0 auto; margin-right: 4px; }
+
 @media (max-width: 960px) {
 	.affibloom-header,
 	.affibloom-band { padding-right: 20px; padding-left: 20px; }

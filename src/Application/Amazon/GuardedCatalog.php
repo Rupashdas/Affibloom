@@ -13,6 +13,7 @@ use Affibloom\Domain\Amazon\Asin;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\RequestLedger;
+use Affibloom\Domain\Amazon\SearchPage;
 use Closure;
 
 /**
@@ -95,6 +96,19 @@ final class GuardedCatalog implements AmazonCatalog {
 	 */
 	public function items( Credentials $credentials, array $asins, string $country ): array {
 		return $this->guarded( fn() => $this->inner->items( $credentials, $asins, $country ), true );
+	}
+
+	/**
+	 * One search page, inside the wait, the pace and the quota (a catalogue request, so it counts).
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param string      $keywords    What to search for.
+	 * @param int         $page        The page.
+	 * @param string      $country     The store's country code.
+	 * @throws CatalogError When throttled, or as the Creators API throws.
+	 */
+	public function search( Credentials $credentials, string $keywords, int $page, string $country ): SearchPage {
+		return $this->guarded( fn() => $this->inner->search( $credentials, $keywords, $page, $country ), true );
 	}
 
 	/**

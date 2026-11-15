@@ -225,4 +225,36 @@ final class CreatorsApiCatalogTest extends TestCase {
 		self::assertSame( array( 'B0AAAAAAAA', 'B0BBBBBBBB', 'B0CCCCCCCC', 'B0DDDDDDDD' ), json_decode( $this->sent[1][1]['body'], true )['itemIds'] );
 		self::assertCount( 2, $this->sent, 'one token, one getItems' );
 	}
+
+	public function test_a_search_asks_searchitems_for_ten_items_of_the_page_with_lassos_resources(): void {
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 200, strtr( self::fixture( 'searchItems.json' ), array( '{{TITLE}}' => 'Stub Ball' ) ) ) );
+
+		$page = ( new CreatorsApiCatalog() )->search( self::credentials(), 'volleyball', 3, 'gb' );
+
+		self::assertSame( 'https://creatorsapi.amazon/catalog/v1/searchItems', $this->sent[1][0] );
+		self::assertSame( 'www.amazon.co.uk', $this->sent[1][1]['headers']['x-marketplace'] );
+		$body = json_decode( $this->sent[1][1]['body'], true );
+		self::assertSame(
+			array( 'volleyball', 'All', 10, 3, 'www.amazon.co.uk', 'vbvault-21' ),
+			array( $body['keywords'], $body['searchIndex'], $body['itemCount'], $body['itemPage'], $body['marketplace'], $body['partnerTag'] )
+		);
+		// Lasso's SEARCH_RESOURCES (R68).
+		self::assertSame( array( 'images.primary.large', 'images.primary.medium', 'images.primary.small', 'itemInfo.title', 'offersV2.listings.price', 'offersV2.listings.availability' ), $body['resources'] );
+		self::assertSame( array( 30, 3 ), array( $page->total, $page->page ) );
+		self::assertCount( 1, $page->items );
+		self::assertSame( array( 'B0STUBITEM', 'Stub Ball', '$24.99', 'https://m.media-amazon.com/images/I/81stubSearch.jpg' ), array( $page->items[0]->asin, $page->items[0]->title, $page->items[0]->price, $page->items[0]->image ) );
+	}
+
+	public function test_a_search_with_no_results_is_an_empty_page_and_an_error_answer_is_an_api_error(): void {
+		$this->answers = array( array( 200, self::fixture( 'token.json' ) ), array( 200, '{"searchResult":{"totalResultCount":0}}' ), array( 400, '{"message":"bad keywords"}' ) );
+		$catalog       = new CreatorsApiCatalog();
+
+		self::assertSame( array(), $catalog->search( self::credentials(), 'nothing', 1, 'gb' )->items );
+		try {
+			$catalog->search( self::credentials(), 'x', 1, 'gb' );
+			self::fail( 'no error' );
+		} catch ( CatalogError $error ) {
+			self::assertSame( array( CatalogError::API_ERROR, 'bad keywords' ), array( $error->kind, $error->getMessage() ) );
+		}
+	}
 }

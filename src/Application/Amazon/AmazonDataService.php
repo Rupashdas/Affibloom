@@ -166,9 +166,10 @@ final class AmazonDataService {
 	}
 
 	/**
-	 * The credentials Amazon may be asked with: all four set (R1, D4) and not refused by Amazon (C1Q0); else null.
+	 * The credentials Amazon may be asked with: all four set (R1, D4) and not refused by Amazon (C1Q0); else null. The
+	 * Amazon search (C1M) asks with them too.
 	 */
-	private function usable(): ?Credentials {
+	public function usable(): ?Credentials {
 		$credentials = $this->credentials->get();
 
 		return $credentials->configured() && null === $this->credentials->refusal() ? $credentials : null;
@@ -340,6 +341,24 @@ final class AmazonDataService {
 		}
 
 		return $draft->with( $changes );
+	}
+
+	/**
+	 * Stores an item Amazon gave elsewhere (a search result, C1M; Lasso's persist_amazon_product_from_selection, R71) when
+	 * the store has no data for it yet and the item is complete, so the next add takes it and asks Amazon nothing (R32).
+	 *
+	 * @param CatalogItem $item    The item.
+	 * @param string      $country The store's country code.
+	 */
+	public function keep( CatalogItem $item, string $country ): void {
+		$asin = Asin::from( $item->asin );
+		if ( null === $asin || null !== $this->products->find( $asin->value, $country ) ) {
+			return;
+		}
+		$data = AmazonProduct::from_item( $item, $asin, $country, 'https://' . Marketplace::host( $country ) . '/dp/' . $asin->value, gmdate( 'Y-m-d H:i:s' ) );
+		if ( $data->complete() ) {
+			$this->products->save( $data );
+		}
 	}
 
 	/**

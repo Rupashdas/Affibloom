@@ -282,7 +282,7 @@ C1F and C1G in Phase 3
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [x] Task C1K: Keep Geni.us Formatting on add and save
 - [x] Task C1L: The cloud-only switches labelled
-- [ ] Task C1M: The Amazon search tab in Add A New Link
+- [x] Task C1M: The Amazon search tab in Add A New Link
 - [ ] Task C1N: The SiteStripe notice
 - [ ] Task C1O: Amazon data when the primary URL changes
 - [ ] Task C1P: The geni.us clean-up job
@@ -6419,11 +6419,18 @@ products (AC15); without credentials the tab says "Needs the Amazon API".
 
 **Files:** the above; `searchItems.json` fixture, `C1.spec.ts` AC15, F18 spec rerun.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Search client and route.**
-- [ ] **Step 3: Tab, selection, add.**
-- [ ] **Step 4: Run and look** at 1280 and 375 px, with the E2E stub.
-- [ ] **Step 5: Commit** — "Search Amazon from Add A New Link".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Search client and route.**
+- [x] **Step 3: Tab, selection, add.**
+- [x] **Step 4: Run and look** at 1280 and 375 px, with the E2E stub.
+- [x] **Step 5: Commit** — "Search Amazon from Add A New Link".
+
+*Note (2026-11-15):* the search runs in `AmazonSearchService` (the Default Tracking ID's store), which keeps each
+person's results in a transient for an hour; `POST /products { selections }` takes ASINs only and stores the kept
+result's data (when the store has none) before the add, so nothing the browser sends becomes Amazon data. Up to ten are
+added in the request, not in Lasso's background run (no Amazon call or page fetch is left). The header's caret menu
+gained Lasso's Marketplace item as "Amazon". Checked: 689 unit tests, phpcs, the tab, a single add and bulk selection
+seen with the stub at 1280 and 375 px.
 
 ---
 

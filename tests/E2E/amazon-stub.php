@@ -6,7 +6,8 @@
  * (the AFFIBLOOM_TEST_AMAZON_STUB switch) names a scenario:
  *
  * - "ok": tokens are granted (token.json); getItems answers getItems-ok.json, or getItems-empty.json (not found) for an
- *   ASIN starting B0NOTFOUND, getItems-oos.json (out of stock) for one starting B0OUTSTOCK.
+ *   ASIN starting B0NOTFOUND, getItems-oos.json (out of stock) for one starting B0OUTSTOCK; searchItems answers ten
+ *   items a page from searchItems.json, three pages (C1M).
  * - "reject": the token request and the catalogue refuse (401), as for wrong or expired credentials.
  * - "unavailable": every request answers 503.
  * - "throttle": every request answers 429.
@@ -150,6 +151,44 @@ add_filter(
 
 			$response         = $answer( 200, 'getItems-empty.json' );
 			$response['body'] = (string) wp_json_encode( array() === $items ? array() : array( 'itemsResult' => array( 'items' => $items ) ) );
+			return $response;
+		}
+
+		if ( str_ends_with( $path, '/searchItems' ) ) {
+			// Ten items a page from searchItems.json (C1M), thirty in all: on page P the ASINs are B0SRP0000N and the titles
+			// "Stub Volleyball P-N" (N 0-9); keywords "nothing" find none.
+			$item_page = max( 1, (int) ( $body['itemPage'] ?? 1 ) );
+			if ( 'nothing' === ( $body['keywords'] ?? '' ) || $item_page > 3 ) {
+				$none         = $answer( 200, 'getItems-empty.json' );
+				$none['body'] = '{"searchResult":{"totalResultCount":0,"items":[]}}';
+				return $none;
+			}
+			$items = array();
+			for ( $n = 0; $n < 10; $n++ ) {
+				$one     = json_decode(
+					$answer(
+						200,
+						'searchItems.json',
+						array(
+							'{{ASIN}}'        => 'B0SR' . $item_page . '0000' . $n,
+							'{{TITLE}}'       => "Stub Volleyball {$item_page}-{$n}",
+							'{{MARKETPLACE}}' => (string) ( $body['marketplace'] ?? 'www.amazon.com' ),
+						)
+					)['body'],
+					true
+				);
+				$items[] = $one['searchResult']['items'][0];
+				$total   = $one['searchResult']['totalResultCount'];
+			}
+			$response         = $answer( 200, 'searchItems.json' );
+			$response['body'] = (string) wp_json_encode(
+				array(
+					'searchResult' => array(
+						'totalResultCount' => $total,
+						'items'            => $items,
+					),
+				)
+			);
 			return $response;
 		}
 

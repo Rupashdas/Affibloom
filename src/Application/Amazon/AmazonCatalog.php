@@ -12,6 +12,7 @@ namespace Affibloom\Application\Amazon;
 use Affibloom\Domain\Amazon\Asin;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
+use Affibloom\Domain\Amazon\SearchPage;
 
 /**
  * Amazon's Creators API, as the use cases need it (C1 D1: the only source of Amazon data; no cloud of Lasso's).
@@ -47,6 +48,17 @@ interface AmazonCatalog {
 	 * @throws CatalogError AuthFailed, HttpError, ApiError or Throttled for the whole request.
 	 */
 	public function items( Credentials $credentials, array $asins, string $country ): array;
+
+	/**
+	 * One page of a product search of a store (C1M; Lasso's search_items, R68): ten items a page, every category.
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param string      $keywords    What to search for, not empty.
+	 * @param int         $page        The page, 1 to 10.
+	 * @param string      $country     The store's country code.
+	 * @throws CatalogError AuthFailed, HttpError, ApiError or Throttled.
+	 */
+	public function search( Credentials $credentials, string $keywords, int $page, string $country ): SearchPage;
 
 	/**
 	 * Amazon's answer for one item exactly as received (C1Q1, for recording real answers): status and body.

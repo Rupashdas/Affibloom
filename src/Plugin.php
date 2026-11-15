@@ -16,6 +16,7 @@ use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
 use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
 use Affibloom\Application\Amazon\PriceRefreshService;
 use Affibloom\Application\Amazon\AmazonDataService;
+use Affibloom\Application\Amazon\AmazonSearchService;
 use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Dashboard\SavedViewService;
@@ -59,6 +60,7 @@ use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
 use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
+use Affibloom\Infrastructure\WordPress\TransientSearchResults;
 use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaBannerDismissals;
 use Affibloom\Infrastructure\WordPress\UserMetaSavedViewRepository;
@@ -324,6 +326,7 @@ final class Plugin {
 		$import    = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups    = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
 		$amazon    = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
+		$search    = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
 		$upgrader  = self::upgrader();
 
 		return array(
@@ -348,11 +351,11 @@ final class Plugin {
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new SettingsController( $settings, $amazon ),
-			new AmazonController( $amazon, $data, $this->bulk_sync() ),
+			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
 			new HelpTips( $settings ),
 			new DisplayController( $display, $settings ),
-			new ProductsController( $products, new ProductResource(), $groups ),
+			new ProductsController( $products, new ProductResource(), $groups, $search ),
 			new BulkAddController( $bulk ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
 			new BulkAddCron( $bulk ),

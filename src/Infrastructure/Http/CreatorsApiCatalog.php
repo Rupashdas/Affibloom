@@ -15,6 +15,8 @@ use Affibloom\Domain\Amazon\Asin;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\Marketplace;
+use Affibloom\Domain\Amazon\SearchPage;
+use Closure;
 
 /**
  * Amazon's Creators API over WordPress's HTTP client, as Lasso_Amazon_Creators_Api calls it (C1 R7-R9, R11-R13, R21).
@@ -30,6 +32,19 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 
 	/** The catalogue's item request (R9). */
 	private const GET_ITEMS = 'https://creatorsapi.amazon/catalog/v1/getItems';
+
+	/** The catalogue's search request (R68). */
+	private const SEARCH_ITEMS = 'https://creatorsapi.amazon/catalog/v1/searchItems';
+
+	/** What searchItems is asked to return: Lasso's SEARCH_RESOURCES (R68). */
+	private const SEARCH_RESOURCES = array(
+		'images.primary.large',
+		'images.primary.medium',
+		'images.primary.small',
+		'itemInfo.title',
+		'offersV2.listings.price',
+		'offersV2.listings.availability',
+	);
 
 	/**
 	 * What getItems is asked to return (C1Q2): Lasso's DEFAULT_RESOURCES (R9) and every other resource Affibloom reads.
@@ -123,7 +138,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	 * @throws CatalogError AuthFailed (no token), HttpError (no answer), ApiError (an error answer), NotFound (no item).
 	 */
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
-		$body  = $this->answer( $credentials, array( $asin ), $country );
+		$body  = $this->get_items_answer( $credentials, array( $asin ), $country );
 		$items = $body['itemsResult']['items'] ?? array();
 		if ( ! is_array( $items ) || ! isset( $items[0] ) || ! is_array( $items[0] ) ) {
 			throw new CatalogError( CatalogError::NOT_FOUND, 'Product not found.' );
@@ -133,7 +148,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	}
 
 	/**
-	 * The getItems answer for one to ten ASINs (R9), the token first; the decoded answer, or the request's error (R13).
+	 * The getItems answer for one to ten ASINs (R9).
 	 *
 	 * @param Credentials $credentials Configured credentials.
 	 * @param list<Asin>  $asins       The ASINs.
@@ -141,7 +156,68 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	 * @return array<array-key, mixed>
 	 * @throws CatalogError AuthFailed (no token), HttpError (no answer), Throttled (429), ApiError (an error answer).
 	 */
-	private function answer( Credentials $credentials, array $asins, string $country ): array {
+	private function get_items_answer( Credentials $credentials, array $asins, string $country ): array {
+		return $this->answer(
+			$credentials,
+			fn( string $token ) => $this->get_items( $credentials, $token, $asins, $country, self::RESOURCES ),
+			'Creators API getItems request failed.'
+		);
+	}
+
+	/**
+	 * One page of a search (R68: Lasso's search_items_request, every category, ten items; the page added, D13). An
+	 * answer without items is an empty page.
+	 *
+	 * @param Credentials $credentials Configured credentials.
+	 * @param string      $keywords    What to search for.
+	 * @param int         $page        The page, 1 to 10.
+	 * @param string      $country     The store's country code.
+	 * @throws CatalogError AuthFailed (no token), HttpError (no answer), Throttled (429), ApiError (an error answer).
+	 */
+	public function search( Credentials $credentials, string $keywords, int $page, string $country ): SearchPage {
+		$marketplace = Marketplace::host( $country );
+		$body        = $this->answer(
+			$credentials,
+			fn( string $token ) => $this->post(
+				self::SEARCH_ITEMS,
+				$credentials,
+				$token,
+				$marketplace,
+				array(
+					'keywords'    => $keywords,
+					'searchIndex' => 'All',
+					'itemCount'   => SearchPage::SIZE,
+					'itemPage'    => $page,
+					'marketplace' => $marketplace,
+					'partnerTag'  => $credentials->partner_tag,
+					'resources'   => self::SEARCH_RESOURCES,
+				)
+			),
+			'Creators API searchItems request failed.'
+		);
+
+		$result = is_array( $body['searchResult'] ?? null ) ? $body['searchResult'] : array();
+		$items  = array();
+		foreach ( is_array( $result['items'] ?? null ) ? $result['items'] : array() as $item ) {
+			if ( is_array( $item ) && is_string( $item['asin'] ?? null ) && '' !== $item['asin'] ) {
+				$items[] = CatalogItem::from_creators( $item );
+			}
+		}
+		$total = is_numeric( $result['totalResultCount'] ?? null ) ? (int) $result['totalResultCount'] : count( $items );
+
+		return new SearchPage( $items, $total, $page );
+	}
+
+	/**
+	 * A catalogue request's answer, the token first; the decoded answer, or the request's error (R13).
+	 *
+	 * @param Credentials                                       $credentials Configured credentials.
+	 * @param Closure(string): (array<string, mixed>|\WP_Error) $send        The request, given the token.
+	 * @param string                                            $failed      Lasso's message for an error answer that has none of Amazon's.
+	 * @return array<array-key, mixed>
+	 * @throws CatalogError AuthFailed (no token), HttpError (no answer), Throttled (429), ApiError (an error answer).
+	 */
+	private function answer( Credentials $credentials, Closure $send, string $failed ): array {
 		try {
 			$token = $this->token( $credentials );
 		} catch ( CatalogError $error ) {
@@ -153,7 +229,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 			throw new CatalogError( CatalogError::AUTH_FAILED, 'Could not obtain Creators API access token.' );
 		}
 
-		$response = $this->get_items( $credentials, $token, $asins, $country, self::RESOURCES );
+		$response = $send( $token );
 
 		if ( is_wp_error( $response ) ) {
 			throw new CatalogError( CatalogError::HTTP_ERROR, $response->get_error_message() );
@@ -167,7 +243,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 			throw new CatalogError( CatalogError::THROTTLED, 'Request was denied due to request throttling.', '', $wait );
 		}
 		if ( $status >= 400 || ! is_array( $body ) ) {
-			$message = is_array( $body ) && isset( $body['message'] ) && is_string( $body['message'] ) && '' !== $body['message'] ? $body['message'] : 'Creators API getItems request failed.';
+			$message = is_array( $body ) && isset( $body['message'] ) && is_string( $body['message'] ) && '' !== $body['message'] ? $body['message'] : $failed;
 			throw new CatalogError( CatalogError::API_ERROR, $message );
 		}
 
@@ -185,7 +261,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	 * @throws CatalogError AuthFailed, HttpError, ApiError or Throttled.
 	 */
 	public function items( Credentials $credentials, array $asins, string $country ): array {
-		$body  = $this->answer( $credentials, $asins, $country );
+		$body  = $this->get_items_answer( $credentials, $asins, $country );
 		$found = array();
 		foreach ( is_array( $body['itemsResult']['items'] ?? null ) ? $body['itemsResult']['items'] : array() as $item ) {
 			if ( is_array( $item ) && is_string( $item['asin'] ?? null ) && '' !== $item['asin'] ) {
@@ -232,8 +308,34 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 	private function get_items( Credentials $credentials, string $token, array $asins, string $country, array $resources ) {
 		$marketplace = Marketplace::host( $country );
 
-		return wp_remote_post(
+		return $this->post(
 			self::GET_ITEMS,
+			$credentials,
+			$token,
+			$marketplace,
+			array(
+				'itemIds'     => array_map( static fn( Asin $asin ): string => $asin->value, $asins ),
+				'itemIdType'  => 'ASIN',
+				'marketplace' => $marketplace,
+				'partnerTag'  => $credentials->partner_tag,
+				'resources'   => $resources,
+			)
+		);
+	}
+
+	/**
+	 * POSTs a catalogue request as JSON with the token and the store's marketplace (R9).
+	 *
+	 * @param string               $url         The catalogue operation.
+	 * @param Credentials          $credentials Configured credentials.
+	 * @param string               $token       A valid access token.
+	 * @param string               $marketplace The store's host.
+	 * @param array<string, mixed> $body        The request.
+	 * @return array<string, mixed>|\WP_Error The response.
+	 */
+	private function post( string $url, Credentials $credentials, string $token, string $marketplace, array $body ) {
+		return wp_remote_post(
+			$url,
 			array(
 				'timeout' => self::TIMEOUT,
 				'headers' => array(
@@ -241,15 +343,7 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 					'Content-Type'  => 'application/json',
 					'x-marketplace' => $marketplace,
 				),
-				'body'    => (string) wp_json_encode(
-					array(
-						'itemIds'     => array_map( static fn( Asin $asin ): string => $asin->value, $asins ),
-						'itemIdType'  => 'ASIN',
-						'marketplace' => $marketplace,
-						'partnerTag'  => $credentials->partner_tag,
-						'resources'   => $resources,
-					)
-				),
+				'body'    => (string) wp_json_encode( $body ),
 			)
 		);
 	}
