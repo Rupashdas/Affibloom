@@ -4,7 +4,7 @@
  *
  * Written for Affibloom's class names (ADR-6; the class map is docs/ui/tokens.md, "Product box") from the rules of
  * Lasso 369's admin/assets/css/lasso-live.min.css (GPL v2 or later) that a Single box uses: Lab (18B), the 2-box
- * themes (18E); the 6-box themes come with 18F, Llama with 18G, stars with 21A, fields and Pros & Cons with 21B, the copy button with 21C, SiteStripe with 22E, and
+ * themes (18E), the 6-box themes (18F); Llama comes with 18G, stars with 21A, fields and Pros & Cons with 21B, the copy button with 21C, SiteStripe with 22E, and
  * the group displays with DT2-DT8. Readers must see the box Lasso drew, so values are kept as Lasso has them and
  * checked against its baselines (tests/fixtures/baselines/variants, 1 %).
  *
@@ -64,7 +64,10 @@
 }
 .affibloom-box-1,
 .affibloom-box-2,
-.affibloom-box-3 {
+.affibloom-box-3,
+.affibloom-box-4,
+.affibloom-box-5,
+.affibloom-box-6 {
 	box-sizing: border-box;
 	position: relative;
 	-ms-flex: 0 0 100%;
@@ -72,10 +75,16 @@
 	max-width: 100%;
 	padding: 0 15px !important;
 }
+.affibloom-box-4 {
+	text-align: right;
+}
 @media (max-width: 767.98px) {
 	.affibloom-box-1,
 	.affibloom-box-2,
-	.affibloom-box-3 {
+	.affibloom-box-3,
+	.affibloom-box-4,
+	.affibloom-box-5,
+	.affibloom-box-6 {
 		padding: 0 !important;
 	}
 }
@@ -618,6 +627,238 @@ a.affibloom-button-2:hover {
 }
 .affibloom-splash.mobile .affibloom-image {
 	float: none;
+}
+
+/* The 6-box themes (Task 18F; templates/front/box-6.php): Cactus and Money. Lasso's grid rules
+   (".lasso-grid-row .lasso-cactus a.lasso-button-1, .lasso-cactus a.lasso-button-2") leave their second half unscoped,
+   so Single boxes have it too: kept, in Lasso's order, after the float it overrides. */
+.affibloom-box .affibloom-cactus {
+	border: 1px solid #e2e2e2;
+	padding: 30px !important;
+	border-radius: 15px;
+}
+.affibloom-cactus .affibloom-box-1,
+.affibloom-cactus .affibloom-box-3,
+.affibloom-cactus .affibloom-box-5 {
+	-ms-flex: 0 0 70% !important;
+	flex: 0 0 70% !important;
+	max-width: 70% !important;
+	padding-left: 0 !important;
+}
+.affibloom-cactus .affibloom-box-2 {
+	-ms-flex: 0 0 30% !important;
+	flex: 0 0 30% !important;
+	max-width: 30% !important;
+	margin-bottom: 15px;
+	padding: 0 0 0 15px !important;
+	text-align: center;
+}
+.affibloom-cactus .affibloom-box-3,
+.affibloom-cactus .affibloom-box-4,
+.affibloom-cactus .affibloom-box-5,
+.affibloom-cactus .affibloom-box-6 {
+	-ms-flex: 0 0 50% !important;
+	flex: 0 0 50% !important;
+	max-width: 50% !important;
+}
+.affibloom-cactus .affibloom-box-6 {
+	text-align: right;
+	padding-right: 0 !important;
+}
+.affibloom-cactus a.affibloom-button-1,
+.affibloom-cactus a.affibloom-button-2 {
+	display: inline-block;
+	padding: 15px 25px;
+	border-radius: 100px;
+	box-shadow: 0 3px 6px rgba(0,0,0,0.20) !important;
+}
+.affibloom-cactus a.affibloom-button-2 {
+	float: right;
+}
+.affibloom-cactus a.affibloom-button-1:hover,
+.affibloom-cactus a.affibloom-button-2:hover {
+	box-shadow: none !important;
+	transform: translateY(3px);
+}
+.affibloom-cactus .affibloom-disclosure,
+.affibloom-cactus .affibloom-date {
+	padding: 10px 0 0 0 !important;
+}
+.affibloom-cactus a.affibloom-button-2 {
+	margin: 0 0 10px 0 !important;
+	float: inherit;
+}
+.affibloom-box .affibloom-money {
+	border: 0;
+	box-shadow: 0 1px 2px 0 rgba(10,16,34,0.4) !important;
+	padding: 20px !important;
+	border-radius: 10px;
+}
+.affibloom-box .affibloom-money:hover {
+	box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07) !important;
+	transition: .2s ease;
+}
+.affibloom-money .affibloom-box-1,
+.affibloom-money .affibloom-box-2,
+.affibloom-money .affibloom-box-3,
+.affibloom-money .affibloom-box-4 {
+	padding: 0 10px !important;
+}
+.affibloom-money .affibloom-box-1 {
+	-ms-flex: 0 0 70% !important;
+	flex: 0 0 70% !important;
+	max-width: 70%;
+}
+.affibloom-money .affibloom-box-2 {
+	-ms-flex: 0 0 30% !important;
+	flex: 0 0 30% !important;
+	max-width: 30%;
+	margin-bottom: 15px;
+	text-align: center;
+}
+.affibloom-money .affibloom-box-2 {
+	padding-right: 0 !important;
+}
+.affibloom-money .affibloom-box-5 {
+	padding-left: 10px !important;
+}
+.affibloom-money .affibloom-box-6 {
+	padding-right: 10px !important;
+}
+.affibloom-money .affibloom-box-3,
+.affibloom-money .affibloom-box-4,
+.affibloom-money .affibloom-box-5,
+.affibloom-money .affibloom-box-6 {
+	-ms-flex: 0 0 50% !important;
+	flex: 0 0 50% !important;
+	max-width: 50% !important;
+}
+.affibloom-money .affibloom-box-6 {
+	text-align: right !important;
+}
+.affibloom-money .affibloom-title {
+	font-size: 25px !important;
+	line-height: 2rem;
+}
+.affibloom-money .affibloom-description {
+	margin-bottom: 20px !important;
+}
+.affibloom-money .affibloom-image img {
+	border-radius: 4px;
+}
+.affibloom-money a.affibloom-button-1 {
+	display: inline-block;
+	padding: 20px;
+	text-align: center !important;
+	border-radius: 4px;
+}
+.affibloom-money a.affibloom-button-1:hover {
+	background: var(--affibloom-button-text);
+	color: var(--affibloom-button);
+	box-shadow: inset 0 0 0 3px var(--affibloom-button) !important;
+}
+.affibloom-money a.affibloom-button-2 {
+	display: inline-block;
+	background-color: var(--affibloom-button-text);
+	color: var(--affibloom-secondary-button);
+	padding: 20px;
+	text-align: center !important;
+	border-radius: 4px;
+	box-shadow: inset 0 0 0 3px var(--affibloom-secondary-button) !important;
+	float: right;
+}
+.affibloom-money a.affibloom-button-2:hover {
+	background-color: var(--affibloom-secondary-button);
+	color: var(--affibloom-button-text);
+	box-shadow: inset 0 0 0 3px var(--affibloom-secondary-button);
+}
+.affibloom-money a.affibloom-button-2 {
+	margin: 0 0 10px 0 !important;
+	float: inherit;
+}
+@media (max-width: 767.98px) {
+	.affibloom-cactus .affibloom-box-1,
+	.affibloom-cactus .affibloom-box-2,
+	.affibloom-cactus .affibloom-box-3,
+	.affibloom-cactus .affibloom-box-4,
+	.affibloom-cactus .affibloom-box-5,
+	.affibloom-cactus .affibloom-box-6 {
+		-ms-flex: 0 0 100% !important;
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+		text-align: center !important;
+	}
+	.affibloom-cactus .affibloom-box-2 {
+		-ms-flex-order: -1;
+		order: -1;
+	}
+	.affibloom-cactus a.affibloom-button-2 {
+		float: none;
+	}
+	.affibloom-money .affibloom-box-1 {
+		padding: 0 !important;
+		text-align: left;
+	}
+	.affibloom-money .affibloom-box-2 {
+		padding: 0 0 0 15px !important;
+	}
+	.affibloom-money .affibloom-box-3 {
+		padding: 0 10px 0 0 !important;
+	}
+	.affibloom-money .affibloom-box-4 {
+		padding: 0 0 0 10px !important;
+	}
+	.affibloom-money a.affibloom-button-1,
+	.affibloom-money a.affibloom-button-2 {
+		margin: 0 !important;
+		line-height: 1.3rem;
+		padding: 15px !important;
+	}
+	.affibloom-money .affibloom-title {
+		font-size: 1.3rem !important;
+		line-height: 1.7rem;
+	}
+}
+.affibloom-cactus.mobile .affibloom-box-1,
+.affibloom-cactus.mobile .affibloom-box-2,
+.affibloom-cactus.mobile .affibloom-box-3,
+.affibloom-cactus.mobile .affibloom-box-4,
+.affibloom-cactus.mobile .affibloom-box-5,
+.affibloom-cactus.mobile .affibloom-box-6 {
+	-ms-flex: 0 0 100% !important;
+	flex: 0 0 100% !important;
+	max-width: 100% !important;
+	text-align: center !important;
+}
+.affibloom-cactus.mobile .affibloom-box-2 {
+	-ms-flex-order: -1;
+	order: -1;
+}
+.affibloom-cactus.mobile a.affibloom-button-2 {
+	float: none;
+}
+.affibloom-money.mobile .affibloom-box-1 {
+	padding: 0 !important;
+	text-align: left;
+}
+.affibloom-money.mobile .affibloom-box-2 {
+	padding: 0 0 0 15px !important;
+}
+.affibloom-money.mobile .affibloom-box-3 {
+	padding: 0 10px 0 0 !important;
+}
+.affibloom-money.mobile .affibloom-box-4 {
+	padding: 0 0 0 10px !important;
+}
+.affibloom-money.mobile a.affibloom-button-1,
+.affibloom-money.mobile a.affibloom-button-2 {
+	margin: 0 !important;
+	line-height: 1.3rem;
+	padding: 15px !important;
+}
+.affibloom-money.mobile .affibloom-title {
+	font-size: 1.3rem !important;
+	line-height: 1.7rem;
 }
 .affibloom-box .affibloom-box-1 h1 a.affibloom-title,
 .affibloom-box .affibloom-box-1 h2 a.affibloom-title,

@@ -73,6 +73,10 @@ const SITE_CSS = [
 // AC1 does with BASELINE_TOP. The `plain` and `badge` states only (deviation 138: the other states come with the tasks
 // that draw them).
 const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
+	'Cactus-plain': { desktop: 534.594, mobile: 646.188 },
+	'Cactus-badge': { desktop: 1065.672, mobile: 1041.859 },
+	'Money-plain': { desktop: 20442.563, mobile: 18203.875 },
+	'Money-badge': { desktop: 20979.75, mobile: 18588.703 },
 	'Cutter-plain': { desktop: 4049.484, mobile: 3652.344 },
 	'Cutter-badge': { desktop: 4500.234, mobile: 4052.234 },
 	'Flow-plain': { desktop: 7169.641, mobile: 6657.406 },
@@ -401,6 +405,32 @@ test.describe( 'F5 Box design', () => {
 			} finally {
 				useSiteDisplay();
 			}
+		} );
+	}
+
+	// AC9 (Task 18F): Cactus and Money draw Lasso's 6-box card (R7) and match their baselines; box 4 is printed empty
+	// without a second button, box 5 only while the disclosure shows.
+	for ( const theme of [ 'Cactus', 'Money' ] ) {
+		test( `@local AC9 ${ theme } prints the 6-box layout and matches its baselines`, async ( { page } ) => {
+			useSiteDisplay();
+			for ( const state of [ 'plain', 'badge' ] as const ) {
+				const path = newPostWith( boxBlock( themeProduct( state, theme ) ) );
+				await page.goto( path );
+				const display = page.locator( `.affibloom-display.affibloom-${ theme.toLowerCase() }` );
+				await expect( display.locator( '> .affibloom-box-1 > a.affibloom-title + .affibloom-price + .affibloom-clear' ) ).toHaveCount( 1 );
+				await expect( display.locator( '> .affibloom-box-2 > a.affibloom-image' ) ).toHaveCount( 1 );
+				await expect( display.locator( '> .affibloom-box-3 > a.affibloom-button-1' ) ).toHaveCount( 1 );
+				await expect( display.locator( '> .affibloom-box-4' ) ).toBeEmpty();
+				await expect( display.locator( '> .affibloom-box-5 > .affibloom-disclosure' ) ).toHaveCount( 1 );
+				await expect( display.locator( '> .affibloom-box-6 > .affibloom-date' ) ).toHaveCount( 1 );
+				await matchesThemeBaseline( page, path, `${ theme }-${ state }` );
+			}
+
+			// The product's Show Disclosure off: no box 5 at all.
+			const hidden = createProduct( { name: `F5 AC9 ${ theme } no disclosure`, theme, show_disclosure: '0' } );
+			await page.goto( newPostWith( boxBlock( hidden ) ) );
+			await expect( page.locator( '.affibloom-display > .affibloom-box-5' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-display > .affibloom-box-6' ) ).toHaveCount( 1 );
 		} );
 	}
 

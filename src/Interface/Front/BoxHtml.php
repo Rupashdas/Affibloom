@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Front;
 
 use Affibloom\Application\Box\BoxView;
-use Affibloom\Domain\Box\LayoutFamily;
 
 /**
  * Prints a box (F5 D1): `templates/front/<layout>.php` with the element partials. Every box caller prints through it.
@@ -28,22 +27,15 @@ final class BoxHtml {
 	/**
 	 * The box's HTML.
 	 *
-	 * The 6-box template comes with its themes (Task 18F); until then Cactus and Money print the 3-box markup.
-	 *
 	 * @param BoxView $view The box.
 	 */
 	public function render( BoxView $view ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- the included template reads $view.
 		// A box the page detection missed (a widget, a theme template) still gets its CSS (Task 18C).
 		$this->assets->late_enqueue();
 
-		$file = $this->templates . '/' . $view->family->value . '.php';
-		if ( ! is_readable( $file ) ) {
-			$file = $this->templates . '/' . LayoutFamily::ThreeBox->value . '.php';
-		}
-
 		ob_start();
 		try {
-			include $file;
+			include $this->templates . '/' . $view->family->value . '.php';
 		} finally {
 			$html = (string) ob_get_clean();
 		}

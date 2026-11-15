@@ -23,10 +23,14 @@ $attributes = $view->wrapper;
 			<?php require __DIR__ . '/partials/description.php'; ?>
 		</div>
 		<div class="affibloom-box-2">
-			<?php require __DIR__ . '/partials/buttons.php'; ?>
+			<?php
+			$buttons = $view->buttons;
+			require __DIR__ . '/partials/buttons.php';
+			?>
 		</div>
 		<div class="affibloom-box-3">
-			<?php require __DIR__ . '/partials/end.php'; ?>
+			<?php require __DIR__ . '/partials/disclosure.php'; ?>
+			<?php require __DIR__ . '/partials/date.php'; ?>
 		</div>
 	</div>
 </div>

@@ -103,7 +103,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18C: Where the box's assets load
 - [ ] Task 18D: Lasso's baselines for every theme and state
 - [x] Task 18E: The 2-box themes and theme resolution
-- [ ] Task 18F: The 6-box themes (Cactus, Money)
+- [x] Task 18F: The 6-box themes (Cactus, Money)
 - [ ] Task 18G: Llama
 - [ ] Task 18H: Layout controls and the phone override on the box
 - [ ] Task 18I: Density and typography on the box
@@ -457,11 +457,17 @@ without a second button.
 
 **Files:** create `templates/front/box-6.php`; modify `assets/front/box.css`, `assets/front/box-layout.css`, `src/Interface/Front/BoxHtml.php`, `tests/E2E/acceptance/F5.spec.ts` (AC9).
 
-- [ ] **Step 1: Failing tests (AC9).**
-- [ ] **Step 2: Template.**
-- [ ] **Step 3: CSS.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Draw Lasso's 6-box themes".
+- [x] **Step 1: Failing tests (AC9).**
+- [x] **Step 2: Template.**
+- [x] **Step 3: CSS.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Draw Lasso's 6-box themes".
+
+*Note (2026-11-16):* AC9 checks `plain` and `badge` (deviation 138). On its second use the markup was shared:
+`partials/buttons.php` prints a given `$buttons` list (box-6 splits the first from the rest) and `end.php` became
+`disclosure.php` and `date.php`; `BoxHtml` lost its box-3 fallback (every layout has its template). Phones put the
+6-box card on a grid and centre its buttons (the phone layout's `button-align`), as Lasso's v2 file does. Checked
+beside Lasso's boxes: equal at 1280 and 390 px, the 2-box themes and Lab still equal. Unit 754, phpcs.
 
 ---
 
