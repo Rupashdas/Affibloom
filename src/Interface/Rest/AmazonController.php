@@ -199,7 +199,8 @@ final class AmazonController implements Module {
 	}
 
 	/**
-	 * A search result as the tab draws it. The image is kept only when it is an https link (Lasso's tab shows no other).
+	 * A search result as the tab draws it. The image and the product page are kept only when they are https links
+	 * (Lasso's tab shows no other); the product page falls back to the ASIN's page on amazon.com, as Lasso's.
 	 *
 	 * @param CatalogItem $item The result.
 	 * @return array{asin: string, title: string, image: string, price: string, url: string}
@@ -212,7 +213,7 @@ final class AmazonController implements Module {
 			'title' => '' === $item->title ? $asin : $item->title,
 			'image' => str_starts_with( $item->image, 'https://' ) ? $item->image : '',
 			'price' => $item->price,
-			'url'   => '' !== $item->url ? $item->url : 'https://' . Marketplace::host( Marketplace::DEFAULT_COUNTRY ) . '/dp/' . $asin,
+			'url'   => str_starts_with( $item->url, 'https://' ) ? $item->url : 'https://' . Marketplace::host( Marketplace::DEFAULT_COUNTRY ) . '/dp/' . $asin,
 		);
 	}
 
