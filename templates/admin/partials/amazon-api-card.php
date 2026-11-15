@@ -7,7 +7,7 @@
  * branding); the intro links to Amazon's Associates Central instead.
  *
  * @package Affibloom
- * @var array{settings: \Affibloom\Domain\Settings\Settings, api: array{state: string, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}} $view
+ * @var array{settings: \Affibloom\Domain\Settings\Settings, api: array{state: string, refusal: array{reason: string, at: string}|null, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +18,7 @@ $states  = array(
 	'not-set-up' => __( 'Not set up', 'affibloom' ),
 	'saved'      => __( 'Saved, not validated', 'affibloom' ),
 	'validated'  => __( 'Validated', 'affibloom' ),
+	'refused'    => __( 'Refused by Amazon', 'affibloom' ),
 );
 $kept    = __( 'Saved — leave blank to keep', 'affibloom' );
 ?>
@@ -28,6 +29,16 @@ $kept    = __( 'Saved — leave blank to keep', 'affibloom' );
 	<div class="affibloom-card__head affibloom-api-card__head">
 		<h2 class="affibloom-card__title" id="affibloom-api-card-title"><?php esc_html_e( 'Amazon Product Data API', 'affibloom' ); ?></h2>
 		<span class="affibloom-state affibloom-state--<?php echo esc_attr( $api['state'] ); ?>" data-api-state><?php echo esc_html( $states[ $api['state'] ] ); ?></span>
+		<?php if ( null !== $api['refusal'] ) : ?>
+			<?php // Kept, not cleared as Lasso does (C1Q0): when and why Amazon refused them; a successful Validate hides it. ?>
+			<?php
+			// The time stays on one line (a <time> that does not wrap).
+			$refused_at = '<time datetime="' . esc_attr( str_replace( ' ', 'T', $api['refusal']['at'] ) . 'Z' ) . '">' . esc_html( substr( $api['refusal']['at'], 0, 16 ) . ' UTC' ) . '</time>';
+			/* translators: 1: date and time, "2026-11-15 07:46 UTC"; 2: Amazon's answer, "HTTP 401, invalid_client". */
+			$refused_text = sprintf( esc_html__( 'Amazon refused these credentials on %1$s (%2$s). Check them and Validate again.', 'affibloom' ), $refused_at, esc_html( $api['refusal']['reason'] ) );
+			?>
+			<p class="affibloom-api-card__refusal" data-api-refusal><?php echo wp_kses( $refused_text, array( 'time' => array( 'datetime' => true ) ) ); ?></p>
+		<?php endif; ?>
 	</div>
 	<div class="affibloom-card__body affibloom-card__body--fields">
 		<div class="affibloom-field">

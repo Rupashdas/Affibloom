@@ -321,14 +321,48 @@ test.describe( 'C1 Amazon product data', () => {
 			expect( stored().credential_id ).toBe( valid.credential_id );
 		}
 
-		// A rejection clears the four fields.
+		// A rejection: see the C1Q0 test below (kept, marked refused).
+	} );
+
+	test( 'C1Q0 a refused Validate keeps the credentials, says why, and asks Amazon nothing until validated again', async ( { page } ) => {
+		credentials( valid );
+		// Lasso clears refused credentials (R22); Affibloom keeps them, marked refused with Amazon's reason.
 		stub( 'reject' );
-		card = await openCard( page );
+		let card = await openCard( page );
 		await card.getByRole( 'button', { name: 'Validate' } ).click();
 		await expect( card.getByRole( 'status' ) ).toHaveText( 'Invalid Amazon Creators API credentials.' );
-		await expect( card.getByText( 'Not set up', { exact: true } ) ).toBeVisible();
-		expect( stored().credential_id ).toBe( '' );
-		expect( stored().secret ).toBe( '' );
+		await expect( card.getByText( 'Refused by Amazon', { exact: true } ) ).toBeVisible();
+		expect( stored().credential_id ).toBe( valid.credential_id );
+		expect( stored().secret ).toBe( valid.secret );
+		card = await openCard( page );
+		await expect( card.getByText( /^Amazon refused these credentials on \d{4}-\d\d-\d\d \d\d:\d\d UTC \(HTTP 401, invalid_client\)\./ ) ).toBeVisible();
+
+		// Refused credentials ask Amazon nothing.
+		stub( 'ok' );
+		await addAmazon( page, randomAsin() );
+		expect( requests() ).toBe( 0 );
+
+		// Validated again: the mark and its line go.
+		card = await openCard( page );
+		await card.getByRole( 'button', { name: 'Validate' } ).click();
+		await expect( card.getByText( 'Validated', { exact: true } ) ).toBeVisible();
+		await expect( card.getByText( /^Amazon refused these credentials/ ) ).toBeHidden();
+		expect( stored() ).not.toHaveProperty( 'refusal' );
+	} );
+
+	test( "C1Q0 the stub answers only the suite's test credentials; a person's requests reach Amazon", () => {
+		stub( 'ok' );
+		const token = ( clientId: string ) =>
+			wp( 'eval', `echo false === apply_filters( 'pre_http_request', false, array( 'body' => wp_json_encode( array( 'grant_type' => 'client_credentials', 'client_id' => '${ clientId }', 'client_secret' => 'x' ) ) ), 'https://api.amazon.com/auth/o2/token' ) ? 'passed' : 'answered';` );
+		const items = ( bearer: string ) =>
+			wp( 'eval', `echo false === apply_filters( 'pre_http_request', false, array( 'headers' => array( 'Authorization' => 'Bearer ${ bearer }' ), 'body' => '{}' ), 'https://creatorsapi.amazon/catalog/v1/getItems' ) ? 'passed' : 'answered';` );
+
+		expect( token( valid.credential_id ) ).toBe( 'answered' );
+		expect( token( 'ACCEPTANCE-ID-C1' ) ).toBe( 'answered' );
+		expect( token( 'amzn1.application-oa2-client.0123456789abcdef0123456789abcdef' ) ).toBe( 'passed' );
+		expect( items( 'stub-access-token' ) ).toBe( 'answered' );
+		expect( items( 'Atza-a-real-token' ) ).toBe( 'passed' );
+		expect( requests() ).toBe( 3 );
 	} );
 
 	test( 'AC8 Save Changes validates saved credentials that are not validated yet (R23)', async ( { page } ) => {

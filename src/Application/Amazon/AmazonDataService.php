@@ -12,6 +12,7 @@ namespace Affibloom\Application\Amazon;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Amazon\Asin;
+use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\CredentialsRepository;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Product\PlaceholderName;
@@ -52,7 +53,16 @@ final class AmazonDataService {
 	 * banner's button are enabled by it.
 	 */
 	public function can_ask_amazon(): bool {
-		return $this->credentials->get()->configured();
+		return null !== $this->usable();
+	}
+
+	/**
+	 * The credentials Amazon may be asked with: all four set (R1, D4) and not refused by Amazon (C1Q0); else null.
+	 */
+	private function usable(): ?Credentials {
+		$credentials = $this->credentials->get();
+
+		return $credentials->configured() && null === $this->credentials->refusal() ? $credentials : null;
 	}
 
 	/**
@@ -76,8 +86,8 @@ final class AmazonDataService {
 			return SyncOutcome::succeeded( SyncOutcome::PRESENT );
 		}
 
-		$credentials = $this->credentials->get();
-		if ( ! $credentials->configured() ) {
+		$credentials = $this->usable();
+		if ( null === $credentials ) {
 			return SyncOutcome::failed( SyncOutcome::FAILED );
 		}
 		try {
@@ -136,8 +146,8 @@ final class AmazonDataService {
 		if ( ProductType::Amazon !== $product->type || null === $asin ) {
 			throw new RefreshFailed( RefreshFailed::NOT_AMAZON );
 		}
-		$credentials = $this->credentials->get();
-		if ( ! $credentials->configured() ) {
+		$credentials = $this->usable();
+		if ( null === $credentials ) {
 			throw new RefreshFailed( RefreshFailed::NOT_CONFIGURED );
 		}
 
@@ -237,8 +247,8 @@ final class AmazonDataService {
 	 * @param string $link    The link the product stores.
 	 */
 	private function fetch( Asin $asin, string $country, string $link ): ?AmazonProduct {
-		$credentials = $this->credentials->get();
-		if ( ! $credentials->configured() ) {
+		$credentials = $this->usable();
+		if ( null === $credentials ) {
 			return null;
 		}
 

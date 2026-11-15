@@ -51,7 +51,7 @@ final class Notice {
 			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),
 			// Save Changes on the Amazon tab could not validate the credentials (C1 R23, without Lasso's licence sentence).
 			'amazon-unverified-kept'    => __( 'Settings were saved, but Creators API credentials could not be validated.', 'affibloom' ) . ' ' . Messages::for_reason( 'amazon_unavailable' ) . ' ' . __( 'Your saved credentials were kept; try again when the service is available.', 'affibloom' ),
-			'amazon-unverified-cleared' => __( 'Settings were saved, but Creators API credentials could not be validated.', 'affibloom' ) . ' ' . Messages::for_reason( 'amazon_rejected' ),
+			'amazon-unverified-refused' => __( 'Settings were saved, but Creators API credentials could not be validated.', 'affibloom' ) . ' ' . Messages::for_reason( 'amazon_rejected' ) . ' ' . __( 'They were kept and marked refused; check them and Validate again.', 'affibloom' ),
 			default        => '',
 		};
 	}

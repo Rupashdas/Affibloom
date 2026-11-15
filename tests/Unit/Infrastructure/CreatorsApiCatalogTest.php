@@ -102,6 +102,16 @@ final class CreatorsApiCatalogTest extends TestCase {
 		$this->assertFailsWith( CatalogError::NOT_FOUND, 'Product not found.' );
 	}
 
+	public function test_a_refused_token_names_amazons_status_and_error(): void {
+		$this->answers = array( array( 401, self::fixture( 'token-401.json' ) ) );
+		try {
+			( new CreatorsApiCatalog() )->verify( new Credentials( 'id', 'secret', 'tag-20', '3.1' ) );
+			self::fail( 'a refused token was accepted' );
+		} catch ( CatalogError $error ) {
+			self::assertSame( array( CatalogError::AUTH_FAILED, 'HTTP 401, invalid_client' ), array( $error->kind, $error->reason ) );
+		}
+	}
+
 	public function test_a_refused_token_is_auth_failed(): void {
 		$this->answers = array( array( 401, self::fixture( 'token-401.json' ) ) );
 		$this->assertFailsWith( CatalogError::AUTH_FAILED, 'Could not obtain Creators API access token.' );

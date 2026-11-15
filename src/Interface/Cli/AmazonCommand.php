@@ -79,6 +79,10 @@ final class AmazonCommand implements Module {
 		if ( ! $credentials->configured() ) {
 			WP_CLI::error( 'Not set up: enter the Creators API credentials in Settings → Amazon, Amazon Product Data API.' );
 		}
+		$refusal = $this->credentials->refusal();
+		if ( null !== $refusal ) {
+			WP_CLI::error( sprintf( 'Refused by Amazon on %s UTC (%s): check the credentials and Validate them again in Settings → Amazon.', $refusal->at, $refusal->reason ) );
+		}
 
 		try {
 			$item = $this->catalog->item( $credentials, $asin, $country );

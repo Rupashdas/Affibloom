@@ -270,7 +270,7 @@ C1F and C1G in Phase 3
 - [x] Task C1C: Filling a new Amazon product on add
 - [x] Task C1D: Refresh on the product page
 - [x] Task C1I: Bulk Amazon sync
-- [ ] Task C1Q0: Amazon credentials kept (why they end up empty)
+- [x] Task C1Q0: Amazon credentials kept (why they end up empty)
 - [ ] Task C1Q1: Real Creators API answers as fixtures
 - [ ] Task C1Q2: Read every relevant resource
 - [ ] Task C1Q3: Store the full Amazon data
@@ -6261,10 +6261,10 @@ Affibloom does clear them it says why, on the card.
 **Steps:**
 
 - [x] **Step 1: Trace** every write of `affibloom_amazon_credentials` (code, tests, tools, run-state) and the backups.
-- [ ] **Step 2: Failing test** reproducing the cause found.
-- [ ] **Step 3: Fix** the cause; every clear records why.
-- [ ] **Step 4: Run and look** (the card at 1280 and 375 px if it changed).
-- [ ] **Step 5: Commit** — "Keep the Amazon credentials unless Amazon refuses them".
+- [x] **Step 2: Failing test** reproducing the cause found.
+- [x] **Step 3: Fix** the cause; every clear records why.
+- [x] **Step 4: Run and look** (the card at 1280 and 375 px if it changed).
+- [x] **Step 5: Commit** — "Keep the Amazon credentials unless Amazon refuses them".
 
 ---
 

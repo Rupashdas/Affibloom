@@ -69,7 +69,7 @@ final class CredentialsServiceTest extends TestCase {
 		self::assertSame( 'secret', $this->amazon->verified[0]->secret );
 	}
 
-	public function test_a_rejection_clears_the_stored_values_but_not_the_country(): void {
+	public function test_a_rejection_keeps_the_typed_values_marked_refused_and_not_the_country(): void {
 		$service = $this->service( 'reject', self::stored() );
 		try {
 			$service->validate( self::TYPED, 'gb' );
@@ -77,8 +77,23 @@ final class CredentialsServiceTest extends TestCase {
 		} catch ( CredentialsNotValidated $refused ) {
 			self::assertSame( CredentialsNotValidated::REJECTED, $refused->reason );
 		}
-		self::assertEquals( new Credentials(), $this->store->stored );
+		// C1Q0 (deviation 119): kept, not cleared as Lasso's R22, so a refusal never loses what was entered.
+		self::assertEquals( Credentials::from_array( self::TYPED ), $this->store->stored );
+		self::assertSame( '', $this->store->signature );
+		self::assertSame( 'HTTP 401, invalid_client', $this->store->refusal?->reason );
+		self::assertSame( CredentialsState::Refused, $service->state() );
 		self::assertSame( 'us', $this->settings->get()->string( 'default_country' ) );
+	}
+
+	public function test_save_changes_after_a_refusal_asks_again_and_a_success_lifts_it(): void {
+		$service = $this->service( 'reject', self::stored() );
+		self::assertSame( CredentialsService::SAVE_REFUSED, $service->save( self::TYPED ) );
+		self::assertNotNull( $this->store->refusal );
+
+		$this->amazon->answer = 'ok';
+		self::assertNull( $service->save( self::TYPED ) );
+		self::assertNull( $this->store->refusal );
+		self::assertSame( CredentialsState::Validated, $service->state() );
 	}
 
 	public function test_an_unavailable_service_changes_nothing(): void {
@@ -98,15 +113,16 @@ final class CredentialsServiceTest extends TestCase {
 		self::assertSame( CredentialsState::Validated, $service->state() );
 	}
 
-	public function test_save_keeps_or_clears_credentials_it_could_not_validate(): void {
+	public function test_save_keeps_credentials_it_could_not_validate(): void {
 		$service = $this->service( 'unavailable' );
 		self::assertSame( CredentialsService::SAVE_KEPT, $service->save( self::TYPED ) );
 		self::assertEquals( self::stored(), $this->store->stored );
 		self::assertSame( CredentialsState::Saved, $service->state() );
 
 		$service = $this->service( 'reject' );
-		self::assertSame( CredentialsService::SAVE_CLEARED, $service->save( self::TYPED ) );
-		self::assertSame( CredentialsState::NotSetUp, $service->state() );
+		self::assertSame( CredentialsService::SAVE_REFUSED, $service->save( self::TYPED ) );
+		self::assertEquals( self::stored(), $this->store->stored );
+		self::assertSame( CredentialsState::Refused, $service->state() );
 	}
 
 	public function test_save_does_not_ask_amazon_again_for_validated_unchanged_credentials(): void {

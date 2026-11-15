@@ -5,6 +5,7 @@ use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\CatalogItem;
 use Affibloom\Domain\Amazon\Credentials;
+use Affibloom\Domain\Amazon\Refusal;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
@@ -24,13 +25,15 @@ final class AmazonDataServiceTest extends TestCase {
 	private FakeAmazonCatalog $amazon;
 	private InMemoryAmazonProducts $rows;
 	private InMemoryProductRepository $library;
+	private InMemoryCredentials $credentials;
 
 	private function service( bool $configured = true, string $answer = 'ok' ): AmazonDataService {
 		$this->amazon  = new FakeAmazonCatalog( $answer );
 		$this->rows    = new InMemoryAmazonProducts();
 		$this->library = new InMemoryProductRepository();
 		$credentials  = $configured ? new Credentials( 'id', 'secret', 'tag-20', '3.1' ) : new Credentials();
-		return new AmazonDataService( new InMemoryCredentials( $credentials ), $this->amazon, $this->rows, $this->library );
+		$this->credentials = new InMemoryCredentials( $credentials );
+		return new AmazonDataService( $this->credentials, $this->amazon, $this->rows, $this->library );
 	}
 
 	private static function draft( string $asin = 'B0STUBITEM', string $country = 'us' ): Product {
@@ -243,5 +246,15 @@ final class AmazonDataServiceTest extends TestCase {
 		self::assertFalse( $unset->can_ask_amazon() );
 		self::assertSame( RefreshFailed::NOT_CONFIGURED, $this->refused( fn() => $unset->refresh( $this->stored( 'Amazon' ) ) )->reason );
 		self::assertSame( array(), $this->amazon->verified );
+	}
+
+	public function test_refused_credentials_ask_amazon_nothing(): void {
+		$service = $this->service();
+		$this->item();
+		$this->credentials->refusal = new Refusal( 'HTTP 401, invalid_client', '2026-11-15 07:46:58' );
+
+		self::assertFalse( $service->can_ask_amazon() );
+		self::assertSame( 'Starting Name', $service->fill( self::draft() )->name );
+		self::assertSame( array(), $this->rows->rows );
 	}
 }

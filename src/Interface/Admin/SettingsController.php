@@ -57,7 +57,7 @@ final class SettingsController implements Module {
 	 * The toast after a save: refused fields first, then credentials Save Changes could not validate (R23).
 	 *
 	 * @param list<string> $refused    Keys that kept their old value.
-	 * @param string|null  $unverified CredentialsService::SAVE_KEPT or SAVE_CLEARED, or null.
+	 * @param string|null  $unverified CredentialsService::SAVE_KEPT or SAVE_REFUSED, or null.
 	 */
 	private static function notice( array $refused, ?string $unverified ): string {
 		if ( $refused ) {

@@ -4,6 +4,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, C1Q0 done, at the user's "Keep them, mark refused"):** deviation 119. Refused credentials
+  kept and marked, shown on the card, no Amazon calls while refused; the stub and the run restore never touch a
+  person's credentials. Unit 646; C1 AC8 and C1Q0 tests passed. Credentials on Local still empty: the user re-enters them.
+
 - **2026-11-15 (Claude Code, C1Q0 step 1):** the cause of the empty credentials traced from MySQL's binary log
   (deviation 118): a real token refusal cleared them at 07:46:58; at 16:51 the test stub answered the user's Validate
   and the run's restore wrote back empty. Fix proposed; waits for the user. Nothing changed in code.

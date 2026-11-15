@@ -124,6 +124,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 116. Task C1I (2026-11-15), bulk Amazon sync: pending without Lasso's last-updated arm (229 here until Task 26 copies the rows), a placeholder counts as no name, REST + WP-Cron.
 - 117. Full Amazon product data, C1Q0-C1Q6, before C1K (the user, 2026-11-15): features field, C1E's price job brought forward, no variations.
 - 118. Task C1Q0 findings (2026-11-15): the credentials were cleared by a real token refusal (07:46:58) and by a test run around the user's Validate (16:51).
+- 119. Task C1Q0 (2026-11-15): refused credentials kept and marked (not cleared, R22), the stub answers only test credentials, the run restore keeps a person's.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2567,3 +2568,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     deleted the option at 16:51:38 and the run's restore wrote back its start state, empty. Proposed fix (C1Q0, waits for
     the user): record every clear's cause and show it on the card; the stub answers only the suite's test credentials;
     the restore keeps credentials a person changed during a run; keep the credentials on a refusal (a deviation from R22).
+
+119. **Task C1Q0: Amazon credentials kept (2026-11-15).** The user: "Keep them, mark refused". A refused token no longer
+    clears the credentials (Lasso's R22): `CredentialsService::check()` stores them with a `Refusal` (Amazon's "HTTP 401,
+    invalid_client" from the token answer, and the UTC time) in the option's `refusal` key; the card shows "Refused by
+    Amazon" and the reason line; `AmazonDataService` (add, Refresh, bulk sync) and `wp affibloom amazon get` ask Amazon
+    nothing while refused; a successful Validate or Save lifts it. Save Changes' toast key is `amazon-unverified-refused`.
+    Tests: the stub answers only the suite's test Credential IDs and its own token; the after-run restore keeps a
+    person's credentials. AC8's rejection checks moved to a new C1Q0 test (AC8 hit the 45 s limit). Checks: unit 646 red
+    then green; C1 AC8 x2 and both C1Q0 tests passed; lint, PHPStan clean; by hand the restore rule and the card at 1280
+    and 375 px (the time kept on one line). The C1K first try's hunks stay unstaged.

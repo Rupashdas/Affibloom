@@ -2,6 +2,7 @@
 namespace Affibloom\Tests\Unit\Fakes;
 
 use Affibloom\Domain\Amazon\Credentials;
+use Affibloom\Domain\Amazon\Refusal;
 use Affibloom\Domain\Amazon\CredentialsRepository;
 
 /**
@@ -18,8 +19,21 @@ final class InMemoryCredentials implements CredentialsRepository {
 		return $this->signature;
 	}
 
+	public ?Refusal $refusal = null;
+
 	public function save( Credentials $credentials, string $signature ): void {
 		$this->stored    = $credentials;
 		$this->signature = $signature;
+		$this->refusal   = null;
+	}
+
+	public function refusal(): ?Refusal {
+		return $this->refusal;
+	}
+
+	public function refuse( Credentials $credentials, Refusal $refusal ): void {
+		$this->stored    = $credentials;
+		$this->signature = '';
+		$this->refusal   = $refusal;
 	}
 }

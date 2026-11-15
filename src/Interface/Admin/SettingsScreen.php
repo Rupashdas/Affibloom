@@ -82,13 +82,18 @@ final class SettingsScreen {
 	 * What the Product Data API card shows (C1 D2, D4): the state, and the Partner tag and Version as stored. The
 	 * Credential ID and Secret are never printed, only whether one is stored.
 	 *
-	 * @return array{state: string, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}
+	 * @return array{state: string, refusal: array{reason: string, at: string}|null, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}
 	 */
 	private function api_card(): array {
-		$stored = $this->credentials->stored();
+		$stored  = $this->credentials->stored();
+		$refusal = $this->credentials->refusal();
 
 		return array(
 			'state'             => $this->credentials->state()->value,
+			'refusal'           => null === $refusal ? null : array(
+				'reason' => $refusal->reason,
+				'at'     => $refusal->at,
+			),
 			'partner_tag'       => $stored->partner_tag,
 			'version'           => $stored->version,
 			'has_credential_id' => '' !== $stored->credential_id,

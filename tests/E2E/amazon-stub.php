@@ -11,12 +11,41 @@
  * - "unavailable": every request answers 503.
  * - "throttle": every request answers 429.
  *
+ * It answers only the suite's own requests (test Credential IDs, its own token); a person's request passes to Amazon.
  * Every request it answers is counted in affibloom_test_amazon_requests, so a test can show that none was made.
  *
  * @package Affibloom
  */
 
 defined( 'ABSPATH' ) || exit;
+
+/**
+ * Whether a Credential ID is one of the suite's test IDs (C1.spec.ts: "…oa2-client.e2e", "ACCEPTANCE-ID-C1"). The
+ * after-run restore (tests/E2E/fixtures/run-state.php) reads it too.
+ *
+ * @param string $credential_id A Credential ID.
+ */
+function affibloom_e2e_is_test_credential( string $credential_id ): bool {
+	return str_ends_with( $credential_id, '.e2e' ) || str_starts_with( $credential_id, 'ACCEPTANCE-' );
+}
+
+/**
+ * Whether an Amazon request comes from the suite: a token request with a test Credential ID, or a catalogue request
+ * carrying the token the stub hands out (fixtures/amazon/token.json).
+ *
+ * @param array<string, mixed> $args The request's arguments.
+ * @param string               $host Its host.
+ */
+function affibloom_e2e_is_stub_request( array $args, string $host ): bool {
+	if ( 'creatorsapi.amazon' === $host ) {
+		$headers = is_array( $args['headers'] ?? null ) ? $args['headers'] : array();
+		return str_contains( (string) ( $headers['Authorization'] ?? '' ), 'Bearer stub-access-token' );
+	}
+	$body = $args['body'] ?? '';
+	$body = is_array( $body ) ? $body : json_decode( (string) $body, true );
+
+	return is_array( $body ) && affibloom_e2e_is_test_credential( (string) ( $body['client_id'] ?? '' ) );
+}
 
 add_filter(
 	'pre_http_request',
@@ -52,6 +81,11 @@ add_filter(
 		}
 		if ( 'throttle' === $scenario ) {
 			return $answer( 429, 'error-429.json' );
+		}
+		// Only the suite's own requests are answered (C1Q0, deviation 119): a token request for one of its test Credential
+		// IDs, or a catalogue request with the stub's token. A person's Validate during a run reaches Amazon.
+		if ( ! affibloom_e2e_is_stub_request( $args, $host ) ) {
+			return $pre;
 		}
 
 		// The token hosts (Login with Amazon and Cognito).

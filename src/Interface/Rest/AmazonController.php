@@ -251,7 +251,7 @@ final class AmazonController implements Module {
 
 	/**
 	 * POST /amazon/validate: 200 with Lasso's success message and the state "validated"; 422 with the missing fields;
-	 * 401 when Amazon refused them (the stored ones are cleared); 503 when Amazon was unavailable (nothing changed).
+	 * 401 when Amazon refused them (kept, marked refused: C1Q0); 503 when Amazon was unavailable (nothing changed).
 	 *
 	 * @param WP_REST_Request $request The four typed values and the selected country.
 	 * @phpstan-param WP_REST_Request<array{credential_id: string, secret: string, partner_tag: string, version: string, country: string}> $request

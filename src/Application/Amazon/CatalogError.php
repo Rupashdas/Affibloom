@@ -28,8 +28,10 @@ final class CatalogError extends RuntimeException {
 	 *
 	 * @param string $kind   One of the constants.
 	 * @param string $detail What happened (Lasso's message, or Amazon's): for logs and the command line, never a page.
+	 * @param string $reason For a refused token, Amazon's HTTP status and error code ("HTTP 401, invalid_client"),
+	 *                       which the card shows (C1Q0); else ''.
 	 */
-	public function __construct( public readonly string $kind, string $detail ) {
+	public function __construct( public readonly string $kind, string $detail, public readonly string $reason = '' ) {
 		parent::__construct( $detail );
 	}
 

@@ -2430,6 +2430,9 @@ body.affibloom-has-modal { overflow: hidden; }
 .affibloom-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .affibloom-state--saved { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
 .affibloom-state--validated { background: var(--affibloom-success-50); color: var(--affibloom-success-700); }
+.affibloom-state--refused { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+.affibloom-api-card__refusal { flex-basis: 100%; margin: 0; color: var(--affibloom-danger-700); font-size: 13px; line-height: 18px; }
+.affibloom-api-card__refusal time { white-space: nowrap; }
 
 /* A button waiting for an answer: disabled, with a spinner before its text (C1A Validate). */
 .affibloom-button.is-busy { display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: progress; }

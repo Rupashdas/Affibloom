@@ -25,10 +25,23 @@ interface CredentialsRepository {
 	public function signature(): string;
 
 	/**
-	 * Replaces the credentials and the signature.
+	 * Replaces the credentials and the signature, and lifts any refusal.
 	 *
 	 * @param Credentials $credentials The credentials.
 	 * @param string      $signature   Their signature when Amazon accepted them, else ''.
 	 */
 	public function save( Credentials $credentials, string $signature ): void;
+
+	/**
+	 * Why and when Amazon refused the stored credentials, or null (C1Q0).
+	 */
+	public function refusal(): ?Refusal;
+
+	/**
+	 * Stores credentials Amazon refused, without a signature and with the refusal (C1Q0; Lasso clears them, R22).
+	 *
+	 * @param Credentials $credentials The refused credentials.
+	 * @param Refusal     $refusal     Why and when.
+	 */
+	public function refuse( Credentials $credentials, Refusal $refusal ): void;
 }

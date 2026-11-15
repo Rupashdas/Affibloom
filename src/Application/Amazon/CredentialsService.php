@@ -13,6 +13,7 @@ use Affibloom\Domain\Amazon\Credentials;
 use Affibloom\Domain\Amazon\CredentialsRepository;
 use Affibloom\Domain\Amazon\CredentialsState;
 use Affibloom\Domain\Amazon\Marketplace;
+use Affibloom\Domain\Amazon\Refusal;
 use Affibloom\Domain\Settings\SettingsRepository;
 
 /**
@@ -26,8 +27,8 @@ final class CredentialsService {
 	/** Save Changes kept unvalidated credentials because Amazon was unavailable (R23). */
 	public const SAVE_KEPT = 'kept';
 
-	/** Save Changes cleared credentials Amazon refused (R23). */
-	public const SAVE_CLEARED = 'cleared';
+	/** Save Changes kept credentials Amazon refused, marked refused (R23; C1Q0: Lasso clears them). */
+	public const SAVE_REFUSED = 'refused';
 
 	/**
 	 * Builds the service.
@@ -50,12 +51,23 @@ final class CredentialsService {
 	}
 
 	/**
-	 * What the card says (D4): Not set up, Saved (not validated), or Validated for the current country.
+	 * Why and when Amazon refused the stored credentials, or null (C1Q0): the card and the command say it.
+	 */
+	public function refusal(): ?Refusal {
+		return $this->credentials->refusal();
+	}
+
+	/**
+	 * What the card says (D4): Not set up, Refused by Amazon (C1Q0), Saved (not validated), or Validated for the
+	 * current country.
 	 */
 	public function state(): CredentialsState {
 		$stored = $this->credentials->get();
 		if ( ! $stored->configured() ) {
 			return CredentialsState::NotSetUp;
+		}
+		if ( null !== $this->credentials->refusal() ) {
+			return CredentialsState::Refused;
 		}
 
 		return $stored->verified_by( $this->credentials->signature(), $this->default_country() ) ? CredentialsState::Validated : CredentialsState::Saved;
@@ -64,7 +76,8 @@ final class CredentialsService {
 	/**
 	 * Validate (R19-R22, D3): checks the typed values (a blank Credential ID or Secret means the stored one) by asking
 	 * Amazon for a token. On success the four values and the country are saved with their signature, and nothing else.
-	 * A rejection clears the four stored values (the country stays, D3); an unavailable service changes nothing.
+	 * A rejection stores the typed values marked refused (C1Q0; Lasso clears them, R22; the country stays, D3); an
+	 * unavailable service changes nothing.
 	 *
 	 * @param array<array-key, mixed> $input   The four typed values by field name.
 	 * @param string                  $country The Default Tracking ID as selected; an unknown code keeps the saved one.
@@ -95,7 +108,7 @@ final class CredentialsService {
 	 * not yet validated (R23).
 	 *
 	 * @param array<array-key, mixed> $input The four posted values by field name.
-	 * @return string|null SAVE_KEPT or SAVE_CLEARED when the validation failed, else null.
+	 * @return string|null SAVE_KEPT or SAVE_REFUSED when the validation failed, else null.
 	 */
 	public function save( array $input ): ?string {
 		$stored  = $this->credentials->get();
@@ -113,7 +126,7 @@ final class CredentialsService {
 		try {
 			$this->check( $posted );
 		} catch ( CredentialsNotValidated $refused ) {
-			return CredentialsNotValidated::UNAVAILABLE === $refused->reason ? self::SAVE_KEPT : self::SAVE_CLEARED;
+			return CredentialsNotValidated::UNAVAILABLE === $refused->reason ? self::SAVE_KEPT : self::SAVE_REFUSED;
 		}
 		$this->credentials->save( $posted, $posted->signature( $country ) );
 
@@ -121,7 +134,9 @@ final class CredentialsService {
 	}
 
 	/**
-	 * Asks Amazon for a token; a refusal clears the stored credentials (R22).
+	 * Asks Amazon for a token. A refusal keeps these credentials, marked refused with Amazon's reason and the time
+	 * (C1Q0, deviation 119): Lasso clears them (R22), which lost validated credentials on the Local site on 2026-11-15
+	 * with no trace of why (deviation 118).
 	 *
 	 * @param Credentials $credentials Configured credentials.
 	 * @throws CredentialsNotValidated When Amazon refuses them or is unavailable.
@@ -133,7 +148,7 @@ final class CredentialsService {
 			if ( $error->unavailable() ) {
 				throw new CredentialsNotValidated( CredentialsNotValidated::UNAVAILABLE );
 			}
-			$this->credentials->save( new Credentials(), '' );
+			$this->credentials->refuse( $credentials, new Refusal( '' !== $error->reason ? $error->reason : $error->getMessage(), gmdate( 'Y-m-d H:i:s' ) ) );
 			throw new CredentialsNotValidated( CredentialsNotValidated::REJECTED );
 		}
 	}

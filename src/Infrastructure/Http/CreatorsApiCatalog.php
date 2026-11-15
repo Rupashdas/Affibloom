@@ -163,9 +163,14 @@ final class CreatorsApiCatalog implements AmazonCatalog {
 		if ( '' === $token ) {
 			// Lasso's verify_credentials(): no answer, 5xx or 429 is the service; anything else is a refusal (R21).
 			$unavailable = 0 === $status || 429 === $status || $status >= 500;
+			// Amazon's own error code (Login with Amazon and Cognito answer {"error": "invalid_client", …}), kept as a
+			// short reason for the card; only letters, digits and _ - . are kept.
+			$code   = is_array( $body ) && isset( $body['error'] ) && is_string( $body['error'] ) ? substr( (string) preg_replace( '/[^A-Za-z0-9_.-]/', '', $body['error'] ), 0, 64 ) : '';
+			$reason = "HTTP $status" . ( '' === $code ? '' : ", $code" );
 			throw new CatalogError(
 				$unavailable ? CatalogError::HTTP_ERROR : CatalogError::AUTH_FAILED,
-				$unavailable ? "Service temporarily unavailable (HTTP $status)." : 'Could not obtain Creators API access token.'
+				$unavailable ? "Service temporarily unavailable (HTTP $status)." : 'Could not obtain Creators API access token.',
+				$reason
 			);
 		}
 

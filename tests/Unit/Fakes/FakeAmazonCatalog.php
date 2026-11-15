@@ -20,7 +20,7 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 	public function verify( Credentials $credentials ): void {
 		$this->verified[] = $credentials;
 		if ( 'reject' === $this->answer ) {
-			throw new CatalogError( CatalogError::AUTH_FAILED, 'refused' );
+			throw new CatalogError( CatalogError::AUTH_FAILED, 'refused', 'HTTP 401, invalid_client' );
 		}
 		if ( 'unavailable' === $this->answer ) {
 			throw new CatalogError( CatalogError::HTTP_ERROR, 'down' );

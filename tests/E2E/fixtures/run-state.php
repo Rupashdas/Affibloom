@@ -11,6 +11,7 @@
  * - every post (any type: products, posts, pages, revisions, attachments) and every term made during the run,
  *   found by ID: anything above the highest ID saved is the run's, and is deleted for good;
  * - every option whose name starts with `affibloom` (settings, Amazon credentials, jobs, test stubs): the saved rows
+ *   (except a person's Amazon credentials entered during the run, which stay: C1Q0)
  *   are written back as they were, byte for byte, and options the run added are deleted; except the schema's
  *   `affibloom_db_version` and `affibloom_upgrade_lock`, which follow the code and its tables, not the run (C1C);
  * - the rows of Affibloom's own tables (`{prefix}affibloom_*`): each table's saved rows are written back and the
@@ -97,6 +98,17 @@ function affibloom_e2e_is_schema_option( string $name ): bool {
 }
 
 /**
+ * Whether the stored Amazon credentials are a person's: a Credential ID that is not one of the suite's test IDs
+ * (affibloom_e2e_is_test_credential(), in tests/E2E/amazon-stub.php, which the plugin loads on a local site).
+ */
+function affibloom_e2e_persons_credentials(): bool {
+	$stored = get_option( 'affibloom_amazon_credentials', array() );
+	$id     = is_array( $stored ) ? trim( (string) ( $stored['credential_id'] ?? '' ) ) : '';
+
+	return '' !== $id && function_exists( 'affibloom_e2e_is_test_credential' ) && ! affibloom_e2e_is_test_credential( $id );
+}
+
+/**
  * Affibloom's own tables on this site (`{prefix}affibloom_*`).
  *
  * @return list<string>
@@ -135,7 +147,14 @@ function affibloom_e2e_restore_state( array $state ): void {
 	foreach ( $state['options'] as $row ) {
 		$saved[ $row['option_name'] ] = $row;
 	}
+	// A person's Amazon credentials (not one of the suite's test IDs) present at the end are theirs, entered during the
+	// run: they stay (C1Q0, deviation 119). A run once wrote back its empty start state over a person's Validate.
+	$person = affibloom_e2e_persons_credentials();
+	if ( $person ) {
+		unset( $saved['affibloom_amazon_credentials'] );
+	}
 	$now           = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", 'affibloom%' ) );
+	$now           = $person ? array_diff( $now, array( 'affibloom_amazon_credentials' ) ) : $now;
 	$options_added = array_values( array_filter( array_diff( $now, array_keys( $saved ) ), static fn( string $name ): bool => ! affibloom_e2e_is_schema_option( $name ) ) );
 	foreach ( $options_added as $name ) {
 		$wpdb->delete( $wpdb->options, array( 'option_name' => $name ) );

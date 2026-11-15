@@ -225,6 +225,11 @@
 			} )
 				.then( function ( answer ) {
 					show( answer.data.message, 'success', answer.data.state );
+					// Validated again: the earlier refusal no longer applies (C1Q0).
+					var refusal = card.querySelector( '[data-api-refusal]' );
+					if ( refusal ) {
+						refusal.hidden = true;
+					}
 				} )
 				.catch( function ( error ) {
 					var known = error && error.code && 0 === error.code.indexOf( 'affibloom_' );
