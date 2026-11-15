@@ -270,6 +270,13 @@ C1F and C1G in Phase 3
 - [x] Task C1C: Filling a new Amazon product on add
 - [x] Task C1D: Refresh on the product page
 - [x] Task C1I: Bulk Amazon sync
+- [ ] Task C1Q0: Amazon credentials kept (why they end up empty)
+- [ ] Task C1Q1: Real Creators API answers as fixtures
+- [ ] Task C1Q2: Read every relevant resource
+- [ ] Task C1Q3: Store the full Amazon data
+- [ ] Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
+- [ ] Task C1Q5: The Amazon Details card
+- [ ] Task C1Q6: Throttling, retry, quota and batched requests
 - Task C1J (no code; listed for coverage only): Tracking-ID behaviours — no code (one line, below)
 - [ ] Task C1K: Keep Geni.us Formatting on add and save
 - [ ] Task C1L: The cloud-only switches labelled
@@ -6231,6 +6238,85 @@ replaced; failure shows R35's message.
 - [x] **Step 4: Banner and script.**
 - [x] **Step 5: Run and look.**
 - [x] **Step 6: Commit** — "Sync Amazon data for products that have none".
+
+---
+
+### Tasks C1Q0-C1Q6: Full Amazon product data (the user, 2026-11-15; deviation 117)
+
+> Added at the user's request, run **before C1K and C1L**, one task at a time with the user's approval between them.
+> Findings, the Creators API's resources and the decisions: `docs/features/C1/full-amazon-data-proposal.md`.
+> Variations (Q7) are out. C1E's scheduled refresh (Phase 7) is brought forward into C1Q4, without its
+> "Only update products with Locations" arm (needs F21). Tests use recorded real answers (C1Q1), never invented ones.
+
+---
+
+### Task C1Q0: Amazon credentials kept (why they end up empty)
+
+**Feature:** C1 (R19-R23, D3) · **Why:** the Local credentials were empty twice (deviation 112; 2026-11-15 after the
+user validated them), and no live call (C1Q1) can be made until they stay.
+
+**User action:** Settings → Amazon: Validate, then Save Changes (and any later save) keeps the credentials; when
+Affibloom does clear them it says why, on the card.
+
+**Steps:**
+
+- [ ] **Step 1: Trace** every write of `affibloom_amazon_credentials` (code, tests, tools, run-state) and the backups.
+- [ ] **Step 2: Failing test** reproducing the cause found.
+- [ ] **Step 3: Fix** the cause; every clear records why.
+- [ ] **Step 4: Run and look** (the card at 1280 and 375 px if it changed).
+- [ ] **Step 5: Commit** — "Keep the Amazon credentials unless Amazon refuses them".
+
+---
+
+### Task C1Q1: Real Creators API answers as fixtures
+
+**Entry point:** `wp affibloom amazon get <asin> --raw [--all]` prints Amazon's answer as received, with every getItems
+resource when `--all`. **Needs** working credentials (C1Q0). Three real ASINs from the site's library (one in stock
+with a saving, one with a deal or another seller, one out of stock or unavailable); the answers are saved under
+`tests/fixtures/amazon/live-*.json` with the partner tag and any account data scrubbed. Settles whether
+`customerReviews` exists and the images' shape. Commit — "Record real Creators API answers as test fixtures".
+
+### Task C1Q2: Read every relevant resource
+
+**Entry point:** the same command, without `--raw`. The client asks the full list (proposal, section 3, without
+variations); `CatalogItem` reads amounts and display strings for price, list price (+ type) and savings, the
+buy-box listing (not listing 0), availability, condition, seller, deal, brand, manufacturer, model, part number,
+warranty, colour, size, dimensions, unit count, EAN/UPC/ISBN, category and sales rank, parent ASIN, all images,
+features. A missing group is empty, never an error. Unit tests per group from C1Q1's files, plus partial answers.
+Commit — "Read every relevant Creators API resource".
+
+### Task C1Q3: Store the full Amazon data
+
+**Entry point:** upgrade step 3 (`Table::create`, dbDelta adds columns). Row gains numeric `price_amount`,
+`basis_amount`, `savings_amount_num` (Lasso's savings were numbers), `brand`, `deal_badge`, `parent_asin`, `images`
+(JSON) and `details` (JSON: the rest); display strings stay for Lasso's formatting (R50). `AmazonProduct` maps
+`CatalogItem` to the row; a failed fetch never overwrites (R27). Tests: unit mapping; E2E round trip through WP-CLI;
+run-state restore. Commit — "Store the full Amazon data with numeric prices".
+
+### Task C1Q4: Features field, fill on add and Refresh, scheduled price refresh
+
+**Entry points:** the product page (Features list: add, edit, remove, order), Add A New Link, Refresh, cron
+`affibloom_amazon_refresh` (hourly). Product field `features` (post meta `_affibloom_features`, JSON list), separate
+from the description, never copied into it. Add and Refresh store Amazon's features into it and the full row; the
+job (R37-R39, D8; C1E brought forward) refreshes due rows only (price, stock, savings, amounts), at most the
+settings' batch, keeps the last good data on failure, writes no product field (D7). Tests: C1 AC1 and AC4
+extended, a Features AC, a job AC (stubbed cron run), unit for the due rule. Commit — "Keep Amazon features and prices
+current".
+
+### Task C1Q5: The Amazon Details card
+
+**Entry point:** the product page of an Amazon product: a read-only card listing every stored field (brand,
+manufacturer, model, warranty, prices, savings, deal, availability, seller, condition, colour, size, dimensions,
+EAN/UPC, category, rank, parent ASIN, images, last updated); "No Amazon data yet" when there is none. E2E AC and the
+375/1280 px looks. Commit — "Show the stored Amazon data on the product page".
+
+### Task C1Q6: Throttling, retry, quota and batched requests
+
+**Entry point:** every Creators call (add, Refresh, bulk sync, the job). A 429's `retryAfterSeconds` or the token's
+Retry-After stores a back-off; no call until it passes (add and Refresh fall back as AC2; the job and bulk sync
+wait). A daily counter keeps the job under the quota (8,640 at the start). Bulk sync and the job ask up to 10 ASINs
+per getItems; per-item errors in a 200 answer are read per ASIN. Unit tests with 429 and partial fixtures; C1 bulk
+sync ACs unchanged. Commit — "Respect Amazon's rate limits and batch Amazon requests".
 
 ---
 

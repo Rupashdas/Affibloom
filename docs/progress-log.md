@@ -4,6 +4,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add each session's entry at the
 
 ## Session log
 
+- **2026-11-15 (Claude Code, full Amazon data planned, at the user's decisions):** findings and tasks C1Q0-C1Q6
+  (deviation 117; `docs/features/C1/full-amazon-data-proposal.md`), before C1K; C1E's price job brought forward.
+  Local's credentials found empty; C1Q0 next.
+
 - **2026-11-15 (Claude Code, Batch 2.2, Task C1I, at the user's "Let's complete batch 2.2"):** bulk Amazon sync
   (deviation 116): pending query, run option, WP-Cron passes at one product a second, REST routes, the banner in the
   notice region. AC7 banner and AC14 red then green; unit 643; lint, PHPStan clean; by hand at 1280 and 375 px.

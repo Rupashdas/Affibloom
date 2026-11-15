@@ -714,6 +714,9 @@ No click figures are imported. The section is in `archive/phase-7-superseded.md`
 
 ### Task C1E: The scheduled refresh job
 
+> **Moved (the user, 2026-11-15, deviation 117):** built in Phase 2 as part of C1Q4. What stays here is only the
+> "Only update products with Locations" arm, which reads F21's link index.
+
 **Feature:** C1 (R37-R39, D8; AC6, AC10) · **Without credentials:** the event runs and does nothing
 
 **Why:** Lasso keeps Amazon data under 24 hours old (requirements N4).

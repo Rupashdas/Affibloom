@@ -282,6 +282,13 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | C1C | C1 | done (deviation 113) |
 | C1D | C1 | done (deviation 114) |
 | C1I | C1 | done (deviation 116) |
+| C1Q0 | C1 | open (deviation 117) |
+| C1Q1 | C1 | open (deviation 117) |
+| C1Q2 | C1 | open (deviation 117) |
+| C1Q3 | C1 | open (deviation 117) |
+| C1Q4 | C1 | open (deviation 117) |
+| C1Q5 | C1 | open (deviation 117) |
+| C1Q6 | C1 | open (deviation 117) |
 | C1J | C1 | open |
 | C1K | C1 | open |
 | C1L | C1 | open |
@@ -505,7 +512,7 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 | C3C | C3 | open |
 | 13K | F19 | open |
 | 26J | F10 | dropped (decision E1) |
-| C1E | C1 | open |
+| C1E | C1 | moved to Phase 2 as C1Q4, less the Locations arm (deviation 117) |
 | C1H | C1 | open |
 | O1 | F22 | open |
 | O2 | F22 | open |

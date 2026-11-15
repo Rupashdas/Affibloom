@@ -122,6 +122,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 114. Task C1D (2026-11-15), Refresh on the product page: image as meta only, placeholder rename on the server, the page keeps a typed name; the image row wraps.
 - 115. Narrower batch-end runs and shorter records (2026-11-15; the user: "All three"); Local's PHP workers are hard-coded.
 - 116. Task C1I (2026-11-15), bulk Amazon sync: pending without Lasso's last-updated arm (229 here until Task 26 copies the rows), a placeholder counts as no name, REST + WP-Cron.
+- 117. Full Amazon product data, C1Q0-C1Q6, before C1K (the user, 2026-11-15): features field, C1E's price job brought forward, no variations.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2546,3 +2547,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       reason line "Needs the Amazon API" is shown, not only described. `can_refresh()` became `can_ask_amazon()`.
     - Checks: AC7 banner and AC14 red first (no pending query), then green; unit 643; lint, PHPStan clean; by hand at
       1280 and 375 px (the chip sat above the words at 375 px; fixed).
+
+117. **Full Amazon product data: Tasks C1Q0-C1Q6, before C1K and C1L (the user, 2026-11-15).** Fetch every relevant
+    Creators API field on add and Refresh (no Lasso cloud, no other service); Description and a new **Features**
+    field (meta JSON, editable, no front-end display yet) stay separate, nothing copied; prices kept current by a
+    scheduled refresh (C1E brought forward into C1Q4, less its Locations arm, which stays in Phase 7) with numeric
+    prices, last good data kept, throttling and quota respected; ratings stay the Primary Rating field if Amazon gives
+    none; variations excluded. Order Q0 → Q6, the user approving each. Written in the phase file, `batches.md`
+    (2.1Q0-2.1Q6) and `docs/features/C1/full-amazon-data-proposal.md`. Found while planning: an uncommitted first try of
+    C1K in the working tree (6 files); left untouched, out of every Q commit.

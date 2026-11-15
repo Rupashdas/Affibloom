@@ -46,6 +46,13 @@ plan lines, reviews, and staging or production work.
 | Batch | Tasks |
 |---|---|
 | 2.1 | C1B, C1C, C1D |
+| 2.1Q0 | C1Q0 (full Amazon data, deviation 117: the user approves each Q task; before C1K) |
+| 2.1Q1 | C1Q1 |
+| 2.1Q2 | C1Q2 |
+| 2.1Q3 | C1Q3 |
+| 2.1Q4 | C1Q4 |
+| 2.1Q5 | C1Q5 |
+| 2.1Q6 | C1Q6 |
 | 2.2 | C1I, C1K, C1L |
 | 2.3 | C1M, C1N |
 | 2.4 | C1O, C1P |
@@ -169,7 +176,7 @@ MCP1 is dropped (decision A10).
 | 7.5 | 34A, 34B, 34C |
 | 7.6 | C3A, C3B, C3C |
 | 7.7 | 13K |
-| 7.8 | C1E, C1H |
+| 7.8 | C1E (the Locations arm only; deviation 117), C1H |
 | 7.9 | O1 |
 | 7.10 | O2, O3 |
 | 7.11 | O4, O5 |
