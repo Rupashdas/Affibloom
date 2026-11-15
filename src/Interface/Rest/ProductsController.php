@@ -403,7 +403,8 @@ final class ProductsController implements Module {
 	 * @phpstan-param WP_REST_Request<array{url: string, selections: list<string>}> $request
 	 */
 	public function create( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$selections = array_values( array_map( 'strval', (array) $request['selections'] ) );
+		// The route's schema makes it a list of strings, at most ten (empty when not sent).
+		$selections = $request['selections'];
 		if ( array() !== $selections ) {
 			return $this->create_selected( $selections );
 		}

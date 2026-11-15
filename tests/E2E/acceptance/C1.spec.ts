@@ -654,14 +654,22 @@ test.describe( 'C1 Amazon product data', () => {
 	} );
 
 	test( 'AC15 the Amazon tab searches Amazon, adds one product or up to ten selected, with their data (C1M)', async ( { page } ) => {
-		const byAsin = ( asin: string ) =>
-			wp( 'post', 'list', '--post_type=affibloom_product', '--post_status=any', '--meta_key=_affibloom_asin', `--meta_value=${ asin }`, '--field=ID' )
-				.split( /\s+/ )
-				.filter( Boolean );
-		// The stub's search results (B0SRP0000N); none of them is a product when the test starts.
+		// Two minutes: two searches, a single add and a bulk add of ten, on Local's two PHP workers.
+		test.setTimeout( 120_000 );
+		// The products made from the stub's search results (ASINs B0SRP0000N), by ASIN, in one WP-CLI call.
+		const products = (): Record< string, number[] > =>
+			JSON.parse(
+				wp(
+					'eval',
+					`global $wpdb; $out = array(); foreach ( $wpdb->get_results( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_affibloom_asin' AND meta_value LIKE 'B0SR%'" ) as $row ) { $out[ $row->meta_value ][] = (int) $row->post_id; } echo wp_json_encode( (object) $out );`
+				)
+			) as Record< string, number[] >;
+		const byAsin = ( asin: string ) => ( products()[ asin ] ?? [] ).map( String );
+		// None of them is a product when the test starts.
 		const asins = [ 1, 2 ].flatMap( ( p ) => Array.from( { length: 10 }, ( _, n ) => `B0SR${ p }0000${ n }` ) );
-		for ( const asin of asins ) {
-			byAsin( asin ).forEach( ( id ) => wp( 'post', 'delete', id, '--force' ) );
+		const leftover = Object.values( products() ).flat();
+		if ( leftover.length ) {
+			wp( 'post', 'delete', ...leftover.map( String ), '--force' );
 		}
 		setSettings( { tracking_id: 'vbvault-20', default_country: 'us' } );
 
@@ -700,7 +708,9 @@ test.describe( 'C1 Amazon product data', () => {
 		// The search result filled the stored data, so the add asked Amazon nothing (R71).
 		expect( requests() ).toBe( searched );
 
-		// Bulk: ten selected across two pages, the eleventh refused, then all ten added.
+		// Bulk: ten selected across two pages, the eleventh refused, then all ten added. A fresh Dashboard first: the add
+		// above reloads it, and a click during that load is lost.
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'More ways to add links' } ).click();
 		await page.getByRole( 'button', { name: /Bulk add links/ } ).click();
 		await dialog.getByRole( 'tab', { name: 'Amazon' } ).click();
@@ -719,11 +729,12 @@ test.describe( 'C1 Amazon product data', () => {
 		page.once( 'dialog', ( confirm ) => confirm.accept() );
 		await dialog.getByRole( 'button', { name: 'Add 10 Links' } ).click();
 		await expect( dialog ).toBeHidden( { timeout: 30_000 } );
+		const added = products();
 		for ( const asin of [ ...asins.slice( 1, 10 ), 'B0SR200000' ] ) {
-			expect( byAsin( asin ), asin ).toHaveLength( 1 );
+			expect( added[ asin ] ?? [], asin ).toHaveLength( 1 );
 		}
-		expect( byAsin( 'B0SR200001' ) ).toHaveLength( 0 );
-		expect( wp( 'post', 'get', byAsin( 'B0SR200000' )[ 0 ], '--field=post_title' ) ).toBe( 'Stub Volleyball 2-0' );
+		expect( added.B0SR200001 ).toBeUndefined();
+		expect( wp( 'post', 'get', String( added.B0SR200000[ 0 ] ), '--field=post_title' ) ).toBe( 'Stub Volleyball 2-0' );
 		expect( requests() ).toBe( searched + 2 );
 	} );
 
