@@ -49,7 +49,8 @@ Editor → blocks/product-box/edit.js
   - `package.json`, `blocks/product-box/block.json`
   - `ProductBoxBlock.php` (register from `build/product-box`)
   - `ProductsController.php`, `ProductService.php`, `ProductResource.php`, `Capabilities.php`, `Plugin.php`
-  - `.github/workflows/ci.yml` (build before the tests)
+  - `.github/workflows/ci.yml` (build before the tests). *Removed 2026-11-16 (deviation 10); there is no
+    workflow to change any more.*
 
 - [ ] **Step 1: Failing test**
 
