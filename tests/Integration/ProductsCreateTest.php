@@ -27,7 +27,7 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 'affibloom_product', get_post_type( $data['id'] ) );
 		self::assertSame( $url, get_post_meta( $data['id'], '_affibloom_url', true ) );
 		self::assertSame( 'other', get_post_meta( $data['id'], '_affibloom_type', true ) );
-		// No message after an add, as Lasso's (url-add.php): a non-Amazon link opens its product's page (Task 14A).
+		// No message after an add, as Lasso's (url-add.php): the new product's page opens (Task 14A; Amazon links too, deviation 133).
 		self::assertStringEndsWith( 'admin.php?page=affibloom-product&id=' . $data['id'], $data['redirect_to'] );
 	}
 
@@ -52,6 +52,8 @@ final class ProductsCreateTest extends WP_UnitTestCase {
 		self::assertSame( 'amazon', get_post_meta( $data['id'], '_affibloom_type', true ) );
 		self::assertSame( 'B0C1234567', get_post_meta( $data['id'], '_affibloom_asin', true ) );
 		self::assertSame( 'us', get_post_meta( $data['id'], '_affibloom_amazon_country', true ) );
+		// As Lasso's: an Amazon add opens its product's page too (deviation 133).
+		self::assertStringEndsWith( 'admin.php?page=affibloom-product&id=' . $data['id'], $data['redirect_to'] );
 	}
 
 	public function test_the_same_asin_on_the_same_store_is_the_product_that_exists(): void {

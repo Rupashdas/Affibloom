@@ -40,8 +40,7 @@ final class ProductServiceTest extends TestCase {
 
 	/**
 	 * Lasso re-saves the product it finds (wp_update_post after is_lasso_url_exist), which makes it the most
-	 * recently changed: it moves to the top of the Dashboard, the only sign an Amazon re-add gives (url-add.php
-	 * reloads the Dashboard with no message).
+	 * recently changed: it moves to the top of the Dashboard.
 	 */
 	public function test_adding_a_link_the_site_has_moves_that_product_to_the_top_of_the_list(): void {
 		$service = $this->service();

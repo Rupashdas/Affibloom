@@ -419,16 +419,11 @@ final class ProductsController implements Module {
 		if ( $added->already_existed ) {
 			$data['duplicate'] = true;
 		}
-		// Where Lasso goes after an add (url-add.php, the success handler), with no message of its own:
-		// - an Amazon link, new or found, reloads the Dashboard (its is_amazon branch runs before the duplicate one);
-		// - any other link opens the product's page (Task 14A), with Lasso's warning when it already existed, which
-		// Lasso asks for with ?is_duplicate=true (url-details.php 2597-2600).
-		if ( ProductType::Amazon === $added->product->type ) {
-			$data['redirect_to'] = admin_url( 'admin.php?page=' . AdminMenu::SLUG );
-		} else {
-			$page                = ProductScreen::url( (int) $added->product->id );
-			$data['redirect_to'] = $added->already_existed ? add_query_arg( 'is_duplicate', '1', $page ) : $page;
-		}
+		// Where Lasso goes after an add (url-add.php 1621-1639), with no message of its own: the product's page, Amazon
+		// links too, with Lasso's warning when it already existed (?is_duplicate=true, url-details.php 2597-2600). Its
+		// "is_amazon" branch never runs: check_error_and_response_ajax() sends no top-level is_amazon (deviation 133).
+		$page                = ProductScreen::url( (int) $added->product->id );
+		$data['redirect_to'] = $added->already_existed ? add_query_arg( 'is_duplicate', '1', $page ) : $page;
 
 		return new WP_REST_Response( array( 'data' => $data ), $added->already_existed ? 200 : 201 );
 	}
@@ -437,7 +432,7 @@ final class ProductsController implements Module {
 	 * The Amazon tab's selections (C1M; Lasso's marketplace_selection(s), R71): each result's data is stored first, then
 	 * its product link is added as a pasted one would be, so it takes Amazon's name and image without a second request.
 	 * Up to ten are added at once rather than in Lasso's background run: none of them asks Amazon or fetches a page.
-	 * 201 with how many were added (found ones count) and the Dashboard, where an Amazon add goes; 400 when a selection
+	 * 201 with how many were added (found ones count) and the Dashboard, where Lasso's run of selections ends (url-add.php 1600); 400 when a selection
 	 * is not one of the person's search results.
 	 *
 	 * @param list<string> $asins The selected ASINs.

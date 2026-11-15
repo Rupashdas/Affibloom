@@ -26,7 +26,7 @@ test.describe( 'F2 Amazon links', () => {
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Add A New Link' } );
 		await dialog.getByRole( 'textbox', { name: 'URL', exact: true } ).fill( input );
-		// An Amazon add ends as Lasso's does: the Dashboard reloads, with no message (url-add.php, its is_amazon branch).
+		// An add ends as Lasso's does: the product's page opens, with no message (url-add.php 1621-1639; deviation 133).
 		// Wait for that load under the test's own timeout: a slow Local copy can take a while to serve it.
 		const reloaded = page.waitForEvent( 'framenavigated' );
 		await dialog.getByRole( 'button', { name: 'Add Link' } ).click();
@@ -45,9 +45,10 @@ test.describe( 'F2 Amazon links', () => {
 		const before = newestProduct();
 		await submit( page, input );
 
-		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 ); // Lasso says nothing after an Amazon add.
+		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 ); // Lasso says nothing after an add.
 		const id = newestProduct();
 		expect( id ).toBeGreaterThan( before );
+		await expect( page ).toHaveURL( new RegExp( `page=affibloom-product&id=${ id }$` ) ); // the new product's page
 
 		const meta = ( key: string ) => {
 			try {
@@ -99,10 +100,8 @@ test.describe( 'F2 Amazon links', () => {
 		await add( page, `https://www.amazon.com/dp/${ a }` );
 
 		await submit( page, `https://www.amazon.com/gp/product/${ a }?th=1` );
-		// Lasso's Amazon branch runs before its duplicate one: the Dashboard reloads with no message, and the product it
-		// found, re-saved, is at the top of the list.
-		await expect( page.locator( '.affibloom-toast' ) ).toHaveCount( 0 );
-		await expect( page.locator( '.affibloom-table tbody tr' ).first() ).toContainText( a );
+		// As Lasso's: the product it found opens, with its duplicate warning (?is_duplicate, deviation 133).
+		await expect( page ).toHaveURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
 		expect( productsWithAsin( a ) ).toHaveLength( 1 );
 
 		// Lasso matches the ASIN with its store: the same ASIN on amazon.co.uk is another product.

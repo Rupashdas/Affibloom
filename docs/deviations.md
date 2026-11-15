@@ -138,6 +138,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 130. Tests per task cut to ~20 s (the user, 2026-11-15): no red run; lint, analyse and Playwright once per batch.
 - 131. The user tests each batch by hand from Claude's guide; Playwright only at the phase exit; PHPStan cache in `.local/`; English.
 - 132. Task 18A (2026-11-16): the box's data attributes and properties get Affibloom names too (`data-affibloom-id`, `data-hide-*`, `--affibloom-*`); table in tokens.md.
+- 133. Add Link (2026-11-16, the user): every single add opens the product's page, Amazon too; deviation 56's Amazon reload was a dead Lasso branch.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2715,3 +2716,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     "Lasso's classes plus `.affibloom-box`" predates decision C1). Also: `RepointResolver` (Application\Box) and
     `ProductRepository::repointed_to()` hold the repoint walk 18S1 reuses; `Product` gained `show_description` and
     `slug`; until 18E/18F every theme prints the 3-box template.
+
+133. **Add Link opens the product's page, Amazon links too (the user, 2026-11-16: "when adding single products in
+    lasso, after adding its opening that product page").** Deviation 56 read `url-add.php` 1624's `res.data['is_amazon']`
+    branch as Lasso's ending for an Amazon add, but `check_error_and_response_ajax()` (class-lasso-affiliate-link.php
+    2004-2015) never sends a top-level `is_amazon`, so the branch is dead: Lasso opens the product's page for every
+    single add, with `is_duplicate` for a found one. `POST /products { url }` now answers that for every link; the
+    Amazon tab's selections and Bulk add still end on the Dashboard (url-add.php 1600). Integration test and F2/F18 specs
+    updated (not run).

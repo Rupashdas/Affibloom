@@ -13,7 +13,7 @@ test.describe( 'F18 Adding links', () => {
 	}
 
 	/**
-	 * How a bulk add (or an Amazon add) ends, as Lasso's does (url-add.php): the Dashboard reloads with no message and
+	 * How a bulk add ends, as Lasso's does (url-add.php): the Dashboard reloads with no message and
 	 * the product at the top of the list.
 	 *
 	 * @param page    The page.
