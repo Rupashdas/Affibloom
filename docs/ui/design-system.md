@@ -6,6 +6,10 @@ blue as the brand colour; the user then found it too basic, asked for four riche
 Decision: ADR-008. Scope: every admin screen, modal and notice, and the block's editor UI. The reader-facing product
 box is **not** covered: it keeps the site's box design (ADR-006).
 
+> **Meadow replaces Aurora (the user, 2026-11-16; deviation 142).** Section 0b below is the admin's design from now
+> on. Sections 1-8 stay as the record of Aurora, which is what the code still draws, until the restyle batch rewrites
+> them as it builds Meadow. Where 0b and sections 1-8 disagree, 0b wins.
+
 **What stays Lasso's:** labels, help texts, fields, tab and column order, and the steps of every workflow
 (`docs/spec/interface.md`). **What is ours:** everything visual below, plus two content additions the user approved
 with Aurora: overview tiles on the Dashboard (U9) and a one-line subtitle under each page title (U10).
@@ -18,6 +22,146 @@ the right holding the theme row, underline tabs, accordions and label-left / con
 colour scheme and the typography below are Affibloom's.** Where this document and Lasso's structure disagree on
 that screen, the structure wins and the tokens still apply. The other admin screens keep the Aurora layout until
 the user says otherwise.
+
+## 0b. Amendment, 2026-11-16: Meadow replaces Aurora
+
+The user found Aurora's navy band heavy (a long product name made it four lines tall, the Dashboard tiles wrapped to
+two rows, Save sat at the foot of a 2,800px product page) and compared five clickable directions: Meadow, Console
+(own sidebar), Split View (list and detail side by side), Canvas (edit on the box) and Nightshift (dark). **The user
+chose Meadow** and approved this section with its four recommended answers: 1320px column, bundled fonts, no Discard
+button, restyle in its own batch after Phase 3's exit check. Reference prototype:
+https://claude.ai/artifact/VKuvkUctK992ethcke8ZMR (private to the user's claude.ai account).
+
+Meadow is calm, spacious and light: a white top bar with underline navigation, no band, a botanical green brand,
+cards with a hairline border and a soft shadow, and the product form beside a sticky live preview.
+
+**Unchanged:** ADR-008's rule (features, fields, labels, help texts, tab and column order and workflow steps are
+Lasso's); section 0 (Settings → Display keeps Lasso's structure, only colours and type are ours); the reader-facing
+box (ADR-006); U9 and U10 as content; the class names in section 8; WCAG 2.2 AA, a visible focus ring everywhere,
+status never by colour alone; ON1/ON2's header behaviour (nav order, `aria-current`, the Menu button below 992px,
+the notice region's API).
+
+### 0b.1 Colour
+
+Token names stay where the role is the same, so most of `admin.css` changes by value. The navy and band tokens are
+retired.
+
+| Token | Aurora | Meadow | Role |
+|---|---|---|---|
+| `--affibloom-brand-600` | `#1E5BB8` | `#1E6B47` | primary buttons, current nav item and tab, links, switches on, focus ring |
+| `--affibloom-brand-700` (new) | — | `#185A3B` | primary hover |
+| `--affibloom-brand-800` (new) | — | `#124A30` | primary pressed |
+| `--affibloom-brand-500` | `#2563C9` | retired | Meadow's buttons and switches are flat |
+| `--affibloom-brand-50` | `#EAF1FC` | `#E3F0E7` | icon chips, selected rows, count pills, selection bar |
+| `--affibloom-brand-25` (new) | — | `#F1F7F2` | hover wash on menus and quiet buttons, quick-edit band |
+| `--affibloom-brand-line` (new) | — | `#C9E0D1` | border of tinted areas (selection bar, quick-edit card) |
+| `--affibloom-navy-900`, `-brand-300`, `-on-navy`, `-on-band` | | retired | no navy header, no band |
+| `--affibloom-ink-900` | `#14213D` | `#16201A` | headings, body text, toast background |
+| `--affibloom-ink-700` | `#3D4A63` | `#55625A` | secondary text, inactive tabs |
+| `--affibloom-ink-600` | `#5B6880` | `#55625A` | help texts, table headers, subtitles |
+| `--affibloom-ink-500` (new) | — | `#6A766E` | URLs under names, meta, placeholders |
+| `--affibloom-ink-400` | `#8A93A3` | `#8A968C` | switch off |
+| `--affibloom-line` | `#EDF1F7` | `#E3E8E1` | card borders, dividers |
+| `--affibloom-control-line` | `#D5DCE8` | `#D3DBD1` | input and secondary button borders |
+| `--affibloom-line-strong` (new) | — | `#B6C1B4` | hover borders |
+| `--affibloom-page` | `#F3F6FB` | `#F5F7F4` | page background |
+| `--affibloom-subtle` | `#FAFBFE` | `#FAFBF9` | table header, card footers |
+| `--affibloom-sunk` (new) | — | `#F1F4F0` | group chips, disabled fields, empty-state chips |
+| `--affibloom-success-700` / `-50` | `#0B6B3A` / `#E8F7EF` | `#1E6B47` / `#E3F0E7` | OK, saved (always with an icon and a word) |
+| `--affibloom-danger-700` / `-50` | `#A1203A` / `#FDECEF` | `#B42318` / `#FDECEA` | broken links, errors, Delete |
+| `--affibloom-warning-700` / `-50` | `#8A4B00` / `#FFF4E0` | `#86560F` / `#FBF2E1` | out of stock, needs attention (text) |
+| `--affibloom-warning-icon` (new) | — | `#B7791F` | the out-of-stock glyph only |
+| `--affibloom-toast-icon` | `#22C55E` | `#9ED8B4` | the toast's tick |
+
+**Contrast (computed, WCAG 2.2):** white on brand-600 6.5:1; brand-600 on white 6.5:1, on brand-50 5.5:1; ink-900 on
+page 15.5:1; ink-600 on white 6.4:1, on page 5.9:1, on brand-50 5.5:1; ink-500 on white 4.7:1, on subtle 4.6:1;
+warning-700 on warning-50 5.6:1; danger-700 on danger-50 5.8:1; white on danger-700 6.6:1; white on ink-900 16.7:1.
+UI parts: switch off on white 3.1:1; warning glyph on its tint 3.3:1; focus ring on page 6.0:1. (The prototype's
+placeholder grey `#7B877F` is 3.7:1; Meadow uses ink-500 for placeholders.)
+
+### 0b.2 Typography
+
+**Faces:** "Plus Jakarta Sans" 700/800 for titles, numbers and the wordmark; "Inter" 400/500/600 for everything else.
+Both are bundled in the plugin (0b.5); the system stack of section 3 is the fallback.
+
+| Role | Value |
+|---|---|
+| Page title | Plus Jakarta Sans 36px / 1.12 / 800, letter-spacing −0.025em |
+| Card title | Plus Jakarta Sans 18px / 1.3 / 700 |
+| Dialog title | Plus Jakarta Sans 22px / 1.25 / 800 |
+| Big number (Dashboard stat buttons) | Plus Jakarta Sans 26px / 1 / 800, tabular figures |
+| Table numbers (Locations, Clicks) | Plus Jakarta Sans 20px / 1 / 700, tabular figures |
+| Wordmark | Plus Jakarta Sans 19px / 800 |
+| Body, controls | Inter 14px / 1.5 / 400; labels and setting names 13–14px / 600 |
+| Subtitle (U10) | Inter 15px, ink-600 |
+| Help text, URLs, small | Inter 12–13px / 1.45 |
+| Table header | Inter 12px / 600, ink-600, sentence case (Aurora's uppercase is dropped) |
+| Eyebrow ("SAVED VIEW") | Inter 11px / 600, uppercase, 0.08em letter spacing |
+
+### 0b.3 Space, shape, depth
+
+- **Spacing:** 4px base. Side gutters 40px (20px from 960px down); 32px between sections; card padding 28px (24px
+  above the card title); 22px between fields; settings rows 16px top and bottom.
+- **Rows and images:** Dashboard rows 80px with 52px image tiles (14px radius), as Aurora and Lasso.
+- **Radius:** cards 16px; stat buttons, notices, the search field and dialogs 14px; buttons and fields 10px; small
+  buttons 9px; group chips 7px; pills, view chips and switches fully round.
+- **Depth:** cards have a 1px `line` border and the shadow `0 1px 2px rgba(22,32,26,.04), 0 6px 16px -10px
+  rgba(22,32,26,.10)`; menus and dialogs `0 18px 40px -12px rgba(22,32,26,.24), 0 2px 6px rgba(22,32,26,.06)`.
+- **Focus:** a 2px brand-600 outline with a 2px offset; fields take a brand-600 border and a 3px
+  `rgba(30,107,71,.20)` ring.
+- **Motion:** 150ms on hover and switches, 140ms menu fade-in, the save bar slides up over 240ms; all off under
+  `prefers-reduced-motion`.
+
+### 0b.4 Layout
+
+- **Header (replaces the navy bar):** white, 64px, a 1px `line` bottom border, sticky under the WordPress admin bar.
+  Left: the flower mark (five brand-600 petals around a white centre) and the wordmark in ink-900, linking to the
+  Dashboard. Then ON1's navigation as text tabs (14px/500 ink-600); the current one brand-600 with a 3px brand-600
+  underline. Right: the Automations button (an outlined round pill with the spinner and the count) and **Add New
+  Link** as a primary split button (its caret opens the Menu). Below 992px the tabs fold behind the Menu button.
+- **No band.** The page head sits on the page background.
+- **Page head:** the title with the U10 subtitle under it on the left; the screen's head actions on the right
+  (Dashboard: the stat buttons; Groups: the search and Add New Group). A product page: "‹ Dashboard", a 76px image
+  tile, the name (two lines at most, the full name as its tooltip), the URL, and Save Changes on the right.
+- **Notices (replace the navy strip):** white cards at the top of the column (14px radius, `line` border, a 36px icon
+  chip in the tone's tint); the tones, the ×, the newest-last order and `affibloomNotice()` stay as ON2 built them.
+  The product's "This product may be out of stock." is a warning-50 card.
+- **Column:** centred, at most 1320px (`--affibloom-content-width`, unchanged).
+- **Footer:** "Version x.y.z" under a hairline, 12px ink-600.
+- **Dashboard (U9):** Broken links, Out of stock and Opportunities become **stat buttons** beside the title (icon chip,
+  26px number, label); pressing Broken links or Out of stock filters the list, marks the button pressed (a ×) and adds
+  a removable filter chip. Products and Clicks (30 days) form a quiet summary line under the subtitle. Then a
+  full-width 48px search with the Ctrl+Shift+L hint, then the table card: the toolbar (SAVED VIEW chips, Filters), the
+  selection bar in brand-50 while rows are ticked, 80px rows, Edit and Shortcode as small outlined buttons that
+  strengthen on row hover, and the footer (range, per page, pages).
+- **Quick edit:** Task 16A's structure: the row becomes a brand-25 band holding a white card with a brand-line border;
+  fields 2/3, image 1/3; Save Changes and Cancel right.
+- **Product page:** underline tabs with count pills; the Share kit as one quiet card row (title left, its buttons
+  right); two columns, **58% form, 42% preview**. The right column is **sticky**: the "Live preview" card (Desktop /
+  Mobile segmented control) and a summary card (Alert, Locations, Clicks). The form is grouped in cards that keep
+  Lasso's field order: *Links & buttons* (Name, the buttons, Add Another Button), *Organize* (Groups, Primary Rating,
+  Add Custom Field), *Display content* (Display Theme, Amazon Image, Badge Text, Price, Description, Features),
+  *Disclosure & link attributes* (Disclosure, Sponsored, Show Disclosure, Detect Opportunities, Show Prime Logo),
+  *Amazon Data*. Delete This Link is a danger text button at the end. **Save bar:** after any change a white bar
+  slides up at the foot of the screen with "Unsaved changes" and Save Changes (no Discard: Lasso has none); U7's
+  leave-guard stays.
+- **Locations, Groups, Group, Fields, Tables, Opportunities:** the same page head, tabs and table card.
+- **Settings:** General / Display / Amazon as a segmented control under the title; each section a card of rows (label
+  and visible help text left, the control right; no icon chips). Display as section 0 says.
+- **Dialogs:** 28px padding, a 44px icon chip (danger tint for destructive ones), the dialog title, actions right.
+- **Toast:** the ink-900 card with the tick, bottom centre.
+
+### 0b.5 Implementation notes
+
+- **Fonts:** WOFF2 files of Inter (400, 500, 600) and Plus Jakarta Sans (700, 800), Latin subset, about 120 KB in all,
+  in `assets/admin/fonts/` with their SIL Open Font License texts; loaded only on Affibloom's admin pages and in the
+  block's editor UI, `font-display: swap`. No request to Google or any other host.
+- **Code:** token values change in `assets/admin/admin.css`; the rules for the navy header, the band and the notice
+  strip give way to the white header, the page head and the notice cards. Components keep using tokens only. No PHP
+  logic, REST route or test selector changes; `tests/E2E/admin-design.spec.ts` (which checks Aurora's navy header and
+  band) is rewritten for Meadow first.
+- **When:** its own batch after Phase 3's exit check (the user, 2026-11-16). Meadow is a look, so it holds whether the
+  admin stays PHP-rendered (ADR-7) or a React admin is approved.
 
 ## 1. Principles
 

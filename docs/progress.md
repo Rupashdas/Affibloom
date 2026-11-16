@@ -37,6 +37,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    The automated part passed on 2026-11-16: every listed AC, each spec whole (F5 90/90, F6, F7, F8, F16, F29, C1, F30,
    F31). Phase 4 waits for the sign-off. F9 passes whole too (its tooltip tests leaked state when one failed;
    fixed 2026-11-16). A React admin is proposed in `docs/proposals/react-admin.md` (not yet decided).
+   **Then: the Meadow restyle** (the user, 2026-11-16, deviation 142): Meadow replaces Aurora (`ui/design-system.md`
+   section 0b); its own batch after the Phase 3 sign-off, tasks not yet written.
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only
    unit tests, `phpcs` and a look (~20 s); at a batch's end lint, analyse and unit tests, then a manual test guide for
    the user; Playwright only at the phase exit; no red run; no save/restore, backup or reset on Local (dummy data).
