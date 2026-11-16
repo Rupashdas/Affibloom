@@ -1002,10 +1002,6 @@ a.affibloom-button-2:hover {
 .affibloom-fields strong {
 	font-weight: 800;
 }
-.affibloom-fields li {
-	font-size: initial !important;
-	color: initial !important;
-}
 .affibloom-fields div {
 	margin: 0 0 10px 0;
 	text-align: left;
