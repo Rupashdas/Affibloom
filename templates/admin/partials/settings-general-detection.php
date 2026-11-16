@@ -5,7 +5,7 @@
  * 35D's. The choice is a plain set of checkboxes that look like chips (no select2), in Lasso's wording.
  *
  * @package Affibloom
- * @var array{settings: \Affibloom\Domain\Settings\Settings, refused: list<string>, post_types: array<string, string>, fields: array<string, string>, has_acf: bool} $view
+ * @var array{settings: \Affibloom\Domain\Settings\Settings, post_types: array<string, string>, fields: array<string, string>, has_acf: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,8 +27,7 @@ if ( $view['has_acf'] ) {
 	<div class="affibloom-card__body affibloom-card__body--fields">
 		<?php foreach ( $groups as $key => [ $label, $none, $choices ] ) : ?>
 			<?php
-			$chosen  = $settings->list( $key );
-			$refused = in_array( $key, $view['refused'], true );
+			$chosen = $settings->list( $key );
 			?>
 			<fieldset class="affibloom-choices" id="affibloom-setting-<?php echo esc_attr( $key ); ?>">
 				<legend class="affibloom-label">
@@ -60,9 +59,8 @@ if ( $view['has_acf'] ) {
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>
-				<?php if ( $refused ) : ?>
-					<p class="affibloom-field__error"><?php esc_html_e( 'One of those is not available on this site, so the previous choice was kept.', 'affibloom' ); ?></p>
-				<?php endif; ?>
+				<?php // Shown after a save that refused this choice (settings-save.js). ?>
+				<p class="affibloom-field__error" id="affibloom-setting-<?php echo esc_attr( $key ); ?>-error" hidden><?php esc_html_e( 'One of those is not available on this site, so the previous choice was kept.', 'affibloom' ); ?></p>
 			</fieldset>
 		<?php endforeach; ?>
 	</div>

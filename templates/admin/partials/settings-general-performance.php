@@ -5,7 +5,7 @@
  * changed; loading the page never rewrites a stored value (D13). The reader is Task F11's.
  *
  * @package Affibloom
- * @var array{settings: \Affibloom\Domain\Settings\Settings, refused: list<string>} $view
+ * @var array{settings: \Affibloom\Domain\Settings\Settings} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,7 +14,6 @@ use Affibloom\Domain\Settings\PerformanceMode;
 
 $settings     = $view['settings'];
 $current_mode = $settings->string( 'performance_mode' );
-$cpu_refused  = in_array( 'cpu_threshold', $view['refused'], true );
 $labels       = array(
 	PerformanceMode::POWER    => __( 'Power', 'affibloom' ),
 	PerformanceMode::BALANCED => __( 'Balanced', 'affibloom' ),
@@ -56,8 +55,8 @@ $labels       = array(
 		<div class="affibloom-field affibloom-field--spaced" data-cpu-field <?php echo PerformanceMode::CUSTOM === $current_mode ? '' : 'hidden'; ?>>
 			<label class="affibloom-label" for="affibloom-setting-cpu_threshold"><?php esc_html_e( 'CPU level', 'affibloom' ); ?></label>
 			<span class="affibloom-input-suffix">
-				<input type="number" class="affibloom-input affibloom-input--number<?php echo $cpu_refused ? ' is-invalid' : ''; ?>" id="affibloom-setting-cpu_threshold" name="settings[cpu_threshold]"
-					value="<?php echo esc_attr( (string) $settings->int( 'cpu_threshold' ) ); ?>" min="1" max="100" step="1" <?php echo $cpu_refused ? 'aria-invalid="true"' : ''; ?>>
+				<input type="number" class="affibloom-input affibloom-input--number" id="affibloom-setting-cpu_threshold" name="settings[cpu_threshold]"
+					value="<?php echo esc_attr( (string) $settings->int( 'cpu_threshold' ) ); ?>" min="1" max="100" step="1">
 				<span aria-hidden="true">%</span>
 			</span>
 		</div>

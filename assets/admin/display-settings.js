@@ -476,7 +476,8 @@
 
 	/**
 	 * The "Button icons" card (F28, Task 14F): "Choose image" opens WordPress's media library for one SVG, PNG or WebP
-	 * image, which fills the hidden attachment and the preview; Remove asks first, as the reset does.
+	 * image, which fills the hidden attachment and the preview; Remove asks first, as the reset does. Add icon and
+	 * Remove go over REST and stay on the page (deviation 143).
 	 *
 	 * @param {HTMLElement} card The card.
 	 */
@@ -500,11 +501,67 @@
 			} );
 		}
 
-		Array.prototype.forEach.call( card.querySelectorAll( 'form[data-confirm]' ), function ( form ) {
-			form.addEventListener( 'submit', function ( event ) {
-				if ( ! window.confirm( form.dataset.confirm ) ) {
-					event.preventDefault();
+		var list = card.querySelector( '.affibloom-icon-set__list' );
+		var busy = false;
+		// Both answer with the toast's words; a request that did not go through shows the card's failure text.
+		var ask = function ( options, done ) {
+			busy = true;
+			window.wp.apiFetch( options ).then( function ( answer ) {
+				window.affibloomToast( answer.data.message, !! answer.data.failed );
+				if ( ! answer.data.failed ) {
+					done( answer.data );
 				}
+			} ).catch( function () {
+				window.affibloomToast( card.dataset.failedText, true );
+			} ).finally( function () {
+				busy = false;
+			} );
+		};
+
+		// Add icon (F28): the new icon joins the card's list and every picker on the page, unticked.
+		if ( add ) {
+			add.addEventListener( 'submit', function ( event ) {
+				event.preventDefault();
+				if ( busy ) {
+					return;
+				}
+				ask( { path: '/affibloom/v1/icons', method: 'POST', body: new FormData( add ) }, function ( data ) {
+					if ( data.row ) {
+						list.insertAdjacentHTML( 'beforeend', data.row );
+					}
+					if ( data.item ) {
+						Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-icon-menu' ), function ( menu ) {
+							var unknown = menu.querySelector( '[data-unknown]' );
+							var holder = document.createElement( 'span' );
+							holder.innerHTML = data.item;
+							menu.insertBefore( holder.firstElementChild, unknown );
+						} );
+					}
+					add.reset();
+					add.querySelector( '[data-icon-attachment]' ).value = '0';
+					add.querySelector( '[data-icon-preview-tile]' ).hidden = true;
+				} );
+			} );
+		}
+
+		// Remove, after Lasso's kind of question: the icon leaves the list and the pickers that have not chosen it (a
+		// text that uses it keeps it until another is chosen, as after a reload it shows as unknown).
+		card.addEventListener( 'click', function ( event ) {
+			var remove = event.target.closest( '[data-icon-remove]' );
+			if ( ! remove || busy || ! window.confirm( remove.dataset.confirm ) ) {
+				return;
+			}
+			var css = remove.dataset.iconRemove;
+			ask( { path: '/affibloom/v1/icons/' + encodeURIComponent( css ), method: 'DELETE' }, function () {
+				var row = remove.closest( '.affibloom-icon-set__item' );
+				if ( row ) {
+					row.remove();
+				}
+				Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-icon-menu [data-icon]' ), function ( item ) {
+					if ( item.dataset.icon === css && 'true' !== item.getAttribute( 'aria-checked' ) ) {
+						item.remove();
+					}
+				} );
 			} );
 		} );
 	}
@@ -574,7 +631,7 @@
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var rail = document.querySelector( '.affibloom-split__rail' );
 		var icons = document.querySelector( '.affibloom-icon-set' );
-		if ( icons ) {
+		if ( icons && window.wp && window.wp.apiFetch ) {
 			iconSet( icons );
 		}
 		var layout = document.querySelector( '[data-rail-panel="layout"]' );

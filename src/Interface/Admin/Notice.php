@@ -21,7 +21,17 @@ final class Notice {
 	 * The message for the notice code in the query, or '' when there is none.
 	 */
 	public function message(): string {
-		return match ( $this->code() ) {
+		return self::text( $this->code() );
+	}
+
+	/**
+	 * The message for a notice code, or '' for an unknown one. A REST save answers with the same words the redirect
+	 * shows (the one save behaviour, deviation 143).
+	 *
+	 * @param string $code Notice code.
+	 */
+	public static function text( string $code ): string {
+		return match ( $code ) {
 			'saved'        => __( 'Settings saved.', 'affibloom' ),
 			'partly-saved' => __( 'Some values were not valid and kept their previous setting. Everything else was saved.', 'affibloom' ),
 			'reset'        => __( 'Display settings were reset to their defaults.', 'affibloom' ),
@@ -47,7 +57,7 @@ final class Notice {
 			// On the Fields list after Delete This Field (Task FL3): Lasso's words.
 			'field-deleted'    => __( 'Successfully deleted the Field.', 'affibloom' ),
 			// The one-time Lasso import (the user, 2026-11-13); the counts ride along in the query.
-			'lasso-imported'   => $this->imported(),
+			'lasso-imported'   => self::imported(),
 			'lasso-import-running' => __( 'An import is already running. Reload this page in a minute.', 'affibloom' ),
 			// Save Changes on the Amazon tab could not validate the credentials (C1 R23, without Lasso's licence sentence).
 			'amazon-unverified-kept'    => __( 'Settings were saved, but Creators API credentials could not be validated.', 'affibloom' ) . ' ' . Messages::for_reason( 'amazon_unavailable' ) . ' ' . __( 'Your saved credentials were kept; try again when the service is available.', 'affibloom' ),
@@ -60,7 +70,16 @@ final class Notice {
 	 * Whether the toast reports something that did not work, so it shows the cross (R23's warning).
 	 */
 	public function failed(): bool {
-		return str_starts_with( $this->code(), 'amazon-unverified-' );
+		return self::failure( $this->code() );
+	}
+
+	/**
+	 * Whether a notice code reports something that did not work.
+	 *
+	 * @param string $code Notice code.
+	 */
+	public static function failure( string $code ): bool {
+		return str_starts_with( $code, 'amazon-unverified-' ) || in_array( $code, array( 'icon-refused', 'icon-kept', 'tracking-refused' ), true );
 	}
 
 	/**
@@ -73,7 +92,7 @@ final class Notice {
 	/**
 	 * "Imported 254 products from Lasso.", with the records left out when there were any (?imported=…&skipped=…).
 	 */
-	private function imported(): string {
+	private static function imported(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
 		$imported = isset( $_GET['imported'] ) ? absint( wp_unslash( $_GET['imported'] ) ) : 0;
 		$skipped  = isset( $_GET['skipped'] ) ? absint( wp_unslash( $_GET['skipped'] ) ) : 0;

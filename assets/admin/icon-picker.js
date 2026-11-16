@@ -33,7 +33,10 @@
 		var words = field.querySelector( '.affibloom-icon-field__words' );
 		var button = field.querySelector( '.affibloom-icon-field__button' );
 		var menu = field.querySelector( '.affibloom-icon-menu' );
-		var items = Array.prototype.slice.call( menu.querySelectorAll( '[role="menuitemradio"]' ) );
+		// Read each time: Add icon and Remove on the Display screen change the menu (display-settings.js).
+		var items = function () {
+			return Array.prototype.slice.call( menu.querySelectorAll( '[role="menuitemradio"]' ) );
+		};
 		var label = document.querySelector( 'label[for="' + stored.id + '"]' );
 		var chosen = field.dataset.iconClass || '';
 
@@ -54,7 +57,7 @@
 
 		var choose = function ( item ) {
 			chosen = item.dataset.icon;
-			items.forEach( function ( other ) {
+			items().forEach( function ( other ) {
 				other.setAttribute( 'aria-checked', other === item ? 'true' : 'false' );
 			} );
 			var name = item.querySelector( '.affibloom-menu__title' ).textContent.trim();
@@ -74,7 +77,7 @@
 			window.setTimeout( function () {
 				if ( ! menu.hidden ) {
 					place( button, menu );
-					( menu.querySelector( '[aria-checked="true"]' ) || items[ 0 ] ).focus( { preventScroll: true } );
+					( menu.querySelector( '[aria-checked="true"]' ) || items()[ 0 ] ).focus( { preventScroll: true } );
 				}
 			}, 0 );
 		} );
@@ -87,12 +90,13 @@
 		} );
 
 		menu.addEventListener( 'keydown', function ( event ) {
-			var index = items.indexOf( document.activeElement );
+			var all = items();
+			var index = all.indexOf( document.activeElement );
 			var next = {
-				ArrowDown: items[ ( index + 1 ) % items.length ],
-				ArrowUp: items[ ( index - 1 + items.length ) % items.length ],
-				Home: items[ 0 ],
-				End: items[ items.length - 1 ],
+				ArrowDown: all[ ( index + 1 ) % all.length ],
+				ArrowUp: all[ ( index - 1 + all.length ) % all.length ],
+				Home: all[ 0 ],
+				End: all[ all.length - 1 ],
 			}[ event.key ];
 			if ( next ) {
 				event.preventDefault();

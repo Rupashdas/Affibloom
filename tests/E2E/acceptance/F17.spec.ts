@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { saveSettings as save } from '../settings';
 import { blockTrackers, setSettings, wp } from '../utils';
 
 // F17 Amazon settings (docs/features/F17/requirements.md).
@@ -20,7 +21,6 @@ test.describe( 'F17 Amazon settings', () => {
 
 	const amazonTab = '/wp-admin/admin.php?page=affibloom-settings&tab=amazon';
 	const stored = (): Record< string, any > => JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) );
-	const save = ( page: Page ) => page.getByRole( 'button', { name: 'Save Changes' } ).click();
 
 	test( 'AC1 every control shows its value and saves', async ( { page } ) => {
 		await page.goto( amazonTab );
@@ -47,8 +47,11 @@ test.describe( 'F17 Amazon settings', () => {
 		await expect( page.locator( '#affibloom-setting-tracking_id-error' ) ).toHaveText( 'This is an invalid Tracking ID' );
 		await save( page );
 		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'kept their previous setting' );
-		await expect( field ).toHaveValue( 'vbvault-20' );
+		// The page stays (deviation 143): the typed ID stays to be corrected, marked, and the stored one is unchanged.
+		await expect( field ).toHaveValue( 'vbvault' );
 		await expect( field ).toHaveAttribute( 'aria-invalid', 'true' );
+		await expect( page.locator( '#affibloom-setting-tracking_id-error' ) ).toHaveText( 'That was not a valid Tracking ID, so the previous one was kept.' );
+		expect( stored().tracking_id ).toBe( 'vbvault-20' );
 
 		await field.fill( 'my_tag.us-21' );
 		await save( page );

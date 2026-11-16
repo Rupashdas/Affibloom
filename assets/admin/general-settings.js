@@ -201,10 +201,25 @@
 		} );
 	}
 
+	/**
+	 * "Disable Help Tooltips" (F9): the server adds the body class on the next load (HelpTips); a save that stays on the
+	 * page (settings-save.js) sets it at once.
+	 */
+	function helpTips() {
+		var toggle = document.getElementById( 'affibloom-setting-disable_help_tips' );
+		if ( ! toggle ) {
+			return;
+		}
+		document.addEventListener( 'affibloom:saved', function () {
+			document.body.classList.toggle( 'affibloom-no-tips', toggle.checked );
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		linkDefaults();
 		analytics();
 		prefix();
 		performance();
+		helpTips();
 	} );
 } )();

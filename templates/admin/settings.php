@@ -7,14 +7,13 @@
  * Uninstall) are not shown until their tasks.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, settings: \Affibloom\Domain\Settings\Settings, action: string, notice: string, refused: list<string>, support: bool, post_types: array<string, string>, fields: array<string, string>, has_acf: bool} $view
+ * @var array{tab: string, tabs: list<string>, settings: \Affibloom\Domain\Settings\Settings, rest_path: string, notice: string, support: bool, post_types: array<string, string>, fields: array<string, string>, has_acf: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $card_data = array(
 	'settings' => $view['settings'],
-	'refused'  => $view['refused'],
 );
 ?>
 <div class="wrap affibloom-admin">
@@ -32,11 +31,9 @@ $card_data = array(
 		?>
 
 		<div class="affibloom-page__body">
-			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard
-				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
-				<input type="hidden" name="tab" value="<?php echo esc_attr( $view['tab'] ); ?>">
-				<?php wp_nonce_field( $view['action'] ); ?>
+			<?php // Saved over REST, staying on the page (settings-save.js; the one save behaviour, deviation 143). ?>
+			<form class="affibloom-settings" method="post" data-save-when-changed data-unsaved-guard data-refresh-values data-rest-save="<?php echo esc_attr( $view['rest_path'] ); ?>"
+				data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
 
 				<div class="affibloom-columns">
 					<div class="affibloom-columns__column">

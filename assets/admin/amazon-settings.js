@@ -150,10 +150,13 @@
 			hint.hidden = true;
 		}
 
-		// A space or comma finishes an ID, whether it was typed or pasted.
+		// A space or comma finishes an ID, whether it was typed or pasted. An emptied box has nothing wrong in it any
+		// more: its message goes at once, not on leaving the box, where it would move Save Changes under the pointer.
 		add.addEventListener( 'input', function () {
 			if ( /[\s,]/.test( add.value ) ) {
 				commit();
+			} else if ( '' === add.value ) {
+				mark( add, false );
 			}
 		} );
 		add.addEventListener( 'keydown', function ( event ) {
@@ -246,6 +249,21 @@
 		var card = document.querySelector( '[data-amazon-api]' );
 		if ( card && window.wp && window.wp.apiFetch ) {
 			apiCard( card );
+			// After Save Changes (settings-save.js) the card shows what is stored: its state, the kept credentials
+			// (the typed Credential ID and Secret are not shown again) and any refusal.
+			document.addEventListener( 'affibloom:answer', function ( event ) {
+				var shown = document.querySelector( '[data-amazon-api]' );
+				if ( ! event.detail.api_card || ! shown ) {
+					return;
+				}
+				var holder = document.createElement( 'div' );
+				holder.innerHTML = event.detail.api_card;
+				var fresh = holder.querySelector( '[data-amazon-api]' );
+				if ( fresh ) {
+					shown.replaceWith( fresh );
+					apiCard( fresh );
+				}
+			} );
 		}
 
 		var tag = document.getElementById( 'affibloom-setting-tracking_id' );

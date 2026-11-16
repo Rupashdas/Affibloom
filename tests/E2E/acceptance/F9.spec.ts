@@ -266,8 +266,8 @@ test.describe( 'F9 Link settings', () => {
 
 	// Lasso's save (R41, settings.js 2379-2464): the form goes by AJAX behind "Updating Your Site", then the same
 	// address loads again. Affibloom keeps its toast after the reload and leaves no notice in the address.
-	// The Display tab stays on the page after a full save (the user, 2026-11-16, deviation 141); the others reload.
-	test( 'AC17 Save Changes saves behind Updating Your Site and reloads the same address', async ( { page } ) => {
+	// Every tab stays on the page after its save (the user, 2026-11-16, deviations 141 and 143), where Lasso reloads.
+	test( 'AC17 Save Changes saves behind Updating Your Site and stays on the same address', async ( { page } ) => {
 		const tabs: Array<{ tab: string; change: () => Promise<void> }> = [
 			{ tab: 'general', change: async () => page.getByLabel( 'Disable Import Notifications' ).setChecked( true ) },
 			{ tab: 'amazon', change: async () => page.getByLabel( 'Show Prime Logo In Displays' ).setChecked( ! ( await page.getByLabel( 'Show Prime Logo In Displays' ).isChecked() ) ) },
@@ -291,26 +291,19 @@ test.describe( 'F9 Link settings', () => {
 				await page.waitForLoadState( 'load' );
 				await change();
 
-				const inPlace = tab.startsWith( 'display' );
 				let loads = 0;
 				const counted = (): void => {
 					loads++;
 				};
 				page.on( 'load', counted );
-				const posted = page.waitForRequest( ( request ) => request.method() === 'POST' && request.url().includes( '/wp-admin/admin-ajax.php' ) );
-				const reloaded = inPlace ? null : page.waitForEvent( 'load', { timeout: 30_000 } );
+				const posted = page.waitForRequest( ( request ) => request.method() === 'POST' && /affibloom(\/|%2F)v1(\/|%2F)settings/.test( request.url() ) );
 				await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 				await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeVisible();
 				await posted;
-				if ( reloaded ) {
-					await reloaded;
-				}
 
 				await expect( page.getByRole( 'status' ).filter( { hasText: 'Settings saved.' } ) ).toBeVisible();
-				if ( inPlace ) {
-					await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeHidden();
-					expect( loads ).toBe( 0 );
-				}
+				await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeHidden();
+				expect( loads ).toBe( 0 );
 				page.off( 'load', counted );
 				const shown = new URL( page.url() ).searchParams;
 				new URLSearchParams( `tab=${ tab }` ).forEach( ( value, name ) => expect( shown.get( name ) ).toBe( value ) );

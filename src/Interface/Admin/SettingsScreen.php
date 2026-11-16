@@ -56,19 +56,16 @@ final class SettingsScreen {
 			return;
 		}
 
-		$refused = isset( $_GET['refused'] ) ? array_map( 'sanitize_key', explode( ',', sanitize_text_field( wp_unslash( $_GET['refused'] ) ) ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
-
 		$this->template->render(
 			'amazon' === $tab ? 'admin/settings-amazon' : 'admin/settings',
 			array(
 				'tab'        => $tab,
 				'tabs'       => $tabs,
 				'settings'   => $this->settings->current(),
-				'action'     => SettingsController::ACTION,
+				'rest_path'  => '/affibloom/v1/settings/tabs/' . $tab,
 				'notice'     => $this->notice->message(),
 				'failed'     => $this->notice->failed(),
-				'api'        => 'amazon' === $tab ? $this->api_card() : array(),
-				'refused'    => $refused,
+				'api'        => 'amazon' === $tab ? self::api_card( $this->credentials ) : array(),
 				// The support view of General (`&support=1`, Task 9L; Lasso's `&support`), which only shows more fields.
 				'support'    => isset( $_GET['support'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- chooses what to display only.
 				'post_types' => 'general' === $tab ? $this->choices->post_types() : array(),
@@ -80,16 +77,18 @@ final class SettingsScreen {
 
 	/**
 	 * What the Product Data API card shows (C1 D2, D4): the state, and the Partner tag and Version as stored. The
-	 * Credential ID and Secret are never printed, only whether one is stored.
+	 * Credential ID and Secret are never printed, only whether one is stored. Also what a REST save of the tab draws the
+	 * card again from (SettingsRestController).
 	 *
+	 * @param CredentialsService $credentials The stored credentials.
 	 * @return array{state: string, refusal: array{reason: string, at: string}|null, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}
 	 */
-	private function api_card(): array {
-		$stored  = $this->credentials->stored();
-		$refusal = $this->credentials->refusal();
+	public static function api_card( CredentialsService $credentials ): array {
+		$stored  = $credentials->stored();
+		$refusal = $credentials->refusal();
 
 		return array(
-			'state'             => $this->credentials->state()->value,
+			'state'             => $credentials->state()->value,
 			'refusal'           => null === $refusal ? null : array(
 				'reason' => $refusal->reason,
 				'at'     => $refusal->at,

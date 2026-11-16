@@ -45,18 +45,15 @@ $button_name = __( 'Icon for %1$s: %2$s', 'affibloom' );
 				<span class="affibloom-menu__title"><?php esc_html_e( 'No icon', 'affibloom' ); ?></span>
 			</button>
 			<?php foreach ( $view['rows'] as $row ) : ?>
-				<button type="button" class="affibloom-menu__item" role="menuitemradio" tabindex="-1"
-					aria-checked="<?php echo $row['icon']->css_class === $css_class ? 'true' : 'false'; ?>" data-icon="<?php echo esc_attr( $row['icon']->css_class ); ?>">
-					<?php $this->render( 'admin/partials/icon-picture', array( 'row' => $row ) ); ?>
-					<?php if ( $row['missing'] ) : ?>
-						<span class="affibloom-menu__text">
-							<span class="affibloom-menu__title"><?php echo esc_html( $row['icon']->name ); ?></span>
-							<span class="affibloom-menu__desc"><?php esc_html_e( 'Image missing', 'affibloom' ); ?></span>
-						</span>
-					<?php else : ?>
-						<span class="affibloom-menu__title"><?php echo esc_html( $row['icon']->name ); ?></span>
-					<?php endif; ?>
-				</button>
+				<?php
+				$this->render(
+					'admin/partials/icon-menu-item',
+					array(
+						'row'     => $row,
+						'checked' => $row['icon']->css_class === $css_class,
+					)
+				);
+				?>
 			<?php endforeach; ?>
 			<?php if ( '' !== $view['unknown'] ) : ?>
 				<?php // D2: the class a stored text names stays a choice until another is picked. ?>

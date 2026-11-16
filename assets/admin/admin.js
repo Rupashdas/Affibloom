@@ -85,6 +85,10 @@
 		form.addEventListener( 'input', enable );
 		form.addEventListener( 'change', enable );
 		form.addEventListener( 'affibloom:change', enable );
+		// Saved in place (settings-save.js): nothing is changed any more.
+		form.addEventListener( 'affibloom:saved', function () {
+			save.disabled = true;
+		} );
 	}
 
 

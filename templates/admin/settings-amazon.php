@@ -6,15 +6,12 @@
  * docs/features/F17/requirements.md. The Product Data API card (C1A) sits under Amazon Associates Accounts, as in Lasso.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, settings: \Affibloom\Domain\Settings\Settings, action: string, notice: string, failed: bool, refused: list<string>, api: array{state: string, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}} $view
+ * @var array{tab: string, tabs: list<string>, settings: \Affibloom\Domain\Settings\Settings, rest_path: string, notice: string, failed: bool, api: array{state: string, partner_tag: string, version: string, has_credential_id: bool, has_secret: bool, countries: array<string, string>}} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $settings      = $view['settings'];
-$tag_refused   = in_array( 'tracking_id', $view['refused'], true );
-$list_refused  = in_array( 'tracking_id_whitelist', $view['refused'], true );
-$days_refused  = in_array( 'days_before_out_of_stock_alerts', $view['refused'], true );
 $tracking_rule = '^[a-zA-Z0-9\-_.]+-[0-9]{2,3}$';
 
 // Lasso's Amazon Preferences, in Lasso's order, with Lasso's help texts (product name removed).
@@ -52,11 +49,9 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 		?>
 
 		<div class="affibloom-page__body">
-			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard
-				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
-				<input type="hidden" name="tab" value="amazon">
-				<?php wp_nonce_field( $view['action'] ); ?>
+			<?php // Saved over REST, staying on the page (settings-save.js; the one save behaviour, deviation 143). ?>
+			<form class="affibloom-settings" method="post" data-save-when-changed data-unsaved-guard data-refresh-values data-rest-save="<?php echo esc_attr( $view['rest_path'] ); ?>"
+				data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
 
 				<div class="affibloom-columns">
 					<div class="affibloom-columns__column">
@@ -68,13 +63,13 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 							<div class="affibloom-card__body affibloom-card__body--fields">
 								<div class="affibloom-field">
 									<label class="affibloom-label" for="affibloom-setting-tracking_id"><?php esc_html_e( 'Tracking ID for This Site', 'affibloom' ); ?></label>
-									<input type="text" class="affibloom-input<?php echo $tag_refused ? ' is-invalid' : ''; ?>" id="affibloom-setting-tracking_id" name="settings[tracking_id]"
+									<input type="text" class="affibloom-input" id="affibloom-setting-tracking_id" name="settings[tracking_id]"
 										value="<?php echo esc_attr( $settings->string( 'tracking_id' ) ); ?>" placeholder="tracking-20"
-										data-tracking-rule="<?php echo esc_attr( $tracking_rule ); ?>" aria-describedby="affibloom-setting-tracking_id-error"
-										<?php echo $tag_refused ? 'aria-invalid="true"' : ''; ?>>
-									<?php // After a refused save the field shows the ID that was kept, so the message says so; typing restores Lasso's message. ?>
-									<p class="affibloom-field__error" id="affibloom-setting-tracking_id-error" data-live="<?php esc_attr_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>" <?php echo $tag_refused ? '' : 'hidden'; ?>>
-										<?php $tag_refused ? esc_html_e( 'That was not a valid Tracking ID, so the previous one was kept.', 'affibloom' ) : esc_html_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>
+										data-tracking-rule="<?php echo esc_attr( $tracking_rule ); ?>" aria-describedby="affibloom-setting-tracking_id-error">
+									<?php // After a refused save (settings-save.js) the message says the stored ID was kept; typing restores Lasso's message. ?>
+									<p class="affibloom-field__error" id="affibloom-setting-tracking_id-error" data-live="<?php esc_attr_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>"
+										data-refused="<?php esc_attr_e( 'That was not a valid Tracking ID, so the previous one was kept.', 'affibloom' ); ?>" hidden>
+										<?php esc_html_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>
 									</p>
 								</div>
 
@@ -93,16 +88,17 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 								<div class="affibloom-field affibloom-field--spaced">
 									<label class="affibloom-label" for="affibloom-setting-tracking_id_whitelist"><?php esc_html_e( 'Tracking ID Whitelist', 'affibloom' ); ?></label>
 									<?php // A plain space-separated field; the script turns it into removable tags, as Lasso's tag list. ?>
-									<input type="text" class="affibloom-input<?php echo $list_refused ? ' is-invalid' : ''; ?>" id="affibloom-setting-tracking_id_whitelist"
+									<input type="text" class="affibloom-input" id="affibloom-setting-tracking_id_whitelist"
 										name="settings[tracking_id_whitelist]" value="<?php echo esc_attr( $settings->string( 'tracking_id_whitelist' ) ); ?>"
 										placeholder="<?php esc_attr_e( 'Select Tracking IDs', 'affibloom' ); ?>" data-tag-list data-tracking-rule="<?php echo esc_attr( $tracking_rule ); ?>"
 										<?php /* translators: %s: a tracking ID. */ ?>
 										data-remove-label="<?php esc_attr_e( 'Remove %s', 'affibloom' ); ?>" data-clear-label="<?php esc_attr_e( 'Remove all tracking IDs', 'affibloom' ); ?>"
 										aria-describedby="affibloom-setting-tracking_id_whitelist-hint affibloom-setting-tracking_id_whitelist-error"
-										<?php disabled( ! $settings->bool( 'multiple_tracking_ids' ) ); ?> <?php echo $list_refused ? 'aria-invalid="true"' : ''; ?>>
+										<?php disabled( ! $settings->bool( 'multiple_tracking_ids' ) ); ?>>
 									<p class="affibloom-field__hint" id="affibloom-setting-tracking_id_whitelist-hint" data-tag-hint><?php esc_html_e( 'Separate tracking IDs with spaces.', 'affibloom' ); ?></p>
-									<p class="affibloom-field__error" id="affibloom-setting-tracking_id_whitelist-error" data-live="<?php esc_attr_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>" <?php echo $list_refused ? '' : 'hidden'; ?>>
-										<?php $list_refused ? esc_html_e( 'One of those was not a valid Tracking ID, so the previous list was kept.', 'affibloom' ) : esc_html_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>
+									<p class="affibloom-field__error" id="affibloom-setting-tracking_id_whitelist-error" data-live="<?php esc_attr_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>"
+										data-refused="<?php esc_attr_e( 'One of those was not a valid Tracking ID, so the previous list was kept.', 'affibloom' ); ?>" hidden>
+										<?php esc_html_e( 'This is an invalid Tracking ID', 'affibloom' ); ?>
 									</p>
 								</div>
 							</div>
@@ -161,9 +157,9 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 								}
 								?>
 								<div class="affibloom-toggle-row">
-									<input type="number" class="affibloom-input affibloom-input--number<?php echo $days_refused ? ' is-invalid' : ''; ?>" id="affibloom-setting-days_before_out_of_stock_alerts"
+									<input type="number" class="affibloom-input affibloom-input--number" id="affibloom-setting-days_before_out_of_stock_alerts"
 										name="settings[days_before_out_of_stock_alerts]" value="<?php echo esc_attr( (string) $settings->int( 'days_before_out_of_stock_alerts' ) ); ?>"
-										min="0" max="30" step="1" aria-describedby="affibloom-setting-days_before_out_of_stock_alerts-help" <?php echo $days_refused ? 'aria-invalid="true"' : ''; ?>>
+										min="0" max="30" step="1" aria-describedby="affibloom-setting-days_before_out_of_stock_alerts-help">
 									<label class="affibloom-toggle-row__label" for="affibloom-setting-days_before_out_of_stock_alerts"><?php esc_html_e( 'Days before out of stock alerts', 'affibloom' ); ?></label>
 									<?php
 									$this->render(

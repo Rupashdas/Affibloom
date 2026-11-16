@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { saveSettings } from '../settings';
 import { blockTrackers, createProduct, unique, wp } from '../utils';
 
 // F28 Button icons (docs/features/F28/requirements.md). Task 14F: the icon set; 14G: the picker.
@@ -44,7 +45,7 @@ test.describe( 'F28 Button icons', () => {
 		await media.getByRole( 'button', { name: 'Choose image' } ).click();
 
 		await card.getByRole( 'button', { name: 'Add icon' } ).click();
-		await page.waitForURL( /affibloom_notice=icon-added/ );
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Icon added.' );
 		const row = page.locator( `.affibloom-icon-set [data-icon-class="${ cls }"]` );
 		await expect( row ).toContainText( name );
 
@@ -55,8 +56,7 @@ test.describe( 'F28 Button icons', () => {
 		// Removing an added icon asks first.
 		page.once( 'dialog', ( dialog ) => dialog.accept() );
 		await row.getByRole( 'button', { name: /Remove/ } ).click();
-		// Wait for the server's answer: the row also vanishes while the old page unloads.
-		await page.waitForURL( /affibloom_notice=icon-removed/ );
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Icon removed.' );
 		await expect( page.locator( `.affibloom-icon-set [data-icon-class="${ cls }"]` ) ).toHaveCount( 0 );
 		expect( wp( 'option', 'get', 'affibloom_icons', '--format=json' ) ).not.toContain( cls );
 	} );
@@ -82,8 +82,7 @@ test.describe( 'F28 Button icons', () => {
 			await page.getByRole( 'button', { name: /^Icon for Primary button text/ } ).click();
 			await page.getByRole( 'menuitemradio', { name: 'Amazon' } ).click();
 			await page.getByLabel( 'Primary button text', { exact: true } ).fill( words );
-			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-			await page.waitForURL( /affibloom_notice=saved/ );
+			await saveSettings( page );
 
 			expect( storedPrimary() ).toBe( `<span class="amazon-icon"></span> ${ words }` );
 			// After the reload the picker shows the icon and the box shows only the words.
@@ -142,19 +141,13 @@ test.describe( 'F28 Button icons', () => {
 	test.describe( 'without JavaScript', () => {
 		test.use( { javaScriptEnabled: false } );
 
-		test( 'AC6 the field is the plain text field and still saves', async ( { page } ) => {
-			const restore = [ keep( 'affibloom_display' ), keep( 'affibloom_settings' ) ];
-			try {
-				await page.goto( `${ displayTab }&panel=colors` );
-				await expect( page.getByRole( 'button', { name: /^Icon for Primary button text/ } ) ).toHaveCount( 0 );
-				const text = `<span class="pricetag-icon"></span> ${ unique( 'F28 AC6' ) }`;
-				await page.getByLabel( 'Primary button text', { exact: true } ).fill( text );
-				await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-				await page.waitForURL( /affibloom_notice=saved/ );
-				expect( storedPrimary() ).toBe( text );
-			} finally {
-				restore.forEach( ( back ) => back() );
-			}
+		// Saving needs JavaScript, as on every settings screen and the product page (the user, 2026-11-17, deviation 143).
+		test( 'AC6 the field is the plain text field, holding the stored text', async ( { page } ) => {
+			await page.goto( `${ displayTab }&panel=colors` );
+			await expect( page.getByRole( 'button', { name: /^Icon for Primary button text/ } ) ).toHaveCount( 0 );
+			const field = page.getByLabel( 'Primary button text', { exact: true } );
+			await expect( field ).toBeEditable();
+			await expect( field ).toHaveAttribute( 'name', 'display[palette][primary_button_text]' );
 		} );
 	} );
 } );

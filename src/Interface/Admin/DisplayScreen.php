@@ -57,8 +57,6 @@ final class DisplayScreen {
 				'types'    => DisplayType::all(),
 				'config'   => $this->display->config( $type ),
 				'columns'  => $this->display->current()->columns(),
-				'action'   => DisplayController::ACTION,
-				'reset'    => DisplayController::RESET_ACTION,
 				'settings' => $this->settings->current(),
 				'notice'   => $this->notice->message(),
 				'panel'    => $panel,

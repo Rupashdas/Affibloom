@@ -11,11 +11,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Affibloom\Interface\Admin\IconController;
-
-$admin_post = admin_url( 'admin-post.php' );
 ?>
-<section class="affibloom-card affibloom-icon-set" id="affibloom-icon-set" aria-labelledby="affibloom-icon-set-title">
+<?php // Add and Remove go over REST and stay on the page (display-settings.js; deviation 143). ?>
+<section class="affibloom-card affibloom-icon-set" id="affibloom-icon-set" aria-labelledby="affibloom-icon-set-title"
+	data-failed-text="<?php esc_attr_e( 'That did not work. Try again.', 'affibloom' ); ?>">
 	<div class="affibloom-card__head">
 		<h2 class="affibloom-card__title" id="affibloom-icon-set-title"><?php esc_html_e( 'Button icons', 'affibloom' ); ?></h2>
 		<p class="affibloom-card__intro"><?php esc_html_e( "Icons you can put in front of a button or badge text. Icons from your site's CSS are drawn by your theme's Additional CSS; icons you add here need no CSS.", 'affibloom' ); ?></p>
@@ -23,43 +22,12 @@ $admin_post = admin_url( 'admin-post.php' );
 
 	<ul class="affibloom-card__body affibloom-icon-set__list">
 		<?php foreach ( $view['icons'] as $row ) : ?>
-			<?php $icon = $row['icon']; ?>
-			<li class="affibloom-icon-set__item" data-icon-class="<?php echo esc_attr( $icon->css_class ); ?>">
-				<?php $this->render( 'admin/partials/icon-picture', array( 'row' => $row ) ); ?>
-				<span class="affibloom-icon-set__text">
-					<span class="affibloom-icon-set__name"><?php echo esc_html( $icon->name ); ?></span>
-					<code class="affibloom-icon-set__class"><?php echo esc_html( $icon->css_class ); ?></code>
-					<?php if ( $row['missing'] ) : ?>
-						<span class="affibloom-icon-set__missing">
-							<?php
-							/* translators: %s: the image's link, e.g. /wp-content/uploads/2023/04/youtube-icon.svg. */
-							echo esc_html( sprintf( __( 'Image missing: %s', 'affibloom' ), $icon->url ) );
-							?>
-						</span>
-					<?php endif; ?>
-				</span>
-				<?php if ( $icon->imported ) : ?>
-					<span class="affibloom-icon-set__source"><?php esc_html_e( "From your site's CSS", 'affibloom' ); ?></span>
-				<?php else : ?>
-					<form class="affibloom-icon-set__remove" method="post" action="<?php echo esc_url( $admin_post ); ?>"
-						data-confirm="<?php echo esc_attr( sprintf( /* translators: %s: icon name. */ __( 'Remove %s? Texts that use it will show no icon until another is chosen.', 'affibloom' ), $icon->name ) ); ?>">
-						<input type="hidden" name="action" value="<?php echo esc_attr( IconController::REMOVE ); ?>">
-						<input type="hidden" name="class" value="<?php echo esc_attr( $icon->css_class ); ?>">
-						<?php wp_nonce_field( IconController::REMOVE ); ?>
-						<button type="submit" class="affibloom-button affibloom-button--small affibloom-button--secondary"
-							aria-label="<?php echo esc_attr( sprintf( /* translators: %s: icon name. */ __( 'Remove %s', 'affibloom' ), $icon->name ) ); ?>">
-							<?php esc_html_e( 'Remove', 'affibloom' ); ?>
-						</button>
-					</form>
-				<?php endif; ?>
-			</li>
+			<?php $this->render( 'admin/partials/icon-set-item', array( 'row' => $row ) ); ?>
 		<?php endforeach; ?>
 	</ul>
 
-	<form class="affibloom-card__foot affibloom-icon-set__add" method="post" action="<?php echo esc_url( $admin_post ); ?>" data-icon-add>
-		<input type="hidden" name="action" value="<?php echo esc_attr( IconController::ADD ); ?>">
+	<form class="affibloom-card__foot affibloom-icon-set__add" method="post" data-icon-add>
 		<input type="hidden" name="attachment" value="0" data-icon-attachment>
-		<?php wp_nonce_field( IconController::ADD ); ?>
 		<label class="screen-reader-text" for="affibloom-icon-name"><?php esc_html_e( 'Icon name', 'affibloom' ); ?></label>
 		<input type="text" class="affibloom-input" id="affibloom-icon-name" name="name" maxlength="40" required
 			placeholder="<?php esc_attr_e( 'Icon name', 'affibloom' ); ?>">

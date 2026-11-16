@@ -6,12 +6,11 @@
  * names Lasso; this names Affibloom.
  *
  * @package Affibloom
- * @var array{tag: string, product: int, settings: string} $view
+ * @var array{tag: string, settings: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
-use Affibloom\Interface\Admin\TrackingIdController;
 ?>
 <div class="affibloom-notice affibloom-notice--warning" role="status" data-tracking-notice>
 	<span class="affibloom-chip affibloom-chip--warning"><?php $this->render( 'admin/partials/icon', array( 'name' => 'tag' ) ); ?></span>
@@ -25,13 +24,9 @@ use Affibloom\Interface\Admin\TrackingIdController;
 	</p>
 	<span class="affibloom-notice__actions">
 		<?php if ( '' !== $view['tag'] ) : ?>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( TrackingIdController::ACTION ); ?>">
-				<input type="hidden" name="tracking_id" value="<?php echo esc_attr( $view['tag'] ); ?>">
-				<input type="hidden" name="product" value="<?php echo esc_attr( (string) $view['product'] ); ?>">
-				<?php wp_nonce_field( TrackingIdController::ACTION ); ?>
-				<button type="submit" class="affibloom-button affibloom-button--small affibloom-button--primary"><?php esc_html_e( 'Yes', 'affibloom' ); ?></button>
-			</form>
+			<?php // Saved over REST, staying on the page (product.js; deviation 143). ?>
+			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--primary" data-tracking-save="<?php echo esc_attr( $view['tag'] ); ?>"
+				data-failed-text="<?php esc_attr_e( 'That did not work. Try again.', 'affibloom' ); ?>"><?php esc_html_e( 'Yes', 'affibloom' ); ?></button>
 			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-tracking-dismiss hidden><?php esc_html_e( 'No', 'affibloom' ); ?></button>
 		<?php else : ?>
 			<a class="affibloom-button affibloom-button--small affibloom-button--primary" href="<?php echo esc_url( $view['settings'] ); ?>"><?php esc_html_e( 'Set Amazon Tracking ID', 'affibloom' ); ?></a>

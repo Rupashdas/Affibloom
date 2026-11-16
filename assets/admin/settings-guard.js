@@ -4,7 +4,7 @@
  *
  * - closing the tab, or leaving through the browser's own controls, gets the browser's prompt;
  * - following any link opens "Unsaved Changes": × and Escape stay, "Leave Without Saving" goes, "Save Changes" saves
- *   the form and then goes where the link led (the server follows a validated `redirect_to`).
+ *   the form and then goes where the link led (settings-save.js follows `redirect_to` after a full save).
  *
  * Nothing is asked when nothing changed, and a submit (Save Changes, Reset Settings) never asks. Without this script
  * the settings forms work as before.

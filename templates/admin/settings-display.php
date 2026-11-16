@@ -10,7 +10,7 @@
  * site-wide behaviour, and Task 10D the preview itself.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, columns: int, action: string, reset: string, settings: \Affibloom\Domain\Settings\Settings, notice: string, panel: string} $view
+ * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, columns: int, settings: \Affibloom\Domain\Settings\Settings, notice: string, panel: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -67,12 +67,10 @@ $fields = array(
 		?>
 
 		<div class="affibloom-page__body">
-			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard
-				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>"
-				data-save-in-place data-saved-text="<?php esc_attr_e( 'Settings saved.', 'affibloom' ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
+			<?php // Saved over REST, staying on the page (settings-save.js; deviations 141, 143). ?>
+			<form class="affibloom-settings" method="post" data-save-when-changed data-unsaved-guard data-rest-save="/affibloom/v1/settings/display"
+				data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
-				<?php wp_nonce_field( $view['action'] ); ?>
 
 				<div class="affibloom-card affibloom-split">
 					<div class="affibloom-split__body">
@@ -236,13 +234,12 @@ $fields = array(
 			</form>
 
 			<?php // A form of its own: the reset button above submits it through its form attribute. ?>
-			<form id="affibloom-display-reset" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-reset-form
+			<?php // Every field changes, so after the reset the screen loads what is stored (settings-save.js). ?>
+			<form id="affibloom-display-reset" method="post" data-reset-form data-rest-save="/affibloom/v1/settings/display/reset"
 				data-confirm="<?php esc_attr_e( 'Reset all display settings to factory defaults? This cannot be undone.', 'affibloom' ); ?>"
-				data-ajax-save data-save-title="<?php esc_attr_e( 'Resetting Display Settings', 'affibloom' ); ?>"
+				data-save-title="<?php esc_attr_e( 'Resetting Display Settings', 'affibloom' ); ?>"
 				data-failed-text="<?php esc_attr_e( 'Error resetting display settings.', 'affibloom' ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( $view['reset'] ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
-				<?php wp_nonce_field( $view['reset'], '_affibloom_reset_nonce', false ); ?>
 			</form>
 
 			<?php // Site-wide, so outside the per-type editor above (F28, Task 14F). ?>

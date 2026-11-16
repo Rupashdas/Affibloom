@@ -187,10 +187,32 @@
 		// "No" on the tracking-ID offer hides it for now, as Lasso's does; it shows again on the next visit.
 		var offer = document.querySelector( '[data-tracking-notice]' );
 		var no = offer && offer.querySelector( '[data-tracking-dismiss]' );
+		var yes = offer && offer.querySelector( '[data-tracking-save]' );
 		if ( no ) {
 			no.hidden = false;
 			no.addEventListener( 'click', function () {
 				offer.hidden = true;
+			} );
+		}
+		// "Yes" saves the link's tag as the site's tracking ID over REST and stays on the page (deviation 143): the
+		// offer goes once it is saved; a tag the Amazon tab's rule refuses keeps it, with the reason as the toast.
+		if ( yes && window.wp && window.wp.apiFetch ) {
+			yes.addEventListener( 'click', function () {
+				yes.disabled = true;
+				window.wp.apiFetch( { path: '/affibloom/v1/settings/tracking-id', method: 'POST', data: { tracking_id: yes.dataset.trackingSave } } )
+					.then( function ( answer ) {
+						window.affibloomToast( answer.data.message, !! answer.data.failed );
+						// Saved: the site has a tracking ID now, so the offer is gone, as on the next load.
+						if ( ! answer.data.failed ) {
+							offer.remove();
+						}
+					} )
+					.catch( function () {
+						window.affibloomToast( yes.dataset.failedText, true );
+					} )
+					.finally( function () {
+						yes.disabled = false;
+					} );
 			} );
 		}
 

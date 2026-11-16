@@ -148,6 +148,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 140. Task DT1 (2026-11-16): the display baselines are drawn on Local with Lasso 370, not staging; three settings modes.
 - 141. Settings → Display (the user, 2026-11-16): a full save stays on the page; Lasso reloads.
 - 142. Admin design (the user, 2026-11-16): Meadow replaces Aurora; restyle Tasks MD1-MD7 (Batches 4.M1-4.M5) before F4.
+- 143. Saving (the user, 2026-11-16/17): every settings screen saves over REST and stays on the page; no save without JavaScript.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2813,3 +2814,22 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     `admin-design.spec.ts`. Planning settled: one Save Changes (the footer becomes the sticky save bar), no new preview
     toggle, the summary card and the stat cards' filters come with their data's tasks (31B, 34B, 36B, O8),
     `.affibloom-tile*` stays. Meadow is a look: it holds whether the admin stays PHP (ADR-7) or a React admin is approved.
+
+143. **One save behaviour: every settings screen saves over REST and stays on the page (the user, 2026-11-16: "We
+    just need to standardize the saving process across all settings"; React dropped, the admin stays PHP, ADR-7).**
+    Settings → General and Amazon posted to `admin-ajax.php` and reloaded (Lasso's way, F9 R41); Display stayed
+    (deviation 141) but reloaded after a partial save; Button icons (add, remove) and the product page's tracking-ID
+    "Yes" were plain `admin-post.php` forms. Now all go to `affibloom/v1`, as the product, group and field screens
+    do: `POST settings/tabs/{tab}`, `settings/display`, `settings/display/reset`, `settings/tracking-id`
+    (SettingsRestController) and `POST icons`, `DELETE icons/{class}` (IconsController). Each answer carries the
+    toast's words (`Notice::text`) and the refused keys; settings-save.js marks a refused field (`#affibloom-setting-
+    <key>`, its `-error` text from `data-refused`), keeps what was typed so it can be corrected, and on General and
+    Amazon (`data-refresh-values`) fetches the page in the background so the other text fields show the stored, cleaned
+    values; the Amazon answer redraws the Product Data API card; Disable Help Tooltips sets its body class at once; the
+    icon list and every picker gain or lose the icon; the tracking-ID offer goes. Only Reset Settings still loads the
+    page afterwards (every Display field changes). Removed: SettingsController, DisplayController, IconController,
+    TrackingIdController, SaveAnswer and the `?refused=` address. **No save without JavaScript** (the user, 2026-11-17,
+    "Drop it"), as on the product page: F28 AC6 now checks only the plain field. Tests changed: F9 AC17 (no reload on
+    any tab), F17 AC2 (the typed ID stays, marked, with "the previous one was kept"), F28 AC2/AC3/AC6, C1 AC8 (the last
+    toast), `tests/E2E/settings.ts` (waits for the save's toast). Found on the way: an emptied whitelist box kept its
+    error until it lost focus, so Save Changes moved under the pointer; the error now goes as the box empties.

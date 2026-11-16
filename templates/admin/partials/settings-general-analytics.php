@@ -6,15 +6,14 @@
  * the site is Task C3's.
  *
  * @package Affibloom
- * @var array{settings: \Affibloom\Domain\Settings\Settings, refused: list<string>} $view
+ * @var array{settings: \Affibloom\Domain\Settings\Settings} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$settings   = $view['settings'];
-$has_id     = '' !== $settings->string( 'ga_tracking_id' );
-$clicks     = $has_id && $settings->bool( 'ga_click_tracking' );
-$id_refused = in_array( 'ga_tracking_id', $view['refused'], true );
+$settings = $view['settings'];
+$has_id   = '' !== $settings->string( 'ga_tracking_id' );
+$clicks   = $has_id && $settings->bool( 'ga_click_tracking' );
 ?>
 <div class="affibloom-card" id="affibloom-card-analytics" data-ga-card>
 	<div class="affibloom-card__head">
@@ -36,7 +35,7 @@ $id_refused = in_array( 'ga_tracking_id', $view['refused'], true );
 				);
 				?>
 			</span>
-			<input type="text" class="affibloom-input<?php echo $id_refused ? ' is-invalid' : ''; ?>" id="affibloom-setting-ga_tracking_id" name="settings[ga_tracking_id]"
+			<input type="text" class="affibloom-input" id="affibloom-setting-ga_tracking_id" name="settings[ga_tracking_id]"
 				value="<?php echo esc_attr( $settings->string( 'ga_tracking_id' ) ); ?>" placeholder="<?php esc_attr_e( 'Tracking ID or Property ID', 'affibloom' ); ?>"
 				autocomplete="off" spellcheck="false" data-ga-id>
 			<p class="affibloom-field__warning" data-ga-warning role="alert" hidden><?php esc_html_e( 'Please Enter GA Tracking ID Before Enable Click Tracking', 'affibloom' ); ?></p>

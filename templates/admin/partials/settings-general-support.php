@@ -6,15 +6,13 @@
  * Analytics is Lasso's own cloud and is not built. The Rebuild Database button waits for Task 35G's rebuild route.
  *
  * @package Affibloom
- * @var array{settings: \Affibloom\Domain\Settings\Settings, refused: list<string>} $view
+ * @var array{settings: \Affibloom\Domain\Settings\Settings} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$settings       = $view['settings'];
-$interval_wrong = in_array( 'cron_interval', $view['refused'], true );
-$domains_wrong  = in_array( 'keep_original_domains', $view['refused'], true );
-$optional       = array(
+$settings = $view['settings'];
+$optional = array(
 	'restrict_prefix'        => array( __( 'Restrict Prefix', 'affibloom' ), __( 'When enabled, cloaked links can only be reached through their prefix.', 'affibloom' ) ),
 	'process_limit'          => array( __( 'Processes Execute Limit', 'affibloom' ), __( 'When enabled, a background job waits in the queue while too many are running.', 'affibloom' ) ),
 	'fontawesome_svg'        => array( __( 'Font Awesome JS Render SVG', 'affibloom' ), __( 'Render Font Awesome icons as SVG on the front end.', 'affibloom' ) ),
@@ -31,7 +29,7 @@ $optional       = array(
 	<div class="affibloom-card__body affibloom-card__body--fields">
 		<div class="affibloom-field">
 			<label class="affibloom-label" for="affibloom-setting-keep_original_domains"><?php esc_html_e( 'Domains', 'affibloom' ); ?></label>
-			<textarea class="affibloom-input<?php echo $domains_wrong ? ' is-invalid' : ''; ?>" id="affibloom-setting-keep_original_domains" name="settings[keep_original_domains]" rows="4"
+			<textarea class="affibloom-input" id="affibloom-setting-keep_original_domains" name="settings[keep_original_domains]" rows="4"
 				spellcheck="false" aria-describedby="affibloom-setting-keep_original_domains-hint"><?php echo esc_textarea( implode( "\n", $settings->list( 'keep_original_domains' ) ) ); ?></textarea>
 			<p class="affibloom-field__hint" id="affibloom-setting-keep_original_domains-hint"><?php esc_html_e( 'One domain a line. Example: domain.com, not https://domain.com/', 'affibloom' ); ?></p>
 		</div>
@@ -45,8 +43,8 @@ $optional       = array(
 	<div class="affibloom-card__body affibloom-card__body--fields">
 		<div class="affibloom-field">
 			<label class="affibloom-label" for="affibloom-setting-cron_interval"><?php esc_html_e( 'Time interval (hours)', 'affibloom' ); ?></label>
-			<input type="number" class="affibloom-input affibloom-input--number<?php echo $interval_wrong ? ' is-invalid' : ''; ?>" id="affibloom-setting-cron_interval" name="settings[cron_interval]"
-				value="<?php echo esc_attr( (string) $settings->int( 'cron_interval' ) ); ?>" min="0" max="3" step="1" <?php echo $interval_wrong ? 'aria-invalid="true"' : ''; ?>>
+			<input type="number" class="affibloom-input affibloom-input--number" id="affibloom-setting-cron_interval" name="settings[cron_interval]"
+				value="<?php echo esc_attr( (string) $settings->int( 'cron_interval' ) ); ?>" min="0" max="3" step="1">
 		</div>
 	</div>
 </div>

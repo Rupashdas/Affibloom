@@ -550,7 +550,7 @@ test.describe( 'C1 Amazon product data', () => {
 		stub( 'ok' );
 		await page.getByRole( 'region', { name: 'Amazon Product Data API' } ).getByLabel( 'Default Tracking ID' ).selectOption( 'us' );
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-		await expect( page.locator( '.affibloom-toast' ).first() ).toContainText( 'Settings saved.' );
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Settings saved.' );
 		await expect( page.getByRole( 'region', { name: 'Amazon Product Data API' } ).getByText( 'Validated', { exact: true } ) ).toBeVisible();
 		expect( stored().secret ).toBe( valid.secret );
 		setSettings( { default_country: 'us' } );

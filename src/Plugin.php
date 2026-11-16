@@ -93,17 +93,13 @@ use Affibloom\Interface\Admin\GroupScreen;
 use Affibloom\Interface\Admin\GroupsScreen;
 use Affibloom\Interface\Admin\PerPage;
 use Affibloom\Interface\Admin\ProductScreen;
-use Affibloom\Interface\Admin\DisplayController;
 use Affibloom\Interface\Admin\DisplayScreen;
 use Affibloom\Interface\Admin\HelpTips;
 use Affibloom\Interface\Admin\IconChoices;
-use Affibloom\Interface\Admin\IconController;
 use Affibloom\Interface\Admin\LassoImportController;
 use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
-use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
-use Affibloom\Interface\Admin\TrackingIdController;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
@@ -121,6 +117,7 @@ use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
 use Affibloom\Interface\Rest\ProductPreviewController;
+use Affibloom\Interface\Rest\IconsController;
 use Affibloom\Interface\Rest\SettingsRestController;
 use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
@@ -401,11 +398,9 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
-			new SettingsController( $settings, $amazon, $genius ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
-			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ) ),
+			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ), $settings, $display, $amazon, $genius, $this->template() ),
 			new HelpTips( $settings ),
-			new DisplayController( $display, $settings ),
 			new ProductsController( $products, new ProductResource(), $groups, $search ),
 			new BulkAddController( $bulk ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
@@ -422,8 +417,7 @@ final class Plugin {
 					$this->catalog()
 				)
 			),
-			new IconController( $icons ),
-			new TrackingIdController( $settings ),
+			new IconsController( $icons, $choices, $this->template() ),
 			new LassoImportController( $import ),
 			new FieldsController( $fields, $this->template() ),
 			new GroupsController( $groups, $this->template() ),

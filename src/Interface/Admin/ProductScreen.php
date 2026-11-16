@@ -99,7 +99,7 @@ final class ProductScreen {
 	 * link's tag to offer ('' when it has none, and the notice links to Settings → Amazon instead); null otherwise.
 	 *
 	 * @param string $site_tag The site's tracking ID.
-	 * @return array{tag: string, product: int, settings: string}|null
+	 * @return array{tag: string, settings: string}|null
 	 */
 	private function tracking_offer( string $site_tag ): ?array {
 		if ( null === $this->product || ProductType::Amazon !== $this->product->type || '' !== $site_tag ) {
@@ -109,7 +109,6 @@ final class ProductScreen {
 
 		return array(
 			'tag'      => null === $amazon ? '' : $amazon->tag(),
-			'product'  => (int) $this->product->id,
 			'settings' => admin_url( 'admin.php?page=' . SettingsScreen::SLUG . '&tab=amazon' ),
 		);
 	}
