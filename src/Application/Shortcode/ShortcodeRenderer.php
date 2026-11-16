@@ -25,6 +25,7 @@ use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\ElementVisibility;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Display\GridColumns;
 use Affibloom\Domain\Display\GridDisclosure;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\InvalidField;
@@ -71,8 +72,8 @@ final class ShortcodeRenderer {
 	) {}
 
 	/**
-	 * A group shown as a grid (F30 R16-R19, R55, R61; D5, D16, D17): the group's shown products as Single boxes in the
-	 * Grid settings, each with the shortcode's per-box values but not its `tracking_id` (Lasso reloads a group's
+	 * A group shown as a grid (F30 R13-R19, R55, R61; D5, D16, D17; N1): the group's shown products as Single boxes in
+	 * the Grid settings (compact ones without description and fields), in rows of `columns` with classic settings, each with the shortcode's per-box values but not its `tracking_id` (Lasso reloads a group's
 	 * products, R5) or `anchor_id`; the wrapper with the Grid settings (customised), then the grid's disclosure. An
 	 * unknown or empty group is the wrapper alone (and the disclosure when it shows).
 	 *
@@ -90,8 +91,11 @@ final class ShortcodeRenderer {
 
 		$cards = array();
 		foreach ( $this->groups->shown( $group->group, $group->limit, $group->latest ) as $product ) {
-			$cards[] = $this->built( $product, $per_card, $post_id, DisplayType::grid() )->as_card();
+			$card    = $this->built( $product, $per_card, $post_id, DisplayType::grid() )->as_card();
+			$cards[] = $group->compact ? $card->compact() : $card;
 		}
+		// R14, N1: the shortcode's columns in both modes; customised settings draw them through the wrapper's count.
+		$columns = GridColumns::of( $group->columns, $advanced, $display->columns() );
 
 		$shows = GridDisclosure::shows( $advanced, $group->disclosure, $settings->bool( 'show_disclosure_grid' ) );
 		$text  = $settings->string( 'disclosure_text' );
@@ -101,9 +105,10 @@ final class ShortcodeRenderer {
 		return new GridView(
 			anchor: AnchorId::of( $request->overrides->anchor_id, $group->group, $number ),
 			classes: 'affibloom-grid-wrap' . ( $advanced ? ' affibloom-advanced' : '' ),
-			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), $shows, $hidden ) : array(),
+			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $columns, $shows, $hidden ) : array(),
 			cards: $cards,
 			disclosure: $shows && '' !== trim( $text ) ? $text : null,
+			per_row: $advanced ? null : $columns,
 		);
 	}
 

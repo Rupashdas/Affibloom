@@ -128,5 +128,23 @@ test.describe( 'F30 Display types', () => {
 			await page.goto( newPostWith( 'No display here.' ) );
 			expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( false );
 		} );
+
+		// AC5 (Task DT3): with default Display settings (classic) the grid is rows of `columns` (1-5, 2 without) and
+		// `compact` hides each card's description, fields and disclosure; Affibloom's shortcode honours both with
+		// customised settings too (N1).
+		test( 'AC5 classic grids sit in rows of columns; compact hides descriptions and fields', async ( { page } ) => {
+			const ids = [ 1, 2, 3, 4, 5 ].map( ( n ) => createProduct( { name: `F30 AC5 ${ n }`, description: 'A long description of this product.', fields: [ { field: 2, value: 'Light' } ] } ) );
+			const slug = createGroup( `F30 AC5 ${ Date.now() }`, ids );
+			wp( 'option', 'delete', 'affibloom_display' );
+			await page.goto( newPostWith( `[affibloom group="${ slug }"][affibloom group="${ slug }" columns="4" compact="true"][affibloom group="${ slug }" columns="1" compact="hide"]` ) );
+			const grids = page.locator( '.affibloom-grid-wrap' );
+			await expect( grids.nth( 0 ) ).not.toHaveClass( /affibloom-advanced/ );
+			await expect( grids.nth( 0 ).locator( '.affibloom-grid-row.affibloom-grid-2' ) ).toHaveCount( 3 );
+			await expect( grids.nth( 0 ).locator( '.affibloom-description' ) ).toHaveCount( 5 );
+			await expect( grids.nth( 1 ).locator( '.affibloom-grid-row.affibloom-grid-4' ) ).toHaveCount( 2 );
+			await expect( grids.nth( 1 ).locator( '.affibloom-description, .affibloom-fields' ) ).toHaveCount( 0 );
+			await expect( grids.nth( 2 ).locator( '.affibloom-grid-row.affibloom-grid-1' ) ).toHaveCount( 5 );
+			await expect( grids.nth( 2 ).locator( '.affibloom-description' ) ).toHaveCount( 0 );
+		} );
 	} );
 } );

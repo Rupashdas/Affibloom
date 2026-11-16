@@ -112,6 +112,21 @@ final class BoxView {
 	}
 
 	/**
+	 * A compact grid card (F30 R13, N1): no description and no fields (its disclosure is already gone, as_card()).
+	 */
+	public function compact(): self {
+		return new self(
+			...array_merge(
+				get_object_vars( $this ),
+				array(
+					'description' => null,
+					'fields'      => array(),
+				)
+			)
+		);
+	}
+
+	/**
 	 * A grid's card (F30 R16, R17): no container id of its own and no disclosure (the grid prints one after its cards;
 	 * Lasso hides a card's by CSS), the wrapper saying so.
 	 */

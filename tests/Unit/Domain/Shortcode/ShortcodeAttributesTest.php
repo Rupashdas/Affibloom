@@ -113,4 +113,19 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertSame( 'shoes', GroupAttributes::of( array( 'group' => ' shoes ' ) )->group );
 		self::assertSame( 'affibloom-anchor-id-shoes-2', AnchorId::of( '', 'shoes', 2 ) );
 	}
+
+	/**
+	 * F30 R13, R14, N1 (Task DT3): `columns` 1-5, else none; `compact` with PHP's true values and `hide`.
+	 */
+	public function test_a_grids_columns_and_compact(): void {
+		self::assertSame( 4, GroupAttributes::of( array( 'columns' => '4' ) )->columns );
+		self::assertNull( GroupAttributes::of( array( 'columns' => '6' ) )->columns );
+		self::assertNull( GroupAttributes::of( array( 'columns' => 'x' ) )->columns );
+		foreach ( array( 'true', '1', 'yes', 'on', 'hide', 'HIDE' ) as $value ) {
+			self::assertTrue( GroupAttributes::of( array( 'compact' => $value ) )->compact, $value );
+		}
+		foreach ( array( '', 'false', 'no', '0' ) as $value ) {
+			self::assertFalse( GroupAttributes::of( array( 'compact' => $value ) )->compact, $value );
+		}
+	}
 }

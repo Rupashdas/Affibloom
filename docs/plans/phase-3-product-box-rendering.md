@@ -150,7 +150,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 - [x] Task DT1: Lasso's own render of the other display types, as baselines
 - [x] Task DT2: A group shown as a grid
-- [ ] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
+- [x] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
 - [ ] Task DT4: A group shown as a list, with the phone swipe row
 - [ ] Task DT5: A product shown as an image
 - [ ] Task DT6: A group shown as a gallery
@@ -1758,13 +1758,17 @@ chose N1's recommendation (`[lasso]` keeps Lasso's behaviour, Task 27A).
 
 **Files:** the above; tests F30 **AC5**, `GridColumnsTest`, a `compact` table in `DisplayAttributesTest`.
 
-- [ ] **Step 1: Failing tests.** AC5 with `affibloom_settings.display` reset to defaults; unit tables for columns
+- [x] **Step 1: Failing tests.** AC5 with `affibloom_settings.display` reset to defaults; unit tables for columns
   (attribute, site count, default 2; gallery excluded) and compact values.
-- [ ] **Step 2: Rule and branch.**
-- [ ] **Step 3: Classic CSS** (50/33.3/25/20 %, 250 px images, theme title sizes
+- [x] **Step 2: Rule and branch.**
+- [x] **Step 3: Classic CSS** (50/33.3/25/20 %, 250 px images, theme title sizes
   at 1300/1200 px, full width below 768 px).
-- [ ] **Step 4: Run and look** (both modes side by side; DT1's `columns="2"` baseline).
-- [ ] **Step 5: Commit** — "Draw classic grids in rows and honour columns and compact".
+- [x] **Step 4: Run and look** (both modes side by side; DT1's `columns="2"` baseline).
+- [x] **Step 5: Commit** — "Draw classic grids in rows and honour columns and compact".
+
+*Note:* the classic grid CSS came with DT2's port. `GridColumns` and `GroupAttributes` (`columns`, `compact`) feed rows
+of N in `grid.php`; N1 as decided (`columns` also sets the customised count, `compact` also takes `hide`). Measured
+beside Lasso with both plugins reset to defaults: rows of 2, and `columns="4" compact="true"`, same pixels at 1280/390.
 
 ---
 

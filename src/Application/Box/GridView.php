@@ -23,6 +23,8 @@ final class GridView {
 	 * @param array<string, string> $wrapper    The wrapper's attributes (customised settings; Lasso leaves out the price flag).
 	 * @param list<BoxView>         $cards      The cards in the group's order.
 	 * @param string|null           $disclosure The disclosure text after the cards; null when it does not show.
+	 * @param int|null              $per_row    Classic settings: the cards in rows of this many (R16); null one row
+	 *                                          holding every card (customised: the CSS grid places them).
 	 */
 	public function __construct(
 		public readonly string $anchor,
@@ -30,5 +32,6 @@ final class GridView {
 		public readonly array $wrapper,
 		public readonly array $cards,
 		public readonly ?string $disclosure,
+		public readonly ?int $per_row = null,
 	) {}
 }
