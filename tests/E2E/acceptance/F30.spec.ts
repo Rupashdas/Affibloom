@@ -198,4 +198,21 @@ test.describe( 'F30 Display types', () => {
 			}
 		} );
 	} );
+
+	// AC10 (Task DT5): type="image" (also style="image", type="image-link") shows the product's image linked to it with
+	// its target and rel; image_url and image_alt override the picture and the alt text; a missing product shows nothing.
+	test( 'AC10 type="image" shows the linked picture with its overrides', async ( { page, context } ) => {
+		await blockTrackers( context );
+		const id = createProduct( { name: 'F30 AC10', image_url: 'https://m.media-amazon.com/images/I/21+19jCldWL._SL500_.jpg', new_tab: '1', nofollow: '1' } );
+		await page.goto( newPostWith( `[affibloom id="${ id }" type="image"][affibloom id="${ id }" style="image" image_url="https://m.media-amazon.com/images/I/31Prn-XVTjL._SL500_.jpg" image_alt="Other words"][affibloom id="${ id }" type="image-link"][affibloom id="999999" type="image"]` ) );
+		const images = page.locator( '.affibloom-box.affibloom-image-container' );
+		await expect( images ).toHaveCount( 3 );
+		const first = images.nth( 0 ).locator( 'a.affibloom-image.image-style' );
+		await expect( first ).toHaveAttribute( 'target', '_blank' );
+		await expect( first ).toHaveAttribute( 'rel', /nofollow/ );
+		await expect( first.locator( 'img' ) ).toHaveAttribute( 'alt', 'F30 AC10' );
+		await expect( first.locator( 'img' ) ).toHaveAttribute( 'loading', 'lazy' );
+		await expect( images.nth( 1 ).locator( 'img' ) ).toHaveAttribute( 'src', 'https://m.media-amazon.com/images/I/31Prn-XVTjL._SL500_.jpg' );
+		await expect( images.nth( 1 ).locator( 'img' ) ).toHaveAttribute( 'alt', 'Other words' );
+	} );
 } );

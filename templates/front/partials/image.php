@@ -12,5 +12,5 @@ defined( 'ABSPATH' ) || exit;
 $attributes = $view->link;
 ?>
 <a class="affibloom-image"<?php require __DIR__ . '/attributes.php'; ?><?php echo $view->image_hidden ? ' style="display: none !important;"' : ''; ?>>
-	<img class="affibloom-image-no-lazy" src="<?php echo esc_url( $view->image_src ); ?>" height="500" width="500" loading="lazy" alt="<?php echo esc_attr( $view->image_alt ); ?>">
+	<img class="affibloom-image-no-lazy" src="<?php echo esc_url( $view->image_src ); ?>" height="500" width="500" <?php echo \Affibloom\Interface\Front\ImageLoading::attribute(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- one of three fixed attributes. ?> alt="<?php echo esc_attr( $view->image_alt ); ?>">
 </a>

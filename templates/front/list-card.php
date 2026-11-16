@@ -49,7 +49,11 @@ foreach ( array_slice( $view->buttons, 1 ) as $card_button ) {
 	<?php endif; ?>
 
 	<div class="affibloom-list-content">
-		<?php require __DIR__ . '/partials/image.php'; ?>
+		<?php $attributes = $view->link; ?>
+		<?php // R22: Lasso's list card keeps the browser's lazy loading whatever the lazy-load plugins (R27). ?>
+		<a class="affibloom-image"<?php require __DIR__ . '/partials/attributes.php'; ?>>
+			<img class="affibloom-image-no-lazy" src="<?php echo esc_url( $view->image_src ); ?>" loading="lazy" height="500" width="500" alt="<?php echo esc_attr( $view->name ); ?>">
+		</a>
 		<?php require __DIR__ . '/partials/stars.php'; ?>
 		<?php require __DIR__ . '/partials/price.php'; ?>
 		<div class="affibloom-description">

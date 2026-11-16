@@ -152,7 +152,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT2: A group shown as a grid
 - [x] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
 - [x] Task DT4: A group shown as a list, with the phone swipe row
-- [ ] Task DT5: A product shown as an image
+- [x] Task DT5: A product shown as an image
 - [ ] Task DT6: A group shown as a gallery
 - [ ] Task DT7: A product shown as a button
 - [ ] Task DT8: The SiteStripe card
@@ -1834,10 +1834,15 @@ nothing.
 **Files:** the above; tests F30 **AC10**, `tests/Integration/ImageDisplayTest.php` (Ezoic / WP Rocket variants with
 stubbed detection).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Renderer, template, CSS.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show a product as a linked image".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Renderer, template, CSS.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show a product as a linked image".
+
+*Note:* 18S4 built the image display (`LayoutFamily::Image`, `image.php`, the overrides through `BoxOverrides`), so
+DT5 added R27: `Interface\Front\ImageLoading` (`loading="lazy"`, or Ezoic's / WP Rocket's class) in every box picture,
+as Lasso's helper is; the list card keeps `loading="lazy"` as Lasso's does. Seen on Local with WP Rocket listed active
+(then undone): the same `<img>` as Lasso's, without its third `faux-noscript` class (D3).
 
 ---
 

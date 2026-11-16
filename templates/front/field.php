@@ -35,7 +35,7 @@ switch ( $inline['part'] ) {
 
 		$attributes = $view->buttons[0]->attributes ?? $view->link;
 		?>
-		<a<?php require __DIR__ . '/partials/attributes.php'; ?>><img src="<?php echo esc_url( $src ); ?>" class="<?php echo esc_attr( $classes ); ?>"<?php echo $sized ? ' width="' . esc_attr( $inline['image_width'] ) . '" height="' . esc_attr( $inline['image_height'] ) . '"' : ''; ?> loading="lazy" alt="<?php echo esc_attr( $view->image_alt ); ?>"></a>
+		<a<?php require __DIR__ . '/partials/attributes.php'; ?>><img src="<?php echo esc_url( $src ); ?>" class="<?php echo esc_attr( $classes ); ?>"<?php echo $sized ? ' width="' . esc_attr( $inline['image_width'] ) . '" height="' . esc_attr( $inline['image_height'] ) . '"' : ''; ?> <?php echo \Affibloom\Interface\Front\ImageLoading::attribute(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- one of three fixed attributes. ?> alt="<?php echo esc_attr( $view->image_alt ); ?>"></a>
 		<?php
 		break;
 	case 'button':

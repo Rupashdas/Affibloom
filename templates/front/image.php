@@ -14,6 +14,6 @@ $attributes = $view->link;
 <div id="<?php echo esc_attr( $view->anchor ); ?>" class="affibloom-box affibloom-image-container">
 	<!-- PRODUCT IMAGE -->
 	<a class="affibloom-image image-style" id="css-<?php echo esc_attr( (string) ( $view->link['data-affibloom-id'] ?? '' ) ); ?>"<?php require __DIR__ . '/partials/attributes.php'; ?>>
-		<img class="affibloom-image-no-lazy" src="<?php echo esc_url( $view->image_src ); ?>" loading="lazy" height="500" width="500" alt="<?php echo esc_attr( $view->image_alt ); ?>">
+		<img class="affibloom-image-no-lazy" src="<?php echo esc_url( $view->image_src ); ?>" <?php echo \Affibloom\Interface\Front\ImageLoading::attribute(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- one of three fixed attributes. ?> height="500" width="500" alt="<?php echo esc_attr( $view->image_alt ); ?>">
 	</a>
 </div>
