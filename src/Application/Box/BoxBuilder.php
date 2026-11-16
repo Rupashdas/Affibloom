@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Application\Box;
 
 use Affibloom\Application\Display\DisplayPresentation;
+use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
 use Affibloom\Domain\Box\DisclosureRule;
@@ -17,6 +18,7 @@ use Affibloom\Domain\Box\ElementVisibility;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Box\PriceRule;
 use Affibloom\Domain\Box\ThemeResolver;
+use Affibloom\Domain\Box\TimestampRule;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Fields\FieldLibrary;
@@ -55,14 +57,15 @@ final class BoxBuilder {
 	/**
 	 * The view of one Single box.
 	 *
-	 * @param Product         $product   A published product (the resolver has followed any repoint).
-	 * @param DisplaySettings $display   The Display settings, as DisplaySettingsService::current() gives them.
-	 * @param Settings        $settings  The site's settings.
-	 * @param BoxOverrides    $overrides The box's own values.
-	 * @param int             $post_id   The post the box is drawn in (0 outside one), for the self-link check.
-	 * @param BoxFields|null  $fields    The product's custom fields and the field library; null for none.
+	 * @param Product            $product   A published product (the resolver has followed any repoint).
+	 * @param DisplaySettings    $display   The Display settings, as DisplaySettingsService::current() gives them.
+	 * @param Settings           $settings  The site's settings.
+	 * @param BoxOverrides       $overrides The box's own values.
+	 * @param int                $post_id   The post the box is drawn in (0 outside one), for the self-link check.
+	 * @param BoxFields|null     $fields    The product's custom fields and the field library; null for none.
+	 * @param AmazonProduct|null $amazon The Amazon product's stored data (C1); null when there is none.
 	 */
-	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null ): BoxView {
+	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null, ?AmazonProduct $amazon = null ): BoxView {
 		$config = $display->config( DisplayType::single() );
 		// R3: the Single type's theme, then the product's own; a box names none until its `theme` attribute (Task 20B).
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, '' );
@@ -109,6 +112,7 @@ final class BoxBuilder {
 			description: $elements->shows( 'desc' ) ? $this->description( $product, $overrides ) : null,
 			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
+			date: TimestampRule::shows( ProductType::Amazon === $product->type, $elements->shows( 'timestamp' ) ) ? TimestampRule::text( $amazon->last_updated ?? '' ) : null,
 		);
 	}
 

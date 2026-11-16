@@ -674,6 +674,31 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC22 (Task 22C): the timestamp shows the Amazon data's last update (seeded here; C1C stores it, C1E keeps it
+	// fresh) with Lasso's tooltip, by the Timestamp element, never on a basic link. Classic rendering is 18K's (AC14).
+	test( "AC22 the timestamp shows Amazon's last update where Lasso shows it", async ( { page } ) => {
+		const asin = 'B0AC22TEST';
+		wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . 'affibloom_amazon_products', array( 'asin' => '${ asin }', 'country' => 'us', 'base_url' => '', 'monetized_url' => '', 'image' => '', 'features' => '[]', 'last_updated' => '2026-11-09 00:01:00' ) );` );
+		const amazon = createProduct( { name: 'F5 AC22 amazon', type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20` } );
+		const basic = createProduct( { name: 'F5 AC22 basic' } );
+		try {
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { timestamp: true } } } ), '--format=json' );
+			await page.goto( newPostWith( boxBlock( amazon ) ) );
+			const date = page.locator( '.affibloom-box .affibloom-date' );
+			await expect( date ).toContainText( '11/09/2026 12:01 am GMT' );
+			await expect( date.locator( 'i.affibloom-amazon-info' ) ).toHaveAttribute( 'data-tooltip', 'Price and availability are accurate as of the date and time indicated and are subject to change.' );
+
+			await page.goto( newPostWith( boxBlock( basic ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-date' ) ).toBeEmpty(); // printed, never filled on a basic link
+
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { timestamp: false } } } ), '--format=json' );
+			await page.goto( newPostWith( boxBlock( amazon ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-date' ) ).toBeEmpty();
+		} finally {
+			useSiteDisplay();
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

@@ -13,9 +13,11 @@ use Affibloom\Application\Box\BoxBuilder;
 use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\Product\ProductRepository;
+use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Module;
@@ -29,14 +31,15 @@ final class ProductBoxBlock implements Module {
 	/**
 	 * Builds the block.
 	 *
-	 * @param string                 $block_dir The folder that holds block.json.
-	 * @param RepointResolver        $products  Which product a box draws.
-	 * @param DisplaySettingsService $display   The Display settings.
-	 * @param SettingsRepository     $settings  The site's settings.
-	 * @param BoxBuilder             $builder   The box engine.
-	 * @param BoxHtml                $html      The box's printer.
-	 * @param ProductRepository      $catalog   The products, for their custom fields.
-	 * @param FieldRepository        $fields    The field library.
+	 * @param string                  $block_dir The folder that holds block.json.
+	 * @param RepointResolver         $products  Which product a box draws.
+	 * @param DisplaySettingsService  $display   The Display settings.
+	 * @param SettingsRepository      $settings  The site's settings.
+	 * @param BoxBuilder              $builder   The box engine.
+	 * @param BoxHtml                 $html      The box's printer.
+	 * @param ProductRepository       $catalog   The products, for their custom fields.
+	 * @param FieldRepository         $fields    The field library.
+	 * @param AmazonProductRepository $amazon   The stored Amazon data (C1), for the timestamp.
 	 */
 	public function __construct(
 		private readonly string $block_dir,
@@ -47,6 +50,7 @@ final class ProductBoxBlock implements Module {
 		private readonly BoxHtml $html,
 		private readonly ProductRepository $catalog,
 		private readonly FieldRepository $fields,
+		private readonly AmazonProductRepository $amazon,
 	) {}
 
 	/**
@@ -78,6 +82,8 @@ final class ProductBoxBlock implements Module {
 		$values = $this->catalog->fields( (int) $product->id );
 		$fields = null === $values ? null : new BoxFields( $values, $this->fields->load() );
 
-		return $this->html->render( $this->builder->build( $product, $this->display->current(), $this->settings->get(), $overrides, (int) get_the_ID(), $fields ) );
+		$amazon = ProductType::Amazon === $product->type && '' !== $product->asin ? $this->amazon->find( $product->asin, $product->amazon_country ) : null;
+
+		return $this->html->render( $this->builder->build( $product, $this->display->current(), $this->settings->get(), $overrides, (int) get_the_ID(), $fields, $amazon ) );
 	}
 }

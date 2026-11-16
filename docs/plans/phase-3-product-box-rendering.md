@@ -113,7 +113,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18J: Element visibility on the box
 - [x] Task 22A: Price, discount and Prime
 - [x] Task 22B: Disclosure
-- [ ] Task 22C: Timestamp
+- [x] Task 22C: Timestamp
 - [ ] Task 18K: Classic rendering
 - [ ] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
 - [ ] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
@@ -922,10 +922,15 @@ Checked beside Lasso's box with the disclosure on and off (Lasso's meta flipped 
 
 **Files:** create `src/Domain/Box/TimestampRule.php`, `tests/Unit/Domain/Box/TimestampRuleTest.php`; modify `src/Application/Box/BoxBuilder.php`, the date partial under `templates/front/`, `tests/E2E/acceptance/F5.spec.ts` (AC22).
 
-- [ ] **Step 1: Failing tests (AC22, a seeded update time).**
-- [ ] **Step 2: Rule and partial.**
-- [ ] **Step 3: Run and look.** A seeded Amazon product at 1280 and 390 px; hover the info icon for the tooltip.
-- [ ] **Step 4: Commit** — "Show the price timestamp".
+- [x] **Step 1: Failing tests (AC22, a seeded update time).**
+- [x] **Step 2: Rule and partial.**
+- [x] **Step 3: Run and look.** A seeded Amazon product at 1280 and 390 px; hover the info icon for the tooltip.
+- [x] **Step 4: Commit** — "Show the price timestamp".
+
+*Note:* the time comes from C1's Amazon table row (`last_updated`), not a `_affibloom_amazon_updated` meta: the block
+passes the row to the builder (C1F reads price and discount from the same row). As Lasso's code, an Amazon product
+with no row prints the icon alone. Checked beside Lasso's box: same place and format at both widths (the times differ:
+separate caches); the tooltip opens with the same styles on hover.
 
 ---
 

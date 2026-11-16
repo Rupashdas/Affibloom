@@ -39,6 +39,8 @@ final class BoxView {
 	 * @param string|null           $description The description, rich text; null prints no description block.
 	 * @param list<BoxButton>       $buttons     The buttons, in order.
 	 * @param string|null           $disclosure  The disclosure text; null when it does not show.
+	 * @param string|null           $date        The price timestamp (R29): the last update ('' unknown); null when it does
+	 *                                           not show.
 	 */
 	public function __construct(
 		public readonly LayoutFamily $family,
@@ -60,5 +62,6 @@ final class BoxView {
 		public readonly ?string $description,
 		public readonly array $buttons,
 		public readonly ?string $disclosure,
+		public readonly ?string $date,
 	) {}
 }
