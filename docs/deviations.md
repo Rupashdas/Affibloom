@@ -150,6 +150,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 142. Admin design (the user, 2026-11-16): Meadow replaces Aurora; restyle Tasks MD1-MD7 (Batches 4.M1-4.M5) before F4.
 - 143. Saving (the user, 2026-11-16/17): every settings screen saves over REST and stays on the page; no save without JavaScript.
 - 144. Settings → Display (the user, 2026-11-17): Single, Grid and List switch in place and one save stores every type, as in Lasso.
+- 145. Loading states (the user, 2026-11-17): content that waits for the server shows a skeleton; actions show `.is-busy`.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2850,3 +2851,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     icon menu closed on any scroll, including the page's own when a preview finished its height (F28 AC4 failed in
     a full run); it now follows its button and closes only when the button leaves the screen. Tests: F16 adds this
     deviation's test; F28 AC6 reads the new field name.
+
+145. **Loading states: skeletons for content, busy buttons for actions (the user, 2026-11-17).** The field library
+    ("Add from library") showed nothing while it loaded and nothing when it failed; the product page's and Settings →
+    Display's previews showed the picture faded under a small spinner. A sweep of every admin request (43) found the
+    group page's and Add Link's Amazon searches empty while waiting too, and Create Field and a field's Remove sendable
+    twice. Now: `affibloomSkeleton( list, n, picture )` (admin.js) draws row shapes in a waiting list; both previews show
+    `partials/box-skeleton.php` until the first box, then the list's moving bar on a redraw; the Dashboard, Groups and
+    Fields lists turn their rows to skeleton bars while they reload (CSS on `.is-loading`, scripts unchanged); actions
+    keep or gain `.is-busy`. Rule for later tasks: content that waits shows a skeleton of itself, an action its busy
+    button; no bare spinners. Checked by `tests/E2E/loading-states.spec.ts` (3 tests, answers held back).

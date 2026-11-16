@@ -108,6 +108,7 @@ $regions  = static function ( string $region, string $partial, callable $data ) 
 									<div class="affibloom-split__frame is-loading" data-preview-frame
 										data-preview-title="<?php esc_attr_e( 'Display preview', 'affibloom' ); ?>"
 										data-preview-error="<?php esc_attr_e( 'The preview could not be drawn. Try again.', 'affibloom' ); ?>">
+										<?php $this->render( 'admin/partials/box-skeleton' ); ?>
 										<div class="affibloom-empty">
 											<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'tag' ) ); ?></span>
 											<p class="affibloom-empty__message"><?php esc_html_e( 'The box preview appears here.', 'affibloom' ); ?></p>

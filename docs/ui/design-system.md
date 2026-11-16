@@ -156,6 +156,12 @@ Both are bundled in the plugin (0b.5); the system stack of section 3 is the fall
   and visible help text left, the control right; no icon chips). Display as section 0 says.
 - **Dialogs:** 28px padding, a 44px icon chip (danger tint for destructive ones), the dialog title, actions right.
 - **Toast:** the ink-900 card with the tick, bottom centre.
+- **Loading (the user, 2026-11-17; deviation 145):** content that waits for the server shows a **skeleton** of itself:
+  grey shapes (`--affibloom-skeleton`, a lighter band moving across in 1.4s, still under reduced motion) where its
+  rows, pictures and lines will be. Lists that wait for a first answer get rows from `affibloomSkeleton()`; the box
+  previews show `partials/box-skeleton.php` until the first box, then the moving bar on a redraw; the Dashboard,
+  Groups and Fields lists turn their rows to skeleton bars while they reload. An action (Save, Add, Delete, Validate)
+  shows its button busy (`.is-busy`, a 14px spinner before the words, disabled). No other spinners.
 
 ### 0b.5 Implementation notes
 

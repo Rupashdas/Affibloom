@@ -31,6 +31,8 @@
 	--affibloom-line-strong: #b6c1b4;
 	--affibloom-segment-bg: #eaefe9;
 	--affibloom-sunk: #f1f4f0;
+	/* Skeletons (loading shapes): segment-bg with a lighter band that moves across. */
+	--affibloom-skeleton: linear-gradient(90deg, #e6ebe4 25%, #f3f6f2 37%, #e6ebe4 63%);
 	--affibloom-danger-700: #b42318;
 	--affibloom-danger-800: #961c13;
 	--affibloom-danger-50: #fdecea;
@@ -272,10 +274,86 @@
 	line-height: 20px;
 }
 
-/* The list while it loads (Task 13D): the card steps back and a thin bar runs along its top. */
+/*
+ * Skeleton (design system, "Skeleton"; the user, 2026-11-17): while content loads, grey shapes of what is coming hold
+ * its place and shimmer, instead of a spinner. Buttons that wait for an answer use `.is-busy` instead (an action, not
+ * content). Every shimmer stops under reduced motion.
+ */
+.affibloom-skeleton {
+	display: block;
+	border-radius: 6px;
+	background: var(--affibloom-skeleton);
+	background-size: 400% 100%;
+	animation: affibloom-shimmer 1.4s ease infinite;
+}
+@keyframes affibloom-shimmer {
+	from { background-position: 100% 50%; }
+	to { background-position: 0 50%; }
+}
+.affibloom-skeleton--line { width: 70%; height: 12px; }
+.affibloom-skeleton--short { width: 42%; }
+.affibloom-skeleton--title { width: 80%; height: 18px; }
+.affibloom-skeleton--thumb { flex: none; width: 48px; height: 48px; border-radius: 10px; }
+.affibloom-skeleton--button { flex: none; width: 64px; height: 32px; border-radius: 9px; }
+/* A list row's shape (admin.js affibloomSkeleton): a picture when results have one, two lines, the row's button. */
+.affibloom-skeleton-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; list-style: none; }
+.affibloom-skeleton-row + .affibloom-skeleton-row { border-top: 1px solid var(--affibloom-line); }
+.affibloom-skeleton-row__lines { display: grid; flex: 1; gap: 8px; min-width: 0; }
+/* A product box's shape (partials/box-skeleton.php): badge, picture beside the title and words, two buttons. */
+.affibloom-box-skeleton {
+	display: none;
+	box-sizing: border-box;
+	width: 100%;
+	gap: 14px;
+	padding: 20px;
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+}
+.affibloom-box-skeleton__badge { width: 96px; height: 22px; border-radius: 4px; }
+.affibloom-box-skeleton__body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 18px; align-items: start; }
+.affibloom-box-skeleton__image { aspect-ratio: 4 / 3; border-radius: 8px; }
+.affibloom-box-skeleton__text { display: grid; gap: 10px; }
+.affibloom-box-skeleton__button { height: 40px; border-radius: 6px; }
+
+/* The list while it loads (Task 13D): its rows turn to skeleton bars and a thin bar runs along its top. */
 .affibloom-list { position: relative; }
-.affibloom-list .affibloom-card { transition: opacity var(--affibloom-ease); }
-.affibloom-list.is-loading .affibloom-card { opacity: 0.55; }
+.affibloom-list.is-loading tbody td { position: relative; color: transparent; }
+.affibloom-list.is-loading tbody td > * { visibility: hidden; }
+.affibloom-list.is-loading tbody td::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 16px;
+	width: min(70%, 220px);
+	height: 12px;
+	margin-top: -6px;
+	border-radius: 6px;
+	background: var(--affibloom-skeleton);
+	background-size: 400% 100%;
+	animation: affibloom-shimmer 1.4s ease infinite;
+}
+/* The cells keep their own shapes: a box for the tick, the picture's tile, the name over its link. */
+.affibloom-list.is-loading tbody .affibloom-col-select::after { width: 18px; height: 18px; margin-top: -9px; border-radius: 5px; }
+.affibloom-list.is-loading tbody .affibloom-col-image::after { width: 48px; height: 48px; margin-top: -24px; border-radius: 10px; }
+.affibloom-list.is-loading tbody .affibloom-col-name::after { width: min(60%, 260px); height: 14px; margin-top: -14px; }
+.affibloom-list.is-loading tbody .affibloom-col-name::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 16px;
+	width: min(40%, 180px);
+	height: 10px;
+	margin-top: 6px;
+	border-radius: 5px;
+	background: var(--affibloom-skeleton);
+	background-size: 400% 100%;
+	animation: affibloom-shimmer 1.4s ease infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+	.affibloom-skeleton,
+	.affibloom-list.is-loading tbody td::after,
+	.affibloom-list.is-loading tbody .affibloom-col-name::before { animation: none; }
+}
 .affibloom-list.is-loading::before {
 	content: "";
 	position: absolute;
@@ -2545,39 +2623,45 @@ body.affibloom-has-modal { overflow: hidden; }
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 }
+/*
+ * Both previews are printed loading. Until the first box is drawn, the frame shows the box's skeleton
+ * (partials/box-skeleton.php) instead of the picture or the placeholder; the placeholder shows only when no box could
+ * be drawn. A redraw keeps the drawn box, slightly faded, with the list's moving bar along the frame's top.
+ */
 .affibloom-split__frame.is-loading { position: relative; }
-.affibloom-split__frame.is-loading .affibloom-preview-frame { opacity: 0.55; }
-/* Both previews are printed loading: until the first box is drawn the frame keeps its place with the spinner, and the
-   placeholder text shows only when no box could be drawn. A redraw keeps the last box, faded, under the spinner. */
-.affibloom-split__frame.is-loading .affibloom-empty > *,
-.affibloom-image-frame.is-loading .affibloom-image-frame__note { visibility: hidden; }
-.no-js .affibloom-split__frame.is-loading .affibloom-empty > *,
-.no-js .affibloom-image-frame.is-loading .affibloom-image-frame__note { visibility: visible; }
-.affibloom-split__frame.is-loading::after,
-.affibloom-image-frame.is-loading::after {
+.affibloom-split__frame.is-loading:not(:has(.affibloom-preview-frame)) .affibloom-box-skeleton,
+.affibloom-image-frame.is-loading:not(.has-box) .affibloom-box-skeleton { display: grid; }
+.affibloom-split__frame.is-loading:not(:has(.affibloom-preview-frame)) .affibloom-empty,
+.affibloom-image-frame.is-loading:not(.has-box) > :not(.affibloom-box-skeleton) { display: none; }
+.affibloom-image-frame.is-loading:not(.has-box) { place-items: stretch; }
+.affibloom-split__frame.is-loading .affibloom-preview-frame,
+.affibloom-image-frame.is-loading .affibloom-preview-frame { opacity: 0.7; transition: opacity var(--affibloom-ease); }
+.affibloom-split__frame.is-loading:has(.affibloom-preview-frame)::before,
+.affibloom-image-frame.is-loading.has-box::before {
 	content: "";
 	position: absolute;
-	top: 24px;
-	left: 50%;
-	width: 24px;
-	height: 24px;
-	margin-left: -12px;
-	border: 3px solid var(--affibloom-line);
-	border-top-color: var(--affibloom-ink-600);
-	border-radius: 50%;
-	animation: affibloom-preview-spin 0.8s linear infinite;
+	z-index: 1;
+	top: 0;
+	right: 16px;
+	left: 16px;
+	height: 3px;
+	border-radius: var(--affibloom-radius-full);
+	background: linear-gradient(90deg, transparent, var(--affibloom-brand-600), transparent);
+	background-size: 40% 100%;
+	background-repeat: no-repeat;
+	animation: affibloom-loading 900ms linear infinite;
 }
-@keyframes affibloom-preview-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
-	.affibloom-split__frame.is-loading::after,
-	.affibloom-image-frame.is-loading::after { animation: none; }
+	.affibloom-split__frame.is-loading:has(.affibloom-preview-frame)::before,
+	.affibloom-image-frame.is-loading.has-box::before { animation: none; background-size: 100% 100%; opacity: 0.6; }
 }
-.no-js .affibloom-split__frame.is-loading::after,
-.no-js .affibloom-image-frame.is-loading::after { display: none; }
+/* Without scripts nothing will draw a box: the picture and the placeholder show, never the skeleton. */
+.no-js .affibloom-split__frame.is-loading .affibloom-box-skeleton,
+.no-js .affibloom-image-frame.is-loading .affibloom-box-skeleton { display: none; }
+.no-js .affibloom-split__frame.is-loading .affibloom-empty { display: block; }
+.no-js .affibloom-image-frame.is-loading > :not(.affibloom-box-skeleton) { display: revert; }
 
 /* The product page's live preview (Task 14E): the real box fills the image frame once drawn. */
 .affibloom-image-frame.has-box { display: block; padding: 0; aspect-ratio: auto; height: auto; }
 .affibloom-image-frame.has-box .affibloom-image-frame__update { display: none; }
 .affibloom-image-frame .affibloom-preview-frame { display: block; width: 100%; min-height: 200px; border: 0; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
-.affibloom-image-frame.is-loading .affibloom-preview-frame,
-.affibloom-image-frame.is-loading .affibloom-image-frame__image { opacity: 0.55; }

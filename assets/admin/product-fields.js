@@ -155,15 +155,25 @@
 		// A remove that fails keeps the question open, with the reason, so it can be tried again or cancelled.
 		var removeProblem = removeModal.querySelector( '[data-field-remove-error]' );
 		removeModal.querySelector( '[data-field-remove-confirm]' ).addEventListener( 'click', function () {
-			if ( ! pending ) {
+			var confirm = this;
+			if ( ! pending || confirm.disabled ) {
 				return;
 			}
 			var id = pending.dataset.fieldId;
+			// Busy while it is asked (design system, "State chip"): one click, one request.
+			confirm.disabled = true;
+			confirm.classList.add( 'is-busy' );
+			var idle = function () {
+				confirm.disabled = false;
+				confirm.classList.remove( 'is-busy' );
+			};
 			wp.apiFetch( { path: path + '/' + id, method: 'DELETE' } ).then( function ( response ) {
+				idle();
 				pending = null;
 				draw( response.data.html );
 				close( removeModal );
 			} ).catch( function ( problem ) {
+				idle();
 				removeProblem.textContent = problem && problem.message ? problem.message : removeProblem.dataset.failed;
 				removeProblem.hidden = false;
 			} );
@@ -208,17 +218,29 @@
 			fail( '' );
 		} );
 		modal.querySelector( '[data-field-create]' ).addEventListener( 'click', function () {
+			var create = this;
+			if ( create.disabled ) {
+				return;
+			}
+			create.disabled = true;
+			create.classList.add( 'is-busy' );
+			var idle = function () {
+				create.disabled = false;
+				create.classList.remove( 'is-busy' );
+			};
 			wp.apiFetch( {
 				path: '/affibloom/v1/fields',
 				method: 'POST',
 				data: { name: title.value, type: modal.querySelector( '[data-field-type]' ).value, description: describe.value },
 			} ).then( function () {
+				idle();
 				title.value = '';
 				describe.value = '';
 				fail( '' );
 				show( 'library' );
 				modal.querySelector( '[data-field-tab="library"]' ).focus();
 			} ).catch( function ( problem ) {
+				idle();
 				fail( problem && problem.message ? problem.message : '' );
 				title.focus();
 			} );
@@ -235,10 +257,14 @@
 
 		var library = function ( wanted ) {
 			var mine = ++requests;
+			// Until the answer comes, the list shows the rows' shapes (design system, "Skeleton").
+			shelf.replaceChildren();
+			window.affibloomSkeleton( shelf, 4, false );
 			wp.apiFetch( { path: '/affibloom/v1/fields?' + new URLSearchParams( { search: search.value, page: String( wanted ) } ).toString() } ).then( function ( response ) {
 				if ( mine !== requests ) {
 					return; // A newer search has been asked for.
 				}
+				window.affibloomSkeleton.done( shelf );
 				var data = response.data;
 				var attached = rows().map( function ( row ) {
 					return row.dataset.fieldId;
@@ -279,6 +305,17 @@
 				pager.querySelector( '[data-field-page="next"]' ).disabled = page >= pages;
 				var label = pager.querySelector( '[data-field-page-text]' );
 				label.textContent = format( label.dataset.format, [ String( page ), String( pages ) ] );
+			} ).catch( function () {
+				if ( mine !== requests ) {
+					return;
+				}
+				// A failed load says so instead of leaving the shapes; searching or paging asks again.
+				window.affibloomSkeleton.done( shelf );
+				var failed = document.createElement( 'li' );
+				failed.className = 'affibloom-field-library__empty';
+				failed.setAttribute( 'role', 'alert' );
+				failed.textContent = shelf.dataset.failed;
+				shelf.replaceChildren( failed );
 			} );
 		};
 

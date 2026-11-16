@@ -103,7 +103,8 @@ $title_help = __( 'Ideal title for use in things like a comparison table header.
 				<ul class="affibloom-field-library" data-field-library aria-live="polite"
 					data-add-label="<?php /* translators: %s: a field's name. */ echo esc_attr__( 'Add %s', 'affibloom' ); ?>"
 					data-added-label="<?php esc_attr_e( 'Added', 'affibloom' ); ?>" data-add-text="<?php esc_attr_e( 'Add', 'affibloom' ); ?>"
-					data-empty="<?php esc_attr_e( "Looks like we're coming up empty.", 'affibloom' ); ?>"></ul>
+					data-empty="<?php esc_attr_e( "Looks like we're coming up empty.", 'affibloom' ); ?>"
+					data-failed="<?php esc_attr_e( 'The list could not be loaded.', 'affibloom' ); ?>"></ul>
 				<div class="affibloom-field-library__pager" data-field-pager hidden>
 					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-field-page="previous"><?php esc_html_e( 'Previous', 'affibloom' ); ?></button>
 					<span data-field-page-text data-format="<?php /* translators: 1: this page, 2: how many pages. */ echo esc_attr__( 'Page %1$s of %2$s', 'affibloom' ); ?>"></span>

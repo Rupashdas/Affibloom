@@ -643,17 +643,21 @@
 				return;
 			}
 			setStatus( text( 'search-busy' ) );
+			// Under the status line, the results' shapes until Amazon answers (design system, "Skeleton").
+			skeleton( results, 3, true );
 			wp.apiFetch( { path: '/affibloom/v1/amazon/search?' + new URLSearchParams( { q: words, page: String( page ) } ).toString() } )
 				.then( function ( response ) {
 					if ( mine !== searches ) {
 						return;
 					}
+					skeleton.done( results );
 					shown = response.data;
 					setStatus( shown.items.length ? '' : text( 'search-empty' ) );
 					showResults();
 				} )
 				.catch( function ( failure ) {
 					if ( mine === searches ) {
+						skeleton.done( results );
 						setStatus( ( failure && failure.message ) || text( 'search-failed' ) );
 					}
 				} );
@@ -1249,6 +1253,37 @@
 		return 'function' === typeof form.affibloomFields ? form.affibloomFields() : new window.FormData( form );
 	}
 
+	/**
+	 * Skeleton rows in a list that is waiting for its first answer (design system, "Skeleton"): grey shapes of the rows
+	 * to come, so the list keeps its size and shows that something is loading. Rows are hidden from screen readers; the
+	 * list says it is busy (`aria-busy`). The script that asked calls `.done()` before it draws the answer or an error.
+	 *
+	 * @param {HTMLElement} list    The list (a `ul`).
+	 * @param {number}      count   How many rows to draw.
+	 * @param {boolean}     picture Whether each row starts with a picture, as search results do.
+	 */
+	function skeleton( list, count, picture ) {
+		skeleton.done( list );
+		for ( var i = 0; i < count; i++ ) {
+			var row = document.createElement( 'li' );
+			row.className = 'affibloom-skeleton-row';
+			row.setAttribute( 'aria-hidden', 'true' );
+			row.innerHTML = ( picture ? '<span class="affibloom-skeleton affibloom-skeleton--thumb"></span>' : '' ) +
+				'<span class="affibloom-skeleton-row__lines"><span class="affibloom-skeleton affibloom-skeleton--line"></span>' +
+				'<span class="affibloom-skeleton affibloom-skeleton--line affibloom-skeleton--short"></span></span>' +
+				'<span class="affibloom-skeleton affibloom-skeleton--button"></span>';
+			list.appendChild( row );
+		}
+		list.setAttribute( 'aria-busy', 'true' );
+	}
+	skeleton.done = function ( list ) {
+		Array.prototype.forEach.call( list.querySelectorAll( ':scope > .affibloom-skeleton-row' ), function ( row ) {
+			row.remove();
+		} );
+		list.removeAttribute( 'aria-busy' );
+	};
+
+	window.affibloomSkeleton = skeleton;
 	window.affibloomFieldEntries = fieldEntries;
 	window.affibloomFormFields = formFields;
 	window.affibloomCopy = copy;

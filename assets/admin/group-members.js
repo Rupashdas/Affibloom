@@ -278,10 +278,14 @@
 		args.set( 'search', term );
 		args.set( 'page', String( page ) );
 		args.set( 'group', String( groupId ) );
+		// Until the answer comes, the results show the rows' shapes (design system, "Skeleton").
+		results.innerHTML = '';
+		window.affibloomSkeleton( results, 3, true );
 		wp.apiFetch( { path: '/affibloom/v1/products?' + args.toString() } ).then( function ( response ) {
 			if ( mine !== requests ) {
 				return;
 			}
+			window.affibloomSkeleton.done( results );
 			var data = response.data;
 			results.innerHTML = '';
 			data.items.forEach( function ( item ) {
@@ -296,6 +300,7 @@
 			pager( data );
 		} ).catch( function () {
 			if ( mine === requests ) {
+				window.affibloomSkeleton.done( results );
 				problem( modal.dataset.failedText );
 			}
 		} );
