@@ -9,6 +9,7 @@ use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\FieldLibrary;
+use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Button;
@@ -479,5 +480,33 @@ final class BoxBuilderTest extends TestCase {
 		$hidden = $box( array( 'primaryText' => 'hide', 'secondaryText' => 'hide' ) );
 		self::assertSame( '1', $hidden->wrapper['data-hide-primary'] );
 		self::assertSame( '1', $hidden->wrapper['data-hide-secondary'] );
+	}
+	/**
+	 * F5 R23, R30-R34 (Task 21B): the visible rows in order, by type, without the Primary Rating, hidden rows, table-only
+	 * fields and Copy to Clipboard (21C).
+	 */
+	public function test_the_fields_block_holds_the_visible_rows_by_type(): void {
+		list( $library, $text )    = FieldLibrary::from_array( array() )->create( 'Upper', FieldType::Text, '' );
+		list( $library, $list )    = $library->create( 'Steps', FieldType::NumberedList, '' );
+		list( $library, $hidden )  = $library->create( 'Secret', FieldType::Text, '' );
+		list( $library, $copy )    = $library->create( 'Code', FieldType::CopyClipboard, '' );
+		$values = ProductFields::from_array(
+			array(
+				array( 'field' => 1, 'value' => '4.5' ),
+				array( 'field' => $text->id, 'value' => 'Mesh' ),
+				array( 'field' => 2, 'value' => "Light\nQuick" ),
+				array( 'field' => $list->id, 'value' => "A\nB" ),
+				array( 'field' => $hidden->id, 'value' => 'No', 'visible' => false ),
+				array( 'field' => $copy->id, 'value' => 'VB10' ),
+				array( 'field' => 99994, 'value' => '$1' ),
+			)
+		);
+		$view = ( new BoxBuilder( self::THUMBNAIL ) )->build( self::product(), self::display(), self::settings(), BoxOverrides::from_block( array( 'productId' => 14727 ) ), 0, new BoxFields( $values, $library ) );
+
+		self::assertSame(
+			array( array( 'text', 'Upper' ), array( 'pros-cons', 'Pros' ), array( 'numbered', 'Steps' ) ),
+			array_map( static fn( $f ) => array( $f->kind, $f->name ), $view->fields )
+		);
+		self::assertSame( array( 'Light', 'Quick' ), $view->fields[1]->lines() );
 	}
 }

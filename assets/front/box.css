@@ -993,3 +993,105 @@ a.affibloom-button-2:hover {
 	float: left !important;
 	margin-right: 0.25rem !important;
 }
+
+/* The custom fields block (Task 21B; Lasso's lasso-live rules for .lasso-fields, Pros and Cons and their icons): the
+   names bold, Pros and Cons as icon lists with no theme bullets, lists with their markers. */
+.affibloom-fields {
+	font-size: 16px;
+}
+.affibloom-fields strong {
+	font-weight: 800;
+}
+.affibloom-fields li {
+	font-size: initial !important;
+	color: initial !important;
+}
+.affibloom-fields div {
+	margin: 0 0 10px 0;
+	text-align: left;
+}
+.affibloom-fields-pros,
+.affibloom-fields-cons,
+.affibloom-fields-2,
+.affibloom-fields-3 {
+	text-align: left;
+}
+.affibloom-fields-pros ul,
+.affibloom-fields-cons ul,
+.affibloom-fields-2 ul,
+.affibloom-fields-3 ul {
+	margin: 0 0 1rem 0 !important;
+	padding-left: 0 !important;
+}
+.affibloom-fields-pros li,
+.affibloom-fields-cons li {
+	list-style: none !important;
+	margin: 0 5px 0 0 !important;
+}
+.affibloom-fields-2 li,
+.affibloom-fields-3 li {
+	list-style: none !important;
+	margin: 0 5px 0 0 !important;
+	position: relative !important;
+}
+.affibloom-fields-pros li::before,
+.affibloom-fields-cons li::before,
+.affibloom-fields-pros li::after,
+.affibloom-fields-cons li::after,
+.affibloom-fields-2 li::before,
+.affibloom-fields-3 li::before,
+.affibloom-fields-2 li::after,
+.affibloom-fields-3 li::after,
+.affibloom-fields-2 > ul > li::before,
+.affibloom-fields-3 > ul > li::before {
+	content: none !important;
+}
+.affibloom-check {
+	display: inline-block;
+	width: 16px;
+	height: 1.3rem;
+	position: relative;
+	top: 0;
+}
+.affibloom-check .affibloom-check-content {
+	display: inline-block;
+	transform: rotate(45deg);
+	height: 12px;
+	width: 7px;
+	margin-left: 15%;
+	border-bottom: 3px solid var(--affibloom-pros);
+	border-right: 3px solid var(--affibloom-pros);
+}
+.affibloom-x {
+	display: inline-block;
+	width: 12px;
+	height: 16px;
+	line-height: 0;
+	position: relative;
+	top: 9px;
+	margin-right: 4px;
+}
+.affibloom-x .affibloom-x-1,
+.affibloom-x .affibloom-x-2 {
+	display: inline-block;
+	width: 13px;
+	height: 3px;
+	background: var(--affibloom-cons);
+	transform: rotate(45deg);
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.affibloom-x .affibloom-x-2 {
+	transform: rotate(-45deg);
+}
+.affibloom-fields-single ul.list {
+	list-style-type: disc;
+	padding-left: 20px !important;
+	margin: 0 0 1rem 0 !important;
+}
+.affibloom-fields-single ol.list {
+	list-style-type: decimal;
+	margin: 0 0 1rem 0 !important;
+	padding-left: 20px !important;
+}

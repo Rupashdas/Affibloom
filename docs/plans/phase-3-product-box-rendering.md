@@ -117,7 +117,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18K: Classic rendering
 - [x] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
 - [ ] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
-- [ ] Task 21B: Custom fields and Pros & Cons in the box
+- [x] Task 21B: Custom fields and Pros & Cons in the box
 - [ ] Task 21C: The Copy to Clipboard field
 - [ ] Task 20D: Product structured data
 - Task 22D: dropped (decision B9: brag mode left out)
@@ -821,11 +821,16 @@ fields, text, numbers.
 
 **Files:** create `src/Application/Box/BoxField.php` and the field partials under `templates/front/`; modify `src/Application/Box/BoxBuilder.php`, `assets/front/box.css`, `tests/E2E/acceptance/F5.spec.ts` (AC18).
 
-- [ ] **Step 1: Failing tests (AC18).**
-- [ ] **Step 2: Builder.**
-- [ ] **Step 3: Partials and CSS.**
-- [ ] **Step 4: Run and look.** A product with Pros, Cons, a list, a rating field and text at 1280 and 390 px beside the `themes/` baselines.
-- [ ] **Step 5: Commit** — "Show custom fields and Pros & Cons in the box".
+- [x] **Step 1: Failing tests (AC18).**
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Partials and CSS.**
+- [x] **Step 4: Run and look.** A product with Pros, Cons, a list, a rating field and text at 1280 and 390 px beside the `themes/` baselines.
+- [x] **Step 5: Commit** — "Show custom fields and Pros & Cons in the box".
+
+*Note:* run before 20C, whose "Depends on" names 21B (the run list had them the other way). One partial
+(`partials/fields.php`) holds Lasso's field-row types; names and values are escaped (D4); Copy to Clipboard is left
+for 21C. Checked beside Lasso's box with Pros and Cons, element on and off, 8 themes, both widths: equal. The
+`all-fields` cells hold Copy to Clipboard, so they pass only with 21C. Test fixture `create-fields.php`.
 
 ---
 

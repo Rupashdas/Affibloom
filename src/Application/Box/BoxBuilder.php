@@ -24,6 +24,7 @@ use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Elements;
 use Affibloom\Domain\Fields\FieldLibrary;
+use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Link\LinkAttributes;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -124,6 +125,8 @@ final class BoxBuilder {
 			prime: $prime,
 			// R63: the Description element gates the block itself.
 			description: $elements->shows( 'desc' ) ? $this->description( $product, $overrides ) : null,
+			// R63: fields are always printed; the Pros & cons element hides them by CSS.
+			fields: null === $fields ? array() : self::fields( $fields->values, $fields->library ),
 			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
 			date: ( $advanced ? TimestampRule::shows( ProductType::Amazon === $product->type, $elements->shows( 'timestamp' ) ) : TimestampRule::shows_classic( ProductType::Amazon === $product->type, '' !== $price ) ) ? TimestampRule::text( $amazon->last_updated ?? '' ) : null,
@@ -285,6 +288,34 @@ final class BoxBuilder {
 		}
 
 		return null;
+	}
+
+	/**
+	 * The fields block (R23, R30-R34): the product's visible rows in their order, without the Primary Rating (the stars,
+	 * R14), the table-only fields and the Copy to Clipboard field (Task 21C), each printed by its type.
+	 *
+	 * @param ProductFields $values  The product's field rows.
+	 * @param FieldLibrary  $library The fields, for names and types.
+	 * @return list<BoxField>
+	 */
+	private static function fields( ProductFields $values, FieldLibrary $library ): array {
+		$out = array();
+		foreach ( $values->all() as $row ) {
+			$field = $library->find( $row->field_id );
+			if ( ! $row->visible || ProductFields::RATING_ID === $row->field_id || null === $field || $field->table_only || FieldType::CopyClipboard === $field->type ) {
+				continue;
+			}
+			$kind = match ( true ) {
+				in_array( $row->field_id, array( 2, 3 ), true ) => BoxField::PROS_CONS,
+				FieldType::Rating === $field->type             => BoxField::RATING,
+				FieldType::BulletedList === $field->type       => BoxField::BULLETED,
+				FieldType::NumberedList === $field->type       => BoxField::NUMBERED,
+				default                                        => BoxField::TEXT,
+			};
+			$out[] = new BoxField( $kind, $row->field_id, $field->name, $row->value );
+		}
+
+		return $out;
 	}
 
 	/**

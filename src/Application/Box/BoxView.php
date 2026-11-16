@@ -38,6 +38,7 @@ final class BoxView {
 	 * @param bool                  $price_block The price block prints (a shown price, or Prime).
 	 * @param bool                  $prime       The Prime logo prints.
 	 * @param string|null           $description The description, rich text; null prints no description block.
+	 * @param list<BoxField>        $fields      The custom fields block (R23); empty prints none.
 	 * @param list<BoxButton>       $buttons     The buttons, in order.
 	 * @param string|null           $disclosure  The disclosure text; null when it does not show.
 	 * @param string|null           $date        The price timestamp (R29): the last update ('' unknown); null when it does
@@ -62,6 +63,7 @@ final class BoxView {
 		public readonly bool $price_block,
 		public readonly bool $prime,
 		public readonly ?string $description,
+		public readonly array $fields,
 		public readonly array $buttons,
 		public readonly ?string $disclosure,
 		public readonly ?string $date,

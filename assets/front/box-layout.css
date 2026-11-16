@@ -42,6 +42,11 @@
 .affibloom-advanced .affibloom-image img {
 	max-height: var(--affibloom-density-image-height) !important;
 }
+/* Pros / cons read at the description size (lasso-live pins .lasso-fields to 16px and list items to initial). */
+:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields,
+:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields :is(.affibloom-fields-pros, .affibloom-fields-cons) li {
+	font-size: var(--affibloom-density-desc-size) !important;
+}
 .affibloom-advanced[data-density-title-lines]:not([data-density-title-lines="0"]) .affibloom-title,
 .affibloom-advanced[data-density-title-lines]:not([data-density-title-lines="0"]) a.affibloom-title {
 	display: -webkit-box !important;
@@ -184,6 +189,9 @@
 .affibloom-advanced[data-hide-image="1"] a.affibloom-image,
 .affibloom-advanced[data-hide-title="1"] :is(.affibloom-title, a.affibloom-title, h3.affibloom-title, span.affibloom-title),
 .affibloom-advanced[data-hide-desc="1"] .affibloom-description,
+.affibloom-advanced[data-hide-proscons="1"] .affibloom-fields,
+.affibloom-advanced[data-hide-proscons="1"] .affibloom-fields-pros,
+.affibloom-advanced[data-hide-proscons="1"] .affibloom-fields-cons,
 .affibloom-advanced[data-hide-primary="1"] .affibloom-button-1,
 .affibloom-advanced[data-hide-secondary="1"] .affibloom-button-2,
 .affibloom-advanced[data-hide-timestamp="1"] .affibloom-date,
@@ -370,8 +378,8 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-llama .affibloom-box-1 {
 		grid-template-rows: auto auto 1fr;
 	}
-	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-lab .affibloom-box-1 > :is(.affibloom-clear, .affibloom-description),
-	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-llama .affibloom-box-1 > :is(.affibloom-clear, .affibloom-description) {
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-lab .affibloom-box-1 > :is(.affibloom-clear, .affibloom-description, .affibloom-fields),
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-llama .affibloom-box-1 > :is(.affibloom-clear, .affibloom-description, .affibloom-fields) {
 		grid-column: 1 / -1 !important;
 	}
 	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-lab .affibloom-box-1 .affibloom-image,
@@ -437,7 +445,9 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-title {
 		font-size: calc(var(--affibloom-density-title-size) * 0.75) !important;
 	}
-	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-description {
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-description,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields :is(.affibloom-fields-pros, .affibloom-fields-cons) li {
 		font-size: calc(var(--affibloom-density-desc-size) * 0.9375) !important;
 	}
 	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-price {

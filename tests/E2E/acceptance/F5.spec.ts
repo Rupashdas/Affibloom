@@ -114,6 +114,24 @@ const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'Llama-rating': { desktop: 18508.031, mobile: 16484.734 },
 	'Money-rating': { desktop: 22054.125, mobile: 19411.359 },
 	'Splash-rating': { desktop: 25181.422, mobile: 22263.234 },
+	// The pros-cons and all-fields states (Task 21B, deviation 138). The site's Pros & cons element is off, so the fields
+	// are printed and hidden; all-fields shows the stars and Amazon's text, price and Prime.
+	'Cactus-pros-cons': { desktop: 2658.906, mobile: 2288.078 },
+	'Cactus-all-fields': { desktop: 3189.984, mobile: 2683.75 },
+	'Cutter-pros-cons': { desktop: 5852.484, mobile: 5314.906 },
+	'Cutter-all-fields': { desktop: 6303.234, mobile: 5714.797 },
+	'Flow-pros-cons': { desktop: 8771.516, mobile: 8193.719 },
+	'Flow-all-fields': { desktop: 9168.984, mobile: 8562.547 },
+	'Geek-pros-cons': { desktop: 11679.984, mobile: 10977.875 },
+	'Geek-all-fields': { desktop: 12110.734, mobile: 11353.547 },
+	'Lab-pros-cons': { desktop: 15413.734, mobile: 13942.25 },
+	'Lab-all-fields': { desktop: 15982.234, mobile: 14339.078 },
+	'Llama-pros-cons': { desktop: 19032.547, mobile: 16873.609 },
+	'Llama-all-fields': { desktop: 19557.063, mobile: 17261.281 },
+	'Money-pros-cons': { desktop: 22591.313, mobile: 19799.391 },
+	'Money-all-fields': { desktop: 23128.5, mobile: 20184.219 },
+	'Splash-pros-cons': { desktop: 25580, mobile: 22632.906 },
+	'Splash-all-fields': { desktop: 25978.578, mobile: 23002.578 },
 };
 
 // Where each baseline box starts on its guide page (px from the top, Local, 2026-11-16; the variants recaptured that day
@@ -154,7 +172,7 @@ async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< v
  * The theme baselines' product (tools/baselines-themes-matrix.ts): the amazon example without a description, with the
  * `badge` state's badge or none, and the given Display Theme (none: the Single type's).
  */
-function themeProduct( state: 'plain' | 'badge' | 'two-buttons' | 'rating', theme?: string ): number {
+function themeProduct( state: 'plain' | 'badge' | 'two-buttons' | 'rating' | 'pros-cons' | 'all-fields', theme?: string ): number {
 	const example = boxes.find( pick.amazon ) as Box;
 	return createProduct( {
 		...productFrom( example ),
@@ -166,6 +184,10 @@ function themeProduct( state: 'plain' | 'badge' | 'two-buttons' | 'rating', them
 		// The capture's `secondary_url` / `secondary_text` (tools/baselines-themes-matrix.ts, SECOND) as the first added button.
 		...( state === 'two-buttons' ? { url2: example.button1?.href ?? '', button_text2: 'Check Price' } : {} ),
 		...( state === 'rating' ? { rating: '4.5' } : {} ),
+		// tools/baselines-themes-matrix.ts: PROS and CONS as Lasso's built-in fields 2 and 3.
+		...( state === 'pros-cons' || state === 'all-fields' ? { fields: PROS_CONS } : {} ),
+		// The `fields` product with LIKE_AMAZON: the amazon example's description, $89.99, Prime, the rating attribute.
+		...( state === 'all-fields' ? { rating: '4.5', description: example.description, show_description: '1', price: '$89.99', show_price: '1' } : {} ),
 		...( theme ? { theme } : {} ),
 	} );
 }
@@ -222,6 +244,12 @@ function useGroupDisplay( settings: GroupSettings ): void {
 	}
 	wp( 'option', 'update', 'affibloom_display', JSON.stringify( stored ), '--format=json' );
 }
+
+// Lasso's built-in Pros (2) and Cons (3) as the capture fills them (BUILT_IN_FIELDS).
+const PROS_CONS = [
+	{ field: 2, value: 'Light and quick off the floor.\nA wide, stable base for lateral moves.' },
+	{ field: 3, value: 'Runs half a size small.' },
+];
 
 // The site's Display settings for Single (F5 requirements, "This copy, 2026-11-14"), as Settings → Display stores them,
 // and the site's settings the box reads. AC3 and AC4 draw boxes with these, as the live boxes were drawn; AC8 with
@@ -723,6 +751,62 @@ test.describe( 'F5 Box design', () => {
 				await page.addStyleTag( { content: SITE_CSS } );
 				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'classic', `Cactus-plain-${ name }.png` ] );
 			}
+		} finally {
+			useSiteDisplay();
+		}
+	} );
+
+	// AC8-AC10, the pros-cons and all-fields states (Task 21B, deviation 138): every theme.
+	for ( const theme of THEMES ) {
+		for ( const state of [ 'pros-cons', 'all-fields' ] as const ) {
+			test( `@local AC8-AC10 ${ theme } with ${ state } matches its baselines`, async ( { page } ) => {
+				useSiteDisplay();
+				const path = newPostWith( boxBlock( themeProduct( state, theme ) ) );
+				await page.goto( path );
+				await expect( page.locator( '.affibloom-box .affibloom-fields-pros' ) ).toBeAttached(); // printed, hidden by the element
+				await matchesThemeBaseline( page, path, `${ theme }-${ state }` );
+			} );
+		}
+	}
+
+	// AC18 (Task 21B): the visible custom fields print by type in the product's order; a hidden row does not print.
+	test( 'AC18 custom fields print in the box by type', async ( { page } ) => {
+		const [ text, textarea, number, rating, bulleted, numbered, hidden ] = JSON.parse( wp( 'eval-file', 'tests/E2E/fixtures/create-fields.php', JSON.stringify( [
+			{ name: 'Upper', type: 'text' },
+			{ name: 'Notes', type: 'textarea' },
+			{ name: 'Weight', type: 'number' },
+			{ name: 'Grip', type: 'rating' },
+			{ name: 'Materials', type: 'bulleted_list' },
+			{ name: 'Steps', type: 'numbered_list' },
+			{ name: 'Secret', type: 'text' },
+		] ) ) ) as number[];
+		const id = createProduct( {
+			name: 'F5 AC18',
+			fields: [
+				...PROS_CONS,
+				{ field: text, value: 'Breathable mesh upper' },
+				{ field: textarea, value: 'Cushioned.\nLight.' },
+				{ field: number, value: '12' },
+				{ field: rating, value: '4' },
+				{ field: bulleted, value: 'Gum rubber outsole\nReinforced toe' },
+				{ field: numbered, value: 'Lace up\nPlay' },
+				{ field: hidden, value: 'Not shown', visible: false },
+			],
+		} );
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { proscons: true } } } ), '--format=json' );
+		try {
+			await page.goto( newPostWith( boxBlock( id ) ) );
+			const fields = page.locator( '.affibloom-box .affibloom-fields' );
+			await expect( fields.locator( '.affibloom-fields-pros.affibloom-fields-2 li .affibloom-check' ) ).toHaveCount( 2 );
+			await expect( fields.locator( '.affibloom-fields-cons.affibloom-fields-3 li .affibloom-x' ) ).toHaveCount( 1 );
+			await expect( fields.locator( '.affibloom-fields-single' ).filter( { hasText: 'Upper:' } ) ).toContainText( 'Breathable mesh upper' );
+			await expect( fields.locator( '.affibloom-fields-single' ).filter( { hasText: 'Notes:' } ).locator( 'br' ) ).toHaveCount( 1 );
+			await expect( fields.locator( '.affibloom-fields-single' ).filter( { hasText: 'Weight:' } ) ).toContainText( '12' );
+			await expect( fields.locator( '.affibloom-fields-single .affibloom-stars .affibloom-stars-value' ) ).toHaveText( '4.0' );
+			await expect( fields.locator( `.affibloom-fields-${ bulleted } ul.list li` ) ).toHaveCount( 2 );
+			await expect( fields.locator( `.affibloom-fields-${ numbered } ol.list li` ) ).toHaveCount( 2 );
+			await expect( fields ).not.toContainText( 'Not shown' );
+			await expect( fields.locator( '.affibloom-fields-pros' ) ).toBeVisible();
 		} finally {
 			useSiteDisplay();
 		}
