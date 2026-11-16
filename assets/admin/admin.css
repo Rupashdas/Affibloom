@@ -1,41 +1,54 @@
 /*
- * Affibloom admin UI kit, Aurora.
- * Every value comes from the approved design system, docs/ui/design-system.md (ADR-008).
+ * Affibloom admin UI kit, Meadow (replacing Aurora screen part by screen part, Tasks MD1-MD7).
+ * Every value comes from the approved design system, docs/ui/design-system.md (section 0b; ADR-008).
  * Rules that must outrank wp-admin's own (.wrap h1, input[type=checkbox]) are scoped under .affibloom-admin.
  */
 
-/* 1. Tokens */
+/* 1. Tokens (Meadow, 0b.1; contrast ratios there) */
 .affibloom-admin {
+	/* Aurora's header and band, until MD2 and MD3 replace them. */
 	--affibloom-navy-900: #0b2a5b;
-	--affibloom-brand-600: #1e5bb8;
-	--affibloom-brand-500: #2563c9;
 	--affibloom-brand-300: #7fb0f5;
-	--affibloom-brand-50: #eaf1fc;
 	--affibloom-on-navy: #c9d8f0;
 	--affibloom-on-band: #d6e2f5;
-	--affibloom-ink-900: #14213d;
-	--affibloom-ink-600: #5b6880;
-	--affibloom-ink-400: #8a93a3;
-	--affibloom-line: #edf1f7;
-	--affibloom-control-line: #d5dce8;
-	--affibloom-segment-bg: #e6ecf6;
-	--affibloom-ink-700: #3d4a63;
-	--affibloom-danger-700: #a1203a;
-	/* Warning (the product page's notices, Task 14A): warning-700 on warning-50 6.2:1, on white 6.8:1. */
-	--affibloom-warning-700: #8a4b00;
-	--affibloom-warning-50: #fff4e0;
-	/* The notice region's other tones (Task ON2): success-700 on success-50 5.8:1, danger-700 on danger-50 6.6:1. */
-	--affibloom-success-700: #136c3a;
-	--affibloom-success-50: #e7f6ed;
-	--affibloom-danger-50: #fdecef;
-	--affibloom-page: #f3f6fb;
-	--affibloom-subtle: #fafbfe;
-	--affibloom-white: #fff;
-	--affibloom-toast-icon: #22c55e;
-	--affibloom-toast-tick: #06210f;
 	--affibloom-on-navy-active: rgba(255, 255, 255, 0.12);
 
-	--affibloom-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	--affibloom-brand-800: #124a30;
+	--affibloom-brand-700: #185a3b;
+	--affibloom-brand-600: #1e6b47;
+	--affibloom-brand-50: #e3f0e7;
+	--affibloom-brand-25: #f1f7f2;
+	--affibloom-brand-line: #c9e0d1;
+	/* The brand at 20% for field focus rings and tinted hovers. */
+	--affibloom-brand-ring: rgba(30, 107, 71, 0.2);
+	--affibloom-ink-900: #16201a;
+	--affibloom-ink-700: #55625a;
+	--affibloom-ink-600: #55625a;
+	--affibloom-ink-500: #6a766e;
+	--affibloom-ink-400: #8a968c;
+	--affibloom-line: #e3e8e1;
+	--affibloom-control-line: #d3dbd1;
+	--affibloom-line-strong: #b6c1b4;
+	--affibloom-segment-bg: #eaefe9;
+	--affibloom-sunk: #f1f4f0;
+	--affibloom-danger-700: #b42318;
+	--affibloom-danger-800: #961c13;
+	--affibloom-danger-50: #fdecea;
+	--affibloom-warning-700: #86560f;
+	--affibloom-warning-50: #fbf2e1;
+	--affibloom-warning-icon: #b7791f;
+	--affibloom-success-700: #1e6b47;
+	--affibloom-success-50: #e3f0e7;
+	--affibloom-page: #f5f7f4;
+	--affibloom-subtle: #fafbf9;
+	--affibloom-white: #fff;
+	--affibloom-toast-icon: #9ed8b4;
+	--affibloom-toast-tick: #124a30;
+
+	/* Bundled in fonts.css (0b.2); the system stack covers what the Latin subset leaves out. */
+	--affibloom-font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	--affibloom-font: "Inter", var(--affibloom-font-system);
+	--affibloom-font-display: "Plus Jakarta Sans", "Inter", var(--affibloom-font-system);
 
 	--affibloom-radius-card: 16px;
 	--affibloom-radius-chip: 12px;
@@ -44,9 +57,10 @@
 	--affibloom-radius-nav: 8px;
 	--affibloom-radius-full: 999px;
 
-	--affibloom-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
-	--affibloom-shadow-toast: 0 12px 32px rgba(16, 24, 40, 0.25);
-	--affibloom-shadow-segment: 0 1px 3px rgba(16, 24, 40, 0.12);
+	/* Meadow's depth (0b.3): cards pair this soft shadow with a 1px line border. */
+	--affibloom-shadow-card: 0 1px 2px rgba(22, 32, 26, 0.04), 0 6px 16px -10px rgba(22, 32, 26, 0.1);
+	--affibloom-shadow-toast: 0 18px 40px -12px rgba(22, 32, 26, 0.24), 0 2px 6px rgba(22, 32, 26, 0.06);
+	--affibloom-shadow-segment: 0 1px 2px rgba(22, 32, 26, 0.1), 0 1px 1px rgba(22, 32, 26, 0.04);
 	--affibloom-ease: 150ms ease;
 	--affibloom-content-width: 1320px;
 	/*
@@ -249,7 +263,7 @@
 	margin: 0;
 	padding: 0;
 	color: var(--affibloom-white);
-	font: 700 30px/38px var(--affibloom-font);
+	font: 700 30px/38px var(--affibloom-font-display);
 }
 .affibloom-page__subtitle {
 	margin: 4px 0 0;
@@ -271,7 +285,7 @@
 	left: 16px;
 	height: 3px;
 	border-radius: var(--affibloom-radius-full);
-	background: linear-gradient(90deg, transparent, var(--affibloom-brand-500), transparent);
+	background: linear-gradient(90deg, transparent, var(--affibloom-brand-600), transparent);
 	background-size: 40% 100%;
 	background-repeat: no-repeat;
 	animation: affibloom-loading 900ms linear infinite;
@@ -314,7 +328,7 @@
 	height: 42px;
 	min-height: 42px;
 	border-color: transparent;
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+	box-shadow: 0 1px 2px rgba(22, 32, 26, 0.12);
 }
 .affibloom-admin .affibloom-band__search .affibloom-search:focus {
 	border-color: var(--affibloom-white);
@@ -355,6 +369,7 @@
 
 /* Card */
 .affibloom-card {
+	border: 1px solid var(--affibloom-line);
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
@@ -364,7 +379,7 @@
 	margin: 0;
 	padding: 0;
 	color: var(--affibloom-ink-900);
-	font: 700 18px/26px var(--affibloom-font);
+	font: 700 18px/26px var(--affibloom-font-display);
 }
 .affibloom-card__intro {
 	margin: 2px 0 0;
@@ -465,9 +480,7 @@
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 	transition: transform var(--affibloom-ease);
 }
-.affibloom-toggle__input:checked + .affibloom-toggle__track {
-	background-image: linear-gradient(120deg, var(--affibloom-brand-600), var(--affibloom-brand-500));
-}
+.affibloom-toggle__input:checked + .affibloom-toggle__track { background-color: var(--affibloom-brand-600); }
 .affibloom-toggle__input:checked + .affibloom-toggle__track::after { transform: translateX(20px); }
 .affibloom-toggle__input:focus-visible + .affibloom-toggle__track {
 	outline: 2px solid var(--affibloom-brand-600);
@@ -510,8 +523,9 @@
 }
 .affibloom-admin .affibloom-input:focus {
 	border-color: var(--affibloom-brand-600);
-	box-shadow: none;
+	box-shadow: 0 0 0 3px var(--affibloom-brand-ring);
 }
+.affibloom-admin .affibloom-input::placeholder { color: var(--affibloom-ink-500); }
 .affibloom-admin .affibloom-color {
 	width: 72px;
 	height: 38px;
@@ -986,7 +1000,7 @@
 	box-shadow: var(--affibloom-shadow-card);
 }
 .affibloom-tile .affibloom-chip { grid-row: 1 / span 3; }
-.affibloom-tile__number { color: var(--affibloom-ink-900); font: 700 26px/30px var(--affibloom-font); }
+.affibloom-tile__number { color: var(--affibloom-ink-900); font: 800 26px/30px var(--affibloom-font-display); font-variant-numeric: tabular-nums; }
 .affibloom-tile__label { overflow: hidden; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-tile__note { color: var(--affibloom-brand-600); font-size: 11px; font-weight: 600; line-height: 16px; }
 /* A tile whose number comes later: the chip and the dash step back, the label stays readable. */
@@ -1167,7 +1181,7 @@
 	box-sizing: border-box;
 	width: calc(100cqi - 40px);
 	padding: 24px;
-	border: 1px solid rgba(30, 91, 184, 0.16);
+	border: 1px solid var(--affibloom-brand-line);
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
@@ -1268,7 +1282,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	background: rgba(30, 91, 184, 0.92);
+	background: rgba(30, 107, 71, 0.92);
 	color: var(--affibloom-white);
 	font: 600 13px/18px var(--affibloom-font);
 	opacity: 0;
@@ -1914,12 +1928,12 @@
  * deep shadow, while a grey slot its size marks where it will land; drag-rows.js places both. */
 .affibloom-admin .is-dragging {
 	transform: rotate(2deg);
-	box-shadow: 0 2px 4px rgba(16, 24, 40, 0.10), 0 16px 32px rgba(16, 24, 40, 0.22);
+	box-shadow: 0 2px 4px rgba(22, 32, 26, 0.10), 0 16px 32px rgba(22, 32, 26, 0.22);
 	transition: transform 120ms ease, box-shadow 120ms ease;
 }
 .affibloom-admin .affibloom-features__item.is-dragging,
 .affibloom-admin .affibloom-member.is-dragging { background: var(--affibloom-white); }
-.affibloom-admin .affibloom-drag-slot { display: block; box-sizing: border-box; list-style: none; background: rgba(16, 24, 40, 0.07); }
+.affibloom-admin .affibloom-drag-slot { display: block; box-sizing: border-box; list-style: none; background: rgba(22, 32, 26, 0.07); }
 html.affibloom-is-dragging,
 html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -2008,13 +2022,17 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 }
 .affibloom-button--primary,
 .affibloom-button--primary:focus {
-	background-image: linear-gradient(180deg, var(--affibloom-brand-500), var(--affibloom-brand-600));
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+	background-color: var(--affibloom-brand-600);
+	background-image: none;
+	box-shadow: 0 1px 2px rgba(18, 74, 48, 0.25);
 	color: var(--affibloom-white);
 }
-.affibloom-button--primary:hover,
+.affibloom-button--primary:hover {
+	background-color: var(--affibloom-brand-700);
+	color: var(--affibloom-white);
+}
 .affibloom-button--primary:active {
-	background-image: linear-gradient(180deg, var(--affibloom-brand-600), var(--affibloom-brand-600));
+	background-color: var(--affibloom-brand-800);
 	color: var(--affibloom-white);
 }
 /* Secondary button (design system): white, control-line border, ink text */
@@ -2032,7 +2050,7 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 /* Danger button (design system): only for destructive actions, always labelled. */
 .affibloom-button--danger,
 .affibloom-button--danger:focus { background: var(--affibloom-danger-700); color: var(--affibloom-white); }
-.affibloom-button--danger:hover { background: #8a1b31; color: var(--affibloom-white); }
+.affibloom-button--danger:hover { background: var(--affibloom-danger-800); color: var(--affibloom-white); }
 
 .affibloom-button:disabled,
 .affibloom-button[aria-disabled="true"] {
@@ -2173,7 +2191,7 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 	width: 0;
 	height: 100%;
 	border-radius: inherit;
-	background: linear-gradient(90deg, var(--affibloom-brand-500), var(--affibloom-brand-600));
+	background: var(--affibloom-brand-600);
 	transition: width 300ms ease;
 }
 
@@ -2215,7 +2233,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	height: 42px;
 	border-color: transparent;
 	background: var(--affibloom-white);
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+	box-shadow: 0 1px 2px rgba(22, 32, 26, 0.12);
 	color: var(--affibloom-navy-900);
 }
 .affibloom-admin .affibloom-button--on-band:hover { background: var(--affibloom-brand-50); color: var(--affibloom-navy-900); }
@@ -2306,7 +2324,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	list-style: none;
 	cursor: text;
 }
-.affibloom-picker__chips:focus-within { border-color: var(--affibloom-brand-600); box-shadow: 0 0 0 3px rgba(30, 91, 184, 0.18); }
+.affibloom-picker__chips:focus-within { border-color: var(--affibloom-brand-600); box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
 .affibloom-picker__chip {
 	display: inline-flex;
 	align-items: center;
@@ -2319,7 +2337,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	font: 600 13px/20px var(--affibloom-font);
 }
 .affibloom-picker__remove { display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: var(--affibloom-radius-full); background: none; color: inherit; cursor: pointer; }
-.affibloom-picker__remove:hover { background: rgba(30, 91, 184, 0.16); }
+.affibloom-picker__remove:hover { background: var(--affibloom-brand-line); }
 .affibloom-picker__remove:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 1px; }
 .affibloom-picker__remove .affibloom-icon { width: 12px; height: 12px; }
 .affibloom-picker__entry { flex: 1 1 120px; margin: 0; min-width: 80px; }

@@ -55,4 +55,4 @@
 	transition: background var(--affibloom-ease), border-color var(--affibloom-ease), color var(--affibloom-ease);
 }
 .affibloom-choice input:checked + span { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); font-weight: 700; }
-.affibloom-choice input:focus-visible + span { outline: 2px solid var(--affibloom-brand-500); outline-offset: 2px; }
+.affibloom-choice input:focus-visible + span { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }

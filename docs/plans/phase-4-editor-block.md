@@ -48,7 +48,7 @@ them when the task is worked, and record any code that differs from the text bel
 
 ### Meadow restyle — runs first (the user, 2026-11-16; deviation 142)
 
-- [ ] Task MD1: Meadow's fonts and colours
+- [x] Task MD1: Meadow's fonts and colours
 - [ ] Task MD2: The white header and notice cards
 - [ ] Task MD3: A page head instead of the band
 - [ ] Task MD4: The Dashboard: counts beside the title, search, list
@@ -169,17 +169,22 @@ own releases (Inter: `rsms/inter` on GitHub; Plus Jakarta Sans: `tokotype/PlusJa
 of the same, Latin subset only, about 120 KB in all. They are copied into the plugin: no request to any other host
 at run time, no npm dependency added.
 
-- [ ] **Step 1: Tests.** Unit: `AdminAssets::enqueue()` registers `affibloom-fonts` on an Affibloom screen and not on
+- [x] **Step 1: Tests.** Unit: `AdminAssets::enqueue()` registers `affibloom-fonts` on an Affibloom screen and not on
   another admin page, and `affibloom-admin` depends on it. E2E (`admin-design.spec.ts`): page background `#F5F7F4`,
   the body font family starts with Inter, the page title's with Plus Jakarta Sans, the primary button flat
   `#1E6B47` with white text, a switch on `#1E6B47` and off `#8A968C`, a card's 1px border, the focus outline
   `#1E6B47` on a switch reached by Tab.
-- [ ] **Step 2: Fonts.** The files, `fonts.css`, the enqueue.
-- [ ] **Step 3: Tokens and components by value.** Section 1's values; retire `--affibloom-brand-500` (flat buttons
+- [x] **Step 2: Fonts.** The files, `fonts.css`, the enqueue.
+- [x] **Step 3: Tokens and components by value.** Section 1's values; retire `--affibloom-brand-500` (flat buttons
   and switches); keep the navy and band tokens until MD2/MD3 remove their last users.
-- [ ] **Step 4: Check and look.** Unit tests, `phpcs` on `AdminAssets.php`; Dashboard and Settings → General at
+- [x] **Step 4: Check and look.** Unit tests, `phpcs` on `AdminAssets.php`; Dashboard and Settings → General at
   1280 px.
-- [ ] **Step 5: Commit** — "Bundle Meadow's fonts and switch the admin to Meadow's colours".
+- [x] **Step 5: Commit** — "Bundle Meadow's fonts and switch the admin to Meadow's colours".
+
+*Note (2026-11-17):* `fonts.css` holds only the `@font-face` rules; the font tokens (`--affibloom-font`,
+`--affibloom-font-display`, `--affibloom-font-system`) sit with the others in `admin.css` section 1. Files from
+Fontsource 5.3.0 (the user approved the download). Seen at 1280 px: the Dashboard's table has a fixed 1076px
+`min-width`, so its Actions column scrolls inside the card at 1280 px (not new); MD4 fixes it.
 
 #### Task MD2: The white header and notice cards
 

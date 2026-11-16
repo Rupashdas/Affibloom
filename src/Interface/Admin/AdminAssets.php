@@ -40,7 +40,9 @@ final class AdminAssets implements Module {
 		if ( ! str_contains( $hook_suffix, 'affibloom' ) ) {
 			return;
 		}
-		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array(), $this->version );
+		// Meadow's bundled fonts (Task MD1), before the styles that name them; served from the plugin, no other host.
+		wp_enqueue_style( 'affibloom-fonts', $this->plugin_url . 'assets/admin/fonts.css', array(), $this->version );
+		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array( 'affibloom-fonts' ), $this->version );
 		// The General tab's own parts, and "Disable Help Tooltips" (Tasks 9B-9K), which reaches every screen.
 		wp_enqueue_style( 'affibloom-settings-general', $this->plugin_url . 'assets/admin/settings-general.css', array( 'affibloom-admin' ), $this->version );
 		// The Fields screens and the product page's field rows (Tasks FL1-FL5).

@@ -1,14 +1,17 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 
-// The approved Affibloom design system, Aurora (docs/ui/design-system.md, ADR-008), checked by computed style.
-const NAVY_900 = 'rgb(11, 42, 91)'; // #0B2A5B
-const BRAND_600 = 'rgb(30, 91, 184)'; // #1E5BB8
-const INK_400 = 'rgb(138, 147, 163)'; // #8A93A3
-const PAGE = 'rgb(243, 246, 251)'; // #F3F6FB
+// The Affibloom design system, checked by computed style. Meadow replaces Aurora screen part by screen part (Tasks
+// MD1-MD6, docs/ui/design-system.md section 0b): MD1 brought Meadow's colours and fonts; the header (MD2) and the band
+// (MD3) are still Aurora's shapes until their tasks rewrite those checks.
+const NAVY_900 = 'rgb(11, 42, 91)'; // #0B2A5B (Aurora's header, until MD2)
+const BRAND_600 = 'rgb(30, 107, 71)'; // #1E6B47
+const INK_400 = 'rgb(138, 150, 140)'; // #8A968C
+const PAGE = 'rgb(245, 247, 244)'; // #F5F7F4
 const WHITE = 'rgb(255, 255, 255)';
 const ON_NAVY_ACTIVE = 'rgba(255, 255, 255, 0.12)';
-const CONTROL_LINE = 'rgb(213, 220, 232)'; // #D5DCE8
-const INK_900 = 'rgb(20, 33, 61)'; // #14213D
+const CONTROL_LINE = 'rgb(211, 219, 209)'; // #D3DBD1
+const LINE = 'rgb(227, 232, 225)'; // #E3E8E1
+const INK_900 = 'rgb(22, 32, 26)'; // #16201A
 
 const css = ( locator: Locator, property: string ) =>
 	locator.evaluate( ( el, prop ) => getComputedStyle( el ).getPropertyValue( prop ), property );
@@ -44,7 +47,13 @@ async function expectShell( page: Page, title: string ) {
 	await expect( current.locator( 'svg' ) ).toHaveCount( 1 ); // icon plus label
 
 	expect( await css( page.locator( '.affibloom-admin' ), 'background-color' ) ).toBe( PAGE );
-	expect( await css( page.locator( '.affibloom-admin' ), 'font-family' ) ).toContain( 'Segoe UI' );
+	// Meadow's bundled fonts (MD1): Inter for text, Plus Jakarta Sans for titles; cards have a hairline border.
+	expect( await css( page.locator( '.affibloom-admin' ), 'font-family' ) ).toMatch( /^"?Inter"?,/ );
+	expect( await css( page.locator( '.affibloom-page__title' ), 'font-family' ) ).toMatch( /^"?Plus Jakarta Sans"?,/ );
+	expect( await page.evaluate( () => document.fonts.check( '16px Inter' ) && document.fonts.check( '800 16px "Plus Jakarta Sans"' ) ) ).toBe( true );
+	const card = page.locator( '.affibloom-card' ).first();
+	expect( await css( card, 'border-top-width' ) ).toBe( '1px' );
+	expect( await css( card, 'border-top-color' ) ).toBe( LINE );
 
 	// The band: a navy-to-blue gradient holding the title and the subtitle (U10).
 	const band = page.locator( '.affibloom-band' );
@@ -87,15 +96,18 @@ test( 'Settings uses the Affibloom design system', async ( { page } ) => {
 	await expect( active ).toHaveAttribute( 'aria-current', 'page' );
 	expect( await css( active, 'background-color' ) ).toBe( WHITE );
 
+	// Meadow's buttons and switches are flat green (MD1).
 	const save = page.getByRole( 'button', { name: 'Save Changes' } );
-	expect( await css( save, 'background-image' ) ).toContain( 'linear-gradient' );
+	expect( await css( save, 'background-image' ) ).toBe( 'none' );
+	expect( await css( save, 'background-color' ) ).toBe( BRAND_600 );
 	expect( await css( save, 'color' ) ).toBe( WHITE );
 
-	// Every setting has an icon chip; toggles are a blue gradient when on, ink-400 when off.
+	// Every setting has an icon chip (until MD6); switches are green when on, ink-400 when off.
 	const row = ( label: string ) => page.locator( '.affibloom-setting' ).filter( { has: page.getByLabel( label ) } );
 	await expect( row( 'Sponsored' ).locator( '.affibloom-chip svg' ) ).toHaveCount( 1 );
 	const track = ( label: string ) => row( label ).locator( '.affibloom-toggle__track' );
-	expect( await css( track( 'New Window / Tab' ), 'background-image' ) ).toContain( 'linear-gradient' );
+	expect( await css( track( 'New Window / Tab' ), 'background-image' ) ).toBe( 'none' );
+	expect( await css( track( 'New Window / Tab' ), 'background-color' ) ).toBe( BRAND_600 );
 	expect( await css( track( 'Sponsored' ), 'background-color' ) ).toBe( INK_400 );
 
 	// U3: each setting's help text is visible under its label and read with the switch.
