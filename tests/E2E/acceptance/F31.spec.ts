@@ -35,4 +35,29 @@ test.describe( 'F31 Shortcode', () => {
 		await page.goto( newPostWith( `[affibloom id="${ retired }" anchor_id="mine"]` ) );
 		await expect( page.locator( '#mine.affibloom-box .affibloom-title' ) ).toContainText( 'F31 AC1' );
 	} );
+
+	// AC2 (Task 18S2): Lasso's text and link attributes change this box only (checked beside [lasso] in 18S2).
+	test( "AC2 [affibloom]'s text and link attributes change this box only", async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC2', url: 'https://www.example.com/item', badge: 'Own badge', description: 'Own description long enough.' } );
+		const self = newPostWith( '' );
+		const post = self.replace( '/?p=', '' );
+		const permalink = wp( 'eval', `echo get_permalink( ${ post } );` );
+		wp( 'post', 'update', post, `--post_content=[affibloom id="${ id }" title="Box title" title_url="https://www.example.com/review" title_type="h3" description="One.lasso-br-codeTwo." badge="Box badge" image_url="https://www.example.com/p.jpg" image_alt="A shoe" primary_url="https://www.example.com/p" primary_text="Shop" secondary_url="${ permalink }" secondary_text="Here"][affibloom id="${ id }" title="hide" badge="hide" description="hide"]` );
+		await page.goto( self );
+		const first = page.locator( '.affibloom-box' ).nth( 0 );
+		await expect( first.locator( 'h3 > a.affibloom-title' ) ).toHaveText( 'Box title' );
+		await expect( first.locator( 'a.affibloom-title' ) ).toHaveAttribute( 'href', 'https://www.example.com/review' );
+		await expect( first.locator( '.affibloom-description br' ) ).toHaveCount( 1 );
+		await expect( first.locator( '.affibloom-badge-text' ) ).toHaveText( 'Box badge' );
+		await expect( first.locator( 'img.affibloom-image-no-lazy' ) ).toHaveAttribute( 'src', 'https://www.example.com/p.jpg' );
+		await expect( first.locator( 'img.affibloom-image-no-lazy' ) ).toHaveAttribute( 'alt', 'A shoe' );
+		await expect( first.locator( 'a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.example.com/p' );
+		await expect( first.locator( 'a.affibloom-button-1' ) ).toHaveText( 'Shop' );
+		await expect( first.locator( 'a.affibloom-button-2' ) ).toHaveCount( 0 ); // links to this page
+
+		const second = page.locator( '.affibloom-box' ).nth( 1 );
+		await expect( second.locator( '.affibloom-title' ) ).toHaveCount( 0 );
+		await expect( second.locator( '.affibloom-badge' ) ).toHaveCount( 0 );
+		await expect( second.locator( '.affibloom-description' ) ).toHaveCount( 0 );
+	} );
 } );

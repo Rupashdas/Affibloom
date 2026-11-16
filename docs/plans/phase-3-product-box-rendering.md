@@ -136,7 +136,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 **F31, Affibloom's own shortcode (single-product parts):**
 
 - [x] Task 18S1: `[affibloom id]` draws a product's box
-- [ ] Task 18S2: Text and link overrides
+- [x] Task 18S2: Text and link overrides
 - [ ] Task 18S3: Value overrides
 - [ ] Task 18S4: `type="button"` and `type="image"`
 - [ ] Task 18S5: `type="link"`, SiteStripe and inline fields
@@ -1289,11 +1289,15 @@ it links to). Each changes this box only.
 
 **Files:** the above; `tests/Unit/Application/BoxOptionsTest.php` (one test per attribute), F31 **AC2**.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Options and builder.**
-- [ ] **Step 3: Template.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Override a box's text and links from the shortcode".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Options and builder.**
+- [x] **Step 3: Template.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Override a box's text and links from the shortcode".
+
+*Note:* 20A-20B had built these in `BoxOverrides::from_shortcode()` and the builder, so 18S2 added `strong` to the title
+tags (F5 D4; its list holds F31 D8's `h2`-`h6` and C8's `h1`; an ignored tag is not logged) and the tests. Checked:
+`[affibloom]` with these attributes beside `[lasso]` with the same, 8 themes, both widths: equal.
 
 ---
 

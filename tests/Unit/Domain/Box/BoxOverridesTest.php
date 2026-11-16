@@ -68,6 +68,8 @@ final class BoxOverridesTest extends TestCase {
 		self::assertSame( '', BoxOverrides::from_block( array( 'titleType' => 'script' ) )->title_type );
 		self::assertSame( '', BoxOverrides::from_shortcode( array( 'title_type' => 'h2 onclick=x' ) )->title_type );
 		self::assertSame( 'span', BoxOverrides::from_shortcode( array( 'title_type' => 'span' ) )->title_type );
+		self::assertSame( 'strong', BoxOverrides::from_shortcode( array( 'title_type' => 'strong' ) )->title_type );
+		self::assertSame( 'h1', BoxOverrides::from_shortcode( array( 'title_type' => 'H1' ) )->title_type ); // decision C8
 	}
 
 	/**

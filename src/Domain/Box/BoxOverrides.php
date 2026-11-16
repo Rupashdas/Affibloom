@@ -29,12 +29,12 @@ final class BoxOverrides {
 	private const BR_CODE = 'lasso-br-code';
 
 	/**
-	 * The tags a title may be wrapped in (R12, R79). Lasso prints any value unchecked; Affibloom keeps the headings and
-	 * the plain containers, so an attribute cannot add markup.
+	 * The tags a title may be wrapped in (F5 R12, R79, D4; F31 D8 with decision C8 allowing `h1`). Lasso prints any value
+	 * unchecked; Affibloom keeps the headings and the plain containers, so an attribute cannot add markup.
 	 *
 	 * @var list<string>
 	 */
-	private const TITLE_TAGS = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span' );
+	private const TITLE_TAGS = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span', 'strong' );
 
 	/**
 	 * Use from_block() or from_shortcode().
