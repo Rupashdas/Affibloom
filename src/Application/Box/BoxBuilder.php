@@ -116,7 +116,7 @@ final class BoxBuilder {
 			link: $title_link,
 			// R69: the box's picture and alternative text; a hidden picture keeps the product's address (Lasso prints
 			// `src="hide"`, a broken request) and is hidden by the wrapper's flag.
-			image_src: '' === $overrides->image_url || BoxOverrides::hides( $overrides->image_url ) ? $this->image( $product, $settings ) : $overrides->image_url,
+			image_src: '' === $overrides->image_url || BoxOverrides::hides( $overrides->image_url ) ? $this->picture( $product, $settings ) : $overrides->image_url,
 			image_alt: '' === $overrides->image_alt ? $name : $overrides->image_alt,
 			// Edge case 9: without the wrapper's flag the classic box hides a hidden picture itself.
 			image_hidden: ! $advanced && ! $elements->shows( 'image' ),
@@ -402,12 +402,12 @@ final class BoxBuilder {
 
 	/**
 	 * The picture (R17, the parts that exist yet): the product's image, else the site's default thumbnail, else
-	 * Affibloom's own.
+	 * Affibloom's own. The structured data reads it too (SchemaMarkup, Task 20D).
 	 *
 	 * @param Product  $product  The product.
 	 * @param Settings $settings The site's settings.
 	 */
-	private function image( Product $product, Settings $settings ): string {
+	public function picture( Product $product, Settings $settings ): string {
 		if ( '' !== $product->image_url ) {
 			return $product->image_url;
 		}

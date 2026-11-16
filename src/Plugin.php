@@ -103,6 +103,7 @@ use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Admin\TrackingIdController;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Front\BoxAssets;
+use Affibloom\Interface\Front\SchemaMarkup;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
@@ -346,6 +347,8 @@ final class Plugin {
 		$upgrader   = self::upgrader();
 		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector() );
 
+		$box_builder = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ) );
+
 		return array(
 			new ProductPostType(),
 			new GroupTaxonomy(),
@@ -354,13 +357,14 @@ final class Plugin {
 				new RepointResolver( new PostTypeProductRepository() ),
 				$display,
 				$this->settings_repository(),
-				new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ) ),
+				$box_builder,
 				new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets ),
 				new PostTypeProductRepository(),
 				new OptionFieldRepository(),
 				new TableAmazonProductRepository()
 			),
 			$box_assets,
+			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),

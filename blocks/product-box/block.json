@@ -133,6 +133,22 @@
 		},
 		"showProsCons": {
 			"type": "boolean"
+		},
+		"schemaReview": {
+			"type": "boolean",
+			"default": false
+		},
+		"schemaProsCons": {
+			"type": "boolean",
+			"default": false
+		},
+		"schemaPrice": {
+			"type": "string",
+			"default": ""
+		},
+		"schemaPriceCurrency": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {

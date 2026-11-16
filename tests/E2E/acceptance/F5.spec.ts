@@ -840,6 +840,25 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC17 (Task 20D): the first box with Review or Pro/Con schema prints one Product JSON-LD in <head>; none without.
+	test( "AC17 the first box asking for schema prints Lasso's Product JSON-LD once", async ( { page } ) => {
+		const id = createProduct( { name: 'F5 AC17', price: '$89.99', fields: [ { field: 1, value: '4.5' }, ...PROS_CONS ] } );
+		const other = createProduct( { name: 'F5 AC17 other' } );
+		await page.goto( newPostWith( boxBlock( other ) + boxBlock( id, { schemaReview: true, schemaProsCons: true } ) + boxBlock( other, { schemaReview: true } ) ) );
+		const scripts = page.locator( 'head script.affibloom-schema-markup-output' );
+		await expect( scripts ).toHaveCount( 1 );
+		const schema = JSON.parse( ( await scripts.textContent() ) ?? '{}' );
+		expect( schema[ '@type' ] ).toBe( 'Product' );
+		expect( schema.name ).toBe( 'F5 AC17' );
+		expect( schema.offers.price ).toBe( '89.99' );
+		expect( schema.review.reviewRating.ratingValue ).toBe( '4.5' );
+		expect( schema.review.positiveNotes.numberOfItems ).toBe( 2 );
+		expect( schema.review.negativeNotes.itemListElement[ 0 ].name ).toBe( 'Runs half a size small.' );
+
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		await expect( page.locator( 'script.affibloom-schema-markup-output' ) ).toHaveCount( 0 );
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

@@ -119,7 +119,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
 - [x] Task 21B: Custom fields and Pros & Cons in the box
 - [x] Task 21C: The Copy to Clipboard field
-- [ ] Task 20D: Product structured data
+- [x] Task 20D: Product structured data
 - Task 22D: dropped (decision B9: brag mode left out)
 - [ ] Task 22E: SiteStripe box
 
@@ -769,11 +769,16 @@ List display, fixed in its own commit.
 
 **Files:** create `src/Application/Box/SchemaBuilder.php`, `src/Interface/Front/SchemaMarkup.php`, `tests/Unit/Application/SchemaBuilderTest.php`; modify `blocks/product-box/block.json` (the four schema attributes), `src/Plugin.php`, `tests/E2E/acceptance/F5.spec.ts` (AC17).
 
-- [ ] **Step 1: Failing tests (AC17; unit `SchemaBuilderTest`).**
-- [ ] **Step 2: Builder.**
-- [ ] **Step 3: Print.**
-- [ ] **Step 4: Run and look.** View the source of a post whose first box enables Review schema and one that does not; check the JSON-LD with Google's Rich Results Test by hand.
-- [ ] **Step 5: Commit** — "Print Lasso's product schema for a box".
+- [x] **Step 1: Failing tests (AC17; unit `SchemaBuilderTest`).**
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Print.**
+- [x] **Step 4: Run and look.** View the source of a post whose first box enables Review schema and one that does not; check the JSON-LD with Google's Rich Results Test by hand.
+- [x] **Step 5: Commit** — "Print Lasso's product schema for a box".
+
+*Note:* the four attributes are `schemaReview`, `schemaProsCons`, `schemaPrice`, `schemaPriceCurrency`; nested blocks are
+searched too. The JSON adds `JSON_HEX_TAG` (a name holding `</script>` cannot close the tag). The picture rule is now
+`BoxBuilder::picture()` (its second use). Compared with Lasso's output for the same product: same structure and values.
+The Rich Results Test by hand is left for the user (manual guide).
 
 ---
 
