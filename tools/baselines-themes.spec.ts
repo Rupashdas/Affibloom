@@ -12,6 +12,9 @@ import { BUILT_IN_FIELDS, cells, FIELDS, GROUPS, matrixFiles, STATES, type Cell,
 //   production is read only; Local's Lasso 370 draws staging's box, 1 px narrower, the environment the tests run
 //   in). Lasso's own code switches the settings (tools/lasso-capture.php); the run puts them back and deletes what
 //   it made.
+// - AFFIBLOOM_CAPTURE=tops: the same pages, but each Lasso box's top (px from the page top, at 1280 and 390 px) is
+//   written to themes/tops.json instead of its PNG, so F5 places Affibloom's box on Lasso's sub-pixel (as THEME_TOP
+//   does for the site page, deviation 138). AFFIBLOOM_GROUPS=<regex> limits the groups (default all).
 
 const OUT = 'tests/fixtures/baselines';
 const STATE = '.local/lasso-capture-state.json';
@@ -19,6 +22,9 @@ const INPUT = '.local/lasso-capture-input.json';
 const EXPECTED_LASSO = process.env.AFFIBLOOM_LASSO_VERSION ?? '370';
 const TITLE = 'Affibloom capture';
 const LOCAL = 'http://volleyballvault.local';
+const TOPS = 'tops' === process.env.AFFIBLOOM_CAPTURE;
+const TOPS_FILE = `tests/fixtures/baselines/themes/tops.json`;
+const tops: Record< string, Record< string, number > > = existsSync( TOPS_FILE ) ? JSON.parse( readFileSync( TOPS_FILE, 'utf8' ) ) : {};
 
 type Box = { guide: string; index: number; lasso_id: string; title: string; description: string; image: string; badge: string; rating: string; prime: boolean; button1: { href: string } | null; button2: unknown };
 const boxes = JSON.parse( readFileSync( `${ OUT }/boxes.json`, 'utf8' ) ) as Box[];
@@ -94,6 +100,11 @@ async function capture( page: Page, url: string, group: Group ): Promise< void >
 			if ( ( await box.count() ) !== 1 ) {
 				throw new Error( `${ cell.base }: Lasso drew ${ await box.count() } boxes for ${ cell.id }` );
 			}
+			if ( TOPS ) {
+				const top = await box.evaluate( ( el ) => el.getBoundingClientRect().top + window.scrollY );
+				tops[ cell.base ] = { ...tops[ cell.base ], [ name ]: +top.toFixed( 3 ) };
+				continue;
+			}
 			await box.screenshot( { path: `${ OUT }/${ cell.base }-${ name }.png` } );
 			if ( name === 'desktop' ) {
 				const html = await box.evaluate( ( el ) => el.outerHTML );
@@ -112,7 +123,7 @@ test( "Lasso's Single boxes for every theme and state", async ( { browser } ) =>
 	const all = GROUPS.flatMap( cells );
 	test.setTimeout( 90 * 60_000 );
 
-	if ( process.env.AFFIBLOOM_CAPTURE !== 'local' ) {
+	if ( process.env.AFFIBLOOM_CAPTURE !== 'local' && ! TOPS ) {
 		console.log( `Dry run (AFFIBLOOM_CAPTURE=local captures on the Local copy, Lasso ${ EXPECTED_LASSO } active).` );
 		console.log( `Reads (never changes) Lasso product ${ amazon.lasso_id } "${ amazon.title }" (boxes.json amazon example).` );
 		console.log( `Makes: 2 products ("fields", "copy"), ${ FIELDS.length } fields "${ TITLE } <type>", ${ GROUPS.length } published posts; deletes them after.` );
@@ -148,6 +159,9 @@ test( "Lasso's Single boxes for every theme and state", async ( { browser } ) =>
 	try {
 		// Task 5's seven variants/ PNGs with Lasso 370 (deviation 135). Their HTML stays Task 5's: 370 prints the same markup.
 		await test.step( 'variants/ with Lasso 370', async () => {
+			if ( TOPS ) {
+				return;
+			}
 			for ( const variant of Object.keys( VARIANTS ) ) {
 				await eachVariant( page, variant, async ( box, name ) => {
 					await box.screenshot( { path: `${ OUT }/variants/${ variant }-${ name }.png` } );
@@ -172,13 +186,19 @@ test( "Lasso's Single boxes for every theme and state", async ( { browser } ) =>
 		} );
 
 		const posts = state.made.posts as Record< string, number >;
-		for ( const group of GROUPS ) {
+		const only = new RegExp( process.env.AFFIBLOOM_GROUPS ?? '.' );
+		for ( const group of GROUPS.filter( ( g ) => ! TOPS || only.test( g.id ) ) ) {
 			await test.step( `${ group.id } (${ cells( group ).length } boxes)`, async () => {
 				lasso( 'display', INPUT, { backup: state.backup, settings: group.settings } );
 				await capture( page, `/?p=${ posts[ group.id ] }`, group );
 			} );
 		}
 
+		if ( TOPS ) {
+			writeFileSync( TOPS_FILE, JSON.stringify( tops, null, 1 ) + '\n' );
+			console.log( `Wrote ${ Object.keys( tops ).length } boxes' tops to ${ TOPS_FILE }.` );
+			return;
+		}
 		const bytes = matrixFiles().filter( ( f ) => f.endsWith( '.png' ) ).reduce( ( sum, f ) => sum + statSync( `${ OUT }/${ f }` ).size, 0 );
 		writeFileSync(
 			`${ OUT }/themes/manifest.json`,

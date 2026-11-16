@@ -214,16 +214,23 @@ const FULL_ATTRIBUTES = {
 	secondaryText: 'Check Price',
 };
 
+// Where Lasso's box started on its group capture page (`AFFIBLOOM_CAPTURE=tops` of tools/baselines-themes.spec.ts,
+// phase 3 exit check): the layout and density groups, px from the page top.
+const GROUP_TOP = JSON.parse( readFileSync( 'tests/fixtures/baselines/themes/tops.json', 'utf8' ) ) as Record< string, Record< 'desktop' | 'mobile', number > >;
+
 /**
- * The box at `path` matches `themes/<cell>-<desktop|mobile>.png` with the site's CSS. The group pages' box offsets
- * were not measured (THEME_TOP holds the `site` page's): if text rasterisation alone fails a cell, measure them as
- * deviation 138 did.
+ * The box at `path` matches `themes/<cell>-<desktop|mobile>.png` with the site's CSS, on Lasso's sub-pixel where the
+ * group's offsets were measured (GROUP_TOP), as the site page's are (THEME_TOP).
  */
 async function matchesGroupBaseline( page: Page, path: string, cell: string ): Promise< void > {
 	for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
 		await page.setViewportSize( { width, height: 900 } );
 		await page.goto( path );
 		await page.addStyleTag( { content: SITE_CSS } );
+		const top = GROUP_TOP[ `themes/${ cell }` ]?.[ name ];
+		if ( undefined !== top ) {
+			await onBaselineSubpixel( page, top );
+		}
 		await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', ...cell.split( '/' ).slice( 0, -1 ), `${ cell.split( '/' ).pop() }-${ name }.png` ] );
 	}
 }

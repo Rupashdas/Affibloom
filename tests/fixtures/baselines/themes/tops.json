@@ -1,0 +1,182 @@
+{
+ "themes/layout-stacked/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-stacked/Cutter-full": {
+  "desktop": 1489.641,
+  "mobile": 1841.313
+ },
+ "themes/layout-stacked/Lab-full": {
+  "desktop": 2448.594,
+  "mobile": 2839.25
+ },
+ "themes/layout-stacked-image-bottom/Cactus-full": {
+  "desktop": 640.188,
+  "mobile": 1068.563
+ },
+ "themes/layout-stacked-image-bottom/Cutter-full": {
+  "desktop": 1542.438,
+  "mobile": 2056.5
+ },
+ "themes/layout-stacked-image-bottom/Lab-full": {
+  "desktop": 2559.391,
+  "mobile": 3091.438
+ },
+ "themes/layout-image-right/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-image-right/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-image-right/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-align-center/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-align-center/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-align-center/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-align-right/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-align-right/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-align-right/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-buttons-left/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-buttons-left/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-buttons-left/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-buttons-center/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 962.969
+ },
+ "themes/layout-buttons-center/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1661.281
+ },
+ "themes/layout-buttons-center/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2327.609
+ },
+ "themes/layout-buttons-right/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-buttons-right/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-buttons-right/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-buttons-hug/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-buttons-hug/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-buttons-hug/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-image-cover/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/layout-image-cover/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/layout-image-cover/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/layout-phone-override/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 962.969
+ },
+ "themes/layout-phone-override/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1661.281
+ },
+ "themes/layout-phone-override/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2327.609
+ },
+ "themes/density-compact/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/density-compact/Cutter-full": {
+  "desktop": 1047.391,
+  "mobile": 1445.031
+ },
+ "themes/density-compact/Lab-full": {
+  "desktop": 1581.875,
+  "mobile": 2030.688
+ },
+ "themes/density-balanced/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/density-balanced/Cutter-full": {
+  "desktop": 1090.641,
+  "mobile": 1502.109
+ },
+ "themes/density-balanced/Lab-full": {
+  "desktop": 1660.625,
+  "mobile": 2127.063
+ },
+ "themes/density-spacious/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/density-spacious/Cutter-full": {
+  "desktop": 1145.891,
+  "mobile": 1555.688
+ },
+ "themes/density-spacious/Lab-full": {
+  "desktop": 1784.875,
+  "mobile": 2222.016
+ },
+ "themes/density-custom/Cactus-full": {
+  "desktop": 587.391,
+  "mobile": 857.375
+ },
+ "themes/density-custom/Cutter-full": {
+  "desktop": 1053.391,
+  "mobile": 1488.891
+ },
+ "themes/density-custom/Lab-full": {
+  "desktop": 1589.875,
+  "mobile": 2100.625
+ }
+}

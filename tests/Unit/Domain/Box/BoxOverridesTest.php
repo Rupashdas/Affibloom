@@ -128,6 +128,8 @@ final class BoxOverridesTest extends TestCase {
 		);
 		self::assertSame( array( 'hide', true, '$99.99', '4.5', 'Light', 'Watch out', 'hide', false ), array( $block->price, $block->prime, $block->basis_price, $block->rating, $block->pros, $block->cons_label, $block->fields, $block->show_pros_cons ) );
 		self::assertNull( BoxOverrides::from_block( array() )->show_pros_cons );
+		// The block reads "-br-" as the shortcode does (phase 3 exit check, F5 AC11).
+		self::assertSame( "One\nTwo", BoxOverrides::from_block( array( 'cons' => 'One-br-Two' ) )->cons );
 
 		$short = BoxOverrides::from_shortcode( array( 'pros' => 'One-br-Two', 'field' => 'hide', 'prime' => 'yes', 'show_pros_cons' => 'false' ) );
 		self::assertSame( "One\nTwo", $short->pros );

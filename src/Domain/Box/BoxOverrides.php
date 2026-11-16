@@ -142,8 +142,9 @@ final class BoxOverrides {
 				'prime'            => true === ( $attributes['prime'] ?? false ) ? '1' : '',
 				'basis_price'      => $text( 'basisPrice' ),
 				'rating'           => $text( 'rating' ),
-				'pros'             => $text( 'pros' ),
-				'cons'             => $text( 'cons' ),
+				// The block speaks the shortcode's language (F31 D2): "-br-" is a line break in pros and cons here too.
+				'pros'             => str_replace( '-br-', "\n", $text( 'pros' ) ),
+				'cons'             => str_replace( '-br-', "\n", $text( 'cons' ) ),
 				'pros_label'       => $text( 'prosLabel' ),
 				'cons_label'       => $text( 'consLabel' ),
 				'fields'           => $text( 'fields' ),
