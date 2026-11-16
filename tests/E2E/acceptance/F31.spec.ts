@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
+import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, setSettings, wp } from '../utils';
 
 // F31 Affibloom's own shortcode (docs/features/F31/requirements.md).
 test.describe( 'F31 Shortcode', () => {
@@ -154,8 +154,7 @@ test.describe( 'F31 Shortcode', () => {
 			expect( feed ).not.toContain( `[affibloom id="${ id }"]` );
 		} finally {
 			wp( 'option', 'update', 'rss_use_excerpt', excerpt );
-			const widgets = wp( 'widget', 'list', 'sidebar-1', '--fields=id,options', '--format=csv' ).split( '
-' ).filter( ( row ) => row.includes( 'F31 AC9 widget' ) );
+			const widgets = wp( 'widget', 'list', 'sidebar-1', '--fields=id,options', '--format=csv' ).split( '\n' ).filter( ( row ) => row.includes( 'F31 AC9 widget' ) );
 			widgets.forEach( ( row ) => wp( 'widget', 'delete', row.split( ',' )[ 0 ] ) );
 		}
 	} );
@@ -224,5 +223,22 @@ test.describe( 'F31 Shortcode', () => {
 		expect( JSON.parse( ( await scripts.textContent() ) ?? '{}' ).name ).toBe( 'F31 AC14 other' );
 		await page.goto( newPostWith( `[affibloom id="${ id }"]` ) );
 		await expect( scripts ).toHaveCount( 0 );
+	} );
+
+	// AC7 (Task 18S7): a group as a grid, list or gallery by `group`, or Lasso's `category`/`categories` (which wins); the
+	// order, latest, limit, columns, compact, bullets and disclosure; the per-box overrides on every card, not tracking_id.
+	test( 'AC7 [affibloom type="grid|list|gallery" group] places the group', async ( { page } ) => {
+		const ids = [ 'a', 'b', 'c' ].map( ( n ) => createProduct( { name: `F31 AC7 ${ n }`, description: 'About it.' } ) );
+		const slug = createGroup( `F31 AC7 ${ Date.now() }`, [ ids[ 2 ], ids[ 0 ], ids[ 1 ] ] );
+		await page.goto( newPostWith( `[affibloom group="${ slug }" badge="Pick" limit="2"][affibloom type="list" category="no-such" categories="${ slug }" bullets="roman" latest="true"][affibloom type="gallery" category="${ slug }" columns="3"][affibloom group="${ slug }" compact="true" disclosure="enable"]` ) );
+		const grid = page.locator( '.affibloom-grid-wrap' ).nth( 0 );
+		await expect( grid.locator( '.affibloom-title' ) ).toHaveText( [ 'F31 AC7 c', 'F31 AC7 a' ] );
+		await expect( grid.locator( '.affibloom-badge' ) ).toHaveCount( 2 );
+		const list = page.locator( 'ol.affibloom-list.affibloom-list-style-roman' );
+		await expect( list.locator( '.affibloom-title' ) ).toHaveText( [ 'F31 AC7 c', 'F31 AC7 b', 'F31 AC7 a' ] );
+		await expect( page.locator( '.affibloom-grid-wrap' ).nth( 1 ).locator( '.affibloom-grid-row.affibloom-grid-3 .affibloom-image-container' ) ).toHaveCount( 3 );
+		const compact = page.locator( '.affibloom-grid-wrap' ).nth( 2 );
+		await expect( compact.locator( '.affibloom-description, .affibloom-fields' ) ).toHaveCount( 0 );
+		await expect( compact.locator( ':scope > .affibloom-disclosure' ) ).toHaveCount( 1 );
 	} );
 } );

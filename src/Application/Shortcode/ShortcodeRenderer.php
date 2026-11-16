@@ -90,7 +90,8 @@ final class ShortcodeRenderer {
 		$settings = $this->settings->get();
 		$advanced = $display->advanced();
 		$config   = $display->config( DisplayType::grid() );
-		$per_card = BoxOverrides::from_shortcode( array_diff_key( $request->attributes, array_flip( array( 'tracking_id', 'anchor_id' ) ) ) );
+		// F31 R12: a card's alt text is its product's name, not the shortcode's image_alt.
+		$per_card = BoxOverrides::from_shortcode( array_diff_key( $request->attributes, array_flip( array( 'tracking_id', 'anchor_id', 'image_alt' ) ) ) );
 
 		$cards = array();
 		foreach ( $this->groups->shown( $group->group, $group->limit, $group->latest ) as $product ) {

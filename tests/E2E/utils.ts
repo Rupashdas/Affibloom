@@ -122,6 +122,12 @@ export function boxBlock( productId: number, attrs: Record< string, unknown > = 
 	return `<!-- wp:affibloom/product-box ${ JSON.stringify( { productId, ...attrs } ) } /-->`;
 }
 
+/** Creates a group of the products in this order, through GroupService (F23), and returns its slug (F30, F31). */
+export function createGroup( name: string, products: number[] ): string {
+	const php = `$g = new \\Affibloom\\Application\\Groups\\GroupService( new \\Affibloom\\Infrastructure\\WordPress\\TermGroupRepository(), new \\Affibloom\\Infrastructure\\WordPress\\PostTypeProductRepository() ); $made = $g->create( '${ name }', '' ); foreach ( array( ${ products.join( ', ' ) } ) as $id ) { $g->add( $made->id, $id ); } echo $made->slug;`;
+	return wp( 'eval', php ).trim().split( '\n' ).pop() as string;
+}
+
 /** Creates a published post whose content is the given markup, and returns its URL path. */
 export function newPostWith( content: string, title = 'Acceptance' ): string {
 	const id = wp( 'post', 'create', '--post_type=post', '--post_status=publish', `--post_title=${ title }`, `--post_content=${ content }`, '--porcelain' );

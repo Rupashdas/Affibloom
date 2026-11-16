@@ -38,9 +38,9 @@ enum DisplayKind: string {
 		if ( '' !== trim( $attributes['prompt'] ?? '' ) && '' === trim( $attributes['id'] ?? '' ) && '' === trim( $attributes['slug'] ?? '' ) ) {
 			return self::AiText;
 		}
-		// F30 R2: a group is a list with type list, a gallery with type gallery, any other type a grid (18S7 adds
-		// `category`).
-		if ( '' !== trim( $attributes['group'] ?? '' ) ) {
+		// F30 R2: a group (`group`, or Lasso's `category`/`categories`, F31 A8) is a list with type list, a gallery with
+		// type gallery, any other type a grid.
+		if ( '' !== GroupAttributes::slug( $attributes ) ) {
 			return match ( $type ) {
 				'list'    => self::List,
 				'gallery' => self::Gallery,

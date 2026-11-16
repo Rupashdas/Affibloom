@@ -158,7 +158,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT8: The SiteStripe card
 - [x] Task DT9: Stored AI text
 - Task DT10: dropped (decision B5: stored AI text only)
-- [ ] Task 18S7: Group displays by shortcode
+- [x] Task 18S7: Group displays by shortcode
 - [ ] Task 18S12: A group's Copy Shortcode
 
 Task 18S8 (the table display by shortcode) is superseded by F25 Task T12 (Phase 7); the number is not reused.
@@ -1454,10 +1454,17 @@ shows the wrapper alone.
 
 **Files:** F31 **AC7**; `DisplayRequestTest` rows.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Kinds and the call.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Place a group as a grid, list or gallery with [affibloom]".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Kinds and the call.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Place a group as a grid, list or gallery with [affibloom]".
+
+*Note:* DT2-DT6 already placed groups by `group` (kinds, renderers); 18S7 added Lasso's `category`/`categories`
+(`GroupAttributes::slug()`: `group`, else `categories`, else `category`) and R12's card alt text (the shortcode's
+`image_alt` is not passed to a grid's or list's cards). `createGroup` moved to `tests/E2E/utils.ts` (second use).
+F31 AC9 (18S9) had a broken `'
+'`; fixed here.
+
 
 ---
 

@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
-import { blockTrackers, createProduct, newPostWith, setSettings, wp } from '../utils';
+import { blockTrackers, createGroup, createProduct, newPostWith, setSettings, wp } from '../utils';
 
 // F30 Display types (docs/features/F30/requirements.md).
 // Baselines: tests/fixtures/baselines/displays/ (Task DT1, tools/baselines-displays.spec.ts): Lasso 370's own grid,
@@ -8,12 +8,6 @@ import { blockTrackers, createProduct, newPostWith, setSettings, wp } from '../u
 
 const DISPLAYS = 'tests/fixtures/baselines/displays';
 type Cell = { base: string; mode: string; shortcode: string; sizes: Record< 'desktop' | 'mobile', [ number, number ] > };
-
-/** A group of the products in this order, through GroupService (F23); returns its slug. */
-function createGroup( name: string, products: number[] ): string {
-	const php = `$g = new \\Affibloom\\Application\\Groups\\GroupService( new \\Affibloom\\Infrastructure\\WordPress\\TermGroupRepository(), new \\Affibloom\\Infrastructure\\WordPress\\PostTypeProductRepository() ); $made = $g->create( '${ name }', '' ); foreach ( array( ${ products.join( ', ' ) } ) as $id ) { $g->add( $made->id, $id ); } echo $made->slug;`;
-	return wp( 'eval', php ).trim().split( '\n' ).pop() as string;
-}
 
 /** The cards' left edges, rounded, relative to the grid. */
 async function cardLefts( page: Page ): Promise< number[] > {

@@ -49,6 +49,22 @@ final class GroupAttributes {
 	) {}
 
 	/**
+	 * The group's slug (F31 A8, D2): `group`, else Lasso's `categories`, which wins over its `category`.
+	 *
+	 * @param array<string, string> $attributes Repaired attributes.
+	 */
+	public static function slug( array $attributes ): string {
+		foreach ( array( 'group', 'categories', 'category' ) as $name ) {
+			$slug = trim( $attributes[ $name ] ?? '' );
+			if ( '' !== $slug ) {
+				return $slug;
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * The attributes of a repaired shortcode. R6: an empty `limit` is no limit; otherwise its whole number, and 0 (or
 	 * anything that is not a number) is 10. `latest` only as `true`, as Lasso compares it.
 	 *
@@ -62,7 +78,7 @@ final class GroupAttributes {
 		$column = trim( $attributes['columns'] ?? '' );
 
 		return new self(
-			trim( $attributes['group'] ?? '' ),
+			self::slug( $attributes ),
 			0 === $count ? self::FALLBACK_LIMIT : $count,
 			'true' === $latest,
 			strtolower( trim( $attributes['disclosure'] ?? '' ) ),

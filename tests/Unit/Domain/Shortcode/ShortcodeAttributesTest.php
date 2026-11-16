@@ -154,4 +154,15 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertSame( DisplayKind::AiText, DisplayRequest::of( array( 'prompt' => 'Best shoes?' ) )->kind );
 		self::assertSame( DisplayKind::Single, DisplayRequest::of( array( 'prompt' => 'Best shoes?', 'id' => '4' ) )->kind );
 	}
+
+	/**
+	 * F31 A8, D2 (Task 18S7): Lasso's `category` and `categories` name the group too, `categories` winning; `group`
+	 * first.
+	 */
+	public function test_lassos_group_names(): void {
+		self::assertSame( DisplayKind::Grid, DisplayRequest::of( array( 'category' => 'shoes' ) )->kind );
+		self::assertSame( DisplayKind::List, DisplayRequest::of( array( 'categories' => 'shoes', 'type' => 'list' ) )->kind );
+		self::assertSame( 'bags', GroupAttributes::of( array( 'category' => 'shoes', 'categories' => 'bags' ) )->group );
+		self::assertSame( 'balls', GroupAttributes::of( array( 'group' => 'balls', 'categories' => 'bags' ) )->group );
+	}
 }
