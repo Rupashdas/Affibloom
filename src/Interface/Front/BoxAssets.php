@@ -27,7 +27,7 @@ use Affibloom\Module;
  *   that; off, every front-end page gets it. Every box drawn enqueues it as a safety net (a widget, a theme template),
  *   printed in the footer when late, with the `<head>` block added inline when it was skipped; once per request.
  * - On every page the Font Awesome config (`fontawesome_svg`) and the body class `affibloom-v<version>`; on AMP pages
- *   the inline CSS; with Jetpack, original images once a box is drawn.
+ *   the inline CSS; with Jetpack, the boxes' own images kept original (F31 D11; Lasso keeps every image of the page).
  *
  * Every box is advanced until classic rendering exists (Task 18K), so the layout rules and script always come along.
  * Lasso's copy-to-clipboard script, which it loads on every page, loads with the box (Task 21C, deviation 136).
@@ -60,6 +60,13 @@ final class BoxAssets implements Module {
 	 * @var bool
 	 */
 	private bool $late_done = false;
+
+	/**
+	 * The drawn boxes' images, which Jetpack's image CDN leaves alone (F31 D11).
+	 *
+	 * @var array<string, true>
+	 */
+	private array $originals = array();
 
 	/**
 	 * Whether the AMP CSS was printed.
@@ -121,12 +128,20 @@ final class BoxAssets implements Module {
 
 	/**
 	 * The safety net (R47), called for every box drawn: the assets are enqueued (WordPress prints a late stylesheet in
-	 * the footer), with the `<head>` block inline when it was skipped. Jetpack's image CDN is told to keep a box's
-	 * original images, as Lasso does once a box is drawn (R50). Once per request; nothing in the admin (the previews
-	 * load their own, Tasks 10D and 14E).
+	 * the footer), with the `<head>` block inline when it was skipped. Jetpack's image CDN is told to keep the box's
+	 * own image original (R50; F31 D11 narrows Lasso's every image of the page). Once per request; nothing in the admin
+	 * (the previews load their own, Tasks 10D and 14E).
+	 *
+	 * @param string $image The box's image address; '' none.
 	 */
-	public function late_enqueue(): void {
-		if ( $this->late_done || is_admin() ) {
+	public function late_enqueue( string $image = '' ): void {
+		if ( is_admin() ) {
+			return;
+		}
+		if ( '' !== $image ) {
+			$this->originals[ $image ] = true;
+		}
+		if ( $this->late_done ) {
 			return;
 		}
 		$this->late_done = true;
@@ -135,7 +150,18 @@ final class BoxAssets implements Module {
 		if ( ! $this->head_printed ) {
 			wp_add_inline_style( self::STYLE, $this->head_css() );
 		}
-		add_filter( 'jetpack_photon_skip_for_url', '__return_true', 1000 );
+		add_filter( 'jetpack_photon_skip_for_url', array( $this, 'photon_skip' ), 1000, 2 );
+	}
+
+	/**
+	 * Jetpack's `jetpack_photon_skip_for_url`: true for a drawn box's image, else Jetpack's own answer.
+	 *
+	 * @param mixed $skip Jetpack's answer.
+	 * @param mixed $url  The image's address.
+	 * @return mixed
+	 */
+	public function photon_skip( mixed $skip, mixed $url ): mixed {
+		return is_string( $url ) && isset( $this->originals[ $url ] ) ? true : $skip;
 	}
 
 	/**

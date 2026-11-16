@@ -141,7 +141,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S4: `type="button"` and `type="image"`
 - [x] Task 18S5: `type="link"`, SiteStripe and inline fields
 - [x] Task 18S6: Address a product by its Amazon URL or destination
-- [ ] Task 18S9: Boxes in widgets, on AMP pages and in feeds
+- [x] Task 18S9: Boxes in widgets, on AMP pages and in feeds
 - [ ] Task 18S10: The Dashboard row's Shortcode button
 - [ ] Task 18S11: The Share kit's Copy shortcode
 - [ ] Task 18S14: Review and pros/cons schema in the page head
@@ -1482,11 +1482,15 @@ for WP) shows the box styled; the feed shows the box.
 
 **Files:** the above; F31 **AC9**.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Modules.**
-- [ ] **Step 3: Run and look** (a widget, `?amp=1`,
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Modules.**
+- [x] **Step 3: Run and look** (a widget, `?amp=1`,
   `/feed/`).
-- [ ] **Step 4: Commit** — "Draw boxes in widgets, AMP pages and feeds".
+- [x] **Step 4: Commit** — "Draw boxes in widgets, AMP pages and feeds".
+
+*Note:* AMP's inline CSS was already in `BoxAssets` (18C, registered always: the hook fires only on AMP templates), so
+no `AmpBoxCss`; new are `WidgetShortcodes` and the box-only Photon skip. Seen on Local: a sidebar text widget's box
+in the phone layout, the full-text feed with boxes (the site's feed sends summaries). No AMP plugin on Local.
 
 ---
 

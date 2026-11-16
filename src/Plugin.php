@@ -106,6 +106,7 @@ use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\SchemaMarkup;
+use Affibloom\Interface\Front\WidgetShortcodes;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
@@ -375,6 +376,7 @@ final class Plugin {
 				new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder ),
 				$box_html
 			),
+			new WidgetShortcodes(),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),

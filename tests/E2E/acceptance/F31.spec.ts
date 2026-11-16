@@ -135,4 +135,28 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( page.locator( '.affibloom-box' ).nth( 1 ).locator( '.affibloom-title' ) ).toContainText( 'F31 AC6 other' );
 		await expect( page.locator( '.affibloom-box' ).nth( 0 ) ).toHaveAttribute( 'id', `affibloom-anchor-id-${ amazon }-1` );
 	} );
+
+	// AC9 (Task 18S9): a text widget's box takes the phone layout; a full-text feed draws the box as the page does.
+	// AMP's inline CSS (amp_post_template_css) is checked by hand: no AMP plugin is installed on Local.
+	test( 'AC9 a widget box takes the phone layout and the feed draws the box', async ( { page, request } ) => {
+		const id = createProduct( { name: 'F31 AC9' } );
+		wp( 'widget', 'add', 'text', 'sidebar-1', '1', '--title=F31 AC9 widget', `--text=[affibloom id="${ id }"]` );
+		const excerpt = wp( 'option', 'get', 'rss_use_excerpt' );
+		wp( 'option', 'update', 'rss_use_excerpt', '0' );
+		try {
+			const path = newPostWith( `[affibloom id="${ id }"]`, 'F31 AC9 feed' );
+			await page.goto( path );
+			const widget = page.locator( '.widget', { hasText: 'F31 AC9 widget' } );
+			await expect( widget.locator( '.affibloom-display' ) ).toHaveClass( /(^| )mobile( |$)/ );
+			await expect( page.locator( '.entry-content .affibloom-display' ).first() ).not.toHaveClass( /(^| )mobile( |$)/ );
+			const feed = await ( await request.get( '/feed/' ) ).text();
+			expect( feed ).toContain( `affibloom-url-` );
+			expect( feed ).not.toContain( `[affibloom id="${ id }"]` );
+		} finally {
+			wp( 'option', 'update', 'rss_use_excerpt', excerpt );
+			const widgets = wp( 'widget', 'list', 'sidebar-1', '--fields=id,options', '--format=csv' ).split( '
+' ).filter( ( row ) => row.includes( 'F31 AC9 widget' ) );
+			widgets.forEach( ( row ) => wp( 'widget', 'delete', row.split( ',' )[ 0 ] ) );
+		}
+	} );
 } );

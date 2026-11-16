@@ -30,8 +30,9 @@ final class BoxHtml {
 	 * @param BoxView $view The box.
 	 */
 	public function render( BoxView $view ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- the included template reads $view.
-		// A box the page detection missed (a widget, a theme template) still gets its CSS (Task 18C).
-		$this->assets->late_enqueue();
+		// A box the page detection missed (a widget, a theme template) still gets its CSS (Task 18C); Jetpack keeps its
+		// image original (F31 D11).
+		$this->assets->late_enqueue( $view->image_src );
 
 		ob_start();
 		try {
