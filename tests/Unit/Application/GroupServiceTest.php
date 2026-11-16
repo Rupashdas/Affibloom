@@ -199,4 +199,23 @@ final class GroupServiceTest extends TestCase {
 		self::assertSame( array( $one ), $this->ids( $this->service()->members( $a->id ) ) );
 		self::assertSame( array( $one, $two ), $this->ids( $this->service()->members( $b->id ) ) );
 	}
+
+	/**
+	 * F30 R6, R15, D2 (Task DT2): a group display's products by the group's slug, in its order or newest first, the
+	 * first `limit`; an unknown slug shows none.
+	 */
+	public function test_a_group_display_shows_its_products_by_slug(): void {
+		$group = $this->service()->create( 'Best Shoes', '' );
+		$one   = $this->product( 'One' );
+		$two   = $this->product( 'Two' );
+		$three = $this->product( 'Three' );
+		foreach ( array( $two, $one, $three ) as $id ) {
+			$this->service()->add( $group->id, $id );
+		}
+
+		self::assertSame( array( $two, $one, $three ), $this->ids( $this->service()->shown( 'best-shoes', null, false ) ) );
+		self::assertSame( array( $two, $one ), $this->ids( $this->service()->shown( 'best-shoes', 2, false ) ) );
+		self::assertSame( array( $three, $two, $one ), $this->ids( $this->service()->shown( 'best-shoes', null, true ) ) );
+		self::assertSame( array(), $this->service()->shown( 'unknown', null, false ) );
+	}
 }

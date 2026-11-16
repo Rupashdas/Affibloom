@@ -12,7 +12,8 @@ defined( 'ABSPATH' ) || exit;
 
 $attributes = $view->wrapper;
 ?>
-<div id="<?php echo esc_attr( $view->anchor ); ?>" class="affibloom-box">
+<?php // A grid's card has no id of its own (F30 R16). ?>
+<div<?php echo '' === $view->anchor ? '' : ' id="' . esc_attr( $view->anchor ) . '"'; ?> class="affibloom-box">
 	<!-- PRODUCT BOX -->
 	<div class="<?php echo esc_attr( $view->classes ); ?>"<?php require __DIR__ . '/partials/attributes.php'; ?>>
 		<?php require __DIR__ . '/partials/badge.php'; ?>

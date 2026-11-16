@@ -110,4 +110,31 @@ final class BoxView {
 	public function with_anchor( string $anchor ): self {
 		return new self( ...array_merge( get_object_vars( $this ), array( 'anchor' => $anchor ) ) );
 	}
+
+	/**
+	 * A grid's card (F30 R16, R17): no container id of its own and no disclosure (the grid prints one after its cards;
+	 * Lasso hides a card's by CSS), the wrapper saying so.
+	 */
+	public function as_card(): self {
+		$wrapper = $this->wrapper;
+		if ( array() !== $wrapper ) {
+			$style = $wrapper['style'] ?? null;
+			unset( $wrapper['style'] );
+			$wrapper['data-hide-disclosure'] = '1';
+			if ( null !== $style ) {
+				$wrapper['style'] = $style;
+			}
+		}
+
+		return new self(
+			...array_merge(
+				get_object_vars( $this ),
+				array(
+					'anchor'     => '',
+					'disclosure' => null,
+					'wrapper'    => $wrapper,
+				)
+			)
+		);
+	}
 }

@@ -149,7 +149,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 **F30, display types, then the group shortcode parts that need them:**
 
 - [x] Task DT1: Lasso's own render of the other display types, as baselines
-- [ ] Task DT2: A group shown as a grid
+- [x] Task DT2: A group shown as a grid
 - [ ] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
 - [ ] Task DT4: A group shown as a list, with the phone swipe row
 - [ ] Task DT5: A product shown as an image
@@ -1714,18 +1714,24 @@ Disclosure in Grids is on. An unknown or empty group shows the empty wrapper (an
 `tests/Unit/Domain/Display/{DisplayAttributesTest,GridDisclosureTest,AnchorIdTest}.php`,
 `tests/Unit/Application/GroupDisplayServiceTest.php`, `tests/Integration/GridDisplayTest.php`.
 
-- [ ] **Step 1: Failing tests.** AC2-AC4, AC13, AC14 on draft pages made through WP-CLI (a group of four products via
+- [x] **Step 1: Failing tests.** AC2-AC4, AC13, AC14 on draft pages made through WP-CLI (a group of four products via
   `term create affibloom_group` and G4's order); unit tables for limit (R6), disclosure (R17), anchor ids (D16),
   `latest`. Expected red: the shortcode prints nothing for `type="grid"`.
-- [ ] **Step 2: Domain and service.** `DisplayAttributes` grid clauses; `GroupDisplayService` over `members()` and one
+- [x] **Step 2: Domain and service.** `DisplayAttributes` grid clauses; `GroupDisplayService` over `members()` and one
   batched product read.
-- [ ] **Step 3: Renderer and template.** Wrapper, one grid of Single boxes built with `DisplayType::grid()` (theme,
+- [x] **Step 3: Renderer and template.** Wrapper, one grid of Single boxes built with `DisplayType::grid()` (theme,
   labels, density, elements, per-card price R18), brag mark, grid disclosure.
-- [ ] **Step 4: CSS.** The customised grid (R20): auto-fill columns ≥ 240 px up to the site count, gap, one column
+- [x] **Step 4: CSS.** The customised grid (R20): auto-fill columns ≥ 240 px up to the site count, gap, one column
   below 768 px, row gap ≥ 30 px, ribbon room, equal-height cards with a shared button row; card disclosures hidden.
-- [ ] **Step 5: Run and look.** Checks; visual diff with DT1's grid baselines at 1280/768/390 px; by hand: an unknown
+- [x] **Step 5: Run and look.** Checks; visual diff with DT1's grid baselines at 1280/768/390 px; by hand: an unknown
   group, an empty group with Disclosure in Grids on, `limit="0"`, `latest="true"`, a trashed member.
-- [ ] **Step 6: Commit** — "Show a group as a grid, as Lasso does".
+- [x] **Step 6: Commit** — "Show a group as a grid, as Lasso does".
+
+*Note:* built on 18S's request and renderer: `DisplayKind::Grid` (a `group`), `GroupAttributes` (limit, latest,
+disclosure), `GridDisclosure`, `GroupService::shown()` (not a separate service), `ShortcodeRenderer::grid()`,
+`GridView`/`GridHtml`/`grid.php`; cards are `BoxBuilder` boxes in the Grid settings, no id, no own disclosure; no brag
+(B9). CSS: Lasso's grid rules from both sheets, ported by script in Lasso's cascade order; measured against Lasso's grid
+on Local, all 8 themes at 1280 and 390 px, every part on the same pixels (site CSS translated). Classic rows: DT3.
 
 ---
 

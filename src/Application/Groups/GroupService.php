@@ -159,6 +159,28 @@ final class GroupService {
 	}
 
 	/**
+	 * The products a group display shows (F30 R6, R15; D2): the group's published products in its order, or newest
+	 * first (by ID, Lasso's `p.ID DESC`), the first `limit` of them; none for an unknown group.
+	 *
+	 * @param string   $slug   The group's slug.
+	 * @param int|null $limit  How many; null all.
+	 * @param bool     $latest Newest first.
+	 * @return list<Product>
+	 */
+	public function shown( string $slug, ?int $limit, bool $latest ): array {
+		$id = $this->groups->find_id_by_slug( $slug );
+		if ( null === $id ) {
+			return array();
+		}
+		$products = $this->members( $id );
+		if ( $latest ) {
+			usort( $products, static fn( Product $a, Product $b ): int => (int) $b->id <=> (int) $a->id );
+		}
+
+		return null === $limit ? $products : array_slice( $products, 0, $limit );
+	}
+
+	/**
 	 * Whether a product is in a group.
 	 *
 	 * @param int $id      The group's ID.

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Front;
 
 use Affibloom\Application\Shortcode\ShortcodeRenderer;
+use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
 use Affibloom\Module;
 
@@ -32,8 +33,9 @@ final class AffibloomShortcode implements Module {
 	 *
 	 * @param ShortcodeRenderer $renderer The renderer.
 	 * @param BoxHtml           $html     The box's printer.
+	 * @param GridHtml          $grids    The grid's printer (F30 DT2).
 	 */
-	public function __construct( private readonly ShortcodeRenderer $renderer, private readonly BoxHtml $html ) {}
+	public function __construct( private readonly ShortcodeRenderer $renderer, private readonly BoxHtml $html, private readonly GridHtml $grids ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -56,7 +58,12 @@ final class AffibloomShortcode implements Module {
 	 */
 	public function render( array|string $attributes ): string {
 		$request = DisplayRequest::of( $attributes );
-		$view    = $this->renderer->view( $request, $this->drawn + 1, (int) get_the_ID() );
+		// F30 R61: a grid always draws, an unknown or empty group as its wrapper.
+		if ( DisplayKind::Grid === $request->kind ) {
+			++$this->drawn;
+			return $this->grids->render( $this->renderer->grid( $request, $this->drawn, (int) get_the_ID() ) );
+		}
+		$view = $this->renderer->view( $request, $this->drawn + 1, (int) get_the_ID() );
 		if ( null === $view ) {
 			do_action( 'affibloom_box_failed', $attributes, (int) get_the_ID() );
 			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {

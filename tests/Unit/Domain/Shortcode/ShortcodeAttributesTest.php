@@ -5,6 +5,7 @@ use Affibloom\Domain\Shortcode\Address;
 use Affibloom\Domain\Shortcode\AnchorId;
 use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
+use Affibloom\Domain\Shortcode\GroupAttributes;
 use Affibloom\Domain\Shortcode\FieldPart;
 use Affibloom\Domain\Shortcode\ShortcodeAttributes;
 use PHPUnit\Framework\TestCase;
@@ -91,5 +92,25 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertCount( 15, FieldPart::cases() );
 		self::assertSame( FieldPart::StarRating, FieldPart::tryFrom( 'star_rating' ) );
 		self::assertNull( FieldPart::tryFrom( 'bogus' ) );
+	}
+
+	/**
+	 * F30 R2, R6 (Task DT2): `group` asks for a grid (a list or gallery is DT4's and DT6's); `limit` empty is all, a
+	 * number its whole value, 0 or junk 10; `latest` only as `true`; a grid's anchor names the group.
+	 */
+	public function test_a_group_display(): void {
+		self::assertSame( DisplayKind::Grid, DisplayRequest::of( array( 'group' => 'shoes' ) )->kind );
+		self::assertSame( DisplayKind::Grid, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'grid' ) )->kind );
+		self::assertSame( DisplayKind::Single, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'list' ) )->kind );
+
+		self::assertNull( GroupAttributes::of( array( 'limit' => '' ) )->limit );
+		self::assertNull( GroupAttributes::of( array() )->limit );
+		self::assertSame( 3, GroupAttributes::of( array( 'limit' => '3' ) )->limit );
+		self::assertSame( 10, GroupAttributes::of( array( 'limit' => '0' ) )->limit );
+		self::assertSame( 10, GroupAttributes::of( array( 'limit' => 'all' ) )->limit );
+		self::assertTrue( GroupAttributes::of( array( 'latest' => 'true' ) )->latest );
+		self::assertFalse( GroupAttributes::of( array( 'latest' => '1' ) )->latest );
+		self::assertSame( 'shoes', GroupAttributes::of( array( 'group' => ' shoes ' ) )->group );
+		self::assertSame( 'affibloom-anchor-id-shoes-2', AnchorId::of( '', 'shoes', 2 ) );
 	}
 }

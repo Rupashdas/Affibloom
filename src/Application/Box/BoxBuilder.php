@@ -84,9 +84,11 @@ final class BoxBuilder {
 	 * @param int                $post_id   The post the box is drawn in (0 outside one), for the self-link check.
 	 * @param BoxFields|null     $fields    The product's custom fields and the field library; null for none.
 	 * @param AmazonProduct|null $amazon The Amazon product's stored data (C1); null when there is none.
+	 * @param DisplayType|null   $type   The display type whose settings draw the box (a grid's cards: Grid, F30 R11,
+	 *                                   R12, R18); null is Single.
 	 */
-	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null, ?AmazonProduct $amazon = null ): BoxView {
-		$config = $display->config( DisplayType::single() );
+	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null, ?AmazonProduct $amazon = null, ?DisplayType $type = null ): BoxView {
+		$config = $display->config( $type ?? DisplayType::single() );
 		// R28 reads the Show Price saved on the product, not the box's `price`.
 		$stored_show_price = $product->show_price;
 		// C1 R48, N3: an Amazon product's price is the stored Amazon data's, when Amazon's API gave it within 24 hours;

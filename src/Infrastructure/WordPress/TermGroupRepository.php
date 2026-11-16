@@ -104,6 +104,17 @@ final class TermGroupRepository implements GroupRepository {
 	}
 
 	/**
+	 * The ID of the group with this slug, or null.
+	 *
+	 * @param string $slug The slug.
+	 */
+	public function find_id_by_slug( string $slug ): ?int {
+		$term = '' === $slug ? false : get_term_by( 'slug', $slug, GroupTaxonomy::NAME );
+
+		return $term instanceof \WP_Term ? $term->term_id : null;
+	}
+
+	/**
 	 * Every group by name, without counts.
 	 *
 	 * @return list<Group>

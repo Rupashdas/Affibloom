@@ -378,6 +378,43 @@ a.affibloom-button-2:hover {
 	max-height: none !important;
 }
 
+/*
+ * The grid of a group display (F30 R16, R17, R20; Task DT2), first part: Lasso's lasso-live.css grid rules that come
+ * before its theme rules, here before the themes too, so a theme's own rule still wins a tie as in Lasso (Llama's
+ * box 2 padding). The theme grid rules and the rest are at the end of this file.
+ */
+.affibloom-grid-row .affibloom-image img { width: 250px; }
+@media (max-width: 767.98px) {
+	.affibloom-grid-wrap .affibloom-stars { display: table-cell !important; }
+	.affibloom-grid-wrap .affibloom-stars { padding-bottom: 10px; }
+	.affibloom-grid-wrap .affibloom-image { display: table-row !important; }
+	.affibloom-grid-wrap .affibloom-image img { float: initial !important; display: inline !important; }
+	.affibloom-grid-wrap .affibloom-price { text-align: left !important; }
+	.affibloom-grid-wrap .affibloom-title { min-height: fit-content !important; }
+	.affibloom-grid-wrap .affibloom-description { width: 100%; }
+}
+.affibloom-grid-row .affibloom-box.affibloom-image-container { margin: 0px auto 20px !important; }
+.affibloom-grid-wrap { margin: 0px; position: relative; }
+.affibloom-grid-row { box-sizing: border-box; display: flex; flex-wrap: wrap; justify-content: center; margin: 0px -15px; position: relative; }
+.affibloom-grid-row .affibloom-display { margin: 0px; }
+.affibloom-grid-row .affibloom-box-1,
+.affibloom-grid-row .affibloom-box-2 { padding: 0px !important; }
+.affibloom-grid-row .affibloom-badge { left: 5px; }
+.affibloom-grid-row .affibloom-disclosure,
+.affibloom-grid-row .affibloom-brag { display: none !important; }
+.affibloom-grid-row .affibloom-date,
+.affibloom-grid-row .affibloom-description { text-align: left !important; }
+.affibloom-grid-2 .affibloom-box { flex: 0 0 50%; max-width: 50%; }
+.affibloom-grid-3 .affibloom-box { flex: 0 0 33.3333%; max-width: 33.3333%; padding: 0px 10px !important; }
+.affibloom-grid-4 .affibloom-box { flex: 0 0 25%; max-width: 25%; }
+.affibloom-grid-5 .affibloom-box { flex: 0 0 20%; max-width: 20%; }
+.affibloom-grid-3 .affibloom-box .affibloom-display { padding: 15px !important; }
+@media (max-width: 767.98px) {
+	.affibloom-grid-row { margin: 0px; }
+	.affibloom-grid-row .affibloom-box { flex: 0 0 100%; max-width: 100%; text-align: center !important; padding: 0px !important; margin: 30px 0px 0px !important; }
+	.affibloom-grid-row .affibloom-badge { left: -10px; }
+}
+
 /* The 2-box themes (Task 18E; templates/front/box-2.php): Cutter, Flow, Geek and Splash. */
 .affibloom-box .affibloom-cutter {
 	border: 6px solid var(--affibloom-main);
@@ -1174,4 +1211,139 @@ a.affibloom-button-2:hover {
 	max-height: inherit;
 	width: auto;
 	position: inherit;
+}
+
+
+/*
+ * The grid of a group display (F30 R16, R17, R20; Task DT2), second part: the rest of Lasso's lasso-live.css rules that
+ * name the grid, in Lasso's order, under Affibloom's names (ADR-6): the classic rows (50/33.3/25/20 %, 250 px images,
+ * full width below 768 px), per-theme title and description sizes and, in both modes, a card's own disclosure hidden.
+ */
+.affibloom-grid-row .affibloom-cactus { padding: 20px !important; }
+.affibloom-grid-row .affibloom-cactus .affibloom-title { font-size: 24px !important; }
+.affibloom-grid-row .affibloom-cactus .affibloom-box-5 { display: none; }
+.affibloom-grid-row .affibloom-cactus .affibloom-box-6 { text-align: left; flex: 0 0 100% !important; max-width: 100% !important; }
+.affibloom-grid-row .affibloom-cactus a.affibloom-button-1 { float: inherit; margin: 0px 0px 10px !important; }
+.affibloom-grid-2 .affibloom-cactus .affibloom-box-1 { padding-right: 10px !important; }
+.affibloom-grid-2 .affibloom-cactus .affibloom-box-3 { padding-left: 0px !important; }
+.affibloom-grid-2 .affibloom-cactus .affibloom-box-4 { padding-right: 0px !important; }
+.affibloom-grid-2 .affibloom-cactus .affibloom-title { margin: 0px 0px 10px !important; }
+.affibloom-grid-3 .affibloom-cactus { text-align: center !important; }
+.affibloom-grid-3 .affibloom-cactus .affibloom-box-1,
+.affibloom-grid-3 .affibloom-cactus .affibloom-box-2,
+.affibloom-grid-3 .affibloom-cactus .affibloom-box-3,
+.affibloom-grid-3 .affibloom-cactus .affibloom-box-4 { flex: 0 0 100% !important; max-width: 100% !important; }
+.affibloom-grid-3 .affibloom-cactus .affibloom-box-2 { order: -1; text-align: center !important; }
+.affibloom-grid-row .affibloom-cutter { padding: 20px; text-align: center; }
+.affibloom-grid-row .affibloom-cutter .affibloom-title { font-size: 24px !important; }
+.affibloom-grid-row .affibloom-cutter .affibloom-box-1,
+.affibloom-grid-row .affibloom-cutter .affibloom-box-2 { flex: 0 0 100%; max-width: 100%; }
+.affibloom-grid-row .affibloom-flow { text-align: center; }
+.affibloom-grid-row .affibloom-flow .affibloom-box-1 { flex: 0 0 100%; max-width: 100%; margin-bottom: 10px; }
+.affibloom-grid-row .affibloom-flow .affibloom-box-2 { flex: 0 0 100%; max-width: 100%; padding: 0px !important; }
+.affibloom-grid-row .affibloom-flow .affibloom-image img { width: 100% !important; max-height: none !important; }
+.affibloom-grid-2 .affibloom-geek .affibloom-box-2 { padding: 0px 15px 5px !important; }
+.affibloom-grid-3 .affibloom-geek .affibloom-box-1,
+.affibloom-grid-3 .affibloom-geek .affibloom-box-2 { padding: 0px !important; }
+.affibloom-grid-row .affibloom-geek { text-align: center; }
+.affibloom-grid-row .affibloom-geek .affibloom-box-1 { flex: 0 0 100%; max-width: 100%; order: 1; }
+.affibloom-grid-row .affibloom-geek .affibloom-box-2 { flex: 0 0 100%; max-width: 100%; order: 2; }
+.affibloom-grid-row .affibloom-geek .affibloom-image img { width: 100% !important; max-height: none !important; }
+.affibloom-grid-row .affibloom-geek a.affibloom-button-1,
+.affibloom-grid-row .affibloom-geek a.affibloom-button-2 { max-width: none; margin: 0px 0px 10px !important; }
+.affibloom-grid-row .affibloom-lab .affibloom-badge,
+.affibloom-grid-row .affibloom-lab .affibloom-badge:hover { left: auto; right: 15px; }
+.affibloom-grid-row .affibloom-lab .affibloom-image { float: none; display: block !important; margin: 0px 0px 10px !important; }
+.affibloom-grid-row .affibloom-lab .affibloom-image img { width: 100% !important; height: auto !important; max-width: none !important; max-height: none !important; }
+.affibloom-grid-row .affibloom-lab .affibloom-title { font-size: 20px !important; }
+.affibloom-grid-row .affibloom-lab .affibloom-description ul,
+.affibloom-grid-row .affibloom-lab .affibloom-description ol { text-align: left !important; }
+.affibloom-grid-row .affibloom-disclosure { display: none; }
+.affibloom-grid-row .affibloom-date { display: inline; vertical-align: middle; }
+@media (max-width: 767.98px) {
+	.affibloom-grid-row .affibloom-lab .affibloom-badge,
+	.affibloom-grid-row .affibloom-lab .affibloom-badge:hover { left: auto; right: 0px; }
+}
+.affibloom-grid-row .affibloom-lab.mobile .affibloom-badge,
+.affibloom-grid-row .affibloom-lab.mobile .affibloom-badge:hover { left: auto; right: 0px; }
+.affibloom-grid-row .affibloom-llama { padding: 20px; text-align: center !important; }
+.affibloom-grid-row .affibloom-llama .affibloom-image { float: none; display: block; width: 100% !important; margin: 0px 0px 10px !important; }
+.affibloom-grid-row .affibloom-llama .affibloom-title { font-size: 30px !important; }
+.affibloom-grid-row .affibloom-llama .affibloom-description ul,
+.affibloom-grid-row .affibloom-llama .affibloom-description ol { text-align: left !important; }
+.affibloom-grid-row .affibloom-llama .affibloom-box-2 { text-align: center !important; }
+.affibloom-grid-row .affibloom-disclosure { display: none; }
+.affibloom-grid-row .affibloom-date { vertical-align: middle; }
+.affibloom-grid-row .affibloom-money { padding: 20px !important; }
+.affibloom-grid-row .affibloom-money .affibloom-title { font-size: 24px !important; }
+.affibloom-grid-row .affibloom-money .affibloom-box-5 { display: none; }
+.affibloom-grid-row .affibloom-money .affibloom-box-6 { flex: 0 0 100% !important; max-width: 100% !important; text-align: left !important; }
+.affibloom-grid-row .affibloom-money a.affibloom-button-1 { float: inherit; margin: 0px 0px 10px !important; }
+.affibloom-grid-2 .affibloom-money .affibloom-box-1 { padding-right: 10px !important; }
+.affibloom-grid-2 .affibloom-money .affibloom-box-3 { padding-left: 0px !important; }
+.affibloom-grid-2 .affibloom-money .affibloom-box-4 { padding-right: 0px !important; }
+.affibloom-grid-2 .affibloom-money .affibloom-title { margin: 0px 0px 10px !important; }
+.affibloom-grid-3 .affibloom-money { text-align: center !important; }
+.affibloom-grid-3 .affibloom-money .affibloom-box-1,
+.affibloom-grid-3 .affibloom-money .affibloom-box-2,
+.affibloom-grid-3 .affibloom-money .affibloom-box-3,
+.affibloom-grid-3 .affibloom-money .affibloom-box-4 { flex: 0 0 100% !important; max-width: 100% !important; }
+.affibloom-grid-3 .affibloom-money .affibloom-box-2 { order: -1; text-align: center !important; }
+.affibloom-grid-row .affibloom-splash .affibloom-box-1,
+.affibloom-grid-row .affibloom-splash .affibloom-box-2 { max-width: 100%; flex: 0 0 100% !important; }
+.affibloom-grid-row .affibloom-splash .affibloom-box-1 { order: 1; padding: 0px !important; }
+.affibloom-grid-row .affibloom-splash .affibloom-box-2 { padding: 0px !important; }
+.affibloom-grid-row .affibloom-splash { padding: 20px; text-align: center !important; }
+.affibloom-grid-row .affibloom-splash .affibloom-image { margin: 0px 0px 10px !important; }
+.affibloom-grid-row .affibloom-splash .affibloom-title { font-size: 20px !important; }
+.affibloom-grid-row .affibloom-splash .affibloom-description ul,
+.affibloom-grid-row .affibloom-splash .affibloom-description ol { text-align: left !important; }
+.affibloom-grid-row .affibloom-splash a.affibloom-button-1 { margin: 0px 0px 10px !important; }
+.affibloom-grid-wrap { width: 100%; margin: 0px auto; }
+#demo_display_box .affibloom-grid-row .affibloom-stars { display: none; }
+.affibloom-grid-row .affibloom-title { min-height: 65px; }
+.affibloom-grid-row .affibloom-cactus .affibloom-title { min-height: 65px; }
+.affibloom-grid-row .affibloom-flow .affibloom-title,
+.affibloom-grid-row .affibloom-geek .affibloom-title { min-height: 110px; }
+.affibloom-grid-row .affibloom-lab .affibloom-title { min-height: 50px; }
+.affibloom-grid-row .affibloom-llama .affibloom-title { min-height: 110px; }
+.affibloom-grid-row .affibloom-splash .affibloom-title { min-height: 50px; }
+.affibloom-grid-row .affibloom-description { min-height: 170px; }
+.affibloom-grid-row .affibloom-cutter .affibloom-description { min-height: 155px; }
+.affibloom-grid-row .affibloom-lab .affibloom-description { min-height: 150px; }
+@media screen and (max-width: 1300px) {
+	.affibloom-grid-row .affibloom-money .affibloom-title { min-height: 100px; }
+	.affibloom-grid-row .affibloom-cutter .affibloom-title { min-height: 100px; }
+	.affibloom-grid-row .affibloom-cactus .affibloom-title { min-height: 95px; }
+	.affibloom-grid-row .affibloom-flow .affibloom-title { min-height: 120px; }
+	.affibloom-grid-row .affibloom-geek .affibloom-title { min-height: 150px; }
+	.affibloom-grid-row .affibloom-lab .affibloom-title { min-height: 50px; }
+	.affibloom-grid-row .affibloom-llama .affibloom-title { min-height: 110px; }
+	.affibloom-grid-row .affibloom-splash .affibloom-description { min-height: 170px; }
+	.affibloom-grid-row .affibloom-flow .affibloom-description { min-height: 195px; }
+	.affibloom-grid-row .affibloom-cactus .affibloom-description { min-height: 195px; }
+	.affibloom-grid-row .affibloom-geek .affibloom-description { min-height: 225px; }
+	.affibloom-grid-row .affibloom-lab .affibloom-description { min-height: 170px; }
+	.affibloom-grid-row .affibloom-llama .affibloom-description { min-height: 200px; }
+	.affibloom-grid-row .affibloom-money .affibloom-description { min-height: 195px; }
+	.affibloom-grid-row .affibloom-cutter .affibloom-description { min-height: 195px; }
+}
+@media screen and (max-width: 1200px) {
+	.affibloom-grid-row .affibloom-title { min-height: 160px; }
+	.affibloom-grid-row .affibloom-splash .affibloom-title { min-height: 80px; }
+	.affibloom-grid-row .affibloom-geek .affibloom-title { min-height: 185px; }
+	.affibloom-grid-row .affibloom-money .affibloom-title { min-height: 105px; }
+	.affibloom-grid-row .affibloom-cactus .affibloom-title { min-height: 95px; }
+	.affibloom-grid-row .affibloom-cutter .affibloom-title { min-height: 95px; }
+	.affibloom-grid-row .affibloom-flow .affibloom-title { min-height: 150px; }
+	.affibloom-grid-row .affibloom-llama .affibloom-title { min-height: 150px; }
+	.affibloom-grid-row .affibloom-description { min-height: 210px; }
+	.affibloom-grid-row .affibloom-splash .affibloom-description { min-height: 200px; }
+	.affibloom-grid-row .affibloom-cutter .affibloom-description { min-height: 240px; }
+	.affibloom-grid-row .affibloom-flow .affibloom-description { min-height: 220px; }
+	.affibloom-grid-row .affibloom-money .affibloom-description { min-height: 220px; }
+	.affibloom-grid-row .affibloom-cactus .affibloom-description { min-height: 220px; }
+	.affibloom-grid-row .affibloom-geek .affibloom-description { min-height: 245px; }
+	.affibloom-grid-row .affibloom-lab .affibloom-description { min-height: 195px; }
+	.affibloom-grid-row .affibloom-llama .affibloom-description { min-height: 220px; }
 }

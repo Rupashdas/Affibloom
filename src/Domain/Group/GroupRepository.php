@@ -48,6 +48,13 @@ interface GroupRepository {
 	public function find_id_by_name( string $name ): ?int;
 
 	/**
+	 * The ID of the group with this slug, or null (a group display's `group`, F30 D1).
+	 *
+	 * @param string $slug The slug.
+	 */
+	public function find_id_by_slug( string $slug ): ?int;
+
+	/**
 	 * Makes a group. The caller has checked the name.
 	 *
 	 * @param string $name        The name.

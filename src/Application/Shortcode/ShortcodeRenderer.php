@@ -12,14 +12,20 @@ namespace Affibloom\Application\Shortcode;
 use Affibloom\Application\Box\BoxBuilder;
 use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\BoxView;
+use Affibloom\Application\Box\GridView;
 use Affibloom\Application\Box\RepointResolver;
+use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\Amazon\ShownPrice;
 use Affibloom\Domain\Box\BoxOverrides;
+use Affibloom\Domain\Box\ElementVisibility;
 use Affibloom\Domain\Box\LayoutFamily;
+use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Display\GridDisclosure;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -31,6 +37,7 @@ use Affibloom\Domain\Shortcode\AnchorId;
 use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
 use Affibloom\Domain\Shortcode\FieldPart;
+use Affibloom\Domain\Shortcode\GroupAttributes;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -50,6 +57,7 @@ final class ShortcodeRenderer {
 	 * @param DisplaySettingsService  $display  The Display settings.
 	 * @param SettingsRepository      $settings The site's settings.
 	 * @param BoxBuilder              $builder  The box engine.
+	 * @param GroupService            $groups   The groups, for a group display's products.
 	 */
 	public function __construct(
 		private readonly ProductRepository $catalog,
@@ -59,7 +67,77 @@ final class ShortcodeRenderer {
 		private readonly DisplaySettingsService $display,
 		private readonly SettingsRepository $settings,
 		private readonly BoxBuilder $builder,
+		private readonly GroupService $groups,
 	) {}
+
+	/**
+	 * A group shown as a grid (F30 R16-R19, R55, R61; D5, D16, D17): the group's shown products as Single boxes in the
+	 * Grid settings, each with the shortcode's per-box values but not its `tracking_id` (Lasso reloads a group's
+	 * products, R5) or `anchor_id`; the wrapper with the Grid settings (customised), then the grid's disclosure. An
+	 * unknown or empty group is the wrapper alone (and the disclosure when it shows).
+	 *
+	 * @param DisplayRequest $request The shortcode's request.
+	 * @param int            $number  The display's number among the page's `[affibloom]` displays, from 1.
+	 * @param int            $post_id The post it is in (0 outside one).
+	 */
+	public function grid( DisplayRequest $request, int $number, int $post_id ): GridView {
+		$group    = GroupAttributes::of( $request->attributes );
+		$display  = $this->display->current();
+		$settings = $this->settings->get();
+		$advanced = $display->advanced();
+		$config   = $display->config( DisplayType::grid() );
+		$per_card = BoxOverrides::from_shortcode( array_diff_key( $request->attributes, array_flip( array( 'tracking_id', 'anchor_id' ) ) ) );
+
+		$cards = array();
+		foreach ( $this->groups->shown( $group->group, $group->limit, $group->latest ) as $product ) {
+			$cards[] = $this->built( $product, $per_card, $post_id, DisplayType::grid() )->as_card();
+		}
+
+		$shows = GridDisclosure::shows( $advanced, $group->disclosure, $settings->bool( 'show_disclosure_grid' ) );
+		$text  = $settings->string( 'disclosure_text' );
+		// R16: the wrapper carries the Grid settings without the price flag; each card has its own (R18).
+		$hidden = array_values( array_diff( ElementVisibility::of( $config->elements(), $per_card )->hidden(), array( 'price' ) ) );
+
+		return new GridView(
+			anchor: AnchorId::of( $request->overrides->anchor_id, $group->group, $number ),
+			classes: 'affibloom-grid-wrap' . ( $advanced ? ' affibloom-advanced' : '' ),
+			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), $shows, $hidden ) : array(),
+			cards: $cards,
+			disclosure: $shows && '' !== trim( $text ) ? $text : null,
+		);
+	}
+
+	/**
+	 * One product's box in a display type's settings.
+	 *
+	 * @param Product      $product   The product.
+	 * @param BoxOverrides $overrides The box's own values.
+	 * @param int          $post_id   The post it is in.
+	 * @param DisplayType  $type      Single, or Grid for a grid's card.
+	 */
+	private function built( Product $product, BoxOverrides $overrides, int $post_id, DisplayType $type ): BoxView {
+		$values = $this->catalog->fields( (int) $product->id );
+
+		return $this->builder->build(
+			$product,
+			$this->display->current(),
+			$this->settings->get(),
+			$overrides,
+			$post_id,
+			null === $values ? null : new BoxFields( $values, $this->fields->load() ),
+			$this->stored( $product ),
+			$type
+		);
+	}
+
+	/**
+	 * An Amazon product's stored data, or null.
+	 *
+	 * @param Product $product The product.
+	 */
+	private function stored( Product $product ): ?AmazonProduct {
+		return ProductType::Amazon === $product->type && '' !== $product->asin ? $this->amazon->find( $product->asin, $product->amazon_country ) : null;
+	}
 
 	/**
 	 * The published product an `amazon_url` (its ASIN and store) or a `geni_url` (its destination) names, or null (A6, A7).
@@ -156,18 +234,9 @@ final class ShortcodeRenderer {
 			return null;
 		}
 
-		$values    = $this->catalog->fields( (int) $product->id );
-		$stored    = ProductType::Amazon === $product->type && '' !== $product->asin ? $this->amazon->find( $product->asin, $product->amazon_country ) : null;
+		$stored    = $this->stored( $product );
 		$overrides = $request->overrides;
-		$view      = $this->builder->build(
-			$product,
-			$this->display->current(),
-			$this->settings->get(),
-			$overrides,
-			$post_id,
-			null === $values ? null : new BoxFields( $values, $this->fields->load() ),
-			$stored
-		);
+		$view      = $this->built( $product, $overrides, $post_id, DisplayType::single() );
 
 		// D5: a deterministic anchor (the block keeps Lasso's uniqid()).
 		$view = $view->with_anchor( AnchorId::of( $overrides->anchor_id, (int) $product->id, $number ) );

@@ -11,6 +11,429 @@
  * @package Affibloom
  */
 
+/*
+ * The grid of a group display, customised settings (F30 R16, R18-R20; Task DT2), first part: the grid selectors that
+ * Lasso's lasso-display-v2-frontend.css writes into the Single box's own rules (density sizes, colours, the date …),
+ * here ahead of those rules, so a later Single rule still wins a tie as in Lasso (the phone date's block). The rules
+ * written for the grid alone are at the end of this file.
+ */
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cactus,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-money,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cutter,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-flow,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-geek,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-lab,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-llama,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-splash { padding: var(--affibloom-density-padding) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row a.affibloom-title { font-size: var(--affibloom-density-title-size) !important; margin-top: var(--affibloom-density-space-between) !important; margin-bottom: var(--affibloom-density-space-between) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-description { font-size: var(--affibloom-density-desc-size) !important; margin-top: var(--affibloom-density-space-between) !important; margin-bottom: var(--affibloom-density-space-between) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-price { font-size: var(--affibloom-density-price-size) !important; }
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-button-2 { font-size: var(--affibloom-density-button-size) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-image img { max-height: var(--affibloom-density-image-height) !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-density-title-lines]:not([data-density-title-lines="0"]) .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-density-title-lines]:not([data-density-title-lines="0"]) a.affibloom-title { -webkit-box-orient: vertical; overflow: hidden; -webkit-line-clamp: var(--affibloom-density-title-lines); display: -webkit-box !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-density-desc-lines]:not([data-density-desc-lines="0"]) .affibloom-description { -webkit-box-orient: vertical; overflow: hidden; -webkit-line-clamp: var(--affibloom-density-desc-lines); display: -webkit-box !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-llama .affibloom-box-2 { flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; width: 100%; display: flex !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-4 { display: flex !important; align-items: center !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-3 { justify-content: flex-start !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-4 { justify-content: flex-end !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money a.affibloom-button-2 { vertical-align: middle; display: inline-block !important; width: auto !important; max-width: none !important; margin: 0px !important; float: none !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-4 { flex: 0 0 50% !important; max-width: 50% !important; width: 50% !important; align-self: stretch !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash .affibloom-button-2 { vertical-align: middle; display: inline-block !important; width: auto !important; max-width: none !important; margin: 0px !important; float: none !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash .affibloom-button-1 { float: left !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash .affibloom-button-2 { float: right !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash .affibloom-end { clear: both; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-4 { flex: 0 0 auto !important; max-width: none !important; width: auto !important; text-align: left !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-4 { margin-left: 8px; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-3 { margin-left: auto; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-4 { margin-right: auto; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-3 { margin-left: auto; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-4 { margin-left: 8px; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-4 { margin-left: 8px; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-llama .affibloom-box-2 { flex-wrap: wrap; gap: 8px; justify-content: flex-start; max-width: 100%; display: flex !important; width: auto !important; text-align: left !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-llama .affibloom-box-2 { flex-wrap: wrap; gap: 8px; justify-content: center; display: flex !important; width: 100% !important; text-align: center !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-llama .affibloom-box-2 { flex-wrap: wrap; gap: 8px; justify-content: flex-end; display: flex !important; width: 100% !important; text-align: right !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-flow .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cutter .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-geek .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-splash .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-splash .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-flow .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cutter .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-geek .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-splash .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-splash .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-flow .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cutter .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-geek .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-splash .affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-splash .affibloom-button-2 { vertical-align: middle; display: inline-block !important; width: auto !important; max-width: none !important; margin: 0px !important; float: none !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-splash .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-splash .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-flow .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cutter .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-geek .affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-splash .affibloom-button-2 { margin-left: 8px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-splash .affibloom-box-2 { text-align: center; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-splash .affibloom-box-2 { text-align: right; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-splash .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-splash .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-splash .affibloom-end { flex-wrap: wrap; align-items: flex-start; clear: both; display: flex !important; justify-content: space-between !important; width: 100% !important; text-align: left !important; }
+@media (max-width: 767.98px) {
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-4 { flex: 0 0 50% !important; max-width: 50% !important; width: 50% !important; text-align: left !important; }
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money .affibloom-box-4 { text-align: right !important; }
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-3,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-4 { flex: 0 0 auto !important; max-width: none !important; width: auto !important; text-align: left !important; }
+}
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-splash a.affibloom-button-2 { box-sizing: border-box; display: block !important; width: 100% !important; max-width: 100% !important; float: none !important; margin-left: 0px !important; margin-right: 0px !important; }
+@media (max-width: 767.98px) {
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+	.affibloom-grid-wrap.affibloom-advanced[data-layout-cta-width="full"] .affibloom-display.affibloom-money .affibloom-box-4 { margin-top: var(--affibloom-density-gap); }
+}
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-cutter .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-flow .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-geek .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-splash .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-cactus .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-money .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-cutter .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-flow .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-geek .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-splash .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-cactus .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-money .affibloom-box-2 { order: -3 !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-cactus .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-money .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-cactus .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-money .affibloom-box-1 { order: -2 !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-cutter .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-flow .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-geek .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-splash .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-cactus .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-money .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-cutter .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-flow .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-geek .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-splash .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-cactus .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-money .affibloom-box-2 { order: -2 !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-cactus .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-money .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-cactus .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-money .affibloom-box-1 { order: -3 !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-lab .affibloom-box-1 .affibloom-image,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-llama .affibloom-box-1 .affibloom-image,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-lab .affibloom-box-1 .affibloom-image,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="top"] .affibloom-display.affibloom-llama .affibloom-box-1 .affibloom-image { order: -1 !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-lab .affibloom-box-1 .affibloom-image,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-llama .affibloom-box-1 .affibloom-image,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-lab .affibloom-box-1 .affibloom-image,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-llama .affibloom-box-1 .affibloom-image { order: 1 !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-cactus .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-cactus .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-money .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-money .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-cutter .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-flow .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-geek .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-splash .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-lab .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-lab .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-llama .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-llama .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-llama .affibloom-box-3 { flex: 0 0 auto !important; max-width: 100% !important; width: 100% !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-lab .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-display.affibloom-llama .affibloom-box-1 { display: flex !important; flex-direction: column !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-hide-badge="1"] .affibloom-badge:not(.affibloom-v2-link-badge-override),
+article .affibloom-grid-wrap.affibloom-advanced[data-hide-title="1"] .affibloom-title,
+article .affibloom-grid-wrap.affibloom-advanced[data-hide-title="1"] a.affibloom-title { display: none !important; }
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cactus,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-money,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cutter,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-flow,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-geek,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-lab,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-llama,
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-splash,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display { position: relative; background-color: var(--affibloom-background) !important; color: var(--affibloom-title) !important; }
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cactus :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-money :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cutter :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-flow :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-geek :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-lab :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-llama :is(.affibloom-title, a.affibloom-title),
+article .affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-splash :is(.affibloom-title, a.affibloom-title),
+.affibloom-grid-wrap.affibloom-advanced .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-title { color: var(--affibloom-title) !important; }
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-button-2 { background: var(--affibloom-button) !important; color: var(--affibloom-button-text) !important; }
+.affibloom-grid-wrap.affibloom-advanced a.affibloom-button-2 { background: var(--affibloom-secondary-button) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-badge { display: inline-block !important; background-color: var(--affibloom-main) !important; color: var(--affibloom-button-text) !important; top: -18px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display,
+.affibloom-box .affibloom-grid-wrap.affibloom-advanced { overflow: visible !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cutter { border-color: var(--affibloom-main) !important; box-shadow: 0 0 5px 0 var(--affibloom-main) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-disclosure { display: inline !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-date { display: inline !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cactus .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-money .affibloom-box-6 { text-align: right !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-splash .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-lab .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-llama .affibloom-box-3 { width: 100%; text-align: right; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-align="center"] .affibloom-date,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-align="center"] .affibloom-disclosure { text-align: center; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-align="left"] .affibloom-date,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-align="left"] .affibloom-disclosure { text-align: left; }
+.affibloom-display.affibloom-advanced[data-layout-orientation].affibloom-lab:not(.affibloom-grid-row *) .affibloom-box-2 { margin-top: var(--affibloom-density-space-between) !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus::before,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus::before,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus::before,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money::before,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money::before,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money::before { content: ""; flex-basis: 100%; width: 0px; height: 0px; overflow: hidden; order: 15; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-4 { order: 10; flex: 0 0 auto !important; max-width: none !important; width: auto !important; text-align: left !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-4 { order: 11; margin-left: 8px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-3 { margin-left: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-4 { order: 11; margin-right: auto !important; margin-left: 8px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-3 { margin-left: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-4 { order: 11; margin-left: 8px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-5 { order: 20; flex: 0 0 50% !important; max-width: 50% !important; width: 50% !important; text-align: left !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money .affibloom-box-6 { order: 21; flex: 0 0 50% !important; max-width: 50% !important; width: 50% !important; text-align: right !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"] .affibloom-display.affibloom-money a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"] .affibloom-display.affibloom-money a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"] .affibloom-display.affibloom-money a.affibloom-button-2 { float: none !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-hide-image="1"] .affibloom-display.affibloom-cactus .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-image="1"] .affibloom-display.affibloom-money .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-primary="1"] .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-primary="1"] .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-secondary="1"] .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-secondary="1"] .affibloom-display.affibloom-money .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-disclosure="1"] .affibloom-display.affibloom-cactus .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-disclosure="1"] .affibloom-display.affibloom-money .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-timestamp="1"] .affibloom-display.affibloom-cactus .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-hide-timestamp="1"] .affibloom-display.affibloom-money .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cactus[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-money[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-primary="1"] .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-secondary="1"] .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-primary="1"] .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-secondary="1"] .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-primary="1"] .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-secondary="1"] .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-primary="1"] .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-hide-secondary="1"] .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-primary="1"] .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-secondary="1"] .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-primary="1"] .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-secondary="1"] .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-primary="1"] .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-secondary="1"] .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-primary="1"] .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-hide-secondary="1"] .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-primary="1"] .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-secondary="1"] .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-primary="1"] .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-secondary="1"] .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-primary="1"] .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-secondary="1"] .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-primary="1"] .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-hide-secondary="1"] .affibloom-display.affibloom-splash a.affibloom-button-2 { display: none !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-cutter .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-cutter .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-flow .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-flow .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-geek .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-geek .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-splash .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-splash .affibloom-badge ~ .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-cactus .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-cactus .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-money .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-money .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-lab .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="left"] .affibloom-display.affibloom-lab .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-lab .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="right"] .affibloom-display.affibloom-llama .affibloom-badge ~ .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-display.affibloom-llama .affibloom-badge ~ .affibloom-box-1 { padding-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-stars,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-end { margin-top: var(--affibloom-density-space-between) !important; }
+
+
 .affibloom-advanced.affibloom-cactus,
 .affibloom-advanced.affibloom-money,
 .affibloom-advanced.affibloom-cutter,
@@ -813,3 +1236,439 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 .affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-lab .affibloom-badge ~ .affibloom-box-1 {
 	padding-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
 }
+
+
+/*
+ * The grid of a group display, customised settings (F30 R16, R18-R20; Task DT2), second part: every rule of Lasso's
+ * lasso-display-v2-frontend.css written for the grid alone, in Lasso's order, under Affibloom's names (ADR-6), taken
+ * from the stylesheet as the browser reads it. Cards sit in one CSS grid of up to the site's column count, never
+ * narrower than 240 px, one column below 768 px, row gap at least 30 px, 30 px top room for the badge ribbon, the
+ * buttons in a shared row; the per-theme and per-layout rules follow.
+ */
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row { --affibloom-grid-min-column-width: 240px; grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--affibloom-grid-min-column-width), calc((100% - (var(--affibloom-layout-columns) - 1) * var(--affibloom-density-gap)) / var(--affibloom-layout-columns)))), 1fr)); width: 100%; justify-content: stretch; justify-items: stretch; gap: var(--affibloom-density-gap) !important; display: grid !important; margin: 0px !important; }
+@media (max-width: 767.98px) {
+	.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row { grid-template-columns: 1fr !important; }
+}
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-geek .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display.affibloom-geek .affibloom-box-2 { padding-left: 0px !important; padding-right: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row > * { min-width: 0px; justify-self: stretch; max-width: none !important; width: 100% !important; flex: 0 0 auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row :is(.affibloom-title, a.affibloom-title) { hyphens: none; overflow-wrap: break-word; word-break: normal; }
+:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields,
+:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields :is(.affibloom-fields-pros, .affibloom-fields-cons) li { font-size: var(--affibloom-density-desc-size) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-box { height: 100%; display: flex; flex-direction: column; flex: 0 0 auto !important; max-width: none !important; width: 100% !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-box.affibloom-image-container { margin: 0 auto var(--affibloom-density-space-between) auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display { margin: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display { display: flex; flex-wrap: wrap; flex: 1 1 auto; height: 100%; min-height: 0px; align-content: stretch; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cactus,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-money,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-lab,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-llama { flex-flow: column; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek .affibloom-box-2 { grid-template-columns: minmax(0px, 1fr) minmax(0px, 1fr); column-gap: 8px; min-height: 0px; align-content: start; display: grid !important; flex: 1 1 auto !important; width: 100% !important; max-width: 100% !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2),
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2),
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2),
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2) { grid-column: 1 / -1; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash .affibloom-box-2::before,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow .affibloom-box-2::before,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter .affibloom-box-2::before,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek .affibloom-box-2::before { content: none !important; display: none !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek a.affibloom-button-2 { grid-row: auto; flex: 0 0 auto !important; width: auto !important; max-width: 100% !important; float: none !important; margin: 0px !important; transform: none !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek a.affibloom-button-1 { grid-column: 1; place-self: end start; margin-top: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek a.affibloom-button-2 { grid-column: 2; place-self: end; margin-top: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-splash .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-geek .affibloom-end { grid-column: 1 / -1; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cactus::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-money::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-lab::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-llama::after { content: ""; order: 1; flex: 1 1 auto; width: 100%; min-height: 0px; height: auto; pointer-events: none; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cactus .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cactus .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-money .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-money .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-llama .affibloom-box-2 { order: 2; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cactus .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-cactus .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-money .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-money .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-lab .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-llama .affibloom-box-3 { order: 3; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display:not(.affibloom-lab) .affibloom-badge { top: -18px !important; left: -10px !important; right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-lab .affibloom-badge { top: -18px !important; left: auto !important; right: 15px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-display.affibloom-lab .affibloom-badge::after { left: auto !important; right: 0px !important; border-width: 0px 0px 7px 10px !important; border-color: rgba(0, 0, 0, 0) var(--affibloom-main) !important; }
+.affibloom-grid-wrap.affibloom-advanced { --affibloom-badge-reserve: 20px; padding-top: 30px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-box { margin: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-row { row-gap: max(var(--affibloom-density-gap), 30px) !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row + .affibloom-grid-row { margin-top: max(var(--affibloom-density-gap), 30px) !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) { display: flex !important; flex-flow: wrap !important; align-items: flex-start !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 { display: contents !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > * { order: 1 !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > :not(a.affibloom-button-1, a.affibloom-button-2) { flex: 0 0 100% !important; max-width: 100% !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > .affibloom-clear { display: none !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-1 { order: 2 !important; flex: 0 0 100% !important; max-width: 100% !important; margin-top: var(--affibloom-density-space-between) !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-1,
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 { order: 3 !important; flex: 0 0 auto !important; float: none !important; margin-top: var(--affibloom-density-space-between) !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 { order: 5 !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > .affibloom-end,
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > :is(.affibloom-single-brag, .affibloom-brag) { order: 6 !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-2 > :first-child { margin-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) { column-gap: 8px; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-1,
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 { margin-left: 0px !important; margin-right: 0px !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-button-align="spread"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) { justify-content: flex-start !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-button-align="left"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) { justify-content: flex-start !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-button-align="center"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) { justify-content: center !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-button-align="right"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) { justify-content: flex-end !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-geek:not(.affibloom-grid-row *) .affibloom-box-2::after { content: ""; flex: 0 0 100%; height: 0px; order: 4; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-geek:not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-1,
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-geek:not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 { flex: 0 1 100% !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-cta-width="full"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-1,
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-cta-width="full"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 { flex: 0 0 100% !important; margin-left: 0px !important; margin-right: 0px !important; }
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-cta-width="full"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 { margin-top: 6px !important; }
+.affibloom-display.affibloom-advanced:is(.affibloom-flow, .affibloom-lab):not(.affibloom-grid-row *) > .affibloom-badge { border-radius: 4px; left: 0px !important; right: auto !important; top: 0px !important; }
+.affibloom-display.affibloom-advanced.affibloom-lab:not(.affibloom-grid-row *) > .affibloom-badge { left: auto !important; right: 0px !important; }
+.affibloom-display.affibloom-advanced:is(.affibloom-flow, .affibloom-lab):not(.affibloom-grid-row *) > .affibloom-badge::after { display: none !important; }
+.affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1,
+.affibloom-display.affibloom-advanced[data-layout-image-position="top"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1,
+.affibloom-display.affibloom-advanced[data-layout-image-position="top"].affibloom-lab:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1 .affibloom-image { margin-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important; }
+.affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-2 { padding-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important; }
+@media (max-width: 767.98px) {
+	.affibloom-display.affibloom-advanced:not(.affibloom-flow, .affibloom-lab, .affibloom-grid-row *) { --affibloom-badge-reserve: 30px; }
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .ls-list-title .affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .ls-list-title a.affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-grid-row .affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-grid-row a.affibloom-title { font-size: calc(var(--affibloom-density-title-size) * 0.75) !important; }
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-description,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-grid-row .affibloom-description,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-fields :is(.affibloom-fields-pros, .affibloom-fields-cons) li { font-size: calc(var(--affibloom-density-desc-size) * 0.9375) !important; }
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-price,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-grid-row .affibloom-price { font-size: calc(var(--affibloom-density-price-size) * 0.9375) !important; }
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-button-1,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-button-2 { font-size: calc(var(--affibloom-density-button-size) * 0.9375) !important; }
+}
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek a.affibloom-button-2 { float: none !important; display: inline-block !important; width: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek a.affibloom-button-1 { margin: 0px auto 0px 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-display.affibloom-geek a.affibloom-button-2 { align-self: end; margin: 0px !important; transform: none !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-geek .affibloom-box-2 { flex: 1 1 auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-splash .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-flow .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-cutter .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-grid-row .affibloom-display.affibloom-geek .affibloom-box-1 { flex: 0 0 auto !important; height: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab > .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab > .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama > .affibloom-box-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama > .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-orientation][data-layout-button-align] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama > .affibloom-box-3 { flex: 0 0 auto !important; max-width: 100% !important; width: 100% !important; min-height: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-2 { display: block !important; box-sizing: border-box !important; text-align: center !important; float: none !important; max-width: 100% !important; min-width: 0px !important; margin-left: 0px !important; margin-right: 0px !important; margin-bottom: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { display: flex !important; flex-flow: wrap !important; place-content: flex-start center !important; align-items: center !important; gap: var(--affibloom-density-space-between, 10px) !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2),
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2),
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2),
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2 > :not(a.affibloom-button-1):not(a.affibloom-button-2) { flex: 0 0 100% !important; width: 100% !important; margin-top: 0px !important; margin-bottom: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-2 { width: fit-content !important; flex: 0 0 auto !important; align-self: center !important; margin-top: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-top: 6px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-left: auto !important; margin-right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2 { display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 6px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-2 { width: 100% !important; align-self: stretch !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-top: 6px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-1 { margin-top: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-end { margin-top: var(--affibloom-density-space-between, 10px) !important; width: 100% !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-end { flex: 0 0 100% !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="full"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-end { flex: 0 0 auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { gap: var(--affibloom-density-space-between, 10px) !important; align-items: center !important; flex-wrap: wrap !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-2 { margin-top: 0px !important; margin-bottom: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus > .affibloom-box-6,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-3,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-4,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-5,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money > .affibloom-box-6 { padding-left: 0px !important; padding-right: 0px !important; margin-left: 0px !important; margin-right: 0px !important; text-align: inherit !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-box { padding: 0px !important; height: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus::before,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money::before { display: none !important; flex-basis: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama a.affibloom-button-2 { padding-left: 10px !important; padding-right: 10px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-title,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-description,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-fields,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-price,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-fields-pros,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-fields-cons,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-end,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-end { min-height: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-splash,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-flow,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-cutter,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-geek,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-cactus,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-money,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-lab,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-llama { height: auto !important; flex: 0 0 auto !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-splash::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-flow::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-cutter::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-geek::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-cactus::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-money::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-lab::after,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-llama::after { display: none !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-splash a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-flow a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-cutter a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row.affibloom-grid-1 .affibloom-box .affibloom-display.affibloom-geek a.affibloom-button-1 { margin-top: var(--affibloom-density-space-between, 10px) !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { justify-content: space-between !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-left: auto !important; margin-right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1 { margin-left: 0px !important; margin-right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="spread"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-left: auto !important; margin-right: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { justify-content: flex-start !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="left"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-left: 0px !important; margin-right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { justify-content: center !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="center"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-left: auto !important; margin-right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-splash .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-flow .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cutter .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-geek .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-lab .affibloom-box-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-llama .affibloom-box-2 { justify-content: flex-end !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-cactus a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align="right"][data-layout-cta-width="hug"][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-money a.affibloom-button-2 { margin-left: auto !important; margin-right: 0px !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-grid-row { margin-left: auto !important; margin-right: auto !important; }
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-advanced[data-hide-primary="1"] a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position] .affibloom-grid-row .affibloom-box .affibloom-display.affibloom-advanced[data-hide-secondary="1"] a.affibloom-button-2,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position][data-hide-primary="1"] .affibloom-grid-row .affibloom-box .affibloom-display a.affibloom-button-1,
+.affibloom-grid-wrap.affibloom-advanced[data-layout-button-align][data-layout-cta-width][data-layout-image-position][data-hide-secondary="1"] .affibloom-grid-row .affibloom-box .affibloom-display a.affibloom-button-2 { display: none !important; }
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display:is(.affibloom-cactus, .affibloom-money) > .affibloom-box-4 + :is(.affibloom-box-5, .affibloom-box-6),
+.affibloom-grid-wrap.affibloom-advanced .affibloom-display:is(.affibloom-lab, .affibloom-llama) > .affibloom-box-3 { margin-top: 10px !important; }
+.affibloom-display.affibloom-advanced.affibloom-flow:not(.affibloom-grid-wrap .affibloom-display) .affibloom-box-2 > a.affibloom-button-1:last-of-type,
+.affibloom-display.affibloom-advanced.affibloom-flow:not(.affibloom-grid-wrap .affibloom-display) .affibloom-box-2 > a.affibloom-button-2 { margin-bottom: 10px !important; }
+.affibloom-display.affibloom-advanced.affibloom-flow:not(.affibloom-grid-wrap .affibloom-display) .affibloom-box-2 > .affibloom-end { margin-top: 0px !important; }

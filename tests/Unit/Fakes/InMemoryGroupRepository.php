@@ -49,6 +49,15 @@ final class InMemoryGroupRepository implements GroupRepository {
 		return null;
 	}
 
+	public function find_id_by_slug( string $slug ): ?int {
+		foreach ( $this->groups as $group ) {
+			if ( $group->slug === $slug ) {
+				return $group->id;
+			}
+		}
+		return null;
+	}
+
 	public function find( int $id ): ?Group {
 		return $this->groups[ $id ] ?? null;
 	}

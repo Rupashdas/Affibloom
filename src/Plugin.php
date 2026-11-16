@@ -108,6 +108,7 @@ use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\SchemaMarkup;
 use Affibloom\Interface\Front\WidgetShortcodes;
 use Affibloom\Interface\Front\BoxHtml;
+use Affibloom\Interface\Front\GridHtml;
 use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
@@ -373,8 +374,9 @@ final class Plugin {
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
 			new AffibloomShortcode(
-				new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder ),
-				$box_html
+				new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups ),
+				$box_html,
+				new GridHtml( dirname( $this->file ) . '/templates/front', $box_html )
 			),
 			new WidgetShortcodes(),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
