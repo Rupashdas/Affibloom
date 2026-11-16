@@ -45,8 +45,9 @@ test.describe( 'F30 Display types', () => {
 		test( 'AC2 type="grid" shows the group in order, in the Grid settings, in columns', async ( { page } ) => {
 			const ids = [ 'one', 'two', 'three', 'four' ].map( ( n ) => createProduct( { name: `F30 AC2 ${ n }` } ) );
 			const draft = createProduct( { name: 'F30 AC2 draft' } );
-			wp( 'post', 'update', String( draft ), '--post_status=draft' );
+			// A group takes only published products (GroupService::add), so the member becomes a draft after it joins.
 			const slug = createGroup( `F30 AC2 ${ Date.now() }`, [ ids[ 2 ], ids[ 0 ], draft, ids[ 3 ], ids[ 1 ] ] );
+			wp( 'post', 'update', String( draft ), '--post_status=draft' );
 			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, grid: { theme: 'Cutter', elements: { price: false } } } ), '--format=json' );
 			try {
 				const path = newPostWith( `[affibloom type="grid" group="${ slug }"]` );
@@ -88,6 +89,8 @@ test.describe( 'F30 Display types', () => {
 			const id = createProduct( { name: 'F30 AC4', disclosure: 'Card disclosure.' } );
 			const slug = createGroup( `F30 AC4 ${ Date.now() }`, [ id ] );
 			setSettings( { show_disclosure_grid: true, disclosure_text: 'Grid disclosure.' } );
+			// disclosure="disable" is read with customised settings only (R17); other specs may leave the defaults.
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, grid: { density: { preset: 'spacious', values: {} } } } ), '--format=json' );
 			try {
 				await page.goto( newPostWith( `[affibloom group="${ slug }"][affibloom group="${ slug }" disclosure="disable"]` ) );
 				const grids = page.locator( '.affibloom-grid-wrap' );
@@ -99,6 +102,7 @@ test.describe( 'F30 Display types', () => {
 				await expect( grids.nth( 0 ).locator( ':scope > .affibloom-disclosure' ) ).toHaveCount( 0 );
 				await expect( grids.nth( 1 ).locator( ':scope > .affibloom-disclosure' ) ).toHaveCount( 1 );
 			} finally {
+				wp( 'option', 'delete', 'affibloom_display' );
 				setSettings( { show_disclosure_grid: false, disclosure_text: 'We earn a commission if you make a purchase, at no additional cost to you.' } );
 			}
 		} );
@@ -181,7 +185,11 @@ test.describe( 'F30 Display types', () => {
 				await page.goto( path );
 				await expect( list ).toHaveCSS( 'overflow-x', 'auto' );
 				await expect( list ).toHaveCSS( 'flex-wrap', 'nowrap' );
-				const [ listWidth, cardWidth ] = await list.evaluate( ( l ) => [ l.clientWidth, l.querySelector( 'li' )!.getBoundingClientRect().width ] );
+				// 62 % of the list's content box (the flex basis), so its padding is left out.
+				const [ listWidth, cardWidth ] = await list.evaluate( ( l ) => {
+					const style = getComputedStyle( l );
+					return [ l.clientWidth - parseFloat( style.paddingLeft ) - parseFloat( style.paddingRight ), l.querySelector( 'li' )!.getBoundingClientRect().width ];
+				} );
 				expect( Math.abs( cardWidth / listWidth - 0.62 ) ).toBeLessThan( 0.02 );
 
 				wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, list: { layout: { mobileOverflow: 'stack' } } } ), '--format=json' );

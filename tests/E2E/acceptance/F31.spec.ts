@@ -18,7 +18,7 @@ test.describe( 'F31 Shortcode', () => {
 		const draft = createProduct( { name: 'F31 AC1 draft' } );
 		wp( 'post', 'update', String( draft ), '--post_status=draft' );
 		const trashed = createProduct( { name: 'F31 AC1 trashed' } );
-		wp( 'post', 'delete', String( trashed ) );
+		wp( 'post', 'update', String( trashed ), '--post_status=trash' ); // products do not take WP-CLI's trash
 
 		await page.goto( newPostWith( boxBlock( id ) + `\n\n[affibloom id="${ id }"]\n\n[affibloom id="${ other }" slug="${ slug }" theme="cactus"]\n\n[affibloom id="${ draft }"][affibloom id="${ trashed }"][affibloom id="999999"]` ) );
 		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 3 );
@@ -64,7 +64,7 @@ test.describe( 'F31 Shortcode', () => {
 	// AC3 (Task 18S3): Lasso's value attributes change this box only.
 	test( "AC3 [affibloom]'s price, Prime, rating, Pros & Cons, fields, disclosure, style and tracking ID", async ( { page } ) => {
 		const id = createProduct( { name: 'F31 AC3', price: '$89.99', show_price: '1', rating: '4.5', fields: [ { field: 3, value: 'Small' } ] } );
-		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { proscons: true, price: true } } } ), '--format=json' );
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', density: { preset: 'spacious', values: {} }, elements: { proscons: true, price: true } } } ), '--format=json' );
 		setSettings( { show_discount_pricing: true } );
 		try {
 			await page.goto( newPostWith( `[affibloom id="${ id }" price="$59" basis_price="$80" prime="1" rating="3" pros="Light-br-Quick" cons_label="Watch out" disclosure_text="Box disclosure." style="mobile"]` ) );
