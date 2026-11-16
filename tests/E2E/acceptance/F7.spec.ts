@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
 
 // F7 Per-box text (docs/features/F7/requirements.md).
 test.describe( 'F7 Per-box text', () => {
-	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
+	// The box's hides print the wrapper's data-hide-* flags, which only advanced (customised) settings print (R53).
+	// Earlier specs delete the Display option, so each test stores customised settings of its own.
+	test.beforeEach( async ( { context } ) => {
+		await blockTrackers( context );
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', density: { preset: 'spacious', values: {} } } } ), '--format=json' );
+	} );
 
 	test( "AC1 a box's badge overrides the product's, and can hide it", async ( { page } ) => {
 		const id = createProduct( { name: 'F7 AC1', badge: 'Product badge' } );

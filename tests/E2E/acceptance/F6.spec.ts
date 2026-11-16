@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import { blockTrackers, boxBlock, createProduct, newPostWith, wp } from '../utils';
 
 // F6 Second button (docs/features/F6/requirements.md). Task 19A draws it; the buttons after it are F29's.
@@ -11,11 +11,22 @@ test.describe( 'F6 Second button', () => {
 	};
 	test.afterAll( () => wp( 'option', 'delete', 'affibloom_display' ) );
 
+	/**
+	 * A link's rel as Affibloom prints it. On this site Rank Math adds `noopener` to every external link in the content
+	 * (its `rank_math/noopener` filter, Lasso's links too), so a `noopener` on a link that does not open a new tab is
+	 * Rank Math's and is left out; on a new-tab link it is Affibloom's own.
+	 */
+	const relOf = async ( link: Locator ): Promise< string > => {
+		const [ rel, target ] = await link.evaluate( ( a ) => [ a.getAttribute( 'rel' ) ?? '', a.getAttribute( 'target' ) ?? '' ] );
+		return rel.split( /\s+/ ).filter( ( token ) => '' !== token && ( '_blank' === target || 'noopener' !== token ) ).join( ' ' );
+	};
+
 	test( 'AC1 shows with its own text and link', async ( { page } ) => {
 		const id = createProduct( { name: 'F6 AC1', url2: 'https://www.example.com/womens', button_text2: "Buy Now Women's Shoe" } );
 		await page.goto( newPostWith( boxBlock( id ) ) );
 		const second = page.locator( '.affibloom-box .affibloom-button-2' );
-		await expect( second ).toHaveText( "Buy Now Women's Shoe" );
+		// WordPress's wptexturize curls the apostrophe in block output, Lasso's block's too.
+		await expect( second ).toHaveText( /\bBuy Now Women['’]s Shoe\s*$/ );
 		await expect( second ).toHaveAttribute( 'href', 'https://www.example.com/womens' );
 	} );
 
@@ -40,13 +51,13 @@ test.describe( 'F6 Second button', () => {
 		await page.goto( newPostWith( boxBlock( id ) ) );
 		const second = page.locator( '.affibloom-button-2' );
 		await expect( second ).toHaveAttribute( 'target', '_self' );
-		await expect( second ).toHaveAttribute( 'rel', 'nofollow sponsored' );
+		expect( await relOf( second ) ).toBe( 'nofollow sponsored' );
 		await expect( second ).toHaveAttribute( 'data-affibloom-btn', '2' );
 
 		const open = createProduct( { name: 'F6 AC3 open', sponsored: '1', url2: 'https://www.example.com/b', button_text2: 'B', new_tab2: '1', nofollow2: '0' } );
 		await page.goto( newPostWith( boxBlock( open ) ) );
 		await expect( page.locator( '.affibloom-button-2' ) ).toHaveAttribute( 'target', '_blank' );
-		await expect( page.locator( '.affibloom-button-2' ) ).toHaveAttribute( 'rel', 'noopener' ); // sponsored needs NoFollow 2
+		expect( await relOf( page.locator( '.affibloom-button-2' ) ) ).toBe( 'noopener' ); // sponsored needs NoFollow 2
 	} );
 
 	test( "AC4 an empty text takes the Single type's secondary label; with none, no href or target", async ( { page } ) => {
@@ -80,7 +91,7 @@ test.describe( 'F6 Second button', () => {
 		await expect( buttons.nth( 2 ) ).toHaveText( 'Three' );
 		await expect( buttons.nth( 2 ) ).toHaveAttribute( 'data-affibloom-btn', '3' );
 		await expect( buttons.nth( 2 ) ).toHaveAttribute( 'target', '_self' );
-		await expect( buttons.nth( 2 ) ).toHaveAttribute( 'rel', '' );
+		expect( await relOf( buttons.nth( 2 ) ) ).toBe( '' );
 	} );
 
 	test( 'AC6 the Secondary button element hides every button after the first, the Primary button the first', async ( { page } ) => {
