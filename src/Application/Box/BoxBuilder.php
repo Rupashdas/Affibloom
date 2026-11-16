@@ -14,6 +14,7 @@ use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\Amazon\PrimeRule;
 use Affibloom\Domain\Amazon\ShownPrice;
+use Affibloom\Domain\Amazon\TrackingIds;
 use DateTimeImmutable;
 use DateTimeZone;
 use Affibloom\Domain\Box\BoxOverrides;
@@ -96,7 +97,7 @@ final class BoxBuilder {
 			$product         = $product->with( array( 'price' => $shown->price ) );
 			$amazon_discount = $shown->discount;
 		}
-		$product = self::applied( $product, $overrides );
+		$product = self::applied( $product, $overrides, $settings );
 		// R3, R65: the Single type's theme, then the product's own, then the box's.
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, $overrides->theme );
 		$id    = (int) $product->id;
@@ -228,19 +229,22 @@ final class BoxBuilder {
 	 *
 	 * @param Product      $product   The product.
 	 * @param BoxOverrides $overrides The box's values.
+	 * @param Settings     $settings  The site's settings, for the tracking ID whitelist.
 	 */
-	private static function applied( Product $product, BoxOverrides $overrides ): Product {
+	private static function applied( Product $product, BoxOverrides $overrides, Settings $settings ): Product {
 		$changes = array();
 		$url     = $product->url;
 		$buttons = $product->buttons->all();
 
-		// Lasso's shortcode retags the product's own links first; the box's URLs (single.php) replace them after.
+		// Lasso's shortcode retags the product's own links first; the box's URLs (single.php) replace them after. The box's
+		// tag is kept only when the site's whitelist allows it (F31 A38, Lasso's get_amazon_product_url), else the site's.
 		$amazon = AmazonUrl::from( $url );
 		if ( '' !== $overrides->tracking_id && null !== $amazon ) {
-			$url    = $amazon->retagged( $overrides->tracking_id );
+			$tag    = TrackingIds::from_settings( $settings )->tag_for( $overrides->tracking_id );
+			$url    = $amazon->retagged( $tag );
 			$second = isset( $buttons[0] ) ? AmazonUrl::from( AffiliateUrl::from_string( $buttons[0]->url ) ) : null;
 			if ( null !== $second ) {
-				$buttons[0] = new Button( $second->retagged( $overrides->tracking_id )->value(), $buttons[0]->text, $buttons[0]->new_tab, $buttons[0]->nofollow );
+				$buttons[0] = new Button( $second->retagged( $tag )->value(), $buttons[0]->text, $buttons[0]->new_tab, $buttons[0]->nofollow );
 			}
 		}
 

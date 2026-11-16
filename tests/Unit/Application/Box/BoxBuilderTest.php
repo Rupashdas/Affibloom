@@ -602,4 +602,21 @@ final class BoxBuilderTest extends TestCase {
 		self::assertArrayNotHasKey( 'data-hide-price', self::build( self::product( array( 'type' => ProductType::Other, 'price' => '$5', 'show_price' => true ) ), $display )->wrapper );
 		self::assertSame( '1', self::build( self::product( array( 'type' => ProductType::Other, 'price' => '$5' ) ), $display )->wrapper['data-hide-price'] );
 	}
+
+	/**
+	 * F31 A38 (Task 18S3): a box's tracking ID is kept only when the site's whitelist allows it (multiple tracking IDs
+	 * on), else the site's tag.
+	 */
+	public function test_a_boxs_tracking_id_needs_the_whitelist(): void {
+		$tag = static fn( array $settings ): string => ( new BoxBuilder( self::THUMBNAIL ) )->build(
+			self::product(),
+			self::display(),
+			self::settings( $settings + array( 'tracking_id' => 'vbvault-20', 'multiple_tracking_ids' => true ) ),
+			BoxOverrides::from_block( array( 'productId' => 14727, 'trackingId' => 'box-20' ) )
+		)->buttons[0]->attributes['href'];
+
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $tag( array( 'tracking_id_whitelist' => array( 'vbvault-20' ) ) ) );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20', $tag( array( 'tracking_id_whitelist' => array( 'vbvault-20', 'box-20' ) ) ) );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $tag( array( 'tracking_id_whitelist' => array( 'box-20' ), 'multiple_tracking_ids' => false ) ) );
+	}
 }

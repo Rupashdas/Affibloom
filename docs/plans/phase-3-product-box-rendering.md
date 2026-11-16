@@ -137,7 +137,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 - [x] Task 18S1: `[affibloom id]` draws a product's box
 - [x] Task 18S2: Text and link overrides
-- [ ] Task 18S3: Value overrides
+- [x] Task 18S3: Value overrides
 - [ ] Task 18S4: `type="button"` and `type="image"`
 - [ ] Task 18S5: `type="link"`, SiteStripe and inline fields
 - [ ] Task 18S6: Address a product by its Amazon URL or destination
@@ -1324,10 +1324,13 @@ per box.
 
 **Files:** the above; `BoxOptionsTest`, F31 **AC3**.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Options, builder, v2 hides.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Override a box's price, rating, pros and cons from the shortcode".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Options, builder, v2 hides.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Override a box's price, rating, pros and cons from the shortcode".
+
+*Note:* 20B-20C had built these; new is A38's whitelist: a box's `tracking_id` is kept only when allowed (multiple IDs
+on), else the site's tag, for the block too (F7 AC7 now sets the whitelist; 20B retagged with any tag).
 
 ---
 

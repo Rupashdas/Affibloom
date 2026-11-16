@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith, wp } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
 
 // F31 Affibloom's own shortcode (docs/features/F31/requirements.md).
 test.describe( 'F31 Shortcode', () => {
@@ -59,5 +59,33 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( second.locator( '.affibloom-title' ) ).toHaveCount( 0 );
 		await expect( second.locator( '.affibloom-badge' ) ).toHaveCount( 0 );
 		await expect( second.locator( '.affibloom-description' ) ).toHaveCount( 0 );
+	} );
+
+	// AC3 (Task 18S3): Lasso's value attributes change this box only.
+	test( "AC3 [affibloom]'s price, Prime, rating, Pros & Cons, fields, disclosure, style and tracking ID", async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC3', price: '$89.99', show_price: '1', rating: '4.5', fields: [ { field: 3, value: 'Small' } ] } );
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { proscons: true, price: true } } } ), '--format=json' );
+		setSettings( { show_discount_pricing: true } );
+		try {
+			await page.goto( newPostWith( `[affibloom id="${ id }" price="$59" basis_price="$80" prime="1" rating="3" pros="Light-br-Quick" cons_label="Watch out" disclosure_text="Box disclosure." style="mobile"]` ) );
+			const box = page.locator( '.affibloom-box' );
+			await expect( box.locator( '.affibloom-latest-price' ) ).toHaveText( '$59' );
+			await expect( box.locator( '.affibloom-discount-price strike' ) ).toHaveText( '$80' );
+			await expect( box.locator( '.affibloom-amazon-prime' ) ).toHaveCount( 1 );
+			await expect( box.locator( '.affibloom-stars-value' ) ).toHaveText( '3.0' );
+			await expect( box.locator( '.affibloom-fields-2 li' ) ).toHaveCount( 2 );
+			await expect( box.locator( '.affibloom-fields-3 strong' ) ).toHaveText( 'Watch out:' );
+			await expect( box.locator( '.affibloom-disclosure' ) ).toHaveText( 'Box disclosure.' );
+			await expect( box.locator( '.affibloom-display' ) ).toHaveClass( /(^| )mobile( |$)/ );
+
+			await page.goto( newPostWith( `[affibloom id="${ id }" price="hide" rating="hide" field="hide"][affibloom id="${ id }" show_pros_cons="false"]` ) );
+			await expect( page.locator( '.affibloom-box' ).nth( 0 ).locator( '.affibloom-price-value' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-box' ).nth( 0 ).locator( '.affibloom-stars' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-box' ).nth( 0 ).locator( '.affibloom-fields' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-box' ).nth( 1 ).locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-proscons', '1' );
+		} finally {
+			setSettings( { show_discount_pricing: false } );
+			wp( 'option', 'delete', 'affibloom_display' );
+		}
 	} );
 } );

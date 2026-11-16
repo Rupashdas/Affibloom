@@ -86,11 +86,19 @@ test.describe( 'F7 Per-box text', () => {
 		await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toBeHidden();
 	} );
 
+	// A box's tag is kept only when whitelisted with multiple tracking IDs on (F31 A38, Lasso's rule), else the site's.
 	test( "AC7 a box's tracking ID replaces the tag on its Amazon links", async ( { page } ) => {
 		const id = createProduct( { name: 'F7 AC7', type: 'amazon', asin: 'B0D2JFK15W', url: 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20' } );
-		await page.goto( newPostWith( boxBlock( id, { trackingId: 'box-20' } ) ) );
-		await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20' );
-		await expect( page.locator( '.affibloom-box a.affibloom-image' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20' );
+		setSettings( { tracking_id: 'vbvault-20', multiple_tracking_ids: true, tracking_id_whitelist: [ 'vbvault-20', 'box-20' ] } );
+		try {
+			await page.goto( newPostWith( boxBlock( id, { trackingId: 'box-20' } ) ) );
+			await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20' );
+			await expect( page.locator( '.affibloom-box a.affibloom-image' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20' );
+			await page.goto( newPostWith( boxBlock( id, { trackingId: 'other-20' } ) ) );
+			await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20' );
+		} finally {
+			setSettings( { tracking_id_whitelist: [ 'vbvault-20' ] } );
+		}
 	} );
 
 	test( "AC8 a box's disclosure text replaces the text and shows it", async ( { page } ) => {
