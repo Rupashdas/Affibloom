@@ -112,7 +112,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 21A: The Primary Rating stars
 - [x] Task 18J: Element visibility on the box
 - [x] Task 22A: Price, discount and Prime
-- [ ] Task 22B: Disclosure
+- [x] Task 22B: Disclosure
 - [ ] Task 22C: Timestamp
 - [ ] Task 18K: Classic rendering
 - [ ] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
@@ -893,10 +893,14 @@ on, price and Prime off), 8 themes, 1280 and 390 px: equal.
 
 **Files:** create `src/Domain/Box/DisclosureRule.php`, `tests/Unit/Domain/Box/DisclosureRuleTest.php`; modify `src/Application/Box/BoxBuilder.php`, `tests/E2E/acceptance/F5.spec.ts` (AC21).
 
-- [ ] **Step 1: Failing tests (AC21).**
-- [ ] **Step 2: Rule.**
-- [ ] **Step 3: Run and look.** A box with the disclosure on, off, and with its own text, at 1280 and 390 px.
-- [ ] **Step 4: Commit** — "Show the disclosure by Lasso's rules".
+- [x] **Step 1: Failing tests (AC21).**
+- [x] **Step 2: Rule.**
+- [x] **Step 3: Run and look.** A box with the disclosure on, off, and with its own text, at 1280 and 390 px.
+- [x] **Step 4: Commit** — "Show the disclosure by Lasso's rules".
+
+*Note:* 18A's builder rule moved into `DisclosureRule`. R25's fallback to the site's setting for a missing meta is
+kept by `Product::defaults` (every saved product stores the flag); Lasso's records get it from the import (Task 26).
+Checked beside Lasso's box with the disclosure on and off (Lasso's meta flipped and restored), 8 themes, both widths.
 
 ---
 

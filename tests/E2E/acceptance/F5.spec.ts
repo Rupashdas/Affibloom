@@ -649,6 +649,31 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC21 (Task 22B): the product's disclosure text, else the site's; shown by the product's Show Disclosure (the
+	// site's setting is only a new product's default); hidden, the 6-box layout prints no box 5. A box's own
+	// `disclosureText` forcing it on is Task 20B's (F7).
+	test( "AC21 the disclosure follows Lasso's rules", async ( { page } ) => {
+		setSettings( { disclosure_text: 'Site disclosure.', show_disclosure: false } );
+		try {
+			const own = createProduct( { name: 'F5 AC21 own', disclosure: 'Our own disclosure.', show_disclosure: '1' } );
+			await page.goto( newPostWith( boxBlock( own ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-disclosure' ) ).toHaveText( 'Our own disclosure.' );
+
+			// The site's Show Disclosure off does not hide a product's that is on: it is only the default.
+			const site = createProduct( { name: 'F5 AC21 site', disclosure: '', show_disclosure: '1' } );
+			await page.goto( newPostWith( boxBlock( site ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-disclosure' ) ).toHaveText( 'Site disclosure.' );
+
+			const off = createProduct( { name: 'F5 AC21 off', show_disclosure: '0', theme: 'Cactus' } );
+			await page.goto( newPostWith( boxBlock( off ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-disclosure' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-disclosure', '1' );
+			await expect( page.locator( '.affibloom-display > .affibloom-box-5' ) ).toHaveCount( 0 );
+		} finally {
+			setSettings( { disclosure_text: 'We earn a commission if you make a purchase, at no additional cost to you.', show_disclosure: true } );
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

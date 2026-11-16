@@ -12,6 +12,7 @@ namespace Affibloom\Application\Box;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
+use Affibloom\Domain\Box\DisclosureRule;
 use Affibloom\Domain\Box\ElementVisibility;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Box\PriceRule;
@@ -79,7 +80,7 @@ final class BoxBuilder {
 		$title_link = '' === $overrides->title_url ? $link : array_merge( $link, array( 'href' => $overrides->title_url ) );
 		$elements   = ElementVisibility::of( $config->elements(), $overrides, $product->show_price );
 
-		$disclosure = $this->disclosure( $product, $settings );
+		$disclosure = DisclosureRule::text( $product->disclosure, $product->show_disclosure, $settings->string( 'disclosure_text' ) );
 		$prime      = PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
 		$price      = PriceRule::prints( $product->price, $product->show_price, $settings->bool( 'show_price' ) ) ? $product->price : '';
 
@@ -233,22 +234,6 @@ final class BoxBuilder {
 		}
 
 		return DescriptionRule::shows( $product->show_description, $product->description ) ? DescriptionRule::text( $product->description ) : null;
-	}
-
-	/**
-	 * The disclosure text when the box shows it (R24, R25): the product's own, trimmed, else the site's; shown when
-	 * the product's Show Disclosure is on and there is text.
-	 *
-	 * @param Product  $product  The product.
-	 * @param Settings $settings The site's settings.
-	 */
-	private function disclosure( Product $product, Settings $settings ): ?string {
-		$text = trim( $product->disclosure );
-		if ( '' === $text ) {
-			$text = $settings->string( 'disclosure_text' );
-		}
-
-		return $product->show_disclosure && '' !== $text ? $text : null;
 	}
 
 	/**
