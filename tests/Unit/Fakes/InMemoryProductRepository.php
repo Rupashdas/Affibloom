@@ -269,4 +269,14 @@ final class InMemoryProductRepository implements ProductRepository {
 		}
 		return null;
 	}
+
+	public function id_by_slug( string $slug ): ?int {
+		foreach ( $this->saved as $product ) {
+			if ( $slug === $product->slug ) {
+				return $product->id;
+			}
+		}
+
+		return null;
+	}
 }

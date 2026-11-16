@@ -17,6 +17,7 @@ use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
 use Affibloom\Application\Amazon\PriceRefreshService;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Box\BoxBuilder;
+use Affibloom\Application\Shortcode\ShortcodeRenderer;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Amazon\AmazonSearchService;
 use Affibloom\Application\Amazon\BulkSyncService;
@@ -102,6 +103,7 @@ use Affibloom\Interface\Admin\SettingsController;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Admin\TrackingIdController;
 use Affibloom\Interface\Block\ProductBoxBlock;
+use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\SchemaMarkup;
 use Affibloom\Interface\Front\BoxHtml;
@@ -369,6 +371,10 @@ final class Plugin {
 			$box_assets,
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
+			new AffibloomShortcode(
+				new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder ),
+				$box_html
+			),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),

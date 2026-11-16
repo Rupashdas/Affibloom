@@ -173,6 +173,14 @@ interface ProductRepository {
 	public function repointed_to( int $id ): ?int;
 
 	/**
+	 * The ID of the product with this slug, whatever its status (F31 A2: Lasso looks a slug up so; the resolver then
+	 * decides what draws), or null.
+	 *
+	 * @param string $slug A product's slug.
+	 */
+	public function id_by_slug( string $slug ): ?int;
+
+	/**
 	 * Deletes a stored product for good, with everything stored on it (the product page's delete, Task 17A).
 	 *
 	 * @param int $id A stored product's ID.

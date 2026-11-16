@@ -544,6 +544,31 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The ID of the product with this slug, whatever its status, or null (F31 A2).
+	 *
+	 * @param string $slug A product's slug.
+	 */
+	public function id_by_slug( string $slug ): ?int {
+		$slug = sanitize_title( $slug );
+		if ( '' === $slug ) {
+			return null;
+		}
+		$ids = get_posts(
+			array(
+				'post_type'        => ProductPostType::NAME,
+				'name'             => $slug,
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+			)
+		);
+
+		return array() === $ids ? null : (int) $ids[0];
+	}
+
+	/**
 	 * The product a product was repointed to, whatever its status (Task 18A).
 	 *
 	 * @param int $id A product's ID.

@@ -70,4 +70,13 @@ final class BoxView {
 		public readonly ?string $disclosure,
 		public readonly ?string $date,
 	) {}
+
+	/**
+	 * A copy with another container `id` (the shortcode's deterministic anchor, F31 D5).
+	 *
+	 * @param string $anchor The container's `id`.
+	 */
+	public function with_anchor( string $anchor ): self {
+		return new self( ...array_merge( get_object_vars( $this ), array( 'anchor' => $anchor ) ) );
+	}
 }

@@ -135,7 +135,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 **F31, Affibloom's own shortcode (single-product parts):**
 
-- [ ] Task 18S1: `[affibloom id]` draws a product's box
+- [x] Task 18S1: `[affibloom id]` draws a product's box
 - [ ] Task 18S2: Text and link overrides
 - [ ] Task 18S3: Value overrides
 - [ ] Task 18S4: `type="button"` and `type="image"`
@@ -1248,14 +1248,19 @@ layout.
 {ShortcodeAttributesTest, DisplayRequestTest, AnchorIdTest, AddressTest}.php`, `tests/Integration/
 AffibloomShortcodeTest.php`; modify `src/Plugin.php`, `BoxOptions.php`, `BoxBuilder.php`, `BoxAssets.php`.
 
-- [ ] **Step 1: Failing tests.** AC1 (a product made through WP-CLI, a post with `[affibloom id]`, `[affibloom slug]`,
+- [x] **Step 1: Failing tests.** AC1 (a product made through WP-CLI, a post with `[affibloom id]`, `[affibloom slug]`,
   a draft product, a trashed one, a retired one, two boxes for the anchor counter, `theme`). Unit: R4 positional repair,
   R5 `&quot;`, slug over id, anchor ids. Expected red: the shortcode prints as text.
-- [ ] **Step 2: Domain** (attributes, request, address, anchor).
-- [ ] **Step 3: Renderer and resolver.**
-- [ ] **Step 4: The shortcode module and assets.**
-- [ ] **Step 5: Run and look** (the box beside the same product's block box, both widths; view source for the id).
-- [ ] **Step 6: Commit** — "Place a product box with [affibloom id]".
+- [x] **Step 2: Domain** (attributes, request, address, anchor).
+- [x] **Step 3: Renderer and resolver.**
+- [x] **Step 4: The shortcode module and assets.**
+- [x] **Step 5: Run and look** (the box beside the same product's block box, both widths; view source for the id).
+- [x] **Step 6: Commit** — "Place a product box with [affibloom id]".
+
+*Note:* names as built: `BoxOverrides` (the plan's `BoxOptions`) carries `theme` and `anchor_id` since 20B; the slug lookup
+is `ProductRepository::id_by_slug()` (the resolver is `RepointResolver`); `BoxAssets` already detected `[affibloom`.
+The default anchor is `affibloom-anchor-id-<id>-<n>` (ADR-6 prefix); the block keeps `uniqid()`. No integration test
+(the suite has never run, deviation 10). Checked on Local: the shortcode's box markup equals the block's.
 
 ---
 
