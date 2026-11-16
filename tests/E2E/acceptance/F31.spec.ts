@@ -202,4 +202,27 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( button ).toHaveText( 'Copied!' );
 		await expect( button ).toHaveText( 'Copy shortcode', { timeout: 2500 } );
 	} );
+
+	// AC14 (Task 18S14): the first box in the post that asks for schema prints one Product JSON-LD, a shortcode as a
+	// block does; schema_price and schema_price_currency replace the price and currency.
+	test( "AC14 the first [affibloom] asking for schema prints Lasso's Product JSON-LD", async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC14', price: '$89.99', fields: [ { field: 1, value: '4.5' }, { field: 2, value: 'Light' }, { field: 3, value: 'Small' } ] } );
+		const other = createProduct( { name: 'F31 AC14 other' } );
+		await page.goto( newPostWith( `[affibloom id="${ other }"] [affibloom id="${ id }" schema_review="enable" schema_pros_cons="enable" schema_price="59" schema_price_currency="EUR"] [affibloom id="${ other }" schema_review="enable"]` ) );
+		const scripts = page.locator( 'head script.affibloom-schema-markup-output' );
+		await expect( scripts ).toHaveCount( 1 );
+		const schema = JSON.parse( ( await scripts.textContent() ) ?? '{}' );
+		expect( schema.name ).toBe( 'F31 AC14' );
+		expect( schema.offers.price ).toBe( '59.00' );
+		expect( schema.offers.priceCurrency ).toBe( 'EUR' );
+		expect( schema.review.reviewRating.ratingValue ).toBe( '4.5' );
+		expect( schema.review.positiveNotes.itemListElement[ 0 ].name ).toBe( 'Light' );
+		expect( schema.review.negativeNotes.itemListElement[ 0 ].name ).toBe( 'Small' );
+
+		// A block before it that asks wins; none asking prints none.
+		await page.goto( newPostWith( boxBlock( other, { schemaReview: true } ) + `[affibloom id="${ id }" schema_review="enable"]` ) );
+		expect( JSON.parse( ( await scripts.textContent() ) ?? '{}' ).name ).toBe( 'F31 AC14 other' );
+		await page.goto( newPostWith( `[affibloom id="${ id }"]` ) );
+		await expect( scripts ).toHaveCount( 0 );
+	} );
 } );

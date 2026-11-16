@@ -144,7 +144,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S9: Boxes in widgets, on AMP pages and in feeds
 - [x] Task 18S10: The Dashboard row's Shortcode button
 - [x] Task 18S11: The Share kit's Copy shortcode
-- [ ] Task 18S14: Review and pros/cons schema in the page head
+- [x] Task 18S14: Review and pros/cons schema in the page head
 
 **F30, display types, then the group shortcode parts that need them:**
 
@@ -1630,11 +1630,16 @@ expects the button enabled. Seen on Local: copied `[affibloom id]`, read "Copied
 
 **Files:** the above; F31 **AC14**; `SchemaBuilderTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Builder and module.**
-- [ ] **Step 3: Run and look** (Rich
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Builder and module.**
+- [x] **Step 3: Run and look** (Rich
   Results test by hand).
-- [ ] **Step 4: Commit** — "Print a box's review schema in the page head".
+- [x] **Step 4: Commit** — "Print a box's review schema in the page head".
+
+*Note:* `SchemaMarkup` and `SchemaBuilder` came with 20D (the block); this task adds `[affibloom]` to its walk, in
+content order (block or shortcode, the first that asks; `u0022` copies skipped as Lasso does). `[lasso]` joins in 27A,
+when Affibloom draws it; Lasso prints its own until then. Seen on Local: the first asking shortcode printed, with
+`schema_price`/`schema_price_currency`. Rich Results test by hand.
 
 ---
 

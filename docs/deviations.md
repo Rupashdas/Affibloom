@@ -144,6 +144,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 136. Task 18C (2026-11-16): box CSS in the admin (R52) moves to the previews 10D/14E; the copy script to 21C.
 - 137. Task 18D (2026-11-16): baselines drawn on Local with Lasso 370 (staging's Lasso is unlicensed); shortcode cells; variants unchanged, so deviation 135's cause is wrong: AC1's gap is Affibloom's CSS.
 - 138. F5 AC8-AC10 (the user, 2026-11-16): the theme tasks check the `plain` and `badge` baselines; two-buttons, no-image, rating, pros-cons and all-fields move to 19A, 20A, 21A, 21B.
+- 139. Task 18S14 (2026-11-16): the schema reads `[affibloom]` now; `[lasso]` joins it in 27A.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2778,3 +2779,8 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     `plain` and `badge` at 1280 and 390 px. The capture's `site` page was rebuilt once on Local with Lasso 370
     (`tools/lasso-capture.php` setup and undo, `lasso_settings` restored) to measure where each box started; F5's
     `THEME_TOP` holds those offsets, so the boxes rasterise at Lasso's sub-pixel positions (as AC1's `BASELINE_TOP`).
+
+139. **Task 18S14 (2026-11-16): the schema reads `[affibloom]` now; `[lasso]` joins in 27A.** F31 D12 has the schema
+    read both shortcodes. While Lasso is active it prints its own schema for `[lasso]`, and Affibloom draws nothing
+    for it (AC15), so reading `[lasso]` now would print a second JSON-LD. `SchemaMarkup::SHORTCODES` holds
+    `affibloom`; **Task 27A** adds `lasso` when Affibloom registers that shortcode (Lasso inactive).

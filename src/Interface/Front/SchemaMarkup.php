@@ -17,14 +17,16 @@ use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\SettingsRepository;
+use Affibloom\Domain\Shortcode\ShortcodeAttributes;
 use Affibloom\Module;
 use WP_Post;
 
 /**
- * `wp_head` (F5 R90, AC17; Lasso's lasso_schema_markup_output): the first Product box block in the post's content with
- * `schemaReview` or `schemaProsCons` on prints one `<script type="application/ld+json">`, once per post. Lasso reads the
- * product's stored name, picture, price, Primary Rating and Pros / Cons, not the box's overrides; `schemaPrice` and
- * `schemaPriceCurrency` replace the price and currency. Shortcode boxes join through the same printer (Task 18S14).
+ * `wp_head` (F5 R90, AC17; F31 R29, D12; Lasso's lasso_schema_markup_output): the first box in the post's content, a
+ * Product box block with `schemaReview` or `schemaProsCons` on or an `[affibloom id]` with `schema_review="enable"` or
+ * `schema_pros_cons="enable"` (Task 18S14), prints one `<script type="application/ld+json">`, once per post. Lasso
+ * reads the product's stored name, picture, price, Primary Rating and Pros / Cons, not the box's overrides; the price
+ * and currency attributes replace the price and currency. `[lasso]` joins when Affibloom draws it (Task 27A).
  */
 final class SchemaMarkup implements Module {
 
@@ -32,6 +34,11 @@ final class SchemaMarkup implements Module {
 	 * The block's name.
 	 */
 	private const BLOCK = 'affibloom/product-box';
+
+	/**
+	 * The shortcodes read (Task 27A adds `lasso` once Affibloom draws it).
+	 */
+	private const SHORTCODES = array( 'affibloom' );
 
 	/**
 	 * Builds the printer.
@@ -66,11 +73,11 @@ final class SchemaMarkup implements Module {
 			return;
 		}
 
-		$attributes = self::first_schema_box( parse_blocks( $post->post_content ) );
-		if ( null === $attributes ) {
+		$box = self::first_schema_box( parse_blocks( $post->post_content ) );
+		if ( null === $box ) {
 			return;
 		}
-		$product = $this->products->product( is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0 );
+		$product = $this->products->product( $box['id'] );
 		if ( null === $product ) {
 			return;
 		}
@@ -91,8 +98,8 @@ final class SchemaMarkup implements Module {
 			}
 		}
 		$stored   = ProductType::Amazon === $product->type && '' !== $product->asin ? $this->amazon->find( $product->asin, $product->amazon_country ) : null;
-		$currency = is_string( $attributes['schemaPriceCurrency'] ?? null ) && '' !== $attributes['schemaPriceCurrency'] ? $attributes['schemaPriceCurrency'] : ( $stored->currency ?? 'USD' );
-		$price    = is_string( $attributes['schemaPrice'] ?? null ) && '' !== $attributes['schemaPrice'] ? $attributes['schemaPrice'] : $product->price;
+		$currency = '' !== $box['currency'] ? $box['currency'] : ( $stored->currency ?? 'USD' );
+		$price    = '' !== $box['price'] ? $box['price'] : $product->price;
 
 		$schema = SchemaBuilder::build(
 			$product->name,
@@ -103,30 +110,75 @@ final class SchemaMarkup implements Module {
 			$lines( 2 ),
 			$lines( 3 ),
 			(string) get_the_author_meta( 'display_name', (int) $post->post_author ),
-			true === ( $attributes['schemaReview'] ?? false ),
-			true === ( $attributes['schemaProsCons'] ?? false )
+			$box['review'],
+			$box['pros_cons']
 		);
 
 		echo PHP_EOL . '<script type="application/ld+json" class="affibloom-schema-markup-output">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG ) . '</script>' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON, its "<" escaped (JSON_HEX_TAG).
 	}
 
 	/**
-	 * The attributes of the first Product box block, nested blocks included, that enables Review or Pro/Con schema;
-	 * Lasso stops at the first box that asks, whether or not its product exists.
+	 * The first box, in content order and nested blocks included, that enables Review or Pro/Con schema: its product
+	 * ID, which schema it asks for and its price and currency ('' the product's). Lasso stops at the first box that
+	 * asks; one whose product does not draw prints nothing (the block's rule since F5, kept for the shortcode).
 	 *
 	 * @param array<int, array<string, mixed>> $blocks Parsed blocks.
-	 * @return array<string, mixed>|null
+	 * @return array{id: int, review: bool, pros_cons: bool, price: string, currency: string}|null
 	 */
 	private static function first_schema_box( array $blocks ): ?array {
 		foreach ( $blocks as $block ) {
 			$attributes = is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array();
-			if ( self::BLOCK === ( $block['blockName'] ?? '' ) && ( true === ( $attributes['schemaReview'] ?? false ) || true === ( $attributes['schemaProsCons'] ?? false ) ) && ! empty( $attributes['productId'] ) ) {
-				return $attributes;
+			if ( self::BLOCK === ( $block['blockName'] ?? '' ) ) {
+				if ( ( true === ( $attributes['schemaReview'] ?? false ) || true === ( $attributes['schemaProsCons'] ?? false ) ) && ! empty( $attributes['productId'] ) ) {
+					return array(
+						'id'        => is_numeric( $attributes['productId'] ) ? (int) $attributes['productId'] : 0,
+						'review'    => true === ( $attributes['schemaReview'] ?? false ),
+						'pros_cons' => true === ( $attributes['schemaProsCons'] ?? false ),
+						'price'     => is_string( $attributes['schemaPrice'] ?? null ) ? $attributes['schemaPrice'] : '',
+						'currency'  => is_string( $attributes['schemaPriceCurrency'] ?? null ) ? $attributes['schemaPriceCurrency'] : '',
+					);
+				}
+				continue;
 			}
-			$inner = is_array( $block['innerBlocks'] ?? null ) ? self::first_schema_box( $block['innerBlocks'] ) : null;
-			if ( null !== $inner ) {
-				return $inner;
+			$found = self::first_schema_shortcode( is_string( $block['innerHTML'] ?? null ) ? $block['innerHTML'] : '' );
+			$found = $found ?? ( is_array( $block['innerBlocks'] ?? null ) ? self::first_schema_box( $block['innerBlocks'] ) : null );
+			if ( null !== $found ) {
+				return $found;
 			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The first `[affibloom]` in the text with an `id` and `schema_review="enable"` or `schema_pros_cons="enable"`
+	 * (R29); a shortcode quoted inside a block's attributes (`u0022`) is a copy, as Lasso skips it.
+	 *
+	 * @param string $html A block's HTML or a classic post's content.
+	 * @return array{id: int, review: bool, pros_cons: bool, price: string, currency: string}|null
+	 */
+	private static function first_schema_shortcode( string $html ): ?array {
+		if ( ! str_contains( $html, '[' ) || ! preg_match_all( '/' . get_shortcode_regex( self::SHORTCODES ) . '/s', $html, $matches, PREG_SET_ORDER ) ) {
+			return null;
+		}
+		foreach ( $matches as $match ) {
+			if ( str_contains( $match[3], 'u0022' ) ) {
+				continue;
+			}
+			$attributes = ShortcodeAttributes::repaired( shortcode_parse_atts( $match[3] ) );
+			$review     = 'enable' === ( $attributes['schema_review'] ?? '' );
+			$pros_cons  = 'enable' === ( $attributes['schema_pros_cons'] ?? '' );
+			if ( ! ctype_digit( $attributes['id'] ?? '' ) || ( ! $review && ! $pros_cons ) ) {
+				continue;
+			}
+
+			return array(
+				'id'        => (int) $attributes['id'],
+				'review'    => $review,
+				'pros_cons' => $pros_cons,
+				'price'     => $attributes['schema_price'] ?? '',
+				'currency'  => $attributes['schema_price_currency'] ?? '',
+			);
 		}
 
 		return null;
