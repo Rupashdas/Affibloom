@@ -2019,7 +2019,7 @@ F8 6, F16 17, F29 AC3/AC5, C1 AC11/AC12, F30 14, F31 12. On the way: two code fi
 capture pages' Lasso offsets measured (`themes/tops.json`, the capture's `tops` mode) and tests brought up to the site
 and to later tasks (Rank Math's `noopener`, C1's Prime and price rules, 18K's classic box, Lasso's stored icon markup).
 F5 AC20 takes about 40 s of its 45 s on Local. Outside this phase: F9's tooltip tests leaked state when one failed
-(fixed the same day; F9 passes whole). Waiting: the user's check by hand and sign-off.
+(fixed the same day; F9 passes whole). **Signed off by the user 2026-11-16.**
 
 ## Coverage
 
