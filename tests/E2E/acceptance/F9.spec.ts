@@ -4,7 +4,12 @@ import { saveSettings } from '../settings';
 
 // F9 Link settings (docs/features/F9/requirements.md).
 test.describe( 'F9 Link settings', () => {
-	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
+	// Help tooltips on before each test: AC14 turns them off, and a test that fails before its cleanup must not leave
+	// them off for the next (AC4 would tick an already ticked box; AC12 and AC14 would find the tips hidden).
+	test.beforeEach( async ( { context } ) => {
+		await blockTrackers( context );
+		setSettings( { disable_help_tips: false } );
+	} );
 
 	test( 'AC1 new products take the site defaults', async ( { page } ) => {
 		setSettings( { new_tab: false, nofollow: true } );
@@ -232,11 +237,14 @@ test.describe( 'F9 Link settings', () => {
 		await page.goto( GENERAL );
 		await expect( page.locator( '.affibloom-help' ).first() ).toBeVisible();
 		await page.getByLabel( 'Disable Help Tooltips' ).setChecked( true );
-		await saveSettings( page );
-		await expect( page.locator( 'body.affibloom-no-tips' ) ).toHaveCount( 1 );
-		await expect( page.locator( '.affibloom-help' ).first() ).toBeHidden();
-		await expect( page.getByLabel( 'Disable Configure Amazon Notification' ) ).toBeVisible();
-		setSettings( { disable_help_tips: false } );
+		try {
+			await saveSettings( page );
+			await expect( page.locator( 'body.affibloom-no-tips' ) ).toHaveCount( 1 );
+			await expect( page.locator( '.affibloom-help' ).first() ).toBeHidden();
+			await expect( page.getByLabel( 'Disable Configure Amazon Notification' ) ).toBeVisible();
+		} finally {
+			setSettings( { disable_help_tips: false } );
+		}
 	} );
 
 	test( 'AC15 the support view adds the maintenance sections', async ( { page } ) => {
@@ -258,6 +266,7 @@ test.describe( 'F9 Link settings', () => {
 
 	// Lasso's save (R41, settings.js 2379-2464): the form goes by AJAX behind "Updating Your Site", then the same
 	// address loads again. Affibloom keeps its toast after the reload and leaves no notice in the address.
+	// The Display tab stays on the page after a full save (the user, 2026-11-16, deviation 141); the others reload.
 	test( 'AC17 Save Changes saves behind Updating Your Site and reloads the same address', async ( { page } ) => {
 		const tabs: Array<{ tab: string; change: () => Promise<void> }> = [
 			{ tab: 'general', change: async () => page.getByLabel( 'Disable Import Notifications' ).setChecked( true ) },
@@ -282,14 +291,27 @@ test.describe( 'F9 Link settings', () => {
 				await page.waitForLoadState( 'load' );
 				await change();
 
-				const posted = page.waitForRequest( ( request ) => request.method() === 'POST' );
-				const reloaded = page.waitForEvent( 'load' );
+				const inPlace = tab.startsWith( 'display' );
+				let loads = 0;
+				const counted = (): void => {
+					loads++;
+				};
+				page.on( 'load', counted );
+				const posted = page.waitForRequest( ( request ) => request.method() === 'POST' && request.url().includes( '/wp-admin/admin-ajax.php' ) );
+				const reloaded = inPlace ? null : page.waitForEvent( 'load', { timeout: 30_000 } );
 				await page.getByRole( 'button', { name: 'Save Changes' } ).click();
 				await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeVisible();
-				expect( ( await posted ).url() ).toContain( '/wp-admin/admin-ajax.php' );
-				await reloaded;
+				await posted;
+				if ( reloaded ) {
+					await reloaded;
+				}
 
 				await expect( page.getByRole( 'status' ).filter( { hasText: 'Settings saved.' } ) ).toBeVisible();
+				if ( inPlace ) {
+					await expect( page.getByRole( 'dialog', { name: 'Updating Your Site' } ) ).toBeHidden();
+					expect( loads ).toBe( 0 );
+				}
+				page.off( 'load', counted );
 				const shown = new URL( page.url() ).searchParams;
 				new URLSearchParams( `tab=${ tab }` ).forEach( ( value, name ) => expect( shown.get( name ) ).toBe( value ) );
 				expect( shown.has( 'affibloom_notice' ) ).toBe( false );
