@@ -157,3 +157,25 @@ let a page finish loading.
 **Why Local and not staging's pictures (2026-11-16):** the seven variants were first captured from staging, signed
 out. Local with Lasso 370 draws the same box, but the page's content column is 1 px narrower (768 against 769 px), which
 shifts the text's anti-aliasing (2 % of pixels). Affibloom's tests run on Local, so the baselines come from Local.
+
+## Display baselines (Task DT1)
+
+Lasso's grid, list (each `bullets` value), gallery, lone button (both `button_type`s), lone image and SiteStripe card,
+which no page of the site shows, for DT2-DT8. Drawn on **Local with Lasso 370**, as the theme baselines (deviation
+137; F30 AC1 named staging, where Lasso is locked). `tests/fixtures/baselines/displays/displays.json` lists each
+display's shortcode, settings mode and PNG sizes; F30 AC1 checks them.
+
+```powershell
+# Dry run: prints what it would make and change; loads no page.
+npx.cmd playwright test -c tools/baselines.config.ts --project displays
+
+# The capture on Local (about a minute).
+$env:AFFIBLOOM_CAPTURE = 'local'; npx.cmd playwright test -c tools/baselines.config.ts --project displays
+```
+
+The run backs up `lasso_settings` as the theme run does, makes one throwaway Lasso group ("Affibloom display capture",
+products 14722-14725 in that order: a `lasso-cat` term and its order rows) and one post of display cells, then
+captures each display at 1280 and 390 px under three settings modes: the site's own, the site's with Keep Site Stripe
+UI on (the SiteStripe card) and Lasso's defaults (DT3's classic grid and list). Always, also after a failure, it puts
+the settings back, compares them, and deletes the group, its order rows and the post. `AFFIBLOOM_RESTORE=1` only
+undoes, as above.

@@ -1,6 +1,6 @@
-import { test, type Browser, type Locator, type Page } from '@playwright/test';
+import { test, type Locator, type Page } from '@playwright/test';
 import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
-import { wp } from '../tests/E2E/utils';
+import { lasso, newPage, settle } from './capture-utils';
 import { BUILT_IN_FIELDS, cells, FIELDS, GROUPS, matrixFiles, STATES, type Cell, type Group, type ProductRef } from './baselines-themes-matrix';
 
 // Task 18D (F5 D10, AC7): Lasso's own Single boxes for every cell of tools/baselines-themes-matrix.ts, and Task 5's
@@ -19,12 +19,6 @@ const INPUT = '.local/lasso-capture-input.json';
 const EXPECTED_LASSO = process.env.AFFIBLOOM_LASSO_VERSION ?? '370';
 const TITLE = 'Affibloom capture';
 const LOCAL = 'http://volleyballvault.local';
-
-// Only what a box needs reaches the browser: the site itself, Amazon's product images and the fonts. The site runs
-// Mediavine ads (on staging about 1,500 requests to some 200 ad and ID-sync hosts per guide, 2026-11-16), which never
-// let a page finish loading, must not be loaded by a capture, and draw nothing in a box; the consent banner,
-// analytics and Lasso's cloud are cut with them (as tools/baselines.spec.ts cuts the trackers).
-const ALLOWED = /^(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)$/;
 
 type Box = { guide: string; index: number; lasso_id: string; title: string; description: string; image: string; badge: string; rating: string; prime: boolean; button1: { href: string } | null; button2: unknown };
 const boxes = JSON.parse( readFileSync( `${ OUT }/boxes.json`, 'utf8' ) ) as Box[];
@@ -67,42 +61,6 @@ function postContent( group: Group ): string {
 	return cells( group )
 		.map( ( c ) => `<!-- wp:html -->\n<div id="${ c.id }" class="affibloom-capture-cell" style="margin:48px 0">${ shortcode( c ) }</div>\n<!-- /wp:html -->` )
 		.join( '\n\n' );
-}
-
-/** Runs one command of tools/lasso-capture.php on a JSON file; returns the command's JSON answer. */
-function lasso( command: string, file: string, input?: unknown ): any {
-	if ( input !== undefined ) {
-		writeFileSync( file, JSON.stringify( input ) );
-	}
-	const out = wp( 'eval-file', 'tools/lasso-capture.php', command, file );
-	return JSON.parse( out.split( '\n' ).filter( ( l ) => l.startsWith( '{' ) ).pop() ?? '{}' );
-}
-
-/** Waits up to 15 s for the page to go quiet, loads lazy images, and returns to the top. */
-async function settle( page: Page ): Promise< void > {
-	const quiet = () => page.waitForLoadState( 'networkidle', { timeout: 15_000 } ).catch( () => console.log( `  ${ page.url() }: still loading after 15 s; going on.` ) );
-	await quiet();
-	await page.evaluate( async () => {
-		for ( let y = 0; y < document.body.scrollHeight; y += 600 ) {
-			window.scrollTo( 0, y );
-			await new Promise( ( r ) => setTimeout( r, 50 ) );
-		}
-		window.scrollTo( 0, 0 );
-	} );
-	await quiet();
-}
-
-/** A signed-out page of the tool's own, with its own time limits and only the allowed hosts. */
-async function newPage( browser: Browser, baseURL: string ): Promise< Page > {
-	const context = await browser.newContext( { baseURL, storageState: undefined } );
-	context.setDefaultTimeout( 20_000 );
-	context.setDefaultNavigationTimeout( 90_000 );
-	const own = new URL( baseURL ).host;
-	await context.route( /^https?:\/\//, ( route ) => {
-		const host = new URL( route.request().url() ).host;
-		return host === own || ALLOWED.test( host ) ? route.continue() : route.abort();
-	} );
-	return context.newPage();
 }
 
 /** One variant's example box on its live guide, at both widths. */

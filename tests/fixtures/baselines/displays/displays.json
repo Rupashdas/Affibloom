@@ -1,0 +1,276 @@
+{
+  "captured": "2026-11-16",
+  "where": "Local copy, Lasso 370 (deviation 137)",
+  "products": [
+    14722,
+    14723,
+    14724,
+    14725
+  ],
+  "modes": {
+    "site": {},
+    "sitestripe": {
+      "keep_site_stripe_ui": true
+    },
+    "defaults": {
+      "reset": true
+    }
+  },
+  "cells": [
+    {
+      "base": "grid-site",
+      "mode": "site",
+      "shortcode": "[lasso type=\"grid\" category=\"{GROUP}\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          1539
+        ],
+        "mobile": [
+          330,
+          2550
+        ]
+      }
+    },
+    {
+      "base": "grid-columns2-limit3",
+      "mode": "site",
+      "shortcode": "[lasso type=\"grid\" category=\"{GROUP}\" columns=\"2\" limit=\"3\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          924
+        ],
+        "mobile": [
+          330,
+          1955
+        ]
+      }
+    },
+    {
+      "base": "list-site",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          1826
+        ],
+        "mobile": [
+          330,
+          1802
+        ]
+      }
+    },
+    {
+      "base": "list-decimal",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\" bullets=\"decimal\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          2024
+        ],
+        "mobile": [
+          330,
+          1801
+        ]
+      }
+    },
+    {
+      "base": "list-alpha",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\" bullets=\"alpha\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          2023
+        ],
+        "mobile": [
+          330,
+          1800
+        ]
+      }
+    },
+    {
+      "base": "list-roman",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\" bullets=\"roman\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          2023
+        ],
+        "mobile": [
+          330,
+          1801
+        ]
+      }
+    },
+    {
+      "base": "list-square",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\" bullets=\"square\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          2023
+        ],
+        "mobile": [
+          330,
+          1733
+        ]
+      }
+    },
+    {
+      "base": "list-circle",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\" bullets=\"circle\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          2023
+        ],
+        "mobile": [
+          330,
+          1733
+        ]
+      }
+    },
+    {
+      "base": "list-hide",
+      "mode": "site",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\" bullets=\"hide\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          2023
+        ],
+        "mobile": [
+          330,
+          1729
+        ]
+      }
+    },
+    {
+      "base": "gallery-site",
+      "mode": "site",
+      "shortcode": "[lasso type=\"gallery\" category=\"{GROUP}\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          275
+        ],
+        "mobile": [
+          330,
+          2024
+        ]
+      }
+    },
+    {
+      "base": "button-primary",
+      "mode": "site",
+      "shortcode": "[lasso id=\"14722\" type=\"button\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          121
+        ],
+        "mobile": [
+          330,
+          121
+        ]
+      }
+    },
+    {
+      "base": "button-secondary",
+      "mode": "site",
+      "shortcode": "[lasso id=\"14722\" type=\"button\" button_type=\"secondary\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          121
+        ],
+        "mobile": [
+          330,
+          121
+        ]
+      }
+    },
+    {
+      "base": "image-site",
+      "mode": "site",
+      "shortcode": "[lasso id=\"14722\" type=\"image\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          570
+        ],
+        "mobile": [
+          330,
+          503
+        ]
+      }
+    },
+    {
+      "base": "sitestripe-site",
+      "mode": "sitestripe",
+      "shortcode": "[lasso id=\"14722\" sitestripe=\"true\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          461
+        ],
+        "mobile": [
+          330,
+          461
+        ]
+      }
+    },
+    {
+      "base": "grid-defaults",
+      "mode": "defaults",
+      "shortcode": "[lasso type=\"grid\" category=\"{GROUP}\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          844
+        ],
+        "mobile": [
+          330,
+          2740
+        ]
+      }
+    },
+    {
+      "base": "grid-defaults-columns2-limit3",
+      "mode": "defaults",
+      "shortcode": "[lasso type=\"grid\" category=\"{GROUP}\" columns=\"2\" limit=\"3\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          844
+        ],
+        "mobile": [
+          330,
+          2120
+        ]
+      }
+    },
+    {
+      "base": "list-defaults",
+      "mode": "defaults",
+      "shortcode": "[lasso type=\"list\" category=\"{GROUP}\"]",
+      "sizes": {
+        "desktop": [
+          768,
+          1382
+        ],
+        "mobile": [
+          330,
+          2787
+        ]
+      }
+    }
+  ]
+}

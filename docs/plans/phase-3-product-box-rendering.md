@@ -148,7 +148,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 **F30, display types, then the group shortcode parts that need them:**
 
-- [ ] Task DT1: Lasso's own render of the other display types, as baselines
+- [x] Task DT1: Lasso's own render of the other display types, as baselines
 - [ ] Task DT2: A group shown as a grid
 - [ ] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
 - [ ] Task DT4: A group shown as a list, with the phone swipe row
@@ -1669,12 +1669,17 @@ then deleted.
 **Files:** modify `tools/baselines.config.ts`; create the fixture folder; test `tests/E2E/acceptance/F30.spec.ts`
 (AC1: every listed baseline exists and is a PNG of the stated size).
 
-- [ ] **Step 1: Failing test.** AC1 lists the expected files; red: none exist.
-- [ ] **Step 2: The staging page.** With the user's go-ahead, make the group and the draft page; record the
+- [x] **Step 1: Failing test.** AC1 lists the expected files; red: none exist.
+- [x] **Step 2: The staging page.** With the user's go-ahead, make the group and the draft page; record the
   shortcodes in `displays.json`.
-- [ ] **Step 3: Capture** at 1280 and 390 px; turn Keep Site Stripe UI back off; delete the page and the group.
-- [ ] **Step 4: Run and look.** AC1 green; look at each image for loading spinners or cookie banners.
-- [ ] **Step 5: Commit** — "Capture Lasso's grid, list, gallery, button, image and SiteStripe baselines".
+- [x] **Step 3: Capture** at 1280 and 390 px; turn Keep Site Stripe UI back off; delete the page and the group.
+- [x] **Step 4: Run and look.** AC1 green; look at each image for loading spinners or cookie banners.
+- [x] **Step 5: Commit** — "Capture Lasso's grid, list, gallery, button, image and SiteStripe baselines".
+
+*Note:* drawn on Local with Lasso 370, not staging (deviation 137: Lasso is locked there), by
+`tools/baselines-displays.spec.ts` (project `displays`) and a `group` command in `lasso-capture.php`; its page, settle
+and Lasso helpers moved to `tools/capture-utils.ts` (second use). 17 displays in three settings modes (site, site with
+Keep Site Stripe UI, Lasso's defaults); settings restored and compared, the group and post deleted. Images looked at.
 
 ---
 

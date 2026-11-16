@@ -1,12 +1,15 @@
 <?php
 /**
- * WP-CLI helper for tools/baselines-themes.spec.ts (Task 18D): sets up, switches and undoes what the capture of
- * Lasso's Single boxes needs on the Local copy, through Lasso's own code (Lasso 370 active). Developer tool, never
- * shipped. Run as `bash tools/local-wp.sh eval-file tools/lasso-capture.php <command> <json file>`.
+ * WP-CLI helper for tools/baselines-themes.spec.ts (Task 18D) and tools/baselines-displays.spec.ts (Task DT1): sets
+ * up, switches and undoes what the capture of Lasso's boxes and displays needs on the Local copy, through Lasso's own
+ * code (Lasso 370 active). Developer tool, never shipped. Run as
+ * `bash tools/local-wp.sh eval-file tools/lasso-capture.php <command> <json file>`.
  *
  * Commands (each reads its input from the JSON file and prints one JSON line):
  * - backup:   saves `lasso_settings` exactly (serialized, base64) and Lasso's active state into the file.
  * - setup:    makes the throwaway products, fields and one published post per group; prints their IDs.
+ * - group:    makes one throwaway Lasso group of existing products, in the given order, and one published post whose
+ *             content names it by `{GROUP}`; prints the group's term, slug and the post.
  * - display:  saves one group's Display settings over the backup (Lasso's `Setting::lasso_set_settings`).
  * - undo:     puts `lasso_settings` and Lasso's active state back, deletes what setup made.
  *
@@ -133,6 +136,43 @@ switch ( $affibloom_command ) {
 		echo wp_json_encode( $affibloom_made ), "\n";
 		break;
 
+	case 'group':
+		// Lasso's group: a `lasso-cat` term on the products and its order rows (the Groups screen's own two writes).
+		$affibloom_slug = 'affibloom-capture-' . time();
+		$affibloom_term = wp_insert_term( $affibloom_input['title'], LASSO_CATEGORY, array( 'slug' => $affibloom_slug ) );
+		if ( is_wp_error( $affibloom_term ) ) {
+			WP_CLI::error( $affibloom_term->get_error_message() );
+		}
+		foreach ( $affibloom_input['products'] as $affibloom_order => $affibloom_product ) {
+			wp_set_object_terms( (int) $affibloom_product, array( (int) $affibloom_term['term_id'] ), LASSO_CATEGORY, true );
+			$wpdb->insert(
+				$wpdb->prefix . LASSO_CATEGORY_ORDER_DB,
+				array(
+					'item_id'     => (int) $affibloom_product,
+					'parent_slug' => $affibloom_slug,
+					'term_order'  => (int) $affibloom_order,
+				)
+			);
+		}
+		$affibloom_post = wp_insert_post(
+			array(
+				'post_type'    => 'post',
+				'post_status'  => 'publish',
+				'post_title'   => $affibloom_input['title'],
+				'post_content' => str_replace( '{GROUP}', $affibloom_slug, $affibloom_input['content'] ),
+			)
+		);
+		echo wp_json_encode(
+			array(
+				'group' => array(
+					'term' => (int) $affibloom_term['term_id'],
+					'slug' => $affibloom_slug,
+				),
+				'posts' => array( 'displays' => $affibloom_post ),
+			)
+		), "\n";
+		break;
+
 	case 'display':
 		$affibloom_saved = unserialize( base64_decode( $affibloom_input['backup']['settings'] ) );
 		Lasso_Setting::lasso_set_settings( affibloom_capture_display( $affibloom_saved, $affibloom_input['settings'] ) );
@@ -153,6 +193,10 @@ switch ( $affibloom_command ) {
 		foreach ( (array) ( $affibloom_made['posts'] ?? array() ) as $affibloom_post ) {
 			wp_delete_post( (int) $affibloom_post, true );
 		}
+		if ( ! empty( $affibloom_made['group'] ) ) {
+			$wpdb->delete( $wpdb->prefix . LASSO_CATEGORY_ORDER_DB, array( 'parent_slug' => $affibloom_made['group']['slug'] ) );
+			wp_delete_term( (int) $affibloom_made['group']['term'], LASSO_CATEGORY );
+		}
 		if ( file_exists( AFFIBLOOM_CAPTURE_QUIET ) ) {
 			unlink( AFFIBLOOM_CAPTURE_QUIET );
 		}
@@ -161,5 +205,5 @@ switch ( $affibloom_command ) {
 		break;
 
 	default:
-		WP_CLI::error( 'Command: backup, setup, display or undo.' );
+		WP_CLI::error( 'Command: backup, setup, group, display or undo.' );
 }

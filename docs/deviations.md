@@ -145,6 +145,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 137. Task 18D (2026-11-16): baselines drawn on Local with Lasso 370 (staging's Lasso is unlicensed); shortcode cells; variants unchanged, so deviation 135's cause is wrong: AC1's gap is Affibloom's CSS.
 - 138. F5 AC8-AC10 (the user, 2026-11-16): the theme tasks check the `plain` and `badge` baselines; two-buttons, no-image, rating, pros-cons and all-fields move to 19A, 20A, 21A, 21B.
 - 139. Task 18S14 (2026-11-16): the schema reads `[affibloom]` now; `[lasso]` joins it in 27A.
+- 140. Task DT1 (2026-11-16): the display baselines are drawn on Local with Lasso 370, not staging; three settings modes.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2784,3 +2785,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     read both shortcodes. While Lasso is active it prints its own schema for `[lasso]`, and Affibloom draws nothing
     for it (AC15), so reading `[lasso]` now would print a second JSON-LD. `SchemaMarkup::SHORTCODES` holds
     `affibloom`; **Task 27A** adds `lasso` when Affibloom registers that shortcode (Lasso inactive).
+
+140. **Task DT1 (2026-11-16): the display baselines are drawn on Local with Lasso 370, not staging.** F30 AC1 and DT1
+    named staging and a group and draft page made there; Lasso is locked on staging (deviation 137), so the capture
+    runs on Local as 18D's does: a throwaway Lasso group of products 14722-14725 and one post, under the site's
+    settings, the site's with Keep Site Stripe UI on, and Lasso's defaults (for DT3), all undone after
+    (`tools/README.md`, "Display baselines"). DT2-DT8 compare against `tests/fixtures/baselines/displays/`; the
+    content column there is 768 px wide at 1280 px, as on every Local post.
