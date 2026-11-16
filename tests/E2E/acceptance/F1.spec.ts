@@ -636,6 +636,8 @@ test.describe( 'F1 Product library', () => {
 
 	test( 'AC7 an Amazon product has no Permalink or cloaking, an Amazon Image field and a read-only price', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F1 AC7' ), type: 'amazon', url: 'https://www.amazon.com/dp/B0F1AC7XYZ?tag=vbvault-20', asin: 'B0F1AC7XYZ', price: '$198.03' } );
+		// An Amazon product's price is the Amazon data's, from the Creators API within 24 hours (C1 N3), not its own field.
+		wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . 'affibloom_amazon_products', array( 'asin' => 'B0F1AC7XYZ', 'country' => 'us', 'base_url' => '', 'monetized_url' => '', 'image' => '', 'features' => '[]', 'price' => '$198.03', 'source' => 'creators', 'last_updated' => gmdate( 'Y-m-d H:i:s' ) ) );` );
 		await withoutCredentials( async () => {
 			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 
