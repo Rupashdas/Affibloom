@@ -2544,3 +2544,9 @@ body.affibloom-has-modal { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
 	.affibloom-split__frame.is-loading::after { animation: none; }
 }
+
+/* The product page's live preview (Task 14E): the real box fills the image frame once drawn. */
+.affibloom-image-frame.has-box { display: block; padding: 0; aspect-ratio: auto; height: auto; }
+.affibloom-image-frame.has-box .affibloom-image-frame__update { display: none; }
+.affibloom-image-frame .affibloom-preview-frame { display: block; width: 100%; min-height: 200px; border: 0; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
+.affibloom-image-frame.is-loading .affibloom-preview-frame { opacity: 0.55; }

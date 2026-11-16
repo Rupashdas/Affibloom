@@ -126,7 +126,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 **F16, F5, F1, the live previews:**
 
 - [x] Task 10D: Settings → Display — the live preview
-- [ ] Task 14E: The product page — the live preview
+- [x] Task 14E: The product page — the live preview
 
 **C1, Amazon price and Prime in the box:**
 
@@ -1139,11 +1139,17 @@ button texts, second button, badge, price, disclosure and description at once; t
 
 **Files:** create `src/Interface/Rest/ProductPreviewController.php`; modify `assets/admin/product.js`, `src/Plugin.php`, `tests/E2E/acceptance/F5.spec.ts` (AC26).
 
-- [ ] **Step 1: Failing test (AC26).**
-- [ ] **Step 2: Route.**
-- [ ] **Step 3: Script.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Preview the product's box while editing".
+- [x] **Step 1: Failing test (AC26).**
+- [x] **Step 2: Route.**
+- [x] **Step 3: Script.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Preview the product's box while editing".
+
+*Note:* the route takes Save's own payload (`window.affibloomProductPayload`, `ProductsController::field_args()`) and
+`ProductService::preview()` applies it unsaved; every change redraws the box (no DOM patching, R102 by redraw). The
+iframe writer moved into `admin.js` (`affibloomBoxFrame`, its second use). In the ~460 px card the frame shows the box's
+phone layout (Lasso's same-page preview squeezes the desktop one). A click on the box's picture opens the media library.
+Checked signed in: typing the badge and a theme change redraw it; nothing stored.
 
 ---
 

@@ -114,6 +114,7 @@ use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
+use Affibloom\Interface\Rest\ProductPreviewController;
 use Affibloom\Interface\Rest\SettingsRestController;
 use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
@@ -366,6 +367,7 @@ final class Plugin {
 				new TableAmazonProductRepository()
 			),
 			$box_assets,
+			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(

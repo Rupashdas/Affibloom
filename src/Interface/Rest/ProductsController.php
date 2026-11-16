@@ -140,7 +140,7 @@ final class ProductsController implements Module {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update' ),
 					'permission_callback' => array( $this, 'can_manage' ),
-					'args'                => $this->field_args(),
+					'args'                => self::field_args(),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
@@ -180,7 +180,7 @@ final class ProductsController implements Module {
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
-	private function field_args(): array {
+	public static function field_args(): array {
 		$args = array();
 		foreach ( array( 'name', 'url', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure' ) as $field ) {
 			$args[ $field ] = array( 'type' => 'string' );
@@ -231,7 +231,7 @@ final class ProductsController implements Module {
 	 * @return WP_REST_Response|WP_Error 200 with the product; 404 for no such product; 422 with a message per field.
 	 */
 	public function update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$input  = array_intersect_key( $request->get_params(), $this->field_args() );
+		$input  = array_intersect_key( $request->get_params(), self::field_args() );
 		$groups = array_key_exists( 'groups', $input ) ? (array) $input['groups'] : null;
 		unset( $input['groups'] );
 

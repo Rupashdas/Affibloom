@@ -39,8 +39,8 @@ $editor = static fn( int $height ): array => array(
 );
 ?>
 <div class="affibloom-card affibloom-product__card affibloom-product__card--display">
-	<?php // The live preview renders the real box (Task 14E, Phase 3); until then the frame holds the image, as Lasso's does. ?>
-	<div class="affibloom-image-frame" data-image-frame>
+	<?php // The live preview (Task 14E): the real box replaces the image here once drawn; the image editor stays behind it. ?>
+	<div class="affibloom-image-frame" data-image-frame data-preview-title="<?php esc_attr_e( 'Product box preview', 'affibloom' ); ?>">
 		<img class="affibloom-image-frame__image" src="<?php echo esc_url( $image ); ?>" alt="" data-image-preview<?php echo '' === $image ? ' hidden' : ''; ?>>
 		<span class="affibloom-image-frame__empty" data-image-empty<?php echo '' === $image ? '' : ' hidden'; ?>>
 			<?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?>

@@ -234,6 +234,8 @@
 			preview.src = src;
 			preview.hidden = false;
 			empty.hidden = true;
+			// The live preview (Task 14E) redraws with the new picture.
+			frame.dispatchEvent( new window.CustomEvent( 'affibloom:image-changed', { bubbles: true } ) );
 		};
 
 		var fail = function ( message ) {
@@ -333,6 +335,72 @@
 					link.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 				} );
 			} );
+		}
+	} );
+
+	/**
+	 * The live preview (F5 R100-R103, F1 B2-B4; Task 14E): the product's real box, drawn by the preview route from what
+	 * Save would send (product-save.js), in the image frame. Every change redraws it (the latest answer wins), a theme
+	 * change included, without saving; a click on the box's picture opens the media library, as "Update Image" does.
+	 *
+	 * @param {HTMLFormElement} form  The product form.
+	 * @param {HTMLElement}     frame The image frame.
+	 */
+	function boxPreview( form, frame ) {
+		var latest = 0;
+		var timer = null;
+		var choose = frame.querySelector( '[data-image-choose]' );
+
+		var draw = function () {
+			var ask = ++latest;
+			var body = window.affibloomProductPayload ? window.affibloomProductPayload() : {};
+			frame.classList.add( 'is-loading' );
+			window.wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId + '/preview', method: 'POST', data: body } ).then( function ( answer ) {
+				if ( ask !== latest ) {
+					return;
+				}
+				Array.prototype.forEach.call( frame.querySelectorAll( '[data-image-preview], [data-image-empty], .affibloom-image-frame__note' ), function ( element ) {
+					element.hidden = true;
+				} );
+				frame.classList.add( 'has-box' );
+				window.affibloomBoxFrame( frame, answer, frame.dataset.previewTitle, function () {
+					frame.classList.remove( 'is-loading' );
+				}, choose ? function () {
+					choose.click();
+				} : null );
+			} ).catch( function () {
+				if ( ask === latest ) {
+					frame.classList.remove( 'is-loading' );
+				}
+			} );
+		};
+
+		var soon = function () {
+			window.clearTimeout( timer );
+			timer = window.setTimeout( draw, 250 );
+		};
+
+		form.addEventListener( 'input', soon );
+		form.addEventListener( 'change', soon );
+		frame.addEventListener( 'affibloom:image-changed', soon );
+		if ( window.tinymce ) {
+			var follow = function ( editor ) {
+				editor.on( 'keyup change', soon );
+			};
+			window.tinymce.editors.forEach( follow );
+			window.tinymce.on( 'AddEditor', function ( event ) {
+				follow( event.editor );
+			} );
+		}
+		// After product-save.js has set up the payload.
+		soon();
+	}
+
+	document.addEventListener( 'DOMContentLoaded', function () {
+		var form = document.getElementById( 'affibloom-product-form' );
+		var frame = document.querySelector( '[data-image-frame]' );
+		if ( form && frame && form.dataset.productId && window.wp && window.wp.apiFetch && window.affibloomBoxFrame ) {
+			boxPreview( form, frame );
 		}
 	} );
 } )();

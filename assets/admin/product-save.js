@@ -151,6 +151,9 @@
 			return data;
 		};
 
+		// The live preview (Task 14E) draws exactly what Save would send.
+		window.affibloomProductPayload = collect;
+
 		// The form as it would be sent; equal to the baseline means nothing to lose.
 		var snapshot = function () {
 			return JSON.stringify( collect() );

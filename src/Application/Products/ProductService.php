@@ -178,6 +178,29 @@ final class ProductService {
 	}
 
 	/**
+	 * The product as the page's unsaved form would make it, for its live preview (F5 R100-R102, D11; Task 14E): the same
+	 * changes Save applies, nothing stored. The link stays the stored one (the preview's links are inert) and a refused
+	 * value leaves the stored product as it is.
+	 *
+	 * @param int                  $id    Product ID.
+	 * @param array<string, mixed> $input Field => value, as Save sends them.
+	 * @throws ProductNotFound When there is no published product with that ID.
+	 */
+	public function preview( int $id, array $input ): Product {
+		$product = $this->get( $id );
+		if ( null === $product ) {
+			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
+		}
+		unset( $input['url'], $input['groups'] );
+
+		try {
+			return $product->with( $this->input->changes( $input ) );
+		} catch ( ValidationFailed ) {
+			return $product;
+		}
+	}
+
+	/**
 	 * The product with its Primary URL as Lasso's save stores it (F1 requirements 9, S7, S8, D12, D17):
 	 * - the same link as stored: not followed again; an Amazon link gets the site's tag rule again (D12);
 	 * - the same Amazon product (ASIN and store): updated in place, a typed Amazon short link kept as typed, the name,

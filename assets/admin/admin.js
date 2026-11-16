@@ -1129,7 +1129,52 @@
 		},
 	};
 
+	/**
+	 * A box preview's frame (Tasks 10D, 14E): writes a preview route's answer (the box's HTML, its stylesheets, the
+	 * `:root` block and the phone script) into an iframe in `container`, so the box's CSS cannot reach the screen and its
+	 * phone rules follow the frame's width. Links lose `href`; a click on the box's picture calls `onImage` when given.
+	 *
+	 * @param {HTMLElement} container The element the frame lives in (its other content is replaced on the first write).
+	 * @param {Object}      answer    { html, styles, root, script }.
+	 * @param {string}      title     The frame's accessible title.
+	 * @param {Function}    done      Called once the frame is drawn.
+	 * @param {Function=}   onImage   Called when the box's picture is clicked.
+	 */
+	function boxFrame( container, answer, title, done, onImage ) {
+		var frame = container.querySelector( 'iframe.affibloom-preview-frame' );
+		if ( ! frame ) {
+			frame = document.createElement( 'iframe' );
+			frame.className = 'affibloom-preview-frame';
+			frame.title = title;
+			container.appendChild( frame );
+		}
+		var links = answer.styles.map( function ( href ) {
+			return '<link rel="stylesheet" href="' + href + '">';
+		} ).join( '' );
+		frame.onload = function () {
+			var doc = frame.contentDocument;
+			Array.prototype.forEach.call( doc.querySelectorAll( 'a[href]' ), function ( link ) {
+				link.removeAttribute( 'href' );
+				link.removeAttribute( 'target' );
+			} );
+			doc.addEventListener( 'click', function ( event ) {
+				event.preventDefault();
+				if ( onImage && event.target.closest( '.affibloom-image' ) ) {
+					onImage();
+				}
+			} );
+			frame.style.height = doc.documentElement.scrollHeight + 'px';
+			done();
+		};
+		frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' +
+			links + '<style>' + answer.root + '</style>' +
+			'<style>body{margin:0;padding:24px 16px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e1e1e}' +
+			( onImage ? '.affibloom-image{cursor:pointer}' : '' ) + '</style>' +
+			'</head><body>' + answer.html + '<script src="' + answer.script + '"><\/script></body></html>';
+	}
+
 	window.affibloomToast = toast;
+	window.affibloomBoxFrame = boxFrame;
 	window.affibloomSaveDialog = saveDialog;
 	window.affibloomFieldErrors = fieldErrors;
 	window.affibloomMedia = media;

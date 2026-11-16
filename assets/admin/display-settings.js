@@ -521,34 +521,14 @@
 	function preview( form, frame, toggle ) {
 		var latest = 0;
 		var timer = null;
-		var iframe = null;
 
 		var write = function ( answer ) {
-			if ( ! iframe ) {
+			if ( ! frame.querySelector( 'iframe' ) ) {
 				frame.textContent = '';
-				iframe = document.createElement( 'iframe' );
-				iframe.className = 'affibloom-preview-frame';
-				iframe.title = frame.dataset.previewTitle;
-				frame.appendChild( iframe );
 			}
-			var links = answer.styles.map( function ( href ) {
-				return '<link rel="stylesheet" href="' + href + '">';
-			} ).join( '' );
-			iframe.onload = function () {
-				var doc = iframe.contentDocument;
-				Array.prototype.forEach.call( doc.querySelectorAll( 'a[href]' ), function ( link ) {
-					link.removeAttribute( 'href' );
-				} );
-				doc.addEventListener( 'click', function ( event ) {
-					event.preventDefault();
-				} );
-				iframe.style.height = doc.documentElement.scrollHeight + 'px';
+			window.affibloomBoxFrame( frame, answer, frame.dataset.previewTitle, function () {
 				frame.classList.remove( 'is-loading' );
-			};
-			iframe.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' +
-				links + '<style>' + answer.root + '</style>' +
-				'<style>body{margin:0;padding:24px 16px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e1e1e}</style>' +
-				'</head><body>' + answer.html + '<script src="' + answer.script + '"><\/script></body></html>';
+			} );
 		};
 
 		var draw = function () {

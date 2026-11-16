@@ -168,4 +168,22 @@ final class ProductServiceAmazonTest extends TestCase {
 
 		self::assertSame( array( 42, 'https://example.com/media.jpg' ), array( $saved->image_id, $saved->image_url ) ); // S6
 	}
+
+	/**
+	 * F5 R100-R102 (Task 14E): the preview applies the form's changes as Save does, keeps the stored link and saves
+	 * nothing; a refused value leaves the stored product.
+	 */
+	public function test_the_preview_applies_the_form_without_saving(): void {
+		\Brain\Monkey\Functions\when( 'wp_kses' )->returnArg( 1 );
+		$service = $this->service();
+		$stored  = $this->stored( 'Ligra' );
+
+		$preview = $service->preview( (int) $stored->id, array( 'badge' => 'Typed Badge', 'theme' => 'Money', 'url' => 'https://www.example.com/other' ) );
+		self::assertSame( 'Typed Badge', $preview->badge );
+		self::assertSame( 'Money', $preview->theme?->name() );
+		self::assertSame( $stored->url->value(), $preview->url->value() );
+		self::assertSame( '', $this->repo->get( (int) $stored->id )->badge );
+
+		self::assertSame( 'Ligra', $service->preview( (int) $stored->id, array( 'name' => '' ) )->name );
+	}
 }

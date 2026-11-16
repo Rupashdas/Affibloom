@@ -908,6 +908,25 @@ test.describe( 'F5 Box design', () => {
 		expect( width ).toBeLessThanOrEqual( 390 );
 	} );
 
+	// AC26 (Task 14E): a product's page shows its real box with the form's unsaved values; typing and a theme change
+	// redraw it without saving.
+	test( "AC26 the product page previews the product's box with unsaved values", async ( { page } ) => {
+		useSiteDisplay();
+		const id = createProduct( { name: 'F5 AC26', badge: '' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		const frame = page.frameLocator( '[data-image-frame] iframe.affibloom-preview-frame' );
+		await expect( frame.locator( '.affibloom-title' ) ).toContainText( 'F5 AC26' );
+
+		await page.fill( '#affibloom-badge-words', 'Typed Badge' );
+		await expect( frame.locator( '.affibloom-badge-text' ) ).toHaveText( 'Typed Badge' );
+		await page.selectOption( '#affibloom-theme', 'Money' );
+		await expect( frame.locator( '.affibloom-display' ) ).toHaveClass( /affibloom-money/ );
+		await expect( frame.locator( 'a[href]' ) ).toHaveCount( 0 );
+
+		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_badge' ) ).toBe( '' ); // nothing saved
+		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_theme' ) ).not.toBe( 'Money' );
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element
