@@ -21,7 +21,7 @@
 	 */
 	function snapshot( form ) {
 		var entries = [];
-		new FormData( form ).forEach( function ( value, name ) {
+		( window.affibloomFormFields ? window.affibloomFormFields( form ) : new FormData( form ) ).forEach( function ( value, name ) {
 			// What the guard itself adds is not the editor's change.
 			if ( 'redirect_to' !== name && 'string' === typeof value ) {
 				entries.push( name + '=' + value );
@@ -58,7 +58,17 @@
 		document.addEventListener( 'submit', function () {
 			leaving = true;
 		} );
-		// A save that stayed on the page (settings-save.js, `data-save-in-place`): what the form holds now is saved.
+		// Fields a screen adds as they were stored (the Display screen's next display type): they are not a change.
+		form.addEventListener( 'affibloom:fields-added', function ( event ) {
+			if ( null === baseline ) {
+				return;
+			}
+			var added = event.detail.map( function ( entry ) {
+				return entry[ 0 ] + '=' + entry[ 1 ];
+			} );
+			baseline = baseline.split( '\n' ).concat( added ).filter( Boolean ).sort().join( '\n' );
+		} );
+		// A save that stayed on the page (settings-save.js): what the form holds now is saved.
 		document.addEventListener( 'affibloom:saved', function () {
 			leaving = false;
 			baseline = snapshot( form );

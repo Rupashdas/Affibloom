@@ -147,7 +147,7 @@
 		form.dataset.saving = '1';
 		dialog.open( modal.dataset.textToggles, form.dataset.saveTitle );
 
-		window.wp.apiFetch( { path: form.dataset.restSave, method: 'POST', body: new FormData( form ) } )
+		window.wp.apiFetch( { path: form.dataset.restSave, method: 'POST', body: window.affibloomFormFields ? window.affibloomFormFields( form ) : new FormData( form ) } )
 			.then( function ( answer ) {
 				var data = answer && answer.data;
 				if ( ! data || 'string' !== typeof data.message ) {

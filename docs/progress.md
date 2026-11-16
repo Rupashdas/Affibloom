@@ -35,7 +35,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 1. **Phase 3 signed off 2026-11-16** (exit check passed: F5 90/90, F6, F7, F8, F16, F29, C1, F30, F31; F9 too).
    React admin dropped (2026-11-16): the admin stays PHP. **One save behaviour done 2026-11-17** (deviation 143): every
-   settings screen saves over REST and stays on the page.
+   settings screen saves over REST and stays on the page. Display switches Single/Grid/List in place (deviation 144).
    **Next: the Meadow restyle** (the user, 2026-11-16, deviation 142): Meadow replaces Aurora (`ui/design-system.md`
    section 0b); Tasks MD1-MD7 in `plans/phase-4-editor-block.md`, Batches 4.M1-4.M5, now, before 23A.
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only

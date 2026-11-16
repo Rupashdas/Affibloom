@@ -149,6 +149,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 141. Settings → Display (the user, 2026-11-16): a full save stays on the page; Lasso reloads.
 - 142. Admin design (the user, 2026-11-16): Meadow replaces Aurora; restyle Tasks MD1-MD7 (Batches 4.M1-4.M5) before F4.
 - 143. Saving (the user, 2026-11-16/17): every settings screen saves over REST and stays on the page; no save without JavaScript.
+- 144. Settings → Display (the user, 2026-11-17): Single, Grid and List switch in place and one save stores every type, as in Lasso.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2833,3 +2834,19 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     any tab), F17 AC2 (the typed ID stays, marked, with "the previous one was kept"), F28 AC2/AC3/AC6, C1 AC8 (the last
     toast), `tests/E2E/settings.ts` (waits for the save's toast). Found on the way: an emptied whitelist box kept its
     error until it lost focus, so Save Changes moved under the pointer; the error now goes as the box empties.
+
+144. **Settings → Display: Single, Grid and List switch without a reload, and one save stores every type (the user,
+    2026-11-17: "when changing single, grid, list view … its still reloading the page … not working exactly like
+    lasso").** Lasso keeps one form for the three types and swaps them in the page (`settings.js` 2073-2087); Affibloom's
+    type links loaded `&type=…`. Now each type's part of the rail (theme row, Layout & spacing, Colors & labels;
+    `display-type-region.php`) is printed for all three, the shown type live and the others in a `<template>`, and
+    their fields are named `display[<type>][…]`. Choosing a type sets the shown part aside with its edits and scripts,
+    puts the chosen one in (set up on first show), updates `type` in the address (a reload opens it again, where Lasso
+    uses sessionStorage) and redraws the preview; Save Changes sends every type that was shown (`form.affibloomFields`),
+    and `settings/display` saves each. The leave guard compares the same fields, a type shown for the first time counts
+    as stored (`affibloom:fields-added`), and each layout is compared and sent as its desktop rows, so the Mobile view
+    is never taken for a change. Below 992px the preview stays on Mobile with Desktop disabled, as in Lasso
+    (`settings.js` 1276-1300). Without JavaScript the type links still open each type's page. Found on the way: an open
+    icon menu closed on any scroll, including the page's own when a preview finished its height (F28 AC4 failed in
+    a full run); it now follows its button and closes only when the button leaves the screen. Tests: F16 adds this
+    deviation's test; F28 AC6 reads the new field name.

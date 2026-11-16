@@ -80,6 +80,29 @@ test.describe( 'F16 Display system', () => {
 		await expect( page.getByLabel( 'Primary button text', { exact: true } ) ).toHaveValue( 'Buy It' );
 	} );
 
+	// Lasso switches Single, Grid and List in place and saves every type at once (settings.js 2073-2087; deviation 144).
+	test( 'Deviation 144: types switch without a reload, keep their edits, and one save stores each', async ( { page } ) => {
+		await page.goto( displayTab( 'single' ) );
+		const types = page.getByRole( 'navigation', { name: 'Display type' } );
+		let loads = 0;
+		page.on( 'load', () => loads++ );
+
+		await page.getByLabel( 'Theme' ).selectOption( 'Llama' );
+		await types.getByRole( 'link', { name: 'Grid' } ).click();
+		await expect( types.getByRole( 'link', { name: 'Grid' } ) ).toHaveAttribute( 'aria-current', 'page' );
+		expect( new URL( page.url() ).searchParams.get( 'type' ) ).toBe( 'grid' );
+		await page.getByLabel( 'Theme' ).selectOption( 'Money' );
+
+		// Back on Single, its unsaved theme is still there.
+		await types.getByRole( 'link', { name: 'Single' } ).click();
+		await expect( page.getByLabel( 'Theme' ) ).toHaveValue( 'Llama' );
+		await saveSettings( page );
+		expect( loads ).toBe( 0 );
+		const stored = storedDisplay();
+		expect( stored.single.theme ).toBe( 'Llama' );
+		expect( stored.grid.theme ).toBe( 'Money' );
+	} );
+
 	test( 'AC4 a density preset applies, and a stepper edit makes it custom within its range', async ( { page } ) => {
 		await page.goto( displayTab( 'grid' ) );
 

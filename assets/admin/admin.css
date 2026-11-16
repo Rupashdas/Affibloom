@@ -640,6 +640,8 @@
 .affibloom-split__rail { font-size: 13px; line-height: 18px; }
 .affibloom-split__rail .affibloom-label { font-size: 13px; }
 .affibloom-admin .affibloom-split__rail .affibloom-input { font-size: 13px; }
+/* One display type's part of the rail (deviation 144): a wrapper for display-settings.js only, never a box. */
+.affibloom-type-region { display: contents; }
 .affibloom-theme-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .affibloom-theme-row .affibloom-select { width: 160px; margin-left: auto; }
 .affibloom-rail-tabs { display: flex; gap: 20px; }

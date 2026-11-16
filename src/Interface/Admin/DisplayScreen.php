@@ -55,7 +55,11 @@ final class DisplayScreen {
 				'tabs'     => $tabs,
 				'type'     => $type,
 				'types'    => DisplayType::all(),
-				'config'   => $this->display->config( $type ),
+				// Every type, so the screen switches between them without a reload (deviation 144).
+				'configs'  => array_combine(
+					array_map( static fn( DisplayType $each ): string => $each->key(), DisplayType::all() ),
+					array_map( fn( DisplayType $each ) => $this->display->config( $each ), DisplayType::all() )
+				),
 				'columns'  => $this->display->current()->columns(),
 				'settings' => $this->settings->current(),
 				'notice'   => $this->notice->message(),

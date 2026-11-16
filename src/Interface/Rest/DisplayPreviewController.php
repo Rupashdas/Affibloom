@@ -82,12 +82,13 @@ final class DisplayPreviewController implements Module {
 	/**
 	 * The preview.
 	 *
-	 * @param WP_REST_Request $request The request: `type` and the form's `display` values.
+	 * @param WP_REST_Request $request The request: `type` and the form's `display` values, by type (`display[<type>]`).
 	 */
 	public function preview( WP_REST_Request $request ): WP_REST_Response {
 		$type  = DisplayType::from( (string) $request->get_param( 'type' ) );
 		$input = $request->get_param( 'display' );
-		$saved = $this->display->preview( $type, is_array( $input ) ? $input : array() );
+		$input = is_array( $input ) && isset( $input[ $type->key() ] ) && is_array( $input[ $type->key() ] ) ? $input[ $type->key() ] : array();
+		$saved = $this->display->preview( $type, $input );
 
 		// The edited type's settings drawn on the Single box, advanced rendering forced on (R96).
 		$config  = $saved->config( $type );

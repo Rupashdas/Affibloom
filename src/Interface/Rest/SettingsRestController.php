@@ -200,24 +200,29 @@ final class SettingsRestController implements Module {
 
 	/**
 	 * POST /settings/display: saves the Display screen, which edits two stores as Lasso's does: the per-type display
-	 * model, and the site-wide display settings (disclosure, Show Price, Site Stripe, Custom CSS).
+	 * model (every type the screen sends), and the site-wide display settings (disclosure, Show Price, Site Stripe,
+	 * Custom CSS).
 	 *
 	 * @param WP_REST_Request $request Request with the form's fields.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	public function save_display( WP_REST_Request $request ): WP_REST_Response {
-		$type = DisplayType::from( sanitize_key( (string) $request->get_param( 'type' ) ) );
 		$flat = self::posted( $request, 'settings' );
 		// Lasso's one "Disclosure in Lists & Tables" toggle writes both keys (display.php 676-677).
 		$flat['show_disclosure_table'] = $flat['show_disclosure_list'] ?? null;
 
-		// Each value is cleaned by type in DisplaySettingsService and SettingsService.
-		$refused = array_merge(
-			$this->display->update_type( $type, self::posted( $request, 'display' ) ),
-			$this->settings->update_tab( 'display', $flat )
-		);
+		// The screen holds every type and sends those it showed (`display[<type>][…]`), as Lasso saves them all at
+		// once (deviation 144). Each value is cleaned by type in DisplaySettingsService and SettingsService.
+		$display = self::posted( $request, 'display' );
+		$refused = array();
+		foreach ( DisplayType::all() as $type ) {
+			if ( isset( $display[ $type->key() ] ) && is_array( $display[ $type->key() ] ) ) {
+				$refused = array_merge( $refused, $this->display->update_type( $type, $display[ $type->key() ] ) );
+			}
+		}
+		$refused = array_merge( $refused, $this->settings->update_tab( 'display', $flat ) );
 
-		return self::answer( $refused ? 'partly-saved' : 'saved', $refused );
+		return self::answer( $refused ? 'partly-saved' : 'saved', array_values( array_unique( $refused ) ) );
 	}
 
 	/**

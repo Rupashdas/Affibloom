@@ -107,13 +107,20 @@
 			}
 		} );
 
-		// A fixed menu would drift from its button: close it when the page or the rail scrolls.
-		// Scrolling inside the menu itself is not a reason to close it.
+		// A fixed menu would drift from its button: when the page or the rail scrolls it follows the button, and closes
+		// once the button has left the screen. The page also scrolls by itself (a preview finishing its height moves
+		// what is above), so a scroll alone is no reason to close. Scrolling inside the menu itself changes nothing.
 		window.addEventListener( 'scroll', function ( event ) {
-			if ( ! menu.hidden && ! menu.contains( event.target ) ) {
+			if ( menu.hidden || menu.contains( event.target ) ) {
+				return;
+			}
+			var box = button.getBoundingClientRect();
+			if ( box.bottom < 0 || box.top > window.innerHeight ) {
 				menu.hidden = true;
 				button.setAttribute( 'aria-expanded', 'false' );
+				return;
 			}
+			place( button, menu );
 		}, true );
 	}
 

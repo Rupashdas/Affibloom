@@ -9,7 +9,7 @@
  * when the toolbar's device toggle says Mobile, and writes the phone overrides into the hidden fields below.
  *
  * @package Affibloom
- * @var array{layout: \Affibloom\Domain\Display\Layout, type: \Affibloom\Domain\Display\DisplayType, columns: int} $view
+ * @var array{layout: \Affibloom\Domain\Display\Layout, type: \Affibloom\Domain\Display\DisplayType, name: string, columns: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -113,9 +113,9 @@ $summary_parts[] = sprintf( __( 'image %s', 'affibloom' ), $layout->value( 'imag
 			<button type="button" class="affibloom-layout-note__reset" data-phone-reset hidden><?php esc_html_e( 'Use desktop layout', 'affibloom' ); ?></button>
 		</div>
 
-		<input type="hidden" name="display[layout][phone_present]" value="1">
+		<input type="hidden" name="<?php echo esc_attr( $view['name'] ); ?>[layout][phone_present]" value="1">
 		<?php foreach ( Layout::PHONE_KEYS as $phone_key ) : ?>
-			<input type="hidden" name="display[layout][phone][<?php echo esc_attr( $phone_key ); ?>]" data-phone-field="<?php echo esc_attr( $phone_key ); ?>"
+			<input type="hidden" name="<?php echo esc_attr( $view['name'] ); ?>[layout][phone][<?php echo esc_attr( $phone_key ); ?>]" data-phone-field="<?php echo esc_attr( $phone_key ); ?>"
 				value="<?php echo esc_attr( $phone[ $phone_key ] ?? '' ); ?>" <?php disabled( ! isset( $phone[ $phone_key ] ) ); ?>>
 		<?php endforeach; ?>
 
@@ -125,7 +125,7 @@ $summary_parts[] = sprintf( __( 'image %s', 'affibloom' ), $layout->value( 'imag
 				<div class="affibloom-options">
 					<?php for ( $column = 1; $column <= 3; $column++ ) : ?>
 						<label class="affibloom-options__option">
-							<input type="radio" name="display[columns]" value="<?php echo esc_attr( (string) $column ); ?>" data-columns <?php checked( $view['columns'], $column ); ?>>
+							<input type="radio" name="<?php echo esc_attr( $view['name'] ); ?>[columns]" value="<?php echo esc_attr( (string) $column ); ?>" data-columns <?php checked( $view['columns'], $column ); ?>>
 							<span><?php echo esc_html( (string) $column ); ?></span>
 						</label>
 					<?php endfor; ?>
@@ -150,7 +150,7 @@ $summary_parts[] = sprintf( __( 'image %s', 'affibloom' ), $layout->value( 'imag
 						$hidden = 'imagePosition' === $key && $pair !== $layout->value( 'orientation' );
 						?>
 						<label class="affibloom-options__option" <?php echo 'imagePosition' === $key ? 'data-orientation="' . esc_attr( $pair ) . '"' : ''; ?> <?php echo $hidden ? 'hidden' : ''; ?>>
-							<input type="radio" name="display[layout][desktop][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $value ); ?>"
+							<input type="radio" name="<?php echo esc_attr( $view['name'] ); ?>[layout][desktop][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $value ); ?>"
 								data-layout-field="<?php echo esc_attr( $key ); ?>" <?php checked( $layout->value( $key ), $value ); ?>>
 							<span><?php echo esc_html( $option_label ); ?></span>
 						</label>

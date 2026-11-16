@@ -10,47 +10,50 @@
  * site-wide behaviour, and Task 10D the preview itself.
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, config: \Affibloom\Domain\Display\DisplayConfig, columns: int, settings: \Affibloom\Domain\Settings\Settings, notice: string, panel: string} $view
+ * @var array{tab: string, tabs: list<string>, type: \Affibloom\Domain\Display\DisplayType, types: list<\Affibloom\Domain\Display\DisplayType>, configs: array<string, \Affibloom\Domain\Display\DisplayConfig>, columns: int, choices: \Affibloom\Interface\Admin\IconChoices, icons: list<array<string, mixed>>, settings: \Affibloom\Domain\Settings\Settings, notice: string, panel: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
-use Affibloom\Domain\Display\Theme;
-
-$config   = $view['config'];
-$settings = $view['settings'];
-// The Disclosure element row writes the scope setting of the type being edited (requirements B5).
-$disclosure_key = array(
-	'single' => 'show_disclosure',
-	'grid'   => 'show_disclosure_grid',
-	'list'   => 'show_disclosure_list',
-)[ $view['type']->key() ];
-$panel          = $view['panel'];
-$panels         = array(
+$settings    = $view['settings'];
+$panel       = $view['panel'];
+$panels      = array(
 	'layout' => __( 'Layout & spacing', 'affibloom' ),
 	'colors' => __( 'Colors & labels', 'affibloom' ),
 );
-$palette        = $config->palette();
-$type_key       = $view['type']->key();
-$type_labels    = array(
+$type_key    = $view['type']->key();
+$type_labels = array(
 	'single' => __( 'Single', 'affibloom' ),
 	'grid'   => __( 'Grid', 'affibloom' ),
 	'list'   => __( 'List', 'affibloom' ),
 );
-
-// Lasso 370's fields, labels and order (docs/spec/interface.md); help texts from Lasso's own form.
-$fields = array(
-	array( 'main', 'color', __( 'Badge', 'affibloom' ), __( 'This is the color of your badge background.', 'affibloom' ) ),
-	array( 'title', 'color', __( 'Title', 'affibloom' ), __( 'This is the color of the title text of your display.', 'affibloom' ) ),
-	array( 'background', 'color', __( 'Background', 'affibloom' ), __( 'This is the color of the inside of your display.', 'affibloom' ) ),
-	array( 'button_text', 'color', __( 'Button + Badge Text', 'affibloom' ), __( 'This is text color for your badges and buttons.', 'affibloom' ) ),
-	array( 'pros', 'color', __( 'Pros', 'affibloom' ), __( 'This is the main color of the Pros Field.', 'affibloom' ) ),
-	array( 'cons', 'color', __( 'Cons', 'affibloom' ), __( 'This is the main color of the Cons Field.', 'affibloom' ) ),
-	array( 'primary_button_text', 'text', __( 'Primary button text', 'affibloom' ), __( 'If you leave your display button text blank, this is what it will default to.', 'affibloom' ) ),
-	array( 'button', 'color', __( 'Primary button color', 'affibloom' ), __( "This is the color of your display's main CTA button.", 'affibloom' ) ),
-	array( 'secondary_button_text', 'text', __( 'Secondary button text', 'affibloom' ), __( 'If you set a secondary button for your display and leave it blank, this is what it will default to.', 'affibloom' ) ),
-	array( 'secondary_button', 'color', __( 'Secondary button color', 'affibloom' ), __( "This is the color of your display's secondary CTA button.", 'affibloom' ) ),
+// The Disclosure element row writes the scope setting of its type (requirements B5).
+$disclosure_keys = array(
+	'single' => 'show_disclosure',
+	'grid'   => 'show_disclosure_grid',
+	'list'   => 'show_disclosure_list',
 );
+
+/*
+ * Each type's part of the rail, live for the type shown and in a <template> for the others (deviation 144). Each type's
+ * fields are named `display[<type>][…]`, so one save carries every type that was edited.
+ */
+$template = $this;
+$regions  = static function ( string $region, string $partial, callable $data ) use ( $template, $view, $type_key ): void {
+	foreach ( $view['types'] as $display_type ) {
+		$key = $display_type->key();
+		$template->render(
+			'admin/partials/display-type-region',
+			array(
+				'region'  => $region,
+				'type'    => $key,
+				'live'    => $key === $type_key,
+				'partial' => $partial,
+				'data'    => $data( $display_type, $view['configs'][ $key ], 'display[' . $key . ']' ),
+			)
+		);
+	}
+};
 ?>
 <div class="wrap affibloom-admin affibloom-admin--display">
 	<?php $this->render( 'admin/partials/header' ); ?>
@@ -70,7 +73,7 @@ $fields = array(
 			<?php // Saved over REST, staying on the page (settings-save.js; deviations 141, 143). ?>
 			<form class="affibloom-settings" method="post" data-save-when-changed data-unsaved-guard data-rest-save="/affibloom/v1/settings/display"
 				data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
-				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
+				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>" data-display-type-field>
 
 				<div class="affibloom-card affibloom-split">
 					<div class="affibloom-split__body">
@@ -78,7 +81,7 @@ $fields = array(
 							<div class="affibloom-split__toolbar">
 								<nav class="affibloom-segment" aria-label="<?php esc_attr_e( 'Display type', 'affibloom' ); ?>">
 									<?php foreach ( $view['types'] as $display_type ) : ?>
-										<a class="affibloom-segment__item<?php echo $display_type->key() === $type_key ? ' is-active' : ''; ?>"
+										<a class="affibloom-segment__item<?php echo $display_type->key() === $type_key ? ' is-active' : ''; ?>" data-display-type="<?php echo esc_attr( $display_type->key() ); ?>"
 											href="<?php echo esc_url( admin_url( 'admin.php?page=affibloom-settings&tab=display&type=' . $display_type->key() . '&panel=' . $panel ) ); ?>"
 											<?php echo $display_type->key() === $type_key ? 'aria-current="page"' : ''; ?>>
 											<?php echo esc_html( $type_labels[ $display_type->key() ] ); ?>
@@ -116,27 +119,16 @@ $fields = array(
 
 						<aside class="affibloom-split__rail">
 							<div class="affibloom-split__rail-head">
-								<div class="affibloom-theme-row">
-									<label class="affibloom-label" for="affibloom-display-theme"><?php esc_html_e( 'Theme', 'affibloom' ); ?></label>
-									<?php
-									$this->render(
-										'admin/partials/help',
-										array(
-											'id'    => 'affibloom-display-theme-help',
-											'text'  => __( 'Applies to the selected display type (Single, Grid, or List).', 'affibloom' ),
-											'label' => __( 'Theme', 'affibloom' ),
-										)
-									);
-									?>
-									<select class="affibloom-input affibloom-select" id="affibloom-display-theme" name="display[theme]"
-										aria-describedby="affibloom-display-theme-help">
-										<?php foreach ( Theme::NAMES as $theme_name ) : ?>
-											<option value="<?php echo esc_attr( $theme_name ); ?>" <?php selected( $theme_name, $config->theme()->name() ); ?>>
-												<?php echo esc_html( $theme_name ); ?>
-											</option>
-										<?php endforeach; ?>
-									</select>
-								</div>
+								<?php
+								$regions(
+									'theme',
+									'admin/partials/display-theme-row',
+									static fn( $display_type, $config, $name ): array => array(
+										'config' => $config,
+										'name'   => $name,
+									)
+								);
+								?>
 
 								<input type="hidden" name="panel" value="<?php echo esc_attr( $panel ); ?>" data-rail-panel-field>
 								<div class="affibloom-rail-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Display settings', 'affibloom' ); ?>">
@@ -155,14 +147,16 @@ $fields = array(
 								<div class="affibloom-rail-panel<?php echo 'layout' === $panel ? ' is-active' : ''; ?>" role="tabpanel"
 									id="affibloom-panel-layout" aria-labelledby="affibloom-tab-layout" data-rail-panel="layout">
 									<?php
-									$this->render(
+									$regions(
+										'layout',
 										'admin/partials/display-layout-panel',
-										array(
+										static fn( $display_type, $config, $name ): array => array(
 											'config'     => $config,
-											'type'       => $view['type'],
+											'type'       => $display_type,
+											'name'       => $name,
 											'columns'    => $view['columns'],
-											'disclosure' => $settings->bool( $disclosure_key ),
-											'mirror'     => 'affibloom-setting-' . $disclosure_key,
+											'disclosure' => $settings->bool( $disclosure_keys[ $display_type->key() ] ),
+											'mirror'     => 'affibloom-setting-' . $disclosure_keys[ $display_type->key() ],
 										)
 									);
 									?>
@@ -171,51 +165,17 @@ $fields = array(
 								<div class="affibloom-rail-panel<?php echo 'colors' === $panel ? ' is-active' : ''; ?>" role="tabpanel"
 									id="affibloom-panel-colors" aria-labelledby="affibloom-tab-colors" data-rail-panel="colors">
 									<p class="affibloom-rail-hint"><?php esc_html_e( 'Colors and button labels apply to the selected display type (Single, Grid, or List).', 'affibloom' ); ?></p>
-									<details class="affibloom-accordion" data-accordion="colors" open>
-									<summary class="affibloom-accordion__toggle"><span><?php esc_html_e( 'Colors & labels', 'affibloom' ); ?></span></summary>
-									<div class="affibloom-accordion__body">
 									<?php
-									foreach ( $fields as [ $key, $field_type, $label, $help ] ) :
-										$field_id = 'affibloom-display-' . $key;
-										$help_id  = $field_id . '-help';
-										/* translators: %s: the colour field's label. */
-										$picker_label = sprintf( __( 'Pick a colour for %s', 'affibloom' ), $label );
-										?>
-										<div class="affibloom-row affibloom-row--<?php echo esc_attr( $field_type ); ?>">
-											<span class="affibloom-row__label">
-												<label class="affibloom-label" for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $label ); ?></label>
-												<?php
-												$this->render(
-													'admin/partials/help',
-													array(
-														'id'    => $help_id,
-														'text'  => $help,
-														'label' => $label,
-													)
-												);
-												?>
-											</span>
-											<span class="affibloom-row__control">
-												<?php if ( 'color' === $field_type ) : ?>
-													<?php // No name: the text field beside it is what gets saved, so a CSS keyword is never rewritten. ?>
-													<input type="color" class="affibloom-swatch" data-affibloom-swatch="<?php echo esc_attr( $field_id ); ?>"
-														value="#000000"
-														aria-label="<?php echo esc_attr( $picker_label ); ?>">
-												<?php endif; ?>
-												<?php if ( 'text' === $field_type ) : ?>
-													<?php // The button texts take an icon from the set (F28, Task 14G). ?>
-													<?php $this->render( 'admin/partials/icon-text-field', $view['choices']->field( $field_id, 'display[palette][' . $key . ']', $label, $palette->value( $key ), '', $help_id ) ); ?>
-												<?php else : ?>
-													<input type="text" class="affibloom-input" id="<?php echo esc_attr( $field_id ); ?>"
-														name="display[palette][<?php echo esc_attr( $key ); ?>]"
-														value="<?php echo esc_attr( $palette->value( $key ) ); ?>"
-														maxlength="500" aria-describedby="<?php echo esc_attr( $help_id ); ?>">
-												<?php endif; ?>
-											</span>
-										</div>
-									<?php endforeach; ?>
-									</div>
-									</details>
+									$regions(
+										'colors',
+										'admin/partials/display-colors-accordion',
+										static fn( $display_type, $config, $name ): array => array(
+											'config'  => $config,
+											'name'    => $name,
+											'choices' => $view['choices'],
+										)
+									);
+									?>
 
 									<?php $this->render( 'admin/partials/display-behaviour-accordions', array( 'settings' => $settings ) ); ?>
 								</div>
@@ -239,7 +199,7 @@ $fields = array(
 				data-confirm="<?php esc_attr_e( 'Reset all display settings to factory defaults? This cannot be undone.', 'affibloom' ); ?>"
 				data-save-title="<?php esc_attr_e( 'Resetting Display Settings', 'affibloom' ); ?>"
 				data-failed-text="<?php esc_attr_e( 'Error resetting display settings.', 'affibloom' ); ?>">
-				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
+				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>" data-display-type-field>
 			</form>
 
 			<?php // Site-wide, so outside the per-type editor above (F28, Task 14F). ?>

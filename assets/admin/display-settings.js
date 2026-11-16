@@ -3,6 +3,11 @@
  * the phone layout behind the device toggle, the summaries, the Disclosure mirror, Save enabled only after a
  * change (see admin.js), and Reset Settings with Lasso's confirmation.
  *
+ * Single, Grid and List switch in place, as in Lasso (settings.js 2073-2087; deviation 144): each type's part of the
+ * rail (theme, Layout & spacing, colours and labels) is printed for all three, the others in a <template>. Choosing a
+ * type keeps the shown part, with its edits, aside and puts the chosen one in; Save Changes sends every type that was
+ * shown. Below 992px the preview stays on Mobile, as Lasso's does.
+ *
  * Every control posts its own field, so the form saves without this script; the script keeps the controls in
  * step the way Lasso's does (admin/assets/js/settings.js): a preset chip fills the steppers, a stepper moves
  * by its step and clamps to its range, and any edit turns the preset into Custom.
@@ -152,7 +157,7 @@
 		var hints = JSON.parse( box.dataset.hints );
 		var base = box.querySelector( '[data-density-base]' );
 		var hint = box.querySelector( '[data-density-hint]' );
-		var chips = Array.prototype.slice.call( box.querySelectorAll( 'input[name="display[density][preset]"]' ) );
+		var chips = Array.prototype.slice.call( box.querySelectorAll( 'input[name$="[density][preset]"]' ) );
 
 		var stepper = function ( field ) {
 			return panel.querySelector( '.affibloom-stepper[data-density-field="' + field + '"]' );
@@ -393,6 +398,19 @@
 			changed( box );
 		} );
 
+		// What the form sends for the layout: the desktop rows, whichever device the radios show (displayTypes reads
+		// it, so the save and the leave guard never take the phone view for a change).
+		box.affibloomDesktopLayout = function () {
+			var sent = {};
+			KEYS.forEach( function ( key ) {
+				var radio = radios( key )[ 0 ];
+				if ( radio && undefined !== desktop[ key ] ) {
+					sent[ radio.name ] = desktop[ key ];
+				}
+			} );
+			return sent;
+		};
+
 		// The radios carry the desktop layout to the server, so they show it again before the form is sent.
 		form.addEventListener( 'submit', function () {
 			mode = 'desktop';
@@ -454,6 +472,11 @@
 		mirrorSwitch.disabled = false;
 		follow( mirrorSwitch, target );
 		follow( target, mirrorSwitch );
+		// A type shown after load (displayTypes) was printed with the stored value; the shared switch may have moved.
+		if ( mirrorSwitch.checked !== target.checked ) {
+			mirrorSwitch.checked = target.checked;
+			mirrorSwitch.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}
 	}
 
 	/**
@@ -472,6 +495,26 @@
 				event.preventDefault();
 			}
 		} );
+	}
+
+	// The display types' parts that are not in the page at the moment (displayTypes), for iconMenus().
+	var asideRegions = function () {
+		return [];
+	};
+
+	/**
+	 * Every icon picker menu of the screen: in the page, in the other types' templates and in the types set aside.
+	 *
+	 * @return {Array<HTMLElement>} The menus.
+	 */
+	function iconMenus() {
+		var roots = [ document ].concat( asideRegions() );
+		Array.prototype.forEach.call( document.querySelectorAll( 'template[data-display-type]' ), function ( template ) {
+			roots.push( template.content );
+		} );
+		return roots.reduce( function ( menus, root ) {
+			return menus.concat( Array.prototype.slice.call( root.querySelectorAll( '.affibloom-icon-menu' ) ) );
+		}, [] );
 	}
 
 	/**
@@ -530,7 +573,7 @@
 						list.insertAdjacentHTML( 'beforeend', data.row );
 					}
 					if ( data.item ) {
-						Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-icon-menu' ), function ( menu ) {
+						iconMenus().forEach( function ( menu ) {
 							var unknown = menu.querySelector( '[data-unknown]' );
 							var holder = document.createElement( 'span' );
 							holder.innerHTML = data.item;
@@ -557,10 +600,12 @@
 				if ( row ) {
 					row.remove();
 				}
-				Array.prototype.forEach.call( document.querySelectorAll( '.affibloom-icon-menu [data-icon]' ), function ( item ) {
-					if ( item.dataset.icon === css && 'true' !== item.getAttribute( 'aria-checked' ) ) {
-						item.remove();
-					}
+				iconMenus().forEach( function ( menu ) {
+					Array.prototype.forEach.call( menu.querySelectorAll( '[data-icon]' ), function ( item ) {
+						if ( item.dataset.icon === css && 'true' !== item.getAttribute( 'aria-checked' ) ) {
+							item.remove();
+						}
+					} );
 				} );
 			} );
 		} );
@@ -616,6 +661,7 @@
 
 		form.addEventListener( 'input', soon );
 		form.addEventListener( 'change', soon );
+		form.addEventListener( 'affibloom:type-changed', soon );
 		if ( toggle ) {
 			toggle.addEventListener( 'click', function ( event ) {
 				var button = event.target.closest( '[data-device]' );
@@ -628,16 +674,179 @@
 		draw();
 	}
 
+	/**
+	 * Sets up one display type's part of the rail: the colour pickers, the Disclosure mirror, and in the Layout &
+	 * spacing part the density, the Elements summary and the layout rows.
+	 *
+	 * @param {HTMLElement}  region The part.
+	 * @param {?HTMLElement} toggle The toolbar's device toggle.
+	 */
+	function setUpRegion( region, toggle ) {
+		Array.prototype.forEach.call( region.querySelectorAll( '[data-affibloom-swatch]' ), connect );
+		Array.prototype.forEach.call( region.querySelectorAll( '[data-mirror]' ), mirror );
+		if ( 'layout' === region.dataset.typeRegion ) {
+			density( region );
+			elements( region );
+			layoutRows( region, toggle );
+		}
+	}
+
+	/**
+	 * Single, Grid and List without a reload (deviation 144). A part shown once stays in memory with its edits and its
+	 * scripts; one never shown is made from its <template> and set up. The address follows the type, so a reload or
+	 * a later visit opens it again.
+	 *
+	 * @param {HTMLFormElement} form   The Display form.
+	 * @param {?HTMLElement}    toggle The toolbar's device toggle.
+	 */
+	function displayTypes( form, toggle ) {
+		var links = Array.prototype.slice.call( document.querySelectorAll( '.affibloom-segment__item[data-display-type]' ) );
+		var fields = Array.prototype.slice.call( document.querySelectorAll( '[data-display-type-field]' ) );
+		var current = fields.length ? fields[ 0 ].value : '';
+		// Each type's parts by region, once shown: { grid: { theme: el, layout: el, colors: el } }.
+		var shown = {};
+		shown[ current ] = {};
+		Array.prototype.forEach.call( form.querySelectorAll( '.affibloom-type-region[data-display-type="' + current + '"]' ), function ( region ) {
+			shown[ current ][ region.dataset.typeRegion ] = region;
+		} );
+
+		asideRegions = function () {
+			var aside = [];
+			Object.keys( shown ).forEach( function ( type ) {
+				if ( type !== current ) {
+					Object.keys( shown[ type ] ).forEach( function ( key ) {
+						aside.push( shown[ type ][ key ] );
+					} );
+				}
+			} );
+			return aside;
+		};
+
+		// What the form sends: its own fields (the type shown) and the parts of the other types that were shown, each
+		// type's layout as its desktop rows (layoutRows), even while the radios show the phone layout.
+		form.affibloomFields = function () {
+			var data = new window.FormData( form );
+			Object.keys( shown ).forEach( function ( type ) {
+				Object.keys( shown[ type ] ).forEach( function ( key ) {
+					var region = shown[ type ][ key ];
+					var box = region.querySelector( '[data-layout]' );
+					if ( type !== current ) {
+						window.affibloomFieldEntries( region ).forEach( function ( entry ) {
+							data.append( entry[ 0 ], entry[ 1 ] );
+						} );
+					}
+					if ( box && box.affibloomDesktopLayout ) {
+						var desktop = box.affibloomDesktopLayout();
+						Object.keys( desktop ).forEach( function ( name ) {
+							data.set( name, desktop[ name ] );
+						} );
+					}
+				} );
+			} );
+			return data;
+		};
+
+		var show = function ( type ) {
+			var fresh = [];
+			if ( type === current || ! shown[ current ] ) {
+				return;
+			}
+			if ( ! shown[ type ] ) {
+				shown[ type ] = {};
+				Array.prototype.forEach.call( document.querySelectorAll( 'template[data-display-type="' + type + '"]' ), function ( template ) {
+					shown[ type ][ template.dataset.typeRegion ] = template.content.firstElementChild.cloneNode( true );
+					fresh.push( shown[ type ][ template.dataset.typeRegion ] );
+				} );
+			}
+			Object.keys( shown[ current ] ).forEach( function ( key ) {
+				var leaving = shown[ current ][ key ];
+				if ( shown[ type ][ key ] ) {
+					leaving.replaceWith( shown[ type ][ key ] );
+				}
+			} );
+			current = type;
+
+			// A part shown for the first time: its scripts, its help tips and icon pickers, and the phone layout if the
+			// toolbar is on Mobile; the leave guard takes its values as stored, not as a change.
+			fresh.forEach( function ( region ) {
+				setUpRegion( region, toggle );
+				region.dispatchEvent( new CustomEvent( 'affibloom:enhance', { bubbles: true } ) );
+				form.dispatchEvent( new CustomEvent( 'affibloom:fields-added', { detail: window.affibloomFieldEntries( region ) } ) );
+			} );
+			var mobile = toggle && toggle.querySelector( '[data-device="mobile"].is-active' );
+			if ( fresh.length && mobile ) {
+				mobile.click();
+			}
+
+			fields.forEach( function ( field ) {
+				field.value = type;
+			} );
+			links.forEach( function ( link ) {
+				var active = link.dataset.displayType === type;
+				link.classList.toggle( 'is-active', active );
+				if ( active ) {
+					link.setAttribute( 'aria-current', 'page' );
+				} else {
+					link.removeAttribute( 'aria-current' );
+				}
+			} );
+			if ( window.history && window.history.replaceState ) {
+				var address = new URL( window.location.href );
+				address.searchParams.set( 'type', type );
+				window.history.replaceState( window.history.state, '', address.toString() );
+			}
+			// The preview draws the type now shown.
+			form.dispatchEvent( new Event( 'affibloom:type-changed' ) );
+		};
+
+		links.forEach( function ( link ) {
+			link.addEventListener( 'click', function ( event ) {
+				if ( event.ctrlKey || event.metaKey || event.shiftKey || event.button ) {
+					return; // a new tab opens the type's own address
+				}
+				event.preventDefault();
+				show( link.dataset.displayType );
+			} );
+		} );
+	}
+
+	/**
+	 * Below 992px the preview stays on Mobile and Desktop does nothing, as in Lasso (settings.js 1276-1300): a narrow
+	 * window cannot show the 1280px desktop frame.
+	 *
+	 * @param {?HTMLElement} toggle The toolbar's device toggle.
+	 */
+	function narrowViewport( toggle ) {
+		var desktop = toggle && toggle.querySelector( '[data-device="desktop"]' );
+		var mobile = toggle && toggle.querySelector( '[data-device="mobile"]' );
+		if ( ! desktop || ! mobile || ! window.matchMedia ) {
+			return;
+		}
+		var narrow = window.matchMedia( '(max-width: 991.98px)' );
+		var follow = function () {
+			desktop.disabled = narrow.matches;
+			if ( narrow.matches && ! mobile.classList.contains( 'is-active' ) ) {
+				mobile.click();
+			}
+		};
+		follow();
+		if ( narrow.addEventListener ) {
+			narrow.addEventListener( 'change', follow );
+		}
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var rail = document.querySelector( '.affibloom-split__rail' );
 		var icons = document.querySelector( '.affibloom-icon-set' );
+		var toggle = document.querySelector( '[data-device-toggle]' );
+		var form = rail ? rail.closest( 'form' ) : null;
 		if ( icons && window.wp && window.wp.apiFetch ) {
 			iconSet( icons );
 		}
-		var layout = document.querySelector( '[data-rail-panel="layout"]' );
 
 		var resetForm = document.querySelector( '[data-reset-form]' );
 
+		// The shared rows (Disclosure & behavior) and the type shown; the other types are set up when first shown.
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-affibloom-swatch]' ), connect );
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-mirror]' ), mirror );
 		if ( resetForm ) {
@@ -646,17 +855,22 @@
 		if ( rail ) {
 			tabs( rail );
 		}
+		var layout = document.querySelector( '.affibloom-type-region[data-type-region="layout"]' );
 		if ( layout ) {
 			density( layout );
 			elements( layout );
-			layoutRows( layout, document.querySelector( '[data-device-toggle]' ) );
+			layoutRows( layout, toggle );
+		}
+		if ( form ) {
+			displayTypes( form, toggle );
 		}
 		var frame = document.querySelector( '[data-preview-frame]' );
 		if ( frame && frame.closest( 'form' ) && window.wp && window.wp.apiFetch ) {
-			preview( frame.closest( 'form' ), frame, document.querySelector( '[data-device-toggle]' ) );
+			preview( frame.closest( 'form' ), frame, toggle );
 		} else if ( frame ) {
 			// The frame is printed loading; with nothing to draw it, the placeholder shows.
 			frame.classList.remove( 'is-loading' );
 		}
+		narrowViewport( toggle );
 	} );
 } )();

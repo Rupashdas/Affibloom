@@ -147,7 +147,7 @@ test.describe( 'F28 Button icons', () => {
 			await expect( page.getByRole( 'button', { name: /^Icon for Primary button text/ } ) ).toHaveCount( 0 );
 			const field = page.getByLabel( 'Primary button text', { exact: true } );
 			await expect( field ).toBeEditable();
-			await expect( field ).toHaveAttribute( 'name', 'display[palette][primary_button_text]' );
+			await expect( field ).toHaveAttribute( 'name', 'display[single][palette][primary_button_text]' );
 		} );
 	} );
 } );

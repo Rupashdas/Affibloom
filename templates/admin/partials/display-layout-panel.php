@@ -7,7 +7,7 @@
  * Every control also works without JavaScript; the script only keeps the chips, steppers and summaries in step.
  *
  * @package Affibloom
- * @var array{config: \Affibloom\Domain\Display\DisplayConfig, type: \Affibloom\Domain\Display\DisplayType, columns: int, disclosure: bool, mirror: string} $view
+ * @var array{config: \Affibloom\Domain\Display\DisplayConfig, type: \Affibloom\Domain\Display\DisplayType, name: string, columns: int, disclosure: bool, mirror: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,11 +89,11 @@ $groups         = array(
 	data-hints="<?php echo esc_attr( (string) wp_json_encode( $hints ) ); ?>">
 	<legend class="affibloom-density__label"><?php esc_html_e( 'Density', 'affibloom' ); ?></legend>
 	<p class="affibloom-rail-hint"><?php esc_html_e( 'Spacing presets apply to the selected display type (Single, Grid, or List).', 'affibloom' ); ?></p>
-	<input type="hidden" name="display[density][base]" value="<?php echo esc_attr( isset( Density::PRESETS[ $preset ] ) ? $preset : '' ); ?>" data-density-base>
+	<input type="hidden" name="<?php echo esc_attr( $view['name'] ); ?>[density][base]" value="<?php echo esc_attr( isset( Density::PRESETS[ $preset ] ) ? $preset : '' ); ?>" data-density-base>
 	<div class="affibloom-chips">
 		<?php foreach ( $chips as $chip_key => $chip_label ) : ?>
 			<label class="affibloom-chip-option">
-				<input type="radio" name="display[density][preset]" value="<?php echo esc_attr( $chip_key ); ?>" <?php checked( $preset, $chip_key ); ?>>
+				<input type="radio" name="<?php echo esc_attr( $view['name'] ); ?>[density][preset]" value="<?php echo esc_attr( $chip_key ); ?>" <?php checked( $preset, $chip_key ); ?>>
 				<span class="affibloom-chip-option__bars affibloom-chip-option__bars--<?php echo esc_attr( $chip_key ); ?>" aria-hidden="true"><span></span><span></span><span></span></span>
 				<span class="affibloom-chip-option__name"><?php echo esc_html( $chip_label ); ?></span>
 			</label>
@@ -115,7 +115,7 @@ $groups         = array(
 		</span>
 	</summary>
 	<div class="affibloom-accordion__body">
-		<input type="hidden" name="display[elements_present]" value="1">
+		<input type="hidden" name="<?php echo esc_attr( $view['name'] ); ?>[elements_present]" value="1">
 		<?php foreach ( Elements::KEYS as $element ) : ?>
 			<?php $element_id = 'affibloom-display-element-' . $element; ?>
 			<?php if ( 'timestamp' === $element ) : ?>
@@ -136,7 +136,7 @@ $groups         = array(
 			<div class="affibloom-toggle-row">
 				<span class="affibloom-toggle">
 					<input type="checkbox" class="affibloom-toggle__input" role="switch" id="<?php echo esc_attr( $element_id ); ?>"
-						name="display[elements][<?php echo esc_attr( $element ); ?>]" value="1" data-element <?php checked( $elements->visible( $element ) ); ?>>
+						name="<?php echo esc_attr( $view['name'] ); ?>[elements][<?php echo esc_attr( $element ); ?>]" value="1" data-element <?php checked( $elements->visible( $element ) ); ?>>
 					<span class="affibloom-toggle__track" aria-hidden="true"></span>
 				</span>
 				<label class="affibloom-toggle-row__label" for="<?php echo esc_attr( $element_id ); ?>"><?php echo esc_html( $element_labels[ $element ] ); ?></label>
@@ -151,6 +151,7 @@ $this->render(
 	array(
 		'layout'  => $view['config']->layout(),
 		'type'    => $view['type'],
+		'name'    => $view['name'],
 		'columns' => $view['columns'],
 	)
 );
@@ -175,7 +176,7 @@ $this->render(
 						<div class="affibloom-options">
 							<?php foreach ( Density::LINE_OPTIONS as $option ) : ?>
 								<label class="affibloom-options__option">
-									<input type="radio" name="display[density][values][<?php echo esc_attr( $field ); ?>]" value="<?php echo esc_attr( (string) $option ); ?>"
+									<input type="radio" name="<?php echo esc_attr( $view['name'] ); ?>[density][values][<?php echo esc_attr( $field ); ?>]" value="<?php echo esc_attr( (string) $option ); ?>"
 										data-density-field="<?php echo esc_attr( $field ); ?>" <?php checked( $value, $option ); ?>>
 									<span><?php echo esc_html( 0 === $option ? __( 'All', 'affibloom' ) : (string) $option ); ?></span>
 								</label>
@@ -193,7 +194,7 @@ $this->render(
 							<output class="affibloom-stepper__value" aria-labelledby="<?php echo esc_attr( $label_id ); ?>" aria-live="polite"><?php echo esc_html( (string) $value ); ?></output>
 							<button type="button" class="affibloom-stepper__button" data-step-dir="1"
 								aria-label="<?php echo esc_attr( sprintf( /* translators: %s: control label. */ __( 'Increase %s', 'affibloom' ), $control_label ) ); ?>">+</button>
-							<input type="hidden" name="display[density][values][<?php echo esc_attr( $field ); ?>]" value="<?php echo esc_attr( (string) $value ); ?>">
+							<input type="hidden" name="<?php echo esc_attr( $view['name'] ); ?>[density][values][<?php echo esc_attr( $field ); ?>]" value="<?php echo esc_attr( (string) $value ); ?>">
 						</div>
 					</div>
 				<?php endif; ?>

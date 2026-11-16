@@ -1215,6 +1215,42 @@
 	}
 
 	window.affibloomToast = toast;
+	/**
+	 * The named, enabled controls inside an element, as a form would send them: a checkbox or radio only when it is
+	 * checked. For fields that are not in a form at the moment (the Display screen's other display types).
+	 *
+	 * @param {Element} root The element.
+	 * @return {Array<Array<string>>} [ name, value ] pairs, in document order.
+	 */
+	function fieldEntries( root ) {
+		var entries = [];
+		Array.prototype.forEach.call( root.querySelectorAll( 'input[name], select[name], textarea[name]' ), function ( field ) {
+			if ( field.disabled || ( ( 'checkbox' === field.type || 'radio' === field.type ) && ! field.checked ) || 'file' === field.type ) {
+				return;
+			}
+			if ( 'SELECT' === field.tagName && field.multiple ) {
+				Array.prototype.forEach.call( field.selectedOptions, function ( option ) {
+					entries.push( [ field.name, option.value ] );
+				} );
+				return;
+			}
+			entries.push( [ field.name, field.value ] );
+		} );
+		return entries;
+	}
+
+	/**
+	 * What a form sends: its own fields, and those a screen keeps beside it (`form.affibloomFields`, display-settings.js).
+	 *
+	 * @param {HTMLFormElement} form The form.
+	 * @return {FormData} The fields.
+	 */
+	function formFields( form ) {
+		return 'function' === typeof form.affibloomFields ? form.affibloomFields() : new window.FormData( form );
+	}
+
+	window.affibloomFieldEntries = fieldEntries;
+	window.affibloomFormFields = formFields;
 	window.affibloomCopy = copy;
 	window.affibloomBoxFrame = boxFrame;
 	window.affibloomSaveDialog = saveDialog;
