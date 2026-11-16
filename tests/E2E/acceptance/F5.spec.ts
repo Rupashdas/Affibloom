@@ -859,6 +859,35 @@ test.describe( 'F5 Box design', () => {
 		await expect( page.locator( 'script.affibloom-schema-markup-output' ) ).toHaveCount( 0 );
 	} );
 
+	// AC24 (Task 22E): with Keep Site Stripe UI on, a box with `sitestripe` draws Lasso's narrow card (themes/sitestripe,
+	// the capture's Lab-sitestripe; checked in 22E beside Lasso's own card); off, the usual box.
+	test( "@local AC24 Keep Site Stripe UI draws Lasso's SiteStripe card for a sitestripe box", async ( { page } ) => {
+		useSiteDisplay();
+		const id = themeProduct( 'plain' );
+		const path = newPostWith( boxBlock( id, { sitestripe: true } ) );
+		setSettings( { keep_site_stripe_ui: true } );
+		try {
+			await page.goto( path );
+			const card = page.locator( '.affibloom-box.sitestripe > .affibloom-display.sitestripe' );
+			await expect( card ).toHaveAttribute( 'style', 'width:240px;height:400px;' );
+			await expect( card.locator( '> .affibloom-box-2 > a.affibloom-button-1' ) ).toHaveCount( 1 );
+			await expect( card.locator( 'a.affibloom-button-2' ) ).toHaveCount( 0 );
+			for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
+				await page.setViewportSize( { width, height: 900 } );
+				await page.goto( path );
+				await page.addStyleTag( { content: SITE_CSS } );
+				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'sitestripe', `Lab-sitestripe-${ name }.png` ] );
+			}
+
+			setSettings( { keep_site_stripe_ui: false } );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-display.sitestripe' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-display.affibloom-lab' ) ).toHaveCount( 1 );
+		} finally {
+			setSettings( { keep_site_stripe_ui: false } );
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

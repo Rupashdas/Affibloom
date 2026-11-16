@@ -1125,3 +1125,36 @@ a.affibloom-button-2:hover {
 	cursor: pointer;
 	pointer-events: none;
 }
+/* The SiteStripe card (Task 22E; Lasso's lasso-live rules 21-26): a narrow floated card, its title and price on one
+   line, the image square, button 1 the card's width. */
+.affibloom-box.sitestripe {
+	display: unset;
+	position: unset;
+	width: unset;
+	float: left;
+}
+.affibloom-display.sitestripe {
+	float: left;
+	display: block;
+}
+.affibloom-display.sitestripe a.affibloom-title,
+.affibloom-display.sitestripe .affibloom-price {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	font-size: 15px !important;
+}
+.affibloom-display.sitestripe a.affibloom-image {
+	display: block;
+	max-height: 100%;
+}
+.affibloom-display.sitestripe a.affibloom-image img {
+	max-height: 100%;
+	aspect-ratio: 1;
+}
+.affibloom-display.sitestripe a.affibloom-button-1,
+.affibloom-display.sitestripe a.affibloom-button-2 {
+	display: block;
+	width: 100%;
+}

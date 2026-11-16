@@ -149,6 +149,14 @@
 		"schemaPriceCurrency": {
 			"type": "string",
 			"default": ""
+		},
+		"sitestripe": {
+			"type": "boolean",
+			"default": false
+		},
+		"sitestripeStyle": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {

@@ -102,15 +102,19 @@ final class BoxBuilder {
 		// R74, R21: the box's basis price, struck through, printed with the price while Show Discount Pricing is on.
 		$discount = '' !== $overrides->basis_price && '' !== $price && $settings->bool( 'show_discount_pricing' ) ? $overrides->basis_price : '';
 
+		// R13: the SiteStripe card replaces the theme's layout while the site keeps the SiteStripe UI.
+		$sitestripe = $overrides->sitestripe && $settings->bool( 'keep_site_stripe_ui' );
+
 		return new BoxView(
-			family: LayoutFamily::of( $theme ),
+			family: $sitestripe ? LayoutFamily::SiteStripe : LayoutFamily::of( $theme ),
 			// R9, R81: the box's anchor ID, else Lasso's anchor with the box's link ID or, without one, uniqid(), so two boxes
 			// of one product never share an ID.
 			anchor: '' !== $overrides->anchor_id ? $overrides->anchor_id : 'affibloom-anchor-id-' . $id . '-' . ( '' !== $overrides->link_id ? $overrides->link_id : uniqid() ),
 			// R6, R80: `mobile` or `desktop` (the box's style, or a text widget's box) after the slug.
-			classes: implode( ' ', array_filter( array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, $overrides->style, $advanced ? 'affibloom-advanced' : '' ) ) ),
+			classes: $sitestripe ? 'affibloom-display sitestripe affibloom-url-' . $product->slug : implode( ' ', array_filter( array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, $overrides->style, $advanced ? 'affibloom-advanced' : '' ) ) ),
 			// R64: the classic box has no v2 wrapper attributes; its colours come through the page's :root block.
-			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $elements->hidden() ) : array(),
+			// R13: the card has only its size, Lasso's default 240 x 400 unless the box gives its own style.
+			wrapper: $sitestripe ? array( 'style' => '' === $overrides->sitestripe_style ? 'width:240px;height:400px;' : $overrides->sitestripe_style ) : ( $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $elements->hidden() ) : array() ),
 			badge: BoxOverrides::hides( $overrides->badge ) ? '' : ( '' === $overrides->badge ? $product->badge : $overrides->badge ),
 			badge_override: $advanced && $elements->badge_overrides(),
 			link: $title_link,

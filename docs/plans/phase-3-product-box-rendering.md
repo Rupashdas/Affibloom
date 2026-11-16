@@ -121,7 +121,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 21C: The Copy to Clipboard field
 - [x] Task 20D: Product structured data
 - Task 22D: dropped (decision B9: brag mode left out)
-- [ ] Task 22E: SiteStripe box
+- [x] Task 22E: SiteStripe box
 
 **F16, F5, F1, the live previews:**
 
@@ -1073,10 +1073,14 @@ Brag mode is left out. The section is in `archive/phase-3-superseded.md`.
 
 **Files:** create `templates/front/box-sitestripe.php`; modify `blocks/product-box/block.json` (`sitestripe`, `sitestripeStyle`), `assets/front/box.css`, `src/Interface/Front/BoxHtml.php`, `tests/E2E/acceptance/F5.spec.ts` (AC24).
 
-- [ ] **Step 1: Failing test (AC24).**
-- [ ] **Step 2: Template and CSS.**
-- [ ] **Step 3: Run and look.** Keep Site Stripe UI on and off, a box with `sitestripe` at 1280 and 390 px beside Lasso's baseline.
-- [ ] **Step 4: Commit** — "Draw the SiteStripe box".
+- [x] **Step 1: Failing test (AC24).**
+- [x] **Step 2: Template and CSS.**
+- [x] **Step 3: Run and look.** Keep Site Stripe UI on and off, a box with `sitestripe` at 1280 and 390 px beside Lasso's baseline.
+- [x] **Step 4: Commit** — "Draw the SiteStripe box".
+
+*Note:* the card is a fourth template family (`LayoutFamily::SiteStripe`, `box-sitestripe.php`) chosen by the builder,
+so `BoxHtml` prints it as any box; no `SiteStripeHtml` class (18S5 and DT8 reuse this path). Checked beside Lasso's
+card (Keep Site Stripe UI on in both) at 1280 and 390 px: equal.
 
 ---
 

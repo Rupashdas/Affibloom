@@ -67,6 +67,8 @@ final class BoxOverrides {
 	 * @param string    $cons_label  The Cons field's name (R71); '' the field's own.
 	 * @param string    $fields      `hide` (no custom fields), `demo` (Lasso's demo Pros & Cons), or '' (R72).
 	 * @param bool|null $show_pros_cons False hides Pros & cons (R84); with `demo`, whether the demo shows (R72).
+	 * @param bool      $sitestripe  Draw the SiteStripe card (R13, R83), while the site keeps the SiteStripe UI.
+	 * @param string    $sitestripe_style The card's inline style (R83); '' Lasso's default size.
 	 */
 	private function __construct(
 		public readonly int $product_id,
@@ -97,6 +99,8 @@ final class BoxOverrides {
 		public readonly string $cons_label = '',
 		public readonly string $fields = '',
 		public readonly ?bool $show_pros_cons = null,
+		public readonly bool $sitestripe = false,
+		public readonly string $sitestripe_style = '',
 	) {}
 
 	/**
@@ -117,33 +121,35 @@ final class BoxOverrides {
 		return self::make(
 			$attributes['productId'] ?? 0,
 			array(
-				'badge'           => $text( 'badge', 'hideBadge' ),
-				'description'     => $text( 'description', 'hideDescription' ),
-				'title'           => $text( 'title', 'hideTitle' ),
-				'title_url'       => $text( 'titleUrl' ),
-				'title_type'      => $text( 'titleType' ),
-				'image_url'       => $text( 'imageUrl', 'hideImage' ),
-				'image_alt'       => $text( 'imageAlt' ),
-				'theme'           => $text( 'theme' ),
-				'primary_url'     => $text( 'primaryUrl' ),
-				'primary_text'    => $text( 'primaryText' ),
-				'secondary_url'   => $text( 'secondaryUrl' ),
-				'secondary_text'  => $text( 'secondaryText' ),
-				'tracking_id'     => $text( 'trackingId' ),
-				'disclosure_text' => $text( 'disclosureText' ),
-				'anchor_id'       => $text( 'anchorId' ),
-				'link_id'         => $text( 'linkId' ),
-				'style'           => $text( 'style' ),
-				'price'           => $text( 'price' ),
-				'prime'           => true === ( $attributes['prime'] ?? false ) ? '1' : '',
-				'basis_price'     => $text( 'basisPrice' ),
-				'rating'          => $text( 'rating' ),
-				'pros'            => $text( 'pros' ),
-				'cons'            => $text( 'cons' ),
-				'pros_label'      => $text( 'prosLabel' ),
-				'cons_label'      => $text( 'consLabel' ),
-				'fields'          => $text( 'fields' ),
-				'show_pros_cons'  => is_bool( $attributes['showProsCons'] ?? null ) ? ( $attributes['showProsCons'] ? 'true' : 'false' ) : '',
+				'badge'            => $text( 'badge', 'hideBadge' ),
+				'description'      => $text( 'description', 'hideDescription' ),
+				'title'            => $text( 'title', 'hideTitle' ),
+				'title_url'        => $text( 'titleUrl' ),
+				'title_type'       => $text( 'titleType' ),
+				'image_url'        => $text( 'imageUrl', 'hideImage' ),
+				'image_alt'        => $text( 'imageAlt' ),
+				'theme'            => $text( 'theme' ),
+				'primary_url'      => $text( 'primaryUrl' ),
+				'primary_text'     => $text( 'primaryText' ),
+				'secondary_url'    => $text( 'secondaryUrl' ),
+				'secondary_text'   => $text( 'secondaryText' ),
+				'tracking_id'      => $text( 'trackingId' ),
+				'disclosure_text'  => $text( 'disclosureText' ),
+				'anchor_id'        => $text( 'anchorId' ),
+				'link_id'          => $text( 'linkId' ),
+				'style'            => $text( 'style' ),
+				'price'            => $text( 'price' ),
+				'prime'            => true === ( $attributes['prime'] ?? false ) ? '1' : '',
+				'basis_price'      => $text( 'basisPrice' ),
+				'rating'           => $text( 'rating' ),
+				'pros'             => $text( 'pros' ),
+				'cons'             => $text( 'cons' ),
+				'pros_label'       => $text( 'prosLabel' ),
+				'cons_label'       => $text( 'consLabel' ),
+				'fields'           => $text( 'fields' ),
+				'show_pros_cons'   => is_bool( $attributes['showProsCons'] ?? null ) ? ( $attributes['showProsCons'] ? 'true' : 'false' ) : '',
+				'sitestripe'       => true === ( $attributes['sitestripe'] ?? false ) ? 'true' : '',
+				'sitestripe_style' => $text( 'sitestripeStyle' ),
 			)
 		);
 	}
@@ -152,7 +158,8 @@ final class BoxOverrides {
 	 * Reads Lasso's shortcode attributes (`id`, `badge`, `description`, `title`, `title_url`, `title_type`,
 	 * `image_url`, `image_alt`, `theme`, `primary_url`, `primary_text`, `secondary_url`, `secondary_text`, `tracking_id`,
 	 * `disclosure_text`, `anchor_id`, `link_id`, `style`, `origin`, `price`, `prime`, `basis_price`, `rating`, `pros`, `cons`,
-	 * `pros_label`, `cons_label`, `fields`, `field`, `show_pros_cons`), as `[lasso]` and `[affibloom]` take them.
+	 * `pros_label`, `cons_label`, `fields`, `field`, `show_pros_cons`, `sitestripe`, `sitestripe_style`), as `[lasso]` and
+	 * `[affibloom]` take them.
 	 *
 	 * @param array<string, mixed> $attributes The shortcode's attributes.
 	 */
@@ -162,36 +169,38 @@ final class BoxOverrides {
 		return self::make(
 			$attributes['id'] ?? 0,
 			array(
-				'badge'           => $text( 'badge' ),
-				'description'     => $text( 'description' ),
-				'title'           => $text( 'title' ),
-				'title_url'       => $text( 'title_url' ),
-				'title_type'      => $text( 'title_type' ),
-				'image_url'       => $text( 'image_url' ),
-				'image_alt'       => $text( 'image_alt' ),
-				'theme'           => $text( 'theme' ),
-				'primary_url'     => $text( 'primary_url' ),
-				'primary_text'    => $text( 'primary_text' ),
-				'secondary_url'   => $text( 'secondary_url' ),
-				'secondary_text'  => $text( 'secondary_text' ),
-				'tracking_id'     => $text( 'tracking_id' ),
-				'disclosure_text' => $text( 'disclosure_text' ),
-				'anchor_id'       => $text( 'anchor_id' ),
-				'link_id'         => $text( 'link_id' ),
+				'badge'            => $text( 'badge' ),
+				'description'      => $text( 'description' ),
+				'title'            => $text( 'title' ),
+				'title_url'        => $text( 'title_url' ),
+				'title_type'       => $text( 'title_type' ),
+				'image_url'        => $text( 'image_url' ),
+				'image_alt'        => $text( 'image_alt' ),
+				'theme'            => $text( 'theme' ),
+				'primary_url'      => $text( 'primary_url' ),
+				'primary_text'     => $text( 'primary_text' ),
+				'secondary_url'    => $text( 'secondary_url' ),
+				'secondary_text'   => $text( 'secondary_text' ),
+				'tracking_id'      => $text( 'tracking_id' ),
+				'disclosure_text'  => $text( 'disclosure_text' ),
+				'anchor_id'        => $text( 'anchor_id' ),
+				'link_id'          => $text( 'link_id' ),
 				// A box in a text widget (Lasso's widget filter adds origin="widget") draws the phone layout.
-				'style'           => '' === $text( 'style' ) && 'widget' === $text( 'origin' ) ? 'mobile' : $text( 'style' ),
-				'price'           => $text( 'price' ),
-				'prime'           => $text( 'prime' ),
-				'basis_price'     => $text( 'basis_price' ),
-				'rating'          => $text( 'rating' ),
+				'style'            => '' === $text( 'style' ) && 'widget' === $text( 'origin' ) ? 'mobile' : $text( 'style' ),
+				'price'            => $text( 'price' ),
+				'prime'            => $text( 'prime' ),
+				'basis_price'      => $text( 'basis_price' ),
+				'rating'           => $text( 'rating' ),
 				// Lasso's shortcode writes a line break in pros and cons as "-br-".
-				'pros'            => str_replace( '-br-', "\n", $text( 'pros' ) ),
-				'cons'            => str_replace( '-br-', "\n", $text( 'cons' ) ),
-				'pros_label'      => $text( 'pros_label' ),
-				'cons_label'      => $text( 'cons_label' ),
+				'pros'             => str_replace( '-br-', "\n", $text( 'pros' ) ),
+				'cons'             => str_replace( '-br-', "\n", $text( 'cons' ) ),
+				'pros_label'       => $text( 'pros_label' ),
+				'cons_label'       => $text( 'cons_label' ),
 				// `field` is Lasso's newer name (its `fields` clashed with AAWP's shortcode).
-				'fields'          => 'hide' === $text( 'field' ) ? 'hide' : $text( 'fields' ),
-				'show_pros_cons'  => $text( 'show_pros_cons' ),
+				'fields'           => 'hide' === $text( 'field' ) ? 'hide' : $text( 'fields' ),
+				'show_pros_cons'   => $text( 'show_pros_cons' ),
+				'sitestripe'       => $text( 'sitestripe' ),
+				'sitestripe_style' => $text( 'sitestripe_style' ),
 			)
 		);
 	}
@@ -247,6 +256,9 @@ final class BoxOverrides {
 			fields: in_array( $values['fields'], array( self::HIDE, 'demo' ), true ) ? $values['fields'] : '',
 			// Lasso's cast_to_boolean: "false", "0", "no", "off" and "" are false; unset is null.
 			show_pros_cons: '' === $values['show_pros_cons'] ? null : ! in_array( strtolower( $values['show_pros_cons'] ), array( 'false', '0', 'no', 'off' ), true ),
+			// Lasso's shortcode: `sitestripe="true"` (cast_to_boolean).
+			sitestripe: in_array( strtolower( $values['sitestripe'] ), array( 'true', '1', 'yes', 'on' ), true ),
+			sitestripe_style: $values['sitestripe_style'],
 		);
 	}
 }

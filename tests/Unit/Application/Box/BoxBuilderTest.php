@@ -540,4 +540,25 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( array(), $box( array( 'fields' => 'demo', 'showProsCons' => false ) )->fields );
 		self::assertSame( '1', $box( array( 'showProsCons' => false ) )->wrapper['data-hide-proscons'] );
 	}
+
+	/**
+	 * F5 R13 (Task 22E): `sitestripe` draws the SiteStripe card only while the site keeps the SiteStripe UI; its style
+	 * sizes it, Lasso's 240 x 400 by default.
+	 */
+	public function test_the_sitestripe_card_needs_the_site_setting(): void {
+		$box = static fn( array $attributes, bool $keep ): BoxView => ( new BoxBuilder( self::THUMBNAIL ) )->build(
+			self::product(),
+			self::display(),
+			self::settings( array( 'keep_site_stripe_ui' => $keep ) ),
+			BoxOverrides::from_block( array( 'productId' => 14727 ) + $attributes )
+		);
+
+		$card = $box( array( 'sitestripe' => true ), true );
+		self::assertSame( LayoutFamily::SiteStripe, $card->family );
+		self::assertSame( 'affibloom-display sitestripe affibloom-url-adidas-ligra-8-kids', $card->classes );
+		self::assertSame( array( 'style' => 'width:240px;height:400px;' ), $card->wrapper );
+		self::assertSame( array( 'style' => 'width:300px;' ), $box( array( 'sitestripe' => true, 'sitestripeStyle' => 'width:300px;' ), true )->wrapper );
+		self::assertSame( LayoutFamily::ThreeBox, $box( array( 'sitestripe' => true ), false )->family );
+		self::assertTrue( BoxOverrides::from_shortcode( array( 'sitestripe' => 'true' ) )->sitestripe );
+	}
 }
