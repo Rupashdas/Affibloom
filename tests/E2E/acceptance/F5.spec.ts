@@ -510,6 +510,23 @@ test.describe( 'F5 Box design', () => {
 		} );
 	}
 
+	// AC12 (Task 18I): the density presets and custom values with both line clamps (R58, R59) match Lasso's boxes. As
+	// AC11 it draws the `full` cells, so it passes only once 19A-22C exist (measured in 18I beside Lasso's own box, with
+	// a long description, for all 8 themes).
+	for ( const group of GROUPS.filter( ( g ) => g.id.startsWith( 'density-' ) ) ) {
+		test( `@local AC12 the ${ group.id } density matches Lasso's boxes`, async ( { page } ) => {
+			useGroupDisplay( group.settings );
+			try {
+				for ( const theme of FAMILIES ) {
+					const path = newPostWith( boxBlock( themeProduct( 'plain', theme ), FULL_ATTRIBUTES ) );
+					await matchesGroupBaseline( page, path, `${ group.id }/${ theme }-full` );
+				}
+			} finally {
+				useSiteDisplay();
+			}
+		} );
+	}
+
 	// AC8: a product's Display Theme in any casing works; an unknown one draws Cactus (R3). The box's own `theme` is the
 	// block attribute of Task 20B (unit-tested in ThemeResolverTest until then).
 	test( 'AC8 a theme name in any casing works and an unknown one draws Cactus', async ( { page } ) => {

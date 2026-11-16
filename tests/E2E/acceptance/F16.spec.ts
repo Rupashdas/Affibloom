@@ -201,6 +201,21 @@ test.describe( 'F16 Display system', () => {
 		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'stacked' );
 	} );
 
+	// AC4 on the front end (Task 18I): a preset's values and a title clamp reach the reader's box.
+	test( 'AC4 a saved density changes the box on the front end', async ( { page } ) => {
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( {
+			columns: 3,
+			single: { theme: 'Lab', density: { preset: 'custom', values: { padding: 12, titleSize: 20, titleLines: 1 } } },
+		} ), '--format=json' );
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await page.goto( newPostWith( boxBlock( createProduct( { name: 'F16 AC4 front with a title long enough to wrap onto a second line in the box' } ) ) ) );
+		const display = page.locator( '.affibloom-display' );
+		await expect( display ).toHaveCSS( 'padding-top', '12px' );
+		const title = display.locator( '.affibloom-title' ).first();
+		await expect( title ).toHaveCSS( 'font-size', '20px' );
+		await expect( title ).toHaveCSS( '-webkit-line-clamp', '1' );
+	} );
+
 	const storedSettings = (): Record< string, any > => JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) );
 
 	test( 'AC9 the disclosure and behaviour settings save, and the Disclosure row follows its scope', async ( { page } ) => {

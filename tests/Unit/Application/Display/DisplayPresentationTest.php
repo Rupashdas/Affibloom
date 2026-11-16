@@ -46,25 +46,25 @@ final class DisplayPresentationTest extends TestCase {
 	public function test_the_site_settings_print_the_captured_wrapper(): void {
 		self::assertSame(
 			array(
-				'data-layout-orientation'    => 'side-by-side',
-				'data-layout-image-position' => 'left',
-				'data-layout-align'          => 'left',
-				'data-layout-button-align'   => 'spread',
-				'data-layout-cta-width'      => 'full',
-				'data-layout-mobile-overflow' => 'stack',
-				'data-layout-image-fit'      => 'contain',
-				'data-density-title-lines'   => '0',
-				'data-density-desc-lines'    => '0',
-				'data-layout-m-orientation'  => 'side-by-side',
+				'data-layout-orientation'      => 'side-by-side',
+				'data-layout-image-position'   => 'left',
+				'data-layout-align'            => 'left',
+				'data-layout-button-align'     => 'spread',
+				'data-layout-cta-width'        => 'full',
+				'data-layout-mobile-overflow'  => 'stack',
+				'data-layout-image-fit'        => 'contain',
+				'data-density-title-lines'     => '0',
+				'data-density-desc-lines'      => '0',
+				'data-layout-m-orientation'    => 'side-by-side',
 				'data-layout-m-image-position' => 'left',
-				'data-layout-m-align'        => 'left',
-				'data-layout-m-button-align' => 'center',
-				'data-layout-m-cta-width'    => 'full',
-				'data-layout-m-image-fit'    => 'contain',
-				'data-hide-price'            => '1',
-				'data-hide-proscons'         => '1',
-				'data-hide-timestamp'        => '1',
-				'style'                      => '--affibloom-main: #000000; --affibloom-title: #000000; --affibloom-button: #5e3f8c; '
+				'data-layout-m-align'          => 'left',
+				'data-layout-m-button-align'   => 'center',
+				'data-layout-m-cta-width'      => 'full',
+				'data-layout-m-image-fit'      => 'contain',
+				'data-hide-price'              => '1',
+				'data-hide-proscons'           => '1',
+				'data-hide-timestamp'          => '1',
+				'style'                        => '--affibloom-main: #000000; --affibloom-title: #000000; --affibloom-button: #5e3f8c; '
 					. '--affibloom-secondary-button: #5e3f8c; --affibloom-button-text: #ffffff; --affibloom-background: #ffffff; '
 					. '--affibloom-pros: #0e4a0e; --affibloom-cons: #4a0e0e; --affibloom-density-preset: spacious; '
 					. '--affibloom-density-gap: 32px; --affibloom-density-padding: 26px; --affibloom-density-space-between: 16px; '
@@ -73,6 +73,52 @@ final class DisplayPresentationTest extends TestCase {
 					. '--affibloom-density-image-height: 320px; --affibloom-layout-columns: 3;',
 			),
 			DisplayPresentation::wrapper( self::site(), 3, true )
+		);
+	}
+
+	/**
+	 * A named preset prints its own map and custom values print as saved, with the two line clamps as attributes too
+	 * (R58, R59), as Lasso printed them.
+	 */
+	public function test_a_preset_and_custom_values_print_lassos_density(): void {
+		$density = static function ( array $stored ): string {
+			$config  = DisplayConfig::from_array( DisplayType::single(), array( 'density' => $stored ) );
+			$wrapper = DisplayPresentation::wrapper( $config, 3, true );
+			preg_match_all( '/--affibloom-density-[a-z-]+: [^;]+;/', $wrapper['style'], $found );
+
+			return $wrapper['data-density-title-lines'] . '/' . $wrapper['data-density-desc-lines'] . ' ' . implode( ' ', $found[0] );
+		};
+
+		// Lasso's captured boxes (tests/fixtures/baselines/themes/density-compact and density-custom, Lab-full.html).
+		self::assertSame(
+			'0/0 --affibloom-density-preset: compact; --affibloom-density-gap: 12px; --affibloom-density-padding: 8px; '
+				. '--affibloom-density-space-between: 4px; --affibloom-density-title-size: 24px; --affibloom-density-title-lines: 0; '
+				. '--affibloom-density-desc-size: 16px; --affibloom-density-desc-lines: 0; --affibloom-density-price-size: 14px; '
+				. '--affibloom-density-button-size: 15px; --affibloom-density-image-height: 140px;',
+			$density( array( 'preset' => 'compact' ) )
+		);
+		self::assertSame(
+			'1/2 --affibloom-density-preset: custom; --affibloom-density-gap: 8px; --affibloom-density-padding: 12px; '
+				. '--affibloom-density-space-between: 6px; --affibloom-density-title-size: 20px; --affibloom-density-title-lines: 1; '
+				. '--affibloom-density-desc-size: 14px; --affibloom-density-desc-lines: 2; --affibloom-density-price-size: 22px; '
+				. '--affibloom-density-button-size: 18px; --affibloom-density-image-height: 200px;',
+			$density(
+				array(
+					'preset' => 'custom',
+					'values' => array(
+						'gap'          => 8,
+						'padding'      => 12,
+						'spaceBetween' => 6,
+						'titleSize'    => 20,
+						'titleLines'   => 1,
+						'descSize'     => 14,
+						'descLines'    => 2,
+						'priceSize'    => 22,
+						'buttonSize'   => 18,
+						'imageHeight'  => 200,
+					),
+				)
+			)
 		);
 	}
 

@@ -106,7 +106,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18F: The 6-box themes (Cactus, Money)
 - [x] Task 18G: Llama
 - [x] Task 18H: Layout controls and the phone override on the box
-- [ ] Task 18I: Density and typography on the box
+- [x] Task 18I: Density and typography on the box
 - [ ] Task 19A: Every button of the product in the box
 - [ ] Task 20A: Per-box overrides — text and image
 - [ ] Task 21A: The Primary Rating stars
@@ -549,10 +549,14 @@ cells (block attributes of 20A-20C), so it passes only once 19A-22C exist (phase
 
 **Files:** modify `assets/front/box-layout.css`, `assets/front/box.css`, `src/Application/Display/DisplayPresentation.php`, `tests/E2E/acceptance/F5.spec.ts` (AC12) and the F16 spec's front-end row (AC4).
 
-- [ ] **Step 1: Failing tests (AC12).**
-- [ ] **Step 2: CSS.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Apply Display density and typography to the box".
+- [x] **Step 1: Failing tests (AC12).**
+- [x] **Step 2: CSS.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Apply Display density and typography to the box".
+
+*Note:* no CSS or PHP change was needed: 18B's density and clamp rules already match Lasso's box element by element
+(compact, spacious, custom with both clamps and a long description; 8 themes, 1280 and 390 px). Added: a unit test
+against Lasso's captured density properties, F5 AC12 (`full` cells, passes once 19A-22C exist) and F16 AC4's front end.
 
 ---
 
