@@ -22,7 +22,16 @@ test.describe( 'F16 Display system', () => {
 	};
 
 	// The display option is written only by this screen, so removing it restores the defaults; the site-wide keys
-	// go back to Lasso's.
+	// go back to Lasso's. Before the tests too: other specs leave their own Display settings behind.
+	const toDefaults = (): void => {
+		try {
+			wp( 'option', 'delete', 'affibloom_display' );
+		} catch {
+			// Nothing was saved.
+		}
+		setSettings( SITE_WIDE_DEFAULTS );
+	};
+	test.beforeAll( toDefaults );
 	test.afterAll( () => {
 		try {
 			wp( 'option', 'delete', 'affibloom_display' );
@@ -198,7 +207,7 @@ test.describe( 'F16 Display system', () => {
 		await page.setViewportSize( { width: 390, height: 900 } );
 		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'side-by-side' );
 		await expect( display ).toHaveAttribute( 'data-layout-button-align', 'center' ); // phones centre the buttons (R56)
-		await expect( display ).toHaveAttribute( 'data-layout-cta-width', 'full' ); // untouched key follows desktop
+		await expect( display ).toHaveAttribute( 'data-layout-cta-width', 'hug' ); // untouched key follows desktop (default hug)
 		await page.setViewportSize( { width: 1280, height: 900 } );
 		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'stacked' );
 	} );
