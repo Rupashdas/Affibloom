@@ -442,4 +442,42 @@ final class BoxBuilderTest extends TestCase {
 		$hidden = ( new BoxBuilder( self::THUMBNAIL ) )->build( self::product(), $classic, self::settings(), BoxOverrides::from_block( array( 'productId' => 14727, 'hideImage' => true ) ) );
 		self::assertTrue( $hidden->image_hidden );
 	}
+
+	/**
+	 * F7 AC5-AC9 (Task 20B): the box's theme, button URLs and texts (`hide` hides), tracking ID (the product's Amazon
+	 * links only, before the box's URLs), disclosure text (shown), anchor ID or link ID, and style.
+	 */
+	public function test_the_boxs_theme_buttons_tracking_disclosure_anchor_and_style(): void {
+		$box = static fn( array $attributes, ?Product $product = null ): BoxView => ( new BoxBuilder( self::THUMBNAIL ) )->build(
+			$product ?? self::product( array( 'buttons' => new Buttons( array( new Button( 'https://www.amazon.com/dp/B0SECOND00?tag=vbvault-20', 'Check Price' ) ) ) ) ),
+			self::display(),
+			self::settings(),
+			BoxOverrides::from_block( array( 'productId' => 14727 ) + $attributes )
+		);
+
+		$view = $box( array( 'theme' => 'Money', 'trackingId' => 'box-20', 'disclosureText' => 'Box disclosure.', 'style' => 'mobile', 'linkId' => '77' ) );
+		self::assertSame( LayoutFamily::SixBox, $view->family );
+		self::assertStringContainsString( 'affibloom-url-adidas-ligra-8-kids mobile affibloom-advanced', $view->classes );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20', $view->buttons[0]->attributes['href'] );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20', $view->link['href'] );
+		self::assertSame( 'https://www.amazon.com/dp/B0SECOND00?tag=box-20', $view->buttons[1]->attributes['href'] );
+		self::assertSame( 'Box disclosure.', $view->disclosure );
+		self::assertSame( 'affibloom-anchor-id-14727-77', $view->anchor );
+
+		$urls = $box( array( 'primaryUrl' => 'https://www.example.com/p', 'primaryText' => 'Go', 'secondaryUrl' => 'https://www.example.com/s', 'secondaryText' => 'More', 'trackingId' => 'box-20', 'anchorId' => 'mine' ) );
+		self::assertSame( 'https://www.example.com/p', $urls->buttons[0]->attributes['href'] );
+		self::assertSame( 'https://www.example.com/p', $urls->link['href'] );
+		self::assertSame( 'Go', $urls->buttons[0]->text );
+		self::assertSame( 'https://www.example.com/s', $urls->buttons[1]->attributes['href'] );
+		self::assertSame( 'More', $urls->buttons[1]->text );
+		self::assertSame( 'mine', $urls->anchor );
+
+		// A second button from the box alone, and `hide` hiding each button through the wrapper.
+		$added = $box( array( 'secondaryUrl' => 'https://www.example.com/s' ), self::product() );
+		self::assertCount( 2, $added->buttons );
+		self::assertSame( 'Our Review', $added->buttons[1]->text );
+		$hidden = $box( array( 'primaryText' => 'hide', 'secondaryText' => 'hide' ) );
+		self::assertSame( '1', $hidden->wrapper['data-hide-primary'] );
+		self::assertSame( '1', $hidden->wrapper['data-hide-secondary'] );
+	}
 }

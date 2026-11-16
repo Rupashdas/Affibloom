@@ -79,4 +79,31 @@ final class BoxOverridesTest extends TestCase {
 		self::assertSame( 0, $box->product_id );
 		self::assertSame( array( '', '', '', '', '', '', '' ), array( $box->badge, $box->description, $box->title, $box->title_url, $box->title_type, $box->image_url, $box->image_alt ) );
 	}
+
+	/**
+	 * Task 20B: the theme, buttons, tracking ID, disclosure, anchor and style from both forms; `origin="widget"` draws the
+	 * phone layout; an unknown style is ignored.
+	 */
+	public function test_the_theme_button_tracking_disclosure_anchor_and_style_fields(): void {
+		$block = BoxOverrides::from_block(
+			array(
+				'theme'          => 'Money',
+				'primaryUrl'     => 'https://www.example.com/p',
+				'primaryText'    => 'hide',
+				'secondaryUrl'   => 'https://www.example.com/s',
+				'secondaryText'  => 'Read Review',
+				'trackingId'     => 'box-20',
+				'disclosureText' => 'Box disclosure.',
+				'anchorId'       => 'my-anchor',
+				'linkId'         => '77',
+				'style'          => 'Mobile',
+			)
+		);
+		self::assertSame( array( 'Money', 'https://www.example.com/p', 'hide', 'https://www.example.com/s', 'Read Review', 'box-20', 'Box disclosure.', 'my-anchor', '77', 'mobile' ), array( $block->theme, $block->primary_url, $block->primary_text, $block->secondary_url, $block->secondary_text, $block->tracking_id, $block->disclosure_text, $block->anchor_id, $block->link_id, $block->style ) );
+
+		self::assertSame( 'mobile', BoxOverrides::from_shortcode( array( 'origin' => 'widget' ) )->style );
+		self::assertSame( 'desktop', BoxOverrides::from_shortcode( array( 'origin' => 'widget', 'style' => 'desktop' ) )->style );
+		self::assertSame( '', BoxOverrides::from_shortcode( array( 'style' => 'tablet' ) )->style );
+		self::assertSame( 'box-20', BoxOverrides::from_shortcode( array( 'tracking_id' => 'box-20' ) )->tracking_id );
+	}
 }

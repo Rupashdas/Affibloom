@@ -356,4 +356,12 @@ final class AmazonUrlTest extends TestCase {
 		self::assertSame( 'Amazon: nike kd14', self::amazon( 'https://www.amazon.com/s?k=nike+kd14' )->search_page_title() );
 		self::assertSame( 'Amazon', self::amazon( 'https://www.amazon.com/dp/B0C1234567' )->search_page_title() );
 	}
+
+	/** F5 R82 (Task 20B): a box's tracking ID sets the tag in the whole query; short and protected links stay. */
+	public function test_a_boxs_tracking_id_retags_the_link(): void {
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20&th=1', self::amazon( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20&th=1' )->retagged( 'box-20' )->value() );
+		self::assertSame( 'https://amazon.com/dp/B0D2JFK15W?tag=box-20', self::amazon( 'https://smile.amazon.com/dp/B0D2JFK15W' )->retagged( 'box-20' )->value() );
+		self::assertSame( 'https://amzn.to/3abcdef', self::amazon( 'https://amzn.to/3abcdef' )->retagged( 'box-20' )->value() );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', self::amazon( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20' )->retagged( '' )->value() );
+	}
 }

@@ -432,18 +432,19 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-fields {
 		text-align: right !important;
 	}
-	.affibloom-advanced .affibloom-title,
-	.affibloom-advanced a.affibloom-title {
+	/* Lasso's :is() keeps its specificity (0,3,x), which beats the themes' `.mobile` title sizes. */
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-title {
 		font-size: calc(var(--affibloom-density-title-size) * 0.75) !important;
 	}
-	.affibloom-advanced .affibloom-description {
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-description {
 		font-size: calc(var(--affibloom-density-desc-size) * 0.9375) !important;
 	}
-	.affibloom-advanced .affibloom-price {
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .affibloom-price {
 		font-size: calc(var(--affibloom-density-price-size) * 0.9375) !important;
 	}
-	.affibloom-advanced a.affibloom-button-1,
-	.affibloom-advanced a.affibloom-button-2 {
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-button-1,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) a.affibloom-button-2 {
 		font-size: calc(var(--affibloom-density-button-size) * 0.9375) !important;
 	}
 }

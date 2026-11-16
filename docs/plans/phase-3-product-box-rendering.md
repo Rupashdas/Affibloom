@@ -115,7 +115,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 22B: Disclosure
 - [x] Task 22C: Timestamp
 - [x] Task 18K: Classic rendering
-- [ ] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
+- [x] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
 - [ ] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
 - [ ] Task 21B: Custom fields and Pros & Cons in the box
 - [ ] Task 21C: The Copy to Clipboard field
@@ -707,10 +707,15 @@ Lasso's box (picture hidden; badge, h3 title, description) in all 8 themes at 12
 
 **Files:** modify `blocks/product-box/block.json`, `src/Interface/Block/ProductBoxBlock.php`, `src/Application/Box/BoxBuilder.php`, `src/Domain/Box/BoxOverrides.php`, `tests/Unit/Domain/Box/BoxOverridesTest.php`, `tests/E2E/acceptance/F7.spec.ts` (AC5-AC9).
 
-- [ ] **Step 1: Failing tests (F7 AC5-AC9).**
-- [ ] **Step 2: Builder.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Override a box's theme, buttons and disclosure".
+- [x] **Step 1: Failing tests (F7 AC5-AC9).**
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Override a box's theme, buttons and disclosure".
+
+*Note:* the overrides change a copy of the product (`BoxBuilder::applied`): the tracking ID retags the product's Amazon
+links before the box's URLs replace them, as Lasso orders it (`AmazonUrl::retagged`). `origin="widget"` is read by
+`from_shortcode()`; the widget filter that adds it is 18S9's. Found beside Lasso's `.mobile` box at 390 px: the phone
+font rules had lost Lasso's `:is()` specificity (18I's rules); restored. Checked, 8 themes, both widths: equal.
 
 ---
 

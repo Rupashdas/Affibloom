@@ -11,6 +11,7 @@ namespace Affibloom\Application\Box;
 
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Domain\Amazon\AmazonProduct;
+use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
 use Affibloom\Domain\Box\DisclosureRule;
@@ -25,6 +26,9 @@ use Affibloom\Domain\Display\Elements;
 use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Link\LinkAttributes;
+use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\Button;
+use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\Settings;
@@ -67,9 +71,10 @@ final class BoxBuilder {
 	 * @param AmazonProduct|null $amazon The Amazon product's stored data (C1); null when there is none.
 	 */
 	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null, ?AmazonProduct $amazon = null ): BoxView {
-		$config = $display->config( DisplayType::single() );
-		// R3: the Single type's theme, then the product's own; a box names none until its `theme` attribute (Task 20B).
-		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, '' );
+		$config  = $display->config( DisplayType::single() );
+		$product = self::applied( $product, $overrides );
+		// R3, R65: the Single type's theme, then the product's own, then the box's.
+		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, $overrides->theme );
 		$id    = (int) $product->id;
 
 		// R68: the box's title replaces the name everywhere it shows (links, alt); `hide` empties it. R12: Lasso prints
@@ -93,9 +98,11 @@ final class BoxBuilder {
 
 		return new BoxView(
 			family: LayoutFamily::of( $theme ),
-			// R9 without a link location: Lasso's uniqid(), so two boxes of one product never share an ID.
-			anchor: 'affibloom-anchor-id-' . $id . '-' . uniqid(),
-			classes: implode( ' ', array_filter( array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, $advanced ? 'affibloom-advanced' : '' ) ) ),
+			// R9, R81: the box's anchor ID, else Lasso's anchor with the box's link ID or, without one, uniqid(), so two boxes
+			// of one product never share an ID.
+			anchor: '' !== $overrides->anchor_id ? $overrides->anchor_id : 'affibloom-anchor-id-' . $id . '-' . ( '' !== $overrides->link_id ? $overrides->link_id : uniqid() ),
+			// R6, R80: `mobile` or `desktop` (the box's style, or a text widget's box) after the slug.
+			classes: implode( ' ', array_filter( array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, $overrides->style, $advanced ? 'affibloom-advanced' : '' ) ) ),
 			// R64: the classic box has no v2 wrapper attributes; its colours come through the page's :root block.
 			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $elements->hidden() ) : array(),
 			badge: BoxOverrides::hides( $overrides->badge ) ? '' : ( '' === $overrides->badge ? $product->badge : $overrides->badge ),
@@ -173,6 +180,57 @@ final class BoxBuilder {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * The product as this box sees it (F5 R73, R75, R82; Lasso's single.php 177-200 and Shortcode 434-440): the box's
+	 * primary URL and text replace the product's link and button text; its secondary URL and text replace the first added
+	 * button's (Lasso's second button), adding one when there is none; its disclosure text replaces the product's and
+	 * shows it; its tracking ID retags the Amazon link and that second button. `hide` stays the text, as Lasso prints
+	 * it in classic rendering (edge case 10); advanced rendering hides the button (R60).
+	 *
+	 * @param Product      $product   The product.
+	 * @param BoxOverrides $overrides The box's values.
+	 */
+	private static function applied( Product $product, BoxOverrides $overrides ): Product {
+		$changes = array();
+		$url     = $product->url;
+		$buttons = $product->buttons->all();
+
+		// Lasso's shortcode retags the product's own links first; the box's URLs (single.php) replace them after.
+		$amazon = AmazonUrl::from( $url );
+		if ( '' !== $overrides->tracking_id && null !== $amazon ) {
+			$url    = $amazon->retagged( $overrides->tracking_id );
+			$second = isset( $buttons[0] ) ? AmazonUrl::from( AffiliateUrl::from_string( $buttons[0]->url ) ) : null;
+			if ( null !== $second ) {
+				$buttons[0] = new Button( $second->retagged( $overrides->tracking_id )->value(), $buttons[0]->text, $buttons[0]->new_tab, $buttons[0]->nofollow );
+			}
+		}
+
+		if ( '' !== $overrides->primary_url ) {
+			$url = AffiliateUrl::from_string( $overrides->primary_url );
+		}
+		if ( '' !== $overrides->primary_text ) {
+			$changes['button_text'] = $overrides->primary_text;
+		}
+		if ( '' !== $overrides->secondary_url || '' !== $overrides->secondary_text ) {
+			$second     = $buttons[0] ?? new Button( '', '' );
+			$buttons[0] = new Button(
+				'' === $overrides->secondary_url ? $second->url : $overrides->secondary_url,
+				'' === $overrides->secondary_text ? $second->text : $overrides->secondary_text,
+				$second->new_tab,
+				$second->nofollow
+			);
+		}
+		$changes['url']     = $url;
+		$changes['buttons'] = new Buttons( $buttons, $product->buttons->main_position() );
+
+		if ( '' !== $overrides->disclosure_text ) {
+			$changes['disclosure']      = $overrides->disclosure_text;
+			$changes['show_disclosure'] = true;
+		}
+
+		return $product->with( $changes );
 	}
 
 	/**

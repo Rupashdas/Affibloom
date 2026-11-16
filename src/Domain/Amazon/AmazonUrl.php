@@ -198,6 +198,23 @@ final class AmazonUrl {
 	}
 
 	/**
+	 * The link with another tracking ID, as a box's `tracking_id` sets it (F5 R82; Lasso's get_amazon_product_url( $url,
+	 * true, false, $tracking_id )): short and protected links stay as they are; otherwise the whole query is kept with
+	 * the tag set ("smile.amazon." read as "amazon.", "&amp;" as "&").
+	 *
+	 * @param string $tag The tracking ID.
+	 */
+	public function retagged( string $tag ): AffiliateUrl {
+		if ( '' === $tag || self::is_short( $this->url ) || $this->is_protected() ) {
+			return $this->url;
+		}
+
+		$link = str_replace( array( 'smile.amazon.', '&amp;' ), array( 'amazon.', '&' ), $this->url->value() );
+
+		return AffiliateUrl::from_string( self::with_tag( $link, self::query_of( $link ), $tag ) );
+	}
+
+	/**
 	 * Lasso_Amazon_Api::is_amazon_search_page(): a search's keywords — no ASIN, a path ending in "/s" or containing
 	 * "/s/", and a "k", "field-keywords" or "keywords" parameter (the first that has a value) — or ''.
 	 */

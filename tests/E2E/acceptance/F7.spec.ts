@@ -64,4 +64,47 @@ test.describe( 'F7 Per-box text', () => {
 		await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-image', '1' );
 		await expect( page.locator( '.affibloom-box a.affibloom-image' ) ).toBeHidden(); // the markup stays (R60)
 	} );
+
+	test( "AC5 a box's theme draws that theme", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC5' } );
+		await page.goto( newPostWith( boxBlock( id, { theme: 'Money' } ) ) );
+		await expect( page.locator( '.affibloom-display' ) ).toHaveClass( /affibloom-money/ );
+		await expect( page.locator( '.affibloom-display > .affibloom-box-6' ) ).toHaveCount( 1 ); // the 6-box layout
+	} );
+
+	test( "AC6 a box's button URLs and texts replace the product's; hide hides a button", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC6', url: 'https://www.example.com/item', url2: 'https://www.example.com/two', button_text2: 'Two' } );
+		await page.goto( newPostWith( boxBlock( id, { primaryUrl: 'https://www.example.com/p', primaryText: 'Go', secondaryUrl: 'https://www.example.com/s', secondaryText: 'More' } ) ) );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.example.com/p' );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveText( 'Go' );
+		await expect( page.locator( '.affibloom-box a.affibloom-title' ) ).toHaveAttribute( 'href', 'https://www.example.com/p' );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toHaveAttribute( 'href', 'https://www.example.com/s' );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toHaveText( 'More' );
+
+		await page.goto( newPostWith( boxBlock( id, { secondaryText: 'hide' } ) ) );
+		await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-secondary', '1' );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toBeHidden();
+	} );
+
+	test( "AC7 a box's tracking ID replaces the tag on its Amazon links", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC7', type: 'amazon', asin: 'B0D2JFK15W', url: 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20' } );
+		await page.goto( newPostWith( boxBlock( id, { trackingId: 'box-20' } ) ) );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20' );
+		await expect( page.locator( '.affibloom-box a.affibloom-image' ) ).toHaveAttribute( 'href', 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20' );
+	} );
+
+	test( "AC8 a box's disclosure text replaces the text and shows it", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC8', show_disclosure: '0' } );
+		await page.goto( newPostWith( boxBlock( id, { disclosureText: 'Box disclosure.' } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-disclosure' ) ).toHaveText( 'Box disclosure.' );
+	} );
+
+	test( "AC9 a box's anchor ID replaces the id; mobile style draws the phone layout at any width", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC9' } );
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await page.goto( newPostWith( boxBlock( id, { anchorId: 'my-box', style: 'mobile' } ) ) );
+		await expect( page.locator( '#my-box.affibloom-box' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.affibloom-display' ) ).toHaveClass( /(^| )mobile( |$)/ );
+		// A box in a text widget draws the mobile layout through [affibloom] (Task 18S9; BoxOverrides reads origin="widget").
+	} );
 } );

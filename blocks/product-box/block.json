@@ -54,6 +54,46 @@
 		"imageAlt": {
 			"type": "string",
 			"default": ""
+		},
+		"theme": {
+			"type": "string",
+			"default": ""
+		},
+		"primaryUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"primaryText": {
+			"type": "string",
+			"default": ""
+		},
+		"secondaryUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"secondaryText": {
+			"type": "string",
+			"default": ""
+		},
+		"trackingId": {
+			"type": "string",
+			"default": ""
+		},
+		"disclosureText": {
+			"type": "string",
+			"default": ""
+		},
+		"anchorId": {
+			"type": "string",
+			"default": ""
+		},
+		"linkId": {
+			"type": "string",
+			"default": ""
+		},
+		"style": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {
