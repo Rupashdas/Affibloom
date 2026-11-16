@@ -29,6 +29,7 @@ final class BoxView {
 	 * @param array<string, string> $link        The image and title links' attributes (the box's title URL, R76).
 	 * @param string                $image_src   The image's address.
 	 * @param string                $image_alt   The image's alternative text.
+	 * @param bool                  $image_hidden The classic box hides the picture itself (no wrapper flag).
 	 * @param string                $title       The name, decoded; '' prints no title.
 	 * @param bool                  $title_linked The title is a link (Link from Display Title), else a span.
 	 * @param string                $title_tag   The tag wrapping the title (R79); '' none.
@@ -52,6 +53,7 @@ final class BoxView {
 		public readonly array $link,
 		public readonly string $image_src,
 		public readonly string $image_alt,
+		public readonly bool $image_hidden,
 		public readonly string $title,
 		public readonly bool $title_linked,
 		public readonly string $title_tag,

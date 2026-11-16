@@ -21,6 +21,7 @@ use Affibloom\Domain\Box\ThemeResolver;
 use Affibloom\Domain\Box\TimestampRule;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Display\Elements;
 use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Link\LinkAttributes;
@@ -81,7 +82,10 @@ final class BoxBuilder {
 		$link = $links->primary( $product->url->value(), $product->new_tab, $product->nofollow, $product->sponsored );
 		// R76: the box's title URL takes the title and the image elsewhere, with the product's target and rel (R87).
 		$title_link = '' === $overrides->title_url ? $link : array_merge( $link, array( 'href' => $overrides->title_url ) );
-		$elements   = ElementVisibility::of( $config->elements(), $overrides, $product->show_price );
+		// R53, R64: advanced rendering reads the Single element switches; the classic box shows every element by its own
+		// data (only the box's own hides apply).
+		$advanced = $display->advanced();
+		$elements = $advanced ? ElementVisibility::of( $config->elements(), $overrides, $product->show_price ) : ElementVisibility::of( Elements::defaults(), $overrides );
 
 		$disclosure = DisclosureRule::text( $product->disclosure, $product->show_disclosure, $settings->string( 'disclosure_text' ) );
 		$prime      = PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
@@ -91,15 +95,18 @@ final class BoxBuilder {
 			family: LayoutFamily::of( $theme ),
 			// R9 without a link location: Lasso's uniqid(), so two boxes of one product never share an ID.
 			anchor: 'affibloom-anchor-id-' . $id . '-' . uniqid(),
-			classes: implode( ' ', array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, 'affibloom-advanced' ) ),
-			wrapper: DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $elements->hidden() ),
+			classes: implode( ' ', array_filter( array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, $advanced ? 'affibloom-advanced' : '' ) ) ),
+			// R64: the classic box has no v2 wrapper attributes; its colours come through the page's :root block.
+			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $elements->hidden() ) : array(),
 			badge: BoxOverrides::hides( $overrides->badge ) ? '' : ( '' === $overrides->badge ? $product->badge : $overrides->badge ),
-			badge_override: $elements->badge_overrides(),
+			badge_override: $advanced && $elements->badge_overrides(),
 			link: $title_link,
 			// R69: the box's picture and alternative text; a hidden picture keeps the product's address (Lasso prints
 			// `src="hide"`, a broken request) and is hidden by the wrapper's flag.
 			image_src: '' === $overrides->image_url || BoxOverrides::hides( $overrides->image_url ) ? $this->image( $product, $settings ) : $overrides->image_url,
 			image_alt: '' === $overrides->image_alt ? $name : $overrides->image_alt,
+			// Edge case 9: without the wrapper's flag the classic box hides a hidden picture itself.
+			image_hidden: ! $advanced && ! $elements->shows( 'image' ),
 			// R61: a hidden title is not printed at all (the links keep the name).
 			title: $elements->shows( 'title' ) ? $name : '',
 			title_linked: $settings->bool( 'link_from_display_title' ),
@@ -112,7 +119,7 @@ final class BoxBuilder {
 			description: $elements->shows( 'desc' ) ? $this->description( $product, $overrides ) : null,
 			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
-			date: TimestampRule::shows( ProductType::Amazon === $product->type, $elements->shows( 'timestamp' ) ) ? TimestampRule::text( $amazon->last_updated ?? '' ) : null,
+			date: ( $advanced ? TimestampRule::shows( ProductType::Amazon === $product->type, $elements->shows( 'timestamp' ) ) : TimestampRule::shows_classic( ProductType::Amazon === $product->type, '' !== $price ) ) ? TimestampRule::text( $amazon->last_updated ?? '' ) : null,
 		);
 	}
 

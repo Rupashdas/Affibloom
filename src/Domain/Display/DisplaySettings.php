@@ -23,10 +23,11 @@ final class DisplaySettings {
 	/**
 	 * Use defaults() or from_array().
 	 *
-	 * @param array<string, DisplayConfig> $configs One per display type key.
-	 * @param int                          $columns Grid columns, 1-3.
+	 * @param array<string, DisplayConfig> $configs  One per display type key.
+	 * @param int                          $columns  Grid columns, 1-3.
+	 * @param bool|null                    $advanced The rendering engine as decided (with_advanced()); null: customised().
 	 */
-	private function __construct( private readonly array $configs, private readonly int $columns ) {}
+	private function __construct( private readonly array $configs, private readonly int $columns, private readonly ?bool $advanced = null ) {}
 
 	/**
 	 * Lasso's defaults for every type.
@@ -82,7 +83,7 @@ final class DisplaySettings {
 	 * @param DisplayConfig $config Its new configuration.
 	 */
 	public function with_config( DisplayType $type, DisplayConfig $config ): self {
-		return new self( array_merge( $this->configs, array( $type->key() => $config ) ), $this->columns );
+		return new self( array_merge( $this->configs, array( $type->key() => $config ) ), $this->columns, $this->advanced );
 	}
 
 	/**
@@ -91,7 +92,62 @@ final class DisplaySettings {
 	 * @param int $columns Grid columns.
 	 */
 	public function with_columns( int $columns ): self {
-		return new self( $this->configs, self::clamp_columns( $columns ) );
+		return new self( $this->configs, self::clamp_columns( $columns ), $this->advanced );
+	}
+
+	/**
+	 * Whether a saved Display value differs from Lasso's defaults (F5 R53; Lasso's
+	 * Helper::has_saved_display_v2_customization): a density off balanced, columns other than 3, any layout key or a
+	 * phone override, any element hidden, or a Grid or List colour or label that differs from Single's. Colours and labels
+	 * alone, the same on every type, keep the classic box.
+	 */
+	public function customised(): bool {
+		if ( self::DEFAULT_COLUMNS !== $this->columns ) {
+			return true;
+		}
+
+		$balanced = Density::preset( 'balanced' )->values();
+		$single   = $this->configs[ DisplayType::SINGLE ]->palette();
+		foreach ( DisplayType::all() as $type ) {
+			$config  = $this->configs[ $type->key() ];
+			$density = $config->density();
+			if ( ! in_array( $density->preset_name(), array( 'balanced', Density::CUSTOM ), true ) ) {
+				return true;
+			}
+			foreach ( $balanced as $key => $value ) {
+				if ( $density->value( $key ) !== $value ) {
+					return true;
+				}
+			}
+			if ( array() !== $config->layout()->phone() || $config->layout()->desktop() !== Layout::defaults( $type )->desktop() ) {
+				return true;
+			}
+			if ( $config->elements()->customised() ) {
+				return true;
+			}
+			if ( ! $type->is( DisplayType::single() ) && ! $config->palette()->same_as( $single ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether boxes render advanced (with the v2 wrapper and stylesheet): as decided by with_advanced(), else
+	 * customised().
+	 */
+	public function advanced(): bool {
+		return $this->advanced ?? $this->customised();
+	}
+
+	/**
+	 * A copy with the rendering engine decided (Lasso's filter `lasso_display_v2_frontend_enabled` decides last).
+	 *
+	 * @param bool $advanced Whether boxes render advanced.
+	 */
+	public function with_advanced( bool $advanced ): self {
+		return new self( $this->configs, $this->columns, $advanced );
 	}
 
 	/**

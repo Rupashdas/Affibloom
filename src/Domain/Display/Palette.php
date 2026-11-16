@@ -118,6 +118,63 @@ final class Palette {
 	}
 
 	/**
+	 * Whether another palette holds the same colours and labels (F5 R53): colours compared as values (a CSS colour name
+	 * as its hex, three-digit hex in full, case ignored), labels as text — Lasso's normalize_display_color_for_compare.
+	 *
+	 * @param Palette $other The other palette.
+	 */
+	public function same_as( Palette $other ): bool {
+		foreach ( self::COLOR_KEYS as $key ) {
+			if ( self::comparable( $this->value( $key ) ) !== self::comparable( $other->value( $key ) ) ) {
+				return false;
+			}
+		}
+		foreach ( self::TEXT_KEYS as $key ) {
+			if ( $this->value( $key ) !== $other->value( $key ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * A colour in the form Lasso compares: the basic CSS names as hex, `#abc` as `#aabbcc`, lower case.
+	 *
+	 * @param string $colour A stored colour.
+	 */
+	private static function comparable( string $colour ): string {
+		$named  = array(
+			'black'   => '#000000',
+			'silver'  => '#c0c0c0',
+			'gray'    => '#808080',
+			'grey'    => '#808080',
+			'white'   => '#ffffff',
+			'maroon'  => '#800000',
+			'red'     => '#ff0000',
+			'purple'  => '#800080',
+			'fuchsia' => '#ff00ff',
+			'green'   => '#008000',
+			'lime'    => '#00ff00',
+			'olive'   => '#808000',
+			'yellow'  => '#ffff00',
+			'navy'    => '#000080',
+			'blue'    => '#0000ff',
+			'teal'    => '#008080',
+			'aqua'    => '#00ffff',
+		);
+		$colour = strtolower( trim( $colour ) );
+		if ( isset( $named[ $colour ] ) ) {
+			return $named[ $colour ];
+		}
+		if ( 1 === preg_match( '/^#([0-9a-f])([0-9a-f])([0-9a-f])$/', $colour, $m ) ) {
+			return '#' . $m[1] . $m[1] . $m[2] . $m[2] . $m[3] . $m[3];
+		}
+
+		return $colour;
+	}
+
+	/**
 	 * Every value, for storage.
 	 *
 	 * @return array<string, string>

@@ -318,9 +318,14 @@ final class Plugin {
 	 * @return list<Module>
 	 */
 	private function modules(): array {
-		$detection  = new WpDetectionChoices();
-		$settings   = new SettingsService( $this->settings_repository(), $detection );
-		$display    = new DisplaySettingsService( new OptionDisplaySettingsRepository(), $this->settings_repository() );
+		$detection = new WpDetectionChoices();
+		$settings  = new SettingsService( $this->settings_repository(), $detection );
+		$display   = new DisplaySettingsService(
+			new OptionDisplaySettingsRepository(),
+			$this->settings_repository(),
+			// F5 R53: Lasso's lasso_display_v2_frontend_enabled under Affibloom's name decides the engine last.
+			static fn( bool $customised ): bool => (bool) apply_filters( 'affibloom_display_advanced_enabled', $customised )
+		);
 		$notice     = new Notice();
 		$resolver   = new LinkResolver( new WpPageFetcher() );
 		$links      = new LinkNormaliser( $resolver, $this->settings_repository() );

@@ -421,4 +421,25 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( '1', $view->wrapper['data-hide-badge'] );
 		self::assertFalse( self::build()->badge_override );
 	}
+
+	/**
+	 * F5 R27, R64 (Task 18K): the classic box has no v2 class or wrapper attributes, shows every element by its own
+	 * data, and shows the timestamp only with a printed price; a box-hidden picture is hidden by the box itself.
+	 */
+	public function test_the_classic_box_has_no_wrapper_and_classic_rules(): void {
+		$classic = DisplaySettings::from_array( array( 'single' => array( 'elements' => array( 'title' => false ) ) ) )->with_advanced( false );
+		$view    = self::build( null, $classic );
+
+		self::assertStringNotContainsString( 'affibloom-advanced', $view->classes );
+		self::assertSame( array(), $view->wrapper );
+		self::assertSame( 'adidas Ligra 8 Kids', $view->title ); // the Title element does not apply
+		self::assertNull( $view->date ); // no price printed
+		self::assertFalse( $view->image_hidden );
+
+		$priced = self::build( self::product( array( 'price' => '$89.99', 'show_price' => true ) ), $classic );
+		self::assertSame( '', $priced->date ); // shown, no Amazon data yet
+
+		$hidden = ( new BoxBuilder( self::THUMBNAIL ) )->build( self::product(), $classic, self::settings(), BoxOverrides::from_block( array( 'productId' => 14727, 'hideImage' => true ) ) );
+		self::assertTrue( $hidden->image_hidden );
+	}
 }

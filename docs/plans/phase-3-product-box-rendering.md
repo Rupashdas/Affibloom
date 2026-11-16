@@ -114,7 +114,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 22A: Price, discount and Prime
 - [x] Task 22B: Disclosure
 - [x] Task 22C: Timestamp
-- [ ] Task 18K: Classic rendering
+- [x] Task 18K: Classic rendering
 - [ ] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
 - [ ] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
 - [ ] Task 21B: Custom fields and Pros & Cons in the box
@@ -611,10 +611,16 @@ price and timestamp by Lasso's classic rules; the filter `affibloom_display_adva
 
 **Files:** modify `src/Application/Box/BoxBuilder.php`, `src/Interface/Front/BoxAssets.php`, `src/Plugin.php` (the filter), `tests/E2E/acceptance/F5.spec.ts` (AC14) and the F16 spec's rows for B1 and B13.
 
-- [ ] **Step 1: Failing tests (AC14).**
-- [ ] **Step 2: Branch.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Render the box classically when the Display settings are untouched".
+- [x] **Step 1: Failing tests (AC14).**
+- [x] **Step 2: Branch.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Render the box classically when the Display settings are untouched".
+
+*Note:* R53 is `DisplaySettings::customised()` (Price skipped while it still follows Show Price, as Lasso skips never-saved
+elements); `DisplaySettingsService` applies `affibloom_display_advanced_enabled` (a closure from `Plugin.php`), so the
+builder and `BoxAssets` read one `advanced()`. A box-hidden picture in classic rendering hides itself (inline style;
+edge case 9). Checked beside Lasso's classic box (both reset), 8 themes, both widths: equal. AC14's classic baseline
+offsets were not measured (as AC11).
 
 ---
 

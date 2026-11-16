@@ -37,10 +37,13 @@ final class DisplaySettingsService {
 	 *
 	 * @param DisplaySettingsRepository $repository Where the configurations are kept.
 	 * @param SettingsRepository        $settings   The site-wide settings, for Show Price (requirements B5a).
+	 * @param \Closure(bool): bool|null $engine     Decides the rendering engine last from whether the settings are
+	 *                                              customised (the `affibloom_display_advanced_enabled` filter, F5 R53).
 	 */
 	public function __construct(
 		private DisplaySettingsRepository $repository,
-		private SettingsRepository $settings
+		private SettingsRepository $settings,
+		private ?\Closure $engine = null
 	) {}
 
 	/**
@@ -55,7 +58,7 @@ final class DisplaySettingsService {
 			$settings = $settings->with_config( $type, $config->with_elements( $config->elements()->with_show_price( $show_price ) ) );
 		}
 
-		return $settings;
+		return null === $this->engine ? $settings : $settings->with_advanced( (bool) ( $this->engine )( $settings->customised() ) );
 	}
 
 	/**

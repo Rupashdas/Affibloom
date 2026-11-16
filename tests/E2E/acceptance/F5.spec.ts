@@ -699,6 +699,35 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC14 (Task 18K): with every Display setting at Lasso's default the box renders classically: no v2 class, wrapper
+	// attributes, stylesheet or phone script; the timestamp only with a shown price (R27); Lasso's classic baselines
+	// (themes/classic, Lasso's defaults, so Cactus). Checked in 18K beside Lasso's own classic box for all 8 themes.
+	test( '@local AC14 with the Display settings untouched the box renders classically', async ( { page } ) => {
+		wp( 'option', 'delete', 'affibloom_display' );
+		setSettings( { show_price: true, show_disclosure: true, link_from_display_title: true, custom_css: '' } );
+		try {
+			const id = themeProduct( 'plain' );
+			const path = newPostWith( boxBlock( id ) );
+			await page.goto( path );
+			const display = page.locator( '.affibloom-display' );
+			await expect( display ).not.toHaveClass( /affibloom-advanced/ );
+			await expect( display ).not.toHaveAttribute( 'data-layout-orientation', /./ );
+			await expect( display ).not.toHaveAttribute( 'style', /./ );
+			await expect( page.locator( 'link[href*="box-layout.css"]' ) ).toHaveCount( 0 );
+			await expect( page.locator( 'script[src*="box-layout.js"]' ) ).toHaveCount( 0 );
+			await expect( page.locator( 'link[href*="assets/front/box.css"]' ) ).toHaveCount( 1 );
+
+			for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
+				await page.setViewportSize( { width, height: 900 } );
+				await page.goto( path );
+				await page.addStyleTag( { content: SITE_CSS } );
+				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'classic', `Cactus-plain-${ name }.png` ] );
+			}
+		} finally {
+			useSiteDisplay();
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

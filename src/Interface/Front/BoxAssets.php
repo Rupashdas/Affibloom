@@ -206,6 +206,10 @@ final class BoxAssets implements Module {
 	 */
 	private function enqueue_box(): void {
 		wp_enqueue_style( self::STYLE, $this->url . 'assets/front/box.css', array(), $this->file_version( 'assets/front/box.css' ) );
+		// R64: the classic box loads neither the advanced stylesheet nor the phone-layout script.
+		if ( ! $this->display->current()->advanced() ) {
+			return;
+		}
 		wp_enqueue_style( self::LAYOUT_STYLE, $this->url . 'assets/front/box-layout.css', array( self::STYLE ), $this->file_version( 'assets/front/box-layout.css' ) );
 		wp_enqueue_script( self::LAYOUT_JS, $this->url . 'assets/front/box-layout.js', array(), $this->file_version( 'assets/front/box-layout.js' ), true );
 	}

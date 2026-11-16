@@ -104,6 +104,20 @@ final class Elements {
 	}
 
 	/**
+	 * Whether any element is hidden (F5 R53): Lasso's defaults show every one. Price is skipped while it still follows
+	 * Show Price, as Lasso skips it while the elements were never saved.
+	 */
+	public function customised(): bool {
+		foreach ( $this->flags as $key => $shown ) {
+			if ( ! $shown && ! ( 'price' === $key && $this->price_inherited ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * How many elements are shown, for the panel's summary.
 	 */
 	public function shown(): int {

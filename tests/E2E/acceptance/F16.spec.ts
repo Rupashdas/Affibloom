@@ -1,6 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
 import { saveSettings } from '../settings';
+import { copyFileSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 
 // F16 Display system (docs/features/F16/requirements.md).
 test.describe( 'F16 Display system', () => {
@@ -208,6 +210,35 @@ test.describe( 'F16 Display system', () => {
 		await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-image', '1' );
 		await expect( page.locator( '.affibloom-box .affibloom-box-2' ) ).toBeHidden(); // the 6-box image box collapses
 		await expect( page.locator( '.affibloom-box .affibloom-box-3' ) ).toBeHidden();
+	} );
+
+	// B1, B13 on the front end (Task 18K): Lasso's defaults draw the classic box, any saved difference the advanced one;
+	// the `affibloom_display_advanced_enabled` filter decides last.
+	test( 'B1 B13 a saved difference turns advanced rendering on, and the filter can switch it off', async ( { page } ) => {
+		const path = newPostWith( boxBlock( createProduct( { name: 'F16 B1 front' } ) ) );
+		wp( 'option', 'delete', 'affibloom_display' );
+		await page.goto( path );
+		await expect( page.locator( '.affibloom-display' ) ).not.toHaveClass( /affibloom-advanced/ );
+
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 2 } ), '--format=json' );
+		await page.goto( path );
+		await expect( page.locator( '.affibloom-display' ) ).toHaveClass( /affibloom-advanced/ );
+
+		const muPlugins = join( __dirname, '..', '..', '..', '..', '..', 'mu-plugins' );
+		const made = ! existsSync( muPlugins );
+		mkdirSync( muPlugins, { recursive: true } );
+		const fixture = join( muPlugins, 'affibloom-e2e-classic-filter.php' );
+		copyFileSync( join( __dirname, '..', 'fixtures', 'classic-filter.php' ), fixture );
+		try {
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-display' ) ).not.toHaveClass( /affibloom-advanced/ );
+			await expect( page.locator( 'link[href*="box-layout.css"]' ) ).toHaveCount( 0 );
+		} finally {
+			unlinkSync( fixture );
+			if ( made ) {
+				rmdirSync( muPlugins );
+			}
+		}
 	} );
 
 	// AC4 on the front end (Task 18I): a preset's values and a title clamp reach the reader's box.
