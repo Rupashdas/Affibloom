@@ -5,7 +5,7 @@
  * it a target of its own and a label.
  *
  * Placeholders until their tasks: Groups (the Groups area), Alert (Tasks 30-31), Locations (the content link
- * index and Task 36), Clicks (Tasks 33-34), Shortcode (Task 18S). The name and the image open the product page
+ * index and Task 36), Clicks (Tasks 33-34). Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
  * (Task 14A), as Lasso's do; the link under the name opens the destination.
  *
  * Edit opens Lasso's quick edit (url-row.php 12-67; F1 requirements 10, Task 16A): the row itself becomes a form with
@@ -25,6 +25,7 @@ $product_page = \Affibloom\Interface\Admin\ProductScreen::url( (int) $product->i
 $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
 $product_id   = (string) $product->id;
 $quick_id     = 'affibloom-quick-' . $product_id;
+$shortcode    = \Affibloom\Interface\ShortcodeText::product( (int) $product->id );
 ?>
 <tr data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
 	<td class="affibloom-col-select">
@@ -67,10 +68,12 @@ $quick_id     = 'affibloom-quick-' . $product_id;
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'pencil' ) ); ?>
 				<span><?php esc_html_e( 'Edit', 'affibloom' ); ?></span>
 			</button>
-			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" aria-disabled="true"
-				aria-describedby="affibloom-soon-note" title="<?php esc_attr_e( 'Copy shortcode: coming soon', 'affibloom' ); ?>">
+			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary"
+				data-copy-shortcode="<?php echo esc_attr( $shortcode ); ?>" data-copied="<?php esc_attr_e( 'Copied', 'affibloom' ); ?>"
+				data-copy-failed="<?php esc_attr_e( 'Could not copy shortcode.', 'affibloom' ); ?>" <?php disabled( '', $shortcode ); ?>
+				title="<?php echo esc_attr( '' === $shortcode ? __( 'Shortcode unavailable for this link', 'affibloom' ) : __( 'Copy shortcode', 'affibloom' ) ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'copy' ) ); ?>
-				<span><?php esc_html_e( 'Shortcode', 'affibloom' ); ?></span>
+				<span data-copy-label aria-live="polite"><?php esc_html_e( 'Shortcode', 'affibloom' ); ?></span>
 			</button>
 		</span>
 	</td>

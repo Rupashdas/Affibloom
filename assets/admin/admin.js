@@ -878,6 +878,43 @@
 	 * @param {string}  message The words.
 	 * @param {boolean} failed  The failure variant, with a cross.
 	 */
+	/**
+	 * Copies text to the clipboard (F31 R30, R31): the Clipboard API, else a hidden textarea and `execCommand('copy')`,
+	 * as Lasso's dashboard and Share kit do. Shared by the Dashboard row (Task 18S10) and the Share kit (Task 14D).
+	 *
+	 * @param {string}   text   The text.
+	 * @param {Function} done   Called once it is copied.
+	 * @param {Function} failed Called when the browser refused (optional).
+	 */
+	function copy( text, done, failed ) {
+		var fallback = function () {
+			var area = document.createElement( 'textarea' );
+			var copied = false;
+			area.value = text;
+			area.setAttribute( 'readonly', '' );
+			area.style.position = 'absolute';
+			area.style.left = '-9999px';
+			document.body.appendChild( area );
+			area.select();
+			try {
+				copied = document.execCommand( 'copy' );
+			} catch ( error ) {
+				copied = false;
+			}
+			area.remove();
+			if ( copied ) {
+				done();
+			} else if ( failed ) {
+				failed();
+			}
+		};
+		if ( navigator.clipboard && navigator.clipboard.writeText ) {
+			navigator.clipboard.writeText( text ).then( done ).catch( fallback );
+		} else {
+			fallback();
+		}
+	}
+
 	function toast( message, failed ) {
 		var template = document.getElementById( 'affibloom-toast-template' );
 		var host = document.querySelector( '.affibloom-admin' );
@@ -1174,6 +1211,7 @@
 	}
 
 	window.affibloomToast = toast;
+	window.affibloomCopy = copy;
 	window.affibloomBoxFrame = boxFrame;
 	window.affibloomSaveDialog = saveDialog;
 	window.affibloomFieldErrors = fieldErrors;

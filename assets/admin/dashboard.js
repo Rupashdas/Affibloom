@@ -863,8 +863,34 @@
 			closeQuick( true );
 		} else if ( event.target.closest( '[data-quick-image]' ) ) {
 			pickImage( event.target.closest( '[data-quick-image]' ) );
+		} else if ( event.target.closest( '[data-copy-shortcode]' ) ) {
+			copyShortcode( event.target.closest( '[data-copy-shortcode]' ) );
 		}
 	} );
+
+	/**
+	 * The row's Shortcode button (F31 R30, Task 18S10): copies `[affibloom id]` and its label reads "Copied" for 1.6 s; a
+	 * row in quick edit ignores it, as Lasso's does; a refused copy says so.
+	 *
+	 * @param {HTMLButtonElement} button The button.
+	 */
+	function copyShortcode( button ) {
+		var row = button.closest( '[data-product-id]' );
+		var label = button.querySelector( '[data-copy-label]' );
+		if ( button.disabled || '' === button.dataset.copyShortcode || ( row && quick.id === row.getAttribute( 'data-product-id' ) ) ) {
+			return;
+		}
+		label.dataset.name = label.dataset.name || label.textContent;
+		window.affibloomCopy( button.dataset.copyShortcode, function () {
+			window.clearTimeout( button.copiedTimer );
+			label.textContent = button.dataset.copied;
+			button.copiedTimer = window.setTimeout( function () {
+				label.textContent = label.dataset.name;
+			}, 1600 );
+		}, function () {
+			window.affibloomToast( button.dataset.copyFailed, true );
+		} );
+	}
 	region.addEventListener( 'submit', function ( event ) {
 		var form = event.target.closest( '[data-quick-form]' );
 		if ( form ) {

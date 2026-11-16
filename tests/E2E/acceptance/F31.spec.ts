@@ -159,4 +159,33 @@ test.describe( 'F31 Shortcode', () => {
 			widgets.forEach( ( row ) => wp( 'widget', 'delete', row.split( ',' )[ 0 ] ) );
 		}
 	} );
+
+	// AC10 (Task 18S10): the Dashboard row's Shortcode button. Local is plain http, so the copy goes through the
+	// textarea fallback; its copy event carries the text.
+	test( "AC10 the Dashboard row's Shortcode button copies [affibloom id]", async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC10' } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom&s=F31%20AC10' );
+		await page.evaluate( () => document.addEventListener( 'copy', ( event ) => {
+			( window as unknown as { copied: string } ).copied = ( event.target as HTMLTextAreaElement ).value;
+		} ) );
+		const copied = () => page.evaluate( () => ( window as unknown as { copied?: string } ).copied );
+		const button = page.locator( `tr[data-product-id="${ id }"] [data-copy-shortcode]` );
+		await expect( button ).toHaveAttribute( 'title', 'Copy shortcode' );
+		await button.click();
+		expect( await copied() ).toBe( `[affibloom id="${ id }"]` );
+		await expect( button ).toHaveText( 'Copied' );
+		await expect( button ).toHaveText( 'Shortcode', { timeout: 2500 } );
+
+		// In quick edit the row's button does nothing.
+		await page.evaluate( () => { ( window as unknown as { copied: string } ).copied = 'before'; } );
+		await page.locator( `tr[data-product-id="${ id }"] [data-quick-edit]` ).click();
+		await page.evaluate( ( selector ) => ( document.querySelector( selector ) as HTMLElement ).click(), `tr[data-product-id="${ id }"] [data-copy-shortcode]` );
+		expect( await copied() ).toBe( 'before' );
+		await page.locator( '[data-quick-cancel]' ).click();
+
+		// A refused copy says so.
+		await page.evaluate( () => { document.execCommand = () => false; } );
+		await button.click();
+		await expect( page.locator( '.affibloom-toast--error' ) ).toContainText( 'Could not copy shortcode.' );
+	} );
 } );

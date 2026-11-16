@@ -8,33 +8,6 @@
 	'use strict';
 
 	/**
-	 * Copies text to the clipboard, with the old selection trick where the clipboard API is not allowed (Lasso's
-	 * lassoShareKitFallbackCopy).
-	 *
-	 * @param {string}   text The text.
-	 * @param {Function} done Called once it is copied.
-	 */
-	function copy( text, done ) {
-		var fallback = function () {
-			var area = document.createElement( 'textarea' );
-			area.value = text;
-			area.setAttribute( 'readonly', '' );
-			area.style.position = 'absolute';
-			area.style.left = '-9999px';
-			document.body.appendChild( area );
-			area.select();
-			document.execCommand( 'copy' );
-			area.remove();
-			done();
-		};
-		if ( navigator.clipboard && navigator.clipboard.writeText ) {
-			navigator.clipboard.writeText( text ).then( done ).catch( fallback );
-		} else {
-			fallback();
-		}
-	}
-
-	/**
 	 * Lasso 370's Share kit (Task 14D): each button copies its snippet from the page as it is now and says "Copied!" for
 	 * 1.5 seconds; its name stays the action. The shareable URL is the destination until link cloaking exists (D5).
 	 *
@@ -60,7 +33,7 @@
 			}
 			var label = button.querySelector( '[data-share-label]' );
 			var original = label.textContent;
-			copy( text, function () {
+			window.affibloomCopy( text, function () {
 				label.textContent = kit.dataset.copied;
 				window.setTimeout( function () {
 					label.textContent = original;

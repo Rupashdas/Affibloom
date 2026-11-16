@@ -142,7 +142,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S5: `type="link"`, SiteStripe and inline fields
 - [x] Task 18S6: Address a product by its Amazon URL or destination
 - [x] Task 18S9: Boxes in widgets, on AMP pages and in feeds
-- [ ] Task 18S10: The Dashboard row's Shortcode button
+- [x] Task 18S10: The Dashboard row's Shortcode button
 - [ ] Task 18S11: The Share kit's Copy shortcode
 - [ ] Task 18S14: Review and pros/cons schema in the page head
 
@@ -1515,10 +1515,14 @@ for 1.6 s (announced); in quick edit it does nothing; a refused copy shows "Coul
 **Files:** `templates/admin/partials/product-row.php`, `assets/admin/{admin,dashboard}.js`, `src/Interface/
 ShortcodeText.php`; F31 **AC10**, F19 Actions rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Text, button, script.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Copy a product's shortcode from its Dashboard row".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Text, button, script.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Copy a product's shortcode from its Dashboard row".
+
+*Note:* `affibloomCopy()` is product.js's Share kit copy moved to admin.js (second use), now with a failure callback.
+Seen on Local (plain http, so the textarea fallback): the row copied `[affibloom id]`, read "Copied" for 1.6 s,
+ignored a click in quick edit; the Share kit still copies.
 
 ---
 
