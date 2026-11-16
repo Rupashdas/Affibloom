@@ -146,6 +146,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 138. F5 AC8-AC10 (the user, 2026-11-16): the theme tasks check the `plain` and `badge` baselines; two-buttons, no-image, rating, pros-cons and all-fields move to 19A, 20A, 21A, 21B.
 - 139. Task 18S14 (2026-11-16): the schema reads `[affibloom]` now; `[lasso]` joins it in 27A.
 - 140. Task DT1 (2026-11-16): the display baselines are drawn on Local with Lasso 370, not staging; three settings modes.
+- 141. Settings → Display (the user, 2026-11-16): a full save stays on the page; Lasso reloads.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2792,3 +2793,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     settings, the site's with Keep Site Stripe UI on, and Lasso's defaults (for DT3), all undone after
     (`tools/README.md`, "Display baselines"). DT2-DT8 compare against `tests/fixtures/baselines/displays/`; the
     content column there is 768 px wide at 1280 px, as on every Local post.
+
+141. **Settings → Display: a full save stays on the page (the user, 2026-11-16: "Stay on the page would be good").**
+    Lasso saves the Display tab by AJAX and then reloads the page (`settings.js` 2444-2445); Affibloom did the same
+    (F9 R41), so the box preview went blank until it was drawn again. Now the Display form carries
+    `data-save-in-place`: when everything was saved the dialog closes, "Settings saved." shows as the toast and the
+    unsaved-changes guard takes the form as saved (`affibloom:saved`). A partial save (a value refused), Reset Settings
+    and the guard's save-then-leave still load the server's address, which shows what was stored. The other Settings
+    tabs keep Lasso's reload. Both previews also open in their loading state, so "The box preview appears here." shows
+    only when no box could be drawn. `tests/E2E/settings.ts` waits for the save's answer, then the toast or the reload.

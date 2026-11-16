@@ -7,6 +7,11 @@
  *
  * After the load the notice is taken out of the address, so the page's address is the one the editor was on and
  * reloading it does not show the toast again. Without this script the forms post to admin-post.php as before.
+ *
+ * A form that also carries `data-save-in-place` (the Display tab, the user's choice of 2026-11-16, deviation 141) stays
+ * on the page when everything was saved: the dialog closes, its `data-saved-text` shows as the toast, and the leave
+ * guard takes the form as saved (`affibloom:saved`), so the box preview stays where it is. A partial save, Reset
+ * Settings and the guard's save-then-leave still load the server's address, which shows what was stored.
  */
 ( function () {
 	'use strict';
@@ -61,6 +66,14 @@
 			.then( function ( answer ) {
 				if ( ! answer || ! answer.success || ! answer.data || ! answer.data.redirect_to ) {
 					throw new Error( 'not saved' );
+				}
+				var target = new URL( answer.data.redirect_to, window.location.href );
+				if ( undefined !== form.dataset.saveInPlace && 'saved' === target.searchParams.get( 'affibloom_notice' ) ) {
+					delete form.dataset.saving;
+					dialog.hide();
+					window.affibloomToast( form.dataset.savedText, false );
+					form.dispatchEvent( new CustomEvent( 'affibloom:saved', { bubbles: true } ) );
+					return;
 				}
 				// The dialog stays up, its bar full, until the page has loaded again (Lasso reloads the same way).
 				modal.querySelector( '[data-save-bar]' ).style.width = '100%';

@@ -58,6 +58,11 @@
 		document.addEventListener( 'submit', function () {
 			leaving = true;
 		} );
+		// A save that stayed on the page (settings-save.js, `data-save-in-place`): what the form holds now is saved.
+		document.addEventListener( 'affibloom:saved', function () {
+			leaving = false;
+			baseline = snapshot( form );
+		} );
 		// A save sent by AJAX that did not go through (settings-save.js): the changes are still unsaved, and the next
 		// plain Save Changes stays on the tab.
 		document.addEventListener( 'affibloom:save-failed', function () {

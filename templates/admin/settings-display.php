@@ -68,7 +68,8 @@ $fields = array(
 
 		<div class="affibloom-page__body">
 			<form class="affibloom-settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-save-when-changed data-unsaved-guard
-				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>">
+				data-ajax-save data-failed-text="<?php esc_attr_e( "Try again. For some reason your settings didn't save.", 'affibloom' ); ?>"
+				data-save-in-place data-saved-text="<?php esc_attr_e( 'Settings saved.', 'affibloom' ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( $view['action'] ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type_key ); ?>">
 				<?php wp_nonce_field( $view['action'] ); ?>
@@ -102,7 +103,8 @@ $fields = array(
 
 							<div class="affibloom-split__preview">
 								<div class="affibloom-split__stage">
-									<div class="affibloom-split__frame" data-preview-frame
+									<?php // Loading until the first box is drawn: the placeholder shows only when none could be (display-settings.js). ?>
+									<div class="affibloom-split__frame is-loading" data-preview-frame
 										data-preview-title="<?php esc_attr_e( 'Display preview', 'affibloom' ); ?>"
 										data-preview-error="<?php esc_attr_e( 'The preview could not be drawn. Try again.', 'affibloom' ); ?>">
 										<div class="affibloom-empty">

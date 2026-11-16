@@ -377,6 +377,9 @@
 		var frame = document.querySelector( '[data-image-frame]' );
 		if ( form && frame && form.dataset.productId && window.wp && window.wp.apiFetch && window.affibloomBoxFrame ) {
 			boxPreview( form, frame );
+		} else if ( frame ) {
+			// The frame is printed loading; with nothing to draw it, the image and the note show.
+			frame.classList.remove( 'is-loading' );
 		}
 	} );
 } )();

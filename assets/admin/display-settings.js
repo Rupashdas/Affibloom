@@ -597,6 +597,9 @@
 		var frame = document.querySelector( '[data-preview-frame]' );
 		if ( frame && frame.closest( 'form' ) && window.wp && window.wp.apiFetch ) {
 			preview( frame.closest( 'form' ), frame, document.querySelector( '[data-device-toggle]' ) );
+		} else if ( frame ) {
+			// The frame is printed loading; with nothing to draw it, the placeholder shows.
+			frame.classList.remove( 'is-loading' );
 		}
 	} );
 } )();

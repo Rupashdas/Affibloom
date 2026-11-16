@@ -2527,7 +2527,14 @@ body.affibloom-has-modal { overflow: hidden; }
 }
 .affibloom-split__frame.is-loading { position: relative; }
 .affibloom-split__frame.is-loading .affibloom-preview-frame { opacity: 0.55; }
-.affibloom-split__frame.is-loading::after {
+/* Both previews are printed loading: until the first box is drawn the frame keeps its place with the spinner, and the
+   placeholder text shows only when no box could be drawn. A redraw keeps the last box, faded, under the spinner. */
+.affibloom-split__frame.is-loading .affibloom-empty > *,
+.affibloom-image-frame.is-loading .affibloom-image-frame__note { visibility: hidden; }
+.no-js .affibloom-split__frame.is-loading .affibloom-empty > *,
+.no-js .affibloom-image-frame.is-loading .affibloom-image-frame__note { visibility: visible; }
+.affibloom-split__frame.is-loading::after,
+.affibloom-image-frame.is-loading::after {
 	content: "";
 	position: absolute;
 	top: 24px;
@@ -2542,11 +2549,15 @@ body.affibloom-has-modal { overflow: hidden; }
 }
 @keyframes affibloom-preview-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
-	.affibloom-split__frame.is-loading::after { animation: none; }
+	.affibloom-split__frame.is-loading::after,
+	.affibloom-image-frame.is-loading::after { animation: none; }
 }
+.no-js .affibloom-split__frame.is-loading::after,
+.no-js .affibloom-image-frame.is-loading::after { display: none; }
 
 /* The product page's live preview (Task 14E): the real box fills the image frame once drawn. */
 .affibloom-image-frame.has-box { display: block; padding: 0; aspect-ratio: auto; height: auto; }
 .affibloom-image-frame.has-box .affibloom-image-frame__update { display: none; }
 .affibloom-image-frame .affibloom-preview-frame { display: block; width: 100%; min-height: 200px; border: 0; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
-.affibloom-image-frame.is-loading .affibloom-preview-frame { opacity: 0.55; }
+.affibloom-image-frame.is-loading .affibloom-preview-frame,
+.affibloom-image-frame.is-loading .affibloom-image-frame__image { opacity: 0.55; }
