@@ -101,7 +101,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18A: The box reaches a reader — markup, elements and links
 - [x] Task 18B: The stylesheet — Lab, the site's settings, colours and Custom CSS
 - [x] Task 18C: Where the box's assets load
-- [ ] Task 18D: Lasso's baselines for every theme and state
+- [x] Task 18D: Lasso's baselines for every theme and state
 - [x] Task 18E: The 2-box themes and theme resolution
 - [x] Task 18F: The 6-box themes (Cactus, Money)
 - [x] Task 18G: Llama
