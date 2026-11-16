@@ -178,5 +178,201 @@
  "themes/density-custom/Lab-full": {
   "desktop": 1589.875,
   "mobile": 2100.625
+ },
+ "themes/classic/Cactus-plain": {
+  "desktop": 534.594,
+  "mobile": 751.781
+ },
+ "themes/classic/Cactus-badge": {
+  "desktop": 1070.219,
+  "mobile": 1482.031
+ },
+ "themes/classic/Cactus-two-buttons": {
+  "desktop": 1605.844,
+  "mobile": 2212.281
+ },
+ "themes/classic/Cactus-rating": {
+  "desktop": 2141.469,
+  "mobile": 2992.531
+ },
+ "themes/classic/Cactus-pros-cons": {
+  "desktop": 2677.094,
+  "mobile": 3762.281
+ },
+ "themes/classic/Cactus-all-fields": {
+  "desktop": 3212.719,
+  "mobile": 4668.531
+ },
+ "themes/classic/Cutter-plain": {
+  "desktop": 4159.969,
+  "mobile": 6161.375
+ },
+ "themes/classic/Cutter-badge": {
+  "desktop": 4628.719,
+  "mobile": 6848.031
+ },
+ "themes/classic/Cutter-two-buttons": {
+  "desktop": 5097.469,
+  "mobile": 7534.688
+ },
+ "themes/classic/Cutter-rating": {
+  "desktop": 5566.219,
+  "mobile": 8280.344
+ },
+ "themes/classic/Cutter-pros-cons": {
+  "desktop": 6034.969,
+  "mobile": 9006.5
+ },
+ "themes/classic/Cutter-all-fields": {
+  "desktop": 6503.719,
+  "mobile": 9869.156
+ },
+ "themes/classic/Flow-plain": {
+  "desktop": 7428.172,
+  "mobile": 11318.406
+ },
+ "themes/classic/Flow-badge": {
+  "desktop": 7796.172,
+  "mobile": 12049.344
+ },
+ "themes/classic/Flow-two-buttons": {
+  "desktop": 8164.172,
+  "mobile": 12780.281
+ },
+ "themes/classic/Flow-rating": {
+  "desktop": 8532.172,
+  "mobile": 13511.219
+ },
+ "themes/classic/Flow-pros-cons": {
+  "desktop": 8900.172,
+  "mobile": 14281.656
+ },
+ "themes/classic/Flow-all-fields": {
+  "desktop": 9275.422,
+  "mobile": 15164.594
+ },
+ "themes/classic/Geek-plain": {
+  "desktop": 10104.234,
+  "mobile": 16564.609
+ },
+ "themes/classic/Geek-badge": {
+  "desktop": 10605.734,
+  "mobile": 17373.844
+ },
+ "themes/classic/Geek-two-buttons": {
+  "desktop": 11107.234,
+  "mobile": 18183.078
+ },
+ "themes/classic/Geek-rating": {
+  "desktop": 11608.734,
+  "mobile": 19042.313
+ },
+ "themes/classic/Geek-pros-cons": {
+  "desktop": 12110.234,
+  "mobile": 19891.047
+ },
+ "themes/classic/Geek-all-fields": {
+  "desktop": 12611.734,
+  "mobile": 20876.281
+ },
+ "themes/classic/Lab-plain": {
+  "desktop": 13528.984,
+  "mobile": 22448.109
+ },
+ "themes/classic/Lab-badge": {
+  "desktop": 14059.453,
+  "mobile": 23210.734
+ },
+ "themes/classic/Lab-two-buttons": {
+  "desktop": 14589.922,
+  "mobile": 23973.359
+ },
+ "themes/classic/Lab-rating": {
+  "desktop": 15120.391,
+  "mobile": 24735.984
+ },
+ "themes/classic/Lab-pros-cons": {
+  "desktop": 15650.859,
+  "mobile": 25538.109
+ },
+ "themes/classic/Lab-all-fields": {
+  "desktop": 16181.328,
+  "mobile": 26452.734
+ },
+ "themes/classic/Llama-plain": {
+  "desktop": 17018.828,
+  "mobile": 27884.438
+ },
+ "themes/classic/Llama-badge": {
+  "desktop": 17551.344,
+  "mobile": 28565.688
+ },
+ "themes/classic/Llama-two-buttons": {
+  "desktop": 18083.859,
+  "mobile": 29246.938
+ },
+ "themes/classic/Llama-rating": {
+  "desktop": 18616.375,
+  "mobile": 29928.188
+ },
+ "themes/classic/Llama-pros-cons": {
+  "desktop": 19148.891,
+  "mobile": 30648.938
+ },
+ "themes/classic/Llama-all-fields": {
+  "desktop": 19681.406,
+  "mobile": 31506.188
+ },
+ "themes/classic/Money-plain": {
+  "desktop": 20591.906,
+  "mobile": 32955.031
+ },
+ "themes/classic/Money-badge": {
+  "desktop": 21122.297,
+  "mobile": 33355.813
+ },
+ "themes/classic/Money-two-buttons": {
+  "desktop": 21652.688,
+  "mobile": 33756.594
+ },
+ "themes/classic/Money-rating": {
+  "desktop": 22183.078,
+  "mobile": 34157.375
+ },
+ "themes/classic/Money-pros-cons": {
+  "desktop": 22713.469,
+  "mobile": 34558.156
+ },
+ "themes/classic/Money-all-fields": {
+  "desktop": 23243.859,
+  "mobile": 35112.359
+ },
+ "themes/classic/Splash-plain": {
+  "desktop": 24173.609,
+  "mobile": 36378.188
+ },
+ "themes/classic/Splash-badge": {
+  "desktop": 24571.078,
+  "mobile": 37045.938
+ },
+ "themes/classic/Splash-two-buttons": {
+  "desktop": 24968.547,
+  "mobile": 37713.688
+ },
+ "themes/classic/Splash-rating": {
+  "desktop": 25366.016,
+  "mobile": 38381.438
+ },
+ "themes/classic/Splash-pros-cons": {
+  "desktop": 25763.484,
+  "mobile": 39088.688
+ },
+ "themes/classic/Splash-all-fields": {
+  "desktop": 26190.734,
+  "mobile": 39932.438
+ },
+ "themes/sitestripe/Lab-sitestripe": {
+  "desktop": 564.594,
+  "mobile": 781.781
  }
 }

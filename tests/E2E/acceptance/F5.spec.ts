@@ -23,9 +23,13 @@ const pick: Record< string, ( b: Box ) => boolean > = {
 	prime: ( b ) => b.prime,
 };
 
+// Amazon short links in the baselines and the ASIN Lasso stored for each (lasso_url_details.product_id): Lasso keeps
+// them as Amazon products, so their boxes show Prime (the `other` variant, product 10098).
+const SHORT_LINK_ASINS: Record< string, string > = { 'https://amzn.to/3puu6RU': 'B0761Y6X21' };
+
 function productFrom( b: Box ): ProductFields {
 	const href = b.button1?.href ?? '';
-	const asin = /\/dp\/([A-Z0-9]{10})/.exec( href )?.[ 1 ];
+	const asin = /\/dp\/([A-Z0-9]{10})/.exec( href )?.[ 1 ] ?? SHORT_LINK_ASINS[ href ];
 	return {
 		name: b.title,
 		url: href,
@@ -367,7 +371,22 @@ test.describe( 'F5 Box design', () => {
 			useSiteDisplay();
 			const example = boxes.find( pick[ variant ] );
 			expect( example, `boxes.json has a ${ variant } box` ).toBeTruthy();
-			const path = newPostWith( boxBlock( createProduct( { ...productFrom( example as Box ), button_text: '', sponsored: '0' } ) ) );
+			// The texts as Lasso stored them, icon markup included (boxes.json keeps only what shows): the buttons and the
+			// badge of the captured box (variants/<variant>.html).
+			const lassoHtml = readFileSync( `tests/fixtures/baselines/variants/${ variant }.html`, 'utf8' );
+			const stored = ( pattern: RegExp ): string | undefined => pattern.exec( lassoHtml )?.[ 1 ].replace( /\s+/g, ' ' ).trim().replace( /&amp;/g, '&' );
+			const second = stored( /<a class="lasso-button-2"[^>]*>([\s\S]*?)<\/a>/ );
+			const path = newPostWith(
+				boxBlock(
+					createProduct( {
+						...productFrom( example as Box ),
+						button_text: stored( /<a class="lasso-button-1"[^>]*>([\s\S]*?)<\/a>/ ) ?? '',
+						...( second ? { button_text2: second } : {} ),
+						badge: stored( /<span class="lasso-badge-text">([\s\S]*?)<\/span>\s*<\/div>/ ) ?? '',
+						sponsored: '0',
+					} )
+				)
+			);
 
 			for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
 				await page.setViewportSize( { width, height: 900 } );
@@ -602,8 +621,12 @@ test.describe( 'F5 Box design', () => {
 	// hides it, except the title and the description, which are not printed; a badge with text stays under a hidden
 	// Badge element (R62); the stars stay with Pros & cons off (F8 AC5).
 	test( 'AC13 each element switch hides its element on the front end', async ( { page } ) => {
+		// Prime shows only on an Amazon product with an ASIN (C1G, Lasso's rule), so the Prime element has something to hide.
 		const id = createProduct( {
 			name: 'F5 AC13',
+			type: 'amazon',
+			asin: 'B0AC13TEST',
+			url: 'https://www.amazon.com/dp/B0AC13TEST?tag=vbvault-20',
 			prime: '1',
 			description: 'A description long enough to show.',
 			badge: 'Product badge',
@@ -717,7 +740,7 @@ test.describe( 'F5 Box design', () => {
 		const amazon = createProduct( { name: 'F5 AC22 amazon', type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20` } );
 		const basic = createProduct( { name: 'F5 AC22 basic' } );
 		try {
-			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { timestamp: true } } } ), '--format=json' );
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', density: { preset: 'spacious', values: {} }, elements: { timestamp: true } } } ), '--format=json' );
 			await page.goto( newPostWith( boxBlock( amazon ) ) );
 			const date = page.locator( '.affibloom-box .affibloom-date' );
 			await expect( date ).toContainText( '11/09/2026 12:01 am GMT' );
@@ -726,7 +749,7 @@ test.describe( 'F5 Box design', () => {
 			await page.goto( newPostWith( boxBlock( basic ) ) );
 			await expect( page.locator( '.affibloom-box .affibloom-date' ) ).toBeEmpty(); // printed, never filled on a basic link
 
-			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { timestamp: false } } } ), '--format=json' );
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', density: { preset: 'spacious', values: {} }, elements: { timestamp: false } } } ), '--format=json' );
 			await page.goto( newPostWith( boxBlock( amazon ) ) );
 			await expect( page.locator( '.affibloom-box .affibloom-date' ) ).toBeEmpty();
 		} finally {
@@ -738,10 +761,17 @@ test.describe( 'F5 Box design', () => {
 	// attributes, stylesheet or phone script; the timestamp only with a shown price (R27); Lasso's classic baselines
 	// (themes/classic, Lasso's defaults, so Cactus). Checked in 18K beside Lasso's own classic box for all 8 themes.
 	test( '@local AC14 with the Display settings untouched the box renders classically', async ( { page } ) => {
-		wp( 'option', 'delete', 'affibloom_display' );
+		// Lasso's "Reset display settings" left its button label (not a Display-tab key in Lasso), so the classic capture
+		// kept the site's Amazon-icon label; Affibloom keeps the label in the Display settings, so every type gets it, and
+		// the settings stay untouched otherwise (same text in every type is not a customisation).
+		const label = { primary_button_text: '<span class="amazon-icon"></span> Buy Now' };
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { single: { palette: label }, grid: { palette: label }, list: { palette: label } } ), '--format=json' );
 		setSettings( { show_price: true, show_disclosure: true, link_from_display_title: true, custom_css: '' } );
 		try {
 			const id = themeProduct( 'plain' );
+			// Lasso's capture had no price for this ASIN; Local's Amazon table may hold a fresh one (C1), so the product's own
+			// Show Price is off and the box prints none, as Lasso's did.
+			wp( 'post', 'meta', 'update', String( id ), '_affibloom_show_price', '0' );
 			const path = newPostWith( boxBlock( id ) );
 			await page.goto( path );
 			const display = page.locator( '.affibloom-display' );
@@ -756,6 +786,7 @@ test.describe( 'F5 Box design', () => {
 				await page.setViewportSize( { width, height: 900 } );
 				await page.goto( path );
 				await page.addStyleTag( { content: SITE_CSS } );
+				await onBaselineSubpixel( page, GROUP_TOP[ 'themes/classic/Cactus-plain' ][ name ] );
 				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'classic', `Cactus-plain-${ name }.png` ] );
 			}
 		} finally {
@@ -876,13 +907,14 @@ test.describe( 'F5 Box design', () => {
 		try {
 			await page.goto( path );
 			const card = page.locator( '.affibloom-box.sitestripe > .affibloom-display.sitestripe' );
-			await expect( card ).toHaveAttribute( 'style', 'width:240px;height:400px;' );
+			await expect( card ).toHaveAttribute( 'style', 'width:240px;height:400px' ); // through safecss_filter_attr (F30 D12)
 			await expect( card.locator( '> .affibloom-box-2 > a.affibloom-button-1' ) ).toHaveCount( 1 );
 			await expect( card.locator( 'a.affibloom-button-2' ) ).toHaveCount( 0 );
 			for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
 				await page.setViewportSize( { width, height: 900 } );
 				await page.goto( path );
 				await page.addStyleTag( { content: SITE_CSS } );
+				await onBaselineSubpixel( page, GROUP_TOP[ 'themes/sitestripe/Lab-sitestripe' ][ name ] );
 				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'sitestripe', `Lab-sitestripe-${ name }.png` ] );
 			}
 
@@ -911,8 +943,8 @@ test.describe( 'F5 Box design', () => {
 
 		await page.click( '[data-device="mobile"]' );
 		await expect( page.locator( '[data-preview-frame]' ) ).toHaveAttribute( 'data-device', 'mobile' );
-		const width = await page.locator( 'iframe.affibloom-preview-frame' ).evaluate( ( el ) => el.getBoundingClientRect().width );
-		expect( width ).toBeLessThanOrEqual( 390 );
+		// The frame narrows through a 0.2 s max-width transition.
+		await expect.poll( () => page.locator( 'iframe.affibloom-preview-frame' ).evaluate( ( el ) => el.getBoundingClientRect().width ) ).toBeLessThanOrEqual( 390 );
 	} );
 
 	// AC26 (Task 14E): a product's page shows its real box with the form's unsaved values; typing and a theme change
@@ -930,8 +962,10 @@ test.describe( 'F5 Box design', () => {
 		await expect( frame.locator( '.affibloom-display' ) ).toHaveClass( /affibloom-money/ );
 		await expect( frame.locator( 'a[href]' ) ).toHaveCount( 0 );
 
-		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_badge' ) ).toBe( '' ); // nothing saved
-		expect( wp( 'post', 'meta', 'get', String( id ), '_affibloom_theme' ) ).not.toBe( 'Money' );
+		// Nothing saved (`wp post meta get` fails on a key never written, so read it as WordPress does).
+		const meta = ( key: string ): string => wp( 'eval', `echo get_post_meta( ${ id }, '${ key }', true );` ).trim().split( '\n' ).pop() ?? '';
+		expect( meta( '_affibloom_badge' ) ).toBe( '' );
+		expect( meta( '_affibloom_theme' ) ).not.toBe( 'Money' );
 	} );
 
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
