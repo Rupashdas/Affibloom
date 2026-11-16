@@ -94,6 +94,45 @@
 		"style": {
 			"type": "string",
 			"default": ""
+		},
+		"price": {
+			"type": "string",
+			"default": ""
+		},
+		"basisPrice": {
+			"type": "string",
+			"default": ""
+		},
+		"rating": {
+			"type": "string",
+			"default": ""
+		},
+		"pros": {
+			"type": "string",
+			"default": ""
+		},
+		"cons": {
+			"type": "string",
+			"default": ""
+		},
+		"prosLabel": {
+			"type": "string",
+			"default": ""
+		},
+		"consLabel": {
+			"type": "string",
+			"default": ""
+		},
+		"fields": {
+			"type": "string",
+			"default": ""
+		},
+		"prime": {
+			"type": "boolean",
+			"default": false
+		},
+		"showProsCons": {
+			"type": "boolean"
 		}
 	},
 	"supports": {

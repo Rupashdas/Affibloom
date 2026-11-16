@@ -14,7 +14,7 @@ use Affibloom\Domain\Display\Elements;
 /**
  * A box's element visibility (F5 R60-R63; Lasso's Helper::compose_display_element_visibility): the Single element map,
  * then the box's own hides (`badge`, `title`, `description`, `image_url`, `primary_text` or `secondary_text` set to
- * `hide`; Task 20C adds the price and fields). Hidden elements are printed and hidden by the wrapper's `data-hide-*` flags, except the
+ * `hide`, `price`, `fields` or `field` set to `hide`, and `show_pros_cons` false). Hidden elements are printed and hidden by the wrapper's `data-hide-*` flags, except the
  * title and the description, which are not printed (R61, R63), and a badge with text, which still shows (R62).
  */
 final class ElementVisibility {
@@ -48,11 +48,16 @@ final class ElementVisibility {
 			'image'     => $overrides->image_url,
 			'primary'   => $overrides->primary_text,
 			'secondary' => $overrides->secondary_text,
+			'price'     => $overrides->price,
+			'proscons'  => $overrides->fields,
 		);
 		foreach ( $box_hides as $key => $value ) {
 			if ( BoxOverrides::hides( $value ) ) {
 				$shown[ $key ] = false;
 			}
+		}
+		if ( false === $overrides->show_pros_cons ) {
+			$shown['proscons'] = false;
 		}
 
 		return new self( $shown );

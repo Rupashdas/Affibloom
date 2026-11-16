@@ -18,7 +18,7 @@ if ( ! $view->price_block ) {
 	<?php if ( '' !== $view->price ) : ?>
 		<?php // Lasso's template puts whitespace between the two spans: readers see a space before the price. ?>
 		<div class="affibloom-price-value">
-			<span class="affibloom-discount-price"></span>
+			<span class="affibloom-discount-price"><?php echo '' === $view->discount ? '' : '<strike>' . wp_kses( $view->discount, ProductInput::PRICE_TAGS ) . '</strike>'; ?></span>
 			<span class="affibloom-latest-price"><?php echo wp_kses( $view->price, ProductInput::PRICE_TAGS ); ?></span>
 		</div>
 	<?php endif; ?>

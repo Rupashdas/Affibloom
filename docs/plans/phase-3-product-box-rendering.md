@@ -116,7 +116,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 22C: Timestamp
 - [x] Task 18K: Classic rendering
 - [x] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
-- [ ] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
+- [x] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
 - [x] Task 21B: Custom fields and Pros & Cons in the box
 - [ ] Task 21C: The Copy to Clipboard field
 - [ ] Task 20D: Product structured data
@@ -738,10 +738,15 @@ font rules had lost Lasso's `:is()` specificity (18I's rules); restored. Checked
 
 **Files:** modify `blocks/product-box/block.json`, `src/Application/Box/BoxBuilder.php`, `src/Domain/Box/BoxOverrides.php`, `tests/E2E/acceptance/F7.spec.ts` (AC10-AC12).
 
-- [ ] **Step 1: Failing tests (F7 AC10-AC12).**
-- [ ] **Step 2: Builder.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Override a box's price, rating and fields".
+- [x] **Step 1: Failing tests (F7 AC10-AC12).**
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Override a box's price, rating and fields".
+
+*Note:* run after 21B (its "Depends on"). The Price element keeps reading the Show Price saved on the product (R28), not
+the box's `price`; `basisPrice` reaches the price partial's discount span (C1F adds Amazon's basis there). Beside
+Lasso's box (rating, price, Pros, renamed Cons), 8 themes, both widths: equal; it found a 21B CSS rule from Lasso's
+List display, fixed in its own commit.
 
 ---
 

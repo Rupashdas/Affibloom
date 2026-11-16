@@ -106,4 +106,32 @@ final class BoxOverridesTest extends TestCase {
 		self::assertSame( '', BoxOverrides::from_shortcode( array( 'style' => 'tablet' ) )->style );
 		self::assertSame( 'box-20', BoxOverrides::from_shortcode( array( 'tracking_id' => 'box-20' ) )->tracking_id );
 	}
+
+	/**
+	 * Task 20C: price, Prime, basis price, rating, Pros and Cons with labels, fields and show_pros_cons from both forms;
+	 * Lasso's "-br-" is a line break; `field="hide"` is `fields="hide"`.
+	 */
+	public function test_the_price_rating_pros_cons_and_fields_fields(): void {
+		$block = BoxOverrides::from_block(
+			array(
+				'price'        => 'hide',
+				'prime'        => true,
+				'basisPrice'   => '$99.99',
+				'rating'       => '4.5',
+				'pros'         => 'Light',
+				'consLabel'    => 'Watch out',
+				'fields'       => 'hide',
+				'showProsCons' => false,
+			)
+		);
+		self::assertSame( array( 'hide', true, '$99.99', '4.5', 'Light', 'Watch out', 'hide', false ), array( $block->price, $block->prime, $block->basis_price, $block->rating, $block->pros, $block->cons_label, $block->fields, $block->show_pros_cons ) );
+		self::assertNull( BoxOverrides::from_block( array() )->show_pros_cons );
+
+		$short = BoxOverrides::from_shortcode( array( 'pros' => 'One-br-Two', 'field' => 'hide', 'prime' => 'yes', 'show_pros_cons' => 'false' ) );
+		self::assertSame( "One\nTwo", $short->pros );
+		self::assertSame( 'hide', $short->fields );
+		self::assertTrue( $short->prime );
+		self::assertFalse( $short->show_pros_cons );
+		self::assertSame( '', BoxOverrides::from_shortcode( array( 'fields' => 'other' ) )->fields );
+	}
 }

@@ -72,8 +72,10 @@ final class BoxBuilder {
 	 * @param AmazonProduct|null $amazon The Amazon product's stored data (C1); null when there is none.
 	 */
 	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null, ?AmazonProduct $amazon = null ): BoxView {
-		$config  = $display->config( DisplayType::single() );
-		$product = self::applied( $product, $overrides );
+		$config = $display->config( DisplayType::single() );
+		// R28 reads the Show Price saved on the product, not the box's `price`.
+		$stored_show_price = $product->show_price;
+		$product           = self::applied( $product, $overrides );
 		// R3, R65: the Single type's theme, then the product's own, then the box's.
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, $overrides->theme );
 		$id    = (int) $product->id;
@@ -91,11 +93,14 @@ final class BoxBuilder {
 		// R53, R64: advanced rendering reads the Single element switches; the classic box shows every element by its own
 		// data (only the box's own hides apply).
 		$advanced = $display->advanced();
-		$elements = $advanced ? ElementVisibility::of( $config->elements(), $overrides, $product->show_price ) : ElementVisibility::of( Elements::defaults(), $overrides );
+		$elements = $advanced ? ElementVisibility::of( $config->elements(), $overrides, $stored_show_price ) : ElementVisibility::of( Elements::defaults(), $overrides );
 
 		$disclosure = DisclosureRule::text( $product->disclosure, $product->show_disclosure, $settings->string( 'disclosure_text' ) );
-		$prime      = PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
-		$price      = PriceRule::prints( $product->price, $product->show_price, $settings->bool( 'show_price' ) ) ? $product->price : '';
+		// R78: the box's `prime` shows Prime whatever the product.
+		$prime = $overrides->prime || PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
+		$price = PriceRule::prints( $product->price, $product->show_price, $settings->bool( 'show_price' ) ) ? $product->price : '';
+		// R74, R21: the box's basis price, struck through, printed with the price while Show Discount Pricing is on.
+		$discount = '' !== $overrides->basis_price && '' !== $price && $settings->bool( 'show_discount_pricing' ) ? $overrides->basis_price : '';
 
 		return new BoxView(
 			family: LayoutFamily::of( $theme ),
@@ -119,14 +124,15 @@ final class BoxBuilder {
 			title: $elements->shows( 'title' ) ? $name : '',
 			title_linked: $settings->bool( 'link_from_display_title' ),
 			title_tag: $overrides->title_type,
-			stars: null === $fields ? null : self::stars( $fields->values, $fields->library ),
+			stars: self::stars( $fields, $overrides->rating ),
 			price: $price,
+			discount: $discount,
 			price_block: '' !== $price || $prime,
 			prime: $prime,
 			// R63: the Description element gates the block itself.
 			description: $elements->shows( 'desc' ) ? $this->description( $product, $overrides ) : null,
 			// R63: fields are always printed; the Pros & cons element hides them by CSS.
-			fields: null === $fields ? array() : self::fields( $fields->values, $fields->library ),
+			fields: self::with_box_fields( null === $fields ? array() : self::fields( $fields->values, $fields->library ), $overrides ),
 			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
 			date: ( $advanced ? TimestampRule::shows( ProductType::Amazon === $product->type, $elements->shows( 'timestamp' ) ) : TimestampRule::shows_classic( ProductType::Amazon === $product->type, '' !== $price ) ) ? TimestampRule::text( $amazon->last_updated ?? '' ) : null,
@@ -189,7 +195,8 @@ final class BoxBuilder {
 	 * The product as this box sees it (F5 R73, R75, R82; Lasso's single.php 177-200 and Shortcode 434-440): the box's
 	 * primary URL and text replace the product's link and button text; its secondary URL and text replace the first added
 	 * button's (Lasso's second button), adding one when there is none; its disclosure text replaces the product's and
-	 * shows it; its tracking ID retags the Amazon link and that second button. `hide` stays the text, as Lasso prints
+	 * shows it; its price hides, shows or replaces the price (R77); its tracking ID retags the Amazon link and that second
+	 * button. `hide` stays the text, as Lasso prints
 	 * it in classic rendering (edge case 10); advanced rendering hides the button (R60).
 	 *
 	 * @param Product      $product   The product.
@@ -233,6 +240,14 @@ final class BoxBuilder {
 			$changes['show_disclosure'] = true;
 		}
 
+		// R77: `hide` hides the price, `show` shows it, another value replaces it and shows it.
+		if ( '' !== $overrides->price ) {
+			$changes['show_price'] = ! BoxOverrides::hides( $overrides->price );
+			if ( ! in_array( $overrides->price, array( BoxOverrides::HIDE, 'show' ), true ) ) {
+				$changes['price'] = $overrides->price;
+			}
+		}
+
 		return $product->with( $changes );
 	}
 
@@ -264,30 +279,36 @@ final class BoxBuilder {
 	}
 
 	/**
-	 * The Primary Rating's stars (R14; F8 AC1-AC4): its row when visible and holding a value; the name when the row
-	 * shows it. A value that is not a number draws no stars (Lasso prints it raw into `--rating`).
+	 * The Primary Rating's stars (R14, R70; F8 AC1-AC4): its row when visible and holding a value; the name when the row
+	 * shows it. The box's `rating` replaces the value (adding stars, without a name, when the product has none) or, set
+	 * to `hide`, leaves none. A value that is not a number draws no stars (Lasso prints it raw into `--rating`).
 	 *
-	 * @param ProductFields $values  The product's field rows.
-	 * @param FieldLibrary  $library The fields, for the name.
+	 * @param BoxFields|null $fields The product's field rows and the library; null for none.
+	 * @param string         $box    The box's rating: '', `hide` or a value.
 	 */
-	private static function stars( ProductFields $values, FieldLibrary $library ): ?BoxStars {
-		foreach ( $values->all() as $row ) {
-			if ( ProductFields::RATING_ID !== $row->field_id ) {
-				continue;
-			}
-			$rating = trim( $row->value );
-			if ( ! $row->visible || ! is_numeric( $rating ) ) {
-				return null;
-			}
-
-			return new BoxStars(
-				$rating,
-				number_format( (float) $rating, 1, '.', '' ),
-				$row->show_name ? (string) $library->find( ProductFields::RATING_ID )?->name : ''
-			);
+	private static function stars( ?BoxFields $fields, string $box ): ?BoxStars {
+		if ( BoxOverrides::hides( $box ) ) {
+			return null;
 		}
 
-		return null;
+		$row = null;
+		foreach ( null === $fields ? array() : $fields->values->all() as $candidate ) {
+			if ( ProductFields::RATING_ID === $candidate->field_id ) {
+				$row = $candidate;
+				break;
+			}
+		}
+		if ( '' === $box && ( null === $row || ! $row->visible ) ) {
+			return null;
+		}
+
+		$rating = trim( '' === $box ? $row->value : $box );
+		if ( ! is_numeric( $rating ) ) {
+			return null;
+		}
+		$label = null !== $fields && null !== $row && $row->show_name ? (string) $fields->library->find( ProductFields::RATING_ID )?->name : '';
+
+		return new BoxStars( $rating, number_format( (float) $rating, 1, '.', '' ), $label );
 	}
 
 	/**
@@ -316,6 +337,48 @@ final class BoxBuilder {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * The fields as the box changes them (R71, R72; Lasso's single.php 93-175): its `pros` / `cons` replace the field's
+	 * lines (and its name, "Pros" / "Cons" unless a label is given) or add it last; a label alone renames it; `hide`
+	 * leaves no fields; `demo` shows Lasso's demo Pros & Cons while `show_pros_cons` is true, else none.
+	 *
+	 * @param list<BoxField> $fields    The product's fields block.
+	 * @param BoxOverrides   $overrides The box's values.
+	 * @return list<BoxField>
+	 */
+	private static function with_box_fields( array $fields, BoxOverrides $overrides ): array {
+		if ( BoxOverrides::hides( $overrides->fields ) ) {
+			return array();
+		}
+		if ( 'demo' === $overrides->fields && null !== $overrides->show_pros_cons ) {
+			return $overrides->show_pros_cons ? array(
+				new BoxField( BoxField::PROS_CONS, 2, 'Pros', "Will make you more effective.\nQuick read and highly actionable." ),
+				new BoxField( BoxField::PROS_CONS, 3, 'Cons', 'You have to be open minded.' ),
+			) : array();
+		}
+
+		foreach ( array(
+			2 => array( $overrides->pros, $overrides->pros_label, 'Pros' ),
+			3 => array( $overrides->cons, $overrides->cons_label, 'Cons' ),
+		) as $id => list( $lines, $label, $default ) ) {
+			if ( '' === $lines && '' === $label ) {
+				continue;
+			}
+			$found = false;
+			foreach ( $fields as $index => $field ) {
+				if ( $id === $field->id ) {
+					$found            = true;
+					$fields[ $index ] = new BoxField( BoxField::PROS_CONS, $id, '' === $label ? $default : $label, '' === $lines ? $field->value : $lines );
+				}
+			}
+			if ( ! $found && '' !== $lines ) {
+				$fields[] = new BoxField( BoxField::PROS_CONS, $id, '' === $label ? $default : $label, $lines );
+			}
+		}
+
+		return $fields;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings } from '../utils';
 
 // F7 Per-box text (docs/features/F7/requirements.md).
 test.describe( 'F7 Per-box text', () => {
@@ -106,5 +106,50 @@ test.describe( 'F7 Per-box text', () => {
 		await expect( page.locator( '#my-box.affibloom-box' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.affibloom-display' ) ).toHaveClass( /(^| )mobile( |$)/ );
 		// A box in a text widget draws the mobile layout through [affibloom] (Task 18S9; BoxOverrides reads origin="widget").
+	} );
+
+	test( "AC10 a box's price hides, shows or replaces the price; prime shows Prime; a basis price is struck", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC10', price: '$89.99', show_price: '1' } );
+		await page.goto( newPostWith( boxBlock( id, { price: '$79.99', prime: true } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-latest-price' ) ).toHaveText( '$79.99' );
+		await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toHaveCount( 1 );
+
+		await page.goto( newPostWith( boxBlock( id, { price: 'hide' } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-price-value' ) ).toHaveCount( 0 );
+
+		setSettings( { show_discount_pricing: true } );
+		try {
+			await page.goto( newPostWith( boxBlock( id, { basisPrice: '$99.99' } ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-discount-price strike' ) ).toHaveText( '$99.99' );
+		} finally {
+			setSettings( { show_discount_pricing: false } );
+		}
+	} );
+
+	test( "AC11 a box's rating replaces, adds or hides the Primary Rating", async ( { page } ) => {
+		const rated = createProduct( { name: 'F7 AC11 rated', rating: '4.5' } );
+		await page.goto( newPostWith( boxBlock( rated, { rating: '3' } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-stars-value' ) ).toHaveText( '3.0' );
+		await page.goto( newPostWith( boxBlock( rated, { rating: 'hide' } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-stars' ) ).toHaveCount( 0 );
+
+		const unrated = createProduct( { name: 'F7 AC11 unrated' } );
+		await page.goto( newPostWith( boxBlock( unrated, { rating: '4' } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-stars-value' ) ).toHaveText( '4.0' );
+	} );
+
+	test( "AC12 a box's Pros and Cons replace or add the fields; fields hide removes them; showProsCons false hides them", async ( { page } ) => {
+		const id = createProduct( { name: 'F7 AC12', fields: [ { field: 3, value: 'Runs small.' } ] } );
+		await page.goto( newPostWith( boxBlock( id, { pros: 'Light.', consLabel: 'Watch out' } ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-fields-2' ) ).toContainText( 'Pros:' );
+		await expect( page.locator( '.affibloom-box .affibloom-fields-2 li' ) ).toHaveText( 'Light.' );
+		await expect( page.locator( '.affibloom-box .affibloom-fields-3 strong' ) ).toHaveText( 'Watch out:' );
+
+		await page.goto( newPostWith( boxBlock( id, { fields: 'hide' } ) ) );
+		await expect( page.locator( '.affibloom-box' ) ).toBeVisible();
+		await expect( page.locator( '.affibloom-box .affibloom-fields' ) ).toHaveCount( 0 );
+
+		await page.goto( newPostWith( boxBlock( id, { showProsCons: false } ) ) );
+		await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-proscons', '1' );
 	} );
 } );

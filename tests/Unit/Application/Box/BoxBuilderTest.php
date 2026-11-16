@@ -509,4 +509,35 @@ final class BoxBuilderTest extends TestCase {
 		);
 		self::assertSame( array( 'Light', 'Quick' ), $view->fields[1]->lines() );
 	}
+
+	/**
+	 * F7 AC10-AC12 (Task 20C): the box's price (hide, show, value), Prime, basis price (with Show Discount Pricing),
+	 * rating (replace, add, hide), Pros and Cons (replace, add, rename) and fields (hide, demo).
+	 */
+	public function test_the_boxs_price_rating_pros_cons_and_fields(): void {
+		$box = static function ( array $attributes, array $rows = array(), ?Product $product = null, array $settings = array() ): BoxView {
+			$fields = new BoxFields( ProductFields::from_array( $rows ), FieldLibrary::from_array( array() ) );
+
+			return ( new BoxBuilder( self::THUMBNAIL ) )->build( $product ?? self::product(), self::display(), self::settings( $settings ), BoxOverrides::from_block( array( 'productId' => 14727 ) + $attributes ), 0, $fields );
+		};
+
+		$value = $box( array( 'price' => '$79.99', 'basisPrice' => '$99.99' ), array(), null, array( 'show_discount_pricing' => true ) );
+		self::assertSame( '$79.99', $value->price );
+		self::assertSame( '$99.99', $value->discount );
+		self::assertSame( '', $box( array( 'price' => '$79.99', 'basisPrice' => '$99.99' ) )->discount ); // the setting is off
+		self::assertSame( '', $box( array( 'price' => 'hide' ), array(), self::product( array( 'price' => '$5' ) ), array( 'show_price' => true ) )->price );
+		self::assertSame( '$5', $box( array( 'price' => 'show' ), array(), self::product( array( 'price' => '$5', 'show_price' => false ) ) )->price );
+		self::assertTrue( $box( array( 'prime' => true ), array(), self::product( array( 'type' => ProductType::Other, 'prime' => false ) ) )->prime );
+
+		self::assertSame( '3.0', $box( array( 'rating' => '3' ), array( array( 'field' => 1, 'value' => '4.5' ) ) )->stars->value );
+		self::assertSame( '3.0', $box( array( 'rating' => '3' ) )->stars->value ); // added
+		self::assertNull( $box( array( 'rating' => 'hide' ), array( array( 'field' => 1, 'value' => '4.5' ) ) )->stars );
+
+		$pros = $box( array( 'pros' => 'Light', 'consLabel' => 'Watch out' ), array( array( 'field' => 3, 'value' => 'Small' ) ) );
+		self::assertSame( array( array( 3, 'Watch out', 'Small' ), array( 2, 'Pros', 'Light' ) ), array_map( static fn( $f ) => array( $f->id, $f->name, $f->value ), $pros->fields ) );
+		self::assertSame( array(), $box( array( 'fields' => 'hide' ), array( array( 'field' => 2, 'value' => 'A' ) ) )->fields );
+		self::assertCount( 2, $box( array( 'fields' => 'demo', 'showProsCons' => true ) )->fields );
+		self::assertSame( array(), $box( array( 'fields' => 'demo', 'showProsCons' => false ) )->fields );
+		self::assertSame( '1', $box( array( 'showProsCons' => false ) )->wrapper['data-hide-proscons'] );
+	}
 }
