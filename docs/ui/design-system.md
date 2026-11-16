@@ -117,34 +117,40 @@ Both are bundled in the plugin (0b.5); the system stack of section 3 is the fall
 - **Header (replaces the navy bar):** white, 64px, a 1px `line` bottom border, sticky under the WordPress admin bar.
   Left: the flower mark (five brand-600 petals around a white centre) and the wordmark in ink-900, linking to the
   Dashboard. Then ON1's navigation as text tabs (14px/500 ink-600); the current one brand-600 with a 3px brand-600
-  underline. Right: the Automations button (an outlined round pill with the spinner and the count) and **Add New
-  Link** as a primary split button (its caret opens the Menu). Below 992px the tabs fold behind the Menu button.
+  underline. Right: **Add New Link** as a primary split button (its caret opens the Menu), and left of it, once ON3
+  builds it, the Automations button (an outlined round pill with the spinner and the count). Below 992px the tabs fold
+  behind the Menu button.
 - **No band.** The page head sits on the page background.
 - **Page head:** the title with the U10 subtitle under it on the left; the screen's head actions on the right
   (Dashboard: the stat buttons; Groups: the search and Add New Group). A product page: "‹ Dashboard", a 76px image
-  tile, the name (two lines at most, the full name as its tooltip), the URL, and Save Changes on the right.
+  tile, the name (two lines at most, the full name as its tooltip) and the URL. (Save Changes stays in the footer
+  bar: one button, see the product page below.)
 - **Notices (replace the navy strip):** white cards at the top of the column (14px radius, `line` border, a 36px icon
   chip in the tone's tint); the tones, the ×, the newest-last order and `affibloomNotice()` stay as ON2 built them.
   The product's "This product may be out of stock." is a warning-50 card.
 - **Column:** centred, at most 1320px (`--affibloom-content-width`, unchanged).
 - **Footer:** "Version x.y.z" under a hairline, 12px ink-600.
 - **Dashboard (U9):** Broken links, Out of stock and Opportunities become **stat buttons** beside the title (icon chip,
-  26px number, label); pressing Broken links or Out of stock filters the list, marks the button pressed (a ×) and adds
-  a removable filter chip. Products and Clicks (30 days) form a quiet summary line under the subtitle. Then a
+  26px number, label). They become buttons that filter the list (pressed with a ×, plus a removable filter chip) in
+  the tasks that bring their filters (31B, O8); until then each shows its number or its placeholder as today. The
+  `.affibloom-tile*` class names stay, so those tasks need no change. Products and Clicks (30 days) form a quiet
+  summary line under the subtitle. Then a
   full-width 48px search with the Ctrl+Shift+L hint, then the table card: the toolbar (SAVED VIEW chips, Filters), the
   selection bar in brand-50 while rows are ticked, 80px rows, Edit and Shortcode as small outlined buttons that
   strengthen on row hover, and the footer (range, per page, pages).
 - **Quick edit:** Task 16A's structure: the row becomes a brand-25 band holding a white card with a brand-line border;
   fields 2/3, image 1/3; Save Changes and Cancel right.
 - **Product page:** underline tabs with count pills; the Share kit as one quiet card row (title left, its buttons
-  right); two columns, **58% form, 42% preview**. The right column is **sticky**: the "Live preview" card (Desktop /
-  Mobile segmented control) and a summary card (Alert, Locations, Clicks). The form is grouped in cards that keep
+  right); two columns, **58% form, 42% preview**. The right column is **sticky**: the live preview card (the real box,
+  which still opens the Media Library for "Update Image", Task 14E); a summary card (Alert, Locations, Clicks) joins it
+  in the tasks that bring those numbers (31B, 34B, 36B). The form is grouped in cards that keep
   Lasso's field order: *Links & buttons* (Name, the buttons, Add Another Button), *Organize* (Groups, Primary Rating,
   Add Custom Field), *Display content* (Display Theme, Amazon Image, Badge Text, Price, Description, Features),
   *Disclosure & link attributes* (Disclosure, Sponsored, Show Disclosure, Detect Opportunities, Show Prime Logo),
-  *Amazon Data*. Delete This Link is a danger text button at the end. **Save bar:** after any change a white bar
-  slides up at the foot of the screen with "Unsaved changes" and Save Changes (no Discard: Lasso has none); U7's
-  leave-guard stays.
+  *Amazon Data*. **Save bar:** Lasso's footer (Delete This Link left, Save Changes right) becomes a white bar stuck
+  to the foot of the screen, so Save Changes is always in reach; while the form has unsaved changes it says "Unsaved
+  changes" beside Save Changes (no Discard: Lasso has none). There is one Save Changes button only (the tests find it
+  by its name). U7's leave-guard stays.
 - **Locations, Groups, Group, Fields, Tables, Opportunities:** the same page head, tabs and table card.
 - **Settings:** General / Display / Amazon as a segmented control under the title; each section a card of rows (label
   and visible help text left, the control right; no icon chips). Display as section 0 says.
@@ -160,8 +166,9 @@ Both are bundled in the plugin (0b.5); the system stack of section 3 is the fall
   strip give way to the white header, the page head and the notice cards. Components keep using tokens only. No PHP
   logic, REST route or test selector changes; `tests/E2E/admin-design.spec.ts` (which checks Aurora's navy header and
   band) is rewritten for Meadow first.
-- **When:** its own batch after Phase 3's exit check (the user, 2026-11-16). Meadow is a look, so it holds whether the
-  admin stays PHP-rendered (ADR-7) or a React admin is approved.
+- **When:** after Phase 3's sign-off and before F4's tasks: Tasks MD1-MD7 in `plans/phase-4-editor-block.md`
+  (Batches 4.M1-4.M5). Meadow is a look, so it holds whether the admin stays PHP-rendered (ADR-7) or a React admin is
+  approved.
 
 ## 1. Principles
 

@@ -360,6 +360,13 @@ keep their commit hash where `progress.md` or the Phase 2 file records one (Task
 
 | Task | Feature | Status |
 |---|---|---|
+| MD1 | Meadow restyle (deviation 142) | open |
+| MD2 | Meadow restyle | open |
+| MD3 | Meadow restyle | open |
+| MD4 | Meadow restyle | open |
+| MD5 | Meadow restyle | open |
+| MD6 | Meadow restyle | open |
+| MD7 | Meadow restyle | open |
 | 23A | F4 | open |
 | 23B | F4 | open |
 | 23C | F4 | open |

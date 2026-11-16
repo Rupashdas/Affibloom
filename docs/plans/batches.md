@@ -95,8 +95,15 @@ plan lines, reviews, and staging or production work.
 
 ## Phase 4
 
+The Meadow restyle runs first (the user, 2026-11-16, deviation 142): five short batches, then F4's.
+
 | Batch | Tasks |
 |---|---|
+| 4.M1 | MD1 (fonts and colours; the font download needs the user's OK) |
+| 4.M2 | MD2, MD3 |
+| 4.M3 | MD4 |
+| 4.M4 | MD5 |
+| 4.M5 | MD6, MD7 |
 | 4.1 | 23A |
 | 4.2 | 23B |
 | 4.3 | 23C |

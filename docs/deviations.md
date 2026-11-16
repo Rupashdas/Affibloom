@@ -147,7 +147,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 139. Task 18S14 (2026-11-16): the schema reads `[affibloom]` now; `[lasso]` joins it in 27A.
 - 140. Task DT1 (2026-11-16): the display baselines are drawn on Local with Lasso 370, not staging; three settings modes.
 - 141. Settings → Display (the user, 2026-11-16): a full save stays on the page; Lasso reloads.
-- 142. Admin design (the user, 2026-11-16): Meadow replaces Aurora; restyle in its own batch after Phase 3's exit check.
+- 142. Admin design (the user, 2026-11-16): Meadow replaces Aurora; restyle Tasks MD1-MD7 (Batches 4.M1-4.M5) before F4.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2804,16 +2804,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     tabs keep Lasso's reload. Both previews also open in their loading state, so "The box preview appears here." shows
     only when no box could be drawn. `tests/E2E/settings.ts` waits for the save's answer, then the toast or the reload.
 
-142. **Admin design: Meadow replaces Aurora (the user, 2026-11-16).** The user found Aurora's navy band heavy (a long
-    product name filled four lines of it, the Dashboard tiles wrapped, Save sat at the foot of a 2,800px product page)
-    and asked for five clickable directions, built as private prototypes from one shared brief with the real labels:
-    Meadow (light, top navigation, green), Console (own sidebar, slide-over quick edit), Split View (list and detail
-    side by side), Canvas (edit on the box), Nightshift (dark, attention first). **The user chose Meadow** and approved
-    its amendment with the four recommended answers: the 1320px column stays, Inter and Plus Jakarta Sans are bundled
-    (no outside request), the save bar has no Discard button (Lasso has none), and the restyle is its own batch after
-    Phase 3's exit check. Recorded in `docs/ui/design-system.md` section 0b (sections 1-8 stay as the record of
-    Aurora, which the code still draws, until that batch rewrites them) and in ADR-008's Amendments. ADR-008's rule,
-    section 0 (Display keeps Lasso's structure), the box (ADR-006), U9/U10 and the tested class names are unchanged.
-    The batch's tasks are not written yet; it starts by rewriting `tests/E2E/admin-design.spec.ts`, which checks
-    Aurora's navy header and band. Meadow is a look, so it holds whether the admin stays PHP-rendered (ADR-7) or a
-    React admin (proposed, not decided) is approved.
+142. **Admin design: Meadow replaces Aurora (the user, 2026-11-16).** Aurora's navy band felt heavy (four-line titles,
+    wrapping tiles, Save at the foot of a 2,800px page); of five clickable prototypes (Meadow, Console, Split View,
+    Canvas, Nightshift) the user chose **Meadow** and approved its answers: 1320px column, bundled Inter and Plus Jakarta
+    Sans, no Discard button, the restyle before Phase 4's F4 tasks. Spec: `docs/ui/design-system.md` section 0b
+    (sections 1-8 are Aurora's record until MD7); ADR-008 Amendments. Unchanged: ADR-008's rule, section 0 (Display),
+    the box, U9/U10, the tested class names. Tasks MD1-MD7, Batches 4.M1-4.M5; each rewrites its part of
+    `admin-design.spec.ts`. Planning settled: one Save Changes (the footer becomes the sticky save bar), no new preview
+    toggle, the summary card and the stat cards' filters come with their data's tasks (31B, 34B, 36B, O8),
+    `.affibloom-tile*` stays. Meadow is a look: it holds whether the admin stays PHP (ADR-7) or a React admin is approved.

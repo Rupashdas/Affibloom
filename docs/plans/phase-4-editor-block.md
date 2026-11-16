@@ -40,8 +40,21 @@ them when the task is worked, and record any code that differs from the text bel
 - **Decided (the user accepted the recommendation, 2026-11-14), B5:** the AI Text tile is left out of the chooser (seven types; no post uses `[lasso prompt]`).
 - **Decided (the user, 2026-11-14), A10:** no MCP routes are built; Task MCP1 is dropped.
 - **Decided (the user, 2026-11-14), A10:** Elementor `_elementor_data` rewriting is not built.
+- **Decided (the user, 2026-11-16), deviation 142: Meadow replaces Aurora.** Tasks MD1-MD7 restyle the admin before
+  F4's tasks start; the block's editor UI is then built in Meadow (`docs/ui/design-system.md` section 0b). Where an open
+  task in any phase says "Aurora" (look, dialog, tile), read "the design system (Meadow)".
 
 ## Tasks in this phase
+
+### Meadow restyle — runs first (the user, 2026-11-16; deviation 142)
+
+- [ ] Task MD1: Meadow's fonts and colours
+- [ ] Task MD2: The white header and notice cards
+- [ ] Task MD3: A page head instead of the band
+- [ ] Task MD4: The Dashboard: counts beside the title, search, list
+- [ ] Task MD5: The product page: head, sticky preview, save bar
+- [ ] Task MD6: Settings, Groups, Fields, dialogs and the toast
+- [ ] Task MD7: The design system rewritten for Meadow
 
 ### F4 — Displays in the editor
 
@@ -108,6 +121,253 @@ stubbed or deferred as said.
 as said), not missing tasks: the drafts call the shortcode "Task 18S" and the renderer "Task 18A" (read as 18S1-18S7 and
 18A-18K); and F4 requirements text says "Tasks 23A-23H", while the map and the drafts end at 23G (the table of
 coverage below is complete with 23A-23G).
+
+---
+
+### Tasks MD1-MD7: the Meadow restyle
+
+> Written 2026-11-16 from `docs/ui/design-system.md` section 0b (the spec), the reference prototype
+> (https://claude.ai/artifact/VKuvkUctK992ethcke8ZMR) and a read of the admin code. **Only the look changes:** no
+> label, help text, field, `name`, id, tab or column order, workflow step, PHP logic or REST route changes. **Class
+> names stay** where tests, scripts or later tasks use them (design system section 8, `.affibloom-tile*`,
+> `.affibloom-page__title`, `.affibloom-page__subtitle`, `.affibloom-tabs__tab`, `#affibloom-save`, `#affibloom-search`);
+> new classes are added beside them. Section 0 holds: Settings → Display keeps Lasso's structure.
+>
+> **Test approach (ADR-8):** the acceptance specs check fields, labels and order, not looks, so they need no change;
+> `tests/E2E/admin-design.spec.ts` is the one look spec, and each task rewrites the part of it that the task changes
+> (written, not run: batches rule 5). A task that moves markup greps the specs for `boundingBox` and layout checks on
+> its screen and updates only those. **Order:** MD1 changes token values, so every screen turns Meadow's colours at
+> once; the header and band look odd for one task until MD2 and MD3 replace them.
+
+#### Task MD1: Meadow's fonts and colours
+
+**Decision:** deviation 142; design system 0b.1-0b.3, 0b.5.
+
+**Why:** every later task builds on the tokens. Changing their values first restyles every screen with no markup
+change, and the bundled fonts must exist before the type scale can use them.
+
+**Depends on:** Phase 3 signed off. Nothing else.
+
+**User action:** any Affibloom screen shows Meadow's palette (green brand, green-tinted greys), Inter for text and Plus
+Jakarta Sans for titles and big numbers; primary buttons and switches are flat green; cards have a hairline border.
+The header and the band are still Aurora's shapes (MD2, MD3).
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `assets/admin/fonts/` with five WOFF2 files (Inter 400, 500, 600; Plus Jakarta Sans 700, 800; Latin subset) and both families' `OFL.txt` | `fonts.css` |
+| `assets/admin/fonts.css` (`@font-face`, `font-display: swap`; tokens `--affibloom-font` = Inter + the system stack, `--affibloom-font-display` = Plus Jakarta Sans + Inter + the system stack) | `AdminAssets` (style `affibloom-fonts`, a dependency of `affibloom-admin`) |
+| Meadow's token values and new tokens in `admin.css` section 1 (table in 0b.1); flat primary button and switch; card border plus shadow; radii; focus ring and field ring; display face on page titles, card titles and tile numbers | every admin screen |
+
+**Files:** create the fonts, `assets/admin/fonts.css`, `tests/Unit/Interface/Admin/AdminAssetsTest.php`; modify
+`src/Interface/Admin/AdminAssets.php`, `assets/admin/admin.css` (sections 1, 4, 6, 8 and the type rules),
+`tests/E2E/admin-design.spec.ts` (its colour constants and the token and type checks).
+
+**Font files:** downloading them needs the user's OK first (name, source, size; global rules). Source: the families'
+own releases (Inter: `rsms/inter` on GitHub; Plus Jakarta Sans: `tokotype/PlusJakartaSans`) or the Fontsource packages
+of the same, Latin subset only, about 120 KB in all. They are copied into the plugin: no request to any other host
+at run time, no npm dependency added.
+
+- [ ] **Step 1: Tests.** Unit: `AdminAssets::enqueue()` registers `affibloom-fonts` on an Affibloom screen and not on
+  another admin page, and `affibloom-admin` depends on it. E2E (`admin-design.spec.ts`): page background `#F5F7F4`,
+  the body font family starts with Inter, the page title's with Plus Jakarta Sans, the primary button flat
+  `#1E6B47` with white text, a switch on `#1E6B47` and off `#8A968C`, a card's 1px border, the focus outline
+  `#1E6B47` on a switch reached by Tab.
+- [ ] **Step 2: Fonts.** The files, `fonts.css`, the enqueue.
+- [ ] **Step 3: Tokens and components by value.** Section 1's values; retire `--affibloom-brand-500` (flat buttons
+  and switches); keep the navy and band tokens until MD2/MD3 remove their last users.
+- [ ] **Step 4: Check and look.** Unit tests, `phpcs` on `AdminAssets.php`; Dashboard and Settings → General at
+  1280 px.
+- [ ] **Step 5: Commit** — "Bundle Meadow's fonts and switch the admin to Meadow's colours".
+
+#### Task MD2: The white header and notice cards
+
+**Decision:** deviation 142; design system 0b.4 (Header, Notices, Footer).
+
+**Why:** the header is on every screen and the navy notice strip continues it; both go together.
+
+**Depends on:** MD1.
+
+**User action:** every Affibloom screen opens with a white 64px header: the flower mark in green and the wordmark,
+the tabs as words (no icons) with a green underline on the current one, **Add New Link** as a green split button.
+Below 992 px the Menu button opens a white panel with the tabs stacked. Notices (the update notice, the bulk Amazon
+sync banner, script notices) show as white cards at the top of the page column, not in a navy strip. The footer's
+version sits under a hairline.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `header.php` markup: the tab icons dropped, the logo's colours from tokens; classes kept | every screen template |
+| `notices.php`: the region moves into the page column (`#affibloom-notices`, `aria-live`, the `<template>` and `affibloomNotice()` unchanged) | every screen template; `admin.js` |
+| `admin.css` sections 2 (header, Menu button and its panel, the split button, Menu), the notice region and the footer | — |
+
+**Files:** modify `templates/admin/partials/{header,notices,footer}.php`, `assets/admin/admin.css`,
+`tests/E2E/admin-design.spec.ts` (the header part: white, 64px, current tab green with its underline, no icon in a
+tab; a notice is a white card inside the column). F38 AC1-AC6 keep passing unchanged (tabs, order, `aria-current`,
+Menu button, notices).
+
+- [ ] **Step 1: Test** (the header and notice part of `admin-design.spec.ts`).
+- [ ] **Step 2: Header and Menu panel.**
+- [ ] **Step 3: Notice cards and footer;** remove the navy tokens' last uses in these sections.
+- [ ] **Step 4: Check and look.** `phpcs` on the partials; Dashboard at 1280 px with a script notice
+  (`affibloomNotice( 'success', 'Test' )` in the console) and the header at 375 px.
+- [ ] **Step 5: Commit** — "Draw the header white with underlined tabs, and notices as cards".
+
+#### Task MD3: A page head instead of the band
+
+**Decision:** deviation 142; design system 0b.4 (No band, Page head).
+
+**Why:** seven templates print the gradient band; one partial replaces it, so the head is the same everywhere (shared
+code extracted on its second use).
+
+**Depends on:** MD2.
+
+**User action:** on the Dashboard, a product page, Groups, a group, Fields, a field and every Settings tab, the title
+(36px) and its subtitle sit on the page background with the screen's head actions on the right; the cards no longer
+float up over a band. Settings' tabs are a segmented control under the title. The product page shows its name, URL and
+tabs this way until MD5 finishes it.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `templates/admin/partials/page-head.php` (`title`, optional `title_id` and `title_class`, `subtitle`, optional `actions` as a partial name and its args, optional `below` partial for tabs) printing `.affibloom-page__title` and `.affibloom-page__subtitle` | `dashboard.php`, `product.php`, `groups.php`, `group.php`, `fields.php`, `field.php`, `settings-band.php` |
+| `settings-band.php` reduced to the head and the segmented tabs (`.affibloom-tabs__tab`, `aria-current` kept) | `settings.php`, `settings-display.php`, `settings-amazon.php` |
+| `admin.css`: section 3 (band) replaced by the page head; section 4's body no longer overlaps; the band's search and segmented rules move with their content | — |
+
+**Files:** create `page-head.php`; modify the seven templates above, `settings-band.php`, `assets/admin/admin.css`,
+`tests/E2E/admin-design.spec.ts` (no `.affibloom-band`; the title 36px/800 in ink on the page; the column centred,
+at most 1320px; the subtitle present). Groups' search and **Add New Group** become the head's actions; the
+Dashboard's search moves under the head (its form, `#affibloom-search` and the shortcut hint unchanged), MD4 sizes it.
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: `page-head.php` and the CSS.** - [ ] **Step 3: The seven templates.**
+- [ ] **Step 4: Check and look.** `phpcs` on the templates; each screen once at 1280 px, Settings → Display too
+  (its structure must be unchanged).
+- [ ] **Step 5: Commit** — "Replace the gradient band with a page head on every screen".
+
+#### Task MD4: The Dashboard: counts beside the title, search, list
+
+**Decision:** deviation 142; design system 0b.4 (Dashboard (U9), Quick edit).
+
+**Why:** the Dashboard is the most used screen; its tiles wrapped to two rows in Aurora.
+
+**Depends on:** MD3.
+
+**User action:** Broken links, Out of stock and Opportunities show as stat cards right of the title (icon chip, big
+number or "—", label and the placeholder note as today); Products and Clicks (30 days) form one quiet line under the
+subtitle (Products is the live count). Under the head a full-width 48px search with the Ctrl+Shift+L hint. The list:
+SAVED VIEW chips and Filters, the selection bar in green tint, 80px rows with 52px image tiles, sentence-case column
+heads, numbers in the display face, Edit and Shortcode as small outlined buttons that strengthen on row hover, the
+pager's current page as a white raised chip. Quick edit opens as a pale green band with a white card. Nothing new
+filters: the stat cards become buttons in 31B and O8.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `dashboard-tiles.php`: the three attention tiles as stat cards in the head's actions, Products and Clicks as the summary line (classes `.affibloom-tile*` and `data-library-count` kept; `dashboard.js` rewrites the count as now) | `dashboard.php` (through `page-head.php`) |
+| `admin.css`: stat cards, summary line, search, toolbar chips, table, selection bar, quick edit, pager | — |
+
+**Files:** modify `templates/admin/dashboard.php`, `templates/admin/partials/dashboard-tiles.php`,
+`assets/admin/admin.css`, `tests/E2E/admin-design.spec.ts` (the Dashboard part). Read F19's spec for layout checks
+on the tiles and the toolbar (`boundingBox`) and update only those.
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: Head and search.** - [ ] **Step 3: List, selection bar, quick edit, pager.**
+- [ ] **Step 4: Check and look.** `phpcs`; the Dashboard at 1280 px: a ticked row, a quick edit open, a search with
+  no match.
+- [ ] **Step 5: Commit** — "Put the Dashboard's counts beside its title and restyle its list".
+
+#### Task MD5: The product page: head, sticky preview, save bar
+
+**Decision:** deviation 142; design system 0b.4 (Page head, Product page).
+
+**Why:** the product page is the longest screen (about 2,800px); the preview scrolled away and Save sat at the
+foot.
+
+**Depends on:** MD4.
+
+**User action:** a product page opens with "‹ Dashboard", a 76px image tile, the name (two lines at most, the full
+name as a tooltip) and the URL; underline tabs with count pills ("Soon" chips stay); the Share kit as one row. Two
+columns, 58% / 42%: on the right the live preview stays in view while the form scrolls (it still opens the Media
+Library for Update Image); on the left the form in cards: *Links & buttons*, *Organize*, *Display content* (the
+fields that sat beside the preview), *Disclosure & link attributes*, *Amazon Data*. The footer (Delete This Link,
+Save Changes) is a bar stuck to the foot of the screen; while the form has unsaved changes it says "Unsaved changes".
+Every field, its order of reading, Save, Enter-to-save and the leave-guard work as before.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `product.php`: the head through `page-head.php`, the 58/42 grid, the aside, the form's cards; the fields keep their ids, `name`s and reading order (Lasso's left column, then its right column) | `ProductScreen` |
+| `product-display-card.php` split: the preview frame into the aside, the display fields into the *Display content* and *Disclosure & link attributes* cards | `product.php` |
+| `product-save.js`: sets `data-dirty` on the form when the guard counts a change and clears it after a save; the bar's status reads it | the product page |
+| `admin.css`: product head, grid, sticky aside (top = admin bar + header + 16px; static below 992px, where the preview moves above the form), cards, save bar | — |
+
+**Files:** modify `templates/admin/product.php`, `templates/admin/partials/{product-display-card,product-fields,
+share-kit,amazon-data-card}.php` (markup only), `assets/admin/{product-save.js,admin.css}`,
+`tests/E2E/admin-design.spec.ts` (the product part: one Save Changes button, the bar stuck to the foot, the aside
+sticky, "Unsaved changes" after typing in Name). Grep the product specs (F1, F7, F8, F28, F29, C1) for layout checks
+and update only those. **One Save Changes:** `#affibloom-save` stays the only one (specs use
+`getByRole( 'button', { name: 'Save Changes' } )`).
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: Head, tabs, Share kit.** - [ ] **Step 3: Grid, aside, cards.**
+- [ ] **Step 4: Save bar and the dirty state.**
+- [ ] **Step 5: Check and look.** Unit tests, `phpcs`; a long-named Amazon product and a plain one at 1280 px:
+  scroll (the preview stays), edit Name (preview and "Unsaved changes"), save (toast, the status clears).
+- [ ] **Step 6: Commit** — "Give the product page a sticky preview and a save bar".
+
+#### Task MD6: Settings, Groups, Fields, dialogs and the toast
+
+**Decision:** deviation 142; design system 0b.4 (Settings, Dialogs, Toast, other screens).
+
+**Why:** what is left of Aurora after MD1-MD5: the settings rows' icon chips, the list screens' cards, the dialogs'
+navy backdrop and the toast's place.
+
+**Depends on:** MD5.
+
+**User action:** Settings → General and Amazon show each section as a card of rows (label and visible help left,
+control right, no icon chips); Display keeps its structure in Meadow's colours and type. Groups, a group, Fields and a
+field use the Dashboard's table card and form cards. Dialogs have 28px padding, a 44px icon chip (red for deleting),
+a 22px title and a dark green-grey backdrop; the toast shows at the bottom centre.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `toggle.php`: the icon chip dropped from settings rows (label, help, `aria-describedby` and the switch unchanged) | the Settings tabs |
+| `admin.css`: settings rows, the list screens, the group member rows, modal (backdrop `rgba(22,32,26,.45)`), toast (bottom centre), state chips | — |
+
+**Files:** modify `templates/admin/partials/toggle.php`, `assets/admin/{admin.css,fields.css,
+settings-general.css}`, `tests/E2E/admin-design.spec.ts` (Settings and Display parts: no chip in a row, the 380px rail
+unchanged, the dialog and the toast).
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: Settings.** - [ ] **Step 3: Groups and Fields.** - [ ] **Step 4: Dialogs and
+  toast.**
+- [ ] **Step 5: Check and look.** `phpcs`; each screen once at 1280 px, a Delete dialog open, a save toast.
+- [ ] **Step 6: Commit** — "Restyle Settings, Groups, Fields, dialogs and the toast for Meadow".
+
+#### Task MD7: The design system rewritten for Meadow
+
+**Decision:** deviation 142.
+
+**Why:** sections 1-8 of `design-system.md` still describe Aurora; after MD6 nothing draws it.
+
+**Depends on:** MD6.
+
+**User action:** none on screen. The design system reads as one document for Meadow.
+
+**Files:** modify `docs/ui/design-system.md` (sections 1-8 rewritten from 0b and from what MD1-MD6 built: tokens,
+components and their measured values; section 0 and the class-name list kept; 0b shortened to its decision and
+history), `assets/admin/admin.css` (drop the retired tokens if any is left: `grep -n "navy\|on-band\|on-navy\|brand-300\|brand-500"`).
+
+- [ ] **Step 1: Rewrite** sections 1-8; remove the retired tokens.
+- [ ] **Step 2: Check.** `grep` the plugin for the retired token names (none left); `composer lint`.
+- [ ] **Step 3: Commit** — "Rewrite the design system for Meadow".
+- [ ] **Step 4 (recommended, the user's call):** the restyle touches every admin screen, so ask whether to run the
+  admin specs once now (F1, F9, F18, F19, F23, F26, F38, C1 and `admin-design.spec.ts`) instead of waiting for
+  Phase 4's exit check.
 
 ---
 
