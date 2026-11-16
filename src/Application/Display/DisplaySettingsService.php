@@ -86,9 +86,38 @@ final class DisplaySettingsService {
 	 * @return list<string> Keys whose values were refused.
 	 */
 	public function update_type( DisplayType $type, array $input ): array {
+		$refused = array();
+		$this->repository->save( $this->applied( $type, $input, $refused ) );
+
+		return $refused;
+	}
+
+	/**
+	 * The settings as the screen's unsaved values would make them, without saving (F5 R96, D11: the Display preview),
+	 * Price that was never saved following Show Price, as current() gives them.
+	 *
+	 * @param DisplayType          $type  The display type being edited.
+	 * @param array<string, mixed> $input The form's `display` values, as update_type() takes them.
+	 */
+	public function preview( DisplayType $type, array $input ): DisplaySettings {
+		$refused    = array();
+		$settings   = $this->applied( $type, $input, $refused );
+		$show_price = $this->settings->get()->bool( 'show_price' );
+		$config     = $settings->config( $type );
+
+		return $settings->with_config( $type, $config->with_elements( $config->elements()->with_show_price( $show_price ) ) );
+	}
+
+	/**
+	 * The stored settings with one type's form values applied; refused colours and labels are left as they were.
+	 *
+	 * @param DisplayType          $type    The display type.
+	 * @param array<string, mixed> $input   The form's values.
+	 * @param list<string>         $refused Filled with the keys whose value was refused.
+	 */
+	private function applied( DisplayType $type, array $input, array &$refused ): DisplaySettings {
 		$settings = $this->repository->get();
 		$config   = $settings->config( $type );
-		$refused  = array();
 
 		if ( isset( $input['theme'] ) && is_string( $input['theme'] ) ) {
 			$config = $config->with_theme( Theme::from( $input['theme'] ) );
@@ -147,9 +176,7 @@ final class DisplaySettingsService {
 			$settings = $settings->with_columns( (int) $input['columns'] );
 		}
 
-		$this->repository->save( $settings );
-
-		return $refused;
+		return $settings;
 	}
 
 	/**

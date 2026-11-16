@@ -241,6 +241,19 @@ test.describe( 'F16 Display system', () => {
 		}
 	} );
 
+	// AC2 (Task 10D): the preview shows the current, unsaved settings at desktop and phone width.
+	test( 'AC2 the preview shows the unsaved settings at desktop and phone width', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=display' );
+		const frame = page.frameLocator( 'iframe.affibloom-preview-frame' );
+		await expect( frame.locator( '.affibloom-display' ) ).toBeVisible();
+		await page.getByRole( 'tab', { name: 'Layout & spacing' } ).click();
+		await page.locator( '[data-layout-row="orientation"]' ).getByRole( 'radio', { name: 'Stacked', exact: true } ).check();
+		await expect( frame.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-layout-orientation', 'stacked' );
+		await page.click( '[data-device="mobile"]' );
+		await expect( page.locator( '[data-preview-frame]' ) ).toHaveAttribute( 'data-device', 'mobile' );
+		await expect( frame.locator( '.affibloom-display' ) ).toBeVisible();
+	} );
+
 	// AC4 on the front end (Task 18I): a preset's values and a title clamp reach the reader's box.
 	test( 'AC4 a saved density changes the box on the front end', async ( { page } ) => {
 		wp( 'option', 'update', 'affibloom_display', JSON.stringify( {

@@ -509,6 +509,88 @@
 		} );
 	}
 
+	/**
+	 * The live preview (F5 R94-R99, F16 AC2; Task 10D): the form's unsaved values go to the preview route, which draws
+	 * Lasso's sample box; it is written into a frame of its own with the box's stylesheets, the unsaved :root block and
+	 * the phone script. Every change redraws it (the latest answer wins); links are inert; the device toggle sizes it.
+	 *
+	 * @param {HTMLFormElement} form   The Display form.
+	 * @param {HTMLElement}     frame  The preview frame.
+	 * @param {HTMLElement|null} toggle The device toggle.
+	 */
+	function preview( form, frame, toggle ) {
+		var latest = 0;
+		var timer = null;
+		var iframe = null;
+
+		var write = function ( answer ) {
+			if ( ! iframe ) {
+				frame.textContent = '';
+				iframe = document.createElement( 'iframe' );
+				iframe.className = 'affibloom-preview-frame';
+				iframe.title = frame.dataset.previewTitle;
+				frame.appendChild( iframe );
+			}
+			var links = answer.styles.map( function ( href ) {
+				return '<link rel="stylesheet" href="' + href + '">';
+			} ).join( '' );
+			iframe.onload = function () {
+				var doc = iframe.contentDocument;
+				Array.prototype.forEach.call( doc.querySelectorAll( 'a[href]' ), function ( link ) {
+					link.removeAttribute( 'href' );
+				} );
+				doc.addEventListener( 'click', function ( event ) {
+					event.preventDefault();
+				} );
+				iframe.style.height = doc.documentElement.scrollHeight + 'px';
+				frame.classList.remove( 'is-loading' );
+			};
+			iframe.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' +
+				links + '<style>' + answer.root + '</style>' +
+				'<style>body{margin:0;padding:24px 16px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e1e1e}</style>' +
+				'</head><body>' + answer.html + '<script src="' + answer.script + '"><\/script></body></html>';
+		};
+
+		var draw = function () {
+			var ask = ++latest;
+			var body = new window.FormData( form );
+			// The form's own nonce is Save's; REST would read a `_wpnonce` field as its nonce and refuse the request.
+			body.delete( '_wpnonce' );
+			frame.classList.add( 'is-loading' );
+			window.wp.apiFetch( { path: '/affibloom/v1/display-preview', method: 'POST', body: body } ).then( function ( answer ) {
+				if ( ask === latest ) {
+					write( answer );
+				}
+			} ).catch( function () {
+				if ( ask !== latest ) {
+					return;
+				}
+				frame.classList.remove( 'is-loading' );
+				if ( window.affibloomToast ) {
+					window.affibloomToast( frame.dataset.previewError, true );
+				}
+			} );
+		};
+
+		var soon = function () {
+			window.clearTimeout( timer );
+			timer = window.setTimeout( draw, 250 );
+		};
+
+		form.addEventListener( 'input', soon );
+		form.addEventListener( 'change', soon );
+		if ( toggle ) {
+			toggle.addEventListener( 'click', function ( event ) {
+				var button = event.target.closest( '[data-device]' );
+				if ( button ) {
+					frame.dataset.device = button.dataset.device;
+					soon();
+				}
+			} );
+		}
+		draw();
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var rail = document.querySelector( '.affibloom-split__rail' );
 		var icons = document.querySelector( '.affibloom-icon-set' );
@@ -531,6 +613,10 @@
 			density( layout );
 			elements( layout );
 			layoutRows( layout, document.querySelector( '[data-device-toggle]' ) );
+		}
+		var frame = document.querySelector( '[data-preview-frame]' );
+		if ( frame && frame.closest( 'form' ) && window.wp && window.wp.apiFetch ) {
+			preview( frame.closest( 'form' ), frame, document.querySelector( '[data-device-toggle]' ) );
 		}
 	} );
 } )();

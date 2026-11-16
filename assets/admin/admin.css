@@ -2513,3 +2513,34 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-api-card__actions { flex-wrap: wrap; }
 	.affibloom-api-card__actions .affibloom-button { width: 100%; }
 }
+
+/* The Display preview (Task 10D): the real box in a frame of its own, so the box's CSS cannot reach the screen and its
+   phone rules follow the frame's width (390px on Mobile). */
+.affibloom-split__frame[data-device="mobile"] { max-width: 390px; }
+.affibloom-split__frame .affibloom-preview-frame {
+	display: block;
+	width: 100%;
+	min-height: 200px;
+	border: 0;
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+}
+.affibloom-split__frame.is-loading { position: relative; }
+.affibloom-split__frame.is-loading .affibloom-preview-frame { opacity: 0.55; }
+.affibloom-split__frame.is-loading::after {
+	content: "";
+	position: absolute;
+	top: 24px;
+	left: 50%;
+	width: 24px;
+	height: 24px;
+	margin-left: -12px;
+	border: 3px solid var(--affibloom-line);
+	border-top-color: var(--affibloom-ink-600);
+	border-radius: 50%;
+	animation: affibloom-preview-spin 0.8s linear infinite;
+}
+@keyframes affibloom-preview-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.affibloom-split__frame.is-loading::after { animation: none; }
+}

@@ -888,6 +888,26 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC25 (Task 10D): Settings → Display draws the sample box with the unsaved settings, in a frame of its own, at
+	// desktop and phone width; links inert; a change redraws it without saving.
+	test( 'AC25 Settings → Display previews the sample box with unsaved settings', async ( { page } ) => {
+		useSiteDisplay();
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=display' );
+		const frame = page.frameLocator( 'iframe.affibloom-preview-frame' );
+		await expect( frame.locator( '.affibloom-title' ) ).toContainText( 'Essentialism: The Disciplined Pursuit of Less' );
+		await expect( frame.locator( '.affibloom-display' ) ).toHaveClass( /affibloom-lab/ );
+		await expect( frame.locator( 'a[href]' ) ).toHaveCount( 0 );
+
+		await page.selectOption( '#affibloom-display-theme', 'Cactus' );
+		await expect( frame.locator( '.affibloom-display' ) ).toHaveClass( /affibloom-cactus/ );
+		expect( JSON.parse( wp( 'option', 'get', 'affibloom_display', '--format=json' ) ).single.theme ).toBe( 'Lab' ); // not saved
+
+		await page.click( '[data-device="mobile"]' );
+		await expect( page.locator( '[data-preview-frame]' ) ).toHaveAttribute( 'data-device', 'mobile' );
+		const width = await page.locator( 'iframe.affibloom-preview-frame' ).evaluate( ( el ) => el.getBoundingClientRect().width );
+		expect( width ).toBeLessThanOrEqual( 390 );
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

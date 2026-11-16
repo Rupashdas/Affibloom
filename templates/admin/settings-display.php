@@ -87,7 +87,7 @@ $fields = array(
 									<?php endforeach; ?>
 								</nav>
 
-								<?php // Lasso's device segment. It edits the phone layout now, and sizes the preview from Task 10D. ?>
+								<?php // Lasso's device segment: it edits the phone layout and sizes the preview (Task 10D). ?>
 								<div class="affibloom-segment affibloom-segment--icons" role="group" aria-label="<?php esc_attr_e( 'Preview device width', 'affibloom' ); ?>" data-device-toggle hidden>
 									<button type="button" class="affibloom-segment__item is-active" data-device="desktop" aria-pressed="true" title="<?php esc_attr_e( 'Desktop (1280px)', 'affibloom' ); ?>">
 										<?php $this->render( 'admin/partials/icon', array( 'name' => 'desktop' ) ); ?>
@@ -102,7 +102,9 @@ $fields = array(
 
 							<div class="affibloom-split__preview">
 								<div class="affibloom-split__stage">
-									<div class="affibloom-split__frame">
+									<div class="affibloom-split__frame" data-preview-frame
+										data-preview-title="<?php esc_attr_e( 'Display preview', 'affibloom' ); ?>"
+										data-preview-error="<?php esc_attr_e( 'The preview could not be drawn. Try again.', 'affibloom' ); ?>">
 										<div class="affibloom-empty">
 											<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'tag' ) ); ?></span>
 											<p class="affibloom-empty__message"><?php esc_html_e( 'The box preview appears here.', 'affibloom' ); ?></p>

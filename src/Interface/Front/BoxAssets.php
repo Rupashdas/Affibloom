@@ -230,6 +230,29 @@ final class BoxAssets implements Module {
 	}
 
 	/**
+	 * The box's stylesheets with their versions, for a preview frame (Tasks 10D, 14E): box.css, and the advanced
+	 * stylesheet when the settings render advanced.
+	 *
+	 * @param bool $advanced Whether the preview renders advanced.
+	 * @return list<string>
+	 */
+	public function stylesheets( bool $advanced ): array {
+		$sheets = array( 'assets/front/box.css' );
+		if ( $advanced ) {
+			$sheets[] = 'assets/front/box-layout.css';
+		}
+
+		return array_map( fn( string $file ): string => add_query_arg( 'ver', $this->file_version( $file ), $this->url . $file ), $sheets );
+	}
+
+	/**
+	 * The phone-layout script with its version, for a preview frame (R48; Tasks 10D, 14E).
+	 */
+	public function phone_script(): string {
+		return add_query_arg( 'ver', $this->file_version( 'assets/front/box-layout.js' ), $this->url . 'assets/front/box-layout.js' );
+	}
+
+	/**
 	 * A file's version: its modification time, as Lasso versions its files (R42), so a changed file is fetched again.
 	 *
 	 * @param string $file The file, from the plugin's folder.

@@ -309,4 +309,23 @@ final class DisplaySettingsServiceTest extends TestCase {
 		self::assertSame( 'Cactus', $repo->get()->config( DisplayType::single() )->theme()->name() );
 		self::assertSame( 3, $repo->get()->columns() );
 	}
+
+	/**
+	 * F5 R96, D11 (Task 10D): the preview applies the form's unsaved values as Save would, and saves nothing.
+	 */
+	public function test_the_preview_applies_unsaved_values_without_saving(): void {
+		$repo    = $this->repository();
+		$preview = ( $this->service( $repo, false ) )->preview(
+			DisplayType::grid(),
+			array(
+				'theme'   => 'Money',
+				'density' => array( 'preset' => 'compact' ),
+			)
+		);
+
+		self::assertSame( 'Money', $preview->config( DisplayType::grid() )->theme()->name() );
+		self::assertSame( 'compact', $preview->config( DisplayType::grid() )->density()->preset_name() );
+		self::assertFalse( $preview->config( DisplayType::grid() )->elements()->visible( 'price' ) ); // follows Show Price
+		self::assertSame( DisplaySettings::defaults()->to_array(), $repo->stored->to_array() );
+	}
 }

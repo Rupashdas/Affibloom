@@ -125,7 +125,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 **F16, F5, F1, the live previews:**
 
-- [ ] Task 10D: Settings → Display — the live preview
+- [x] Task 10D: Settings → Display — the live preview
 - [ ] Task 14E: The product page — the live preview
 
 **C1, Amazon price and Prime in the box:**
@@ -1105,11 +1105,17 @@ inert; a spinner while loading; an error toast on failure.
 
 **Files:** create `src/Interface/Rest/DisplayPreviewController.php`, `src/Application/Display/PreviewProduct.php`; modify `src/Interface/Admin/DisplayScreen.php`, `assets/admin/display-settings.js`, `src/Plugin.php`, `tests/E2E/acceptance/F5.spec.ts` (AC25) and the F16 spec (AC2).
 
-- [ ] **Step 1: Failing test (AC25).**
-- [ ] **Step 2: Route and sample.**
-- [ ] **Step 3: Script.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Preview the Display settings on the real box".
+- [x] **Step 1: Failing test (AC25).**
+- [x] **Step 2: Route and sample.**
+- [x] **Step 3: Script.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Preview the Display settings on the real box".
+
+*Note:* the preview is an iframe written from the route's answer (HTML, stylesheets, the unsaved `:root` block, the phone
+script): the box's CSS cannot reach the admin (deviation 136), and the 390 px frame triggers the box's own phone rules.
+Grid and List preview their settings on the Single box until DT2/DT4 draw groups. The form's Save nonce is left out of
+the request (REST reads `_wpnonce`). The sample's product link is `https://example.com/essentialism` (inert). Elements
+are drawn as the unsaved settings render them (no "all drawn, hidden by script"). Checked signed in at 1280 and 390 px.
 
 ---
 

@@ -113,6 +113,7 @@ use Affibloom\Interface\Rest\GroupsController;
 use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductsController;
+use Affibloom\Interface\Rest\DisplayPreviewController;
 use Affibloom\Interface\Rest\SettingsRestController;
 use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
@@ -348,6 +349,7 @@ final class Plugin {
 		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector() );
 
 		$box_builder = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ) );
+		$box_html    = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
 
 		return array(
 			new ProductPostType(),
@@ -358,12 +360,13 @@ final class Plugin {
 				$display,
 				$this->settings_repository(),
 				$box_builder,
-				new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets ),
+				$box_html,
 				new PostTypeProductRepository(),
 				new OptionFieldRepository(),
 				new TableAmazonProductRepository()
 			),
 			$box_assets,
+			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
