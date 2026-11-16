@@ -105,7 +105,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18E: The 2-box themes and theme resolution
 - [x] Task 18F: The 6-box themes (Cactus, Money)
 - [x] Task 18G: Llama
-- [ ] Task 18H: Layout controls and the phone override on the box
+- [x] Task 18H: Layout controls and the phone override on the box
 - [ ] Task 18I: Density and typography on the box
 - [ ] Task 19A: Every button of the product in the box
 - [ ] Task 20A: Per-box overrides — text and image
@@ -520,10 +520,14 @@ every box accordingly; phones below 768 px show the phone layout.
 
 **Files:** modify `assets/front/box-layout.css`, `tests/E2E/acceptance/F5.spec.ts` (AC11) and the F16 spec's front-end rows (AC6, AC7).
 
-- [ ] **Step 1: Failing tests** (AC11 matrix from `themes/`).
-- [ ] **Step 2: CSS port.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Apply the Display layout to the box".
+- [x] **Step 1: Failing tests** (AC11 matrix from `themes/`).
+- [x] **Step 2: CSS port.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Apply the Display layout to the box".
+
+*Note:* checked beside Lasso's own box on Local (a pair page per state, every element's box and style): all 11 layout
+groups plus the site's settings, 8 themes, plain and badge, 1280 and 390 px, equal. AC11 draws the matrix's `full`
+cells (block attributes of 20A-20C), so it passes only once 19A-22C exist (phase exit); F16 AC6/AC7 got a front-end test.
 
 ---
 

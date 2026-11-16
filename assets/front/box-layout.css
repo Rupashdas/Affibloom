@@ -147,6 +147,9 @@
 	flex: 1 1 100%;
 	width: 100%;
 }
+/* Stacked: every box takes the card's width (Lasso's lines 995-1035; the 2-box and 6-box themes from Task 18H). */
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"]:is(.affibloom-cactus, .affibloom-money, .affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-1,
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"]:is(.affibloom-cactus, .affibloom-money, .affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2,
 .affibloom-display.affibloom-advanced[data-layout-orientation="stacked"].affibloom-lab .affibloom-box-1,
 .affibloom-display.affibloom-advanced[data-layout-orientation="stacked"].affibloom-llama .affibloom-box-1,
 .affibloom-display.affibloom-advanced[data-layout-orientation="stacked"].affibloom-lab .affibloom-box-2,
@@ -239,7 +242,8 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	display: none !important;
 }
 .affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1,
-.affibloom-display.affibloom-advanced[data-layout-image-position="top"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1 {
+.affibloom-display.affibloom-advanced[data-layout-image-position="top"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1,
+.affibloom-display.affibloom-advanced[data-layout-image-position="top"].affibloom-lab:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-1 .affibloom-image {
 	margin-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
 }
 .affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-flow:not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-2 {
@@ -280,10 +284,81 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 }
 /* Lasso's stacked spacing (#5891, lines 1311-1315): the image at the bottom keeps a gap above it, and the buttons'
    row keeps one above it in either orientation (not inside a grid row). */
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-1,
 .affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-lab .affibloom-box-1 .affibloom-image,
 .affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-llama .affibloom-box-1 .affibloom-image,
 .affibloom-display.affibloom-advanced[data-layout-orientation].affibloom-lab:not(.affibloom-grid-row *) .affibloom-box-2 {
 	margin-top: var(--affibloom-density-space-between) !important;
+}
+/* Stacked with the image at the bottom, 2-box (Lasso's lines 1317-1420): the copy box is unwrapped so the order is
+   copy, image, buttons, footer, as the other themes show it. */
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) {
+	display: flex !important;
+	flex-flow: row wrap !important;
+	align-items: flex-start !important;
+	column-gap: 8px;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 {
+	display: contents !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > * {
+	order: 1 !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > :not(a.affibloom-button-1, a.affibloom-button-2) {
+	flex: 0 0 100% !important;
+	max-width: 100% !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > .affibloom-clear {
+	display: none !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-1 {
+	order: 2 !important;
+	flex: 0 0 100% !important;
+	max-width: 100% !important;
+	margin-top: var(--affibloom-density-space-between) !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > :is(a.affibloom-button-1, a.affibloom-button-2) {
+	order: 3 !important;
+	flex: 0 0 auto !important;
+	float: none !important;
+	margin-top: var(--affibloom-density-space-between) !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 {
+	order: 5 !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > .affibloom-end {
+	order: 6 !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *):has(> .affibloom-badge) .affibloom-box-2 > :first-child {
+	margin-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"]:is([data-layout-button-align="spread"], [data-layout-button-align="left"]):is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) {
+	justify-content: flex-start !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-button-align="center"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) {
+	justify-content: center !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-button-align="right"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) {
+	justify-content: flex-end !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-geek:not(.affibloom-grid-row *) .affibloom-box-2::after {
+	content: "";
+	flex: 0 0 100%;
+	height: 0;
+	order: 4;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"].affibloom-geek:not(.affibloom-grid-row *) .affibloom-box-2 > :is(a.affibloom-button-1, a.affibloom-button-2) {
+	flex: 0 1 100% !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-cta-width="full"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > :is(a.affibloom-button-1, a.affibloom-button-2) {
+	flex: 0 0 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+.affibloom-display.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"][data-layout-cta-width="full"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash):not(.affibloom-grid-row *) .affibloom-box-2 > a.affibloom-button-2 {
+	margin-top: 6px !important;
 }
 @media (max-width: 767.98px) {
 	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"].affibloom-lab .affibloom-box-2 {
@@ -404,13 +479,6 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	grid-column: 1;
 	grid-row: 1 / span 20;
 	align-self: start;
-}
-.affibloom-display.affibloom-advanced[data-layout-image-position="right"].affibloom-lab .affibloom-badge ~ .affibloom-box-1,
-.affibloom-display.affibloom-advanced[data-layout-image-position="right"].affibloom-llama .affibloom-badge ~ .affibloom-box-1,
-.affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-lab .affibloom-badge ~ .affibloom-box-1,
-.affibloom-display.affibloom-advanced[data-layout-image-position="bottom"].affibloom-lab .affibloom-badge ~ .affibloom-box-1,
-.affibloom-display.affibloom-advanced[data-layout-image-position="bottom"].affibloom-llama .affibloom-badge ~ .affibloom-box-1 {
-	padding-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
 }
 .affibloom-advanced .affibloom-price,
 .affibloom-advanced .affibloom-end {
@@ -599,9 +667,9 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 		text-align: right !important;
 	}
 }
-/* Centred buttons on a 6-box card (the phone layout's): both buttons in one row, centred together, with the disclosure
-   and the date in the row under them (a zero-height flex item breaks the row). */
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money)::before {
+/* Grouped buttons on a 6-box card (left, centre or right; Lasso's lines 1776-1957): both buttons in one row, placed
+   together, with the disclosure and the date in the row under them (a zero-height flex item breaks the row). */
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money)::before {
 	content: "";
 	flex-basis: 100%;
 	width: 0;
@@ -609,15 +677,19 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	overflow: hidden;
 	order: 15;
 }
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-3,
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-3,
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
 	flex: 0 0 auto !important;
 	max-width: none !important;
 	width: auto !important;
 	order: 10;
 	text-align: left !important;
 }
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-3 {
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
+	order: 11;
+	margin-left: 8px !important;
+}
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-3 {
 	margin-left: auto !important;
 }
 .affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
@@ -625,21 +697,21 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	margin-right: auto !important;
 	margin-left: 8px !important;
 }
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-5 {
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-5 {
 	flex: 0 0 50% !important;
 	max-width: 50% !important;
 	width: 50% !important;
 	order: 20;
 	text-align: left !important;
 }
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-6 {
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-6 {
 	flex: 0 0 50% !important;
 	max-width: 50% !important;
 	width: 50% !important;
 	order: 21;
 	text-align: right !important;
 }
-.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) a.affibloom-button-2 {
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) a.affibloom-button-2 {
 	float: none !important;
 }
 /* A hidden timestamp hides the 6-box date box (Lasso's line 1966; the other element rules are Task 18J's). */
@@ -676,20 +748,33 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 		order: 41 !important;
 		margin-top: 4px !important;
 	}
-	/* Two grouped buttons do not fit one phone row: each takes the row, the second 8px under the first. */
-	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-3,
-	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
+	/* Two grouped buttons do not fit one phone row: each takes the row, the second 8px under the first, aligned
+	   (Lasso's lines 3117-3169). */
+	.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-3,
+	.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
 		flex: 0 0 100% !important;
 		max-width: 100% !important;
 		width: 100% !important;
 		margin-left: 0 !important;
 		margin-right: 0 !important;
 	}
-	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
+	.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
 		margin-top: 8px !important;
 	}
-	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-3,
-	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-4 {
+	.affibloom-display.affibloom-advanced[data-layout-button-align="left"]:is(.affibloom-cactus, .affibloom-money) :is(.affibloom-box-3, .affibloom-box-4) {
+		text-align: left !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-button-align="center"]:is(.affibloom-cactus, .affibloom-money) :is(.affibloom-box-3, .affibloom-box-4) {
 		text-align: center !important;
 	}
+	.affibloom-display.affibloom-advanced[data-layout-button-align="right"]:is(.affibloom-cactus, .affibloom-money) :is(.affibloom-box-3, .affibloom-box-4) {
+		text-align: right !important;
+	}
+}
+/* The ribbon starts at the card's top edge, so with the image on the right (or at the bottom) the copy box clears what
+   the card's padding does not (Lasso's lines 2472-2509; after the phone rules, which it overrides as Lasso's does). */
+.affibloom-display.affibloom-advanced:is([data-layout-image-position="right"], [data-layout-image-position="bottom"]):is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-badge ~ .affibloom-box-2,
+.affibloom-display.affibloom-advanced:is([data-layout-image-position="right"], [data-layout-image-position="bottom"]):is(.affibloom-cactus, .affibloom-money, .affibloom-lab, .affibloom-llama) .affibloom-badge ~ .affibloom-box-1,
+.affibloom-display.affibloom-advanced[data-layout-image-position="left"].affibloom-lab .affibloom-badge ~ .affibloom-box-1 {
+	padding-top: max(0px, calc(var(--affibloom-badge-reserve, 38px) - var(--affibloom-density-padding, 10px))) !important;
 }

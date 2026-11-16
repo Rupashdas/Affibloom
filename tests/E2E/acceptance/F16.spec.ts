@@ -175,6 +175,32 @@ test.describe( 'F16 Display system', () => {
 		expect( list.mobile ).toBeUndefined();
 	} );
 
+	// AC6, AC7 on the front end (Task 18H): the saved layout reaches the reader's box; the phone layout only below 768 px.
+	test( 'AC6 AC7 a saved layout and its phone override change the box on the front end', async ( { page } ) => {
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( {
+			columns: 3,
+			single: { theme: 'Cactus', layout: { orientation: 'stacked', imagePosition: 'top', buttonAlign: 'left', mobile: { orientation: 'side-by-side', imagePosition: 'left' } } },
+		} ), '--format=json' );
+		const path = newPostWith( boxBlock( createProduct( { name: 'F16 AC6 front' } ) ) );
+		const display = page.locator( '.affibloom-display' );
+
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await page.goto( path );
+		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'stacked' );
+		const card = ( await display.boundingBox() )!;
+		const copy = ( await display.locator( '> .affibloom-box-1' ).boundingBox() )!;
+		const image = ( await display.locator( '> .affibloom-box-2' ).boundingBox() )!;
+		expect( image.y ).toBeLessThan( copy.y ); // image on top, both the card's width
+		expect( copy.width ).toBeGreaterThan( card.width * 0.8 );
+
+		await page.setViewportSize( { width: 390, height: 900 } );
+		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'side-by-side' );
+		await expect( display ).toHaveAttribute( 'data-layout-button-align', 'center' ); // phones centre the buttons (R56)
+		await expect( display ).toHaveAttribute( 'data-layout-cta-width', 'full' ); // untouched key follows desktop
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'stacked' );
+	} );
+
 	const storedSettings = (): Record< string, any > => JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) );
 
 	test( 'AC9 the disclosure and behaviour settings save, and the Disclosure row follows its scope', async ( { page } ) => {

@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
-import { matrixFiles, THEMES } from '../../../tools/baselines-themes-matrix';
+import { FAMILIES, GROUPS, matrixFiles, THEMES, type GroupSettings } from '../../../tools/baselines-themes-matrix';
 import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp, type ProductFields } from '../utils';
 
 // F5 Box design (docs/features/F5/requirements.md).
@@ -141,6 +141,48 @@ async function matchesThemeBaseline( page: Page, path: string, cell: string ): P
 		await onBaselineSubpixel( page, THEME_TOP[ cell ][ name ] );
 		await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'site', `${ cell }-${ name }.png` ] );
 	}
+}
+
+// The matrix's `full` state (tools/baselines-themes-matrix.ts) as the box block's attributes (Tasks 20A-20C: one
+// mapping from Lasso's names, BoxOverrides), so a group's cell is drawn as Lasso drew it.
+const FULL_ATTRIBUTES = {
+	badge: 'Our Pick',
+	rating: '4.5',
+	pros: 'Light and quick off the floor.-br-A wide, stable base for lateral moves.',
+	cons: 'Runs half a size small.',
+	secondaryUrl: 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20',
+	secondaryText: 'Check Price',
+};
+
+/**
+ * The box at `path` matches `themes/<cell>-<desktop|mobile>.png` with the site's CSS. The group pages' box offsets
+ * were not measured (THEME_TOP holds the `site` page's): if text rasterisation alone fails a cell, measure them as
+ * deviation 138 did.
+ */
+async function matchesGroupBaseline( page: Page, path: string, cell: string ): Promise< void > {
+	for ( const [ name, width ] of [ [ 'desktop', 1280 ], [ 'mobile', 390 ] ] as const ) {
+		await page.setViewportSize( { width, height: 900 } );
+		await page.goto( path );
+		await page.addStyleTag( { content: SITE_CSS } );
+		await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', ...cell.split( '/' ).slice( 0, -1 ), `${ cell.split( '/' ).pop() }-${ name }.png` ] );
+	}
+}
+
+/** The site's Single settings with a matrix group's changes (its GroupSettings): elements replace, layout merges. */
+function useGroupDisplay( settings: GroupSettings ): void {
+	useSiteDisplay();
+	const stored = JSON.parse( wp( 'option', 'get', 'affibloom_display', '--format=json' ) );
+	const single = stored.single;
+	if ( settings.elements ) {
+		single.elements = settings.elements;
+	}
+	if ( settings.layout ) {
+		single.layout = { ...single.layout, ...settings.layout };
+	}
+	if ( settings.density ) {
+		single.density = { values: {}, ...settings.density };
+	}
+	wp( 'option', 'update', 'affibloom_display', JSON.stringify( stored ), '--format=json' );
 }
 
 // The site's Display settings for Single (F5 requirements, "This copy, 2026-11-14"), as Settings → Display stores them,
@@ -449,6 +491,24 @@ test.describe( 'F5 Box design', () => {
 			await matchesThemeBaseline( page, path, `Llama-${ state }` );
 		}
 	} );
+
+	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
+	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
+	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element
+	// beside Lasso's own box for the plain and badge states of all 8 themes).
+	for ( const group of GROUPS.filter( ( g ) => g.id.startsWith( 'layout-' ) ) ) {
+		test( `@local AC11 the ${ group.id } layout matches Lasso's boxes`, async ( { page } ) => {
+			useGroupDisplay( group.settings );
+			try {
+				for ( const theme of FAMILIES ) {
+					const path = newPostWith( boxBlock( themeProduct( 'plain', theme ), FULL_ATTRIBUTES ) );
+					await matchesGroupBaseline( page, path, `${ group.id }/${ theme }-full` );
+				}
+			} finally {
+				useSiteDisplay();
+			}
+		} );
+	}
 
 	// AC8: a product's Display Theme in any casing works; an unknown one draws Cactus (R3). The box's own `theme` is the
 	// block attribute of Task 20B (unit-tested in ThemeResolverTest until then).
