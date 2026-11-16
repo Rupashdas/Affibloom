@@ -73,9 +73,9 @@ final class DisplayPresentation {
 	/**
 	 * The wrapper's attributes, in Lasso's order, ending with `style`.
 	 *
-	 * @param DisplayConfig $config           The display type's settings.
-	 * @param int           $columns          The grid's column count (site-wide).
-	 * @param bool          $disclosure_shown Whether this box shows its disclosure (R25).
+	 * @param DisplayConfig     $config           The display type's settings.
+	 * @param int               $columns          The grid's column count (site-wide).
+	 * @param bool              $disclosure_shown Whether this box shows its disclosure (R25).
 	 * @param list<string>|null $hidden       The hidden elements as the box decides them (ElementVisibility: the switches,
 	 *                                        the box's hides and a product's own Show Price, R28, R60); null: the switches.
 	 * @return array<string, string>

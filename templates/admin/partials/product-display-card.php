@@ -10,11 +10,12 @@
  * answer (C1D), which Lasso stores at once.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, choices: \Affibloom\Interface\Admin\IconChoices} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, choices: \Affibloom\Interface\Admin\IconChoices, amazon_row: \Affibloom\Domain\Amazon\AmazonProduct|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Domain\Amazon\ShownPrice;
 use Affibloom\Domain\Product\ProductType;
 
 $product   = $view['product'];
@@ -162,7 +163,8 @@ $editor = static fn( int $height ): array => array(
 			</div>
 			<?php if ( $is_amazon ) : ?>
 				<?php // Lasso: "Can't change the price of an Amazon Product"; its price comes from the Amazon API (C1). ?>
-				<input type="text" class="affibloom-input" id="affibloom-price" name="price" value="<?php echo esc_attr( wp_strip_all_tags( $product->price ) ); ?>"
+				<?php // C1F: the price the box shows, from the stored Amazon data (R48, N3). ?>
+				<input type="text" class="affibloom-input" id="affibloom-price" name="price" value="<?php echo esc_attr( ShownPrice::of( $view['amazon_row'], new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ) )->price ); ?>"
 					placeholder="$99.99" aria-describedby="affibloom-price-help" readonly>
 				<p class="affibloom-field__hint">
 					<?php esc_html_e( 'Amazon prices updated via', 'affibloom' ); ?>

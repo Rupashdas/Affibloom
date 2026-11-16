@@ -12,6 +12,9 @@ namespace Affibloom\Application\Box;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonUrl;
+use Affibloom\Domain\Amazon\ShownPrice;
+use DateTimeImmutable;
+use DateTimeZone;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
 use Affibloom\Domain\Box\DisclosureRule;
@@ -51,13 +54,22 @@ final class BoxBuilder {
 	private readonly ?\Closure $post_of_url;
 
 	/**
+	 * The current moment, for the age of stored Amazon prices; null is now.
+	 *
+	 * @var \Closure(): DateTimeImmutable|null
+	 */
+	private readonly ?\Closure $clock;
+
+	/**
 	 * Builds the engine.
 	 *
-	 * @param string                     $default_thumbnail Affibloom's own picture for a product without one (F5 D14).
-	 * @param \Closure(string): int|null $post_of_url       Which post a URL points to, for the self-link check (R40).
+	 * @param string                             $default_thumbnail Affibloom's own picture for a product without one (F5 D14).
+	 * @param \Closure(string): int|null         $post_of_url       Which post a URL points to, for the self-link check (R40).
+	 * @param \Closure(): DateTimeImmutable|null $clock     The current moment (tests); null is now.
 	 */
-	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null ) {
+	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null, ?\Closure $clock = null ) {
 		$this->post_of_url = $post_of_url;
+		$this->clock       = $clock;
 	}
 
 	/**
@@ -75,7 +87,15 @@ final class BoxBuilder {
 		$config = $display->config( DisplayType::single() );
 		// R28 reads the Show Price saved on the product, not the box's `price`.
 		$stored_show_price = $product->show_price;
-		$product           = self::applied( $product, $overrides );
+		// C1 R48, N3: an Amazon product's price is the stored Amazon data's, when Amazon's API gave it within 24 hours;
+		// the box's `price` replaces it after (Lasso's order).
+		$amazon_discount = '';
+		if ( ProductType::Amazon === $product->type ) {
+			$shown           = ShownPrice::of( $amazon, null === $this->clock ? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ) : ( $this->clock )() );
+			$product         = $product->with( array( 'price' => $shown->price ) );
+			$amazon_discount = $shown->discount;
+		}
+		$product = self::applied( $product, $overrides );
 		// R3, R65: the Single type's theme, then the product's own, then the box's.
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, $overrides->theme );
 		$id    = (int) $product->id;
@@ -99,8 +119,10 @@ final class BoxBuilder {
 		// R78: the box's `prime` shows Prime whatever the product.
 		$prime = $overrides->prime || PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
 		$price = PriceRule::prints( $product->price, $product->show_price, $settings->bool( 'show_price' ) ) ? $product->price : '';
-		// R74, R21: the box's basis price, struck through, printed with the price while Show Discount Pricing is on.
-		$discount = '' !== $overrides->basis_price && '' !== $price && $settings->bool( 'show_discount_pricing' ) ? $overrides->basis_price : '';
+		// R74, R21, C1 R51: the box's basis price, else Amazon's, struck through with the price while Show Discount Pricing
+		// is on.
+		$basis    = '' !== $overrides->basis_price ? $overrides->basis_price : $amazon_discount;
+		$discount = '' !== $basis && '' !== $price && $settings->bool( 'show_discount_pricing' ) ? $basis : '';
 
 		// R13: the SiteStripe card replaces the theme's layout while the site keeps the SiteStripe UI.
 		$sitestripe = $overrides->sitestripe && $settings->bool( 'keep_site_stripe_ui' );

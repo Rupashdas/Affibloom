@@ -264,6 +264,7 @@ $soon_tabs   = array(
 						'amazon_tab'  => $view['amazon_tab'],
 						'can_refresh' => $view['can_refresh'],
 						'choices'     => $view['choices'],
+						'amazon_row'  => $view['amazon_row'],
 					)
 				);
 				?>

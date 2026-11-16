@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, createProduct, setSettings, wp } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
 
 // C1 Amazon product data (docs/features/C1/requirements.md, AC1-AC20). Tests never call Amazon: the test-only stub
 // tests/E2E/amazon-stub.php, which affibloom.php loads on a local site only, answers the Creators API's hosts with
@@ -140,6 +140,30 @@ test.describe( 'C1 Amazon product data', () => {
 	} );
 
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
+
+	// AC11 (Task C1F): the box shows the stored Amazon price (Amazon's API within 24 hours, decision E6), the struck basis
+	// with Show Discount Pricing, the timestamp where Lasso shows it, and the product page's read-only price matches.
+	test( 'AC11 the box shows the stored Amazon price, the struck basis and the timestamp; the product page matches', async ( { page } ) => {
+		const asin = 'B0C1FTEST1';
+		wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . 'affibloom_amazon_products', array( 'asin' => '${ asin }', 'country' => 'us', 'price' => '$37.41', 'currency' => 'USD', 'base_url' => '', 'monetized_url' => '', 'image' => '', 'features' => '[]', 'savings_basis' => '$70.00', 'price_amount' => 37.41, 'basis_amount' => 70.00, 'source' => 'creators', 'last_updated' => gmdate( 'Y-m-d H:i:s' ) ) );` );
+		const id = createProduct( { name: 'C1 AC11', type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20`, show_price: '1', price: '$99.99' } );
+		setSettings( { show_discount_pricing: true } );
+		try {
+			await page.goto( newPostWith( boxBlock( id ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-latest-price' ) ).toHaveText( '$37.41' );
+			await expect( page.locator( '.affibloom-box .affibloom-discount-price strike' ) ).toHaveText( '$70.00' );
+
+			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+			await expect( page.locator( '#affibloom-price' ) ).toHaveValue( '$37.41' );
+		} finally {
+			setSettings( { show_discount_pricing: false } );
+		}
+
+		// A row older than 24 hours shows no price.
+		wp( 'eval', `global $wpdb; $wpdb->update( $wpdb->prefix . 'affibloom_amazon_products', array( 'last_updated' => gmdate( 'Y-m-d H:i:s', time() - 2 * DAY_IN_SECONDS ) ), array( 'asin' => '${ asin }', 'country' => 'us' ) );` );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		await expect( page.locator( '.affibloom-box .affibloom-price-value' ) ).toHaveCount( 0 );
+	} );
 
 	test( 'AC1 with valid credentials, an added Amazon link takes its name and image from Amazon (C1C)', async ( { page } ) => {
 		credentials( valid );

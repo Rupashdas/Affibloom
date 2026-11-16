@@ -130,7 +130,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 
 **C1, Amazon price and Prime in the box:**
 
-- [ ] Task C1F: Price, discount and timestamp
+- [x] Task C1F: Price, discount and timestamp
 - [ ] Task C1G: Prime by Lasso's rule
 
 **F31, Affibloom's own shortcode (single-product parts):**
@@ -1173,11 +1173,16 @@ Checked signed in: typing the badge and a theme change redraw it; nothing stored
 
 **Files:** box templates, `BoxBuilder.php`, `ProductScreen.php`; `PriceFormatTest.php`, `DiscountPriceTest.php`; `C1.spec.ts` AC11; baseline check.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain.**
-- [ ] **Step 3: Box and page.**
-- [ ] **Step 4: Run and look** (pixel baselines).
-- [ ] **Step 5: Commit** — "Show Amazon price, discount and time as Lasso does".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain.**
+- [x] **Step 3: Box and page.**
+- [x] **Step 4: Run and look** (pixel baselines).
+- [x] **Step 5: Commit** — "Show Amazon price, discount and time as Lasso does".
+
+*Note:* `Domain\Amazon\{PriceFormat, DiscountPrice, ShownPrice}`; `ShownPrice` (not an `AmazonPriceView`) carries E6:
+only a `creators` row younger than 24 h shows a price, so an Amazon product's migrated `price` meta never shows. The
+timestamp came with 22C. The box's `basisPrice` wins over Amazon's basis. Found the 22A wrapper bug (R28) while looking;
+fixed in its own commit. Checked at 1280 px with a seeded fresh row.
 
 ---
 

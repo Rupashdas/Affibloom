@@ -4,6 +4,7 @@ namespace Affibloom\Tests\Unit\Application\Box;
 use Affibloom\Application\Box\BoxBuilder;
 use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\BoxView;
+use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Display\DisplaySettings;
@@ -184,9 +185,11 @@ final class BoxBuilderTest extends TestCase {
 		self::assertFalse( $no_prime->prime );
 		self::assertFalse( $no_prime->price_block );
 
+		// A product that is not Amazon's prints its own price (C1F: an Amazon product's comes from its Amazon data).
 		$priced = self::build(
 			self::product(
 				array(
+					'type'       => ProductType::Other,
 					'prime'      => false,
 					'price'      => '$59.99',
 					'show_price' => true,
@@ -437,8 +440,8 @@ final class BoxBuilderTest extends TestCase {
 		self::assertNull( $view->date ); // no price printed
 		self::assertFalse( $view->image_hidden );
 
-		$priced = self::build( self::product( array( 'price' => '$89.99', 'show_price' => true ) ), $classic );
-		self::assertSame( '', $priced->date ); // shown, no Amazon data yet
+		$priced = self::build( self::product( array( 'type' => ProductType::Other, 'price' => '$89.99', 'show_price' => true ) ), $classic );
+		self::assertNull( $priced->date ); // not an Amazon product (C1F's test covers an Amazon one)
 
 		$hidden = ( new BoxBuilder( self::THUMBNAIL ) )->build( self::product(), $classic, self::settings(), BoxOverrides::from_block( array( 'productId' => 14727, 'hideImage' => true ) ) );
 		self::assertTrue( $hidden->image_hidden );
@@ -525,8 +528,8 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( '$79.99', $value->price );
 		self::assertSame( '$99.99', $value->discount );
 		self::assertSame( '', $box( array( 'price' => '$79.99', 'basisPrice' => '$99.99' ) )->discount ); // the setting is off
-		self::assertSame( '', $box( array( 'price' => 'hide' ), array(), self::product( array( 'price' => '$5' ) ), array( 'show_price' => true ) )->price );
-		self::assertSame( '$5', $box( array( 'price' => 'show' ), array(), self::product( array( 'price' => '$5', 'show_price' => false ) ) )->price );
+		self::assertSame( '', $box( array( 'price' => 'hide' ), array(), self::product( array( 'type' => ProductType::Other, 'price' => '$5' ) ), array( 'show_price' => true ) )->price );
+		self::assertSame( '$5', $box( array( 'price' => 'show' ), array(), self::product( array( 'type' => ProductType::Other, 'price' => '$5', 'show_price' => false ) ) )->price );
 		self::assertTrue( $box( array( 'prime' => true ), array(), self::product( array( 'type' => ProductType::Other, 'prime' => false ) ) )->prime );
 
 		self::assertSame( '3.0', $box( array( 'rating' => '3' ), array( array( 'field' => 1, 'value' => '4.5' ) ) )->stars->value );
@@ -560,5 +563,43 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( array( 'style' => 'width:300px;' ), $box( array( 'sitestripe' => true, 'sitestripeStyle' => 'width:300px;' ), true )->wrapper );
 		self::assertSame( LayoutFamily::ThreeBox, $box( array( 'sitestripe' => true ), false )->family );
 		self::assertTrue( BoxOverrides::from_shortcode( array( 'sitestripe' => 'true' ) )->sitestripe );
+	}
+
+	/**
+	 * C1 R48, R51, N3 (Task C1F): an Amazon product's price and struck basis come from its Amazon data when Amazon's API
+	 * gave it within 24 hours; older or migrated data shows no price; the classic box then shows the timestamp.
+	 */
+	public function test_an_amazon_price_comes_from_fresh_amazon_data(): void {
+		$row = static fn( string $updated, string $source = 'creators' ): AmazonProduct => new AmazonProduct(
+			'B0D2JFK15W', 'us', 'Ligra', '$37.41', 'USD', '', '', '', false, '$32.59', 46, '$70.00', array(), $source, $updated, true, 37.41, 70.0
+		);
+		$builder = new BoxBuilder( self::THUMBNAIL, null, static fn(): \DateTimeImmutable => new \DateTimeImmutable( '2026-11-16 12:00:00', new \DateTimeZone( 'UTC' ) ) );
+		$build   = static fn( AmazonProduct $amazon, array $settings = array(), ?DisplaySettings $display = null ): BoxView => $builder->build(
+			self::product( array( 'price' => '$99 (migrated)', 'show_price' => true ) ),
+			$display ?? self::display(),
+			self::settings( $settings ),
+			BoxOverrides::from_block( array( 'productId' => 14727 ) ),
+			0,
+			null,
+			$amazon
+		);
+
+		$fresh = $build( $row( '2026-11-16 01:00:00' ), array( 'show_discount_pricing' => true ) );
+		self::assertSame( '$37.41', $fresh->price );
+		self::assertSame( '$70.00', $fresh->discount );
+		self::assertSame( '', $build( $row( '2026-11-16 01:00:00' ) )->discount ); // Show Discount Pricing off
+		self::assertSame( '', $build( $row( '2026-11-15 11:00:00' ) )->price ); // older than 24 hours
+		self::assertSame( '', $build( $row( '2026-11-16 01:00:00', 'lasso' ) )->price ); // migrated
+		self::assertSame( '11/16/2026 01:00 am GMT', $build( $row( '2026-11-16 01:00:00' ), array(), DisplaySettings::defaults()->with_advanced( false ) )->date );
+	}
+
+	/**
+	 * F5 R28 (Task 22A, fixed in C1F): a product's own Show Price lifts the site's hidden Price element on the wrapper.
+	 */
+	public function test_a_products_own_show_price_lifts_the_hidden_price_element(): void {
+		$display = DisplaySettings::from_array( array( 'single' => array( 'theme' => 'Lab', 'elements' => array( 'price' => false ) ) ) );
+
+		self::assertArrayNotHasKey( 'data-hide-price', self::build( self::product( array( 'type' => ProductType::Other, 'price' => '$5', 'show_price' => true ) ), $display )->wrapper );
+		self::assertSame( '1', self::build( self::product( array( 'type' => ProductType::Other, 'price' => '$5' ) ), $display )->wrapper['data-hide-price'] );
 	}
 }
