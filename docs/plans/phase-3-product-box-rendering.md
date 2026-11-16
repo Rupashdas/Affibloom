@@ -140,7 +140,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S3: Value overrides
 - [x] Task 18S4: `type="button"` and `type="image"`
 - [x] Task 18S5: `type="link"`, SiteStripe and inline fields
-- [ ] Task 18S6: Address a product by its Amazon URL or destination
+- [x] Task 18S6: Address a product by its Amazon URL or destination
 - [ ] Task 18S9: Boxes in widgets, on AMP pages and in feeds
 - [ ] Task 18S10: The Dashboard row's Shortcode button
 - [ ] Task 18S11: The Share kit's Copy shortcode
@@ -1422,10 +1422,13 @@ ASIN and country; `geni_url="<destination>"` the product with that destination; 
 
 **Files:** the above; F31 **AC6**; `AddressTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Lookups.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Find a box's product by its Amazon URL or destination".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Lookups.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Find a box's product by its Amazon URL or destination".
+
+*Note:* the repository already had `find_amazon()` and `find_by_url_key()` (published only), so no `by_asin()`/
+`by_destination()`; `ShortcodeRenderer` tries them only when the slug and ID found nothing. Seen on Local with `wp eval`.
 
 ---
 

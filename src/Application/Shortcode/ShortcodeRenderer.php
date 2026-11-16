@@ -21,6 +21,8 @@ use Affibloom\Domain\Amazon\ShownPrice;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Fields\FieldRepository;
+use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
@@ -58,6 +60,37 @@ final class ShortcodeRenderer {
 		private readonly SettingsRepository $settings,
 		private readonly BoxBuilder $builder,
 	) {}
+
+	/**
+	 * The published product an `amazon_url` (its ASIN and store) or a `geni_url` (its destination) names, or null (A6, A7).
+	 *
+	 * @param string $amazon_url  An Amazon link; '' none.
+	 * @param string $destination A destination; '' none.
+	 */
+	private function by_link( string $amazon_url, string $destination ): ?Product {
+		if ( '' !== $amazon_url ) {
+			try {
+				$amazon = AmazonUrl::from( AffiliateUrl::from_string( $amazon_url ) );
+			} catch ( InvalidField ) {
+				$amazon = null;
+			}
+			if ( null !== $amazon && '' !== $amazon->asin() ) {
+				$found = $this->catalog->find_amazon( $amazon->asin(), $amazon->country() );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		if ( '' !== $destination ) {
+			try {
+				return $this->catalog->find_by_url_key( AffiliateUrl::from_string( $destination )->key() );
+			} catch ( InvalidField ) {
+				return null;
+			}
+		}
+
+		return null;
+	}
 
 	/**
 	 * One inline value's data (F31 R11; Lasso's aawp/fields.php): the part and its plain value, or for `thumb` its picture
@@ -115,12 +148,10 @@ final class ShortcodeRenderer {
 	 * @param int            $post_id The post it is in (0 outside one).
 	 */
 	public function view( DisplayRequest $request, int $number, int $post_id ): ?BoxView {
-		$id = '' === $request->address->slug ? null : $this->catalog->id_by_slug( $request->address->slug );
-		$id = $id ?? $request->address->id;
-		if ( $id <= 0 ) {
-			return null;
-		}
-		$product = $this->products->product( $id );
+		$id      = '' === $request->address->slug ? null : $this->catalog->id_by_slug( $request->address->slug );
+		$id      = $id ?? $request->address->id;
+		$product = $id > 0 ? $this->products->product( $id ) : null;
+		$product = $product ?? $this->by_link( $request->address->amazon_url, $request->address->destination );
 		if ( null === $product ) {
 			return null;
 		}

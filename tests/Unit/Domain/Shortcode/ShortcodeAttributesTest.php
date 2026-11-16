@@ -44,6 +44,11 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertSame( 42, $address->id );
 		self::assertSame( 'ligra-kids', $address->slug );
 		self::assertSame( 0, Address::of( array( 'id' => 'abc' ) )->id );
+
+		// A6, A7 (Task 18S6): an Amazon link and a destination, trimmed.
+		$by_link = Address::of( array( 'amazon_url' => ' https://www.amazon.com/dp/B0D2JFK15W ', 'geni_url' => ' https://example.com/x ' ) );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W', $by_link->amazon_url );
+		self::assertSame( 'https://example.com/x', $by_link->destination );
 	}
 
 	/**

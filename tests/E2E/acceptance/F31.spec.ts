@@ -123,4 +123,16 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( page.locator( '.affibloom-display.sitestripe' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.affibloom-box .affibloom-display' ) ).toHaveCount( 1 );
 	} );
+
+	// AC6 (Task 18S6): amazon_url finds the published product with that ASIN and store, geni_url the one with that
+	// destination; the ID and slug come first; none draws nothing.
+	test( 'AC6 [affibloom amazon_url] and [affibloom geni_url] find the product', async ( { page } ) => {
+		const amazon = createProduct( { name: 'F31 AC6 amazon', type: 'amazon', asin: 'B0F31AC601', url: 'https://www.amazon.com/dp/B0F31AC601?tag=vbvault-20' } );
+		createProduct( { name: 'F31 AC6 other', url: 'https://www.example.com/f31-ac6' } );
+		await page.goto( newPostWith( '[affibloom amazon_url="https://www.amazon.com/Some-Name/dp/B0F31AC601/ref=x"][affibloom geni_url="https://www.example.com/f31-ac6"][affibloom amazon_url="https://www.amazon.co.uk/dp/B0F31AC601"][affibloom geni_url="https://www.example.com/none"]' ) );
+		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 2 );
+		await expect( page.locator( '.affibloom-box' ).nth( 0 ).locator( '.affibloom-title' ) ).toContainText( 'F31 AC6 amazon' );
+		await expect( page.locator( '.affibloom-box' ).nth( 1 ).locator( '.affibloom-title' ) ).toContainText( 'F31 AC6 other' );
+		await expect( page.locator( '.affibloom-box' ).nth( 0 ) ).toHaveAttribute( 'id', `affibloom-anchor-id-${ amazon }-1` );
+	} );
 } );
