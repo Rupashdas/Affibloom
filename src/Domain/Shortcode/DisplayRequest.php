@@ -42,12 +42,18 @@ final class DisplayRequest {
 	 */
 	public static function of( array|string $raw ): self {
 		$attributes = ShortcodeAttributes::repaired( $raw );
+		$kind       = DisplayKind::of( $attributes );
+		$secondary  = 'secondary' === strtolower( $attributes['button_type'] ?? '' );
+		// F30 R30: a lone secondary button takes its URL from `primary_url` (Lasso reads no `secondary_url` there).
+		$values = DisplayKind::Button === $kind && $secondary
+			? array( 'secondary_url' => $attributes['primary_url'] ?? '' ) + array_diff_key( $attributes, array_flip( array( 'primary_url', 'secondary_url' ) ) )
+			: $attributes;
 
 		return new self(
-			DisplayKind::of( $attributes ),
+			$kind,
 			Address::of( $attributes ),
-			BoxOverrides::from_shortcode( $attributes ),
-			'secondary' === strtolower( $attributes['button_type'] ?? '' ),
+			BoxOverrides::from_shortcode( $values ),
+			$secondary,
 			$attributes
 		);
 	}

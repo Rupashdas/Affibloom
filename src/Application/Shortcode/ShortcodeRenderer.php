@@ -29,6 +29,7 @@ use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\GridColumns;
 use Affibloom\Domain\Display\GridDisclosure;
 use Affibloom\Domain\Display\ListBullets;
+use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -317,6 +318,12 @@ final class ShortcodeRenderer {
 					break;
 				}
 			}
+		}
+
+		// F30 D10: Lasso's button takes the box's theme name unchecked (`lasso-<name>`, which nothing styles); a name
+		// outside the 8 prints no theme class, the same look.
+		if ( DisplayKind::Button === $request->kind && '' !== trim( $overrides->theme ) && ! Theme::known( $overrides->theme ) ) {
+			$view = $view->without_theme();
 		}
 
 		// A10: a lone button, a lone image, a text link (A40) or one inline value (R11).

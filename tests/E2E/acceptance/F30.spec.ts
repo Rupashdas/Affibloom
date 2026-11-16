@@ -240,4 +240,29 @@ test.describe( 'F30 Display types', () => {
 		const lefts = await galleries.nth( 0 ).locator( '.affibloom-image-container' ).evaluateAll( ( items ) => items.map( ( i ) => Math.round( i.getBoundingClientRect().left ) ) );
 		expect( new Set( lefts ).size ).toBe( 1 );
 	} );
+
+	// AC9 (Task DT7): type="button" shows the primary button alone (text and URL overridable); button_type="secondary"
+	// the secondary button (its URL from primary_url) or, without a secondary URL, the primary; the product's target
+	// and rel; a theme outside the 8 prints no theme class (D10).
+	test( 'AC9 type="button" shows one button, primary or secondary', async ( { page, context } ) => {
+		await blockTrackers( context );
+		const two = createProduct( { name: 'F30 AC9 two', url: 'https://www.example.com/f30-ac9-one', url2: 'https://www.example.com/f30-ac9-two', button_text2: 'Second', new_tab: '1', nofollow: '1' } );
+		const one = createProduct( { name: 'F30 AC9 one', url: 'https://www.example.com/f30-ac9-only' } );
+		await page.goto( newPostWith( `[affibloom id="${ two }" type="button" primary_text="Go" primary_url="https://example.com/go"][affibloom id="${ two }" type="button" button_type="secondary"][affibloom id="${ two }" type="button" button_type="secondary" primary_url="https://example.com/s" secondary_text="Other"][affibloom id="${ one }" type="button" button_type="secondary"][affibloom id="${ two }" type="button" theme="Nope"]` ) );
+		const containers = page.locator( '.affibloom-button-container' );
+		await expect( containers ).toHaveCount( 5 );
+		await expect( containers.locator( 'a' ) ).toHaveCount( 5 );
+		const link = ( n: number ) => containers.nth( n ).locator( 'a' );
+		await expect( link( 0 ) ).toHaveClass( 'affibloom-button-1' );
+		await expect( link( 0 ) ).toHaveText( 'Go' );
+		await expect( link( 0 ) ).toHaveAttribute( 'href', 'https://example.com/go' );
+		await expect( link( 0 ) ).toHaveAttribute( 'target', '_blank' );
+		await expect( link( 0 ) ).toHaveAttribute( 'rel', /nofollow/ );
+		await expect( link( 1 ) ).toHaveClass( 'affibloom-button-2' );
+		await expect( link( 1 ) ).toHaveAttribute( 'href', 'https://www.example.com/f30-ac9-two' );
+		await expect( link( 2 ) ).toHaveAttribute( 'href', 'https://example.com/s' );
+		await expect( link( 2 ) ).toHaveText( 'Other' );
+		await expect( link( 3 ) ).toHaveClass( 'affibloom-button-1' );
+		await expect( containers.nth( 4 ) ).toHaveClass( 'affibloom-box affibloom-button-container' );
+	} );
 } );

@@ -39,6 +39,21 @@ final class Theme {
 	}
 
 	/**
+	 * Whether a name is one of the 8 themes, ignoring case (F30 D10: the lone button prints no theme class for another).
+	 *
+	 * @param string $raw The name.
+	 */
+	public static function known( string $raw ): bool {
+		foreach ( self::NAMES as $name ) {
+			if ( 0 === strcasecmp( $name, trim( $raw ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Reads a stored or submitted name, ignoring case. Anything unknown is the default.
 	 *
 	 * @param string $raw Stored or submitted value.

@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 $buttons = array_slice( $view->buttons, 0, 1 );
 ?>
-<div id="<?php echo esc_attr( $view->anchor ); ?>" class="affibloom-box affibloom-button-container <?php echo esc_attr( $view->theme ); ?>">
+<div id="<?php echo esc_attr( $view->anchor ); ?>" class="<?php echo esc_attr( trim( 'affibloom-box affibloom-button-container ' . $view->theme ) ); ?>">
 	<!-- PRODUCT BUTTON -->
 	<?php require __DIR__ . '/partials/buttons.php'; ?>
 </div>

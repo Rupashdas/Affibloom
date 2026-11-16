@@ -154,7 +154,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT4: A group shown as a list, with the phone swipe row
 - [x] Task DT5: A product shown as an image
 - [x] Task DT6: A group shown as a gallery
-- [ ] Task DT7: A product shown as a button
+- [x] Task DT7: A product shown as a button
 - [ ] Task DT8: The SiteStripe card
 - [ ] Task DT9: Stored AI text
 - Task DT10: dropped (decision B5: stored AI text only)
@@ -1899,10 +1899,14 @@ with `primary_url`, its text with `secondary_text`) or, without a secondary URL,
 
 **Files:** the above; tests F30 **AC9**, a `button_type` table in `DisplayAttributesTest`.
 
-- [ ] **Step 1: Failing tests** (both modes, the fallback, icon spans in the text, an unknown theme name).
-- [ ] **Step 2: Renderer and template.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show a product as a lone button".
+- [x] **Step 1: Failing tests** (both modes, the fallback, icon spans in the text, an unknown theme name).
+- [x] **Step 2: Renderer and template.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show a product as a lone button".
+
+*Note:* 18S4 drew the lone button; DT7 added R30 (secondary mode reads its URL from `primary_url`, so a product
+without a second button gets one) and D10 (`Theme::known()`: a theme outside the 8 prints no class). Compared with
+`[lasso type="button"]` on Local in 9 cases (overrides, both modes, the fallback, icon text, themes): same output.
 
 ---
 

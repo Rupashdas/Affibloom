@@ -1,6 +1,7 @@
 <?php
 namespace Affibloom\Tests\Unit\Domain\Shortcode;
 
+use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Shortcode\Address;
 use Affibloom\Domain\Shortcode\AnchorId;
 use Affibloom\Domain\Shortcode\DisplayKind;
@@ -130,5 +131,19 @@ final class ShortcodeAttributesTest extends TestCase {
 		foreach ( array( '', 'false', 'no', '0' ) as $value ) {
 			self::assertFalse( GroupAttributes::of( array( 'compact' => $value ) )->compact, $value );
 		}
+	}
+
+	/**
+	 * F30 R30, D10 (Task DT7): a lone secondary button takes its URL from `primary_url`, not `secondary_url`; the
+	 * primary button keeps `primary_url`; only the 8 themes are known.
+	 */
+	public function test_a_lone_buttons_urls(): void {
+		$secondary = DisplayRequest::of( array( 'id' => '1', 'type' => 'button', 'button_type' => 'secondary', 'primary_url' => 'https://example.com/s', 'secondary_url' => 'https://example.com/x' ) );
+		self::assertSame( 'https://example.com/s', $secondary->overrides->secondary_url );
+		self::assertSame( '', $secondary->overrides->primary_url );
+		$primary = DisplayRequest::of( array( 'id' => '1', 'type' => 'button', 'primary_url' => 'https://example.com/p' ) );
+		self::assertSame( 'https://example.com/p', $primary->overrides->primary_url );
+		self::assertTrue( Theme::known( 'lab' ) );
+		self::assertFalse( Theme::known( 'Nope' ) );
 	}
 }

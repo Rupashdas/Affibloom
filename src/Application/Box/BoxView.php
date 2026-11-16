@@ -117,6 +117,13 @@ final class BoxView {
 	}
 
 	/**
+	 * A copy without the theme's class (the lone button with a theme name outside the 8, F30 D10).
+	 */
+	public function without_theme(): self {
+		return new self( ...array_merge( get_object_vars( $this ), array( 'theme' => '' ) ) );
+	}
+
+	/**
 	 * A compact grid card (F30 R13, N1): no description and no fields (its disclosure is already gone, as_card()).
 	 */
 	public function compact(): self {
