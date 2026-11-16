@@ -12,6 +12,7 @@ namespace Affibloom\Application\Box;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonUrl;
+use Affibloom\Domain\Amazon\PrimeRule;
 use Affibloom\Domain\Amazon\ShownPrice;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -117,7 +118,7 @@ final class BoxBuilder {
 
 		$disclosure = DisclosureRule::text( $product->disclosure, $product->show_disclosure, $settings->string( 'disclosure_text' ) );
 		// R78: the box's `prime` shows Prime whatever the product.
-		$prime = $overrides->prime || PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
+		$prime = $overrides->prime || PrimeRule::shows( $settings->bool( 'show_prime' ), ProductType::Amazon === $product->type, $product->asin, $product->prime );
 		$price = PriceRule::prints( $product->price, $product->show_price, $settings->bool( 'show_price' ) ) ? $product->price : '';
 		// R74, R21, C1 R51: the box's basis price, else Amazon's, struck through with the price while Show Discount Pricing
 		// is on.

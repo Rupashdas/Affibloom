@@ -60,7 +60,7 @@ final class ProductTest extends TestCase {
 		self::assertSame( '', $product->price );
 		self::assertSame( '', $product->description );
 		self::assertSame( '', $product->disclosure );
-		self::assertFalse( $product->prime );
+		self::assertTrue( $product->prime ); // C1G (decision C4): the Prime switch is an opt-out, on by default
 		self::assertSame( 0, $product->image_id );
 	}
 

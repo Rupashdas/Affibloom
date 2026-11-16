@@ -46,7 +46,7 @@ final class Product {
 	 *                                      show_price: '' falls back to the setting).
 	 * @param string       $description     The description, rich text (Lasso's affiliate_desc).
 	 * @param string       $disclosure      The disclosure; '' means the site's text (Lasso's disclosure_text).
-	 * @param bool         $prime           Show the Prime logo (Amazon products; set by the editor until C1).
+	 * @param bool         $prime           The Prime logo's opt-out switch (C1G, decision C4): on unless an editor turns it off.
 	 * @param int          $image_id        The image's media library item, when it was picked there; 0 otherwise.
 	 * @param list<string> $features        The product's feature bullets, in order (C1Q4: Amazon's on add and Refresh,
 	 *                                      editable; separate from the description; not shown in displays yet).
@@ -107,6 +107,7 @@ final class Product {
 			$defaults->bool( 'nofollow' ),
 			$defaults->bool( 'sponsored' ),
 			$defaults->bool( 'show_disclosure' ),
+			prime: true,
 		);
 	}
 

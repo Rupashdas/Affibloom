@@ -38,13 +38,4 @@ final class PriceRuleTest extends TestCase {
 		self::assertNotContains( 'price', ElementVisibility::of( $off, BoxOverrides::from_block( array() ), true )->hidden() );
 	}
 
-	/**
-	 * R20, D7, C4: Prime on an Amazon product while the site shows Prime and the product's switch is on.
-	 */
-	public function test_prime_shows_on_amazon_products_with_both_switches_on(): void {
-		self::assertTrue( PriceRule::prime( true, true, true ) );
-		self::assertFalse( PriceRule::prime( false, true, true ) );
-		self::assertFalse( PriceRule::prime( true, false, true ) );
-		self::assertFalse( PriceRule::prime( true, true, false ) );
-	}
 }

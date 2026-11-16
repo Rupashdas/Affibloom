@@ -835,7 +835,8 @@ final class PostTypeProductRepository implements ProductRepository {
 			show_price: '' === $meta( 'show_price' ) ? null : '1' === $meta( 'show_price' ),
 			description: $meta( 'description' ),
 			disclosure: $meta( 'disclosure' ),
-			prime: '1' === $meta( 'prime' ),
+			// C1G (decision C4): the Prime switch is an opt-out, on unless an editor stored it off.
+			prime: '0' !== $meta( 'prime' ),
 			image_id: (int) $meta( 'image_id' ),
 			features: self::features( $meta( 'features' ) ),
 			old_genius_url: $meta( 'old_genius_url' ),

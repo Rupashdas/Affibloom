@@ -131,7 +131,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 **C1, Amazon price and Prime in the box:**
 
 - [x] Task C1F: Price, discount and timestamp
-- [ ] Task C1G: Prime by Lasso's rule
+- [x] Task C1G: Prime by Lasso's rule
 
 **F31, Affibloom's own shortcode (single-product parts):**
 
@@ -1207,10 +1207,14 @@ fixed in its own commit. Checked at 1280 px with a seeded fresh row.
 
 **Files:** `BoxBuilder.php`, `PrimeRuleTest.php`, `product-display-card.php` (per N2), `C1.spec.ts` AC12.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Rule and box.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show the Prime logo by Lasso's rule".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Rule and box.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show the Prime logo by Lasso's rule".
+
+*Note:* per C4 the product page keeps its Prime switch as an opt-out: a missing `_affibloom_prime` now reads as on and new
+products start on (134 Local products had none). `PriceRule::prime` moved into `Domain\Amazon\PrimeRule`, which adds
+Lasso's ASIN condition. The import still maps Lasso's cached `is_prime` (`LassoRecordMapper`): D7's correction is Task 26's.
 
 ---
 

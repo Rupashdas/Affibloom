@@ -141,6 +141,29 @@ test.describe( 'C1 Amazon product data', () => {
 
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
+	// AC12 (Task C1G, decision C4): Prime on every Amazon product with an ASIN while Show Prime is on, inside the price
+	// block even with the price hidden; on no other product; none while the setting is off; a product's switch opts out.
+	test( 'AC12 the Prime logo shows on every Amazon product with an ASIN while Show Prime is on', async ( { page } ) => {
+		const amazon = createProduct( { name: 'C1 AC12 amazon', type: 'amazon', asin: 'B0C1GTEST1', url: 'https://www.amazon.com/dp/B0C1GTEST1?tag=vbvault-20', show_price: '0' } );
+		const other = createProduct( { name: 'C1 AC12 other' } );
+		const off = createProduct( { name: 'C1 AC12 off', type: 'amazon', asin: 'B0C1GTEST2', url: 'https://www.amazon.com/dp/B0C1GTEST2?tag=vbvault-20', prime: '0' } );
+		setSettings( { show_prime: true } );
+		try {
+			await page.goto( newPostWith( boxBlock( amazon ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-price > .affibloom-amazon-prime' ) ).toHaveCount( 1 ); // no Prime meta stored: on
+			await page.goto( newPostWith( boxBlock( other ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toHaveCount( 0 );
+			await page.goto( newPostWith( boxBlock( off ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toHaveCount( 0 );
+
+			setSettings( { show_prime: false } );
+			await page.goto( newPostWith( boxBlock( amazon ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toHaveCount( 0 );
+		} finally {
+			setSettings( { show_prime: true } );
+		}
+	} );
+
 	// AC11 (Task C1F): the box shows the stored Amazon price (Amazon's API within 24 hours, decision E6), the struck basis
 	// with Show Discount Pricing, the timestamp where Lasso shows it, and the product page's read-only price matches.
 	test( 'AC11 the box shows the stored Amazon price, the struck basis and the timestamp; the product page matches', async ( { page } ) => {

@@ -10,8 +10,8 @@ declare( strict_types=1 );
 namespace Affibloom\Domain\Box;
 
 /**
- * When a box prints the price and the Prime logo (F5 R18-R20, R28, D7; Lasso's single.php 278-284 and Helper
- * is_display_v2_price_visible_for_link). The struck basis price (R21) is C1F's, behind the site's Show Discount Pricing.
+ * When a box prints the price (F5 R18-R19, R28; Lasso's single.php 278-284 and Helper is_display_v2_price_visible_for_link).
+ * The struck basis price (R21) is C1F's, behind the site's Show Discount Pricing; Prime is C1G's PrimeRule.
  */
 final class PriceRule {
 
@@ -35,17 +35,5 @@ final class PriceRule {
 	 */
 	public static function element_shows( bool $element, ?bool $product ): bool {
 		return $element || true === $product;
-	}
-
-	/**
-	 * Whether the Prime logo prints (R20, D7, decision C4): an Amazon product, the site's Show Prime on, and the
-	 * product's own Prime switch on (the opt-out that defaults on).
-	 *
-	 * @param bool $amazon  The product is an Amazon product.
-	 * @param bool $site    The site's Show Prime.
-	 * @param bool $product The product's Prime switch.
-	 */
-	public static function prime( bool $amazon, bool $site, bool $product ): bool {
-		return $amazon && $site && $product;
 	}
 }
