@@ -147,4 +147,55 @@ test.describe( 'F30 Display types', () => {
 			await expect( grids.nth( 2 ).locator( '.affibloom-description' ) ).toHaveCount( 0 );
 		} );
 	} );
+
+	test.describe( 'list (Task DT4)', () => {
+		test.beforeEach( async ( { context } ) => blockTrackers( context ) );
+
+		// AC6: one list card per product in the List settings, never a badge, inside the list its bullets ask for. The
+		// pixel match with Lasso's list (displays/list-*, every bullets value, 5 themes, 1280 and 390 px) was measured on
+		// Local (Task DT4's Note).
+		test( 'AC6 type="list" shows list cards inside the list its bullets ask for', async ( { page } ) => {
+			const ids = [ 'one', 'two' ].map( ( n ) => createProduct( { name: `F30 AC6 ${ n }`, badge: 'Top Pick', disclosure: 'Own disclosure.' } ) );
+			wp( 'post', 'meta', 'update', String( ids[ 1 ] ), '_affibloom_show_disclosure', '0' );
+			const slug = createGroup( `F30 AC6 ${ Date.now() }`, ids );
+			await page.goto( newPostWith( [ '', 'decimal', 'alpha', 'roman', 'square', 'circle', 'hide', 'stars' ].map( ( b ) => `[affibloom type="list" group="${ slug }" bullets="${ b }"]` ).join( '' ) ) );
+			const lists = page.locator( '.affibloom-list-ol, ol.affibloom-list, ul.affibloom-list' );
+			await expect( lists ).toHaveCount( 8 );
+			const expected = [ [ 'OL', 'affibloom-list-ol affibloom-list-style-decimal' ], [ 'OL', 'affibloom-list affibloom-list-style-decimal' ], [ 'OL', 'affibloom-list affibloom-list-style-alpha' ], [ 'OL', 'affibloom-list affibloom-list-style-roman' ], [ 'UL', 'affibloom-list affibloom-list-style-square' ], [ 'UL', 'affibloom-list affibloom-list-style-circle' ], [ 'UL', 'affibloom-list affibloom-list-style-hide' ], [ 'OL', 'affibloom-list-ol affibloom-list-style-decimal' ] ];
+			for ( const [ index, [ tag, classes ] ] of expected.entries() ) {
+				expect( await lists.nth( index ).evaluate( ( l ) => l.tagName ) ).toBe( tag );
+				await expect( lists.nth( index ) ).toHaveClass( new RegExp( `^${ classes }( affibloom-advanced)?$` ) );
+			}
+			const first = lists.nth( 0 );
+			await expect( first.locator( '> li > .affibloom-box.affibloom-list' ) ).toHaveCount( 2 );
+			await expect( first.locator( '.affibloom-list-title .affibloom-title' ) ).toHaveText( [ 'F30 AC6 one', 'F30 AC6 two' ] );
+			await expect( first.locator( '.affibloom-badge' ) ).toHaveCount( 0 );
+			await expect( first.locator( 'li' ).nth( 0 ).locator( '.affibloom-disclosure' ) ).toHaveText( 'Own disclosure.' );
+			await expect( first.locator( 'li' ).nth( 1 ).locator( '.affibloom-disclosure' ) ).toHaveCount( 0 );
+		} );
+
+		// AC7: with Mobile overflow "Swipe row" for List, below 768 px the list scrolls sideways a card (62 %) at a time;
+		// with "Stack" it stays a column.
+		test( 'AC7 the List swipe row on phones', async ( { page } ) => {
+			const ids = [ 1, 2, 3 ].map( ( n ) => createProduct( { name: `F30 AC7 ${ n }` } ) );
+			const slug = createGroup( `F30 AC7 ${ Date.now() }`, ids );
+			const path = newPostWith( `[affibloom type="list" group="${ slug }"]` );
+			const list = page.locator( '.affibloom-list-ol' );
+			try {
+				wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, list: { layout: { mobileOverflow: 'swipe' } } } ), '--format=json' );
+				await page.setViewportSize( { width: 390, height: 900 } );
+				await page.goto( path );
+				await expect( list ).toHaveCSS( 'overflow-x', 'auto' );
+				await expect( list ).toHaveCSS( 'flex-wrap', 'nowrap' );
+				const [ listWidth, cardWidth ] = await list.evaluate( ( l ) => [ l.clientWidth, l.querySelector( 'li' )!.getBoundingClientRect().width ] );
+				expect( Math.abs( cardWidth / listWidth - 0.62 ) ).toBeLessThan( 0.02 );
+
+				wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, list: { layout: { mobileOverflow: 'stack' } } } ), '--format=json' );
+				await page.reload();
+				await expect( list ).not.toHaveCSS( 'overflow-x', 'auto' );
+			} finally {
+				wp( 'option', 'delete', 'affibloom_display' );
+			}
+		} );
+	} );
 } );

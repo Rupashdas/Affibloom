@@ -33,7 +33,7 @@ final class AffibloomShortcode implements Module {
 	 *
 	 * @param ShortcodeRenderer $renderer The renderer.
 	 * @param BoxHtml           $html     The box's printer.
-	 * @param GridHtml          $grids    The grid's printer (F30 DT2).
+	 * @param GridHtml          $grids    The grid's and the list's printer (F30 DT2, DT4).
 	 */
 	public function __construct( private readonly ShortcodeRenderer $renderer, private readonly BoxHtml $html, private readonly GridHtml $grids ) {}
 
@@ -62,6 +62,11 @@ final class AffibloomShortcode implements Module {
 		if ( DisplayKind::Grid === $request->kind ) {
 			++$this->drawn;
 			return $this->grids->render( $this->renderer->grid( $request, $this->drawn, (int) get_the_ID() ) );
+		}
+		// R61: a list always draws, an unknown or empty group as the empty list.
+		if ( DisplayKind::List === $request->kind ) {
+			++$this->drawn;
+			return $this->grids->list( $this->renderer->list( $request, $this->drawn, (int) get_the_ID() ) );
 		}
 		$view = $this->renderer->view( $request, $this->drawn + 1, (int) get_the_ID() );
 		if ( null === $view ) {

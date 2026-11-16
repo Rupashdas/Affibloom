@@ -13,6 +13,7 @@ use Affibloom\Application\Box\BoxBuilder;
 use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\BoxView;
 use Affibloom\Application\Box\GridView;
+use Affibloom\Application\Box\ListView;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Application\Display\DisplaySettingsService;
@@ -27,6 +28,7 @@ use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\GridColumns;
 use Affibloom\Domain\Display\GridDisclosure;
+use Affibloom\Domain\Display\ListBullets;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -109,6 +111,39 @@ final class ShortcodeRenderer {
 			cards: $cards,
 			disclosure: $shows && '' !== trim( $text ) ? $text : null,
 			per_row: $advanced ? null : $columns,
+		);
+	}
+
+	/**
+	 * A group shown as a list (F30 R21-R23; D6, D7): the group's shown products as list cards in the List settings, each
+	 * with the shortcode's per-box values (not its `tracking_id` or `anchor_id`) and its own disclosure; the list's
+	 * bullets and the List settings' attributes without the price and disclosure flags.
+	 *
+	 * @param DisplayRequest $request The shortcode's request.
+	 * @param int            $number  The display's number among the page's `[affibloom]` displays, from 1.
+	 * @param int            $post_id The post it is in (0 outside one).
+	 */
+	public function list( DisplayRequest $request, int $number, int $post_id ): ListView {
+		$group    = GroupAttributes::of( $request->attributes );
+		$display  = $this->display->current();
+		$advanced = $display->advanced();
+		$config   = $display->config( DisplayType::list() );
+		$per_card = BoxOverrides::from_shortcode( array_diff_key( $request->attributes, array_flip( array( 'tracking_id', 'anchor_id' ) ) ) );
+
+		$cards = array();
+		foreach ( $this->groups->shown( $group->group, $group->limit, $group->latest ) as $product ) {
+			$cards[] = $this->built( $product, $per_card, $post_id, DisplayType::list() );
+		}
+		$bullets = ListBullets::of( $group->bullets );
+		$hidden  = array_values( array_diff( ElementVisibility::of( $config->elements(), $per_card )->hidden(), array( 'price' ) ) );
+
+		return new ListView(
+			anchor: AnchorId::of( $request->overrides->anchor_id, $group->group, $number ),
+			tag: $bullets->tag,
+			classes: $bullets->classes . ( $advanced ? ' affibloom-advanced' : '' ),
+			// R21, R23: the list shows each card's disclosure, so the list carries no disclosure flag.
+			wrapper: $advanced ? DisplayPresentation::wrapper( $config, $display->columns(), true, $hidden ) : array(),
+			cards: $cards,
 		);
 	}
 

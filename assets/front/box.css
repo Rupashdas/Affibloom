@@ -415,6 +415,63 @@ a.affibloom-button-2:hover {
 	.affibloom-grid-row .affibloom-badge { left: -10px; }
 }
 
+/*
+ * The list of a group display (F30 R21-R24; Task DT4), first part: Lasso's lasso-live.css list rules that come before
+ * its theme rules, here before the themes too (Lasso's cascade order). The theme list rules and the rest are at the end
+ * of this file.
+ */
+.affibloom-list { box-sizing: border-box; display: flex; flex-wrap: wrap; font-family: inherit !important; padding: 0px !important; }
+.affibloom-box.affibloom-list { margin: 40px auto !important; width: 100% !important; }
+ol .affibloom-box.affibloom-list:last-child,
+ul .affibloom-box.affibloom-list:last-child { margin-bottom: 0px !important; }
+.affibloom-list a,
+.affibloom-list a:hover { text-decoration: none !important; font-weight: bold !important; opacity: 1 !important; }
+.affibloom-list a:hover { transition: 0.25s; }
+.affibloom-list .affibloom-image { float: right; max-width: 50% !important; padding: 0px 0px 0px 20px !important; }
+.affibloom-list .affibloom-image img { width: 100%; max-height: 300px !important; max-width: 230px !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list .affibloom-image { float: inherit; max-width: 100% !important; padding: 10px !important; }
+	.affibloom-list .affibloom-description { margin: 10px 0px !important; }
+}
+.affibloom-list .affibloom-box-1,
+.affibloom-list .affibloom-box-2,
+.affibloom-list .affibloom-box-3 { flex: 0 0 50% !important; }
+@media (max-width: 767.98px) {
+	.affibloom-box.affibloom-list .affibloom-box-1,
+	.affibloom-box.affibloom-list .affibloom-box-2,
+	.affibloom-box.affibloom-list .affibloom-box-3 { flex: 0 0 100% !important; text-align: left !important; }
+}
+.affibloom-list .ls-list-title,
+.affibloom-list li { max-width: 70%; }
+.affibloom-list li { line-height: 1.25; font-size: 30px !important; margin: 0px !important; box-shadow: none !important; color: var(--affibloom-title) !important; }
+.affibloom-list .affibloom-fields li,
+.affibloom-list.affibloom-llama .affibloom-fields li { font-size: initial !important; color: initial !important; }
+.affibloom-list-content { width: 100%; }
+.affibloom-list-content .affibloom-image { margin-top: -80px; max-height: 250px; max-width: 30% !important; }
+.affibloom-list-ol { padding-left: 1rem !important; }
+.affibloom-list-style-hide { list-style-type: none !important; }
+.affibloom-list-style-decimal { list-style-type: decimal !important; }
+.affibloom-list-style-circle { list-style-type: circle !important; }
+.affibloom-list-style-square { list-style-type: square !important; }
+.affibloom-list-style-alpha { list-style-type: lower-alpha !important; }
+.affibloom-list-style-roman { list-style-type: lower-roman !important; }
+.affibloom-list .affibloom-description { font-size: inherit; width: 70%; }
+.affibloom-list .affibloom-button-1 { margin-bottom: 10px; display: inline-block; }
+.affibloom-box.affibloom-list .affibloom-description li { text-decoration: initial !important; margin: 0px 0px 5px !important; color: initial !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list .ls-list-title,
+	.affibloom-list li { max-width: inherit; }
+	.affibloom-list li { margin: 0px 0px 10px 15px !important; }
+	.affibloom-list-content .affibloom-image { max-width: inherit !important; }
+	.affibloom-list-ol .affibloom-stars { display: table-cell !important; }
+	.affibloom-list-ol .affibloom-stars { padding-top: 10px; }
+	.affibloom-list-ol .affibloom-image { display: table-row !important; }
+	.affibloom-list-ol .affibloom-image img { float: left; }
+	.affibloom-list-ol .affibloom-price { text-align: left !important; }
+	.affibloom-list-ol .affibloom-title { min-height: fit-content !important; }
+	.affibloom-list-ol .affibloom-description { width: 100%; }
+}
+
 /* The 2-box themes (Task 18E; templates/front/box-2.php): Cutter, Flow, Geek and Splash. */
 .affibloom-box .affibloom-cutter {
 	border: 6px solid var(--affibloom-main);
@@ -1347,3 +1404,59 @@ a.affibloom-button-2:hover {
 	.affibloom-grid-row .affibloom-lab .affibloom-description { min-height: 195px; }
 	.affibloom-grid-row .affibloom-llama .affibloom-description { min-height: 220px; }
 }
+
+/*
+ * The list of a group display (F30 R21-R24; Task DT4), second part: the rest of Lasso's lasso-live.css list rules, in
+ * Lasso's order, under Affibloom's names (ADR-6; Lasso's .ls-list-title is .affibloom-list-title): the 40 px card
+ * margins, the 30 px titles at 70 %, the image floated right (at most 230 x 300 px, pulled up 80 px), the bullet
+ * styles and, below 768 px, full widths with the image unfloated.
+ */
+.affibloom-cactus .affibloom-list-content .affibloom-image { max-width: 30% !important; margin-top: -50px; }
+@media (max-width: 767.98px) {
+	.affibloom-list-content .affibloom-cactus .affibloom-image { max-width: 100% !important; }
+}
+.affibloom-list-content .affibloom-cactus.mobile .affibloom-image { max-width: 100% !important; }
+.affibloom-list.affibloom-cutter li { text-decoration: underline !important; }
+.affibloom-cutter .affibloom-list-content a.affibloom-button-1,
+.affibloom-cutter .affibloom-list-content a.affibloom-button-2 { width: 50%; }
+.affibloom-list.affibloom-cutter .affibloom-fields-pros li,
+.affibloom-list.affibloom-cutter .affibloom-fields-cons li { text-decoration: none !important; }
+@media (max-width: 767.98px) {
+	.affibloom-cutter .affibloom-list-content a.affibloom-button-1,
+	.affibloom-cutter .affibloom-list-content a.affibloom-button-2 { width: 100%; }
+}
+.affibloom-cutter.mobile .affibloom-list-content a.affibloom-button-1,
+.affibloom-cutter.mobile .affibloom-list-content a.affibloom-button-2 { width: 100%; }
+.affibloom-list.affibloom-lab .affibloom-image { margin: 0px !important; }
+.affibloom-list.affibloom-lab .affibloom-fields-pros li,
+.affibloom-list.affibloom-lab .affibloom-fields-cons li { font-size: inherit !important; }
+.affibloom-list.affibloom-llama .affibloom-box-2 { border: 0px !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list.affibloom-llama li { font-size: 20px !important; }
+}
+.affibloom-list.affibloom-llama.mobile li { font-size: 20px !important; }
+.affibloom-list.affibloom-money .affibloom-box-1 { max-width: 70%; flex: 0 0 70% !important; }
+.affibloom-list.affibloom-money .affibloom-box-2 { max-width: 30%; margin-bottom: 15px; text-align: center; flex: 0 0 30% !important; }
+.affibloom-list.affibloom-money .affibloom-box-2 { padding: 0px !important; }
+.affibloom-list.affibloom-money a.affibloom-button-2 { float: initial; }
+.affibloom-money .affibloom-list-content .affibloom-image { max-width: 30% !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list.affibloom-money li { font-size: 1.3rem !important; line-height: 1.7rem; }
+}
+.affibloom-list.affibloom-money.mobile li { font-size: 1.3rem !important; line-height: 1.7rem; }
+.affibloom-list.affibloom-splash .affibloom-box-2 { max-width: 30%; order: 2; text-align: center; flex: 0 0 30% !important; padding-right: 0px !important; }
+.affibloom-list.affibloom-splash .affibloom-box-1 { max-width: 70%; order: 1; flex: 0 0 70% !important; padding-left: 0px !important; }
+.affibloom-list.affibloom-splash .affibloom-box-2 { padding: 0px !important; }
+.affibloom-list.affibloom-splash .affibloom-image { margin-top: -40px; }
+.affibloom-list.h1 > li h1 a.affibloom-title,
+.affibloom-list.h2 > li h2 a.affibloom-title,
+.affibloom-list.h3 > li h3 a.affibloom-title,
+.affibloom-list.h4 > li h4 a.affibloom-title,
+.affibloom-list.h1 > li h1 span.affibloom-title,
+.affibloom-list.h2 > li h2 span.affibloom-title,
+.affibloom-list.h3 > li h3 span.affibloom-title,
+.affibloom-list.h4 > li h4 span.affibloom-title { font-size: inherit !important; }
+.affibloom-list.h1 > li { font-size: 2em !important; }
+.affibloom-list.h2 > li { font-size: 1.5em !important; }
+.affibloom-list.h3 > li { font-size: 1.17em !important; }
+.affibloom-list.h4 > li { font-size: 1em !important; }

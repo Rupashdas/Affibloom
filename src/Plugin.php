@@ -376,7 +376,7 @@ final class Plugin {
 			new AffibloomShortcode(
 				new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups ),
 				$box_html,
-				new GridHtml( dirname( $this->file ) . '/templates/front', $box_html )
+				new GridHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets )
 			),
 			new WidgetShortcodes(),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),

@@ -46,6 +46,9 @@ final class BoxView {
 	 * @param string|null           $date        The price timestamp (R29): the last update ('' unknown); null when it does
 	 *                                           not show.
 	 * @param array<string, string> $inline      A text link's or an inline value's own data (F31 R11, A40; Task 18S5).
+	 * @param string                $name        The name as the links show it (the box's title, decoded), whatever the
+	 *                                           Title element says: a list card prints it (F30 R22).
+	 * @param string                $slug        The product's slug, for a list card's class.
 	 */
 	public function __construct(
 		public readonly LayoutFamily $family,
@@ -73,6 +76,8 @@ final class BoxView {
 		public readonly ?string $disclosure,
 		public readonly ?string $date,
 		public readonly array $inline = array(),
+		public readonly string $name = '',
+		public readonly string $slug = '',
 	) {}
 
 	/**

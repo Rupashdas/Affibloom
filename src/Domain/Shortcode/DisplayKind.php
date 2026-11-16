@@ -22,6 +22,7 @@ enum DisplayKind: string {
 	case Link   = 'link';
 	case Field  = 'field';
 	case Grid   = 'grid';
+	case List   = 'list';
 
 	/**
 	 * The kind in a shortcode's attributes: `type="button"`, `type="image"` or `"image-link"` (AmaLinks Pro's), or
@@ -31,8 +32,12 @@ enum DisplayKind: string {
 	 */
 	public static function of( array $attributes ): self {
 		$type = strtolower( $attributes['type'] ?? '' );
-		// F30 R2: a group is a grid unless a list or gallery is asked for (DT4, DT6 draw those; 18S7 adds `category`).
-		if ( '' !== trim( $attributes['group'] ?? '' ) && ! in_array( $type, array( 'list', 'gallery' ), true ) ) {
+		// F30 R2: a group is a list with type list, a grid unless a gallery is asked for (DT6 draws that; 18S7 adds
+		// `category`).
+		if ( '' !== trim( $attributes['group'] ?? '' ) && 'list' === $type ) {
+			return self::List;
+		}
+		if ( '' !== trim( $attributes['group'] ?? '' ) && 'gallery' !== $type ) {
 			return self::Grid;
 		}
 		if ( 'button' === $type ) {

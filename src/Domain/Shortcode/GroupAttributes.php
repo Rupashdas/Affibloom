@@ -36,6 +36,7 @@ final class GroupAttributes {
 	 * @param string   $disclosure `enable`, `disable` or '' (the setting decides).
 	 * @param int|null $columns    The grid's columns, 1-5; null none (GridColumns decides).
 	 * @param bool     $compact    Cards without description, fields and disclosure.
+	 * @param string   $bullets    A list's `bullets` as written ('' none; ListBullets reads it).
 	 */
 	public function __construct(
 		public readonly string $group,
@@ -44,6 +45,7 @@ final class GroupAttributes {
 		public readonly string $disclosure,
 		public readonly ?int $columns = null,
 		public readonly bool $compact = false,
+		public readonly string $bullets = '',
 	) {}
 
 	/**
@@ -66,7 +68,8 @@ final class GroupAttributes {
 			strtolower( trim( $attributes['disclosure'] ?? '' ) ),
 			// R14: 1 to 5, anything else none.
 			in_array( $column, array( '1', '2', '3', '4', '5' ), true ) ? (int) $column : null,
-			in_array( strtolower( trim( $attributes['compact'] ?? '' ) ), self::COMPACT, true )
+			in_array( strtolower( trim( $attributes['compact'] ?? '' ) ), self::COMPACT, true ),
+			trim( $attributes['bullets'] ?? '' )
 		);
 	}
 }

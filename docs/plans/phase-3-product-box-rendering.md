@@ -151,7 +151,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT1: Lasso's own render of the other display types, as baselines
 - [x] Task DT2: A group shown as a grid
 - [x] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
-- [ ] Task DT4: A group shown as a list, with the phone swipe row
+- [x] Task DT4: A group shown as a list, with the phone swipe row
 - [ ] Task DT5: A product shown as an image
 - [ ] Task DT6: A group shown as a gallery
 - [ ] Task DT7: A product shown as a button
@@ -1796,13 +1796,18 @@ list scrolls sideways a card at a time.
 
 **Files:** the above; tests F30 **AC6, AC7**, `ListBulletsTest`, `tests/Integration/ListDisplayTest.php`.
 
-- [ ] **Step 1: Failing tests** (each `bullets` value and an unknown one; a product with Show Disclosure off; phone
+- [x] **Step 1: Failing tests** (each `bullets` value and an unknown one; a product with Show Disclosure off; phone
   width with Stack and with Swipe row).
-- [ ] **Step 2: Bullets, card builder, renderer, templates.**
-- [ ] **Step 3: CSS** (classic list rules, customised
+- [x] **Step 2: Bullets, card builder, renderer, templates.**
+- [x] **Step 3: CSS** (classic list rules, customised
   flex column with the density gap, the swipe row: no wrap, scroll, snap, 62 % items).
-- [ ] **Step 4: Run and look** (DT1's list baselines; swipe by touch emulation and by Tab through the cards).
-- [ ] **Step 5: Commit** — "Show a group as a list, with Lasso's bullets and phone swipe row".
+- [x] **Step 4: Run and look** (DT1's list baselines; swipe by touch emulation and by Tab through the cards).
+- [x] **Step 5: Commit** — "Show a group as a list, with Lasso's bullets and phone swipe row".
+
+*Note:* the card is the Single box's view in the List settings (`BoxView` gained `name` and `slug`), printed by
+`list-card.php` with the box partials; `ListBullets`, `ListView`, `ShortcodeRenderer::list()`, `GridHtml::list()` (no
+separate `ListCardBuilder`/`ListHtml`). CSS ported as DT2's (Lasso's `.ls-list-title` is `.affibloom-list-title`).
+Measured beside Lasso's list on Local: every `bullets` value, 5 themes and the swipe row, same pixels at 1280/390.
 
 ---
 

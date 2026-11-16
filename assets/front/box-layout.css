@@ -12,6 +12,79 @@
  */
 
 /*
+ * The list of a group display, customised settings (F30 R21-R24; Task DT4), first part: the list selectors that Lasso's
+ * lasso-display-v2-frontend.css writes into the Single box's own rules, here ahead of those rules (Lasso's cascade
+ * order). The rules written for the list alone are at the end of this file.
+ */
+.affibloom-advanced .ls-list-title .affibloom-title,
+.affibloom-advanced .ls-list-title a.affibloom-title { font-size: var(--affibloom-density-title-size) !important; margin-top: var(--affibloom-density-space-between) !important; margin-bottom: var(--affibloom-density-space-between) !important; }
+.affibloom-advanced[data-density-title-lines]:not([data-density-title-lines="0"]) .ls-list-title .affibloom-title,
+.affibloom-advanced[data-density-title-lines]:not([data-density-title-lines="0"]) .ls-list-title a.affibloom-title { -webkit-box-orient: vertical; overflow: hidden; -webkit-line-clamp: var(--affibloom-density-title-lines); display: -webkit-box !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-2 { vertical-align: middle; display: inline-block !important; width: auto !important; max-width: none !important; margin: 0px !important; float: none !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-1 { float: left !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-button-2 { float: right !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-list-content > div:last-child,
+.affibloom-list.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"]) .affibloom-list-content > div:last-child { clear: both; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="left"] .affibloom-box-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="left"] .affibloom-box-2 { flex-wrap: wrap; gap: 8px; justify-content: flex-start; max-width: 100%; display: flex !important; width: auto !important; text-align: left !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="center"] .affibloom-box-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="center"] .affibloom-box-2 { flex-wrap: wrap; gap: 8px; justify-content: center; display: flex !important; width: 100% !important; text-align: center !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="right"] .affibloom-box-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="right"] .affibloom-box-2 { flex-wrap: wrap; gap: 8px; justify-content: flex-end; display: flex !important; width: 100% !important; text-align: right !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="left"] .affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="left"] .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="left"] .affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-button-align="left"] .affibloom-button-2,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="center"] .affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="center"] .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="center"] .affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-button-align="center"] .affibloom-button-2,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="right"] .affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="right"] .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="right"] .affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-button-align="right"] .affibloom-button-2 { vertical-align: middle; display: inline-block !important; width: auto !important; max-width: none !important; margin: 0px !important; float: none !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="left"] .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="left"] .affibloom-button-2,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="center"] .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="center"] .affibloom-button-2,
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="right"] .affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-button-align="right"] .affibloom-button-2 { margin-left: 8px !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="center"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-button-align="center"] .affibloom-list-content { text-align: center; }
+.affibloom-list-ol.affibloom-advanced[data-layout-button-align="right"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-button-align="right"] .affibloom-list-content { text-align: right; }
+.affibloom-advanced[data-hide-title="1"] .ls-list-title,
+article .affibloom-list-ol.affibloom-advanced[data-hide-title="1"] .affibloom-title,
+article .affibloom-list.affibloom-advanced[data-hide-title="1"] .affibloom-title { display: none !important; }
+.affibloom-advanced .affibloom-box.affibloom-list[data-hide-price="1"] .affibloom-price .affibloom-price-value { display: none !important; }
+.affibloom-advanced[data-hide-prime="1"] .affibloom-box.affibloom-list[data-hide-price="1"] .affibloom-price { display: none !important; }
+.affibloom-list-ol.affibloom-advanced .affibloom-date,
+.affibloom-list.affibloom-advanced .affibloom-date { display: inline !important; }
+@media (max-width: 767.98px) {
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .ls-list-title .affibloom-title,
+	:is(.affibloom-advanced, .affibloom-grid-wrap.affibloom-advanced) .ls-list-title a.affibloom-title { font-size: calc(var(--affibloom-density-title-size) * 0.75) !important; }
+}
+.affibloom-list-ol.affibloom-advanced .affibloom-price,
+.affibloom-list-ol.affibloom-advanced .affibloom-stars,
+.affibloom-list-ol.affibloom-advanced .affibloom-fields,
+.affibloom-list-ol.affibloom-advanced .affibloom-fields-pros,
+.affibloom-list-ol.affibloom-advanced .affibloom-fields-cons,
+.affibloom-list-ol.affibloom-advanced .affibloom-end { margin-top: var(--affibloom-density-space-between) !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list-ol.affibloom-advanced .affibloom-list-content > div:last-child,
+	.affibloom-list.affibloom-advanced .affibloom-list-content > div:last-child { gap: 4px; display: flex !important; flex-direction: column !important; align-items: stretch !important; }
+	.affibloom-list-ol.affibloom-advanced .affibloom-date,
+	.affibloom-list.affibloom-advanced .affibloom-date { order: -1 !important; display: block !important; float: none !important; width: 100% !important; margin: 0px !important; }
+	.affibloom-list-ol.affibloom-advanced .affibloom-disclosure,
+	.affibloom-list.affibloom-advanced .affibloom-disclosure { order: 1 !important; display: block !important; float: none !important; width: 100% !important; margin: 0px !important; }
+}
+
+/*
  * The grid of a group display, customised settings (F30 R16, R18-R20; Task DT2), first part: the grid selectors that
  * Lasso's lasso-display-v2-frontend.css writes into the Single box's own rules (density sizes, colours, the date …),
  * here ahead of those rules, so a later Single rule still wins a tie as in Lasso (the phone date's block). The rules
@@ -1672,3 +1745,120 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 .affibloom-display.affibloom-advanced.affibloom-flow:not(.affibloom-grid-wrap .affibloom-display) .affibloom-box-2 > a.affibloom-button-1:last-of-type,
 .affibloom-display.affibloom-advanced.affibloom-flow:not(.affibloom-grid-wrap .affibloom-display) .affibloom-box-2 > a.affibloom-button-2 { margin-bottom: 10px !important; }
 .affibloom-display.affibloom-advanced.affibloom-flow:not(.affibloom-grid-wrap .affibloom-display) .affibloom-box-2 > .affibloom-end { margin-top: 0px !important; }
+
+/*
+ * The list of a group display, customised settings (F30 R21-R24; Task DT4), second part: every rule of Lasso's
+ * lasso-display-v2-frontend.css written for the list alone, in Lasso's order, under Affibloom's names: a flex column with
+ * the density gap and, below 768 px with Mobile overflow "Swipe row", a horizontal scroll row (no wrap, scroll snap,
+ * no markers, each card 62 % wide).
+ */
+.affibloom-advanced .affibloom-list .affibloom-list-content { padding: var(--affibloom-density-padding) !important; }
+.affibloom-list-ol.affibloom-advanced,
+.affibloom-list.affibloom-advanced { display: flex; flex-direction: column; gap: var(--affibloom-density-gap); }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-image { float: right !important; max-width: 30% !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list .affibloom-list-content > .affibloom-stars,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list .affibloom-list-content > .affibloom-price,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list .affibloom-list-content > .affibloom-description,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list .affibloom-list-content > .affibloom-fields,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content > .affibloom-stars,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content > .affibloom-price,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content > .affibloom-description,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content > .affibloom-fields { clear: none !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list-ol.affibloom-advanced[data-layout-mobile-overflow="swipe"],
+	.affibloom-list.affibloom-advanced[data-layout-mobile-overflow="swipe"] { display: flex; flex-flow: row; overflow-x: auto; gap: var(--affibloom-density-gap); padding-bottom: 6px; scroll-snap-type: x mandatory; list-style: none; margin-left: 0px; padding-left: 0px; }
+	.affibloom-list-ol.affibloom-advanced[data-layout-mobile-overflow="swipe"] > li,
+	.affibloom-list.affibloom-advanced[data-layout-mobile-overflow="swipe"] > li { flex: 0 0 62%; scroll-snap-align: start; }
+}
+.affibloom-list-ol.affibloom-advanced[data-layout-image-position="left"] .affibloom-image,
+.affibloom-list-ol.affibloom-advanced[data-layout-image-position="top"] .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-image-position="left"] .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-image-position="top"] .affibloom-image { float: left !important; padding: 0px 20px 0px 0px !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-image-position="right"] .affibloom-image,
+.affibloom-list-ol.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-image-position="right"] .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-image-position="bottom"] .affibloom-image { float: right !important; padding: 0px 0px 0px 20px !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-image-position="left"] .affibloom-list-content .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-image-position="left"] .affibloom-list-content .affibloom-image,
+.affibloom-list-ol.affibloom-advanced[data-layout-image-position="top"] .affibloom-list-content .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-image-position="top"] .affibloom-list-content .affibloom-image { margin-top: 0px !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-image-fit] .affibloom-list-content .affibloom-image img,
+.affibloom-list.affibloom-advanced[data-layout-image-fit] .affibloom-list-content .affibloom-image img { max-height: var(--affibloom-density-image-height) !important; height: auto !important; width: auto !important; max-width: 100% !important; object-fit: contain !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-image-fit="cover"] .affibloom-list-content .affibloom-image img,
+.affibloom-list.affibloom-advanced[data-layout-image-fit="cover"] .affibloom-list-content .affibloom-image img { object-fit: cover !important; width: 100% !important; height: var(--affibloom-density-image-height) !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content { display: flex !important; flex-flow: wrap !important; align-items: flex-start !important; align-content: flex-start !important; gap: var(--affibloom-density-space-between, 10px) !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content > *,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content > * { flex: 0 0 100% !important; width: 100% !important; margin-top: 0px !important; margin-bottom: 0px !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-image { float: none !important; margin: 0px !important; padding: 0px !important; max-width: 100% !important; order: 0 !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-price,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-price,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-description,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-description,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-fields,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-fields,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-stars,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-stars,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-fields-pros,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-fields-pros,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-fields-cons,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-fields-cons { order: 10 !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="right"] .affibloom-list-content .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="right"] .affibloom-list-content .affibloom-image,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"] .affibloom-list-content .affibloom-image,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-image-position="bottom"] .affibloom-list-content .affibloom-image { order: 20 !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content a.affibloom-button-2 { order: 30 !important; float: none !important; flex: 0 0 auto !important; width: fit-content !important; margin-left: 0px !important; margin-right: 0px !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-2 { flex: 0 0 100% !important; width: 100% !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-end,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content .affibloom-end { order: 40 !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content > div:last-child,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"] .affibloom-list-content > div:last-child { order: 40 !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="spread"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="spread"] .affibloom-list-content { justify-content: space-between !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="left"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="left"] .affibloom-list-content { justify-content: flex-start !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="center"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="center"] .affibloom-list-content { justify-content: center !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="right"] .affibloom-list-content,
+.affibloom-list.affibloom-advanced[data-layout-orientation="stacked"][data-layout-button-align="right"] .affibloom-list-content { justify-content: flex-end !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"] .affibloom-list-content a.affibloom-button-2 { margin-top: var(--affibloom-density-space-between, 10px) !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="spread"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="spread"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="left"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="left"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="left"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="left"] .affibloom-list-content a.affibloom-button-2 { float: left !important; clear: none !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="left"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="left"] .affibloom-list-content a.affibloom-button-2 { margin-left: var(--affibloom-density-space-between, 10px) !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="spread"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="spread"] .affibloom-list-content a.affibloom-button-2 { float: right !important; clear: none !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="center"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="center"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="center"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="center"] .affibloom-list-content a.affibloom-button-2 { float: none !important; display: block !important; width: fit-content !important; margin-left: auto !important; margin-right: auto !important; clear: both !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-cta-width="full"] .affibloom-list-content a.affibloom-button-2 { float: none !important; display: block !important; width: 100% !important; clear: both !important; margin-left: 0px !important; margin-right: 0px !important; }
+.affibloom-list-ol.affibloom-advanced .affibloom-list-content .affibloom-image,
+.affibloom-list.affibloom-advanced .affibloom-list-content .affibloom-image { max-height: none !important; height: auto !important; line-height: 0 !important; }
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="right"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="right"] .affibloom-list-content a.affibloom-button-1,
+.affibloom-list-ol.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="right"] .affibloom-list-content a.affibloom-button-2,
+.affibloom-list.affibloom-advanced[data-layout-orientation="side-by-side"][data-layout-button-align="right"] .affibloom-list-content a.affibloom-button-2 { float: none !important; display: block !important; width: fit-content !important; margin-left: auto !important; margin-right: 0px !important; clear: both !important; }
+.affibloom-list-ol.affibloom-advanced .affibloom-list-content > :is(a.affibloom-button-1, a.affibloom-button-2) + div { padding-top: 5px !important; }
+@media (max-width: 767.98px) {
+	.affibloom-list-ol.affibloom-advanced .affibloom-list-content .affibloom-image,
+	.affibloom-list.affibloom-advanced .affibloom-list-content .affibloom-image { margin-top: 0px !important; }
+}
