@@ -20,16 +20,19 @@ final class DisplayRequest {
 	/**
 	 * Builds the request.
 	 *
-	 * @param DisplayKind  $kind      What to draw.
-	 * @param Address      $address   Which product.
-	 * @param BoxOverrides $overrides The box's own values.
-	 * @param bool         $secondary `button_type="secondary"`: a lone button draws the second button (A34).
+	 * @param DisplayKind           $kind      What to draw.
+	 * @param Address               $address   Which product.
+	 * @param BoxOverrides          $overrides The box's own values.
+	 * @param bool                  $secondary `button_type="secondary"`: a lone button draws the second button (A34).
+	 * @param array<string, string> $attributes The repaired attributes, for the kinds that read their own (`label`,
+	 *                                          `value`, `image_size`, …).
 	 */
 	public function __construct(
 		public readonly DisplayKind $kind,
 		public readonly Address $address,
 		public readonly BoxOverrides $overrides,
 		public readonly bool $secondary = false,
+		public readonly array $attributes = array(),
 	) {}
 
 	/**
@@ -44,7 +47,8 @@ final class DisplayRequest {
 			DisplayKind::of( $attributes ),
 			Address::of( $attributes ),
 			BoxOverrides::from_shortcode( $attributes ),
-			'secondary' === strtolower( $attributes['button_type'] ?? '' )
+			'secondary' === strtolower( $attributes['button_type'] ?? '' ),
+			$attributes
 		);
 	}
 }

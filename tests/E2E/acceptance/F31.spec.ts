@@ -102,4 +102,25 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( boxes.nth( 2 ).locator( `a.affibloom-image.image-style#css-${ id } img` ) ).toHaveAttribute( 'width', '500' );
 		await expect( boxes.nth( 2 ) ).toHaveAttribute( 'id', `affibloom-anchor-id-${ id }-3` );
 	} );
+
+	// AC5 (Task 18S5): a plain text link, the SiteStripe box by the setting, one inline value; an unknown part is none.
+	test( 'AC5 type="link", sitestripe and type="field" place a link, the SiteStripe box or one value', async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC5', url: 'https://www.example.com/item' } );
+		await page.goto( newPostWith( `Before [affibloom id="${ id }" type="link" label="Buy it"] [affibloom id="${ id }" type="link"] [affibloom id="${ id }" type="field" value="title"][affibloom id="${ id }" type="field" value="bogus"] after.` ) );
+		await expect( page.locator( 'a', { hasText: 'Buy it' } ) ).toHaveAttribute( 'href', 'https://www.example.com/item' );
+		await expect( page.locator( 'a', { hasText: 'F31 AC5' } ) ).toHaveCount( 1 );
+		await expect( page.locator( 'span.affibloom-aawp-fields' ) ).toHaveText( 'F31 AC5' );
+
+		const path = newPostWith( `[affibloom id="${ id }" sitestripe="true"]` );
+		setSettings( { keep_site_stripe_ui: true } );
+		try {
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-display.sitestripe' ) ).toHaveCount( 1 );
+		} finally {
+			setSettings( { keep_site_stripe_ui: false } );
+		}
+		await page.goto( path );
+		await expect( page.locator( '.affibloom-display.sitestripe' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.affibloom-box .affibloom-display' ) ).toHaveCount( 1 );
+	} );
 } );

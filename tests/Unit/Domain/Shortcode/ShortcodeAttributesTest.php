@@ -5,6 +5,7 @@ use Affibloom\Domain\Shortcode\Address;
 use Affibloom\Domain\Shortcode\AnchorId;
 use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
+use Affibloom\Domain\Shortcode\FieldPart;
 use Affibloom\Domain\Shortcode\ShortcodeAttributes;
 use PHPUnit\Framework\TestCase;
 
@@ -73,5 +74,17 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertSame( DisplayKind::Image, DisplayRequest::of( array( 'style' => 'image' ) )->kind );
 		self::assertSame( DisplayKind::Single, DisplayRequest::of( array( 'type' => 'other' ) )->kind );
 		self::assertTrue( DisplayRequest::of( array( 'type' => 'button', 'button_type' => 'secondary' ) )->secondary );
+	}
+
+	/**
+	 * A10 link, R11, A14 (Task 18S5): `type="link"`, `type="field"` and the 15 inline parts; any other part is none.
+	 */
+	public function test_the_link_and_inline_field_kinds(): void {
+		self::assertSame( DisplayKind::Link, DisplayRequest::of( array( 'type' => 'link', 'label' => 'Buy' ) )->kind );
+		self::assertSame( 'Buy', DisplayRequest::of( array( 'type' => 'link', 'label' => 'Buy' ) )->attributes['label'] );
+		self::assertSame( DisplayKind::Field, DisplayRequest::of( array( 'type' => 'field', 'value' => 'price' ) )->kind );
+		self::assertCount( 15, FieldPart::cases() );
+		self::assertSame( FieldPart::StarRating, FieldPart::tryFrom( 'star_rating' ) );
+		self::assertNull( FieldPart::tryFrom( 'bogus' ) );
 	}
 }

@@ -139,7 +139,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S2: Text and link overrides
 - [x] Task 18S3: Value overrides
 - [x] Task 18S4: `type="button"` and `type="image"`
-- [ ] Task 18S5: `type="link"`, SiteStripe and inline fields
+- [x] Task 18S5: `type="link"`, SiteStripe and inline fields
 - [ ] Task 18S6: Address a product by its Amazon URL or destination
 - [ ] Task 18S9: Boxes in widgets, on AMP pages and in feeds
 - [ ] Task 18S10: The Dashboard row's Shortcode button
@@ -1390,10 +1390,14 @@ value="price"` (any of the 15 parts, `thumb` with `image_size`, `image_class`, `
 
 **Files:** the above; F31 **AC5**; `FieldPartTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Kinds and views.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Place a product as a text link, a SiteStripe box or one inline value".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Kinds and views.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Place a product as a text link, a SiteStripe box or one inline value".
+
+*Note:* SiteStripe needed no kind: `sitestripe` reaches 22E's card through `BoxOverrides`. Link and field are template
+families (`link.php`, `field.php`; no `LinkHtml`/`FieldHtml`), the renderer computes the inline value (Lasso's rating and
+review count are always 0, C1 R53). Lasso's `._SL500_._SL75_` thumbnail quirk is kept. Checked on Local.
 
 ---
 

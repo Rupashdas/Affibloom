@@ -45,6 +45,7 @@ final class BoxView {
 	 * @param string|null           $disclosure  The disclosure text; null when it does not show.
 	 * @param string|null           $date        The price timestamp (R29): the last update ('' unknown); null when it does
 	 *                                           not show.
+	 * @param array<string, string> $inline      A text link's or an inline value's own data (F31 R11, A40; Task 18S5).
 	 */
 	public function __construct(
 		public readonly LayoutFamily $family,
@@ -71,6 +72,7 @@ final class BoxView {
 		public readonly array $buttons,
 		public readonly ?string $disclosure,
 		public readonly ?string $date,
+		public readonly array $inline = array(),
 	) {}
 
 	/**
@@ -80,6 +82,15 @@ final class BoxView {
 	 */
 	public function as_family( LayoutFamily $family ): self {
 		return new self( ...array_merge( get_object_vars( $this ), array( 'family' => $family ) ) );
+	}
+
+	/**
+	 * A copy with a text link's or an inline value's data (F31 R11, A40).
+	 *
+	 * @param array<string, string> $inline The data.
+	 */
+	public function with_inline( array $inline ): self {
+		return new self( ...array_merge( get_object_vars( $this ), array( 'inline' => $inline ) ) );
 	}
 
 	/**

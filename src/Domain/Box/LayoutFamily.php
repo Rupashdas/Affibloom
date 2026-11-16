@@ -24,6 +24,9 @@ enum LayoutFamily: string {
 	// A product placed as a lone button or a lone image (F31 R10, A10; Task 18S4).
 	case Button = 'button';
 	case Image  = 'image';
+	// A plain text link and one inline value (F31 R11, A10 link, A14; Task 18S5).
+	case Link  = 'link';
+	case Field = 'field';
 
 	/**
 	 * Cutter, Flow, Geek and Splash draw 2 boxes; Lab and Llama 3; Cactus and Money 6.
