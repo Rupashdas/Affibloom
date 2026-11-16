@@ -2013,6 +2013,14 @@ show the box as readers will see it.
 
 **Sign-off:** the user signs this phase off after the check by hand. The next phase (4) does not start before that.
 
+*Result (2026-11-16, automated part):* every listed AC passes on Local, each spec run whole: F5 90/90, F6 6, F7 12,
+F8 6, F16 17, F29 AC3/AC5, C1 AC11/AC12, F30 14, F31 12. On the way: two code fixes (a block's pros and cons read
+`-br-`; the previews keep their box while loading and the Display save stays on the page, deviation 141), the group
+capture pages' Lasso offsets measured (`themes/tops.json`, the capture's `tops` mode) and tests brought up to the site
+and to later tasks (Rank Math's `noopener`, C1's Prime and price rules, 18K's classic box, Lasso's stored icon markup).
+F5 AC20 takes about 40 s of its 45 s on Local. Outside this phase: F9 AC4, AC12 and AC14 (Settings → General) fail
+with or without this run's changes. Waiting: the user's check by hand and sign-off.
+
 ## Coverage
 
 Every requirement (R) and acceptance criterion (AC) of the phase's features, and the task that owns it. Rows from the

@@ -33,12 +33,10 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 
 ## Next up
 
-1. **Next: Phase 3's exit check** (`plans/phase-3-product-box-rendering.md`, "Exit check"): the F5, F6, F7, F8, F16, F29,
-   C1, F30 and F31 ACs run together with Playwright (written per task, never run in this session), then the user's check by
-   hand and sign-off; Phase 4 waits for it. Done 2026-11-16: Batches 3.5-3.26 in one session, every display measured
-   beside Lasso's own on Local (grid, list, gallery: same pixels at 1280 and 390 px). Deviations 139 (`[lasso]` schema in
-   27A) and 140 (display baselines on Local). Known: the Copy to Clipboard icon is invisible because the theme makes
-   buttons white (as Lasso's); the clipboard tests use the textarea fallback (Local is plain http).
+1. **Next: the user's check by hand and sign-off of Phase 3** (`plans/phase-3-product-box-rendering.md`, "Exit check").
+   The automated part passed on 2026-11-16: every listed AC, each spec whole (F5 90/90, F6, F7, F8, F16, F29, C1, F30,
+   F31). Phase 4 waits for the sign-off. Open, outside Phase 3: F9 AC4, AC12, AC14 (Settings → General) fail with or
+   without this run's changes. A React admin is proposed in `docs/proposals/react-admin.md` (not yet decided).
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only
    unit tests, `phpcs` and a look (~20 s); at a batch's end lint, analyse and unit tests, then a manual test guide for
    the user; Playwright only at the phase exit; no red run; no save/restore, backup or reset on Local (dummy data).
