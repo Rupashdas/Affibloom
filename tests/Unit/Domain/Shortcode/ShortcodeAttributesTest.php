@@ -146,4 +146,12 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertTrue( Theme::known( 'lab' ) );
 		self::assertFalse( Theme::known( 'Nope' ) );
 	}
+
+	/**
+	 * F30 R2 (Task DT9): a prompt without a product is the AI text; with an id it is that product's box.
+	 */
+	public function test_a_prompt(): void {
+		self::assertSame( DisplayKind::AiText, DisplayRequest::of( array( 'prompt' => 'Best shoes?' ) )->kind );
+		self::assertSame( DisplayKind::Single, DisplayRequest::of( array( 'prompt' => 'Best shoes?', 'id' => '4' ) )->kind );
+	}
 }

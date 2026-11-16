@@ -23,6 +23,7 @@ use Affibloom\Application\Amazon\AmazonSearchService;
 use Affibloom\Application\Amazon\BulkSyncService;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Dashboard\SavedViewService;
+use Affibloom\Application\Display\AiTextService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
@@ -52,6 +53,7 @@ use Affibloom\Infrastructure\WordPress\OptionBulkRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionBulkSyncRunRepository;
 use Affibloom\Infrastructure\WordPress\OptionCredentialsRepository;
 use Affibloom\Infrastructure\WordPress\OptionDisplaySettingsRepository;
+use Affibloom\Infrastructure\WordPress\OptionAiTextRepository;
 use Affibloom\Infrastructure\WordPress\OptionFieldRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaFieldUsage;
 use Affibloom\Infrastructure\WordPress\OptionIconRepository;
@@ -108,7 +110,7 @@ use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\SchemaMarkup;
 use Affibloom\Interface\Front\WidgetShortcodes;
 use Affibloom\Interface\Front\BoxHtml;
-use Affibloom\Interface\Front\GridHtml;
+use Affibloom\Interface\Front\DisplayHtml;
 use Affibloom\Interface\Rest\AmazonController;
 use Affibloom\Interface\Rest\BulkAddController;
 use Affibloom\Interface\Rest\DashboardController;
@@ -376,7 +378,8 @@ final class Plugin {
 			new AffibloomShortcode(
 				new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups ),
 				$box_html,
-				new GridHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets )
+				new DisplayHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets ),
+				new AiTextService( new OptionAiTextRepository() )
 			),
 			new WidgetShortcodes(),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),

@@ -24,6 +24,7 @@ enum DisplayKind: string {
 	case Grid    = 'grid';
 	case List    = 'list';
 	case Gallery = 'gallery';
+	case AiText  = 'ai-text';
 
 	/**
 	 * The kind in a shortcode's attributes: `type="button"`, `type="image"` or `"image-link"` (AmaLinks Pro's), or
@@ -33,6 +34,10 @@ enum DisplayKind: string {
 	 */
 	public static function of( array $attributes ): self {
 		$type = strtolower( $attributes['type'] ?? '' );
+		// F30 R2 (1): a prompt without a product (no id or slug) is the AI text, before anything else.
+		if ( '' !== trim( $attributes['prompt'] ?? '' ) && '' === trim( $attributes['id'] ?? '' ) && '' === trim( $attributes['slug'] ?? '' ) ) {
+			return self::AiText;
+		}
 		// F30 R2: a group is a list with type list, a gallery with type gallery, any other type a grid (18S7 adds
 		// `category`).
 		if ( '' !== trim( $attributes['group'] ?? '' ) ) {

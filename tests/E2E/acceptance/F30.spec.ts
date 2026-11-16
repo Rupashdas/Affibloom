@@ -289,4 +289,20 @@ test.describe( 'F30 Display types', () => {
 			setSettings( { keep_site_stripe_ui: false } );
 		}
 	} );
+
+	// AC12 (Task DT9): prompt="…" without a product shows the text stored for that prompt (through wp_kses_post), and
+	// nothing when none is stored. The code asks no service: AiTextService reads only affibloom_ai_texts (its unit test).
+	test( 'AC12 a prompt shows its stored AI text, or nothing', async ( { page, context } ) => {
+		await blockTrackers( context );
+		const prompt = `F30 AC12 ${ Date.now() }`;
+		wp( 'eval', `update_option( 'affibloom_ai_texts', array( \\Affibloom\\Domain\\Display\\AiText::key( '${ prompt }', 'html' ) => '<p>Stored answer.</p><script>document.title = "x";</script>' ) );` );
+		try {
+			await page.goto( newPostWith( `[affibloom prompt="${ prompt }"][affibloom prompt="F30 AC12 nothing stored"]` ) );
+			await expect( page.locator( '.affibloom-box.affibloom-ai' ) ).toHaveCount( 1 );
+			await expect( page.locator( '.affibloom-ai .affibloom-ai-text p' ) ).toHaveText( 'Stored answer.' );
+			await expect( page.locator( '.affibloom-ai script' ) ).toHaveCount( 0 );
+		} finally {
+			wp( 'option', 'delete', 'affibloom_ai_texts' );
+		}
+	} );
 } );

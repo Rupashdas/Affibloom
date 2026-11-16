@@ -1460,3 +1460,8 @@ ul .affibloom-box.affibloom-list:last-child { margin-bottom: 0px !important; }
 .affibloom-list.h2 > li { font-size: 1.5em !important; }
 .affibloom-list.h3 > li { font-size: 1.17em !important; }
 .affibloom-list.h4 > li { font-size: 1em !important; }
+
+/* A stored AI text (F30 R43; Task DT9; Lasso's lasso-live rule 53-55): its container without padding. */
+.affibloom-box.affibloom-ai {
+	padding: 0 !important;
+}

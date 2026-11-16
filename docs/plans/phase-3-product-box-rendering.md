@@ -156,7 +156,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT6: A group shown as a gallery
 - [x] Task DT7: A product shown as a button
 - [x] Task DT8: The SiteStripe card
-- [ ] Task DT9: Stored AI text
+- [x] Task DT9: Stored AI text
 - Task DT10: dropped (decision B5: stored AI text only)
 - [ ] Task 18S7: Group displays by shortcode
 - [ ] Task 18S12: A group's Copy Shortcode
@@ -1965,10 +1965,15 @@ that prompt; with none stored it shows nothing. No outgoing request happens.
 **Files:** the above; tests F30 **AC12** (a `pre_http_request` guard fails the test on any outgoing call),
 `AiTextServiceTest`, `OptionAiTextRepositoryTest` (integration; kses on print).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Store, service, renderer.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show stored AI text without calling any service".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Store, service, renderer.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show stored AI text without calling any service".
+
+*Note:* `AiText::key()` keeps Lasso's transient key (format + md5 of the trimmed prompt) for Task 26; the store reads
+only (`find()`; Task 26 adds the writing). `GridHtml` became the plan's `DisplayHtml` (grid, list, AI text).
+`DisplayKind::AiText`: a prompt without an id or slug. Seen on Local: the stored text through `wp_kses_post`, an
+unknown prompt prints nothing.
 
 ---
 

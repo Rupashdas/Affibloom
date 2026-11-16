@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Front;
 
+use Affibloom\Application\Display\AiTextService;
 use Affibloom\Application\Shortcode\ShortcodeRenderer;
 use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
@@ -33,9 +34,15 @@ final class AffibloomShortcode implements Module {
 	 *
 	 * @param ShortcodeRenderer $renderer The renderer.
 	 * @param BoxHtml           $html     The box's printer.
-	 * @param GridHtml          $grids    The grid's and the list's printer (F30 DT2, DT4).
+	 * @param DisplayHtml       $displays The group displays' and the AI text's printer (F30 DT2-DT9).
+	 * @param AiTextService     $ai_texts The stored AI texts (F30 DT9).
 	 */
-	public function __construct( private readonly ShortcodeRenderer $renderer, private readonly BoxHtml $html, private readonly GridHtml $grids ) {}
+	public function __construct(
+		private readonly ShortcodeRenderer $renderer,
+		private readonly BoxHtml $html,
+		private readonly DisplayHtml $displays,
+		private readonly AiTextService $ai_texts,
+	) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -58,20 +65,23 @@ final class AffibloomShortcode implements Module {
 	 */
 	public function render( array|string $attributes ): string {
 		$request = DisplayRequest::of( $attributes );
-		// F30 R61: a grid always draws, an unknown or empty group as its wrapper.
+		// F30 R39, D14: a prompt without a product shows its stored text, or nothing; no service is asked.
+		if ( DisplayKind::AiText === $request->kind ) {
+			$text = $this->ai_texts->find( $request->attributes['prompt'] ?? '', strtolower( trim( $request->attributes['format'] ?? '' ) ) );
+			return null === $text ? '' : $this->displays->ai_text( $text );
+		}
+		// F30 R61: a grid or a gallery always draws, an unknown or empty group as its wrapper; a list as the empty list.
 		if ( DisplayKind::Grid === $request->kind ) {
 			++$this->drawn;
-			return $this->grids->render( $this->renderer->grid( $request, $this->drawn, (int) get_the_ID() ) );
+			return $this->displays->grid( $this->renderer->grid( $request, $this->drawn, (int) get_the_ID() ) );
 		}
-		// R61: a gallery always draws, an unknown or empty group as its wrapper.
 		if ( DisplayKind::Gallery === $request->kind ) {
 			++$this->drawn;
-			return $this->grids->render( $this->renderer->gallery( $request, $this->drawn, (int) get_the_ID() ) );
+			return $this->displays->grid( $this->renderer->gallery( $request, $this->drawn, (int) get_the_ID() ) );
 		}
-		// R61: a list always draws, an unknown or empty group as the empty list.
 		if ( DisplayKind::List === $request->kind ) {
 			++$this->drawn;
-			return $this->grids->list( $this->renderer->list( $request, $this->drawn, (int) get_the_ID() ) );
+			return $this->displays->list( $this->renderer->list( $request, $this->drawn, (int) get_the_ID() ) );
 		}
 		$view = $this->renderer->view( $request, $this->drawn + 1, (int) get_the_ID() );
 		if ( null === $view ) {
