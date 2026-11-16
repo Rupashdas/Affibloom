@@ -21,6 +21,9 @@ enum LayoutFamily: string {
 	case SixBox   = 'box-6';
 	// The SiteStripe card (R13), whatever the theme: a box with `sitestripe` while the site keeps the SiteStripe UI.
 	case SiteStripe = 'box-sitestripe';
+	// A product placed as a lone button or a lone image (F31 R10, A10; Task 18S4).
+	case Button = 'button';
+	case Image  = 'image';
 
 	/**
 	 * Cutter, Flow, Geek and Splash draw 2 boxes; Lab and Llama 3; Cactus and Money 6.

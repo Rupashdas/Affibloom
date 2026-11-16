@@ -1158,3 +1158,20 @@ a.affibloom-button-2:hover {
 	display: block;
 	width: 100%;
 }
+/* A product placed as a lone button or a lone image (Task 18S4; Lasso's lasso-live rules for
+   .lasso-button-container and .lasso-image-container): the button bold, the image centred at its own height. */
+.affibloom-button-container a {
+	text-decoration: none !important;
+	font-weight: bold !important;
+	opacity: 1 !important;
+}
+.affibloom-box.affibloom-image-container {
+	text-align: center;
+	padding: 0;
+}
+.affibloom-image.image-style img {
+	height: auto;
+	max-height: inherit;
+	width: auto;
+	position: inherit;
+}

@@ -138,7 +138,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S1: `[affibloom id]` draws a product's box
 - [x] Task 18S2: Text and link overrides
 - [x] Task 18S3: Value overrides
-- [ ] Task 18S4: `type="button"` and `type="image"`
+- [x] Task 18S4: `type="button"` and `type="image"`
 - [ ] Task 18S5: `type="link"`, SiteStripe and inline fields
 - [ ] Task 18S6: Address a product by its Amazon URL or destination
 - [ ] Task 18S9: Boxes in widgets, on AMP pages and in feeds
@@ -1355,11 +1355,16 @@ image (500×500, `?src=image` on a non-Amazon permalink); both carry the anchor 
 
 **Files:** the above; F31 **AC4**; `DisplayRequestTest` rows.
 
-- [ ] **Step 1: Failing tests** (markup equality with Lasso's for one product, both kinds).
-- [ ] **Step 2: Kinds,
+- [x] **Step 1: Failing tests** (markup equality with Lasso's for one product, both kinds).
+- [x] **Step 2: Kinds,
   views, templates.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Place a product as a button or an image".
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Place a product as a button or an image".
+
+*Note:* as 22E, the two are template families (`LayoutFamily::Button`, `::Image`; `button.php`, `image.php`) chosen by the
+renderer, so `BoxHtml` prints them (no `ButtonHtml`/`ImageHtml`; DT5 and DT7 reuse these). `?src=image` belongs to a
+cloaked permalink, which Affibloom does not have yet. Checked beside `[lasso type="button|image"]`, 8 themes, both
+widths: equal.
 
 ---
 

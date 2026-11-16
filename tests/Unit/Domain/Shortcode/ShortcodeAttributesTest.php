@@ -63,4 +63,15 @@ final class ShortcodeAttributesTest extends TestCase {
 		self::assertSame( 'Money', $request->overrides->theme );
 		self::assertSame( 'here', $request->overrides->anchor_id );
 	}
+
+	/**
+	 * A10, A11, A34 (Task 18S4): `type="button"`, `type="image"` / `"image-link"` / `style="image"`, `button_type`.
+	 */
+	public function test_the_lone_button_and_image_kinds(): void {
+		self::assertSame( DisplayKind::Button, DisplayRequest::of( array( 'type' => 'Button' ) )->kind );
+		self::assertSame( DisplayKind::Image, DisplayRequest::of( array( 'type' => 'image-link' ) )->kind );
+		self::assertSame( DisplayKind::Image, DisplayRequest::of( array( 'style' => 'image' ) )->kind );
+		self::assertSame( DisplayKind::Single, DisplayRequest::of( array( 'type' => 'other' ) )->kind );
+		self::assertTrue( DisplayRequest::of( array( 'type' => 'button', 'button_type' => 'secondary' ) )->secondary );
+	}
 }

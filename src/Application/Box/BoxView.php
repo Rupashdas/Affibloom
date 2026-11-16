@@ -21,6 +21,7 @@ final class BoxView {
 	 *
 	 * @param LayoutFamily          $family      Which layout prints it.
 	 * @param string                $anchor      The container's `id`.
+	 * @param string                $theme       The theme's class (`affibloom-<theme>`), for the lone button's container.
 	 * @param string                $classes     The display wrapper's classes.
 	 * @param array<string, string> $wrapper     The display wrapper's other attributes (DisplayPresentation).
 	 * @param string                $badge       The badge text; '' for none.
@@ -48,6 +49,7 @@ final class BoxView {
 	public function __construct(
 		public readonly LayoutFamily $family,
 		public readonly string $anchor,
+		public readonly string $theme,
 		public readonly string $classes,
 		public readonly array $wrapper,
 		public readonly string $badge,
@@ -70,6 +72,24 @@ final class BoxView {
 		public readonly ?string $disclosure,
 		public readonly ?string $date,
 	) {}
+
+	/**
+	 * A copy drawn by another template (the shortcode's lone button or image, F31 A10).
+	 *
+	 * @param LayoutFamily $family The template.
+	 */
+	public function as_family( LayoutFamily $family ): self {
+		return new self( ...array_merge( get_object_vars( $this ), array( 'family' => $family ) ) );
+	}
+
+	/**
+	 * A copy with other buttons (the lone secondary button, F31 A34).
+	 *
+	 * @param list<BoxButton> $buttons The buttons.
+	 */
+	public function with_buttons( array $buttons ): self {
+		return new self( ...array_merge( get_object_vars( $this ), array( 'buttons' => $buttons ) ) );
+	}
 
 	/**
 	 * A copy with another container `id` (the shortcode's deterministic anchor, F31 D5).

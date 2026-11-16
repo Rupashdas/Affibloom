@@ -88,4 +88,18 @@ test.describe( 'F31 Shortcode', () => {
 			wp( 'option', 'delete', 'affibloom_display' );
 		}
 	} );
+
+	// AC4 (Task 18S4): a lone button in the product's theme (the second with button_type="secondary") and a lone linked
+	// image, both with the anchor (checked beside [lasso type="button|image"] in 18S4).
+	test( 'AC4 type="button" and type="image" place a lone button or image', async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC4', theme: 'Money', url2: 'https://www.example.com/two', button_text2: 'Two' } );
+		await page.goto( newPostWith( `[affibloom id="${ id }" type="button"][affibloom id="${ id }" type="button" button_type="secondary"][affibloom id="${ id }" type="image"]` ) );
+		const boxes = page.locator( '.affibloom-box' );
+		await expect( boxes.nth( 0 ) ).toHaveClass( /affibloom-button-container affibloom-money/ );
+		await expect( boxes.nth( 0 ).locator( 'a.affibloom-button-1' ) ).toHaveCount( 1 );
+		await expect( boxes.nth( 1 ).locator( 'a.affibloom-button-2' ) ).toHaveText( 'Two' );
+		await expect( boxes.nth( 2 ) ).toHaveClass( /affibloom-image-container/ );
+		await expect( boxes.nth( 2 ).locator( `a.affibloom-image.image-style#css-${ id } img` ) ).toHaveAttribute( 'width', '500' );
+		await expect( boxes.nth( 2 ) ).toHaveAttribute( 'id', `affibloom-anchor-id-${ id }-3` );
+	} );
 } );

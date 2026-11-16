@@ -135,6 +135,7 @@ final class BoxBuilder {
 			// of one product never share an ID.
 			anchor: '' !== $overrides->anchor_id ? $overrides->anchor_id : 'affibloom-anchor-id-' . $id . '-' . ( '' !== $overrides->link_id ? $overrides->link_id : uniqid() ),
 			// R6, R80: `mobile` or `desktop` (the box's style, or a text widget's box) after the slug.
+			theme: 'affibloom-' . strtolower( $theme->name() ),
 			classes: $sitestripe ? 'affibloom-display sitestripe affibloom-url-' . $product->slug : implode( ' ', array_filter( array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, $overrides->style, $advanced ? 'affibloom-advanced' : '' ) ) ),
 			// R64: the classic box has no v2 wrapper attributes; its colours come through the page's :root block.
 			// R13: the card has only its size, Lasso's default 240 x 400 unless the box gives its own style.

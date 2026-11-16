@@ -23,11 +23,13 @@ final class DisplayRequest {
 	 * @param DisplayKind  $kind      What to draw.
 	 * @param Address      $address   Which product.
 	 * @param BoxOverrides $overrides The box's own values.
+	 * @param bool         $secondary `button_type="secondary"`: a lone button draws the second button (A34).
 	 */
 	public function __construct(
 		public readonly DisplayKind $kind,
 		public readonly Address $address,
 		public readonly BoxOverrides $overrides,
+		public readonly bool $secondary = false,
 	) {}
 
 	/**
@@ -38,6 +40,11 @@ final class DisplayRequest {
 	public static function of( array|string $raw ): self {
 		$attributes = ShortcodeAttributes::repaired( $raw );
 
-		return new self( DisplayKind::Single, Address::of( $attributes ), BoxOverrides::from_shortcode( $attributes ) );
+		return new self(
+			DisplayKind::of( $attributes ),
+			Address::of( $attributes ),
+			BoxOverrides::from_shortcode( $attributes ),
+			'secondary' === strtolower( $attributes['button_type'] ?? '' )
+		);
 	}
 }

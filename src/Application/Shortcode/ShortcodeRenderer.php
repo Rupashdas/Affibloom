@@ -15,11 +15,13 @@ use Affibloom\Application\Box\BoxView;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
+use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Domain\Shortcode\AnchorId;
+use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
 
 /**
@@ -81,6 +83,23 @@ final class ShortcodeRenderer {
 		);
 
 		// D5: a deterministic anchor (the block keeps Lasso's uniqid()).
-		return $view->with_anchor( AnchorId::of( $overrides->anchor_id, (int) $product->id, $number ) );
+		$view = $view->with_anchor( AnchorId::of( $overrides->anchor_id, (int) $product->id, $number ) );
+
+		// A34: button_type="secondary" draws the second button when the product has one.
+		if ( DisplayKind::Button === $request->kind && $request->secondary ) {
+			foreach ( $view->buttons as $button ) {
+				if ( 'affibloom-button-2' === $button->css_class ) {
+					$view = $view->with_buttons( array( $button ) );
+					break;
+				}
+			}
+		}
+
+		// A10: a lone button or a lone image.
+		return match ( $request->kind ) {
+			DisplayKind::Button => $view->as_family( LayoutFamily::Button ),
+			DisplayKind::Image  => $view->as_family( LayoutFamily::Image ),
+			default             => $view,
+		};
 	}
 }
