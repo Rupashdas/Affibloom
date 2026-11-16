@@ -65,7 +65,7 @@ $soon_tabs   = array(
 				$this->render( 'admin/partials/tracking-id-notice', $view['tracking'] );
 			}
 			// Lasso 370 opens its page with the Share kit (Task 14D).
-			$this->render( 'admin/partials/share-kit' );
+			$this->render( 'admin/partials/share-kit', array( 'shortcode' => \Affibloom\Interface\ShortcodeText::product( (int) $product->id ) ) );
 			?>
 
 			<?php // Save Changes, or Enter in a text field, sends the form through product-save.js (Task 15A). ?>

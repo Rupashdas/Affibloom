@@ -143,7 +143,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18S6: Address a product by its Amazon URL or destination
 - [x] Task 18S9: Boxes in widgets, on AMP pages and in feeds
 - [x] Task 18S10: The Dashboard row's Shortcode button
-- [ ] Task 18S11: The Share kit's Copy shortcode
+- [x] Task 18S11: The Share kit's Copy shortcode
 - [ ] Task 18S14: Review and pros/cons schema in the page head
 
 **F30, display types, then the group shortcode parts that need them:**
@@ -1545,10 +1545,14 @@ ignored a click in quick edit; the Share kit still copies.
 
 **Files:** the above; F31 **AC11**, F1 AC (Share kit) rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: The button.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Copy a product's shortcode from its Share kit".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: The button.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Copy a product's shortcode from its Share kit".
+
+*Note:* the button lives in `partials/share-kit.php` and copies through product.js (which already calls
+`affibloomCopy()`); `product-save.js` needed nothing, as the product page always holds a saved product. F1 AC11 now
+expects the button enabled. Seen on Local: copied `[affibloom id]`, read "Copied!".
 
 ---
 

@@ -735,7 +735,7 @@ test.describe( 'F1 Product library', () => {
 	} );
 
 	// Task 14D: Lasso's Share kit. The shareable URL is the destination until link cloaking exists (D5); the disclosure
-	// is the field's, else the site's text; the shortcode and the block wait for Task 18S and Phase 4.
+	// is the field's, else the site's text; the shortcode is F31 AC11's (Task 18S11); the block waits for Phase 4.
 	test( 'AC11 the Share kit copies the destination and the disclosure', async ( { page } ) => {
 		// The Local site is plain http, where browsers give pages no clipboard API, so the page copies with the
 		// selection fallback (product.js). Record what either way copies.
@@ -773,7 +773,7 @@ test.describe( 'F1 Product library', () => {
 		await kit.getByRole( 'button', { name: 'Copy disclosure' } ).click();
 		expect( await clipboard() ).toBe( await page.locator( '#affibloom-disclosure' ).getAttribute( 'placeholder' ) );
 
-		await expect( kit.getByRole( 'button', { name: 'Copy shortcode' } ) ).toBeDisabled();
+		await expect( kit.getByRole( 'button', { name: 'Copy shortcode' } ) ).toBeEnabled();
 		await expect( kit.getByRole( 'button', { name: 'Copy block' } ) ).toBeDisabled();
 	} );
 

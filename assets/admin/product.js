@@ -20,6 +20,9 @@
 			if ( 'public' === target || 'destination' === target ) {
 				return destination ? destination.value.trim() : '';
 			}
+			if ( 'shortcode' === target ) {
+				return kit.dataset.shortcode || '';
+			}
 			if ( 'disclosure' === target && disclosure ) {
 				return '' !== disclosure.value.trim() ? disclosure.value.trim() : disclosure.getAttribute( 'placeholder' ) || '';
 			}

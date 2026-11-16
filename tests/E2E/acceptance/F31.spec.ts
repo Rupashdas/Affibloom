@@ -188,4 +188,18 @@ test.describe( 'F31 Shortcode', () => {
 		await button.click();
 		await expect( page.locator( '.affibloom-toast--error' ) ).toContainText( 'Could not copy shortcode.' );
 	} );
+
+	// AC11 (Task 18S11): the product page's Share kit copies [affibloom id] and reads "Copied!" for 1.5 s.
+	test( "AC11 the Share kit's Copy shortcode copies [affibloom id]", async ( { page } ) => {
+		const id = createProduct( { name: 'F31 AC11' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await page.evaluate( () => document.addEventListener( 'copy', ( event ) => {
+			( window as unknown as { copied: string } ).copied = ( event.target as HTMLTextAreaElement ).value;
+		} ) );
+		const button = page.getByRole( 'region', { name: 'Share kit' } ).getByRole( 'button', { name: 'Copy shortcode' } );
+		await button.click();
+		expect( await page.evaluate( () => ( window as unknown as { copied?: string } ).copied ) ).toBe( `[affibloom id="${ id }"]` );
+		await expect( button ).toHaveText( 'Copied!' );
+		await expect( button ).toHaveText( 'Copy shortcode', { timeout: 2500 } );
+	} );
 } );
