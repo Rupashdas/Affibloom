@@ -215,4 +215,29 @@ test.describe( 'F30 Display types', () => {
 		await expect( images.nth( 1 ).locator( 'img' ) ).toHaveAttribute( 'src', 'https://m.media-amazon.com/images/I/31Prn-XVTjL._SL500_.jpg' );
 		await expect( images.nth( 1 ).locator( 'img' ) ).toHaveAttribute( 'alt', 'Other words' );
 	} );
+
+	// AC8 (Task DT6): type="gallery" shows each product as a linked image in rows of `columns` (2-5, else 4), one per
+	// row below 768 px; only the wrapper has an id. Measured beside Lasso's gallery on Local (Task DT6's Note).
+	test( 'AC8 type="gallery" shows the group as linked images in rows', async ( { page, context } ) => {
+		await blockTrackers( context );
+		const ids = [ 1, 2, 3, 4, 5 ].map( ( n ) => createProduct( { name: `F30 AC8 ${ n }`, image_url: 'https://m.media-amazon.com/images/I/21+19jCldWL._SL500_.jpg' } ) );
+		const slug = createGroup( `F30 AC8 ${ Date.now() }`, ids );
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await page.goto( newPostWith( `[affibloom type="gallery" group="${ slug }"][affibloom type="gallery" group="${ slug }" columns="3"][affibloom type="gallery" group="${ slug }" columns="1"]` ) );
+		const galleries = page.locator( '.affibloom-grid-wrap' );
+		await expect( galleries.nth( 0 ) ).not.toHaveClass( /affibloom-advanced/ );
+		await expect( galleries.nth( 0 ).locator( '.affibloom-grid-row.affibloom-grid-4' ) ).toHaveCount( 2 );
+		await expect( galleries.nth( 1 ).locator( '.affibloom-grid-row.affibloom-grid-3' ) ).toHaveCount( 2 );
+		await expect( galleries.nth( 2 ).locator( '.affibloom-grid-row.affibloom-grid-4' ) ).toHaveCount( 2 );
+		await expect( galleries.nth( 0 ).locator( '.affibloom-image-container a.affibloom-image img' ) ).toHaveCount( 5 );
+		await expect( galleries.nth( 0 ).locator( '.affibloom-image-container[id]' ) ).toHaveCount( 0 );
+		await expect( galleries.nth( 0 ).locator( 'img' ).first() ).toHaveAttribute( 'alt', 'F30 AC8 1' );
+		const tops = await galleries.nth( 0 ).locator( '.affibloom-image-container' ).evaluateAll( ( items ) => items.map( ( i ) => Math.round( i.getBoundingClientRect().top ) ) );
+		expect( new Set( tops.slice( 0, 4 ) ).size ).toBe( 1 );
+
+		await page.setViewportSize( { width: 390, height: 900 } );
+		await page.reload();
+		const lefts = await galleries.nth( 0 ).locator( '.affibloom-image-container' ).evaluateAll( ( items ) => items.map( ( i ) => Math.round( i.getBoundingClientRect().left ) ) );
+		expect( new Set( lefts ).size ).toBe( 1 );
+	} );
 } );

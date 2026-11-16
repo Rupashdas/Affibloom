@@ -115,6 +115,34 @@ final class ShortcodeRenderer {
 	}
 
 	/**
+	 * A group shown as an image gallery (F30 R25, R26; D3, D9): the group's shown products as lone images (the
+	 * gallery's `image_url` on each; the alt text the product's name, as Lasso's), in rows of `columns` (2-5, else 4),
+	 * inside the grid's wrapper without settings, theme or disclosure; only the wrapper has an id.
+	 *
+	 * @param DisplayRequest $request The shortcode's request.
+	 * @param int            $number  The display's number among the page's `[affibloom]` displays, from 1.
+	 * @param int            $post_id The post it is in (0 outside one).
+	 */
+	public function gallery( DisplayRequest $request, int $number, int $post_id ): GridView {
+		$group    = GroupAttributes::of( $request->attributes );
+		$per_card = BoxOverrides::from_shortcode( array_diff_key( $request->attributes, array_flip( array( 'tracking_id', 'anchor_id', 'image_alt' ) ) ) );
+
+		$items = array();
+		foreach ( $this->groups->shown( $group->group, $group->limit, $group->latest ) as $product ) {
+			$items[] = $this->built( $product, $per_card, $post_id, DisplayType::single() )->as_family( LayoutFamily::Image )->with_anchor( '' );
+		}
+
+		return new GridView(
+			anchor: AnchorId::of( $request->overrides->anchor_id, $group->group, $number ),
+			classes: 'affibloom-grid-wrap',
+			wrapper: array(),
+			cards: $items,
+			disclosure: null,
+			per_row: GridColumns::gallery( $group->columns ),
+		);
+	}
+
+	/**
 	 * A group shown as a list (F30 R21-R23; D6, D7): the group's shown products as list cards in the List settings, each
 	 * with the shortcode's per-box values (not its `tracking_id` or `anchor_id`) and its own disclosure; the list's
 	 * bullets and the List settings' attributes without the price and disclosure flags.

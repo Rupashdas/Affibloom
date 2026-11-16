@@ -153,7 +153,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT3: The grid with default Display settings — rows, `columns`, `compact`
 - [x] Task DT4: A group shown as a list, with the phone swipe row
 - [x] Task DT5: A product shown as an image
-- [ ] Task DT6: A group shown as a gallery
+- [x] Task DT6: A group shown as a gallery
 - [ ] Task DT7: A product shown as a button
 - [ ] Task DT8: The SiteStripe card
 - [ ] Task DT9: Stored AI text
@@ -1866,11 +1866,15 @@ rows of three (2-5; four when absent), one per row on a phone.
 
 **Files:** the above; tests F30 **AC8**.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Renderer and template** (rows of N, the wrapper keeps the only
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Renderer and template** (rows of N, the wrapper keeps the only
   id).
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show a group as an image gallery".
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show a group as an image gallery".
+
+*Note:* `ShortcodeRenderer::gallery()` gives a `GridView` of lone images (18S4's `image.php`, no id on the items) in
+rows of `GridColumns::gallery()`, printed by `grid.php`; its CSS came with DT2's port. Measured beside Lasso's gallery
+on Local with `columns` 4 (none), 3, 1 and 5: same pixels at 1280/390.
 
 ---
 

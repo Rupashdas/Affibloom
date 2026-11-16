@@ -63,6 +63,11 @@ final class AffibloomShortcode implements Module {
 			++$this->drawn;
 			return $this->grids->render( $this->renderer->grid( $request, $this->drawn, (int) get_the_ID() ) );
 		}
+		// R61: a gallery always draws, an unknown or empty group as its wrapper.
+		if ( DisplayKind::Gallery === $request->kind ) {
+			++$this->drawn;
+			return $this->grids->render( $this->renderer->gallery( $request, $this->drawn, (int) get_the_ID() ) );
+		}
 		// R61: a list always draws, an unknown or empty group as the empty list.
 		if ( DisplayKind::List === $request->kind ) {
 			++$this->drawn;

@@ -18,4 +18,14 @@ final class GridColumnsTest extends TestCase {
 		self::assertSame( 3, GridColumns::of( null, true, 3 ) );
 		self::assertSame( 2, GridColumns::of( null, false, 3 ) );
 	}
+
+	/**
+	 * A gallery: `columns` 2-5, else 4 (Task DT6).
+	 */
+	public function test_a_gallerys_columns(): void {
+		self::assertSame( 3, GridColumns::gallery( 3 ) );
+		self::assertSame( 5, GridColumns::gallery( 5 ) );
+		self::assertSame( 4, GridColumns::gallery( 1 ) );
+		self::assertSame( 4, GridColumns::gallery( null ) );
+	}
 }

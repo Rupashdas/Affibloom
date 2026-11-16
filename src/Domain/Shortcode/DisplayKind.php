@@ -16,13 +16,14 @@ namespace Affibloom\Domain\Shortcode;
  */
 enum DisplayKind: string {
 
-	case Single = 'single';
-	case Button = 'button';
-	case Image  = 'image';
-	case Link   = 'link';
-	case Field  = 'field';
-	case Grid   = 'grid';
-	case List   = 'list';
+	case Single  = 'single';
+	case Button  = 'button';
+	case Image   = 'image';
+	case Link    = 'link';
+	case Field   = 'field';
+	case Grid    = 'grid';
+	case List    = 'list';
+	case Gallery = 'gallery';
 
 	/**
 	 * The kind in a shortcode's attributes: `type="button"`, `type="image"` or `"image-link"` (AmaLinks Pro's), or
@@ -32,13 +33,14 @@ enum DisplayKind: string {
 	 */
 	public static function of( array $attributes ): self {
 		$type = strtolower( $attributes['type'] ?? '' );
-		// F30 R2: a group is a list with type list, a grid unless a gallery is asked for (DT6 draws that; 18S7 adds
+		// F30 R2: a group is a list with type list, a gallery with type gallery, any other type a grid (18S7 adds
 		// `category`).
-		if ( '' !== trim( $attributes['group'] ?? '' ) && 'list' === $type ) {
-			return self::List;
-		}
-		if ( '' !== trim( $attributes['group'] ?? '' ) && 'gallery' !== $type ) {
-			return self::Grid;
+		if ( '' !== trim( $attributes['group'] ?? '' ) ) {
+			return match ( $type ) {
+				'list'    => self::List,
+				'gallery' => self::Gallery,
+				default   => self::Grid,
+			};
 		}
 		if ( 'button' === $type ) {
 			return self::Button;

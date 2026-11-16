@@ -23,6 +23,11 @@ final class GridColumns {
 	public const CLASSIC_DEFAULT = 2;
 
 	/**
+	 * A gallery's count when the shortcode gives none or one outside 2-5 (R14).
+	 */
+	public const GALLERY_DEFAULT = 4;
+
+	/**
 	 * The count.
 	 *
 	 * @param int|null $attribute  The shortcode's `columns` (1-5); null none.
@@ -35,5 +40,14 @@ final class GridColumns {
 		}
 
 		return $customised ? $site : self::CLASSIC_DEFAULT;
+	}
+
+	/**
+	 * A gallery's count (R14, R25): the shortcode's `columns` when it is 2-5, else 4; the settings play no part.
+	 *
+	 * @param int|null $attribute The shortcode's `columns` (1-5); null none.
+	 */
+	public static function gallery( ?int $attribute ): int {
+		return null !== $attribute && $attribute >= 2 ? $attribute : self::GALLERY_DEFAULT;
 	}
 }

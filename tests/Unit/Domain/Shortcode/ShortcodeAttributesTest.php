@@ -95,14 +95,15 @@ final class ShortcodeAttributesTest extends TestCase {
 	}
 
 	/**
-	 * F30 R2, R6 (Task DT2): `group` asks for a grid (a list with type list, Task DT4; a gallery is DT6's); `limit` empty is all, a
+	 * F30 R2, R6 (Task DT2): `group` asks for a grid (a list with type list, DT4; a gallery with type gallery, DT6; any other type a grid); `limit` empty is all, a
 	 * number its whole value, 0 or junk 10; `latest` only as `true`; a grid's anchor names the group.
 	 */
 	public function test_a_group_display(): void {
 		self::assertSame( DisplayKind::Grid, DisplayRequest::of( array( 'group' => 'shoes' ) )->kind );
 		self::assertSame( DisplayKind::Grid, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'grid' ) )->kind );
 		self::assertSame( DisplayKind::List, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'list' ) )->kind );
-		self::assertSame( DisplayKind::Single, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'gallery' ) )->kind );
+		self::assertSame( DisplayKind::Gallery, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'gallery' ) )->kind );
+		self::assertSame( DisplayKind::Grid, DisplayRequest::of( array( 'group' => 'shoes', 'type' => 'button' ) )->kind );
 		self::assertSame( 'roman', GroupAttributes::of( array( 'bullets' => ' roman ' ) )->bullets );
 
 		self::assertNull( GroupAttributes::of( array( 'limit' => '' ) )->limit );
