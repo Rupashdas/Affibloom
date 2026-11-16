@@ -812,6 +812,34 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC19 (Task 21C): a Copy to Clipboard field shows its value and a button that copies it; its script loads with the
+	// box (deviation 136). The local site is http, so the copy takes Lasso's textarea path; recorded here.
+	test( 'AC19 a Copy to Clipboard field shows its value and a button that copies it', async ( { page } ) => {
+		const [ coupon ] = JSON.parse( wp( 'eval-file', 'tests/E2E/fixtures/create-fields.php', JSON.stringify( [ { name: 'Coupon', type: 'copy_clipboard' } ] ) ) ) as number[];
+		const id = createProduct( { name: 'F5 AC19', fields: [ { field: coupon, value: 'VBVAULT10' } ] } );
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { proscons: true } } } ), '--format=json' );
+		try {
+			await page.goto( newPostWith( boxBlock( id ) ) );
+			const field = page.locator( '.affibloom-box .affibloom-field-copy-clipboard' );
+			await expect( field.locator( '.affibloom-copy-clipboard-value' ) ).toHaveText( 'VBVAULT10' );
+			const button = field.getByRole( 'button', { name: 'Copy to clipboard' } );
+			await expect( button ).toHaveAttribute( 'data-copy-value', 'VBVAULT10' );
+			await expect( page.locator( 'script[src*="assets/front/copy-clipboard.js"]' ) ).toHaveCount( 1 );
+
+			await page.evaluate( () => {
+				const real = document.execCommand.bind( document );
+				document.execCommand = ( command: string ) => {
+					( window as unknown as { copied: string } ).copied = ( document.activeElement as HTMLTextAreaElement ).value;
+					return real( command );
+				};
+			} );
+			await button.click();
+			await expect.poll( () => page.evaluate( () => ( window as unknown as { copied?: string } ).copied ) ).toBe( 'VBVAULT10' );
+		} finally {
+			useSiteDisplay();
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

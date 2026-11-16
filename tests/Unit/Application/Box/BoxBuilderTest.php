@@ -482,8 +482,8 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( '1', $hidden->wrapper['data-hide-secondary'] );
 	}
 	/**
-	 * F5 R23, R30-R34 (Task 21B): the visible rows in order, by type, without the Primary Rating, hidden rows, table-only
-	 * fields and Copy to Clipboard (21C).
+	 * F5 R23, R30-R35 (Tasks 21B, 21C): the visible rows in order, by type, without the Primary Rating, hidden rows and
+	 * table-only fields.
 	 */
 	public function test_the_fields_block_holds_the_visible_rows_by_type(): void {
 		list( $library, $text )    = FieldLibrary::from_array( array() )->create( 'Upper', FieldType::Text, '' );
@@ -504,7 +504,7 @@ final class BoxBuilderTest extends TestCase {
 		$view = ( new BoxBuilder( self::THUMBNAIL ) )->build( self::product(), self::display(), self::settings(), BoxOverrides::from_block( array( 'productId' => 14727 ) ), 0, new BoxFields( $values, $library ) );
 
 		self::assertSame(
-			array( array( 'text', 'Upper' ), array( 'pros-cons', 'Pros' ), array( 'numbered', 'Steps' ) ),
+			array( array( 'text', 'Upper' ), array( 'pros-cons', 'Pros' ), array( 'numbered', 'Steps' ), array( 'copy', 'Code' ) ),
 			array_map( static fn( $f ) => array( $f->kind, $f->name ), $view->fields )
 		);
 		self::assertSame( array( 'Light', 'Quick' ), $view->fields[1]->lines() );

@@ -312,8 +312,8 @@ final class BoxBuilder {
 	}
 
 	/**
-	 * The fields block (R23, R30-R34): the product's visible rows in their order, without the Primary Rating (the stars,
-	 * R14), the table-only fields and the Copy to Clipboard field (Task 21C), each printed by its type.
+	 * The fields block (R23, R30-R35): the product's visible rows in their order, without the Primary Rating (the stars,
+	 * R14) and the table-only fields, each printed by its type.
 	 *
 	 * @param ProductFields $values  The product's field rows.
 	 * @param FieldLibrary  $library The fields, for names and types.
@@ -323,7 +323,7 @@ final class BoxBuilder {
 		$out = array();
 		foreach ( $values->all() as $row ) {
 			$field = $library->find( $row->field_id );
-			if ( ! $row->visible || ProductFields::RATING_ID === $row->field_id || null === $field || $field->table_only || FieldType::CopyClipboard === $field->type ) {
+			if ( ! $row->visible || ProductFields::RATING_ID === $row->field_id || null === $field || $field->table_only ) {
 				continue;
 			}
 			$kind = match ( true ) {
@@ -331,6 +331,7 @@ final class BoxBuilder {
 				FieldType::Rating === $field->type             => BoxField::RATING,
 				FieldType::BulletedList === $field->type       => BoxField::BULLETED,
 				FieldType::NumberedList === $field->type       => BoxField::NUMBERED,
+				FieldType::CopyClipboard === $field->type      => BoxField::COPY,
 				default                                        => BoxField::TEXT,
 			};
 			$out[] = new BoxField( $kind, $row->field_id, $field->name, $row->value );

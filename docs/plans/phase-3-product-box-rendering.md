@@ -118,7 +118,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 20B: Per-box overrides — theme, buttons, tracking ID, disclosure, anchor, mobile
 - [x] Task 20C: Per-box overrides — price, Prime, rating, Pros & Cons, fields
 - [x] Task 21B: Custom fields and Pros & Cons in the box
-- [ ] Task 21C: The Copy to Clipboard field
+- [x] Task 21C: The Copy to Clipboard field
 - [ ] Task 20D: Product structured data
 - Task 22D: dropped (decision B9: brag mode left out)
 - [ ] Task 22E: SiteStripe box
@@ -747,6 +747,95 @@ font rules had lost Lasso's `:is()` specificity (18I's rules); restored. Checked
 the box's `price`; `basisPrice` reaches the price partial's discount span (C1F adds Amazon's basis there). Beside
 Lasso's box (rating, price, Pros, renamed Cons), 8 themes, both widths: equal; it found a 21B CSS rule from Lasso's
 List display, fixed in its own commit.
+
+---
+
+### Task 20D: Product structured data
+
+**Feature:** F5 (R90-R93; AC17)
+
+**Why:** Lasso prints Product JSON-LD in the head for the first box that asks for it (F5 R90-R93), and 248 boxes on this site carry the schema attributes (F31 18S14).
+
+**Depends on:** 20A, 21A, 21B.
+
+**User action:** the first box with `schemaReview` or `schemaProsCons` on prints one Product JSON-LD in `<head>`
+(offers, review with author and rating, pros/cons notes); none otherwise.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Application\Box\SchemaBuilder`, `Interface\Front\SchemaMarkup`; the four schema attributes | `wp_head` |
+
+**Files:** create `src/Application/Box/SchemaBuilder.php`, `src/Interface/Front/SchemaMarkup.php`, `tests/Unit/Application/SchemaBuilderTest.php`; modify `blocks/product-box/block.json` (the four schema attributes), `src/Plugin.php`, `tests/E2E/acceptance/F5.spec.ts` (AC17).
+
+- [ ] **Step 1: Failing tests (AC17; unit `SchemaBuilderTest`).**
+- [ ] **Step 2: Builder.**
+- [ ] **Step 3: Print.**
+- [ ] **Step 4: Run and look.** View the source of a post whose first box enables Review schema and one that does not; check the JSON-LD with Google's Rich Results Test by hand.
+- [ ] **Step 5: Commit** — "Print Lasso's product schema for a box".
+
+---
+
+### Task 21A: The Primary Rating stars
+
+**Feature:** F5 (R14; AC1 rating), F8 AC1-AC6
+
+**Why:** the Primary Rating is the stars readers see in the box (F5 R14; F8).
+
+**Depends on:** 18B, F1 14C.
+
+**User action:** a product with a visible Primary Rating shows stars and the value (label when its toggle is on).
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| stars partial, rules | `BoxBuilder` |
+
+**Files:** create the stars partial under `templates/front/`; modify `src/Application/Box/BoxBuilder.php`, `assets/front/box.css`, `tests/E2E/acceptance/{F5,F8}.spec.ts` (F8 AC1-AC6).
+
+- [x] **Step 1: Failing tests (F8).**
+- [x] **Step 2: Builder and partial.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show the rating in the box".
+
+*Note:* the block now passes the product's field rows and the field library (`BoxFields`) to the builder; 21B reads
+the same. The label carries `affibloom-stars-label` only (Lasso adds its utility classes `float-left mr-1`; their two
+declarations sit on the label's rule). A non-numeric rating draws no stars (Lasso prints it raw into `--rating`).
+`createProduct({ rating })` now writes field 1's row. Checked beside Lasso's box, all 8 themes, 1280 and 390 px: equal.
+
+---
+
+### Task 21B: Custom fields and Pros & Cons in the box
+
+**Feature:** F5 (R23, R30-R34; AC18)
+
+**Why:** the box prints a product's visible custom fields by type, among them Pros and Cons with their icons and colours (F5 R23, R30-R34).
+
+**Depends on:** 21A, 18D.
+
+**User action:** a product's visible fields print in order by type: Pros/Cons with icons and colours, lists, rating
+fields, text, numbers.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `BoxField`, field partials, field rules | `BoxBuilder` |
+
+**Files:** create `src/Application/Box/BoxField.php` and the field partials under `templates/front/`; modify `src/Application/Box/BoxBuilder.php`, `assets/front/box.css`, `tests/E2E/acceptance/F5.spec.ts` (AC18).
+
+- [x] **Step 1: Failing tests (AC18).**
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Partials and CSS.**
+- [x] **Step 4: Run and look.** A product with Pros, Cons, a list, a rating field and text at 1280 and 390 px beside the `themes/` baselines.
+- [x] **Step 5: Commit** — "Show custom fields and Pros & Cons in the box".
+
+*Note:* run before 20C, whose "Depends on" names 21B (the run list had them the other way). One partial
+(`partials/fields.php`) holds Lasso's field-row types; names and values are escaped (D4); Copy to Clipboard is left
+for 21C. Checked beside Lasso's box with Pros and Cons, element on and off, 8 themes, both widths: equal. The
+`all-fields` cells hold Copy to Clipboard, so they pass only with 21C. Test fixture `create-fields.php`.
 
 ---
 

@@ -1,8 +1,8 @@
 <?php
 /**
  * The custom fields block (F5 R23, R30-R34; Lasso's field-row.php under Affibloom's names): Pros and Cons as lists with
- * check or cross icons, rating fields as stars, bulleted and numbered lists, and every other type as text with its line
- * breaks. Names and values are escaped (D4; Lasso prints them raw).
+ * check or cross icons, rating fields as stars, bulleted and numbered lists, Copy to Clipboard with its button, and
+ * every other type as text with its line breaks. Names and values are escaped (D4; Lasso prints them raw).
  *
  * @package Affibloom
  * @var \Affibloom\Application\Box\BoxView $view
@@ -55,6 +55,13 @@ if ( array() === $view->fields ) {
 						</<?php echo tag_escape( $list_tag ); ?>>
 					<?php endif; ?>
 				</div>
+			</div>
+		<?php elseif ( BoxField::COPY === $field->kind ) : ?>
+			<div class="affibloom-fields-single affibloom-field-copy-clipboard">
+				<strong><?php echo esc_html( $field->name ); ?>:</strong>
+				<?php if ( '' !== $field->value ) : ?>
+					<span class="affibloom-copy-clipboard-value"><?php echo esc_html( $field->value ); ?></span><button type="button" class="affibloom-copy-clipboard-btn" aria-label="<?php esc_attr_e( 'Copy to clipboard', 'affibloom' ); ?>" data-copy-value="<?php echo esc_attr( $field->value ); ?>"><svg class="affibloom-copy-clipboard-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+				<?php endif; ?>
 			</div>
 		<?php else : ?>
 			<div class="affibloom-fields-single">

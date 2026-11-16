@@ -30,7 +30,7 @@ use Affibloom\Module;
  *   the inline CSS; with Jetpack, original images once a box is drawn.
  *
  * Every box is advanced until classic rendering exists (Task 18K), so the layout rules and script always come along.
- * Lasso's copy-to-clipboard script, which it loads on every page, comes with its field (Task 21C).
+ * Lasso's copy-to-clipboard script, which it loads on every page, loads with the box (Task 21C, deviation 136).
  */
 final class BoxAssets implements Module {
 
@@ -38,6 +38,7 @@ final class BoxAssets implements Module {
 	public const STYLE        = 'affibloom-box';
 	public const LAYOUT_STYLE = 'affibloom-box-layout';
 	public const LAYOUT_JS    = 'affibloom-box-layout';
+	public const COPY_JS      = 'affibloom-copy-clipboard';
 
 	/**
 	 * Whether this request's page needs the box's assets, once asked.
@@ -206,6 +207,8 @@ final class BoxAssets implements Module {
 	 */
 	private function enqueue_box(): void {
 		wp_enqueue_style( self::STYLE, $this->url . 'assets/front/box.css', array(), $this->file_version( 'assets/front/box.css' ) );
+		// R36 (deviation 136): the Copy to Clipboard button's script, in the footer, wherever a box is.
+		wp_enqueue_script( self::COPY_JS, $this->url . 'assets/front/copy-clipboard.js', array(), $this->file_version( 'assets/front/copy-clipboard.js' ), true );
 		// R64: the classic box loads neither the advanced stylesheet nor the phone-layout script.
 		if ( ! $this->display->current()->advanced() ) {
 			return;

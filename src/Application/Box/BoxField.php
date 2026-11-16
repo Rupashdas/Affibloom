@@ -27,6 +27,9 @@ final class BoxField {
 	/** A numbered list. */
 	public const NUMBERED = 'numbered';
 
+	/** A Copy to Clipboard field: the value and a button that copies it (R35). */
+	public const COPY = 'copy';
+
 	/** Every other type: the value with its line breaks. */
 	public const TEXT = 'text';
 

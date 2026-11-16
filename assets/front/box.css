@@ -1091,3 +1091,37 @@ a.affibloom-button-2:hover {
 	margin: 0 0 1rem 0 !important;
 	padding-left: 20px !important;
 }
+/* The Copy to Clipboard field (Task 21C; Lasso's lasso-live rules 117-121): the value, then a bare icon button. */
+.affibloom-field-copy-clipboard .affibloom-copy-clipboard-value {
+	vertical-align: middle;
+}
+.affibloom-field-copy-clipboard .affibloom-copy-clipboard-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 0 0 5px;
+	padding: 0;
+	border: 0;
+	background: transparent !important;
+	box-shadow: none !important;
+	vertical-align: middle;
+	line-height: 1;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.affibloom-field-copy-clipboard .affibloom-copy-clipboard-btn:hover,
+.affibloom-field-copy-clipboard .affibloom-copy-clipboard-btn:focus {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+.affibloom-field-copy-clipboard .affibloom-copy-clipboard-btn:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+.affibloom-field-copy-clipboard .affibloom-copy-clipboard-icon {
+	display: block;
+	cursor: pointer;
+	pointer-events: none;
+}
