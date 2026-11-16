@@ -609,6 +609,46 @@ test.describe( 'F5 Box design', () => {
 		}
 	} );
 
+	// AC20 (Task 22A): price by the product's Show Price (else the site's), the Price element in advanced rendering with
+	// the product's own Show Price winning (R28), Prime for Amazon products while Show Prime is on. The struck discount
+	// (R21) is C1F's (C1 AC11).
+	test( "AC20 price and Prime follow Lasso's rules", async ( { page } ) => {
+		const off = createProduct( { name: 'F5 AC20 off', price: '$89.99', show_price: '0' } );
+		const own = createProduct( { name: 'F5 AC20 own', price: '$89.99', show_price: '1' } );
+		const site = createProduct( { name: 'F5 AC20 site', price: '$89.99' } );
+		const amazon = createProduct( { name: 'F5 AC20 amazon', type: 'amazon', asin: 'B0D2JFK15W', url: 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', prime: '1' } );
+		const other = createProduct( { name: 'F5 AC20 other', prime: '1' } );
+		try {
+			// Price element off for the Single type; the site's Show Price on.
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { price: false } } } ), '--format=json' );
+			setSettings( { show_price: true, show_prime: true } );
+
+			await page.goto( newPostWith( boxBlock( off ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-price-value' ) ).toHaveCount( 0 );
+
+			await page.goto( newPostWith( boxBlock( own ) ) );
+			await expect( page.locator( '.affibloom-display' ) ).not.toHaveAttribute( 'data-hide-price', /./ );
+			await expect( page.locator( '.affibloom-box .affibloom-latest-price' ) ).toHaveText( '$89.99' );
+			await expect( page.locator( '.affibloom-box .affibloom-price-value' ) ).toBeVisible();
+
+			await page.goto( newPostWith( boxBlock( site ) ) );
+			await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-price', '1' );
+			await expect( page.locator( '.affibloom-box .affibloom-price-value' ) ).toBeHidden(); // printed, hidden by the element
+
+			await page.goto( newPostWith( boxBlock( amazon ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toBeVisible();
+			await page.goto( newPostWith( boxBlock( other ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toHaveCount( 0 );
+
+			setSettings( { show_prime: false } );
+			await page.goto( newPostWith( boxBlock( amazon ) ) );
+			await expect( page.locator( '.affibloom-box .affibloom-amazon-prime' ) ).toHaveCount( 0 );
+		} finally {
+			setSettings( { show_prime: true } );
+			useSiteDisplay();
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

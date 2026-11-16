@@ -29,14 +29,17 @@ final class ElementVisibility {
 	/**
 	 * The visibility of one box.
 	 *
-	 * @param Elements     $elements  The display type's element switches.
-	 * @param BoxOverrides $overrides The box's own values.
+	 * @param Elements     $elements   The display type's element switches.
+	 * @param BoxOverrides $overrides  The box's own values.
+	 * @param bool|null    $show_price The product's Show Price (null when never stored): saved on, it shows the Price
+	 *                                 element whatever the site's switch (R28).
 	 */
-	public static function of( Elements $elements, BoxOverrides $overrides ): self {
+	public static function of( Elements $elements, BoxOverrides $overrides, ?bool $show_price = null ): self {
 		$shown = array();
 		foreach ( Elements::KEYS as $key ) {
 			$shown[ $key ] = $elements->visible( $key );
 		}
+		$shown['price'] = PriceRule::element_shows( $shown['price'], $show_price );
 
 		$box_hides = array(
 			'badge' => $overrides->badge,

@@ -111,7 +111,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 20A: Per-box overrides — text and image
 - [x] Task 21A: The Primary Rating stars
 - [x] Task 18J: Element visibility on the box
-- [ ] Task 22A: Price, discount and Prime
+- [x] Task 22A: Price, discount and Prime
 - [ ] Task 22B: Disclosure
 - [ ] Task 22C: Timestamp
 - [ ] Task 18K: Classic rendering
@@ -863,10 +863,15 @@ Display/Amazon key); Prime for every Amazon product with Show Prime on (F5 R20, 
 
 **Files:** create `src/Domain/Box/PriceRule.php`, `tests/Unit/Domain/Box/PriceRuleTest.php`; modify `src/Application/Box/BoxBuilder.php`, the settings class (`show_amazon_discount_pricing`), `tests/E2E/acceptance/F5.spec.ts` (AC20).
 
-- [ ] **Step 1: Failing tests (AC20; unit).**
-- [ ] **Step 2: Rule.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show price and Prime by Lasso's rules".
+- [x] **Step 1: Failing tests (AC20; unit).**
+- [x] **Step 2: Rule.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show price and Prime by Lasso's rules".
+
+*Note:* the setting exists since 10F as `show_discount_pricing`, so no new key; the struck basis price needs C1F's
+Amazon data (`DiscountPrice`), which gates it on that setting. Prime now also needs an Amazon product. The price
+partial keeps Lasso's whitespace between its spans (a 5 px space readers see). Checked beside Lasso's box (price
+on, price and Prime off), 8 themes, 1280 and 390 px: equal.
 
 ---
 

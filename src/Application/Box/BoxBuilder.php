@@ -14,6 +14,7 @@ use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
 use Affibloom\Domain\Box\ElementVisibility;
 use Affibloom\Domain\Box\LayoutFamily;
+use Affibloom\Domain\Box\PriceRule;
 use Affibloom\Domain\Box\ThemeResolver;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
@@ -21,6 +22,7 @@ use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Link\LinkAttributes;
 use Affibloom\Domain\Product\Product;
+use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\Settings;
 
 /**
@@ -75,11 +77,11 @@ final class BoxBuilder {
 		$link = $links->primary( $product->url->value(), $product->new_tab, $product->nofollow, $product->sponsored );
 		// R76: the box's title URL takes the title and the image elsewhere, with the product's target and rel (R87).
 		$title_link = '' === $overrides->title_url ? $link : array_merge( $link, array( 'href' => $overrides->title_url ) );
-		$elements   = ElementVisibility::of( $config->elements(), $overrides );
+		$elements   = ElementVisibility::of( $config->elements(), $overrides, $product->show_price );
 
 		$disclosure = $this->disclosure( $product, $settings );
-		$prime      = $settings->bool( 'show_prime' ) && $product->prime;
-		$price      = ( $product->show_price ?? $settings->bool( 'show_price' ) ) ? $product->price : '';
+		$prime      = PriceRule::prime( ProductType::Amazon === $product->type, $settings->bool( 'show_prime' ), $product->prime );
+		$price      = PriceRule::prints( $product->price, $product->show_price, $settings->bool( 'show_price' ) ) ? $product->price : '';
 
 		return new BoxView(
 			family: LayoutFamily::of( $theme ),

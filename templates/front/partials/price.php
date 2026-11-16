@@ -16,7 +16,11 @@ if ( ! $view->price_block ) {
 ?>
 <div class="affibloom-price">
 	<?php if ( '' !== $view->price ) : ?>
-		<div class="affibloom-price-value"><span class="affibloom-discount-price"></span><span class="affibloom-latest-price"><?php echo wp_kses( $view->price, ProductInput::PRICE_TAGS ); ?></span></div>
+		<?php // Lasso's template puts whitespace between the two spans: readers see a space before the price. ?>
+		<div class="affibloom-price-value">
+			<span class="affibloom-discount-price"></span>
+			<span class="affibloom-latest-price"><?php echo wp_kses( $view->price, ProductInput::PRICE_TAGS ); ?></span>
+		</div>
 	<?php endif; ?>
 	<?php if ( $view->prime ) : ?>
 		<i class="affibloom-amazon-prime"></i>
