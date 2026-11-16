@@ -145,3 +145,5 @@ Everything **not** listed here was settled from Lasso's source and the project r
 |---|---|
 | Add Link ending (2026-11-16) | **Every single add opens the product's page, Amazon links too**, as Lasso does ("when adding single products in lasso, after adding its opening that product page"). Deviation 133. |
 | Reordering on the product page (2026-11-16) | **Drag only, like Lasso:** buttons, custom fields and features lose Move up / Move down; a grip drags each row (Arrow Up / Down from the keyboard), accepting that WCAG 2.2 SC 2.5.7 is not met. **The drag looks like Trello's** (tilted card, grey slot, rows slide aside). Deviation 134. |
+| Display save (2026-11-16) | **Settings → Display stays on the page after a full Save Changes** ("Stay on the page would be good"), where Lasso reloads; a partial save and Reset Settings still reload; both box previews keep their box while loading. Deviation 141. |
+| React admin (2026-11-16) | **Raised, not decided:** the user plans to move the admin screens to a React dashboard with a new look. A plan is in `docs/proposals/react-admin.md` (12 numbered decisions); nothing is scheduled until the user decides. |

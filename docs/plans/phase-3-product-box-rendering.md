@@ -863,11 +863,11 @@ for 21C. Checked beside Lasso's box with Pros and Cons, element on and off, 8 th
 
 **Files:** create `src/Application/Box/SchemaBuilder.php`, `src/Interface/Front/SchemaMarkup.php`, `tests/Unit/Application/SchemaBuilderTest.php`; modify `blocks/product-box/block.json` (the four schema attributes), `src/Plugin.php`, `tests/E2E/acceptance/F5.spec.ts` (AC17).
 
-- [ ] **Step 1: Failing tests (AC17; unit `SchemaBuilderTest`).**
-- [ ] **Step 2: Builder.**
-- [ ] **Step 3: Print.**
-- [ ] **Step 4: Run and look.** View the source of a post whose first box enables Review schema and one that does not; check the JSON-LD with Google's Rich Results Test by hand.
-- [ ] **Step 5: Commit** — "Print Lasso's product schema for a box".
+- [x] **Step 1: Failing tests (AC17; unit `SchemaBuilderTest`).**
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Print.**
+- [x] **Step 4: Run and look.** View the source of a post whose first box enables Review schema and one that does not; check the JSON-LD with Google's Rich Results Test by hand.
+- [x] **Step 5: Commit** — "Print Lasso's product schema for a box".
 
 ---
 
@@ -951,10 +951,10 @@ for 21C. Checked beside Lasso's box with Pros and Cons, element on and off, 8 th
 
 **Files:** create the copy partial under `templates/front/`; modify `assets/front/copy-clipboard.js`, `src/Application/Box/BoxBuilder.php`, `tests/E2E/acceptance/F5.spec.ts` (AC19).
 
-- [ ] **Step 1: Failing test (AC19).**
-- [ ] **Step 2: Partial and script.**
-- [ ] **Step 3: Run and look.** Click the copy button on a post at 1280 px and paste the value elsewhere.
-- [ ] **Step 4: Commit** — "Copy a field's value from the box".
+- [x] **Step 1: Failing test (AC19).**
+- [x] **Step 2: Partial and script.**
+- [x] **Step 3: Run and look.** Click the copy button on a post at 1280 px and paste the value elsewhere.
+- [x] **Step 4: Commit** — "Copy a field's value from the box".
 
 ---
 
