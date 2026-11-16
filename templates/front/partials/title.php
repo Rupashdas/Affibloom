@@ -13,6 +13,9 @@ if ( '' === $view->title ) {
 }
 
 $attributes = $view->link;
+if ( '' !== $view->title_tag ) {
+	echo '<' . tag_escape( $view->title_tag ) . '>';
+}
 if ( $view->title_linked ) :
 	?>
 	<a class="affibloom-title"<?php require __DIR__ . '/attributes.php'; ?>>
@@ -22,3 +25,6 @@ if ( $view->title_linked ) :
 	<span class="affibloom-title"><?php echo esc_html( $view->title ); ?></span>
 	<?php
 endif;
+if ( '' !== $view->title_tag ) {
+	echo '</' . tag_escape( $view->title_tag ) . '>';
+}

@@ -307,4 +307,73 @@ final class BoxBuilderTest extends TestCase {
 		$last = self::build( self::product( array( 'buttons' => new Buttons( $buttons, 2 ) ) ) );
 		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $last->buttons[2]->attributes['href'] );
 	}
+
+	/**
+	 * F7 AC1-AC4 (Task 20A): the box's badge, description, title, title link and tag, picture and alt replace the
+	 * product's, in the links' names too; each `hide` hides its element through the wrapper (R60).
+	 */
+	public function test_the_boxs_texts_and_image_replace_the_products(): void {
+		$box  = static fn( array $attributes ): BoxView => ( new BoxBuilder( self::THUMBNAIL ) )->build(
+			self::product(),
+			self::display(),
+			self::settings(),
+			BoxOverrides::from_block( array( 'productId' => 14727 ) + $attributes )
+		);
+		$view = $box(
+			array(
+				'badge'       => 'Top Pick',
+				'description' => 'Short.lasso-br-codeSweet.',
+				'title'       => 'Ligra Kids',
+				'titleUrl'    => 'https://www.example.com/review',
+				'titleType'   => 'h3',
+				'imageUrl'    => 'https://www.example.com/p.jpg',
+			)
+		);
+
+		self::assertSame( 'Top Pick', $view->badge );
+		self::assertSame( 'Short.<br>Sweet.', $view->description );
+		self::assertSame( 'Ligra Kids', $view->title );
+		self::assertSame( 'Ligra Kids', $view->image_alt );
+		self::assertSame( 'Ligra Kids', $view->link['title'] );
+		self::assertSame( 'Ligra Kids', $view->buttons[0]->attributes['data-affibloom-name'] );
+		self::assertSame( 'https://www.example.com/review', $view->link['href'] );
+		self::assertSame( '_blank', $view->link['target'] );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $view->buttons[0]->attributes['href'] );
+		self::assertSame( 'h3', $view->title_tag );
+		self::assertSame( 'https://www.example.com/p.jpg', $view->image_src );
+		self::assertArrayNotHasKey( 'data-hide-badge', $view->wrapper );
+
+		$hidden = $box(
+			array(
+				'hideBadge'       => true,
+				'hideDescription' => true,
+				'hideTitle'       => true,
+				'hideImage'       => true,
+				'imageAlt'        => 'A white shoe',
+			)
+		);
+		self::assertSame( '', $hidden->badge );
+		self::assertNull( $hidden->description );
+		self::assertSame( '', $hidden->title );
+		self::assertSame( 'Amazon', $hidden->link['data-affibloom-name'] ); // Lasso's domain label for an empty name
+		self::assertSame( 'https://m.media-amazon.com/images/I/31Prn-XVTjL._SL500_.jpg', $hidden->image_src );
+		self::assertSame( 'A white shoe', $hidden->image_alt );
+		foreach ( array( 'badge', 'title', 'desc', 'image' ) as $element ) {
+			self::assertSame( '1', $hidden->wrapper[ 'data-hide-' . $element ] );
+		}
+	}
+
+	/**
+	 * R67: a box's description forces the block on, even when the product's Show Description is off.
+	 */
+	public function test_a_boxs_description_forces_the_block_on(): void {
+		$view = ( new BoxBuilder( self::THUMBNAIL ) )->build(
+			self::product( array( 'show_description' => false, 'description' => '' ) ),
+			self::display(),
+			self::settings(),
+			BoxOverrides::from_block( array( 'productId' => 14727, 'description' => 'Box text' ) )
+		);
+
+		self::assertSame( 'Box text', $view->description );
+	}
 }

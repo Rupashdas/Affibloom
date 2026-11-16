@@ -96,6 +96,15 @@ const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'Llama-two-buttons': { desktop: 17933.516, mobile: 16048.063 },
 	'Money-two-buttons': { desktop: 21516.938, mobile: 18977.531 },
 	'Splash-two-buttons': { desktop: 24782.844, mobile: 21844.563 },
+	// The no-image state (Task 20A, deviation 138: the box's image_url="hide").
+	'Cactus-no-image': { desktop: 3721.984, mobile: 3299.969 },
+	'Cutter-no-image': { desktop: 6851.438, mobile: 6329.031 },
+	'Flow-no-image': { desktop: 9665.234, mobile: 9121.813 },
+	'Geek-no-image': { desktop: 12704.234, mobile: 11943.563 },
+	'Lab-no-image': { desktop: 16550.734, mobile: 14926.344 },
+	'Llama-no-image': { desktop: 20111.813, mobile: 17864.5 },
+	'Money-no-image': { desktop: 23665.688, mobile: 20762.688 },
+	'Splash-no-image': { desktop: 26476.828, mobile: 23586.594 },
 };
 
 // Where each baseline box starts on its guide page (px from the top, Local, 2026-11-16; the variants recaptured that day
@@ -517,6 +526,17 @@ test.describe( 'F5 Box design', () => {
 			await page.goto( path );
 			await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toHaveText( 'Check Price' );
 			await matchesThemeBaseline( page, path, `${ theme }-two-buttons` );
+		} );
+	}
+
+	// AC8-AC10, the no-image state (Task 20A, deviation 138): every theme with the box's picture hidden.
+	for ( const theme of THEMES ) {
+		test( `@local AC8-AC10 ${ theme } with its image hidden matches its baselines`, async ( { page } ) => {
+			useSiteDisplay();
+			const path = newPostWith( boxBlock( themeProduct( 'plain', theme ), { hideImage: true } ) );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-image', '1' );
+			await matchesThemeBaseline( page, path, `${ theme }-no-image` );
 		} );
 	}
 

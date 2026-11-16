@@ -1,6 +1,6 @@
 <?php
 /**
- * What one box asks of its product: which product, and later the box's own texts and values.
+ * What one box asks of its product: which product, and the box's own texts and values.
  *
  * @package Affibloom
  */
@@ -10,26 +10,133 @@ declare( strict_types=1 );
 namespace Affibloom\Domain\Box;
 
 /**
- * One box's overrides (F5 R65-R89, F7). Task 18A reads the product only; Tasks 20A-20C add the overrides, and the
- * shortcodes (18S1, 27A) read the same fields from their attributes.
+ * One box's overrides (F5 R65-R89, F7), read from the block's attributes or from Lasso's shortcode attribute names (one
+ * mapping, used by the block, `[affibloom]` 18S2 and `[lasso]` 27A). A text field is '' when the box does not set it
+ * and `hide` (Lasso's word) when the box hides it. Task 20A holds the texts and the image; 20B-20C add the rest.
  */
 final class BoxOverrides {
 
 	/**
-	 * Use from_block().
-	 *
-	 * @param int $product_id The product's ID; 0 when none was given.
+	 * Lasso's word for "hide this element".
 	 */
-	private function __construct( public readonly int $product_id ) {}
+	public const HIDE = 'hide';
 
 	/**
-	 * Reads the block's attributes (`affibloom/product-box`). A missing or malformed ID is 0, which draws nothing.
+	 * Lasso's line break code in a description attribute (LASSO_BR_CODE).
+	 */
+	private const BR_CODE = 'lasso-br-code';
+
+	/**
+	 * The tags a title may be wrapped in (R12, R79). Lasso prints any value unchecked; Affibloom keeps the headings and
+	 * the plain containers, so an attribute cannot add markup.
+	 *
+	 * @var list<string>
+	 */
+	private const TITLE_TAGS = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span' );
+
+	/**
+	 * Use from_block() or from_shortcode().
+	 *
+	 * @param int    $product_id  The product's ID; 0 when none was given.
+	 * @param string $badge       The badge (R66): '' the product's, `hide`, or the text.
+	 * @param string $description The description (R67): '' the product's, `hide`, or the text (it forces the block on).
+	 * @param string $title       The name (R68): '' the product's, `hide`, or the text.
+	 * @param string $title_url   Where the title and the image link (R76); '' the product's link.
+	 * @param string $title_type  The tag wrapping the title (R79); '' none.
+	 * @param string $image_url   The picture (R69): '' the product's, `hide`, or an address.
+	 * @param string $image_alt   The picture's alternative text (R69); '' the name.
+	 */
+	private function __construct(
+		public readonly int $product_id,
+		public readonly string $badge = '',
+		public readonly string $description = '',
+		public readonly string $title = '',
+		public readonly string $title_url = '',
+		public readonly string $title_type = '',
+		public readonly string $image_url = '',
+		public readonly string $image_alt = '',
+	) {}
+
+	/**
+	 * Reads the block's attributes (`affibloom/product-box`): Lasso's values under camelCase names, each hide a switch
+	 * of its own (`hideBadge`, …). A missing or malformed ID is 0, which draws nothing.
 	 *
 	 * @param array<string, mixed> $attributes The block's attributes.
 	 */
 	public static function from_block( array $attributes ): self {
-		$id = $attributes['productId'] ?? 0;
+		$text = static function ( string $name, string $hide = '' ) use ( $attributes ): string {
+			if ( '' !== $hide && true === ( $attributes[ $hide ] ?? false ) ) {
+				return self::HIDE;
+			}
 
-		return new self( is_numeric( $id ) ? max( 0, (int) $id ) : 0 );
+			return is_string( $attributes[ $name ] ?? null ) ? trim( $attributes[ $name ] ) : '';
+		};
+
+		return self::make(
+			$attributes['productId'] ?? 0,
+			array(
+				'badge'       => $text( 'badge', 'hideBadge' ),
+				'description' => $text( 'description', 'hideDescription' ),
+				'title'       => $text( 'title', 'hideTitle' ),
+				'title_url'   => $text( 'titleUrl' ),
+				'title_type'  => $text( 'titleType' ),
+				'image_url'   => $text( 'imageUrl', 'hideImage' ),
+				'image_alt'   => $text( 'imageAlt' ),
+			)
+		);
+	}
+
+	/**
+	 * Reads Lasso's shortcode attributes (`id`, `badge`, `description`, `title`, `title_url`, `title_type`,
+	 * `image_url`, `image_alt`), as `[lasso]` and `[affibloom]` take them.
+	 *
+	 * @param array<string, mixed> $attributes The shortcode's attributes.
+	 */
+	public static function from_shortcode( array $attributes ): self {
+		$text = static fn( string $name ): string => is_scalar( $attributes[ $name ] ?? null ) ? trim( (string) $attributes[ $name ] ) : '';
+
+		return self::make(
+			$attributes['id'] ?? 0,
+			array(
+				'badge'       => $text( 'badge' ),
+				'description' => $text( 'description' ),
+				'title'       => $text( 'title' ),
+				'title_url'   => $text( 'title_url' ),
+				'title_type'  => $text( 'title_type' ),
+				'image_url'   => $text( 'image_url' ),
+				'image_alt'   => $text( 'image_alt' ),
+			)
+		);
+	}
+
+	/**
+	 * Whether a field is set to Lasso's `hide`.
+	 *
+	 * @param string $value One of the text fields.
+	 */
+	public static function hides( string $value ): bool {
+		return self::HIDE === $value;
+	}
+
+	/**
+	 * The overrides from read values: the description's line break code becomes `<br>` (Lasso's shortcode, 258-259);
+	 * a title tag outside TITLE_TAGS is dropped.
+	 *
+	 * @param mixed                 $id     The product ID as given.
+	 * @param array<string, string> $values The text fields, keyed by property.
+	 */
+	private static function make( mixed $id, array $values ): self {
+		$type = strtolower( $values['title_type'] );
+
+		return new self(
+			is_numeric( $id ) ? max( 0, (int) $id ) : 0,
+			badge: $values['badge'],
+			description: str_replace( self::BR_CODE, '<br>', $values['description'] ),
+			title: $values['title'],
+			title_url: $values['title_url'],
+			title_type: in_array( $type, self::TITLE_TAGS, true ) ? $type : '',
+			image_url: $values['image_url'],
+			image_alt: $values['image_alt'],
+		);
 	}
 }

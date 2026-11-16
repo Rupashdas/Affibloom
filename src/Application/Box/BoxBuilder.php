@@ -55,18 +55,23 @@ final class BoxBuilder {
 	 * @param BoxOverrides    $overrides The box's own values.
 	 * @param int             $post_id   The post the box is drawn in (0 outside one), for the self-link check.
 	 */
-	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0 ): BoxView { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- the overrides arrive with Tasks 20A-20C.
+	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0 ): BoxView {
 		$config = $display->config( DisplayType::single() );
 		// R3: the Single type's theme, then the product's own; a box names none until its `theme` attribute (Task 20B).
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, '' );
 		$id    = (int) $product->id;
 
-		// R12: Lasso prints the name through html_entity_decode; the template escapes it again.
-		$name  = html_entity_decode( $product->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		// R68: the box's title replaces the name everywhere it shows (links, alt); `hide` empties it. R12: Lasso prints
+		// the name through html_entity_decode; the template escapes it again.
+		$name  = BoxOverrides::hides( $overrides->title ) ? '' : ( '' === $overrides->title ? $product->name : $overrides->title );
+		$name  = html_entity_decode( $name, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$links = new LinkAttributes( $id, $name );
 		// The public link (R40) is the destination: Amazon's already holds its tag, and the cloaked permalink of other
 		// products comes with the links area.
 		$link = $links->primary( $product->url->value(), $product->new_tab, $product->nofollow, $product->sponsored );
+		// R76: the box's title URL takes the title and the image elsewhere, with the product's target and rel (R87).
+		$title_link = '' === $overrides->title_url ? $link : array_merge( $link, array( 'href' => $overrides->title_url ) );
+		$hidden     = $this->hidden( $overrides );
 
 		$disclosure = $this->disclosure( $product, $settings );
 		$prime      = $settings->bool( 'show_prime' ) && $product->prime;
@@ -77,17 +82,20 @@ final class BoxBuilder {
 			// R9 without a link location: Lasso's uniqid(), so two boxes of one product never share an ID.
 			anchor: 'affibloom-anchor-id-' . $id . '-' . uniqid(),
 			classes: implode( ' ', array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, 'affibloom-advanced' ) ),
-			wrapper: DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure ),
-			badge: $product->badge,
-			link: $link,
-			image_src: $this->image( $product, $settings ),
-			image_alt: $name,
+			wrapper: DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $hidden ),
+			badge: BoxOverrides::hides( $overrides->badge ) ? '' : ( '' === $overrides->badge ? $product->badge : $overrides->badge ),
+			link: $title_link,
+			// R69: the box's picture and alternative text; a hidden picture keeps the product's address (Lasso prints
+			// `src="hide"`, a broken request) and is hidden by the wrapper's flag.
+			image_src: '' === $overrides->image_url || BoxOverrides::hides( $overrides->image_url ) ? $this->image( $product, $settings ) : $overrides->image_url,
+			image_alt: '' === $overrides->image_alt ? $name : $overrides->image_alt,
 			title: $name,
 			title_linked: $settings->bool( 'link_from_display_title' ),
+			title_tag: $overrides->title_type,
 			price: $price,
 			price_block: '' !== $price || $prime,
 			prime: $prime,
-			description: DescriptionRule::shows( $product->show_description, $product->description ) ? DescriptionRule::text( $product->description ) : null,
+			description: $this->description( $product, $overrides ),
 			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
 		);
@@ -170,6 +178,42 @@ final class BoxBuilder {
 	 */
 	private function links_to_post( string $url, int $post_id ): bool {
 		return $post_id > 0 && null !== $this->post_of_url && ( $this->post_of_url )( $url ) === $post_id;
+	}
+
+	/**
+	 * The description block's text (R67): `hide` prints none; the box's own text replaces the product's and forces the
+	 * block on; else Lasso's rule for the product's.
+	 *
+	 * @param Product      $product   The product.
+	 * @param BoxOverrides $overrides The box's values.
+	 */
+	private function description( Product $product, BoxOverrides $overrides ): ?string {
+		if ( BoxOverrides::hides( $overrides->description ) ) {
+			return null;
+		}
+		if ( '' !== $overrides->description ) {
+			return DescriptionRule::text( $overrides->description );
+		}
+
+		return DescriptionRule::shows( $product->show_description, $product->description ) ? DescriptionRule::text( $product->description ) : null;
+	}
+
+	/**
+	 * The elements the box itself hides (R60; Lasso's compose_display_element_visibility): its badge, title,
+	 * description or picture set to `hide`.
+	 *
+	 * @param BoxOverrides $overrides The box's values.
+	 * @return list<string>
+	 */
+	private function hidden( BoxOverrides $overrides ): array {
+		$hides = array(
+			'badge' => $overrides->badge,
+			'title' => $overrides->title,
+			'desc'  => $overrides->description,
+			'image' => $overrides->image_url,
+		);
+
+		return array_keys( array_filter( $hides, array( BoxOverrides::class, 'hides' ) ) );
 	}
 
 	/**

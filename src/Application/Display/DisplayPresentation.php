@@ -76,9 +76,10 @@ final class DisplayPresentation {
 	 * @param DisplayConfig $config           The display type's settings.
 	 * @param int           $columns          The grid's column count (site-wide).
 	 * @param bool          $disclosure_shown Whether this box shows its disclosure (R25).
+	 * @param list<string>  $hidden           Elements the box itself hides (R60: `badge="hide"`, `image_url="hide"`, …).
 	 * @return array<string, string>
 	 */
-	public static function wrapper( DisplayConfig $config, int $columns, bool $disclosure_shown ): array {
+	public static function wrapper( DisplayConfig $config, int $columns, bool $disclosure_shown, array $hidden = array() ): array {
 		$layout     = $config->layout();
 		$desktop    = $layout->desktop();
 		$attributes = array();
@@ -95,7 +96,7 @@ final class DisplayPresentation {
 		}
 
 		foreach ( Elements::KEYS as $element ) {
-			if ( ! $config->elements()->visible( $element ) ) {
+			if ( ! $config->elements()->visible( $element ) || in_array( $element, $hidden, true ) ) {
 				$attributes[ 'data-hide-' . $element ] = '1';
 			}
 		}

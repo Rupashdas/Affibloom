@@ -108,7 +108,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18H: Layout controls and the phone override on the box
 - [x] Task 18I: Density and typography on the box
 - [x] Task 19A: Every button of the product in the box
-- [ ] Task 20A: Per-box overrides — text and image
+- [x] Task 20A: Per-box overrides — text and image
 - [ ] Task 21A: The Primary Rating stars
 - [ ] Task 18J: Element visibility on the box
 - [ ] Task 22A: Price, discount and Prime
@@ -664,11 +664,16 @@ all 8 themes and the 6-box groupings, 1280 and 390 px: equal. F6's AC2 used the 
 
 **Files:** modify `blocks/product-box/block.json`, `src/Domain/Box/BoxOverrides.php`, `src/Interface/Block/ProductBoxBlock.php`, `src/Application/Box/BoxBuilder.php`; create `tests/Unit/Domain/Box/BoxOverridesTest.php`; modify `tests/E2E/acceptance/F7.spec.ts` (AC1-AC4).
 
-- [ ] **Step 1: Failing tests (F7 AC1-AC4; unit `BoxOverridesTest`).**
-- [ ] **Step 2: Domain.**
-- [ ] **Step 3: Builder.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Override a box's text and image".
+- [x] **Step 1: Failing tests (F7 AC1-AC4; unit `BoxOverridesTest`).**
+- [x] **Step 2: Domain.**
+- [x] **Step 3: Builder.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Override a box's text and image".
+
+*Note:* two choices against Lasso's letter: a hidden picture keeps the product's `src` (Lasso prints `src="hide"`, a
+broken request; both hide it by `data-hide-image`), and `titleType` takes only h1-h6, p, div, span (Lasso prints any
+value). The 6-box image box's hide rule (Lasso 1960) came forward from 18J for the `no-image` cells. Checked beside
+Lasso's box (picture hidden; badge, h3 title, description) in all 8 themes at 1280 and 390 px: equal.
 
 ---
 

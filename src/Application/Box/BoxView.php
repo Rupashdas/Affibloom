@@ -24,11 +24,12 @@ final class BoxView {
 	 * @param string                $classes     The display wrapper's classes.
 	 * @param array<string, string> $wrapper     The display wrapper's other attributes (DisplayPresentation).
 	 * @param string                $badge       The badge text; '' for none.
-	 * @param array<string, string> $link        The image and title links' attributes.
+	 * @param array<string, string> $link        The image and title links' attributes (the box's title URL, R76).
 	 * @param string                $image_src   The image's address.
 	 * @param string                $image_alt   The image's alternative text.
 	 * @param string                $title       The name, decoded; '' prints no title.
 	 * @param bool                  $title_linked The title is a link (Link from Display Title), else a span.
+	 * @param string                $title_tag   The tag wrapping the title (R79); '' none.
 	 * @param string                $price       The price to print, small HTML; '' when it does not show.
 	 * @param bool                  $price_block The price block prints (a shown price, or Prime).
 	 * @param bool                  $prime       The Prime logo prints.
@@ -47,6 +48,7 @@ final class BoxView {
 		public readonly string $image_alt,
 		public readonly string $title,
 		public readonly bool $title_linked,
+		public readonly string $title_tag,
 		public readonly string $price,
 		public readonly bool $price_block,
 		public readonly bool $prime,

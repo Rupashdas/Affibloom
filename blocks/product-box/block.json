@@ -10,6 +10,50 @@
 		"productId": {
 			"type": "number",
 			"default": 0
+		},
+		"badge": {
+			"type": "string",
+			"default": ""
+		},
+		"hideBadge": {
+			"type": "boolean",
+			"default": false
+		},
+		"description": {
+			"type": "string",
+			"default": ""
+		},
+		"hideDescription": {
+			"type": "boolean",
+			"default": false
+		},
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"hideTitle": {
+			"type": "boolean",
+			"default": false
+		},
+		"titleUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"titleType": {
+			"type": "string",
+			"default": ""
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"hideImage": {
+			"type": "boolean",
+			"default": false
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {

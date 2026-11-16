@@ -714,7 +714,9 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 .affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) a.affibloom-button-2 {
 	float: none !important;
 }
-/* A hidden timestamp hides the 6-box date box (Lasso's line 1966; the other element rules are Task 18J's). */
+/* A hidden timestamp hides the 6-box date box and a hidden image its image box (Lasso's lines 1960-1970; the other
+   element rules are Task 18J's). */
+.affibloom-advanced[data-hide-image="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-2,
 .affibloom-advanced[data-hide-timestamp="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-6 {
 	display: none !important;
 }
