@@ -30,6 +30,7 @@ final class BoxView {
 	 * @param string                $title       The name, decoded; '' prints no title.
 	 * @param bool                  $title_linked The title is a link (Link from Display Title), else a span.
 	 * @param string                $title_tag   The tag wrapping the title (R79); '' none.
+	 * @param BoxStars|null         $stars       The Primary Rating's stars (R14); null prints none.
 	 * @param string                $price       The price to print, small HTML; '' when it does not show.
 	 * @param bool                  $price_block The price block prints (a shown price, or Prime).
 	 * @param bool                  $prime       The Prime logo prints.
@@ -49,6 +50,7 @@ final class BoxView {
 		public readonly string $title,
 		public readonly bool $title_linked,
 		public readonly string $title_tag,
+		public readonly ?BoxStars $stars,
 		public readonly string $price,
 		public readonly bool $price_block,
 		public readonly bool $prime,

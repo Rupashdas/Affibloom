@@ -78,14 +78,22 @@ export type ProductFields = Partial< {
 	buttons: ProductButton[];
 	// Where the default button (the product's main link) sits among them, from 0 (F29: the user's request).
 	primary_position: string;
+	// Custom field rows (`_affibloom_fields`); `rating` above is a shorthand for the Primary Rating's row (field 1).
+	fields: ProductFieldRow[];
 } >;
+
+/** One custom field row of a product (FL4, `_affibloom_fields`). */
+export type ProductFieldRow = { field: number; value: string; visible?: boolean; show_name?: boolean };
 
 /** A button after the primary (F29, `_affibloom_buttons`). */
 export type ProductButton = { url: string; text?: string; new_tab?: boolean; nofollow?: boolean };
 
 /** Creates a product directly in the database (meta keys from docs/spec/interface.md, section 4). */
 export function createProduct( fields: ProductFields ): number {
-	const { name = 'Test product', buttons = [], url2, button_text2, new_tab2, nofollow2, ...meta } = fields;
+	const { name = 'Test product', buttons = [], url2, button_text2, new_tab2, nofollow2, rating, fields: rows = [], ...meta } = fields;
+	// The Primary Rating is field 1's row (Task 21A reads it there, as the product page saves it).
+	const fieldRows = [ ...( rating !== undefined ? [ { field: 1, value: rating } ] : [] ), ...rows ]
+		.map( ( r ) => ( { field: r.field, value: r.value, visible: r.visible ?? true, show_name: r.show_name ?? false } ) );
 	// The secondary button is the first of the list since Task 14H (F29 D4); Lasso's toggles default to on.
 	const list = url2 !== undefined || button_text2 !== undefined
 		? [ { url: url2 ?? '', text: button_text2 ?? '', new_tab: new_tab2 !== '0', nofollow: nofollow2 !== '0' }, ...buttons ]
@@ -98,7 +106,11 @@ export function createProduct( fields: ProductFields ): number {
 	const metaInput = Object.fromEntries( Object.entries( all ).map( ( [ k, v ] ) => [ `_affibloom_${ k }`, v ] ) );
 	// AffiliateUrl::key(): "&amp;" read as "&", trailing slashes dropped, lower case — for every product, Amazon's too.
 	metaInput._affibloom_url_key = all.url.replace( /&amp;/g, '&' ).replace( /\/+$/, '' ).toLowerCase();
-	const input: Record< string, unknown > = stored.length ? { ...metaInput, _affibloom_buttons: stored } : metaInput;
+	const input: Record< string, unknown > = {
+		...metaInput,
+		...( stored.length ? { _affibloom_buttons: stored } : {} ),
+		...( fieldRows.length ? { _affibloom_fields: fieldRows } : {} ),
+	};
 	// One `_affibloom_button_url` row per added button's link, as save() writes them (Task 13G): the search reads these.
 	const buttonUrls = stored.map( ( b ) => b.url.trim() ).filter( ( url ) => url !== '' );
 	// One WP-CLI call for the post, its meta and the button rows (deviation 111; it was 1 + one per button).

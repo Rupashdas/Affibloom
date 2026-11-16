@@ -105,6 +105,15 @@ const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'Llama-no-image': { desktop: 20111.813, mobile: 17864.5 },
 	'Money-no-image': { desktop: 23665.688, mobile: 20762.688 },
 	'Splash-no-image': { desktop: 26476.828, mobile: 23586.594 },
+	// The rating state (Task 21A, deviation 138): Lasso's `rating="4.5"`, here the product's Primary Rating.
+	'Cactus-rating': { desktop: 2127.828, mobile: 1886.203 },
+	'Cutter-rating': { desktop: 5401.734, mobile: 4915.016 },
+	'Flow-rating': { desktop: 8374.047, mobile: 7824.891 },
+	'Geek-rating': { desktop: 11249.234, mobile: 10602.203 },
+	'Lab-rating': { desktop: 14845.234, mobile: 13545.422 },
+	'Llama-rating': { desktop: 18508.031, mobile: 16484.734 },
+	'Money-rating': { desktop: 22054.125, mobile: 19411.359 },
+	'Splash-rating': { desktop: 25181.422, mobile: 22263.234 },
 };
 
 // Where each baseline box starts on its guide page (px from the top, Local, 2026-11-16; the variants recaptured that day
@@ -120,6 +129,8 @@ const BASELINE_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'second-button': { desktop: 4686.781, mobile: 7594.188 },
 	badge: { desktop: 4686.781, mobile: 7594.188 },
 	prime: { desktop: 4686.781, mobile: 7594.188 },
+	// Task 21A, measured the same way (same caveat).
+	rating: { desktop: 4787.391, mobile: 9191.688 },
 };
 
 /**
@@ -143,7 +154,7 @@ async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< v
  * The theme baselines' product (tools/baselines-themes-matrix.ts): the amazon example without a description, with the
  * `badge` state's badge or none, and the given Display Theme (none: the Single type's).
  */
-function themeProduct( state: 'plain' | 'badge' | 'two-buttons', theme?: string ): number {
+function themeProduct( state: 'plain' | 'badge' | 'two-buttons' | 'rating', theme?: string ): number {
 	const example = boxes.find( pick.amazon ) as Box;
 	return createProduct( {
 		...productFrom( example ),
@@ -154,6 +165,7 @@ function themeProduct( state: 'plain' | 'badge' | 'two-buttons', theme?: string 
 		badge: state === 'badge' ? 'Our Pick' : '',
 		// The capture's `secondary_url` / `secondary_text` (tools/baselines-themes-matrix.ts, SECOND) as the first added button.
 		...( state === 'two-buttons' ? { url2: example.button1?.href ?? '', button_text2: 'Check Price' } : {} ),
+		...( state === 'rating' ? { rating: '4.5' } : {} ),
 		...( theme ? { theme } : {} ),
 	} );
 }
@@ -313,9 +325,9 @@ async function boxTree( page: Page, lassoHtml: string | null ): Promise< Tree > 
 test.describe( 'F5 Box design', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
-	// AC1 for the Lab examples (Task 18B, AC5; second-button, badge and prime Task 19A's); rating is 21A's. The box
+	// AC1 for the Lab examples (Task 18B, AC5; second-button, badge and prime Task 19A's, rating 21A's). The box
 	// is drawn with the site's Display settings, as the live boxes were.
-	for ( const variant of [ 'amazon', 'other', 'no-description', 'second-button', 'badge', 'prime' ] ) {
+	for ( const variant of [ 'amazon', 'other', 'no-description', 'second-button', 'badge', 'prime', 'rating' ] ) {
 		test( `@local AC1 the ${ variant } box matches its baseline on desktop and mobile`, async ( { page } ) => {
 			useSiteDisplay();
 			const example = boxes.find( pick[ variant ] );
@@ -537,6 +549,17 @@ test.describe( 'F5 Box design', () => {
 			await page.goto( path );
 			await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-image', '1' );
 			await matchesThemeBaseline( page, path, `${ theme }-no-image` );
+		} );
+	}
+
+	// AC8-AC10, the rating state (Task 21A, deviation 138): every theme with the Primary Rating's stars.
+	for ( const theme of THEMES ) {
+		test( `@local AC8-AC10 ${ theme } with a rating matches its baselines`, async ( { page } ) => {
+			useSiteDisplay();
+			const path = newPostWith( boxBlock( themeProduct( 'rating', theme ) ) );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-box .affibloom-stars-value' ) ).toHaveText( '4.5' );
+			await matchesThemeBaseline( page, path, `${ theme }-rating` );
 		} );
 	}
 

@@ -18,6 +18,7 @@ $attributes = $view->wrapper;
 		<div class="affibloom-box-1">
 			<?php require __DIR__ . '/partials/image.php'; ?>
 			<?php require __DIR__ . '/partials/title.php'; ?>
+			<?php require __DIR__ . '/partials/stars.php'; ?>
 			<?php require __DIR__ . '/partials/price.php'; ?>
 			<div class="affibloom-clear"></div>
 			<?php require __DIR__ . '/partials/description.php'; ?>

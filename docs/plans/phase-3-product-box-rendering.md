@@ -109,7 +109,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18I: Density and typography on the box
 - [x] Task 19A: Every button of the product in the box
 - [x] Task 20A: Per-box overrides — text and image
-- [ ] Task 21A: The Primary Rating stars
+- [x] Task 21A: The Primary Rating stars
 - [ ] Task 18J: Element visibility on the box
 - [ ] Task 22A: Price, discount and Prime
 - [ ] Task 22B: Disclosure
@@ -774,10 +774,15 @@ Lasso's box (picture hidden; badge, h3 title, description) in all 8 themes at 12
 
 **Files:** create the stars partial under `templates/front/`; modify `src/Application/Box/BoxBuilder.php`, `assets/front/box.css`, `tests/E2E/acceptance/{F5,F8}.spec.ts` (F8 AC1-AC6).
 
-- [ ] **Step 1: Failing tests (F8).**
-- [ ] **Step 2: Builder and partial.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show the rating in the box".
+- [x] **Step 1: Failing tests (F8).**
+- [x] **Step 2: Builder and partial.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show the rating in the box".
+
+*Note:* the block now passes the product's field rows and the field library (`BoxFields`) to the builder; 21B reads
+the same. The label carries `affibloom-stars-label` only (Lasso adds its utility classes `float-left mr-1`; their two
+declarations sit on the label's rule). A non-numeric rating draws no stars (Lasso prints it raw into `--rating`).
+`createProduct({ rating })` now writes field 1's row. Checked beside Lasso's box, all 8 themes, 1280 and 390 px: equal.
 
 ---
 

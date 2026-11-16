@@ -2,11 +2,14 @@
 namespace Affibloom\Tests\Unit\Application\Box;
 
 use Affibloom\Application\Box\BoxBuilder;
+use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\BoxView;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\Theme;
+use Affibloom\Domain\Fields\FieldLibrary;
+use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Button;
 use Affibloom\Domain\Product\Buttons;
@@ -375,5 +378,30 @@ final class BoxBuilderTest extends TestCase {
 		);
 
 		self::assertSame( 'Box text', $view->description );
+	}
+
+	/**
+	 * F8 AC1-AC4 (Task 21A): the Primary Rating's visible row draws the stars, its value with one decimal, the field's
+	 * name when the row shows it; nothing without a value, hidden or not a number.
+	 */
+	public function test_the_primary_rating_draws_the_stars(): void {
+		$stars = static function ( array $row, array $names = array() ) {
+			$fields = new BoxFields( ProductFields::from_array( array( array( 'field' => 1 ) + $row ) ), FieldLibrary::from_array( array(), $names ) );
+
+			return ( new BoxBuilder( self::THUMBNAIL ) )->build( self::product(), self::display(), self::settings(), BoxOverrides::from_block( array( 'productId' => 14727 ) ), 0, $fields )->stars;
+		};
+
+		$plain = $stars( array( 'value' => '4.5' ) );
+		self::assertSame( '4.5', $plain->rating );
+		self::assertSame( '4.5', $plain->value );
+		self::assertSame( '', $plain->label );
+
+		self::assertSame( '4.0', $stars( array( 'value' => '4' ) )->value );
+		self::assertSame( 'Our Rating', $stars( array( 'value' => '3', 'show_name' => true ), array( 1 => 'Our Rating' ) )->label );
+		self::assertSame( 'Primary Rating', $stars( array( 'value' => '3', 'show_name' => true ) )->label );
+		self::assertNull( $stars( array( 'value' => '' ) ) );
+		self::assertNull( $stars( array( 'value' => '4.5', 'visible' => false ) ) );
+		self::assertNull( $stars( array( 'value' => '4; color: red' ) ) );
+		self::assertNull( self::build()->stars );
 	}
 }

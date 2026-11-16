@@ -407,21 +407,27 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	.affibloom-display.affibloom-advanced[data-layout-align="left"] .affibloom-title,
 	.affibloom-display.affibloom-advanced[data-layout-align="left"] a.affibloom-title,
 	.affibloom-display.affibloom-advanced[data-layout-align="left"] .affibloom-description,
-	.affibloom-display.affibloom-advanced[data-layout-align="left"] .affibloom-price {
+	.affibloom-display.affibloom-advanced[data-layout-align="left"] .affibloom-price,
+	.affibloom-display.affibloom-advanced[data-layout-align="left"] .affibloom-stars,
+	.affibloom-display.affibloom-advanced[data-layout-align="left"] .affibloom-fields {
 		text-align: left !important;
 	}
 	.affibloom-display.affibloom-advanced[data-layout-align="center"] :is(h1, h2, h3, h4, h5, h6):has(> .affibloom-title),
 	.affibloom-display.affibloom-advanced[data-layout-align="center"] .affibloom-title,
 	.affibloom-display.affibloom-advanced[data-layout-align="center"] a.affibloom-title,
 	.affibloom-display.affibloom-advanced[data-layout-align="center"] .affibloom-description,
-	.affibloom-display.affibloom-advanced[data-layout-align="center"] .affibloom-price {
+	.affibloom-display.affibloom-advanced[data-layout-align="center"] .affibloom-price,
+	.affibloom-display.affibloom-advanced[data-layout-align="center"] .affibloom-stars,
+	.affibloom-display.affibloom-advanced[data-layout-align="center"] .affibloom-fields {
 		text-align: center !important;
 	}
 	.affibloom-display.affibloom-advanced[data-layout-align="right"] :is(h1, h2, h3, h4, h5, h6):has(> .affibloom-title),
 	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-title,
 	.affibloom-display.affibloom-advanced[data-layout-align="right"] a.affibloom-title,
 	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-description,
-	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-price {
+	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-price,
+	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-stars,
+	.affibloom-display.affibloom-advanced[data-layout-align="right"] .affibloom-fields {
 		text-align: right !important;
 	}
 	.affibloom-advanced .affibloom-title,
@@ -481,6 +487,10 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	align-self: start;
 }
 .affibloom-advanced .affibloom-price,
+.affibloom-advanced .affibloom-stars,
+.affibloom-advanced .affibloom-fields,
+.affibloom-advanced .affibloom-fields-pros,
+.affibloom-advanced .affibloom-fields-cons,
 .affibloom-advanced .affibloom-end {
 	margin-top: var(--affibloom-density-space-between) !important;
 }
@@ -578,6 +588,9 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 > :is(a.affibloom-title, span.affibloom-title) {
 		display: block !important;
 		width: auto !important;
+	}
+	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 > .affibloom-stars {
+		display: block !important;
 	}
 	.affibloom-display.affibloom-advanced[data-layout-orientation="side-by-side"]:is(.affibloom-cutter, .affibloom-flow, .affibloom-geek, .affibloom-splash) .affibloom-box-2 .affibloom-end {
 		clear: both;

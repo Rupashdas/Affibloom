@@ -10,9 +10,12 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Block;
 
 use Affibloom\Application\Box\BoxBuilder;
+use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Domain\Box\BoxOverrides;
+use Affibloom\Domain\Fields\FieldRepository;
+use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Module;
@@ -32,6 +35,8 @@ final class ProductBoxBlock implements Module {
 	 * @param SettingsRepository     $settings  The site's settings.
 	 * @param BoxBuilder             $builder   The box engine.
 	 * @param BoxHtml                $html      The box's printer.
+	 * @param ProductRepository      $catalog   The products, for their custom fields.
+	 * @param FieldRepository        $fields    The field library.
 	 */
 	public function __construct(
 		private readonly string $block_dir,
@@ -40,6 +45,8 @@ final class ProductBoxBlock implements Module {
 		private readonly SettingsRepository $settings,
 		private readonly BoxBuilder $builder,
 		private readonly BoxHtml $html,
+		private readonly ProductRepository $catalog,
+		private readonly FieldRepository $fields,
 	) {}
 
 	/**
@@ -68,6 +75,9 @@ final class ProductBoxBlock implements Module {
 			return '';
 		}
 
-		return $this->html->render( $this->builder->build( $product, $this->display->current(), $this->settings->get(), $overrides, (int) get_the_ID() ) );
+		$values = $this->catalog->fields( (int) $product->id );
+		$fields = null === $values ? null : new BoxFields( $values, $this->fields->load() );
+
+		return $this->html->render( $this->builder->build( $product, $this->display->current(), $this->settings->get(), $overrides, (int) get_the_ID(), $fields ) );
 	}
 }

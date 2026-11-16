@@ -16,6 +16,8 @@ use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Box\ThemeResolver;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Fields\FieldLibrary;
+use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Link\LinkAttributes;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\Settings;
@@ -54,8 +56,9 @@ final class BoxBuilder {
 	 * @param Settings        $settings  The site's settings.
 	 * @param BoxOverrides    $overrides The box's own values.
 	 * @param int             $post_id   The post the box is drawn in (0 outside one), for the self-link check.
+	 * @param BoxFields|null  $fields    The product's custom fields and the field library; null for none.
 	 */
-	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0 ): BoxView {
+	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0, ?BoxFields $fields = null ): BoxView {
 		$config = $display->config( DisplayType::single() );
 		// R3: the Single type's theme, then the product's own; a box names none until its `theme` attribute (Task 20B).
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, '' );
@@ -92,6 +95,7 @@ final class BoxBuilder {
 			title: $name,
 			title_linked: $settings->bool( 'link_from_display_title' ),
 			title_tag: $overrides->title_type,
+			stars: null === $fields ? null : self::stars( $fields->values, $fields->library ),
 			price: $price,
 			price_block: '' !== $price || $prime,
 			prime: $prime,
@@ -178,6 +182,33 @@ final class BoxBuilder {
 	 */
 	private function links_to_post( string $url, int $post_id ): bool {
 		return $post_id > 0 && null !== $this->post_of_url && ( $this->post_of_url )( $url ) === $post_id;
+	}
+
+	/**
+	 * The Primary Rating's stars (R14; F8 AC1-AC4): its row when visible and holding a value; the name when the row
+	 * shows it. A value that is not a number draws no stars (Lasso prints it raw into `--rating`).
+	 *
+	 * @param ProductFields $values  The product's field rows.
+	 * @param FieldLibrary  $library The fields, for the name.
+	 */
+	private static function stars( ProductFields $values, FieldLibrary $library ): ?BoxStars {
+		foreach ( $values->all() as $row ) {
+			if ( ProductFields::RATING_ID !== $row->field_id ) {
+				continue;
+			}
+			$rating = trim( $row->value );
+			if ( ! $row->visible || ! is_numeric( $rating ) ) {
+				return null;
+			}
+
+			return new BoxStars(
+				$rating,
+				number_format( (float) $rating, 1, '.', '' ),
+				$row->show_name ? (string) $library->find( ProductFields::RATING_ID )?->name : ''
+			);
+		}
+
+		return null;
 	}
 
 	/**

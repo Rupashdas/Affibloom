@@ -967,3 +967,29 @@ a.affibloom-button-2:hover {
 .affibloom-box .google-auto-placed {
 	display: none;
 }
+/* The Primary Rating's stars (Task 21A; Lasso's lasso-live rules 95-97): five stars filled to --rating out of 5. The
+   label's float and gap are Lasso's `float-left mr-1` utility classes, kept on the label's own rule so the box adds no
+   site-wide utility classes. */
+.affibloom-stars {
+	--rating: 3.5;
+	--percent: calc(var(--rating) / 5 * 100%);
+	display: inline-block;
+	font-size: inherit;
+	line-height: 1;
+	margin: 0 0 10px 0;
+}
+.affibloom-stars::before {
+	content: "★★★★★";
+	font-family: Times;
+	letter-spacing: 1px;
+	background: linear-gradient(90deg, #fc0 var(--percent), #e2e2e2 var(--percent));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+.affibloom-stars-value {
+	font-size: 14px;
+}
+.affibloom-stars-label {
+	float: left !important;
+	margin-right: 0.25rem !important;
+}
