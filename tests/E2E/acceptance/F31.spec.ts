@@ -241,4 +241,21 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( compact.locator( '.affibloom-description, .affibloom-fields' ) ).toHaveCount( 0 );
 		await expect( compact.locator( ':scope > .affibloom-disclosure' ) ).toHaveCount( 1 );
 	} );
+
+	// AC12 (Task 18S12): a saved group's Copy Shortcode ("Copy this Display to your clipboard.") copies its grid
+	// shortcode, and the tooltip reads "Copied!". Local is plain http: the textarea fallback's copy event has the text.
+	test( "AC12 a group's Copy Shortcode copies its grid shortcode", async ( { page } ) => {
+		const slug = createGroup( `F31 AC12 ${ Date.now() }`, [] );
+		const id = wp( 'eval', `echo get_term_by( 'slug', '${ slug }', 'affibloom_group' )->term_id;` ).trim().split( '\n' ).pop();
+		await page.goto( `/wp-admin/admin.php?page=affibloom-group&id=${ id }` );
+		await page.evaluate( () => document.addEventListener( 'copy', ( event ) => {
+			( window as unknown as { copied: string } ).copied = ( event.target as HTMLTextAreaElement ).value;
+		} ) );
+		const button = page.locator( '[data-copy-group-shortcode]' );
+		await expect( button ).toHaveAttribute( 'title', 'Copy this Display to your clipboard.' );
+		await button.click();
+		expect( await page.evaluate( () => ( window as unknown as { copied?: string } ).copied ) ).toBe( `[affibloom type="grid" group="${ slug }"]` );
+		await expect( button ).toHaveAttribute( 'title', 'Copied!' );
+		await expect( button ).toHaveAttribute( 'title', 'Copy this Display to your clipboard.', { timeout: 2500 } );
+	} );
 } );

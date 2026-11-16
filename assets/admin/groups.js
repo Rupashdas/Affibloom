@@ -203,4 +203,29 @@
 			} );
 		} );
 	}
+
+	/* ---------------------------------------------------------------------------------------------------------
+	 * A group's Copy Shortcode (F31 R32, Task 18S12): copies its grid shortcode; the tooltip and the label read
+	 * "Copied!" for 1.5 seconds, as the Share kit's labels do; a refused copy says so.
+	 * ------------------------------------------------------------------------------------------------------- */
+	var copyButton = document.querySelector( '[data-copy-group-shortcode]' );
+	if ( copyButton && '' !== copyButton.dataset.copyGroupShortcode ) {
+		var copyLabel = copyButton.querySelector( '[data-copy-label]' );
+		var copyName = copyLabel.textContent;
+		var copyTitle = copyButton.title;
+		var copyTimer = 0;
+		copyButton.addEventListener( 'click', function () {
+			window.affibloomCopy( copyButton.dataset.copyGroupShortcode, function () {
+				window.clearTimeout( copyTimer );
+				copyButton.title = copyButton.dataset.copied;
+				copyLabel.textContent = copyButton.dataset.copied;
+				copyTimer = window.setTimeout( function () {
+					copyButton.title = copyTitle;
+					copyLabel.textContent = copyName;
+				}, 1500 );
+			}, function () {
+				window.affibloomToast( copyButton.dataset.copyFailed, true );
+			} );
+		} );
+	}
 }() );

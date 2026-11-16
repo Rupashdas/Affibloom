@@ -159,7 +159,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT9: Stored AI text
 - Task DT10: dropped (decision B5: stored AI text only)
 - [x] Task 18S7: Group displays by shortcode
-- [ ] Task 18S12: A group's Copy Shortcode
+- [x] Task 18S12: A group's Copy Shortcode
 
 Task 18S8 (the table display by shortcode) is superseded by F25 Task T12 (Phase 7); the number is not reused.
 **Task 18S13 (a table's Copy Shortcode) moved to Phase 7**, right after F25 T12 (it needs the table builder T3 and T12);
@@ -1582,10 +1582,15 @@ expects the button enabled. Seen on Local: copied `[affibloom id]`, read "Copied
 
 **Files:** the above; F31 **AC12**, F23 AC3 rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Control.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Copy a group's display shortcode".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Control.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Copy a group's display shortcode".
+
+*Note:* the control is in the group page's band (`group.php`) and its script in `groups.js`, through `affibloomCopy()`;
+the label reads "Copied!" with the tooltip, as the Share kit's labels do. The page's unused "Coming soon" note went.
+Seen on Local: copied `[affibloom type="grid" group="pair-grid"]`, "Copied!" for 1.5 s.
+
 
 ---
 

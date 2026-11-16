@@ -16,4 +16,12 @@ final class ShortcodeTextTest extends TestCase {
 		self::assertSame( '[affibloom id="42"]', ShortcodeText::product( 42 ) );
 		self::assertSame( '', ShortcodeText::product( 0 ) );
 	}
+
+	/**
+	 * A group's grid by its slug (F31 R32, D9; Task 18S12); nothing without a slug.
+	 */
+	public function test_a_groups_shortcode(): void {
+		self::assertSame( '[affibloom type="grid" group="best-shoes"]', ShortcodeText::group( 'best-shoes' ) );
+		self::assertSame( '', ShortcodeText::group( '' ) );
+	}
 }

@@ -23,4 +23,14 @@ final class ShortcodeText {
 	public static function product( int $id ): string {
 		return $id > 0 ? '[affibloom id="' . $id . '"]' : '';
 	}
+
+	/**
+	 * A group's grid, `[affibloom type="grid" group="<slug>"]` (Lasso's `[lasso type="grid" category="<slug>"]`, R32);
+	 * '' for a group without a slug.
+	 *
+	 * @param string $slug The group's slug.
+	 */
+	public static function group( string $slug ): string {
+		return '' === $slug ? '' : '[affibloom type="grid" group="' . $slug . '"]';
+	}
 }

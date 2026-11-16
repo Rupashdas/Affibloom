@@ -2,7 +2,7 @@
 /**
  * A group's page, or "Add a New Group" (Lasso's `admin/views/groups/{header,group-details,group-urls}.php`; F23
  * R5-R6, R10, R17): the band holds the heading, the tabs (Links <n> and Details) and, on the right, Add a Link (Links
- * tab) and Copy Shortcode ("Coming soon", D5). The Links tab lists the group's products in its order (Task G4); the
+ * tab) and Copy Shortcode (F31 R32, Task 18S12). The Links tab lists the group's products in its order (Task G4); the
  * Details tab holds Name, Slug (once the group exists) and Description with Save Changes (Task G2). Delete This Group
  * is in the footer of both (R10).
  *
@@ -48,10 +48,12 @@ $gid         = $is_new ? 0 : $group->id;
 								<span><?php esc_html_e( 'Add a Link', 'affibloom' ); ?></span>
 							</button>
 						<?php endif; ?>
-						<?php // Copy Shortcode waits for Affibloom's own shortcode (F23 D5). ?>
-						<button type="button" class="affibloom-button affibloom-button--on-band" aria-disabled="true" aria-describedby="affibloom-soon-note" title="<?php esc_attr_e( 'Copy Shortcode: coming soon', 'affibloom' ); ?>">
+						<?php // F31 R32: Lasso's tooltip, which reads "Copied!" once the group's grid shortcode is copied (groups.js). ?>
+						<button type="button" class="affibloom-button affibloom-button--on-band" data-copy-group-shortcode="<?php echo esc_attr( \Affibloom\Interface\ShortcodeText::group( $group->slug ) ); ?>"
+							title="<?php esc_attr_e( 'Copy this Display to your clipboard.', 'affibloom' ); ?>" data-copied="<?php esc_attr_e( 'Copied!', 'affibloom' ); ?>"
+							data-copy-failed="<?php esc_attr_e( 'Could not copy shortcode.', 'affibloom' ); ?>">
 							<?php $this->render( 'admin/partials/icon', array( 'name' => 'copy' ) ); ?>
-							<span><?php esc_html_e( 'Copy Shortcode', 'affibloom' ); ?></span>
+							<span data-copy-label aria-live="polite"><?php esc_html_e( 'Copy Shortcode', 'affibloom' ); ?></span>
 						</button>
 					</div>
 				<?php endif; ?>
@@ -140,7 +142,6 @@ $gid         = $is_new ? 0 : $group->id;
 					</button>
 				</div>
 			<?php endif; ?>
-			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 		</div>
 	</div>
 
