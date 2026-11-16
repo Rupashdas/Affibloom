@@ -1462,8 +1462,7 @@ shows the wrapper alone.
 *Note:* DT2-DT6 already placed groups by `group` (kinds, renderers); 18S7 added Lasso's `category`/`categories`
 (`GroupAttributes::slug()`: `group`, else `categories`, else `category`) and R12's card alt text (the shortcode's
 `image_alt` is not passed to a grid's or list's cards). `createGroup` moved to `tests/E2E/utils.ts` (second use).
-F31 AC9 (18S9) had a broken `'
-'`; fixed here.
+F31 AC9 (18S9) had a line break inside a string literal, which stopped the whole spec from loading; fixed here.
 
 
 ---
