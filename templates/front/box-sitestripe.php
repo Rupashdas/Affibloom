@@ -1,7 +1,7 @@
 <?php
 /**
  * The SiteStripe card (F5 R13): Lasso's sitestripe.php under Affibloom's names (ADR-6). A narrow card, sized by the
- * box's SiteStripe style, with one box holding the image, title, price (its spans titled with their text), Prime
+ * box's SiteStripe style (cleaned, F30 D12), with one box holding the image, title, price (its spans titled with their text), Prime
  * after the price block, and button 1 only.
  *
  * @package Affibloom
@@ -13,6 +13,11 @@ defined( 'ABSPATH' ) || exit;
 use Affibloom\Application\Products\ProductInput;
 
 $attributes = $view->wrapper;
+// F30 D12: the box's SiteStripe style through WordPress's CSS filter (Lasso prints it raw): width and height come out
+// the same; `expression(`, `behavior` and other properties WordPress does not allow are dropped.
+if ( isset( $attributes['style'] ) ) {
+	$attributes['style'] = safecss_filter_attr( $attributes['style'] );
+}
 ?>
 <div id="<?php echo esc_attr( $view->anchor ); ?>" class="affibloom-box sitestripe">
 	<!-- PRODUCT BOX -->

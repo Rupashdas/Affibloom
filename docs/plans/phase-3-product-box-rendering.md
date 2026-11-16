@@ -155,7 +155,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task DT5: A product shown as an image
 - [x] Task DT6: A group shown as a gallery
 - [x] Task DT7: A product shown as a button
-- [ ] Task DT8: The SiteStripe card
+- [x] Task DT8: The SiteStripe card
 - [ ] Task DT9: Stored AI text
 - Task DT10: dropped (decision B5: stored AI text only)
 - [ ] Task 18S7: Group displays by shortcode
@@ -1932,10 +1932,14 @@ same shortcode shows the ordinary Single box.
 
 **Files:** the above; tests F30 **AC11**.
 
-- [ ] **Step 1: Failing tests** (setting on and off; a style with `expression(` or `url(` removed).
-- [ ] **Step 2: Builder, renderer, template, CSS.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Draw SiteStripe cards when Keep Site Stripe UI is on".
+- [x] **Step 1: Failing tests** (setting on and off; a style with `expression(` or `url(` removed).
+- [x] **Step 2: Builder, renderer, template, CSS.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Draw SiteStripe cards when Keep Site Stripe UI is on".
+
+*Note:* 22E drew the card (`LayoutFamily::SiteStripe`, `box-sitestripe.php`) and its gate, so DT8 added D12: the
+style through `safecss_filter_attr()` in the template. WordPress keeps `background:url(…)` (an allowed property) and
+drops `expression(` and `behavior`. Seen on Local with the setting on, then off again.
 
 ---
 

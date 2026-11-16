@@ -265,4 +265,28 @@ test.describe( 'F30 Display types', () => {
 		await expect( link( 3 ) ).toHaveClass( 'affibloom-button-1' );
 		await expect( containers.nth( 4 ) ).toHaveClass( 'affibloom-box affibloom-button-container' );
 	} );
+
+	// AC11 (Task DT8): sitestripe="true" shows the compact card (240 x 400 px unless sitestripe_style says otherwise,
+	// that style through WordPress's CSS filter) while Keep Site Stripe UI is on, the ordinary Single box while it is off.
+	test( 'AC11 sitestripe="true" shows the SiteStripe card only with Keep Site Stripe UI', async ( { page, context } ) => {
+		await blockTrackers( context );
+		const id = createProduct( { name: 'F30 AC11' } );
+		const path = newPostWith( `[affibloom id="${ id }" sitestripe="true"][affibloom id="${ id }" sitestripe="true" sitestripe_style="width:300px;height:450px;color:expression(alert(1))"]` );
+		setSettings( { keep_site_stripe_ui: true } );
+		try {
+			await page.goto( path );
+			const cards = page.locator( '.affibloom-display.sitestripe' );
+			await expect( cards ).toHaveCount( 2 );
+			await expect( cards.nth( 0 ) ).toHaveAttribute( 'style', 'width:240px;height:400px' );
+			await expect( cards.nth( 1 ) ).toHaveAttribute( 'style', 'width:300px;height:450px' );
+			await expect( cards.nth( 0 ).locator( '.affibloom-button-1' ) ).toHaveCount( 1 );
+			await expect( cards.nth( 0 ).locator( '.affibloom-badge, .affibloom-description, .affibloom-disclosure' ) ).toHaveCount( 0 );
+			setSettings( { keep_site_stripe_ui: false } );
+			await page.reload();
+			await expect( page.locator( '.affibloom-display.sitestripe' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-box .affibloom-display' ) ).toHaveCount( 2 );
+		} finally {
+			setSettings( { keep_site_stripe_ui: false } );
+		}
+	} );
 } );
