@@ -8,6 +8,8 @@ use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\Button;
+use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\Settings;
@@ -73,9 +75,9 @@ final class BoxBuilderTest extends TestCase {
 	/**
 	 * Builds the box.
 	 *
-	 * @param Product|null              $product  The product; the amazon box's by default.
-	 * @param DisplaySettings|null      $display  The Display settings.
-	 * @param Settings|null             $settings The site's settings.
+	 * @param Product|null         $product  The product; the amazon box's by default.
+	 * @param DisplaySettings|null $display  The Display settings.
+	 * @param Settings|null        $settings The site's settings.
 	 */
 	private static function build( ?Product $product = null, ?DisplaySettings $display = null, ?Settings $settings = null ): BoxView {
 		return ( new BoxBuilder( self::THUMBNAIL ) )->build(
@@ -178,7 +180,15 @@ final class BoxBuilderTest extends TestCase {
 		self::assertFalse( $no_prime->prime );
 		self::assertFalse( $no_prime->price_block );
 
-		$priced = self::build( self::product( array( 'prime' => false, 'price' => '$59.99', 'show_price' => true ) ) );
+		$priced = self::build(
+			self::product(
+				array(
+					'prime'      => false,
+					'price'      => '$59.99',
+					'show_price' => true,
+				)
+			)
+		);
 		self::assertSame( '$59.99', $priced->price );
 		self::assertTrue( $priced->price_block );
 
@@ -189,7 +199,16 @@ final class BoxBuilderTest extends TestCase {
 	public function test_the_description_follows_lassos_rule(): void {
 		self::assertSame( 'The junior version of the Ligra 8.', self::build()->description );
 		self::assertSame( '', self::build( self::product( array( 'description' => '' ) ) )->description );
-		self::assertNull( self::build( self::product( array( 'description' => '', 'show_description' => false ) ) )->description );
+		self::assertNull(
+			self::build(
+				self::product(
+					array(
+						'description'      => '',
+						'show_description' => false,
+					)
+				)
+			)->description
+		);
 	}
 
 	/**
@@ -203,5 +222,89 @@ final class BoxBuilderTest extends TestCase {
 		$hidden = self::build( self::product( array( 'show_disclosure' => false ) ) );
 		self::assertNull( $hidden->disclosure );
 		self::assertSame( '1', $hidden->wrapper['data-hide-disclosure'] );
+	}
+
+	/**
+	 * The second button (F6 AC1, AC3): its own link and text, Lasso's secondary `rel` (sponsored only with its own
+	 * NoFollow), its number before `rel` (F12's name for Lasso's `data-lasso-button`).
+	 */
+	public function test_the_second_button_has_its_own_link_and_lassos_secondary_attributes(): void {
+		$product = self::product(
+			array(
+				'sponsored' => true,
+				'buttons'   => new Buttons( array( new Button( 'https://www.example.com/womens', "Buy Now Women's Shoe", false, true ) ) ),
+			)
+		);
+		$second  = self::build( $product )->buttons[1];
+
+		self::assertSame( 'affibloom-button-2', $second->css_class );
+		self::assertSame( "Buy Now Women's Shoe", $second->text );
+		self::assertSame(
+			array(
+				'target'                       => '_self',
+				'href'                         => 'https://www.example.com/womens',
+				'data-affibloom-box-trackable' => 'true',
+				'data-affibloom-id'            => '14727',
+				'data-affibloom-name'          => 'adidas Ligra 8 Kids',
+				'title'                        => 'adidas Ligra 8 Kids',
+				'data-affibloom-btn'           => '2',
+				'rel'                          => 'nofollow sponsored',
+			),
+			$second->attributes
+		);
+
+		$no_follow = self::build(
+			self::product(
+				array(
+					'sponsored' => true,
+					'buttons'   => new Buttons( array( new Button( 'https://www.example.com/a', 'A', true, false ) ) ),
+				)
+			)
+		);
+		self::assertSame( 'noopener', $no_follow->buttons[1]->attributes['rel'] );
+	}
+
+	/**
+	 * F6 AC2, AC4: no button without a URL or to the post the box is in; an empty text takes the Single type's secondary
+	 * label, and with that empty too the button has neither `href` nor `target`.
+	 */
+	public function test_a_second_button_needs_a_url_off_this_post_and_falls_back_to_the_label(): void {
+		$builder = new BoxBuilder( self::THUMBNAIL, static fn( string $url ): int => 'https://site.test/this-guide/' === $url ? 77 : 0 );
+		$build   = static fn( array $buttons, int $post, ?DisplaySettings $display = null ): BoxView => $builder->build(
+			self::product( array( 'buttons' => new Buttons( $buttons ) ) ),
+			$display ?? self::display(),
+			self::settings(),
+			BoxOverrides::from_block( array( 'productId' => 14727 ) ),
+			$post
+		);
+
+		self::assertCount( 1, $build( array( new Button( '', 'Text only' ) ), 77 )->buttons );
+		self::assertCount( 1, $build( array( new Button( 'https://site.test/this-guide/', 'Here' ) ), 77 )->buttons );
+		self::assertCount( 2, $build( array( new Button( 'https://site.test/this-guide/', 'Here' ) ), 0 )->buttons );
+
+		self::assertSame( 'Our Review', $build( array( new Button( 'https://www.example.com/b', '' ) ), 77 )->buttons[1]->text );
+		$blank = DisplaySettings::from_array( array( 'single' => array( 'palette' => array( 'secondary_button_text' => '' ) ) ) );
+		$bare  = $build( array( new Button( 'https://www.example.com/b', '' ) ), 77, $blank )->buttons[1]->attributes;
+		self::assertArrayNotHasKey( 'href', $bare );
+		self::assertArrayNotHasKey( 'target', $bare );
+	}
+
+	/**
+	 * F6 AC5, F29 AC3: every button in the product's order, the default one where it was put; the first printed is
+	 * button 1, the others button 2 with their number.
+	 */
+	public function test_every_button_prints_in_the_products_order(): void {
+		$buttons = array( new Button( 'https://www.example.com/a', 'A' ), new Button( 'https://www.example.com/b', 'B' ) );
+		$view    = self::build( self::product( array( 'buttons' => new Buttons( $buttons, 1 ) ) ) );
+
+		self::assertSame( array( 'affibloom-button-1', 'affibloom-button-2', 'affibloom-button-2' ), array_map( static fn( $b ) => $b->css_class, $view->buttons ) );
+		self::assertSame( array( 'A', '<span class="amazon-icon"></span> Buy Now', 'B' ), array_map( static fn( $b ) => $b->text, $view->buttons ) );
+		self::assertArrayNotHasKey( 'data-affibloom-btn', $view->buttons[0]->attributes );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $view->buttons[1]->attributes['href'] );
+		self::assertSame( '2', $view->buttons[1]->attributes['data-affibloom-btn'] );
+		self::assertSame( '3', $view->buttons[2]->attributes['data-affibloom-btn'] );
+
+		$last = self::build( self::product( array( 'buttons' => new Buttons( $buttons, 2 ) ) ) );
+		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $last->buttons[2]->attributes['href'] );
 	}
 }

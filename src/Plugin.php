@@ -349,7 +349,7 @@ final class Plugin {
 				new RepointResolver( new PostTypeProductRepository() ),
 				$display,
 				$this->settings_repository(),
-				new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp' ),
+				new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ) ),
 				new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets )
 			),
 			$box_assets,

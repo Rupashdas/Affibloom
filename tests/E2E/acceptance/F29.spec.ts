@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, createProduct, unique } from '../utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, unique } from '../utils';
 
 // F29 Any number of buttons (docs/features/F29/requirements.md). Task 14H: the product page; saving is Task 15.
 // The user, 2026-11-13: one button by default, the default one movable like the others; the first in the list is the
@@ -38,6 +38,39 @@ test.describe( 'F29 Any number of buttons', () => {
 		await expect( third.getByRole( 'switch', { name: 'New Window / Tab' } ) ).not.toBeChecked();
 		await expect( third.getByRole( 'switch', { name: 'NoFollow / NoIndex' } ) ).not.toBeChecked();
 		await expect( page.locator( 'input[name="primary_position"]' ) ).toHaveValue( '1' );
+	} );
+
+	// AC3 (Task 19A): in a box the buttons follow the product's order; the first is button 1, the rest button 2, and a
+	// button without a URL is left out.
+	test( 'AC3 in a box the buttons follow their order, the first the primary one', async ( { page } ) => {
+		const id = createProduct( {
+			name: unique( 'F29 AC3' ),
+			url: 'https://www.example.com/main',
+			buttons: [
+				{ url: 'https://www.example.com/men', text: 'Men' },
+				{ url: '', text: 'No link' },
+				{ url: 'https://www.example.com/women', text: 'Women' },
+			],
+			primary_position: '1',
+		} );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		const buttons = page.locator( '.affibloom-box a:is(.affibloom-button-1, .affibloom-button-2)' );
+		await expect( buttons ).toHaveCount( 3 );
+		await expect( buttons.nth( 0 ) ).toHaveClass( 'affibloom-button-1' );
+		await expect( buttons.nth( 0 ) ).toHaveAttribute( 'href', 'https://www.example.com/men' );
+		await expect( buttons.nth( 1 ) ).toHaveClass( 'affibloom-button-2' );
+		await expect( buttons.nth( 1 ) ).toHaveAttribute( 'href', 'https://www.example.com/main' );
+		await expect( buttons.nth( 2 ) ).toHaveText( 'Women' );
+	} );
+
+	// AC5 (Task 19A): the default button first and one added button is Lasso's two-button box; the pixel check is F5's
+	// `two-buttons` theme cells (AC8-AC10) and AC1's second-button variant.
+	test( "AC5 the default button first with one added button prints Lasso's two buttons", async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F29 AC5' ), buttons: [ { url: 'https://www.example.com/two', text: 'Two' } ] } );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).toHaveAttribute( 'href', 'https://www.example.com/item' );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-1' ) ).not.toHaveAttribute( 'data-affibloom-btn', /./ );
+		await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toHaveAttribute( 'data-affibloom-btn', '2' );
 	} );
 
 	test( 'AC2 one button by default; buttons are added, moved (the default too) and removed', async ( { page } ) => {

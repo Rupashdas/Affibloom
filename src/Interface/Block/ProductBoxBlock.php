@@ -68,6 +68,6 @@ final class ProductBoxBlock implements Module {
 			return '';
 		}
 
-		return $this->html->render( $this->builder->build( $product, $this->display->current(), $this->settings->get(), $overrides ) );
+		return $this->html->render( $this->builder->build( $product, $this->display->current(), $this->settings->get(), $overrides, (int) get_the_ID() ) );
 	}
 }

@@ -87,6 +87,15 @@ const THEME_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	'Llama-badge': { desktop: 17409, mobile: 15656.391 },
 	'Splash-plain': { desktop: 23985.688, mobile: 21101.219 },
 	'Splash-badge': { desktop: 24384.266, mobile: 21470.891 },
+	// The two-buttons state (Task 19A, deviation 138), from the same rebuilt page.
+	'Cactus-two-buttons': { desktop: 1596.75, mobile: 1441.531 },
+	'Cutter-two-buttons': { desktop: 4950.984, mobile: 4456.125 },
+	'Flow-two-buttons': { desktop: 7976.578, mobile: 7407.063 },
+	'Geek-two-buttons': { desktop: 10818.484, mobile: 10177.531 },
+	'Lab-two-buttons': { desktop: 14216.734, mobile: 13089.594 },
+	'Llama-two-buttons': { desktop: 17933.516, mobile: 16048.063 },
+	'Money-two-buttons': { desktop: 21516.938, mobile: 18977.531 },
+	'Splash-two-buttons': { desktop: 24782.844, mobile: 21844.563 },
 };
 
 // Where each baseline box starts on its guide page (px from the top, Local, 2026-11-16; the variants recaptured that day
@@ -96,6 +105,12 @@ const BASELINE_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	amazon: { desktop: 19494.563, mobile: 31649.719 },
 	other: { desktop: 7293.297, mobile: 10818.172 },
 	'no-description': { desktop: 18032.469, mobile: 33108.891 },
+	// Task 19A: the three variants are one box (the guide's first), measured the same way on Local on 2026-11-16; the
+	// amazon box measured then gave .563/.938 against the .563/.719 above, so recheck the phone fraction if text
+	// rasterisation alone fails one.
+	'second-button': { desktop: 4686.781, mobile: 7594.188 },
+	badge: { desktop: 4686.781, mobile: 7594.188 },
+	prime: { desktop: 4686.781, mobile: 7594.188 },
 };
 
 /**
@@ -119,7 +134,7 @@ async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< v
  * The theme baselines' product (tools/baselines-themes-matrix.ts): the amazon example without a description, with the
  * `badge` state's badge or none, and the given Display Theme (none: the Single type's).
  */
-function themeProduct( state: 'plain' | 'badge', theme?: string ): number {
+function themeProduct( state: 'plain' | 'badge' | 'two-buttons', theme?: string ): number {
 	const example = boxes.find( pick.amazon ) as Box;
 	return createProduct( {
 		...productFrom( example ),
@@ -128,6 +143,8 @@ function themeProduct( state: 'plain' | 'badge', theme?: string ): number {
 		description: '',
 		show_description: '0',
 		badge: state === 'badge' ? 'Our Pick' : '',
+		// The capture's `secondary_url` / `secondary_text` (tools/baselines-themes-matrix.ts, SECOND) as the first added button.
+		...( state === 'two-buttons' ? { url2: example.button1?.href ?? '', button_text2: 'Check Price' } : {} ),
 		...( theme ? { theme } : {} ),
 	} );
 }
@@ -287,9 +304,9 @@ async function boxTree( page: Page, lassoHtml: string | null ): Promise< Tree > 
 test.describe( 'F5 Box design', () => {
 	test.beforeEach( async ( { context } ) => blockTrackers( context ) );
 
-	// AC1 for the three Lab examples (Task 18B, AC5); second-button, badge and prime are 19A's, rating 21A's. The box
+	// AC1 for the Lab examples (Task 18B, AC5; second-button, badge and prime Task 19A's); rating is 21A's. The box
 	// is drawn with the site's Display settings, as the live boxes were.
-	for ( const variant of [ 'amazon', 'other', 'no-description' ] ) {
+	for ( const variant of [ 'amazon', 'other', 'no-description', 'second-button', 'badge', 'prime' ] ) {
 		test( `@local AC1 the ${ variant } box matches its baseline on desktop and mobile`, async ( { page } ) => {
 			useSiteDisplay();
 			const example = boxes.find( pick[ variant ] );
@@ -491,6 +508,17 @@ test.describe( 'F5 Box design', () => {
 			await matchesThemeBaseline( page, path, `Llama-${ state }` );
 		}
 	} );
+
+	// AC8-AC10, the two-buttons state (Task 19A, deviation 138): every theme with Lasso's second button.
+	for ( const theme of THEMES ) {
+		test( `@local AC8-AC10 ${ theme } with two buttons matches its baselines`, async ( { page } ) => {
+			useSiteDisplay();
+			const path = newPostWith( boxBlock( themeProduct( 'two-buttons', theme ) ) );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-box a.affibloom-button-2' ) ).toHaveText( 'Check Price' );
+			await matchesThemeBaseline( page, path, `${ theme }-two-buttons` );
+		} );
+	}
 
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,

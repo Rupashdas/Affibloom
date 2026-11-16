@@ -107,7 +107,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 18G: Llama
 - [x] Task 18H: Layout controls and the phone override on the box
 - [x] Task 18I: Density and typography on the box
-- [ ] Task 19A: Every button of the product in the box
+- [x] Task 19A: Every button of the product in the box
 - [ ] Task 20A: Per-box overrides — text and image
 - [ ] Task 21A: The Primary Rating stars
 - [ ] Task 18J: Element visibility on the box
@@ -632,11 +632,16 @@ with their numbers, texts (per-type default), rel and target; a button to the pa
 
 **Files:** modify `src/Application/Box/{BoxBuilder,BoxButton}.php`, `src/Domain/Link/LinkAttributes.php`, `templates/front/box-{2,3,6}.php`, `tests/E2E/acceptance/{F5,F6}.spec.ts`, the F29 spec (AC3, AC5), `tests/Unit/Application/BoxBuilderTest.php`.
 
-- [ ] **Step 1: Failing tests** (F6 AC1-AC6, F5 AC1 three variants, F29 AC3/AC5).
-- [ ] **Step 2: Builder.**
-- [ ] **Step 3: Templates (all three families).**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Show every product button in the box".
+- [x] **Step 1: Failing tests** (F6 AC1-AC6, F5 AC1 three variants, F29 AC3/AC5).
+- [x] **Step 2: Builder.**
+- [x] **Step 3: Templates (all three families).**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Show every product button in the box".
+
+*Note:* the templates needed no change (box 4 already took every button after the first). `url_to_postid` reaches the
+builder as a closure from `Plugin.php` and the block passes `get_the_ID()`. Two buttons checked beside Lasso's box in
+all 8 themes and the 6-box groupings, 1280 and 390 px: equal. F6's AC2 used the old `_affibloom_url2` meta; now
+`_affibloom_buttons`. AC1's new variant offsets were measured on Local (the phone fraction may need a recheck).
 
 ---
 

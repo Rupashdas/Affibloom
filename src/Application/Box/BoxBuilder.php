@@ -30,11 +30,21 @@ use Affibloom\Domain\Settings\Settings;
 final class BoxBuilder {
 
 	/**
+	 * Which post a URL points to (WordPress's `url_to_postid`, 0 for none); null finds none.
+	 *
+	 * @var \Closure(string): int|null
+	 */
+	private readonly ?\Closure $post_of_url;
+
+	/**
 	 * Builds the engine.
 	 *
-	 * @param string $default_thumbnail Affibloom's own picture for a product without one (F5 D14).
+	 * @param string                     $default_thumbnail Affibloom's own picture for a product without one (F5 D14).
+	 * @param \Closure(string): int|null $post_of_url       Which post a URL points to, for the self-link check (R40).
 	 */
-	public function __construct( private readonly string $default_thumbnail ) {}
+	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null ) {
+		$this->post_of_url = $post_of_url;
+	}
 
 	/**
 	 * The view of one Single box.
@@ -43,8 +53,9 @@ final class BoxBuilder {
 	 * @param DisplaySettings $display   The Display settings, as DisplaySettingsService::current() gives them.
 	 * @param Settings        $settings  The site's settings.
 	 * @param BoxOverrides    $overrides The box's own values.
+	 * @param int             $post_id   The post the box is drawn in (0 outside one), for the self-link check.
 	 */
-	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides ): BoxView { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- the overrides arrive with Tasks 20A-20C.
+	public function build( Product $product, DisplaySettings $display, Settings $settings, BoxOverrides $overrides, int $post_id = 0 ): BoxView { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- the overrides arrive with Tasks 20A-20C.
 		$config = $display->config( DisplayType::single() );
 		// R3: the Single type's theme, then the product's own; a box names none until its `theme` attribute (Task 20B).
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, '' );
@@ -60,7 +71,6 @@ final class BoxBuilder {
 		$disclosure = $this->disclosure( $product, $settings );
 		$prime      = $settings->bool( 'show_prime' ) && $product->prime;
 		$price      = ( $product->show_price ?? $settings->bool( 'show_price' ) ) ? $product->price : '';
-		$label      = '' === $product->button_text ? $config->palette()->value( 'primary_button_text' ) : $product->button_text;
 
 		return new BoxView(
 			family: LayoutFamily::of( $theme ),
@@ -78,9 +88,88 @@ final class BoxBuilder {
 			price_block: '' !== $price || $prime,
 			prime: $prime,
 			description: DescriptionRule::shows( $product->show_description, $product->description ) ? DescriptionRule::text( $product->description ) : null,
-			buttons: array( new BoxButton( 'affibloom-button-1', $link, $label ) ),
+			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
 		);
+	}
+
+	/**
+	 * The product's buttons in its order (F29 D7, F6): the default button (the product's own link and switches) where
+	 * it was put among the added ones; the first printed is `affibloom-button-1`, the others `affibloom-button-2` with
+	 * their number. An added button needs a URL that is not the post the box is in (R40), takes the Single type's
+	 * secondary label when its text is empty (R41) and Lasso's secondary `rel` (F6 AC3).
+	 *
+	 * @param Product               $product   The product.
+	 * @param LinkAttributes        $links     The product's link attributes.
+	 * @param array<string, string> $link      The default button's (primary) attributes.
+	 * @param string                $primary   The Single type's primary label.
+	 * @param string                $secondary The Single type's secondary label.
+	 * @param int                   $post_id   The post the box is drawn in.
+	 * @return list<BoxButton>
+	 */
+	private function buttons( Product $product, LinkAttributes $links, array $link, string $primary, string $secondary, int $post_id ): array {
+		$rows  = array();
+		$added = $product->buttons->all();
+		foreach ( $added as $index => $button ) {
+			if ( $index === $product->buttons->main_position() ) {
+				$rows[] = null;
+			}
+			$rows[] = $button;
+		}
+		if ( count( $added ) <= $product->buttons->main_position() ) {
+			$rows[] = null;
+		}
+
+		$out = array();
+		foreach ( $rows as $button ) {
+			$number = count( $out ) + 1;
+			$class  = 1 === $number ? 'affibloom-button-1' : 'affibloom-button-2';
+			if ( null === $button ) {
+				$attributes = $link;
+				if ( $number > 1 ) {
+					$attributes = self::numbered( $attributes, $number );
+				}
+				$out[] = new BoxButton( $class, $attributes, '' === $product->button_text ? $primary : $product->button_text );
+				continue;
+			}
+
+			$url = trim( $button->url );
+			if ( '' === $url || $this->links_to_post( $url, $post_id ) ) {
+				continue;
+			}
+			$text       = '' === $button->text ? $secondary : $button->text;
+			$attributes = $links->secondary( $url, $text, $button->new_tab, $button->nofollow, $product->sponsored );
+			$out[]      = new BoxButton( $class, 1 === $number ? $attributes : self::numbered( $attributes, $number ), $text );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * A button's attributes with its number before `rel`, where Lasso prints `data-lasso-button` (F12's
+	 * `data-affibloom-btn`, deviation 132).
+	 *
+	 * @param array<string, string> $attributes The link's attributes, in Lasso's order.
+	 * @param int                   $number     The button's place in the box, from 1.
+	 * @return array<string, string>
+	 */
+	private static function numbered( array $attributes, int $number ): array {
+		$rel = $attributes['rel'];
+		unset( $attributes['rel'] );
+		$attributes['data-affibloom-btn'] = (string) $number;
+		$attributes['rel']                = $rel;
+
+		return $attributes;
+	}
+
+	/**
+	 * Lasso's self-link check (single.php 226-229): the URL is the post the box is drawn in.
+	 *
+	 * @param string $url     The button's URL.
+	 * @param int    $post_id The post the box is drawn in; 0 outside one, where nothing matches.
+	 */
+	private function links_to_post( string $url, int $post_id ): bool {
+		return $post_id > 0 && null !== $this->post_of_url && ( $this->post_of_url )( $url ) === $post_id;
 	}
 
 	/**
