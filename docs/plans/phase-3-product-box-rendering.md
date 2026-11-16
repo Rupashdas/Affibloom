@@ -110,7 +110,7 @@ Tasks run in the order listed. The order was settled on 2026-11-14 so that every
 - [x] Task 19A: Every button of the product in the box
 - [x] Task 20A: Per-box overrides — text and image
 - [x] Task 21A: The Primary Rating stars
-- [ ] Task 18J: Element visibility on the box
+- [x] Task 18J: Element visibility on the box
 - [ ] Task 22A: Price, discount and Prime
 - [ ] Task 22B: Disclosure
 - [ ] Task 22C: Timestamp
@@ -579,11 +579,16 @@ rating stays with Pros & cons off.
 
 **Files:** create `src/Domain/Box/ElementVisibility.php`, `tests/Unit/Domain/Box/ElementVisibilityTest.php`; modify `src/Application/Box/BoxBuilder.php`, `assets/front/box-layout.css`, `tests/E2E/acceptance/F5.spec.ts` (AC13), the F6 spec (AC6) and the F16 spec's front-end row (AC5).
 
-- [ ] **Step 1: Failing tests** (AC13; unit `ElementVisibilityTest`).
-- [ ] **Step 2: Domain.**
-- [ ] **Step 3: CSS.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Hide box elements by the Display settings".
+- [x] **Step 1: Failing tests** (AC13; unit `ElementVisibilityTest`).
+- [x] **Step 2: Domain.**
+- [x] **Step 3: CSS.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Hide box elements by the Display settings".
+
+*Note:* as Lasso 370's code, a hidden Description element also leaves the description unprinted (R63; AC13's "markup
+kept" covers the other elements), and a badge with text always stays (`affibloom-badge-override`, tokens.md). Checked
+beside Lasso's box, each of badge, image, title, prime, desc, primary, secondary off, 8 themes, 1280 and 390 px:
+equal. Price, timestamp and Pros & cons are checked with 22A, 22C and 21B, which draw them.
 
 ---
 

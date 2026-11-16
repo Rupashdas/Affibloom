@@ -12,6 +12,7 @@ namespace Affibloom\Application\Box;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Box\DescriptionRule;
+use Affibloom\Domain\Box\ElementVisibility;
 use Affibloom\Domain\Box\LayoutFamily;
 use Affibloom\Domain\Box\ThemeResolver;
 use Affibloom\Domain\Display\DisplaySettings;
@@ -74,7 +75,7 @@ final class BoxBuilder {
 		$link = $links->primary( $product->url->value(), $product->new_tab, $product->nofollow, $product->sponsored );
 		// R76: the box's title URL takes the title and the image elsewhere, with the product's target and rel (R87).
 		$title_link = '' === $overrides->title_url ? $link : array_merge( $link, array( 'href' => $overrides->title_url ) );
-		$hidden     = $this->hidden( $overrides );
+		$elements   = ElementVisibility::of( $config->elements(), $overrides );
 
 		$disclosure = $this->disclosure( $product, $settings );
 		$prime      = $settings->bool( 'show_prime' ) && $product->prime;
@@ -85,21 +86,24 @@ final class BoxBuilder {
 			// R9 without a link location: Lasso's uniqid(), so two boxes of one product never share an ID.
 			anchor: 'affibloom-anchor-id-' . $id . '-' . uniqid(),
 			classes: implode( ' ', array( 'affibloom-display', 'affibloom-' . strtolower( $theme->name() ), 'affibloom-url-' . $product->slug, 'affibloom-advanced' ) ),
-			wrapper: DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $hidden ),
+			wrapper: DisplayPresentation::wrapper( $config, $display->columns(), null !== $disclosure, $elements->hidden() ),
 			badge: BoxOverrides::hides( $overrides->badge ) ? '' : ( '' === $overrides->badge ? $product->badge : $overrides->badge ),
+			badge_override: $elements->badge_overrides(),
 			link: $title_link,
 			// R69: the box's picture and alternative text; a hidden picture keeps the product's address (Lasso prints
 			// `src="hide"`, a broken request) and is hidden by the wrapper's flag.
 			image_src: '' === $overrides->image_url || BoxOverrides::hides( $overrides->image_url ) ? $this->image( $product, $settings ) : $overrides->image_url,
 			image_alt: '' === $overrides->image_alt ? $name : $overrides->image_alt,
-			title: $name,
+			// R61: a hidden title is not printed at all (the links keep the name).
+			title: $elements->shows( 'title' ) ? $name : '',
 			title_linked: $settings->bool( 'link_from_display_title' ),
 			title_tag: $overrides->title_type,
 			stars: null === $fields ? null : self::stars( $fields->values, $fields->library ),
 			price: $price,
 			price_block: '' !== $price || $prime,
 			prime: $prime,
-			description: $this->description( $product, $overrides ),
+			// R63: the Description element gates the block itself.
+			description: $elements->shows( 'desc' ) ? $this->description( $product, $overrides ) : null,
 			buttons: $this->buttons( $product, $links, $link, $config->palette()->value( 'primary_button_text' ), $config->palette()->value( 'secondary_button_text' ), $post_id ),
 			disclosure: $disclosure,
 		);
@@ -227,24 +231,6 @@ final class BoxBuilder {
 		}
 
 		return DescriptionRule::shows( $product->show_description, $product->description ) ? DescriptionRule::text( $product->description ) : null;
-	}
-
-	/**
-	 * The elements the box itself hides (R60; Lasso's compose_display_element_visibility): its badge, title,
-	 * description or picture set to `hide`.
-	 *
-	 * @param BoxOverrides $overrides The box's values.
-	 * @return list<string>
-	 */
-	private function hidden( BoxOverrides $overrides ): array {
-		$hides = array(
-			'badge' => $overrides->badge,
-			'title' => $overrides->title,
-			'desc'  => $overrides->description,
-			'image' => $overrides->image_url,
-		);
-
-		return array_keys( array_filter( $hides, array( BoxOverrides::class, 'hides' ) ) );
 	}
 
 	/**

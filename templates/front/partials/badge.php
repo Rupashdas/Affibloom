@@ -12,7 +12,7 @@ use Affibloom\Application\Products\ProductInput;
 
 if ( '' !== $view->badge ) :
 	?>
-	<div class="affibloom-badge">
+	<div class="affibloom-badge<?php echo $view->badge_override ? ' affibloom-badge-override' : ''; ?>">
 		<span class="affibloom-badge-text"><?php echo wp_kses( $view->badge, ProductInput::ICON_MARKUP ); ?></span>
 	</div>
 	<?php

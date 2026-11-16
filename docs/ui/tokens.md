@@ -90,6 +90,8 @@ decision C1; deviation 132). Task 41 translates the site's `.lasso-*` Additional
 | `lasso-amazon-prime` | `affibloom-amazon-prime` | |
 | `clear` | `affibloom-clear` | |
 | `lasso-description` | `affibloom-description` | |
+| `lasso-v2-link-badge-override` | `affibloom-badge-override` | a badge with text under a hidden Badge element (18J, R62) |
+| `lasso-stars`, `lasso-stars-value`, `lasso-stars-label float-left mr-1` | `affibloom-stars`, `affibloom-stars-value`, `affibloom-stars-label` | the Primary Rating (21A); the label's utility classes are its own rule |
 | `lasso-button-1`, `lasso-button-2` | `affibloom-button-1`, `affibloom-button-2` | |
 | `lasso-disclosure`, `lasso-date` | `affibloom-disclosure`, `affibloom-date` | |
 | `lasso-end` | `affibloom-end` | the 2-box layout's disclosure and date row (18E) |

@@ -404,4 +404,21 @@ final class BoxBuilderTest extends TestCase {
 		self::assertNull( $stars( array( 'value' => '4; color: red' ) ) );
 		self::assertNull( self::build()->stars );
 	}
+
+	/**
+	 * F5 R61-R63 (Task 18J): a hidden Title or Description element prints no title or description block; the links keep
+	 * the name; the badge takes the override class under a hidden Badge element.
+	 */
+	public function test_hidden_title_description_and_badge_elements(): void {
+		$display = DisplaySettings::from_array( array( 'single' => array( 'theme' => 'Lab', 'elements' => array( 'title' => false, 'desc' => false, 'badge' => false ) ) ) );
+		$view    = self::build( null, $display );
+
+		self::assertSame( '', $view->title );
+		self::assertSame( 'adidas Ligra 8 Kids', $view->link['data-affibloom-name'] );
+		self::assertNull( $view->description );
+		self::assertSame( 'Best for Kids & Youth', $view->badge );
+		self::assertTrue( $view->badge_override );
+		self::assertSame( '1', $view->wrapper['data-hide-badge'] );
+		self::assertFalse( self::build()->badge_override );
+	}
 }

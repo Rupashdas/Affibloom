@@ -563,6 +563,52 @@ test.describe( 'F5 Box design', () => {
 		} );
 	}
 
+	// AC13 (Task 18J): each element switch hides its element as Lasso does: the markup stays and the wrapper's flag
+	// hides it, except the title and the description, which are not printed; a badge with text stays under a hidden
+	// Badge element (R62); the stars stay with Pros & cons off (F8 AC5).
+	test( 'AC13 each element switch hides its element on the front end', async ( { page } ) => {
+		const id = createProduct( {
+			name: 'F5 AC13',
+			prime: '1',
+			description: 'A description long enough to show.',
+			badge: 'Product badge',
+			rating: '4.5',
+			buttons: [ { url: 'https://www.example.com/two', text: 'Two' } ],
+		} );
+		const path = newPostWith( boxBlock( id ) );
+		const display = page.locator( '.affibloom-display' );
+		const off = ( key: string ): void => {
+			wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Lab', elements: { [ key ]: false } } } ), '--format=json' );
+		};
+		try {
+			for ( const [ key, selector ] of [ [ 'image', 'a.affibloom-image' ], [ 'prime', '.affibloom-amazon-prime' ], [ 'primary', 'a.affibloom-button-1' ], [ 'secondary', 'a.affibloom-button-2' ] ] ) {
+				off( key );
+				await page.goto( path );
+				await expect( display ).toHaveAttribute( `data-hide-${ key }`, '1' );
+				await expect( page.locator( `.affibloom-box ${ selector }` ).first() ).toBeAttached(); // the markup stays
+				await expect( page.locator( `.affibloom-box ${ selector }` ).first() ).toBeHidden();
+			}
+
+			off( 'title' );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveCount( 0 );
+
+			off( 'desc' );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-box .affibloom-description' ) ).toHaveCount( 0 );
+
+			off( 'badge' );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-box .affibloom-badge.affibloom-badge-override' ) ).toBeVisible();
+
+			off( 'proscons' );
+			await page.goto( path );
+			await expect( page.locator( '.affibloom-box .affibloom-stars' ) ).toBeVisible();
+		} finally {
+			useSiteDisplay();
+		}
+	} );
+
 	// AC11 (Task 18H): every layout control and the phone override change the box as Lasso's do (R54-R57), checked
 	// against the matrix's layout groups: one theme per family, the `full` state (every element on, both buttons,
 	// rating, Pros & Cons), so it passes only once 19A-22C draw those (phase exit; measured in 18H element by element

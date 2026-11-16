@@ -177,7 +177,9 @@
 	flex: 0 0 40%;
 	min-width: 0;
 }
-.affibloom-advanced[data-hide-badge="1"] .affibloom-badge,
+/* R61, R62: a hidden element keeps its markup; a badge with text under a hidden Badge element takes the override class
+   and stays (Lasso's lasso-v2-link-badge-override). */
+.affibloom-advanced[data-hide-badge="1"] .affibloom-badge:not(.affibloom-badge-override),
 .affibloom-advanced[data-hide-image="1"] .affibloom-image,
 .affibloom-advanced[data-hide-image="1"] a.affibloom-image,
 .affibloom-advanced[data-hide-title="1"] :is(.affibloom-title, a.affibloom-title, h3.affibloom-title, span.affibloom-title),
@@ -727,10 +729,17 @@ article .affibloom-display.affibloom-advanced:is(.affibloom-cactus, .affibloom-m
 .affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"]):is(.affibloom-cactus, .affibloom-money) a.affibloom-button-2 {
 	float: none !important;
 }
-/* A hidden timestamp hides the 6-box date box and a hidden image its image box (Lasso's lines 1960-1970; the other
-   element rules are Task 18J's). */
+/* Element visibility against the button layouts (Lasso's lines 1960-2120, Task 18J): a hidden element's 6-box box
+   collapses, and a hidden button beats the spread and grouped button rules. */
 .affibloom-advanced[data-hide-image="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-2,
-.affibloom-advanced[data-hide-timestamp="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-6 {
+.affibloom-advanced[data-hide-primary="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-3,
+.affibloom-advanced[data-hide-secondary="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-4,
+.affibloom-advanced[data-hide-disclosure="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-5,
+.affibloom-advanced[data-hide-timestamp="1"]:is(.affibloom-cactus, .affibloom-money) .affibloom-box-6,
+.affibloom-display.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"])[data-hide-primary="1"]:is(.affibloom-cactus, .affibloom-money, .affibloom-flow, .affibloom-cutter, .affibloom-geek, .affibloom-splash) a.affibloom-button-1,
+.affibloom-display.affibloom-advanced[data-layout-button-align="spread"]:not([data-layout-cta-width="full"])[data-hide-secondary="1"]:is(.affibloom-cactus, .affibloom-money, .affibloom-flow, .affibloom-cutter, .affibloom-geek, .affibloom-splash) a.affibloom-button-2,
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"])[data-hide-primary="1"]:is(.affibloom-flow, .affibloom-cutter, .affibloom-geek, .affibloom-splash) a.affibloom-button-1,
+.affibloom-display.affibloom-advanced:is([data-layout-button-align="left"], [data-layout-button-align="center"], [data-layout-button-align="right"])[data-hide-secondary="1"]:is(.affibloom-flow, .affibloom-cutter, .affibloom-geek, .affibloom-splash) a.affibloom-button-2 {
 	display: none !important;
 }
 .affibloom-display.affibloom-advanced.affibloom-splash .affibloom-box-2 > .affibloom-end {

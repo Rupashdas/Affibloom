@@ -201,6 +201,15 @@ test.describe( 'F16 Display system', () => {
 		await expect( display ).toHaveAttribute( 'data-layout-orientation', 'stacked' );
 	} );
 
+	// AC5 on the front end (Task 18J): an element switched off is hidden in the reader's box.
+	test( 'AC5 an element switched off is hidden in the box on the front end', async ( { page } ) => {
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, single: { theme: 'Cactus', elements: { image: false, primary: false } } } ), '--format=json' );
+		await page.goto( newPostWith( boxBlock( createProduct( { name: 'F16 AC5 front' } ) ) ) );
+		await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-image', '1' );
+		await expect( page.locator( '.affibloom-box .affibloom-box-2' ) ).toBeHidden(); // the 6-box image box collapses
+		await expect( page.locator( '.affibloom-box .affibloom-box-3' ) ).toBeHidden();
+	} );
+
 	// AC4 on the front end (Task 18I): a preset's values and a title clamp reach the reader's box.
 	test( 'AC4 a saved density changes the box on the front end', async ( { page } ) => {
 		wp( 'option', 'update', 'affibloom_display', JSON.stringify( {

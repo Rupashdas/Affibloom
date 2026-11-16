@@ -24,6 +24,8 @@ final class BoxView {
 	 * @param string                $classes     The display wrapper's classes.
 	 * @param array<string, string> $wrapper     The display wrapper's other attributes (DisplayPresentation).
 	 * @param string                $badge       The badge text; '' for none.
+	 * @param bool                  $badge_override The Badge element is off, so the badge takes the class the hide rule
+	 *                                              skips (R62).
 	 * @param array<string, string> $link        The image and title links' attributes (the box's title URL, R76).
 	 * @param string                $image_src   The image's address.
 	 * @param string                $image_alt   The image's alternative text.
@@ -44,6 +46,7 @@ final class BoxView {
 		public readonly string $classes,
 		public readonly array $wrapper,
 		public readonly string $badge,
+		public readonly bool $badge_override,
 		public readonly array $link,
 		public readonly string $image_src,
 		public readonly string $image_alt,
