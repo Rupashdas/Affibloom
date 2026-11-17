@@ -536,28 +536,7 @@
 .affibloom-empty__text { max-width: 520px; margin: 8px auto 0; color: var(--affibloom-ink-600); font-size: 14px; line-height: 21px; }
 .affibloom-empty__action { margin-top: 20px; }
 
-/* 5. Settings row: icon chip, label with its visible description (U3), switch on the right */
-.affibloom-setting {
-	display: flex;
-	align-items: center;
-	gap: 20px;
-	padding: 20px 0;
-	border-top: 1px solid var(--affibloom-line);
-}
-.affibloom-setting:first-child { border-top: 0; }
-.affibloom-setting__text { flex: 1; min-width: 0; }
-.affibloom-setting__label {
-	display: block;
-	color: var(--affibloom-ink-900);
-	font-weight: 600;
-}
-.affibloom-setting__desc {
-	display: block;
-	margin-top: 2px;
-	color: var(--affibloom-ink-600);
-	font-size: 13px;
-	line-height: 18px;
-}
+/* 5. Settings rows: Lasso's switch rows (partials/switch-row.php, deviation 96); Aurora's icon-chip row is gone (MD6). */
 
 /* 6. Toggle: 44 x 24; the real checkbox lies over the track, so a click or tap hits it */
 .affibloom-toggle {
@@ -651,7 +630,6 @@
 	background: var(--affibloom-white);
 	cursor: pointer;
 }
-.affibloom-field + .affibloom-setting { margin-top: 16px; }
 
 /* Segmented tabs on a light page (design system, "Segmented tabs"): the display type chooser */
 .affibloom-segment {
@@ -1926,6 +1904,7 @@
 .affibloom-notice__text { margin: 0; color: var(--affibloom-ink-900); font-weight: 600; }
 .affibloom-notice > .affibloom-chip { width: 36px; height: 36px; }
 .affibloom-chip--warning { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
+.affibloom-chip--danger { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
 
 /* The notice region (Task ON2, F38 D8; Lasso's notification bars): the top of the page's column, under the header,
    newest last (MD2: no navy strip). Empty, it takes no room. Content-box, as the page body: the column is 1320px
@@ -2374,18 +2353,22 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 	cursor: not-allowed;
 }
 
-/* 9. Toast: dark card with a check, bottom right, slides in, gone after 4 s */
+/* 9. Toast: the ink card with a check, bottom centre (Meadow, MD6), slides in, gone after 4 s */
 .affibloom-toast {
 	position: fixed;
-	right: 24px;
+	right: 0;
 	bottom: 24px;
+	left: 0;
+	box-sizing: border-box;
+	width: fit-content;
+	margin: 0 auto;
 	z-index: 100000;
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	max-width: 360px;
-	padding: 12px 16px;
-	border-radius: var(--affibloom-radius-chip);
+	padding: 12px 18px 12px 14px;
+	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-ink-900);
 	box-shadow: var(--affibloom-shadow-toast);
 	color: var(--affibloom-white);
@@ -2408,13 +2391,16 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 /* A failure says what to do next, so it stays longer (C1 R23's warning is two sentences). */
 .affibloom-toast--error { animation-duration: 9s; }
 .affibloom-toast__icon[hidden] { display: none; }
+/* Above the product page's save bar (MD5). */
+.affibloom-admin:has(.affibloom-product__footer) .affibloom-toast { bottom: 88px; }
 @keyframes affibloom-toast {
 	0% { opacity: 0; transform: translateY(8px); }
 	5%, 90% { opacity: 1; transform: none; }
 	100% { opacity: 0; transform: translateY(8px); visibility: hidden; }
 }
 
-/* Modal (design system, "Modal"): 560px, 16px radius, toast shadow, navy backdrop; head, body and foot like a card */
+/* Modal (Meadow, 0b.4; MD6): 560px, 12px radius, the menus' shadow, a dark green-grey backdrop; 28px padding, an
+   optional 44px icon chip above the 22px title; head, body and foot like a card */
 .affibloom-modal {
 	position: fixed;
 	inset: 0;
@@ -2423,7 +2409,7 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 	place-items: center;
 	padding: 16px;
 }
-.affibloom-modal__backdrop { position: absolute; inset: 0; background: rgba(11, 42, 91, 0.45); }
+.affibloom-modal__backdrop { position: absolute; inset: 0; background: rgba(22, 32, 26, 0.45); }
 .affibloom-modal__panel {
 	position: relative;
 	width: 100%;
@@ -2434,13 +2420,15 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-toast);
 }
-.affibloom-modal__head { position: relative; padding: 24px 56px 0 24px; }
-.affibloom-admin .affibloom-modal__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 700 18px/26px var(--affibloom-font); }
-.affibloom-modal__intro { margin: 4px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-modal__head { position: relative; padding: 28px 64px 0 28px; }
+.affibloom-modal__chip { width: 44px; height: 44px; margin-bottom: 16px; border-radius: var(--affibloom-radius-card); }
+.affibloom-modal__chip .affibloom-icon { width: 22px; height: 22px; }
+.affibloom-admin .affibloom-modal__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 800 22px/1.25 var(--affibloom-font-display); letter-spacing: -0.015em; }
+.affibloom-modal__intro { margin: 6px 0 0; color: var(--affibloom-ink-600); font-size: 14px; line-height: 21px; }
 .affibloom-modal__close {
 	position: absolute;
-	top: 18px;
-	right: 18px;
+	top: 16px;
+	right: 16px;
 	display: grid;
 	place-items: center;
 	width: 32px;
@@ -2453,12 +2441,12 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 	cursor: pointer;
 }
 .affibloom-modal__close:hover { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
-.affibloom-modal__body { padding: 20px 24px 24px; }
+.affibloom-modal__body { padding: 16px 28px 28px; }
 .affibloom-modal__foot {
 	display: flex;
 	justify-content: flex-end;
 	gap: 12px;
-	padding: 16px 24px;
+	padding: 16px 28px;
 	border-top: 1px solid var(--affibloom-line);
 	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
 	background: var(--affibloom-subtle);
@@ -2757,8 +2745,6 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-admin .affibloom-header__menu-button { padding: 0 9px; }
 	.affibloom-admin .affibloom-header__action { padding: 0 10px; }
 	.affibloom-admin .affibloom-header__caret { padding: 0 7px; }
-	.affibloom-setting { flex-wrap: wrap; }
-	.affibloom-setting .affibloom-toggle { margin-left: 56px; }
 	.affibloom-card__foot .affibloom-button { width: 100%; }
 	.affibloom-grid { grid-template-columns: 1fr; }
 	.affibloom-modal__foot .affibloom-button { width: 100%; }

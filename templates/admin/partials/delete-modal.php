@@ -30,6 +30,8 @@ $failed_text   = $view['failed_text'] ?? __( 'Could not delete. Please try again
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr( $modal_id ); ?>-title" aria-describedby="<?php echo esc_attr( $modal_id ); ?>-text">
 		<div class="affibloom-modal__head">
+			<?php // Meadow's dialog chip (MD6): the danger tint and the bin, as the action destroys. ?>
+			<span class="affibloom-chip affibloom-modal__chip affibloom-chip--danger" aria-hidden="true"><?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?></span>
 			<h2 id="<?php echo esc_attr( $modal_id ); ?>-title" class="affibloom-modal__title"><?php echo esc_html( $view['title'] ); ?></h2>
 			<button type="button" class="affibloom-modal__close" data-affibloom-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>

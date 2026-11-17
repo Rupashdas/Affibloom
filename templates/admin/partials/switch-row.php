@@ -3,7 +3,8 @@
  * A Lasso-style switch row: the switch on the left, its label, and a "?" help tip when there is help text.
  *
  * Used where a screen follows Lasso's structure (Display's Disclosure & behavior, the Amazon tab). Extracted on its
- * second use. Settings rows in the Aurora layout (General) use partials/toggle.php instead.
+ * second use. Settings → General uses it too, in Lasso's structure (deviation 96); Aurora's row with an icon chip
+ * (partials/toggle.php) is gone (Task MD6).
  *
  * @package Affibloom
  * @var array{id: string, name: string, label: string, checked: bool, help?: string, note?: string, soon?: bool, disabled?: bool, data?: array<string, string>} $view

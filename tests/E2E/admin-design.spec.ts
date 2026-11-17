@@ -262,6 +262,37 @@ test( 'the product page has a sticky preview and a save bar', async ( { page } )
 	await expect( form ).toHaveAttribute( 'data-dirty', 'true' );
 } );
 
+test( 'dialogs and the toast use the design system', async ( { page } ) => {
+	await page.goto( '/wp-admin/admin.php?page=affibloom' );
+	await page.locator( '.affibloom-card--list .affibloom-row__name' ).first().click();
+	await expect( page.locator( '#affibloom-product-form' ) ).toBeVisible();
+
+	// MD6 (0b.4): 28px padding, a 44px icon chip (danger tint for a delete), a 22px title, a dark green-grey backdrop.
+	await page.getByRole( 'button', { name: 'Delete This Link' } ).click();
+	const dialog = page.getByRole( 'dialog', { name: 'Delete This Link?' } );
+	await expect( dialog ).toBeVisible();
+	const chip = dialog.locator( '.affibloom-modal__chip' );
+	expect( await css( chip, 'width' ) ).toBe( '44px' );
+	expect( await css( chip, 'background-color' ) ).toBe( 'rgb(253, 236, 234)' ); // danger-50
+	const heading = dialog.getByRole( 'heading', { name: 'Delete This Link?' } );
+	expect( await css( heading, 'font-size' ) ).toBe( '22px' );
+	expect( await css( heading, 'font-family' ) ).toMatch( /^"?Plus Jakarta Sans"?,/ );
+	expect( await css( dialog.locator( '.affibloom-modal__head' ), 'padding-left' ) ).toBe( '28px' );
+	expect( await css( page.locator( '#affibloom-delete-modal .affibloom-modal__backdrop' ), 'background-color' ) ).toBe( 'rgba(22, 32, 26, 0.45)' );
+	await page.keyboard.press( 'Escape' );
+	await expect( dialog ).toBeHidden();
+
+	// The toast: the ink card at the bottom centre, above the product page's save bar.
+	await page.evaluate( () => ( window as unknown as { affibloomToast: ( text: string, failed: boolean ) => void } ).affibloomToast( 'Test', false ) );
+	const toast = page.locator( '.affibloom-toast' ).filter( { hasText: 'Test' } );
+	await expect( toast ).toBeVisible();
+	expect( await css( toast, 'background-color' ) ).toBe( INK_900 );
+	const [ toastBox, barBox ] = [ await box( toast ), await box( page.locator( '.affibloom-product__footer' ) ) ];
+	const viewport = page.viewportSize()!;
+	expect( Math.abs( toastBox.x + toastBox.width / 2 - viewport.width / 2 ) ).toBeLessThanOrEqual( 2 );
+	expect( toastBox.y + toastBox.height ).toBeLessThanOrEqual( barBox.y );
+} );
+
 test( 'Settings uses the Affibloom design system', async ( { page } ) => {
 	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
 	await expectShell( page, 'Settings' );
@@ -277,21 +308,22 @@ test( 'Settings uses the Affibloom design system', async ( { page } ) => {
 	expect( await css( save, 'background-color' ) ).toBe( BRAND_600 );
 	expect( await css( save, 'color' ) ).toBe( WHITE );
 
-	// Every setting has an icon chip (until MD6); switches are green when on, ink-400 when off.
-	const row = ( label: string ) => page.locator( '.affibloom-setting' ).filter( { has: page.getByLabel( label ) } );
-	await expect( row( 'Sponsored' ).locator( '.affibloom-chip svg' ) ).toHaveCount( 1 );
+	// Lasso's rows (deviation 96): the switch, its label and the "?" tip; no icon chips (MD6). Switches are green when on,
+	// ink-400 when off, whatever the stored values are.
+	const row = ( label: string ) => page.locator( '.affibloom-toggle-row' ).filter( { has: page.getByLabel( label, { exact: true } ) } );
+	await expect( page.locator( '.affibloom-card .affibloom-toggle-row .affibloom-chip' ) ).toHaveCount( 0 );
 	const track = ( label: string ) => row( label ).locator( '.affibloom-toggle__track' );
-	expect( await css( track( 'New Window / Tab' ), 'background-image' ) ).toBe( 'none' );
-	expect( await css( track( 'New Window / Tab' ), 'background-color' ) ).toBe( BRAND_600 );
-	expect( await css( track( 'Sponsored' ), 'background-color' ) ).toBe( INK_400 );
+	for ( const label of [ 'New Window / Tab', 'Sponsored' ] ) {
+		const on = await page.getByLabel( label, { exact: true } ).isChecked();
+		expect( await css( track( label ), 'background-image' ) ).toBe( 'none' );
+		expect( await css( track( label ), 'background-color' ) ).toBe( on ? BRAND_600 : INK_400 );
+	}
 
-	// U3: each setting's help text is visible under its label and read with the switch.
-	const sponsored = page.getByLabel( 'Sponsored' );
+	// U3: each setting's help is read with the switch (the "?" tip's text).
+	const sponsored = page.getByLabel( 'Sponsored', { exact: true } );
 	const describedBy = await sponsored.getAttribute( 'aria-describedby' );
 	expect( describedBy ).toBeTruthy();
-	const help = page.locator( `#${ describedBy }` );
-	await expect( help ).toBeVisible();
-	await expect( help ).toHaveText( 'When enabled, this link will be set to sponsored.' );
+	await expect( page.locator( `#${ describedBy }` ) ).toHaveText( 'When enabled, this link will be set to sponsored.' );
 
 	// Keyboard: the switch is reached with Tab and shows the brand focus ring.
 	await tabTo( page, sponsored );

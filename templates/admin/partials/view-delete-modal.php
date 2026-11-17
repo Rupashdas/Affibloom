@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-view-delete-title" aria-describedby="affibloom-view-delete-text">
 		<div class="affibloom-modal__head">
+			<span class="affibloom-chip affibloom-modal__chip affibloom-chip--danger" aria-hidden="true"><?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?></span>
 			<h2 id="affibloom-view-delete-title" class="affibloom-modal__title"><?php esc_html_e( 'Delete saved view?', 'affibloom' ); ?></h2>
 			<button type="button" class="affibloom-modal__close" data-affibloom-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>

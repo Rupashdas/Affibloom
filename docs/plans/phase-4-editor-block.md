@@ -53,7 +53,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task MD3: A page head instead of the band
 - [x] Task MD4: The Dashboard: counts beside the title, search, list
 - [x] Task MD5: The product page: head, sticky preview, save bar
-- [ ] Task MD6: Settings, Groups, Fields, dialogs and the toast
+- [x] Task MD6: Settings, Groups, Fields, dialogs and the toast
 - [ ] Task MD7: The design system rewritten for Meadow
 
 ### F4 — Displays in the editor
@@ -369,10 +369,16 @@ a 22px title and a dark green-grey backdrop; the toast shows at the bottom centr
 settings-general.css}`, `tests/E2E/admin-design.spec.ts` (Settings and Display parts: no chip in a row, the 380px rail
 unchanged, the dialog and the toast).
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: Settings.** - [ ] **Step 3: Groups and Fields.** - [ ] **Step 4: Dialogs and
+- [x] **Step 1: Test.** - [x] **Step 2: Settings.** - [x] **Step 3: Groups and Fields.** - [x] **Step 4: Dialogs and
   toast.**
-- [ ] **Step 5: Check and look.** `phpcs`; each screen once at 1280 px, a Delete dialog open, a save toast.
-- [ ] **Step 6: Commit** — "Restyle Settings, Groups, Fields, dialogs and the toast for Meadow".
+- [x] **Step 5: Check and look.** `phpcs`; each screen once at 1280 px, a Delete dialog open, a save toast.
+- [x] **Step 6: Commit** — "Restyle Settings, Groups, Fields, dialogs and the toast for Meadow".
+
+*Note (2026-11-17):* Settings → General has used Lasso's switch rows (`switch-row.php`) since deviation 96, so no row
+had an icon chip: `toggle.php` and its CSS were dead and are removed; the spec checks the switch rows instead. Groups,
+a group, Fields and a field already wore the shared head and table card after MD3-MD4. The 44px chip is on the dialogs
+it means something on (`delete-modal.php`, `view-delete-modal.php`: danger and bin; `unsaved-modal.php`: warning); the
+toast sits above the product page's save bar. Seen at 1280 px: each screen, the delete dialog, a toast (centred).
 
 #### Task MD7: The design system rewritten for Meadow
 
