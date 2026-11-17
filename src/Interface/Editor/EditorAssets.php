@@ -50,6 +50,7 @@ final class EditorAssets implements Module {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue' ) );
 		add_action( 'admin_footer', array( $this, 'print_modal' ) );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_canvas' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_classic' ) );
 	}
 
 	/**
@@ -65,24 +66,59 @@ final class EditorAssets implements Module {
 	 * The modal's styles (the design system's, which its root's `.affibloom-admin` scopes) and its script's address.
 	 */
 	public function enqueue(): void {
-		wp_enqueue_style( 'affibloom-fonts', $this->plugin_url . 'assets/admin/fonts.css', array(), $this->version );
-		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array( 'affibloom-fonts' ), $this->version );
-		wp_enqueue_style( 'affibloom-display-modal', $this->plugin_url . 'assets/editor/display-modal.css', array( 'affibloom-admin' ), $this->version );
-
-		$config = array(
-			'modalScript' => add_query_arg( 'ver', $this->version, $this->plugin_url . 'assets/editor/display-modal.js' ),
-			// The sidebar's Customize Display fields per type (Task 24A).
-			'overrides'   => OverrideTexts::catalog(),
-		);
-		wp_add_inline_script( self::BLOCK_SCRIPT, 'window.affibloomEditor = ' . wp_json_encode( $config ) . ';', 'before' );
+		$this->styles();
+		wp_add_inline_script( self::BLOCK_SCRIPT, $this->config(), 'before' );
 	}
 
 	/**
-	 * The modal's markup, hidden until a block opens it; on block-editor screens only.
+	 * The Classic editor's screens (Task ED1): while ClassicButton is active, the same styles and the modal's address for
+	 * the TinyMCE button, with WordPress's apiFetch, which the Classic editor does not load itself.
+	 *
+	 * @param string $hook_suffix The admin page, e.g. "post.php".
+	 */
+	public function enqueue_classic( string $hook_suffix ): void {
+		if ( ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) || ! ClassicButton::active() ) {
+			return;
+		}
+		$this->styles();
+		wp_register_script( 'affibloom-editor-config', false, array( 'wp-api-fetch' ), $this->version, false );
+		wp_enqueue_script( 'affibloom-editor-config' );
+		wp_add_inline_script( 'affibloom-editor-config', $this->config() );
+	}
+
+	/**
+	 * Meadow's fonts and admin styles, then the modal's.
+	 */
+	private function styles(): void {
+		wp_enqueue_style( 'affibloom-fonts', $this->plugin_url . 'assets/admin/fonts.css', array(), $this->version );
+		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array( 'affibloom-fonts' ), $this->version );
+		wp_enqueue_style( 'affibloom-display-modal', $this->plugin_url . 'assets/editor/display-modal.css', array( 'affibloom-admin' ), $this->version );
+	}
+
+	/**
+	 * `window.affibloomEditor`: the modal's address, the sidebar's fields (Task 24A) and the Classic button's words (ED1).
+	 */
+	private function config(): string {
+		$config = array(
+			'modalScript' => add_query_arg( 'ver', $this->version, $this->plugin_url . 'assets/editor/display-modal.js' ),
+			'overrides'   => OverrideTexts::catalog(),
+			// Lasso's button words (R61-R62), with Affibloom's name in place of Lasso's.
+			'classic'     => array(
+				'add'     => __( 'Add A Display', 'affibloom' ),
+				'loading' => __( 'Loading Display...', 'affibloom' ),
+				'retry'   => __( 'Retry Add A Display', 'affibloom' ),
+			),
+		);
+
+		return 'window.affibloomEditor = ' . wp_json_encode( $config ) . ';';
+	}
+
+	/**
+	 * The modal's markup, hidden until a block (or the Classic editor's button, ED1) opens it; on editor screens only.
 	 */
 	public function print_modal(): void {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( null === $screen || ! $screen->is_block_editor() ) {
+		if ( null === $screen || ! ( $screen->is_block_editor() || ( 'post' === $screen->base && ClassicButton::active() ) ) ) {
 			return;
 		}
 		$this->template->render(

@@ -101,6 +101,7 @@ use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
+use Affibloom\Interface\Editor\ClassicButton;
 use Affibloom\Interface\Editor\EditorAssets;
 use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
@@ -406,6 +407,7 @@ final class Plugin {
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets ),
+			new ClassicButton( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ), $settings, $display, $amazon, $genius, $this->template() ),

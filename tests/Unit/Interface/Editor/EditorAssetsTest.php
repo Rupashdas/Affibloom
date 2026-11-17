@@ -82,14 +82,22 @@ final class EditorAssetsTest extends TestCase {
 		self::assertSame( 'Button url', $config['overrides']['button'][2]['label'] );
 	}
 
-	public function test_the_modal_is_printed_on_block_editor_screens_only(): void {
+	public function test_the_modal_is_printed_on_editor_screens_only(): void {
 		Functions\when( 'current_user_can' )->justReturn( true );
-		$classic = \Mockery::mock();
+		$classic       = \Mockery::mock();
+		$classic->base = 'post';
 		$classic->shouldReceive( 'is_block_editor' )->andReturn( false );
 		Functions\when( 'get_current_screen' )->justReturn( $classic );
+		Functions\when( 'get_option' )->justReturn( array( 'affibloom/affibloom.php' ) );
 		ob_start();
 		self::assets()->print_modal();
 		self::assertSame( '', ob_get_clean() );
+
+		// With the Classic Editor plugin active, its post screen gets the modal for the toolbar button (Task ED1).
+		Functions\when( 'get_option' )->justReturn( array( 'classic-editor/classic-editor.php' ) );
+		ob_start();
+		self::assets()->print_modal();
+		self::assertSame( 'MODAL', ob_get_clean() );
 
 		$block = \Mockery::mock();
 		$block->shouldReceive( 'is_block_editor' )->andReturn( true );

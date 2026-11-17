@@ -371,6 +371,33 @@ test.describe( 'F4 Displays in the editor', () => {
 		expect( most ).toBeLessThanOrEqual( 3 );
 	} );
 
+	test( 'AC16 with the Classic Editor plugin, Add A Display inserts the shortcode at the cursor', async ( { page } ) => {
+		let installed = true;
+		try {
+			wp( 'plugin', 'is-installed', 'classic-editor' );
+		} catch {
+			installed = false; // WP-CLI's is-installed exits 1.
+		}
+		test.skip( ! installed, 'The Classic Editor plugin is not installed on this site.' );
+		const name = unique( 'F4 AC16' );
+		const id = createProduct( { name } );
+		wp( 'plugin', 'activate', 'classic-editor' );
+		try {
+			await page.goto( '/wp-admin/post-new.php' );
+			await page.waitForFunction( () => ( window as unknown as { tinymce?: { get: ( id: string ) => { initialized?: boolean } | null } } ).tinymce?.get( 'content' )?.initialized );
+			await page.locator( '.mce-btn', { hasText: 'Add A Display' } ).first().click();
+			const modal = page.locator( '#affibloom-display-modal' );
+			await modal.getByRole( 'button', { name: 'Single' } ).click();
+			const search = modal.getByPlaceholder( 'Search URLs' );
+			await search.fill( name );
+			await search.press( 'Enter' );
+			await modal.locator( '.affibloom-link-row', { hasText: name } ).getByRole( 'button', { name: 'Add' } ).click();
+			await expect.poll( () => page.evaluate( () => ( window as unknown as { tinymce: { get: ( id: string ) => { getContent: () => string } } } ).tinymce.get( 'content' ).getContent() ) ).toContain( `[affibloom id="${ id }"]` );
+		} finally {
+			wp( 'plugin', 'deactivate', 'classic-editor' );
+		}
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

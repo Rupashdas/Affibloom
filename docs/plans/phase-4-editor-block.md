@@ -70,7 +70,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24C: Shortcode box and Update Display
 - [x] Task 24D: Edit Display
 - [x] Task 24E: Preview queue on load
-- [ ] Task ED1: Classic editor button
+- [x] Task ED1: Classic editor button
 - [ ] Task ED2: Elementor widget
 - [ ] Task ED3: Rank Math content analysis
 - [ ] Task ED4: AMP inline styles
@@ -954,10 +954,16 @@ Not loaded on this site today (no such plugin), so the test activates the plugin
 
 **Files:** create the above; modify `Plugin.php`, `display-modal.js`; tests `tests/E2E/acceptance/F4.spec.ts` (AC16).
 
-- [ ] **Step 1: Failing test** (Classic Editor plugin activated in the test; skipped when it cannot be installed).
-- [ ] **Step 2: `mce_external_plugins`, `mce_buttons`, insert at cursor.**
-- [ ] **Step 3: Run and look.** By hand in the classic editor, 1280 and 375 px.
-- [ ] **Step 4: Commit** — "Insert displays from the Classic editor".
+- [x] **Step 1: Failing test** (Classic Editor plugin activated in the test; skipped when it cannot be installed).
+- [x] **Step 2: `mce_external_plugins`, `mce_buttons`, insert at cursor.**
+- [x] **Step 3: Run and look.** By hand in the classic editor, 1280 and 375 px.
+- [x] **Step 4: Commit** — "Insert displays from the Classic editor".
+
+*Note (2026-11-17):* Classic Editor 1.7.0, Elementor 4.4.1 and AMP 2.5.5 installed on Local at the user's word (zips from
+downloads.wordpress.org: WP-CLI could not reach wordpress.org's API), inactive; the AC16 test switches Classic Editor
+on and off. The button loads the same modal lazily (its words and apiFetch from EditorAssets on classic screens) and
+inserts the shortcode the preview route writes, so groups go in by slug. Seen at 1280 px: the button, Single, the
+shortcode at the cursor.
 
 ---
 
