@@ -7,7 +7,7 @@
  * the entire Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, lasso_pending: int, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,10 +50,6 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 		?>
 
 		<div class="affibloom-page__body affibloom-dashboard">
-			<?php if ( $view['lasso_pending'] > 0 ) : ?>
-				<?php $this->render( 'admin/partials/lasso-import', array( 'pending' => $view['lasso_pending'] ) ); ?>
-			<?php endif; ?>
-
 			<?php // One table card (0b.4): the toolbar as its top row, the list under it; only the list region reloads. ?>
 			<div class="affibloom-card affibloom-card--list">
 				<div class="affibloom-toolbar">

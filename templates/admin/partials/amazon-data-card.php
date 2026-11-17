@@ -42,7 +42,7 @@ $none = '—';
 				<dt><?php esc_html_e( 'Features', 'affibloom' ); ?></dt>
 				<dd><?php echo esc_html( (string) count( $row->features ) ); ?></dd>
 				<dt><?php esc_html_e( 'Source', 'affibloom' ); ?></dt>
-				<dd><?php echo 'lasso' === $row->source ? esc_html__( 'Imported', 'affibloom' ) : esc_html__( 'Creators API', 'affibloom' ); ?></dd>
+				<dd><?php echo 'imported' === $row->source ? esc_html__( 'Imported', 'affibloom' ) : esc_html__( 'Creators API', 'affibloom' ); ?></dd>
 				<dt><?php esc_html_e( 'Last updated', 'affibloom' ); ?></dt>
 				<dd><?php echo esc_html( substr( $row->last_updated, 0, 16 ) . ' UTC' ); ?></dd>
 			</dl>

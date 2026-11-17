@@ -65,7 +65,7 @@ Grouped by feature, in the order they are worked.
 
 **Core without Lasso**
 
-- [ ] Task LC1: Take the one-time Lasso import out of core
+- [x] Task LC1: Take the one-time Lasso import out of core
 - [ ] Task LC2: Take Lasso's markup out of core
 
 **F21 — the content link index**
@@ -169,10 +169,14 @@ copies stay: they are not shipped behaviour.
 `templates/admin/dashboard.php`, `templates/admin/partials/amazon-data-card.php`, `assets/admin/dashboard.js`,
 `src/Application/Upgrade/Upgrader.php`; create the architecture test.
 
-- [ ] **Step 1: Test.** `NoLassoInCoreTest` (LC2's files allowed for now) and the Upgrader step's unit test.
-- [ ] **Step 2: Remove the import and its wiring; rename the Amazon source.**
-- [ ] **Step 3: Run and look.** The Dashboard at 1280 px: no import card; a product imported earlier opens as before.
-- [ ] **Step 4: Commit** — "Take the one-time Lasso import out of core".
+- [x] **Step 1: Test.** `NoLassoInCoreTest` (LC2's files allowed for now) and the Upgrader step's unit test.
+- [x] **Step 2: Remove the import and its wiring; rename the Amazon source.**
+- [x] **Step 3: Run and look.** The Dashboard at 1280 px: no import card; a product imported earlier opens as before.
+- [x] **Step 4: Commit** — "Take the one-time Lasso import out of core".
+
+*Note (2026-11-18):* no `Upgrader` step: nothing ever wrote the Amazon source `lasso` (Local: 175 rows, all
+`creators`), so only the card's check and `AmazonProduct`'s doc changed to `imported`. The import card's CSS went too.
+`NoLassoInCoreTest` scans PHP with the tokenizer and JS/CSS without comments; its allow-list holds LC2's 7 files.
 
 ---
 

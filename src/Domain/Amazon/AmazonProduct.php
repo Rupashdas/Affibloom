@@ -12,7 +12,8 @@ namespace Affibloom\Domain\Amazon;
 /**
  * Amazon's data for one ASIN on one store (C1 D5; Lasso's lasso_amazon_products row, R26): what products with that ASIN
  * read their Amazon name, image, price and stock from. Every lookup and write carries the country (D5 fixes Lasso's
- * ASIN-only update, R29). `source` says where it came from: "creators" (the Creators API) or "lasso" (Task 26's copy).
+ * ASIN-only update, R29). `source` says where it came from: "creators" (the Creators API) or "imported" (copied in by
+ * a migration, such as the separate Lasso migrator's, deviation 146).
  */
 final class AmazonProduct {
 
@@ -32,7 +33,7 @@ final class AmazonProduct {
 	 * @param int          $savings_percent The saving in per cent, or 0.
 	 * @param string       $savings_basis   The display price the saving is from, or ''.
 	 * @param list<string> $features        The feature lines.
-	 * @param string       $source          "creators" or "lasso".
+	 * @param string       $source          "creators" or "imported".
 	 * @param string       $last_updated    When it was fetched, "Y-m-d H:i:s" in UTC.
 	 * @param bool         $is_prime        Lasso's Prime flag, history only: no fetch writes it (R14), Task 26 copies it, and
 	 *                                      a newer row keeps the older one's (over()). The box's Prime logo follows the ASIN

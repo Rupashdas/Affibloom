@@ -11,7 +11,6 @@ namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Groups\GroupService;
-use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\SearchTerm;
@@ -26,13 +25,12 @@ final class DashboardScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template           $template Template renderer.
-	 * @param ProductService     $products The product library.
-	 * @param PerPage            $per_page How many products this editor sees at a time.
-	 * @param SavedViewService   $views    This editor's saved views (Task 13E).
-	 * @param Notice             $notice   The toast after a redirect: "Product deleted." (Task 17A).
-	 * @param LassoImportService $import   The one-time Lasso import, whose card shows while it has records to bring in.
-	 * @param GroupService       $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
+	 * @param Template         $template Template renderer.
+	 * @param ProductService   $products The product library.
+	 * @param PerPage          $per_page How many products this editor sees at a time.
+	 * @param SavedViewService $views    This editor's saved views (Task 13E).
+	 * @param Notice           $notice   The toast after a redirect: "Product deleted." (Task 17A).
+	 * @param GroupService     $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
 	 */
 	public function __construct(
 		private Template $template,
@@ -40,7 +38,6 @@ final class DashboardScreen {
 		private PerPage $per_page,
 		private SavedViewService $views,
 		private Notice $notice,
-		private LassoImportService $import,
 		private GroupService $groups,
 	) {}
 
@@ -68,19 +65,18 @@ final class DashboardScreen {
 		$this->template->render(
 			'admin/dashboard',
 			array(
-				'products'      => $products,
-				'term'          => $term->text(),
-				'link_kind'     => $link_kind,
-				'group'         => $group,
-				'group_list'    => $this->groups->all(),
-				'groups_of'     => $this->groups->for_products( $ids ),
-				'views'         => $this->views->list( get_current_user_id() ),
-				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
+				'products'   => $products,
+				'term'       => $term->text(),
+				'link_kind'  => $link_kind,
+				'group'      => $group,
+				'group_list' => $this->groups->all(),
+				'groups_of'  => $this->groups->for_products( $ids ),
+				'views'      => $this->views->list( get_current_user_id() ),
+				'url'        => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
 				// Every list argument but the page, for the GET forms' hidden inputs (Task 13F).
-				'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one ),
-				'library'       => $this->products->count(),
-				'notice'        => $this->notice->message(),
-				'lasso_pending' => $this->import->pending(),
+				'args'       => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one ),
+				'library'    => $this->products->count(),
+				'notice'     => $this->notice->message(),
 			)
 		);
 	}

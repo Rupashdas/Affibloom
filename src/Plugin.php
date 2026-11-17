@@ -29,7 +29,6 @@ use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Lifecycle;
-use Affibloom\Application\Migration\LassoImportService;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\GeniusCleanupService;
 use Affibloom\Application\Products\LinkNormaliser;
@@ -43,7 +42,6 @@ use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Infrastructure\Http\CreatorsApiCatalog;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
-use Affibloom\Infrastructure\Lasso\WpLassoSource;
 use Affibloom\Infrastructure\Schema\Migrator;
 use Affibloom\Infrastructure\Schema\Table;
 use Affibloom\Infrastructure\WordPress\BoxDetector;
@@ -61,7 +59,6 @@ use Affibloom\Infrastructure\WordPress\OptionLock;
 use Affibloom\Infrastructure\WordPress\OptionPluginState;
 use Affibloom\Infrastructure\WordPress\OptionSettingsRepository;
 use Affibloom\Infrastructure\WordPress\PluginUpdates;
-use Affibloom\Infrastructure\WordPress\PostMetaLassoImportLog;
 use Affibloom\Infrastructure\WordPress\PostMetaPendingAmazonSync;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
@@ -96,7 +93,6 @@ use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Admin\DisplayScreen;
 use Affibloom\Interface\Admin\HelpTips;
 use Affibloom\Interface\Admin\IconChoices;
-use Affibloom\Interface\Admin\LassoImportController;
 use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsScreen;
@@ -349,7 +345,6 @@ final class Plugin {
 		$icons      = new IconService( new OptionIconRepository(), new SiteCssIcons() );
 		$choices    = new IconChoices( $icons );
 		$fields     = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
-		$import     = new LassoImportService( new WpLassoSource(), new PostMetaLassoImportLog(), new PostTypeProductRepository() );
 		$groups     = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
 		$amazon     = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
 		$search     = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
@@ -393,7 +388,7 @@ final class Plugin {
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $import, $groups ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data ),
 				new SettingsScreen(
 					$this->template(),
@@ -433,7 +428,6 @@ final class Plugin {
 				)
 			),
 			new IconsController( $icons, $choices, $this->template() ),
-			new LassoImportController( $import ),
 			new FieldsController( $fields, $this->template() ),
 			new GroupsController( $groups, $this->template() ),
 			new ProductFieldsController( $fields, $this->template() ),
