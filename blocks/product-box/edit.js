@@ -19,11 +19,14 @@ import { FlowerIcon } from './flower';
 import { loadModal, useModalState } from './modal-loader';
 import { queuePreview } from './preview-queue';
 
-/** Every attribute at its default: a new display replaces the old one and its overrides, as Lasso's insert does. */
+/**
+ * Every attribute at its default: a new display replaces the old one and its overrides, as Lasso's insert does. An
+ * object default (the overrides' {}) is left unset: a new object is not the schema's, so WordPress would store it.
+ */
 const DEFAULTS = Object.fromEntries(
 	Object.entries( metadata.attributes ).map( ( [ name, spec ] ) => [
 		name,
-		spec.default,
+		typeof spec.default === 'object' ? undefined : spec.default,
 	] )
 );
 

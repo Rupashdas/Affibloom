@@ -98,8 +98,13 @@ export default function CustomizeDisplay( { attributes, setAttributes } ) {
 	if ( ! fields.length ) {
 		return null;
 	}
-	const store = ( name, value ) =>
-		setAttributes( { overrides: withOverride( overrides, name, value ) } );
+	// No overrides left: the attribute is unset, so the stored block stays bare.
+	const store = ( name, value ) => {
+		const next = withOverride( overrides, name, value );
+		setAttributes( {
+			overrides: Object.keys( next ).length ? next : undefined,
+		} );
+	};
 
 	return (
 		<InspectorControls>
