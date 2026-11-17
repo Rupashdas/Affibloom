@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Settings;
 
+use Closure;
 use InvalidArgumentException;
 use LogicException;
 use Affibloom\Domain\Amazon\Marketplace;
@@ -112,8 +113,10 @@ final class SettingsService {
 	 * @param SettingsRepository    $repository Where settings are kept.
 	 * @param DetectionChoices|null $choices    The post types and ACF fields the site offers for Custom Link Detection;
 	 *                                          without it no choice is valid.
+	 * @param Closure|null          $scan_changed Called after a save that changed what Custom Link Detection scans
+	 *                                            (the link index's rebuild, Task 35D).
 	 */
-	public function __construct( private SettingsRepository $repository, private ?DetectionChoices $choices = null ) {}
+	public function __construct( private SettingsRepository $repository, private ?DetectionChoices $choices = null, private ?Closure $scan_changed = null ) {}
 
 	/**
 	 * The current settings.
@@ -181,6 +184,11 @@ final class SettingsService {
 		}
 
 		$this->repository->save( $after );
+
+		// Task 35D: what Custom Link Detection scans changed, so the link index is built again (F21 AC4).
+		if ( null !== $this->scan_changed && ( $before->list( 'scan_post_types' ) !== $after->list( 'scan_post_types' ) || $before->list( 'scan_custom_fields' ) !== $after->list( 'scan_custom_fields' ) ) ) {
+			( $this->scan_changed )();
+		}
 
 		return $refused;
 	}

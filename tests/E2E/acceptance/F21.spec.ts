@@ -1,5 +1,8 @@
+import { copyFileSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 import { test, expect } from '@playwright/test';
-import { boxBlock, createGroup, createProduct, unique, wp } from '../utils';
+import { boxBlock, createGroup, createProduct, setSettings, unique, wp } from '../utils';
+import { saveSettings } from '../settings';
 
 // F21 The content link index (docs/features/F21/requirements.md; Phase 5, deviation 146: Affibloom's own content only).
 
@@ -109,5 +112,32 @@ test.describe( 'F21 The content link index', () => {
 		wp( 'post', 'delete', post, '--force' );
 		expect( rows( post ) ).toEqual( [] );
 		wp( 'post', 'delete', future, '--force' );
+	} );
+
+	test( 'AC4 a custom post type chosen in Custom Link Detection is indexed, another is not, and saving the choice rebuilds', async ( { page } ) => {
+		const muPlugins = join( __dirname, '..', '..', '..', '..', '..', 'mu-plugins' );
+		const made = ! existsSync( muPlugins );
+		mkdirSync( muPlugins, { recursive: true } );
+		const fixture = join( muPlugins, 'affibloom-e2e-test-post-types.php' );
+		copyFileSync( join( __dirname, '..', 'fixtures', 'test-post-types.php' ), fixture );
+		try {
+			setSettings( { scan_post_types: [] } );
+			const link = '<p><a href="https://www.example.org/cpt">CPT</a></p>';
+			const chosen = wp( 'post', 'create', '--post_type=affibloom_e2e_chosen', '--post_status=publish', '--post_title=Chosen', `--post_content=${ link }`, '--porcelain' );
+			const other = wp( 'post', 'create', '--post_type=affibloom_e2e_other', '--post_status=publish', '--post_title=Other', `--post_content=${ link }`, '--porcelain' );
+			expect( rows( chosen ) ).toEqual( [] );
+
+			await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
+			await page.locator( '#affibloom-card-detection .affibloom-choice', { hasText: 'E2E chosen' } ).locator( 'input' ).check();
+			await saveSettings( page );
+			await expect.poll( () => rows( chosen ).length ).toBe( 1 );
+			expect( rows( other ) ).toEqual( [] );
+		} finally {
+			setSettings( { scan_post_types: [] } );
+			unlinkSync( fixture );
+			if ( made ) {
+				rmdirSync( muPlugins );
+			}
+		}
 	} );
 } );

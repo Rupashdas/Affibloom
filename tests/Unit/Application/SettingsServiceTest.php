@@ -441,4 +441,18 @@ final class SettingsServiceTest extends TestCase {
 		);
 		self::assertSame( 1, $repo->get()->int( 'manual_process_limit' ) );
 	}
+
+	public function test_a_change_of_what_custom_link_detection_scans_rebuilds_the_link_index(): void {
+		$repo     = $this->repository();
+		$rebuilds = 0;
+		$service  = new SettingsService( $repo, $this->choices(), function () use ( &$rebuilds ): void {
+			++$rebuilds;
+		} );
+
+		$service->update_tab( 'general', array( 'scan_post_types' => array( 'recipe' ) ) );
+		$service->update_tab( 'general', array( 'scan_post_types' => array( 'recipe' ) ) );
+		$service->update_tab( 'general', array( 'scan_custom_fields' => array( 'review_link' ) ) );
+
+		self::assertSame( 2, $rebuilds );
+	}
 }

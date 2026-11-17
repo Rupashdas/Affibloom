@@ -73,7 +73,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task 35A: The index of anchors in post content — `wp affibloom links rebuild`
 - [x] Task 35B: Displays in the index — shortcodes and blocks
 - [x] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
-- [ ] Task 35D: Custom Link Detection — Settings → General
+- [x] Task 35D: Custom Link Detection — Settings → General
 - [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post`
 - [ ] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
 - [ ] Task 35G: Settings → General — Link Index and Performance
@@ -371,11 +371,17 @@ before). The controls are 9I's; this task makes the scan follow them.
 
 **Files:** the above; tests (unit validation; E2E F21 AC4 with a test CPT).
 
-- [ ] **Step 1: Failing tests.** AC4 with a test CPT: a post of the chosen type is indexed, one of another type is not; red: the scan ignores the keys.
-- [ ] **Step 2: Keys and source.**
-- [ ] **Step 3: The effect (the rebuild on change).**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Choose custom post types and fields to scan".
+- [x] **Step 1: Failing tests.** AC4 with a test CPT: a post of the chosen type is indexed, one of another type is not; red: the scan ignores the keys.
+- [x] **Step 2: Keys and source.**
+- [x] **Step 3: The effect (the rebuild on change).**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Choose custom post types and fields to scan".
+
+*Note (2026-11-18):* `HostQuery` reads the chosen types (its `types()` also serves the source and the save hooks); ACF fields are read in
+`PostContentSource` (no separate `AcfFieldsSource`: one place per host) as `acf:<meta key>`. The rebuild on change is a
+callback `SettingsService` gets; until 35F it runs inline (about 9 s for Local's 1,105 posts in the save request).
+Checked in Brave: ticking a test post type and saving indexed its post. Local now lists Lasso's `lasso-urls` there
+(LC2 dropped Lasso's exclusion; it is another plugin's public type).
 
 ---
 

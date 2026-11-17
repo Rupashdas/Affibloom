@@ -347,7 +347,12 @@ final class Plugin {
 	 */
 	private function modules(): array {
 		$detection = new WpDetectionChoices();
-		$settings  = new SettingsService( $this->settings_repository(), $detection );
+		$settings  = new SettingsService(
+			$this->settings_repository(),
+			$detection,
+			// Task 35D: inline until Task 35F runs the rebuild in the background.
+			fn() => $this->link_index_rebuild()->run_inline()
+		);
 		$display   = new DisplaySettingsService(
 			new OptionDisplaySettingsRepository(),
 			$this->settings_repository(),
@@ -458,7 +463,7 @@ final class Plugin {
 			new UpgradeCommand( $upgrader ),
 			new AmazonCommand( $amazon, $catalog ),
 			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository() ),
-			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository() ),
+			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
 			new ForeignNotices( $this->navigation() ),
 		);
 	}
@@ -467,7 +472,7 @@ final class Plugin {
 	 * The link index's rebuild (F21, Task 35A): every indexed post through the indexer.
 	 */
 	private function link_index_rebuild(): LinkIndexRebuild {
-		return new LinkIndexRebuild( new HostQuery(), $this->link_indexer() );
+		return new LinkIndexRebuild( $this->host_query(), $this->link_indexer() );
 	}
 
 	/**
@@ -481,7 +486,7 @@ final class Plugin {
 		$links = new ProductResolver( new PostTypeProductRepository() );
 
 		$this->link_indexer = new LinkIndexer(
-			new PostContentSource(),
+			new PostContentSource( $this->host_query(), $this->settings_repository() ),
 			new WpLinkScanner(),
 			$links,
 			new DisplayResolver( new PostTypeProductRepository(), new TermGroupRepository(), $links ),
@@ -493,6 +498,13 @@ final class Plugin {
 		);
 
 		return $this->link_indexer;
+	}
+
+	/**
+	 * The posts the link index covers (F21 D6, D7; Task 35D's chosen types).
+	 */
+	private function host_query(): HostQuery {
+		return new HostQuery( $this->settings_repository() );
 	}
 
 	/**

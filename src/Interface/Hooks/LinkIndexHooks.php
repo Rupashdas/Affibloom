@@ -34,8 +34,9 @@ final class LinkIndexHooks implements Module {
 	 *
 	 * @param LinkIndexer            $indexer Indexes one post.
 	 * @param LinkLocationRepository $rows    The index, for a deleted post's rows.
+	 * @param HostQuery              $hosts   The indexed post types.
 	 */
-	public function __construct( private LinkIndexer $indexer, private LinkLocationRepository $rows ) {}
+	public function __construct( private LinkIndexer $indexer, private LinkLocationRepository $rows, private HostQuery $hosts ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -54,7 +55,7 @@ final class LinkIndexHooks implements Module {
 	 * @param WP_Post $post    The post as saved.
 	 */
 	public function saved( int $post_id, WP_Post $post ): void {
-		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || ! in_array( $post->post_type, HostQuery::TYPES, true ) ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || ! in_array( $post->post_type, $this->hosts->types(), true ) ) {
 			return;
 		}
 		$this->index( $post_id );
@@ -67,7 +68,7 @@ final class LinkIndexHooks implements Module {
 	 */
 	public function changed( int $post_id ): void {
 		$post = get_post( $post_id );
-		if ( $post instanceof WP_Post && in_array( $post->post_type, HostQuery::TYPES, true ) ) {
+		if ( $post instanceof WP_Post && in_array( $post->post_type, $this->hosts->types(), true ) ) {
 			$this->index( $post_id );
 		}
 	}

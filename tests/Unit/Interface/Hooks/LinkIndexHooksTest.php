@@ -10,9 +10,11 @@ use Affibloom\Domain\LinkIndex\HostContent;
 use Affibloom\Domain\LinkIndex\LinkClassifier;
 use Affibloom\Domain\LinkIndex\LinkIndexStats;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
+use Affibloom\Infrastructure\WordPress\HostQuery;
 use Affibloom\Interface\Hooks\LinkIndexHooks;
 use Affibloom\Tests\Unit\Fakes\InMemoryGroupRepository;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
 use Affibloom\Tests\Unit\TestCase;
 use Brain\Monkey\Functions;
 use WP_Post;
@@ -28,7 +30,7 @@ final class LinkIndexHooksTest extends TestCase {
 	/** @var list<int> The hosts the event was fired for. */
 	public array $events = array();
 
-	private function hooks( bool $indexed_status = true ): LinkIndexHooks {
+	private function hooks( bool $indexed_status = true, array $types = array() ): LinkIndexHooks {
 		$test    = $this;
 		$content = new class( $indexed_status ) implements ContentSource {
 			public function __construct( private bool $indexed ) {}
@@ -70,7 +72,7 @@ final class LinkIndexHooksTest extends TestCase {
 			}
 		);
 
-		return new LinkIndexHooks( $indexer, $rows );
+		return new LinkIndexHooks( $indexer, $rows, new HostQuery( new InMemorySettingsRepository( array( 'scan_post_types' => $types ) ) ) );
 	}
 
 	private static function post( int $id, string $type = 'post' ): WP_Post {
@@ -120,5 +122,11 @@ final class LinkIndexHooksTest extends TestCase {
 
 		self::assertSame( array( 'delete 7', 'delete 7' ), $this->calls );
 		self::assertSame( array(), $this->events );
+	}
+
+	public function test_a_chosen_custom_post_type_is_a_host(): void {
+		$this->hooks( true, array( 'recipe' ) )->saved( 9, self::post( 9, 'recipe' ) );
+
+		self::assertSame( array( 'replace 9' ), $this->calls );
 	}
 }
