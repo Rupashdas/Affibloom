@@ -832,7 +832,8 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * The buttons after the primary one (F29) are searched by their links only, as Lasso's search matches the second
 	 * button's link (60 of the 263 live records have one): one `_affibloom_button_url` row each (Task 13G), not the
 	 * serialised list, whose button texts and keys (`url`, `nofollow`) would match too.
-	 * URL variants join if that subsystem is ever built.
+	 * A product is found by its URL variants too (F27 R20; Task V5): a variant's name or key containing the term, and an
+	 * all-digit term a variant's number, as Lasso_DB's search joins lasso_url_variants.
 	 *
 	 * @return callable(string, \WP_Query): string
 	 */
@@ -857,9 +858,20 @@ final class PostTypeProductRepository implements ProductRepository {
 				),
 			);
 
+			$variants = $wpdb->prefix . TableVariantRepository::TABLE;
+			$arms[]   = $wpdb->prepare(
+				"EXISTS ( SELECT 1 FROM %i AS affibloom_v
+					WHERE affibloom_v.parent_id = {$wpdb->posts}.ID
+						AND ( affibloom_v.name LIKE %s OR affibloom_v.variant_key LIKE %s ) )",
+				$variants,
+				$like,
+				$like
+			);
+
 			$id = $term->post_id();
 			if ( null !== $id ) {
 				$arms[] = $wpdb->prepare( "{$wpdb->posts}.ID = %d", $id );
+				$arms[] = $wpdb->prepare( "EXISTS ( SELECT 1 FROM %i AS affibloom_vid WHERE affibloom_vid.parent_id = {$wpdb->posts}.ID AND affibloom_vid.id = %d )", $variants, $id );
 			}
 
 			$asin = $term->asin();

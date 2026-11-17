@@ -128,4 +128,15 @@ test.describe( 'F27 URL variants', () => {
 		expect( wp( 'post', 'meta', 'get', String( replaced ), '_affibloom_url' ) ).not.toContain( 'tag=nobody-20' );
 		expect( wp( 'eval', `echo do_shortcode( '[affibloom id="${ amazon }" tracking_id="${ tag }"]' );` ) ).toContain( `tag=${ tag }` );
 	} );
+
+	test( 'AC8 the Dashboard search finds a product by a variant name, key or number', async ( { page } ) => {
+		const product = createProduct( { name: unique( 'F27 find' ), url: 'https://www.example.com/f27-find' } );
+		const word = unique( 'zebra' ).toLowerCase().replace( /[^a-z0-9]/g, '' );
+		addVariant( product, `Podcast ${ word }`, `${ word }-pod` );
+		const id = wp( 'eval', `global $wpdb; echo $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}affibloom_url_variants WHERE parent_id = ${ product }" );` );
+		for ( const term of [ `Podcast ${ word }`, `${ word }-pod`, id ] ) {
+			await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( term ) }` );
+			await expect( page.locator( `tr[data-product-id="${ product }"]` ) ).toBeVisible();
+		}
+	} );
 } );

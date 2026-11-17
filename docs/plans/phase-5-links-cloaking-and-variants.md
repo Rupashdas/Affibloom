@@ -111,7 +111,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task V2: Add, edit, remove and save variants
 - [x] Task V3: A variant permalink answers
 - [x] Task V4: Amazon variant tags are kept
-- [ ] Task V5: Find products by their variants on the Dashboard
+- [x] Task V5: Find products by their variants on the Dashboard
 
 **F21 — render-time link attributes and displays (after the cloaking block)**
 
@@ -1158,10 +1158,12 @@ product with that slug wins; the prefix does not apply.
 
 **Files:** the repository; tests F27 AC8, F19 search specs rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Arms.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Search the Dashboard by URL variants".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Arms.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Search the Dashboard by URL variants".
+
+*Note (2026-11-18):* *Note:* two arms in the Dashboard's WHERE filter (`search_filter()`): a variant's name or key LIKE the term, and an all-digit term a variant's ID. Seen at 1280 px: "tiktok" lists Example (20489) by its variant `example-tiktok`; through `page()`, "Instagram bio" and "insta-20" find their products.
 
 ---
 
