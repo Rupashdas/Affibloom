@@ -73,7 +73,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task ED1: Classic editor button
 - [x] Task ED2: Elementor widget
 - [x] Task ED3: Rank Math content analysis
-- [ ] Task ED4: AMP inline styles
+- [x] Task ED4: AMP inline styles
 - [ ] Task ED5: Keep Lasso's link attributes valid in core blocks (N3 accepted)
 - Task ED6: moved to Phase 5, right after Task 27A (on 2026-11-14; it depends on 27A)
 - Task MCP1: dropped (decision A10)
@@ -1059,10 +1059,17 @@ adds only what 18S9 leaves out.
 
 **Files:** modify `AmpBoxCss.php` only if needed; test `tests/Integration/AmpStylesTest.php`; `tests/E2E/acceptance/F4.spec.ts` (AC19).
 
-- [ ] **Step 1: Failing integration test** (simulated AMP request).
-- [ ] **Step 2: `amp_post_template_css`.** The AMP guard disables the analytics footer (R75).
-- [ ] **Step 3: Run and look.** By hand with an AMP request (`?amp=1`).
-- [ ] **Step 4: Commit** — "Style displays on AMP pages".
+- [x] **Step 1: Failing integration test** (simulated AMP request).
+- [x] **Step 2: `amp_post_template_css`.** The AMP guard disables the analytics footer (R75).
+- [x] **Step 3: Run and look.** By hand with an AMP request (`?amp=1`).
+- [x] **Step 4: Commit** — "Style displays on AMP pages".
+
+*Note (2026-11-17):* 18S9's hook already printed `box-amp.css` once, but the file held only the Single Lab rules. It is now
+Lasso's lasso-amp.css in full, renamed (every theme, grid, list, fields, stars, table); its one `!important` is dropped.
+No `AmpBoxCss` and no integration test (no wp-env here): a unit check reads the file, and AC19 runs with the AMP plugin.
+Lasso hooks no analytics footer on AMP (its line is commented out), so there is nothing to turn off. Seen with AMP 2.5.5
+(Reader, legacy; on, then off again) at 1280 px: a Cactus single, a grid and a list styled inline, no Affibloom stylesheet
+link or script. The AMP plugin also inlines the enqueued box.css and box-layout.css, so the site's layout applies there.
 
 ---
 

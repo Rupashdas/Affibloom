@@ -30,6 +30,22 @@ final class BoxAssetsTest extends TestCase {
 		self::assertStringContainsString( 'a{color:red}', $css );
 	}
 
+	/**
+	 * AMP pages take the boxes' CSS inline (F4 R75, Task ED4): every theme and display type is styled, and nothing AMP
+	 * refuses is in it.
+	 */
+	public function test_the_amp_stylesheet_styles_every_theme_and_display_type(): void {
+		$css = (string) file_get_contents( dirname( __DIR__, 4 ) . '/assets/front/box-amp.css' );
+		$css = (string) preg_replace( '#/\*.*?\*/#s', '', $css );
+
+		foreach ( array( 'cactus', 'cutter', 'flow', 'geek', 'lab', 'llama', 'money', 'splash', 'grid-row', 'list', 'fields-pros', 'stars', 'image-container' ) as $part ) {
+			self::assertStringContainsString( '.affibloom-' . $part . ' ', $css, $part );
+		}
+		self::assertStringNotContainsString( '!important', $css );
+		self::assertStringNotContainsString( 'lasso', $css );
+		self::assertDoesNotMatchRegularExpression( '#url\(\'(?!images/)#', $css );
+	}
+
 	public function test_the_font_awesome_config_follows_the_setting(): void {
 		self::assertSame( "<script type=\"text/javascript\">window.FontAwesomeConfig = { autoReplaceSvg: true }</script>\n", BoxAssets::font_awesome_config( true ) );
 		self::assertStringContainsString( 'autoReplaceSvg: false }', BoxAssets::font_awesome_config( false ) );

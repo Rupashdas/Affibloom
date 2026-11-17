@@ -478,6 +478,34 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect.poll( () => page.evaluate( () => ( window as unknown as { affibloomRefreshes: string[] } ).affibloomRefreshes ) ).toContain( 'content' );
 	} );
 
+	test( 'AC19 on an AMP page a display is styled by inline CSS, with no stylesheet or script of its own', async ( { page } ) => {
+		let installed = true;
+		try {
+			wp( 'plugin', 'is-installed', 'amp' );
+		} catch {
+			installed = false;
+		}
+		test.skip( ! installed, 'The AMP plugin is not installed on this site.' );
+		const name = unique( 'F4 AC19' );
+		const id = createProduct( { name, theme: 'Cactus' } );
+		const post = newPostWith( boxBlock( id ) );
+		wp( 'plugin', 'activate', 'amp' );
+		try {
+			// The AMP plugin's Reader mode (its default): the legacy template, which takes CSS only inline.
+			await page.goto( post + '&amp=1' );
+			await expect( page.locator( 'html[amp], html[⚡]' ) ).toHaveCount( 1 );
+			await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( name );
+			const css = ( await page.locator( 'style[amp-custom]' ).textContent() ) ?? '';
+			expect( css ).toContain( '.affibloom-cactus' );
+			expect( css ).toContain( '.affibloom-grid-row' );
+			await expect( page.locator( '.affibloom-display.affibloom-cactus' ) ).toHaveCSS( 'border-top-width', '1px' );
+			await expect( page.locator( 'link[rel="stylesheet"][href*="affibloom"]' ) ).toHaveCount( 0 );
+			await expect( page.locator( 'script[src*="affibloom"]' ) ).toHaveCount( 0 );
+		} finally {
+			wp( 'plugin', 'deactivate', 'amp' );
+		}
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );
