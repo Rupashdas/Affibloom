@@ -38,8 +38,8 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    settings screen saves over REST and stays on the page. Display switches Single/Grid/List in place (deviation 144).
    **Next: the Meadow restyle** (the user, 2026-11-16, deviation 142): Meadow replaces Aurora (`ui/design-system.md`
    section 0b); Tasks MD1-MD7 in `plans/phase-4-editor-block.md`, Batches 4.M1-4.M5, now, before 23A. **Batch 4.M1
-   done 2026-11-17** (MD1: bundled fonts and Meadow's colours); **next: Batch 4.M2** (MD2 header and notices, MD3 page
-   head).
+   done 2026-11-17** (MD1: bundled fonts and Meadow's colours); **Batch 4.M2 done 2026-11-17** (MD2 white header and
+   notice cards, MD3 page head instead of the band); **next: Batch 4.M3** (MD4: the Dashboard).
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only
    unit tests, `phpcs` and a look (~20 s); at a batch's end lint, analyse and unit tests, then a manual test guide for
    the user; Playwright only at the phase exit; no red run; no save/restore, backup or reset on Local (dummy data).
