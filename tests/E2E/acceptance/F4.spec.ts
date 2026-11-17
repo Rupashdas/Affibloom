@@ -1,16 +1,21 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect as baseExpect, type Page } from '@playwright/test';
 import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, unique, wp } from '../utils';
 
 // F4 Displays in the editor (docs/features/F4/requirements.md). Labels: Lasso's, minus its name (D5).
 const MODAL_SCRIPT = /assets\/editor\/display-modal\.js/;
 
+// Every step here waits on the server: on Local, two PHP workers also serve the editor's own requests (Lasso's, Rank
+// Math's, the heartbeat), so an answer that takes 2 s alone can take more than 5 s in a full run (Phase 4 exit check).
+const expect = baseExpect.configure( { timeout: 15_000 } );
+test.use( { actionTimeout: 20_000 } );
+test.describe.configure( { timeout: 120_000 } );
+
 /** A new post with the "Product box" block inserted from the inserter. */
 async function insertProductBox( page: Page ) {
 	await page.goto( '/wp-admin/post-new.php' );
-	const welcome = page.getByRole( 'dialog', { name: /welcome/i } );
-	if ( await welcome.isVisible().catch( () => false ) ) {
-		await page.keyboard.press( 'Escape' );
-	}
+	// A user's first visit opens "Welcome to the editor" a moment after load; it is turned off, which also closes it.
+	await page.waitForFunction( () => ( window as unknown as { wp?: { data?: { dispatch: ( store: string ) => unknown } } } ).wp?.data?.dispatch( 'core/preferences' ) );
+	await page.evaluate( () => ( window as unknown as { wp: { data: { dispatch: ( store: string ) => { set: ( scope: string, name: string, value: boolean ) => void } } } } ).wp.data.dispatch( 'core/preferences' ).set( 'core/edit-post', 'welcomeGuide', false ) );
 	await page.getByRole( 'button', { name: /block inserter/i } ).click();
 	await page.getByRole( 'searchbox', { name: /search/i } ).fill( 'Product box' );
 	// Exact: the site has synced patterns such as "Product Box (Not Tested)" that a substring match would hit.
@@ -28,7 +33,7 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		const block = await insertProductBox( page );
 		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
-		const modal = page.locator( '.affibloom-block-modal' );
+		const modal = page.locator( '#affibloom-display-modal' );
 		await modal.getByRole( 'button', { name: 'Single' } ).click();
 		const search = modal.getByPlaceholder( 'Search URLs' );
 		await search.fill( name );
@@ -47,7 +52,7 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		const block = await insertProductBox( page );
 		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
-		const modal = page.locator( '.affibloom-block-modal' );
+		const modal = page.locator( '#affibloom-display-modal' );
 		await modal.getByRole( 'button', { name: 'Single' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Choose a Link' } );
 		await expect( dialog ).toBeVisible();
@@ -84,7 +89,7 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		const block = await insertProductBox( page );
 		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
-		const modal = page.locator( '.affibloom-block-modal' );
+		const modal = page.locator( '#affibloom-display-modal' );
 		await modal.getByRole( 'button', { name: 'Button' } ).click();
 		const search = modal.getByPlaceholder( 'Search URLs' );
 		await search.fill( name );
@@ -115,6 +120,7 @@ test.describe( 'F4 Displays in the editor', () => {
 	} );
 
 	test( 'AC6 Grid, List and Gallery open "Choose a Group": counts, Enter-only search, Add inserts the group', async ( { page } ) => {
+		test.setTimeout( 150_000 ); // Three blocks, three modal runs.
 		const stamp = unique( 'F4 AC6' );
 		const products = [ 1, 2 ].map( ( n ) => createProduct( { name: `${ stamp } product ${ n }` } ) );
 		createGroup( `${ stamp } pair`, products );
@@ -122,7 +128,7 @@ test.describe( 'F4 Displays in the editor', () => {
 		for ( const type of [ 'Grid', 'List', 'Gallery' ] ) {
 			const block = await insertProductBox( page );
 			await block.getByRole( 'button', { name: 'Add a Display' } ).click();
-			const modal = page.locator( '.affibloom-block-modal' );
+			const modal = page.locator( '#affibloom-display-modal' );
 			await modal.getByRole( 'button', { name: type } ).click();
 			const dialog = page.getByRole( 'dialog', { name: 'Choose a Group' } );
 			await expect( dialog ).toBeVisible();
@@ -138,7 +144,13 @@ test.describe( 'F4 Displays in the editor', () => {
 
 			const stored = await page.evaluate( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getEditedPostContent: () => string } } } } ).wp.data.select( 'core/editor' ).getEditedPostContent() );
 			expect( stored ).toMatch( new RegExp( `"type":"${ type.toLowerCase() }","groupId":\\d+` ) );
-			await expect( block.locator( '.affibloom-block__preview' ) ).toContainText( `${ stamp } product 1` );
+			// A gallery draws only the products' linked images (F30), each link titled with its product.
+			const preview = block.locator( '.affibloom-block__preview' );
+			if ( 'Gallery' === type ) {
+				await expect( preview.locator( `a[title="${ stamp } product 1"]` ) ).toHaveCount( 1 );
+			} else {
+				await expect( preview ).toContainText( `${ stamp } product 1` );
+			}
 		}
 	} );
 
@@ -150,7 +162,7 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		const block = await insertProductBox( page );
 		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
-		const modal = page.locator( '.affibloom-block-modal' ).first();
+		const modal = page.locator( '#affibloom-display-modal' );
 		await modal.getByRole( 'button', { name: 'Grid' } ).click();
 		await modal.getByRole( 'button', { name: 'Create Group' } ).click();
 
@@ -343,9 +355,12 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		const [ tab ] = await Promise.all( [ page.waitForEvent( 'popup' ), canvas.getByRole( 'button', { name: 'Edit Display' } ).click() ] );
 		await expect( tab ).toHaveURL( new RegExp( `page=affibloom-product&id=${ id }` ) );
+		// The save script binds on load; a click before it would post the form the old way.
+		await tab.waitForLoadState( 'load' );
 		await tab.locator( '#affibloom-name' ).fill( `${ name } renamed` );
 		await tab.getByRole( 'button', { name: 'Save Changes' } ).click();
-		await expect( tab.locator( '.affibloom-toast' ).last() ).toBeVisible();
+		// The toast follows the "Updating" dialog, which closes a second after the answer.
+		await expect( tab.locator( '.affibloom-toast' ).last() ).toBeVisible( { timeout: 15_000 } );
 		await tab.close();
 		await page.bringToFront();
 		await page.evaluate( () => window.dispatchEvent( new Event( 'focus' ) ) );
@@ -406,6 +421,7 @@ test.describe( 'F4 Displays in the editor', () => {
 			installed = false;
 		}
 		test.skip( ! installed, 'Elementor is not installed on this site.' );
+		test.setTimeout( 240_000 );
 		const name = unique( 'F4 AC17' );
 		const id = createProduct( { name } );
 		wp( 'plugin', 'activate', 'elementor' );
@@ -448,7 +464,7 @@ test.describe( 'F4 Displays in the editor', () => {
 			await page.evaluate( () => ( window as unknown as { $e: { run: ( command: string ) => Promise<unknown> } } ).$e.run( 'document/save/publish' ) );
 			await expect.poll( () => wp( 'post', 'get', post, '--field=post_status' ).trim() ).toBe( 'publish' );
 			await page.goto( `/?page_id=${ post }` );
-			await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( 'Retitled' );
+			await expect( page.locator( '.affibloom-box .affibloom-title', { hasText: 'Retitled' } ) ).toBeVisible();
 		} finally {
 			wp( 'plugin', 'deactivate', 'elementor' );
 		}
@@ -494,7 +510,7 @@ test.describe( 'F4 Displays in the editor', () => {
 			// The AMP plugin's Reader mode (its default): the legacy template, which takes CSS only inline.
 			await page.goto( post + '&amp=1' );
 			await expect( page.locator( 'html[amp], html[⚡]' ) ).toHaveCount( 1 );
-			await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( name );
+			await expect( page.locator( '.affibloom-box .affibloom-title', { hasText: name } ) ).toBeVisible();
 			const css = ( await page.locator( 'style[amp-custom]' ).textContent() ) ?? '';
 			expect( css ).toContain( '.affibloom-cactus' );
 			expect( css ).toContain( '.affibloom-grid-row' );
@@ -558,7 +574,7 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		const block = await insertProductBox( page );
 		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
-		const modal = page.locator( '.affibloom-block-modal' ).first();
+		const modal = page.locator( '#affibloom-display-modal' );
 		await modal.getByRole( 'button', { name: 'Grid' } ).click();
 		await expect( modal.locator( '.affibloom-group-row' ).first() ).toBeVisible();
 		await expect( modal.getByRole( 'button', { name: 'Create Group' } ) ).toHaveCount( 0 );
@@ -575,7 +591,8 @@ test.describe( 'F4 Displays in the editor', () => {
 		const name = unique( 'F4 AC2' );
 		const id = createProduct( { name } );
 		await page.goto( newPostWith( boxBlock( id ) ) );
-		await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( name );
+		// The site's sidebar draws boxes of its own; the post's is found by its title.
+		await expect( page.locator( '.affibloom-box .affibloom-title', { hasText: name } ) ).toBeVisible();
 	} );
 
 	test( 'AC3 the empty panel waits for the modal: "Loading..." then Add a Display', async ( { page } ) => {
@@ -630,7 +647,7 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( dialog ).toBeHidden();
 
 		await add.click();
-		await page.locator( '.affibloom-block-modal .affibloom-modal__backdrop' ).click( { position: { x: 5, y: 5 } } );
+		await page.locator( '#affibloom-display-modal > .affibloom-modal__backdrop' ).click( { position: { x: 5, y: 5 } } );
 		await expect( dialog ).toBeHidden();
 		await expect( add ).toBeFocused();
 	} );
