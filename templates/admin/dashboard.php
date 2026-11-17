@@ -1,9 +1,9 @@
 <?php
 /**
- * Dashboard screen: the band with the title and subtitle (U10), the overview tiles (U9), the toolbar, Lasso's
- * selection bar and the list region. The arrangement is Lasso's (the user's gate 4 answer for F19, 2026-11-13);
- * the look is Aurora's. Every Lasso column and control is present (the user, 2026-11-13: "Complete the entire
- * Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
+ * Dashboard screen: the page head with the title, subtitle (U10) and search, the overview tiles (U9), the toolbar,
+ * Lasso's selection bar and the list region. The arrangement is Lasso's (the user's gate 4 answer for F19,
+ * 2026-11-13); the look is Meadow's. Every Lasso column and control is present (the user, 2026-11-13: "Complete
+ * the entire Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
  * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, lasso_pending: int, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
@@ -20,33 +20,23 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
-		<div class="affibloom-band">
-			<div class="affibloom-band__inner affibloom-band__inner--split">
-				<div class="affibloom-band__text">
-					<h1 class="affibloom-page__title"><?php esc_html_e( 'Dashboard', 'affibloom' ); ?></h1>
-					<p class="affibloom-page__subtitle"><?php esc_html_e( 'Your affiliate products, their links and where they are used.', 'affibloom' ); ?></p>
-				</div>
-				<?php // The search sits right of the title, as in Lasso's title row (the user, 2026-11-13). ?>
-				<form class="affibloom-band__search" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" role="search">
-					<?php
-					$this->render(
-						'admin/partials/list-args',
-						array(
-							'args'   => $view['args'],
-							'except' => array( 's' ),
-						)
-					);
-					?>
-					<label class="screen-reader-text" for="affibloom-search"><?php esc_html_e( 'Search', 'affibloom' ); ?></label>
-					<input type="search" id="affibloom-search" class="affibloom-input affibloom-search" name="s"
-						value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						data-placeholder="<?php echo esc_attr( $placeholder_text ); ?>"
-						aria-describedby="affibloom-search-kbd">
-					<?php // Lasso's hint for its shortcut; the script shows ⌘⇧L on a Mac. ?>
-					<kbd id="affibloom-search-kbd" class="affibloom-search-kbd">Ctrl+Shift+L</kbd>
-				</form>
-			</div>
-		</div>
+		<?php
+		// Meadow's head (0b.4): the title and subtitle, then the full-width search under it.
+		$this->render(
+			'admin/partials/page-head',
+			array(
+				'title'      => __( 'Dashboard', 'affibloom' ),
+				'subtitle'   => __( 'Your affiliate products, their links and where they are used.', 'affibloom' ),
+				'below'      => 'admin/partials/dashboard-search',
+				'below_args' => array(
+					'args'             => $view['args'],
+					'term'             => $view['term'],
+					'placeholder'      => $placeholder,
+					'placeholder_text' => $placeholder_text,
+				),
+			)
+		);
+		?>
 
 		<div class="affibloom-page__body affibloom-dashboard">
 			<?php $this->render( 'admin/partials/dashboard-tiles', array( 'library' => $view['library'] ) ); ?>

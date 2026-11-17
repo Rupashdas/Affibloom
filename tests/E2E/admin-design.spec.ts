@@ -2,8 +2,7 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 
 // The Affibloom design system, checked by computed style. Meadow replaces Aurora screen part by screen part (Tasks
 // MD1-MD6, docs/ui/design-system.md section 0b): MD1 brought Meadow's colours and fonts, MD2 the white header and the
-// notice cards; the band (MD3) is still Aurora's shape until its task rewrites those checks.
-const NAVY_900 = 'rgb(11, 42, 91)'; // #0B2A5B (Aurora's band, until MD3)
+// notice cards, MD3 the page head in place of the band.
 const BRAND_600 = 'rgb(30, 107, 71)'; // #1E6B47
 const INK_400 = 'rgb(138, 150, 140)'; // #8A968C
 const INK_600 = 'rgb(85, 98, 90)'; // #55625A
@@ -36,7 +35,7 @@ async function tabTo( page: Page, target: Locator ) {
 	throw new Error( 'The control was not reached with the Tab key.' );
 }
 
-// Header, band and page, shared by every screen.
+// Header, page head and page, shared by every screen.
 async function expectShell( page: Page, title: string ) {
 	// Meadow's header (MD2): white, 64px, sticky, a hairline under it; the tabs are words, the current one green with
 	// a 3px green underline; the wordmark in the display face; Add New Link a green split button.
@@ -79,29 +78,30 @@ async function expectShell( page: Page, title: string ) {
 	expect( await css( card, 'border-top-width' ) ).toBe( '1px' );
 	expect( await css( card, 'border-top-color' ) ).toBe( LINE );
 
-	// The band: a navy-to-blue gradient holding the title and the subtitle (U10).
-	const band = page.locator( '.affibloom-band' );
-	const gradient = await css( band, 'background-image' );
-	expect( gradient ).toContain( 'linear-gradient' );
-	expect( gradient ).toContain( NAVY_900 );
-	expect( gradient ).toContain( BRAND_600 );
-	const h1 = band.getByRole( 'heading', { level: 1, name: title } );
-	expect( await css( h1, 'color' ) ).toBe( WHITE );
-	expect( await css( h1, 'font-size' ) ).toBe( '30px' );
-	expect( await css( h1, 'font-weight' ) ).toBe( '700' );
-	await expect( band.locator( '.affibloom-page__subtitle' ) ).not.toBeEmpty();
+	// No band (MD3): the page head sits on the page background, the title 36px/800 in ink with the subtitle (U10)
+	// under it.
+	await expect( page.locator( '.affibloom-band' ) ).toHaveCount( 0 );
+	const head = page.locator( '.affibloom-page__head' );
+	expect( await css( head, 'background-color' ) ).toBe( 'rgba(0, 0, 0, 0)' );
+	expect( await css( head, 'background-image' ) ).toBe( 'none' );
+	const h1 = head.getByRole( 'heading', { level: 1, name: title } );
+	expect( await css( h1, 'color' ) ).toBe( INK_900 );
+	expect( await css( h1, 'font-size' ) ).toBe( '36px' );
+	expect( await css( h1, 'font-weight' ) ).toBe( '800' );
+	await expect( head.locator( '.affibloom-page__subtitle' ) ).not.toBeEmpty();
 
-	// Content floats over the band: the first card starts above the band's bottom edge.
-	const bandBox = await box( band );
+	// Nothing floats over the head: the first card starts below it.
+	const headBox = await box( head );
 	const firstCard = await box( page.locator( '.affibloom-card' ).first() );
-	expect( firstCard.y ).toBeLessThan( bandBox.y + bandBox.height );
+	expect( firstCard.y ).toBeGreaterThanOrEqual( headBox.y + headBox.height - 1 );
 
-	// One centred column, as Lasso's: the content is at most 1080px wide, centred under the band, and the title
-	// lines up with the content's left edge. The column is the body's first element (a card, or a form holding
-	// cards side by side), not the first card, which on the two-column Amazon tab is only the left one.
+	// One centred column, as Lasso's: the content is at most 1320px wide, centred in the page, and the title lines
+	// up with the content's left edge. The column is the body's first element (a card, or a form holding cards side
+	// by side), not the first card, which on the two-column Amazon tab is only the left one.
 	const column = await box( page.locator( '.affibloom-page__body > *' ).first() );
-	expect( column.width ).toBeLessThanOrEqual( 1080 );
-	expect( Math.abs( ( column.x + column.width / 2 ) - ( bandBox.x + bandBox.width / 2 ) ) ).toBeLessThanOrEqual( 1 );
+	const admin = await box( page.locator( '.affibloom-admin' ) );
+	expect( column.width ).toBeLessThanOrEqual( 1320 );
+	expect( Math.abs( ( column.x + column.width / 2 ) - ( admin.x + admin.width / 2 ) ) ).toBeLessThanOrEqual( 1 );
 	const titleBox = await box( h1 );
 	expect( Math.abs( titleBox.x - column.x ) ).toBeLessThanOrEqual( 1 );
 }
@@ -134,7 +134,7 @@ test( 'Settings uses the Affibloom design system', async ( { page } ) => {
 	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
 	await expectShell( page, 'Settings' );
 
-	// Section tabs: a segmented control on the band, the current one a white segment.
+	// Section tabs: a segmented control under the title, the current one a white segment.
 	const active = page.getByRole( 'navigation', { name: 'Settings sections' } ).getByRole( 'link', { name: 'General' } );
 	await expect( active ).toHaveAttribute( 'aria-current', 'page' );
 	expect( await css( active, 'background-color' ) ).toBe( WHITE );

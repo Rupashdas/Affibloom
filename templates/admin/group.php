@@ -1,10 +1,10 @@
 <?php
 /**
  * A group's page, or "Add a New Group" (Lasso's `admin/views/groups/{header,group-details,group-urls}.php`; F23
- * R5-R6, R10, R17): the band holds the heading, the tabs (Links <n> and Details) and, on the right, Add a Link (Links
- * tab) and Copy Shortcode (F31 R32, Task 18S12). The Links tab lists the group's products in its order (Task G4); the
- * Details tab holds Name, Slug (once the group exists) and Description with Save Changes (Task G2). Delete This Group
- * is in the footer of both (R10).
+ * R5-R6, R10, R17): the page head holds the heading, the tabs (Links <n> and Details) and, on the right, Add a
+ * Link (Links tab) and Copy Shortcode (F31 R32, Task 18S12). The Links tab lists the group's products in its order
+ * (Task G4); the Details tab holds Name, Slug (once the group exists) and Description with Save Changes (Task G2).
+ * Delete This Group is in the footer of both (R10).
  *
  * @package Affibloom
  * @var array{group: ?\Affibloom\Domain\Group\Group, tab: string, members: list<\Affibloom\Domain\Product\Product>, notice: string} $view
@@ -24,41 +24,37 @@ $gid         = $is_new ? 0 : $group->id;
 	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
-		<div class="affibloom-band">
-			<div class="affibloom-band__inner<?php echo $is_new ? '' : ' affibloom-band__inner--split'; ?>">
-				<div class="affibloom-band__text">
-					<h1 class="affibloom-page__title" id="affibloom-group-title"><?php echo esc_html( $heading ); ?></h1>
-					<?php if ( ! $is_new ) : ?>
-						<nav class="affibloom-tabs" aria-label="<?php esc_attr_e( 'Group sections', 'affibloom' ); ?>">
-							<a class="affibloom-tabs__tab<?php echo 'links' === $current_tab ? ' is-active' : ''; ?>" <?php echo 'links' === $current_tab ? 'aria-current="page"' : ''; ?> href="<?php echo esc_url( GroupScreen::url( $gid, 'links' ) ); ?>">
-								<?php
-								/* translators: %s: how many products are in the group. */
-								echo esc_html( sprintf( __( 'Links %s', 'affibloom' ), number_format_i18n( $group->count ) ) );
-								?>
-							</a>
-							<a class="affibloom-tabs__tab<?php echo 'details' === $current_tab ? ' is-active' : ''; ?>" <?php echo 'details' === $current_tab ? 'aria-current="page"' : ''; ?> href="<?php echo esc_url( GroupScreen::url( $gid, 'details' ) ); ?>"><?php esc_html_e( 'Details', 'affibloom' ); ?></a>
-						</nav>
-					<?php endif; ?>
-				</div>
-				<?php if ( ! $is_new ) : ?>
-					<div class="affibloom-band__actions">
-						<?php if ( 'links' === $current_tab ) : ?>
-							<button type="button" class="affibloom-button affibloom-button--on-band" data-affibloom-open="affibloom-add-to-group" aria-haspopup="dialog">
-								<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
-								<span><?php esc_html_e( 'Add a Link', 'affibloom' ); ?></span>
-							</button>
-						<?php endif; ?>
-						<?php // F31 R32: Lasso's tooltip, which reads "Copied!" once the group's grid shortcode is copied (groups.js). ?>
-						<button type="button" class="affibloom-button affibloom-button--on-band" data-copy-group-shortcode="<?php echo esc_attr( \Affibloom\Interface\ShortcodeText::group( $group->slug ) ); ?>"
-							title="<?php esc_attr_e( 'Copy this Display to your clipboard.', 'affibloom' ); ?>" data-copied="<?php esc_attr_e( 'Copied!', 'affibloom' ); ?>"
-							data-copy-failed="<?php esc_attr_e( 'Could not copy shortcode.', 'affibloom' ); ?>">
-							<?php $this->render( 'admin/partials/icon', array( 'name' => 'copy' ) ); ?>
-							<span data-copy-label aria-live="polite"><?php esc_html_e( 'Copy Shortcode', 'affibloom' ); ?></span>
-						</button>
-					</div>
-				<?php endif; ?>
-			</div>
-		</div>
+		<?php
+		// An existing group has its tabs (Links <n> and Details) and its actions; "Add a New Group" has the title only.
+		$group_head = array(
+			'title'    => $heading,
+			'title_id' => 'affibloom-group-title',
+		);
+		if ( ! $is_new ) {
+			$group_head['tabs']         = array(
+				'label' => __( 'Group sections', 'affibloom' ),
+				'items' => array(
+					array(
+						/* translators: %s: how many products are in the group. */
+						'label'   => sprintf( __( 'Links %s', 'affibloom' ), number_format_i18n( $group->count ) ),
+						'url'     => GroupScreen::url( $gid, 'links' ),
+						'current' => 'links' === $current_tab,
+					),
+					array(
+						'label'   => __( 'Details', 'affibloom' ),
+						'url'     => GroupScreen::url( $gid, 'details' ),
+						'current' => 'details' === $current_tab,
+					),
+				),
+			);
+			$group_head['actions']      = 'admin/partials/group-head-actions';
+			$group_head['actions_args'] = array(
+				'tab'       => $current_tab,
+				'shortcode' => \Affibloom\Interface\ShortcodeText::group( $group->slug ),
+			);
+		}
+		$this->render( 'admin/partials/page-head', $group_head );
+		?>
 
 		<div class="affibloom-page__body affibloom-group">
 			<?php if ( $is_new || 'details' === $current_tab ) : ?>

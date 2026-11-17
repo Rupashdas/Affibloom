@@ -1,10 +1,10 @@
 <?php
 /**
  * A field's page, or "Add a New Field" (Lasso's `admin/views/fields/{header,field-details,field-urls}.php`; F26 R12-R13,
- * R20): the band holds the heading and, for an existing field, its tabs, Links (with the number of products it lists) and
- * Details. The Links tab lists the published products that have the field; the Details form saves through POST /fields (a
- * new field) or PATCH /fields/{id} (assets/admin/fields.js); Delete This Field asks, or says "Hold Up" when a product
- * has the field.
+ * R20): the page head holds the heading and, for an existing field, its tabs, Links (with the number of products it
+ * lists) and Details. The Links tab lists the published products that have the field; the Details form saves through
+ * POST /fields (a new field) or PATCH /fields/{id} (assets/admin/fields.js); Delete This Field asks, or says "Hold Up"
+ * when a product has the field.
  *
  * @package Affibloom
  * @var array{field: ?\Affibloom\Domain\Fields\Field, tab: string, products: ?\Affibloom\Domain\Product\ProductPage, types: list<\Affibloom\Domain\Fields\FieldType>, usage: int, notice: string} $view
@@ -24,23 +24,33 @@ $products    = $view['products'];
 	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
-		<div class="affibloom-band">
-			<div class="affibloom-band__inner">
-				<h1 class="affibloom-page__title" id="affibloom-field-title"><?php echo esc_html( $heading ); ?></h1>
-				<?php if ( ! $is_new ) : ?>
-					<nav class="affibloom-tabs" aria-label="<?php esc_attr_e( 'Field sections', 'affibloom' ); ?>">
-						<a class="affibloom-tabs__tab<?php echo 'links' === $current_tab ? ' is-active' : ''; ?>" <?php echo 'links' === $current_tab ? 'aria-current="page"' : ''; ?> href="<?php echo esc_url( FieldScreen::url( $field->id, 'links' ) ); ?>">
-							<?php esc_html_e( 'Links', 'affibloom' ); ?>
-							<?php // The number is what the tab lists (published products), from the server (F26 D7); none, no number (R12). ?>
-							<?php if ( null !== $products && $products->total > 0 ) : ?>
-								<span class="affibloom-tabs__count"><?php echo esc_html( number_format_i18n( $products->total ) ); ?></span>
-							<?php endif; ?>
-						</a>
-						<a class="affibloom-tabs__tab<?php echo 'details' === $current_tab ? ' is-active' : ''; ?>" <?php echo 'details' === $current_tab ? 'aria-current="page"' : ''; ?> href="<?php echo esc_url( FieldScreen::url( $field->id, 'details' ) ); ?>"><?php esc_html_e( 'Details', 'affibloom' ); ?></a>
-					</nav>
-				<?php endif; ?>
-			</div>
-		</div>
+		<?php
+		// An existing field has its tabs: Links, with the number of published products it lists (F26 D7; none, no
+		// number, R12), and Details. "Add a New Field" has the title only.
+		$field_head = array(
+			'title'    => $heading,
+			'title_id' => 'affibloom-field-title',
+		);
+		if ( ! $is_new ) {
+			$field_head['tabs'] = array(
+				'label' => __( 'Field sections', 'affibloom' ),
+				'items' => array(
+					array(
+						'label'   => __( 'Links', 'affibloom' ),
+						'url'     => FieldScreen::url( $field->id, 'links' ),
+						'current' => 'links' === $current_tab,
+						'count'   => null !== $products ? $products->total : 0,
+					),
+					array(
+						'label'   => __( 'Details', 'affibloom' ),
+						'url'     => FieldScreen::url( $field->id, 'details' ),
+						'current' => 'details' === $current_tab,
+					),
+				),
+			);
+		}
+		$this->render( 'admin/partials/page-head', $field_head );
+		?>
 
 		<div class="affibloom-page__body affibloom-fieldpage">
 			<?php if ( ! $is_new && 'links' === $current_tab && null !== $products ) : ?>

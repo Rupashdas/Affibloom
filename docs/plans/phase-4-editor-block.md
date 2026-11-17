@@ -50,7 +50,7 @@ them when the task is worked, and record any code that differs from the text bel
 
 - [x] Task MD1: Meadow's fonts and colours
 - [x] Task MD2: The white header and notice cards
-- [ ] Task MD3: A page head instead of the band
+- [x] Task MD3: A page head instead of the band
 - [ ] Task MD4: The Dashboard: counts beside the title, search, list
 - [ ] Task MD5: The product page: head, sticky preview, save bar
 - [ ] Task MD6: Settings, Groups, Fields, dialogs and the toast
@@ -251,10 +251,15 @@ tabs this way until MD5 finishes it.
 at most 1320px; the subtitle present). Groups' search and **Add New Group** become the head's actions; the
 Dashboard's search moves under the head (its form, `#affibloom-search` and the shortcut hint unchanged), MD4 sizes it.
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: `page-head.php` and the CSS.** - [ ] **Step 3: The seven templates.**
-- [ ] **Step 4: Check and look.** `phpcs` on the templates; each screen once at 1280 px, Settings → Display too
+- [x] **Step 1: Test.** - [x] **Step 2: `page-head.php` and the CSS.** - [x] **Step 3: The seven templates.**
+- [x] **Step 4: Check and look.** `phpcs` on the templates; each screen once at 1280 px, Settings → Display too
   (its structure must be unchanged).
-- [ ] **Step 5: Commit** — "Replace the gradient band with a page head on every screen".
+- [x] **Step 5: Commit** — "Replace the gradient band with a page head on every screen".
+
+*Note (2026-11-17):* the section tabs are a `tabs` argument rendered by a shared `section-tabs.php` (Settings, a
+product, a group, a field), not a `below` partial; the head actions are `list-head-actions.php` (Groups, Fields) and
+`group-head-actions.php`; `below` holds only the Dashboard's search (`dashboard-search.php`). The navy, band and
+`brand-300` tokens are gone; the modal backdrop's navy stays for MD6. Seen at 1280 px on all seven screens.
 
 #### Task MD4: The Dashboard: counts beside the title, search, list
 

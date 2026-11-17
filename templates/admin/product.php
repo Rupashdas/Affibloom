@@ -1,10 +1,10 @@
 <?php
 /**
- * Product page, Details tab: Lasso's link details page (url-details.php and dashboard/header.php) in Aurora's shell.
- * The band holds the name, the link under it and Lasso's four tabs; below, Lasso's two cards (the link on the left,
+ * Product page, Details tab: Lasso's link details page (url-details.php and dashboard/header.php) in Meadow's shell.
+ * The head holds the name, the link under it and Lasso's four tabs; below, Lasso's two cards (the link on the left,
  * the display on the right) and its footer, the arrangement the user chose at gate 4 (F1 requirements, D1).
  *
- * Built in Task 14A: the band, the left card and the ways in. Placeholders until their tasks: the right card (14B),
+ * Built in Task 14A: the head, the left card and the ways in. Placeholders until their tasks: the right card (14B),
  * custom fields (14C), Groups (the Groups area), Permalink (link cloaking), the Locations, Opportunities and Variants
  * tabs (their areas) and Delete This Link (Task 17). Save Changes stores the form through PATCH /products/{id}
  * (Task 15A, assets/admin/product-save.js).
@@ -23,34 +23,36 @@ $product = $view['product'];
 $is_amazon = ProductType::Amazon === $product->type;
 // D5: the link under the title is the destination until link cloaking exists (Lasso's rule when cloaking is off).
 $destination = $product->url->value();
-$soon_tabs   = array(
-	__( 'Locations', 'affibloom' ),
-	__( 'Opportunities', 'affibloom' ),
-	__( 'Variants', 'affibloom' ),
-);
 ?>
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page affibloom-product-page">
-		<div class="affibloom-band">
-			<div class="affibloom-band__inner">
-				<h1 class="affibloom-page__title affibloom-product__title" id="affibloom-product-title">
-					<?php echo esc_html( '' !== $product->name ? $product->name : __( 'Enter a URL Name', 'affibloom' ) ); ?>
-				</h1>
-				<a class="affibloom-product-url" href="<?php echo esc_url( $destination ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $destination ); ?></a>
-
-				<nav class="affibloom-tabs" aria-label="<?php esc_attr_e( 'Product sections', 'affibloom' ); ?>">
-					<a class="affibloom-tabs__tab is-active" aria-current="page" href="<?php echo esc_url( ProductScreen::url( (int) $product->id ) ); ?>"><?php esc_html_e( 'Details', 'affibloom' ); ?></a>
-					<?php foreach ( $soon_tabs as $tab_label ) : ?>
-						<span class="affibloom-tabs__tab is-disabled" aria-disabled="true" aria-describedby="affibloom-soon-note">
-							<?php echo esc_html( $tab_label ); ?>
-							<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?>
-						</span>
-					<?php endforeach; ?>
-				</nav>
-			</div>
-		</div>
+		<?php
+		// The name, the link under it and Lasso's four tabs; Locations, Opportunities and Variants come with their areas.
+		$this->render(
+			'admin/partials/page-head',
+			array(
+				'title'       => '' !== $product->name ? $product->name : __( 'Enter a URL Name', 'affibloom' ),
+				'title_id'    => 'affibloom-product-title',
+				'title_class' => 'affibloom-product__title',
+				'link'        => $destination,
+				'tabs'        => array(
+					'label' => __( 'Product sections', 'affibloom' ),
+					'items' => array(
+						array(
+							'label'   => __( 'Details', 'affibloom' ),
+							'url'     => ProductScreen::url( (int) $product->id ),
+							'current' => true,
+						),
+						array( 'label' => __( 'Locations', 'affibloom' ) ),
+						array( 'label' => __( 'Opportunities', 'affibloom' ) ),
+						array( 'label' => __( 'Variants', 'affibloom' ) ),
+					),
+				),
+			)
+		);
+		?>
 
 		<div class="affibloom-page__body affibloom-product">
 			<?php if ( $view['duplicate'] ) : ?>

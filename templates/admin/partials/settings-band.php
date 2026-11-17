@@ -1,6 +1,7 @@
 <?php
 /**
- * The Settings band: the page title, its subtitle (U10) and the segmented tab strip.
+ * The Settings head: the page title, its subtitle (U10) and General / Display / Amazon as a segmented control under
+ * them (Meadow, Task MD3; it was a gradient band, the name stays for its three callers).
  *
  * Shared by the Settings tabs and the Display screen (extracted on its second use).
  *
@@ -15,20 +16,23 @@ $labels = array(
 	'display' => __( 'Display', 'affibloom' ),
 	'amazon'  => __( 'Amazon', 'affibloom' ),
 );
-?>
-<div class="affibloom-band">
-	<div class="affibloom-band__inner">
-		<h1 class="affibloom-page__title"><?php esc_html_e( 'Settings', 'affibloom' ); ?></h1>
-		<p class="affibloom-page__subtitle"><?php esc_html_e( 'Defaults for new links, the product box and Amazon.', 'affibloom' ); ?></p>
+$items  = array();
+foreach ( $view['tabs'] as $tab_key ) {
+	$items[] = array(
+		'label'   => $labels[ $tab_key ] ?? $tab_key,
+		'url'     => admin_url( 'admin.php?page=affibloom-settings&tab=' . $tab_key ),
+		'current' => $tab_key === $view['tab'],
+	);
+}
 
-		<nav class="affibloom-tabs" aria-label="<?php esc_attr_e( 'Settings sections', 'affibloom' ); ?>">
-			<?php foreach ( $view['tabs'] as $tab_key ) : ?>
-				<a class="affibloom-tabs__tab<?php echo $tab_key === $view['tab'] ? ' is-active' : ''; ?>"
-					href="<?php echo esc_url( admin_url( 'admin.php?page=affibloom-settings&tab=' . $tab_key ) ); ?>"
-					<?php echo $tab_key === $view['tab'] ? 'aria-current="page"' : ''; ?>>
-					<?php echo esc_html( $labels[ $tab_key ] ?? $tab_key ); ?>
-				</a>
-			<?php endforeach; ?>
-		</nav>
-	</div>
-</div>
+$this->render(
+	'admin/partials/page-head',
+	array(
+		'title'    => __( 'Settings', 'affibloom' ),
+		'subtitle' => __( 'Defaults for new links, the product box and Amazon.', 'affibloom' ),
+		'tabs'     => array(
+			'label' => __( 'Settings sections', 'affibloom' ),
+			'items' => $items,
+		),
+	)
+);

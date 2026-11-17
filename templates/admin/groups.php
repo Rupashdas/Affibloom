@@ -1,7 +1,7 @@
 <?php
 /**
- * The Groups list: the band with the title, the search and Add New Group, then the list region (Lasso's
- * `admin/views/groups/groups.php`; F23 R2). The arrangement is Lasso's, the look Aurora's. The list partial is the one
+ * The Groups list: the page head with the title, the search and Add New Group, then the list region (Lasso's
+ * `admin/views/groups/groups.php`; F23 R2). The arrangement is Lasso's, the look Meadow's. The list partial is the one
  * GET /groups renders, so the page and the in-place list share one template.
  *
  * @package Affibloom
@@ -16,26 +16,24 @@ use Affibloom\Interface\Admin\GroupsScreen;
 	<?php $this->render( 'admin/partials/header' ); ?>
 
 	<div class="affibloom-page">
-		<div class="affibloom-band">
-			<div class="affibloom-band__inner affibloom-band__inner--split">
-				<div class="affibloom-band__text">
-					<h1 class="affibloom-page__title"><?php esc_html_e( 'Groups', 'affibloom' ); ?></h1>
-					<p class="affibloom-page__subtitle"><?php esc_html_e( 'Keep related products together and show them as a list, grid or gallery.', 'affibloom' ); ?></p>
-				</div>
-				<div class="affibloom-band__actions">
-					<form class="affibloom-band__search" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" role="search">
-						<input type="hidden" name="page" value="<?php echo esc_attr( GroupsScreen::SLUG ); ?>">
-						<label class="screen-reader-text" for="affibloom-groups-search"><?php esc_html_e( 'Search Groups', 'affibloom' ); ?></label>
-						<input type="search" id="affibloom-groups-search" class="affibloom-input affibloom-search" name="s"
-							value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php esc_attr_e( 'Search Groups', 'affibloom' ); ?>">
-					</form>
-					<a class="affibloom-button affibloom-button--on-band" href="<?php echo esc_url( $view['new'] ); ?>">
-						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
-						<span><?php esc_html_e( 'Add New Group', 'affibloom' ); ?></span>
-					</a>
-				</div>
-			</div>
-		</div>
+		<?php
+		$this->render(
+			'admin/partials/page-head',
+			array(
+				'title'        => __( 'Groups', 'affibloom' ),
+				'subtitle'     => __( 'Keep related products together and show them as a list, grid or gallery.', 'affibloom' ),
+				'actions'      => 'admin/partials/list-head-actions',
+				'actions_args' => array(
+					'slug'         => GroupsScreen::SLUG,
+					'search_id'    => 'affibloom-groups-search',
+					'search_label' => __( 'Search Groups', 'affibloom' ),
+					'term'         => $view['term'],
+					'add_url'      => $view['new'],
+					'add_label'    => __( 'Add New Group', 'affibloom' ),
+				),
+			)
+		);
+		?>
 
 		<div class="affibloom-page__body affibloom-groups">
 			<div id="affibloom-groups-list" class="affibloom-list">

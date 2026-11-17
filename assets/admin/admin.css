@@ -6,12 +6,6 @@
 
 /* 1. Tokens (Meadow, 0b.1; contrast ratios there) */
 .affibloom-admin {
-	/* Aurora's band, until MD3 replaces it. */
-	--affibloom-navy-900: #0b2a5b;
-	--affibloom-brand-300: #7fb0f5;
-	--affibloom-on-band: #d6e2f5;
-	--affibloom-on-navy-active: rgba(255, 255, 255, 0.12);
-
 	--affibloom-brand-800: #124a30;
 	--affibloom-brand-700: #185a3b;
 	--affibloom-brand-600: #1e6b47;
@@ -84,12 +78,11 @@
 /* An element the script or the template hides stays hidden, whatever display its component sets. */
 .affibloom-admin [hidden] { display: none !important; }
 
-/* Focus ring: green on light surfaces, white on the band (until MD3) */
+/* Focus ring: green, on every surface (Meadow has no dark one) */
 .affibloom-admin :focus-visible {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;
 }
-.affibloom-band :focus-visible { outline-color: var(--affibloom-white); }
 /*
  * wp-admin's `a:focus` gives every focused link 2px corners and a blue ring, so a link styled as a button lost its
  * corners while pressed (the user, 2026-11-17: "Add New Field"). Here links keep their own shape and show only the
@@ -278,28 +271,39 @@
 .affibloom-menu__title { font-weight: 600; }
 .affibloom-menu__desc { color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
 
-/* 3. Band: the gradient with the title, the subtitle and section tabs */
-.affibloom-band {
-	padding: 40px var(--affibloom-space-gutter) 88px;
-	background: linear-gradient(120deg, var(--affibloom-navy-900) 0%, var(--affibloom-brand-600) 100%);
-	color: var(--affibloom-white);
-}
-/* The band's content sits in the same centred column as the body below it. */
-.affibloom-band__inner {
+/*
+ * 3. Page head (Meadow, 0b.4; Task MD3, partials/page-head.php): no band. On the page background, in the body's
+ * centred column, the title and what sits under it (subtitle, link, section tabs) on the left; the screen's search and
+ * buttons on the right, in one row level with the title (the user, 2026-11-17: one head on every screen). The text
+ * takes the room left over, so the row only wraps when the window is too narrow for both.
+ */
+.affibloom-page__head {
 	max-width: var(--affibloom-content-width);
 	margin: 0 auto;
+	padding: 36px var(--affibloom-space-gutter) 32px;
 }
+.affibloom-page__head-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px 32px;
+}
+.affibloom-page__head-text { flex: 1 1 360px; min-width: 0; }
+.affibloom-page__actions { display: flex; flex: 0 0 auto; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 12px; }
 .affibloom-admin .affibloom-page__title {
 	margin: 0;
 	padding: 0;
-	color: var(--affibloom-white);
-	font: 700 30px/38px var(--affibloom-font-display);
+	color: var(--affibloom-ink-900);
+	font: 800 36px/1.12 var(--affibloom-font-display);
+	letter-spacing: -0.025em;
 }
 .affibloom-page__subtitle {
-	margin: 4px 0 0;
-	color: var(--affibloom-on-band);
-	font-size: 14px;
-	line-height: 20px;
+	max-width: 640px;
+	margin: 8px 0 0;
+	color: var(--affibloom-ink-600);
+	font-size: 15px;
+	line-height: 22px;
 }
 
 /*
@@ -403,23 +407,14 @@
 .affibloom-list-error .affibloom-button { margin-top: 12px; }
 .affibloom-list .affibloom-card:focus { outline: none; }
 
-/* A band with something on its right, as the Dashboard's search beside its title (Lasso's title row). */
 /*
- * One head on every screen (the user, 2026-11-17: "inconsistency"): the title and what sits under it (subtitle, tabs)
- * on the left; the screen's search and buttons on the right, in one row level with the title. The text takes the room
- * left over, so the row only wraps when the window is too narrow for both.
+ * The head's search: in the actions row on a list screen (Groups, Fields), across the column under the head on the
+ * Dashboard (MD4 sizes it). The field is the kit's round search, white with a hairline on the page.
  */
-.affibloom-band__inner--split {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 16px 32px;
-}
-.affibloom-band__text { flex: 1 1 320px; min-width: 0; }
-.affibloom-band__search { position: relative; flex: 0 1 340px; min-width: 220px; }
-.affibloom-band__inner--split > .affibloom-band__search,
-.affibloom-band__inner--split > .affibloom-band__actions { margin-top: -2px; }
+.affibloom-page__search { position: relative; flex: 0 0 300px; min-width: 0; }
+.affibloom-page__search--wide { margin-top: 24px; }
+.affibloom-admin .affibloom-page__search .affibloom-search { width: 100%; max-width: none; height: 42px; min-height: 42px; }
+.affibloom-admin .affibloom-page__search--wide .affibloom-search { padding-right: 110px; }
 /* Lasso's shortcut hint, inside the search box on its right. */
 .affibloom-search-kbd {
 	position: absolute;
@@ -434,49 +429,47 @@
 	pointer-events: none;
 	transform: translateY(-50%);
 }
-.affibloom-admin .affibloom-band__search .affibloom-search { padding-right: 110px; }
-/* On the gradient the search is a white field with no border, as the header's white button is. */
-.affibloom-admin .affibloom-band__search .affibloom-search {
-	max-width: none;
-	height: 42px;
-	min-height: 42px;
-	border-color: transparent;
-	box-shadow: 0 1px 2px rgba(22, 32, 26, 0.12);
-}
-.affibloom-admin .affibloom-band__search .affibloom-search:focus {
-	border-color: var(--affibloom-white);
-	outline: 2px solid var(--affibloom-white);
-	outline-offset: 2px;
-}
 
-/* Section tabs: a segmented control on the band */
+/*
+ * Section tabs (partials/section-tabs.php): a segmented control under the title, the current tab a white segment.
+ * Settings keeps it (0b.4); the product page's become underline tabs in MD5. Four tabs do not fit a phone, so the
+ * control scrolls sideways instead of widening the page; the focus ring sits inside each tab so the scroll box does
+ * not clip it.
+ */
 .affibloom-tabs {
 	display: inline-flex;
-	gap: 4px;
+	gap: 2px;
+	max-width: 100%;
 	margin-top: 20px;
-	padding: 4px;
+	padding: 3px;
+	box-sizing: border-box;
+	overflow-x: auto;
 	border-radius: var(--affibloom-radius-control);
-	background: var(--affibloom-on-navy-active);
+	background: var(--affibloom-segment-bg);
 }
 .affibloom-tabs__tab {
-	padding: 7px 16px;
+	flex: 0 0 auto;
+	padding: 7px 14px;
 	border-radius: var(--affibloom-radius-segment);
-	color: var(--affibloom-on-band);
+	color: var(--affibloom-ink-600);
 	font-weight: 600;
 	text-decoration: none;
+	white-space: nowrap;
+	transition: color var(--affibloom-ease), background-color var(--affibloom-ease);
 }
 .affibloom-tabs__tab:hover,
-.affibloom-tabs__tab:focus { color: var(--affibloom-white); }
+.affibloom-tabs__tab:focus { color: var(--affibloom-ink-900); }
+.affibloom-admin .affibloom-tabs__tab:focus-visible { outline-offset: -2px; }
 .affibloom-tabs__tab.is-active {
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-segment);
 	color: var(--affibloom-ink-900);
 }
 
-/* 4. Body: one centred column, as Lasso's; content floats 48px up over the band */
+/* 4. Body: one centred column, as Lasso's, under the page head */
 .affibloom-page__body {
 	max-width: var(--affibloom-content-width);
-	margin: -48px auto 0;
+	margin: 0 auto;
 	padding: 0 var(--affibloom-space-gutter) 56px;
 }
 
@@ -1151,7 +1144,7 @@
 	gap: 6px;
 	margin-right: auto;
 	padding: 3px 4px 3px 14px;
-	border: 1px solid var(--affibloom-brand-300);
+	border: 1px solid var(--affibloom-brand-line);
 	border-radius: var(--affibloom-radius-full);
 	background: var(--affibloom-brand-50);
 }
@@ -1627,8 +1620,8 @@
 }
 
 /*
- * 7e. The product page (Task 14A): Lasso's arrangement in Aurora's shell (the user's gate 4 answer, F1 D1). The
- * band holds the name, the link under it and the four tabs; the body holds Lasso's two cards side by side (its
+ * 7e. The product page (Task 14A): Lasso's arrangement in Meadow's shell (the user's gate 4 answer, F1 D1). The
+ * head holds the name, the link under it and the four tabs; the body holds Lasso's two cards side by side (its
  * col-lg-5 / col-lg-7) and its footer (Delete left, Save right). Labels sit above their fields and toggles left of
  * their labels, as on Lasso's page.
  */
@@ -1638,27 +1631,25 @@
 	max-width: 100%;
 	margin-top: 6px;
 	overflow: hidden;
-	color: var(--affibloom-on-band);
+	color: var(--affibloom-brand-600);
 	font-size: 14px;
+	font-weight: 500;
 	line-height: 20px;
+	text-decoration: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 .affibloom-product-url:hover,
-.affibloom-product-url:focus { color: var(--affibloom-white); }
+.affibloom-product-url:focus { color: var(--affibloom-brand-700); text-decoration: underline; text-underline-offset: 3px; }
 /* A tab whose section comes later: readable, not a link, with its "Soon" chip. */
 .affibloom-tabs__tab.is-disabled {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	color: var(--affibloom-on-band);
+	color: var(--affibloom-ink-500);
 	cursor: default;
-	opacity: 0.85;
 }
-.affibloom-tabs__tab.is-disabled:hover { color: var(--affibloom-on-band); }
-/* Four tabs do not fit a phone: the segment scrolls sideways inside the band instead of widening the page. */
-.affibloom-product-page .affibloom-tabs { max-width: 100%; overflow-x: auto; }
-.affibloom-product-page .affibloom-tabs__tab { flex: 0 0 auto; white-space: nowrap; }
+.affibloom-tabs__tab.is-disabled:hover { color: var(--affibloom-ink-500); }
 /* wp-admin caps a select's width; this one fills its column like the text fields. */
 .affibloom-admin select.affibloom-input { max-width: none; }
 .affibloom-product__form {
@@ -2337,21 +2328,8 @@ body.affibloom-has-modal { overflow: hidden; }
 /*
  * 10. Groups (F23, Task G1; docs/ui/design-system.md, "Groups list"). The list is the Dashboard's card and table with
  * three columns (Name, Description, Links) and a footer with the range and the page links; the whole row opens the
- * group through the name's link stretched over it. The band's right side holds the search and Add New Group, a white
- * button on the gradient as the header's is.
+ * group through the name's link stretched over it. The page head's actions hold the search and Add New Group.
  */
-.affibloom-band__actions { display: flex; flex: 0 0 auto; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 12px; }
-.affibloom-band__actions .affibloom-band__search { flex: 0 0 300px; min-width: 0; }
-.affibloom-admin .affibloom-button--on-band,
-.affibloom-admin .affibloom-button--on-band:focus {
-	height: 42px;
-	border-color: transparent;
-	background: var(--affibloom-white);
-	box-shadow: 0 1px 2px rgba(22, 32, 26, 0.12);
-	color: var(--affibloom-navy-900);
-}
-.affibloom-admin .affibloom-button--on-band:hover { background: var(--affibloom-brand-50); color: var(--affibloom-navy-900); }
-.affibloom-admin .affibloom-band__actions .affibloom-band__search .affibloom-search { padding-right: 16px; }
 .affibloom-table.affibloom-table--groups { min-width: 0; }
 .affibloom-table--groups .affibloom-col-name { width: 30%; }
 .affibloom-table--groups .affibloom-col-links { width: 110px; text-align: center; }
@@ -2518,7 +2496,7 @@ body.affibloom-has-modal { overflow: hidden; }
 
 @media (max-width: 960px) {
 	.affibloom-header,
-	.affibloom-band { padding-right: 20px; padding-left: 20px; }
+	.affibloom-page__head { padding-right: 20px; padding-left: 20px; }
 	.affibloom-page__body,
 	.affibloom-notices { padding-right: 20px; padding-left: 20px; }
 	.affibloom-footer { width: calc(100% - 40px); }
@@ -2576,7 +2554,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	/* The selection bar wraps to two lines on a phone: a card's corners, not a stretched pill. */
 	.affibloom-selection { padding: 8px 10px; border-radius: var(--affibloom-radius-card); }
 	.affibloom-search-kbd { display: none; }
-	.affibloom-admin .affibloom-band__search .affibloom-search { padding-right: 16px; }
+	.affibloom-admin .affibloom-page__search--wide .affibloom-search { padding-right: 16px; }
+	.affibloom-admin .affibloom-page__title { font-size: 28px; }
 	/* Two tiles a row on a phone, so the five do not fill the first screen on their own. */
 	.affibloom-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 	.affibloom-tile { padding: 12px 14px; }
@@ -2591,8 +2570,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-product__switches { grid-template-columns: 1fr; }
 	.affibloom-product__card { padding: 20px; }
 	/* Groups: three columns fit a phone, the description wraps and the Links count keeps a narrow column. */
-	.affibloom-band__actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; }
-	.affibloom-band__actions .affibloom-band__search { flex: 1 1 220px; }
+	.affibloom-page__actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; }
+	.affibloom-page__actions .affibloom-page__search { flex: 1 1 220px; }
 	.affibloom-table--groups .affibloom-col-name { width: 34%; }
 	.affibloom-table--groups .affibloom-col-links { width: 64px; }
 	.affibloom-table--groups .affibloom-row__name { white-space: normal; overflow-wrap: anywhere; }

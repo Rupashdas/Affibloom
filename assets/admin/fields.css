@@ -51,7 +51,8 @@
 	margin-left: 6px;
 	padding: 0 6px;
 	border-radius: 10px;
-	background: var(--affibloom-on-navy-active);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-600);
 	font-size: 12px;
 	font-weight: 700;
 	line-height: 20px;
