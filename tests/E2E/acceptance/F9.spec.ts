@@ -222,6 +222,33 @@ test.describe( 'F9 Link settings', () => {
 		setSettings( { performance_mode: 'balanced', cpu_threshold: 80 } );
 	} );
 
+	test( 'AC13 the Link Index card shows the last build, the progress of a running one, and Rebuild Database in the support view', async ( { page } ) => {
+		const card = page.locator( '#affibloom-card-link-index' );
+		wp( 'option', 'delete', 'affibloom_link_index_state' );
+		await page.goto( GENERAL );
+		await expect( card.getByRole( 'heading', { name: 'Link Index' } ) ).toBeVisible();
+		await expect( card.getByText( 'Affibloom tracks every link on your site.' ) ).toBeVisible();
+		await expect( card.getByText( 'Links Indexed' ) ).toBeVisible();
+		await expect( card.getByText( 'Last Updated' ) ).toBeVisible();
+		await expect( card.getByRole( 'button', { name: 'Rebuild Database' } ) ).toHaveCount( 0 );
+
+		// The support view's button asks first; Confirm starts the rebuild and the card follows within a poll.
+		await page.goto( `${ GENERAL }&support=1` );
+		await card.getByRole( 'button', { name: 'Rebuild Database' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Ready to rebuild?' } );
+		await expect( dialog.getByText( "By rebuilding your link index, you'll start with a clean slate." ) ).toBeVisible();
+		await dialog.getByRole( 'button', { name: 'Confirm' } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Rebuild started.' );
+		await expect( card.getByText( 'Build Progress' ) ).toBeVisible( { timeout: 10_000 } );
+		await expect( card.getByText( "We're indexing your links in the background, feel free to do something else." ) ).toBeVisible();
+
+		// Finished: the card goes back to its figures.
+		for ( let run = 0; run < 20 && wp( 'option', 'get', 'affibloom_link_index_state', '--format=json' ).includes( '"running"' ); run++ ) {
+			wp( 'cron', 'event', 'run', 'affibloom_link_index_batch' );
+		}
+		await expect( card.getByText( 'Links Indexed' ) ).toBeVisible( { timeout: 10_000 } );
+	} );
+
 	test( 'AC12 Custom Link Detection lists the site post types and saves the choice', async ( { page } ) => {
 		await page.goto( GENERAL );
 		const card = page.locator( '#affibloom-card-detection' );

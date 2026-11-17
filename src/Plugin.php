@@ -440,7 +440,8 @@ final class Plugin {
 					new DisplayScreen( $this->template(), $display, $settings, $notice, $choices ),
 					$notice,
 					$detection,
-					$amazon
+					$amazon,
+					$this->link_index_status()
 				),
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
@@ -474,7 +475,7 @@ final class Plugin {
 			new IconsController( $icons, $choices, $this->template() ),
 			new FieldsController( $fields, $this->template() ),
 			new GroupsController( $groups, $this->template() ),
-			new LinkIndexController( new LinkIndexStatus( new OptionLinkIndexState(), new TableLinkLocationRepository() ), $this->link_index_rebuild() ),
+			new LinkIndexController( $this->link_index_status(), $this->link_index_rebuild() ),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),
 			$this->upgrade_hooks(),
@@ -517,6 +518,13 @@ final class Plugin {
 		);
 
 		return $this->link_indexer;
+	}
+
+	/**
+	 * The Link Index card's figures (F21 R51; Tasks 35G, 9J).
+	 */
+	private function link_index_status(): LinkIndexStatus {
+		return new LinkIndexStatus( new OptionLinkIndexState(), new TableLinkLocationRepository() );
 	}
 
 	/**

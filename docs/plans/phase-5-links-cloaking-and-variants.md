@@ -80,7 +80,7 @@ Grouped by feature, in the order they are worked.
 
 **F9 (part) — the Link Index card**
 
-- [ ] Task 9J: Link Index card
+- [x] Task 9J: Link Index card
 
 **F38 (part) — Automations and link index notices**
 
@@ -524,10 +524,16 @@ is not built.)
 
 **Files:** create `templates/admin/partials/settings-general-link-index.php`; modify `templates/admin/settings.php`, `assets/admin/general-settings.js`; test `tests/E2E/acceptance/F9.spec.ts` (AC13).
 
-- [ ] **Step 1: Failing test.** AC13 against 35G's route: empty body at 0, figures after an index, progress and ETA while building; red: no card.
-- [ ] **Step 2: Card and poller.**
-- [ ] **Step 3: Run and look.** On Local after the first index: the card at 1280 and 375 px.
-- [ ] **Step 4: Commit** — "Show the link index on Settings → General".
+- [x] **Step 1: Failing test.** AC13 against 35G's route: empty body at 0, figures after an index, progress and ETA while building; red: no card.
+- [x] **Step 2: Card and poller.**
+- [x] **Step 3: Run and look.** On Local after the first index: the card at 1280 and 375 px.
+- [x] **Step 4: Commit** — "Show the link index on Settings → General".
+
+*Note (2026-11-18):* the card is the right column's first; its words come from one `Interface\Admin\LinkIndexText` (also the route's), the
+fact list shares the Amazon data card's style (`.affibloom-facts`), and the support view's Rebuild Database opens 35G's
+dialog. Checked in Brave at 1280 px: Last Updated and Links Indexed (4,606); Rebuild Database → "Ready to rebuild?" →
+Confirm → Build Progress "0 completed of 1,105 total", then "221 completed", ETA 1 minute, from the 5 s poll. A first
+look found the support flag missing from the card's data (a PHP warning), fixed before the commit.
 
 ---
 

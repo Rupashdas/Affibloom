@@ -50,6 +50,13 @@ $card_data = array(
 					<div class="affibloom-columns__column">
 						<?php
 						$this->render(
+							'admin/partials/settings-general-link-index',
+							$card_data + array(
+								'link_index' => $view['link_index'],
+								'support'    => $view['support'],
+							)
+						);
+						$this->render(
 							'admin/partials/settings-general-detection',
 							$card_data + array(
 								'post_types' => $view['post_types'],

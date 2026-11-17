@@ -8,6 +8,7 @@
  * - Cloaked Link Prefix: what is typed becomes its slug form, and the example line follows (9G).
  * - Performance Mode: choosing a preset sets its numbers; only Custom shows the CPU level (9H).
  * - Rebuild Database: "Ready to rebuild?", then the link index is rebuilt in the background (F21 R52, Task 35G).
+ * - Link Index: the card's figures, redrawn every 5 seconds (F21 R57, Task 9J).
  *
  * The server applies the same rules where it can, so the form still saves correctly without this script.
  */
@@ -117,6 +118,44 @@
 					confirm.classList.remove( 'is-busy' );
 				} );
 		} );
+	}
+
+	/**
+	 * The Link Index card (F21 R51, R57): Build Progress, ETA and the background sentence while a rebuild runs, else
+	 * Last Updated and Links Indexed (nothing while the index is empty). Polled every 5 seconds while the tab is shown,
+	 * and redrawn at once when a rebuild starts.
+	 */
+	function linkIndex() {
+		var card = document.querySelector( '[data-link-index]' );
+		if ( ! card ) {
+			return;
+		}
+		var part = function ( name ) {
+			return card.querySelector( '[data-link-index-' + name + ']' );
+		};
+
+		function draw( figures ) {
+			var running = 'running' === figures.status;
+			part( 'running' ).hidden = ! running;
+			part( 'sentence' ).hidden = ! running;
+			part( 'done' ).hidden = running || figures.links_indexed < 1;
+			part( 'progress' ).textContent = figures.progress_text;
+			part( 'eta' ).textContent = figures.eta_text;
+			part( 'updated' ).textContent = figures.last_updated_text;
+			part( 'links' ).textContent = figures.links_text;
+		}
+
+		document.addEventListener( 'affibloom:link-index', function ( event ) {
+			if ( event.detail ) {
+				draw( event.detail );
+			}
+		} );
+		window.setInterval( function () {
+			if ( document.hidden ) {
+				return;
+			}
+			wp.apiFetch( { path: '/affibloom/v1/link-index' } ).then( draw ).catch( function () {} );
+		}, 5000 );
 	}
 
 	/**
@@ -267,5 +306,6 @@
 		performance();
 		helpTips();
 		rebuild();
+		linkIndex();
 	} );
 } )();

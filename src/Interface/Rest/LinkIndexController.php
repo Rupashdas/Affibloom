@@ -12,6 +12,7 @@ namespace Affibloom\Interface\Rest;
 use Affibloom\Application\LinkIndex\LinkIndexRebuild;
 use Affibloom\Application\LinkIndex\LinkIndexStatus;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\Admin\LinkIndexText;
 use Affibloom\Module;
 use WP_Error;
 use WP_REST_Response;
@@ -74,7 +75,7 @@ final class LinkIndexController implements Module {
 	 * The figures.
 	 */
 	public function show(): WP_REST_Response {
-		return new WP_REST_Response( $this->status->figures( time() ), 200 );
+		return new WP_REST_Response( LinkIndexText::of( $this->status->figures( time() ) ), 200 );
 	}
 
 	/**
@@ -88,7 +89,7 @@ final class LinkIndexController implements Module {
 		return new WP_REST_Response(
 			array(
 				'message' => __( 'Rebuild started.', 'affibloom' ),
-				'status'  => $this->status->figures( time() ),
+				'status'  => LinkIndexText::of( $this->status->figures( time() ) ),
 			),
 			202
 		);

@@ -2079,13 +2079,21 @@
 .affibloom-amazon-data__empty { margin: 0; color: var(--affibloom-ink-600); }
 .affibloom-amazon-data__body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; }
 .affibloom-amazon-data__image { width: 96px; height: 96px; object-fit: contain; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
-.affibloom-amazon-data__list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 24px; margin: 0; font-size: 14px; }
-.affibloom-amazon-data__list dt { color: var(--affibloom-ink-600); font-weight: 600; }
-.affibloom-amazon-data__list dd { margin: 0; color: var(--affibloom-ink-900); overflow-wrap: anywhere; }
+/* A list of facts, label then value (the Amazon data card; the Link Index card, Task 9J). */
+.affibloom-amazon-data__list,
+.affibloom-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 24px; margin: 0; font-size: 14px; }
+.affibloom-amazon-data__list dt,
+.affibloom-facts dt { color: var(--affibloom-ink-600); font-weight: 600; }
+.affibloom-amazon-data__list dd,
+.affibloom-facts dd { margin: 0; color: var(--affibloom-ink-900); overflow-wrap: anywhere; }
+.affibloom-facts[hidden] { display: none; }
+.affibloom-card__actions { margin: 16px 0 0; }
 @media (max-width: 600px) {
 	.affibloom-amazon-data__body { grid-template-columns: minmax(0, 1fr); }
-	.affibloom-amazon-data__list { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-	.affibloom-amazon-data__list dd { margin-bottom: 8px; }
+	.affibloom-amazon-data__list,
+	.affibloom-facts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+	.affibloom-amazon-data__list dd,
+	.affibloom-facts dd { margin-bottom: 8px; }
 }
 .affibloom-product__pair--even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .affibloom-image-frame {

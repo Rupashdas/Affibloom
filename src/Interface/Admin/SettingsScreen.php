@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Application\LinkIndex\LinkIndexStatus;
 use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Settings\DetectionChoices;
 use Affibloom\Application\Settings\SettingsService;
@@ -31,6 +32,7 @@ final class SettingsScreen {
 	 * @param Notice             $notice      The toast after a save.
 	 * @param DetectionChoices   $choices     What Custom Link Detection can scan (General).
 	 * @param CredentialsService $credentials The Amazon tab's Product Data API card (C1A).
+	 * @param LinkIndexStatus    $link_index  General's Link Index card (Task 9J).
 	 */
 	public function __construct(
 		private Template $template,
@@ -38,7 +40,8 @@ final class SettingsScreen {
 		private DisplayScreen $display,
 		private Notice $notice,
 		private DetectionChoices $choices,
-		private CredentialsService $credentials
+		private CredentialsService $credentials,
+		private LinkIndexStatus $link_index
 	) {}
 
 	/**
@@ -71,6 +74,7 @@ final class SettingsScreen {
 				'post_types' => 'general' === $tab ? $this->choices->post_types() : array(),
 				'fields'     => 'general' === $tab ? $this->choices->custom_fields() : array(),
 				'has_acf'    => 'general' === $tab && $this->choices->has_acf(),
+				'link_index' => 'general' === $tab ? LinkIndexText::of( $this->link_index->figures( time() ) ) : array(),
 			)
 		);
 	}
