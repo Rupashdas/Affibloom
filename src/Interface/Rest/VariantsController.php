@@ -13,6 +13,7 @@ use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Variants\VariantService;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Variant\VariantKind;
+use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\VariantRows;
 use Affibloom\Interface\Template;
@@ -44,6 +45,20 @@ final class VariantsController implements Module {
 	 */
 	public function register(): void {
 		add_action( 'rest_api_init', array( $this, 'routes' ) );
+		add_action( 'deleted_post', array( $this, 'deleted' ), 10, 2 );
+	}
+
+	/**
+	 * A product deleted for good takes its variants with it (F27 edge case 3: Lasso leaves them, and they would redirect
+	 * nowhere); a retired or trashed product keeps them.
+	 *
+	 * @param int   $id   The deleted post's ID.
+	 * @param mixed $post The deleted post.
+	 */
+	public function deleted( int $id, mixed $post ): void {
+		if ( $post instanceof \WP_Post && ProductPostType::NAME === $post->post_type ) {
+			$this->variants->forget( $id );
+		}
 	}
 
 	/**

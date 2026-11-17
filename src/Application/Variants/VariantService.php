@@ -60,4 +60,13 @@ final class VariantService {
 			array_map( static fn( array $row ): Variant => new Variant( 0, $product_id, $row['name'], $row['key'], $kind ), $rows )
 		);
 	}
+
+	/**
+	 * Forgets a deleted product's variants (edge case 3).
+	 *
+	 * @param int $product_id The product's ID.
+	 */
+	public function forget( int $product_id ): void {
+		$this->variants->replace( $product_id, array() );
+	}
 }
