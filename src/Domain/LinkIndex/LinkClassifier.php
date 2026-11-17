@@ -43,8 +43,8 @@ final class LinkClassifier {
 	 * @param string        $detected_at Now, UTC.
 	 */
 	public function classify( LinkCandidate $link, int $product_id, int $host_id, string $host_url, string $source, int $occurrence, string $detected_at ): LinkLocation {
-		$type   = $this->type( $link->href, $product_id );
-		$amazon = self::amazon( $link->href );
+		$type   = $link->is_sitestripe() ? LinkType::SiteStripe : $this->type( $link->href, $product_id );
+		$amazon = self::amazon( $link->product_url() );
 		$text   = trim( (string) preg_replace( '/\s+/u', ' ', $link->text ) );
 
 		return new LinkLocation(
@@ -54,7 +54,7 @@ final class LinkClassifier {
 			occurrence: $occurrence,
 			product_id: $product_id,
 			link_type: $type->value,
-			display_type: $link->has_image ? DisplayType::IMAGE : DisplayType::TEXT,
+			display_type: self::display_type( $link ),
 			url: $link->href,
 			url_md5: LocationKey::md5( $link->href ),
 			anchor_text: '' === $text ? null : mb_strcut( $text, 0, self::TEXT_BYTES, 'UTF-8' ),
@@ -68,6 +68,19 @@ final class LinkClassifier {
 			detected_at: $detected_at,
 			original_url: $link->href,
 		);
+	}
+
+	/**
+	 * Text, Image-only anchor text, or SiteStripe's Image and Product Box (R25, R31).
+	 *
+	 * @param LinkCandidate $link The link.
+	 */
+	private static function display_type( LinkCandidate $link ): string {
+		return match ( $link->kind ) {
+			LinkCandidate::SITESTRIPE_IMAGE => DisplayType::SITESTRIPE_IMAGE,
+			LinkCandidate::SITESTRIPE_IFRAME => DisplayType::SITESTRIPE_BOX,
+			default => $link->has_image ? DisplayType::IMAGE : DisplayType::TEXT,
+		};
 	}
 
 	/**

@@ -21,6 +21,12 @@ final class DisplayType {
 	/** An anchor around an image. */
 	public const IMAGE = 'Image-only anchor text';
 
+	/** A SiteStripe image (R31). */
+	public const SITESTRIPE_IMAGE = 'Image';
+
+	/** A SiteStripe iframe (R31). */
+	public const SITESTRIPE_BOX = 'Product Box';
+
 	/** A display's label by its type, as the shortcode's `type` or the block's writes it. */
 	private const DISPLAYS = array(
 		'button'  => 'Button',

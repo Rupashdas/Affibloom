@@ -74,7 +74,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task 35B: Displays in the index — shortcodes and blocks
 - [x] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
 - [x] Task 35D: Custom Link Detection — Settings → General
-- [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post`
+- [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post` (SiteStripe and Elementor done 2026-11-18; the other plugins wait for the user's answer)
 - [ ] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
 - [ ] Task 35G: Settings → General — Link Index and Performance
 
@@ -408,12 +408,21 @@ Checked in Brave: ticking a test post type and saving indexed its post. Local no
 
 **Files:** sources, scanner, hooks; integration tests with fixtures per source (plugins absent → skipped).
 
-- [ ] **Step 1: Failing tests.** AC5: a fixture per source (plugin absent → skipped); red: no rows for these hosts.
-- [ ] **Step 2: Sources.**
-- [ ] **Step 3: Hooks.**
-- [ ] **Step 4: Record the output filters (N1).**
-- [ ] **Step 5: Run and look.** `wp affibloom links rebuild --post=<id>` on a fixture post per available plugin; none is active on this site, so the E2E skips are listed.
-- [ ] **Step 6: Commit** — "Index links in builders and recipe plugins".
+- [x] **Step 1: Failing tests.** AC5: a fixture per source (plugin absent → skipped); red: no rows for these hosts.
+- [x] **Step 2: Sources.**
+- [x] **Step 3: Hooks.**
+- [x] **Step 4: Record the output filters (N1).**
+- [x] **Step 5: Run and look.** `wp affibloom links rebuild --post=<id>` on a fixture post per available plugin; none is active on this site, so the E2E skips are listed.
+- [x] **Step 6: Commit** — "Index links in builders and recipe plugins".
+
+*Note (2026-11-18):* **part built; the rest waits for the user's answer** (`open-decisions.md`, "Non-affiliate integrations"). Built:
+SiteStripe images and iframes (setting `scan_sitestripe_in_post_content`; `Domain\LinkIndex\SiteStripe` reads Lasso's
+`asin(s)`, `tag`/`tracking_id`, `region`/`marketplace`), link type `sitestripe`, display Image or Product Box, tied by
+the Amazon link they name (checked on Local: both tied to product 20331; off, none). Elementor needs no reader: it writes
+its plain copy (with the Affibloom widget's shortcode, ED2) into `post_content`, which is scanned, and its save runs
+`save_post`; reading `_elementor_data` too would count every link twice. Not built yet (none installed on this site):
+Kadence buttons and testimonials, Beaver Builder, Thrive, TablePress, WP Recipe Maker, Mediavine Create, and the list of
+their output filters for 35H.
 
 ---
 

@@ -4,6 +4,7 @@ namespace Affibloom\Tests\Unit\Infrastructure\Html;
 use Affibloom\Domain\LinkIndex\DisplayCandidate;
 use Affibloom\Domain\LinkIndex\LinkCandidate;
 use Affibloom\Infrastructure\Html\WpLinkScanner;
+use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
 use Brain\Monkey;
 use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase;
@@ -108,5 +109,13 @@ final class WpLinkScannerTest extends TestCase {
 			$found
 		);
 		self::assertSame( 'affibloom/product-box {"type":"image","productId":5,"groupId":0}', ( new WpLinkScanner() )->displays( $html )[0]->markup );
+	}
+
+	public function test_sitestripe_images_and_iframes_are_links_only_with_the_setting_on(): void {
+		$html = '<p><img src="https://ws-na.amazon-adsystem.com/widgets/q?ASIN=B0F21TEST1&tag=t-20"></p><iframe src="https://ws-na.amazon-adsystem.com/widgets/q?asins=B0F21TEST1"></iframe><img src="https://example.com/x.jpg">';
+		$on   = new WpLinkScanner( new InMemorySettingsRepository( array( 'scan_sitestripe_in_post_content' => true ) ) );
+
+		self::assertSame( array( LinkCandidate::SITESTRIPE_IMAGE, LinkCandidate::SITESTRIPE_IFRAME ), array_map( static fn( LinkCandidate $link ): string => $link->kind, $on->scan( $html ) ) );
+		self::assertSame( array(), ( new WpLinkScanner( new InMemorySettingsRepository() ) )->scan( $html ) );
 	}
 }

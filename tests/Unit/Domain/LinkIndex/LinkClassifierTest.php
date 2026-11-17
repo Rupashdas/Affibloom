@@ -7,6 +7,7 @@ use Affibloom\Domain\LinkIndex\LinkCandidate;
 use Affibloom\Domain\LinkIndex\LinkClassifier;
 use Affibloom\Domain\LinkIndex\LinkLocation;
 use Affibloom\Domain\LinkIndex\LocationKey;
+use Affibloom\Domain\LinkIndex\SiteStripe;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -70,5 +71,14 @@ final class LinkClassifierTest extends TestCase {
 		$kept = self::row( new LinkCandidate( 'https://a.test/new' ) )->keeping( 'https://a.test/first', true, 9 );
 
 		self::assertSame( array( 'https://a.test/first', true, 9, 'https://a.test/new' ), array( $kept->original_url, $kept->is_ignored, $kept->assigned_product_id, $kept->url ) );
+	}
+
+	public function test_sitestripe_markup_names_its_amazon_product_and_is_its_own_link_type(): void {
+		self::assertSame( 'https://www.amazon.com/dp/B0F21TEST1/?tag=site-20', SiteStripe::amazon_url( 'https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&asins=B0F21TEST1&tracking_id=site-20&marketplace=amazon&region=US' ) );
+		self::assertSame( 'https://www.amazon.co.uk/dp/B0F21TEST1/?tag=uk-21', SiteStripe::amazon_url( 'https://ws-eu.amazon-adsystem.com/widgets/q?asin=B0F21TEST1&amp;tag=uk-21&amp;region=UK' ) );
+		self::assertNull( SiteStripe::amazon_url( 'https://example.com/i.jpg?asin=B0F21TEST1' ) );
+
+		$row = self::row( new LinkCandidate( 'https://ws-na.amazon-adsystem.com/widgets/q?asins=B0F21TEST1&tracking_id=site-20', '', '', false, '', LinkCandidate::SITESTRIPE_IFRAME ), 5 );
+		self::assertSame( array( 'sitestripe', 'Product Box', 'B0F21TEST1', 'site-20', null ), array( $row->link_type, $row->display_type, $row->asin, $row->tracking_id, $row->domain ) );
 	}
 }

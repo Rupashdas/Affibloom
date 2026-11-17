@@ -140,4 +140,23 @@ test.describe( 'F21 The content link index', () => {
 			}
 		}
 	} );
+
+	test( 'AC5 with SiteStripe scan on, SiteStripe images and iframes are indexed with their Amazon product; off, they are not', () => {
+		const asin = 'B0F21SITE1';
+		const product = createProduct( { name: unique( 'F21 SiteStripe' ), url: `https://www.amazon.com/dp/${ asin }`, type: 'amazon', asin } );
+		const markup = `<!-- wp:html --><img src="https://ws-na.amazon-adsystem.com/widgets/q?ASIN=${ asin }&amp;tag=site-20&amp;MarketPlace=US"><iframe src="https://ws-na.amazon-adsystem.com/widgets/q?asins=${ asin }&amp;tracking_id=site-20&amp;region=US"></iframe><!-- /wp:html -->`;
+		try {
+			setSettings( { scan_sitestripe_in_post_content: true } );
+			const post = postWith( markup );
+			expect( rows( post ).map( ( r ) => [ r.link_type, r.display_type, r.product_id, r.asin ] ) ).toEqual( [
+				[ 'sitestripe', 'Image', String( product ), asin ],
+				[ 'sitestripe', 'Product Box', String( product ), asin ],
+			] );
+			setSettings( { scan_sitestripe_in_post_content: false } );
+			wp( 'affibloom', 'links', 'rebuild', `--post=${ post }` );
+			expect( rows( post ) ).toEqual( [] );
+		} finally {
+			setSettings( { scan_sitestripe_in_post_content: false } );
+		}
+	} );
 } );

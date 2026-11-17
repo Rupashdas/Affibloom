@@ -68,7 +68,7 @@ final class LinkIndexer {
 			foreach ( $this->scanner->scan( $html ) as $link ) {
 				$md5          = LocationKey::md5( $link->href );
 				$seen[ $md5 ] = ( $seen[ $md5 ] ?? 0 ) + 1;
-				$rows[]       = $this->classifier->classify( $link, $this->resolver->resolve( $link->href ), $host->id, $host->url, $source, $seen[ $md5 ], $now );
+				$rows[]       = $this->classifier->classify( $link, $this->resolver->resolve( $link->product_url() ), $host->id, $host->url, $source, $seen[ $md5 ], $now );
 			}
 			foreach ( $this->scanner->displays( $html ) as $display ) {
 				$md5          = LocationKey::md5( $display->markup );

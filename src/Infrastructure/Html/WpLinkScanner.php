@@ -13,6 +13,8 @@ use Affibloom\Application\LinkIndex\LinkScanner;
 use Affibloom\Domain\LinkIndex\DisplayCandidate;
 use Affibloom\Domain\LinkIndex\DisplayType;
 use Affibloom\Domain\LinkIndex\LinkCandidate;
+use Affibloom\Domain\LinkIndex\SiteStripe;
+use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Domain\Shortcode\Address;
 use Affibloom\Domain\Shortcode\GroupAttributes;
 use Affibloom\Domain\Shortcode\ShortcodeAttributes;
@@ -23,7 +25,8 @@ use WP_HTML_Tag_Processor;
  * (risk "Parser differences"). Blocks Lasso does not scan are left out whole; anchors inside an element whose class
  * starts like an FAQ or accordion are skipped, as are anchors with an ignored class (Affibloom's own
  * `affibloom-scan-ignore` and Kadence's overlay links), and hrefs that are empty, `#…`, `[…]`, `mailto:` or `tel:`.
- * Displays are Affibloom's block and shortcode outside those blocks (R27; deviation 146).
+ * Displays are Affibloom's block and shortcode outside those blocks (R27; deviation 146). With "SiteStripe scan" on
+ * (Settings, `scan_sitestripe_in_post_content`; R31), SiteStripe images and iframes are links too.
  */
 final class WpLinkScanner implements LinkScanner {
 
@@ -39,6 +42,19 @@ final class WpLinkScanner implements LinkScanner {
 	/** Affibloom's block. */
 	private const BOX_BLOCK = 'affibloom/product-box';
 
+	/** The markup SiteStripe candidates are read from. */
+	private const SITESTRIPE_TAGS = array(
+		'IMG'    => LinkCandidate::SITESTRIPE_IMAGE,
+		'IFRAME' => LinkCandidate::SITESTRIPE_IFRAME,
+	);
+
+	/**
+	 * Builds the scanner.
+	 *
+	 * @param SettingsRepository|null $settings Whether SiteStripe markup is scanned; without it, it is not.
+	 */
+	public function __construct( private ?SettingsRepository $settings = null ) {}
+
 	/** Elements that never have a closing tag. */
 	private const VOID = array( 'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'SOURCE', 'TRACK', 'WBR' );
 
@@ -49,7 +65,8 @@ final class WpLinkScanner implements LinkScanner {
 	 * @return list<LinkCandidate>
 	 */
 	public function scan( string $html ): array {
-		if ( false === stripos( $html, '<a' ) ) {
+		$sitestripe = null !== $this->settings && $this->settings->get()->bool( 'scan_sitestripe_in_post_content' ) && str_contains( $html, 'amazon-adsystem.com' );
+		if ( false === stripos( $html, '<a' ) && ! $sitestripe ) {
 			return array();
 		}
 		if ( str_contains( $html, '<!-- wp:' ) ) {
@@ -96,9 +113,22 @@ final class WpLinkScanner implements LinkScanner {
 					'ignored' => $inside || array() !== array_intersect( $classes, self::IGNORED_ANCHORS ),
 					'image'   => false,
 					'text'    => '',
+					'kind'    => LinkCandidate::ANCHOR,
 				);
 			} elseif ( 'IMG' === $tag && null !== $anchor ) {
 				$anchor['image'] = true;
+			}
+			$src = self::attribute( $tags, 'src' );
+			if ( $sitestripe && isset( self::SITESTRIPE_TAGS[ $tag ] ) && SiteStripe::is( $src ) ) {
+				$links[] = array(
+					'href'    => trim( $src ),
+					'rel'     => '',
+					'target'  => '',
+					'ignored' => $inside || in_array( 'affibloom-scan-ignore', $classes, true ),
+					'image'   => false,
+					'text'    => '',
+					'kind'    => self::SITESTRIPE_TAGS[ $tag ],
+				);
 			}
 			if ( ! in_array( $tag, self::VOID, true ) && ! $tags->has_self_closing_flag() ) {
 				$open[] = array( $tag, $inside || self::ignores( $classes ) );
@@ -111,7 +141,7 @@ final class WpLinkScanner implements LinkScanner {
 		$kept = array();
 		foreach ( $links as $link ) {
 			if ( ! $link['ignored'] && ! self::skipped( $link['href'] ) ) {
-				$kept[] = new LinkCandidate( $link['href'], $link['rel'], $link['target'], $link['image'], $link['text'] );
+				$kept[] = new LinkCandidate( $link['href'], $link['rel'], $link['target'], $link['image'], $link['text'], $link['kind'] );
 			}
 		}
 

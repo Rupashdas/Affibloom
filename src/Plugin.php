@@ -487,7 +487,7 @@ final class Plugin {
 
 		$this->link_indexer = new LinkIndexer(
 			new PostContentSource( $this->host_query(), $this->settings_repository() ),
-			new WpLinkScanner(),
+			new WpLinkScanner( $this->settings_repository() ),
 			$links,
 			new DisplayResolver( new PostTypeProductRepository(), new TermGroupRepository(), $links ),
 			new LinkClassifier( site_url() ),
