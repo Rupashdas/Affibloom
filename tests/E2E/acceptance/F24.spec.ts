@@ -151,4 +151,21 @@ test.describe( 'F24 Link cloaking', () => {
 		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
 		await expect( page.locator( `tr[data-product-id="${ product }"] .affibloom-row__url` ) ).toHaveAttribute( 'href', new RegExp( `/${ slug }/$` ) );
 	} );
+
+	test( 'AC12 the block editor link search lists a product as Product with its public link, for editors only', async ( { page, request } ) => {
+		const name = unique( 'F24 search' );
+		const product = createProduct( { name, url: 'https://www.example.com/search-product' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_cloak', '1' );
+		await page.goto( '/wp-admin/post-new.php' );
+		const found = await page.evaluate( async ( search ) => {
+			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { title: string; subtype: string; url: string }[] > } };
+			return w.wp.apiFetch( { path: `/wp/v2/search?type=post&search=${ encodeURIComponent( search ) }` } );
+		}, name );
+		expect( found[ 0 ] ).toMatchObject( { title: name, subtype: 'Product' } );
+		expect( found[ 0 ].url ).toMatch( new RegExp( `/${ slug }/$` ) );
+
+		const visitor = await ( await request.get( `/wp-json/wp/v2/search?type=post&search=${ encodeURIComponent( name ) }`, { headers: { cookie: '' } } ) ).json();
+		expect( visitor ).toEqual( [] );
+	} );
 } );

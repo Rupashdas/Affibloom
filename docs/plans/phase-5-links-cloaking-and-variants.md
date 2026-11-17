@@ -100,7 +100,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL5: The General settings take effect
 - [x] Task CL6: The public link in front-end output
 - [x] Task CL7: The Dashboard row's link
-- [ ] Task CL8: Products in the block editor's link search
+- [x] Task CL8: Products in the block editor's link search
 - [ ] Task CL9: Products in the classic editor's link dialog
 - [ ] Task CL10: Old addresses (Lasso's hand-over moved to Phase M, 26G)
 - [ ] Task CL11: A pasted cloaked URL finds its product
@@ -904,10 +904,12 @@ Amazon; the post's stored content is unchanged.
 
 **Files:** the above, `Plugin.php`; tests F24 AC12, integration `ProductSearchHandlerTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Handler.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Find products in the block editor's link search".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Handler.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Find products in the block editor's link search".
+
+*Note (2026-11-18):* *Note:* Gutenberg's popover asks `/wp/v2/search` only for `post`, `term` and `post-format`, so a handler of its own type would never be asked: `ProductSearchHandler` extends WordPress's post handler and `ProductLinkSearch` swaps it in through `wp_rest_search_handlers`. Products appear only for `edit_posts` (the route is open to visitors). Seen in the block editor: "Example … /example-27 … Product".
 
 ---
 

@@ -140,6 +140,7 @@ use Affibloom\Interface\Rest\FieldsController;
 use Affibloom\Interface\Rest\GroupsController;
 use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
+use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
 use Affibloom\Interface\Rest\EditorController;
@@ -471,6 +472,7 @@ final class Plugin {
 			new HelpTips( $settings ),
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
+			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ) ),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),
