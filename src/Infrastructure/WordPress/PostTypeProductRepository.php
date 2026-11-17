@@ -58,6 +58,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_nofollow'         => self::flag( $product->nofollow ),
 				'_affibloom_sponsored'        => self::flag( $product->sponsored ),
 				'_affibloom_show_disclosure'  => self::flag( $product->show_disclosure ),
+				'_affibloom_cloak'            => self::flag( $product->cloak ),
 				'_affibloom_button_text'      => $product->button_text,
 				'_affibloom_primary_position' => (string) $product->buttons->main_position(),
 				// '' is the display type's theme, and the site's Show Price (hydrate() reads them back that way).
@@ -544,6 +545,30 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The published or retired product with this slug, or null (F24 D3: a cloaked address answers for both).
+	 *
+	 * @param string $slug A slug.
+	 */
+	public function find_by_slug( string $slug ): ?Product {
+		$slug = sanitize_title( $slug );
+		if ( '' === $slug ) {
+			return null;
+		}
+		$posts = get_posts(
+			array(
+				'post_type'        => ProductPostType::NAME,
+				'name'             => $slug,
+				'post_status'      => array( 'publish', ProductPostType::RETIRED ),
+				'posts_per_page'   => 1,
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+			)
+		);
+
+		return isset( $posts[0] ) ? $this->hydrate( $posts[0] ) : null;
+	}
+
+	/**
 	 * The ID of the product with this slug, whatever its status, or null (F31 A2).
 	 *
 	 * @param string $slug A product's slug.
@@ -869,6 +894,8 @@ final class PostTypeProductRepository implements ProductRepository {
 			// '' (never stored) means on, and any other value counts as PHP's truth, as Lasso reads show_description.
 			show_description: '' === $meta( 'show_description' ) ? null : '0' !== $meta( 'show_description' ),
 			slug: $post->post_name,
+			// Missing is off, as Lasso reads link_cloaking with intval (F24 D1).
+			cloak: '1' === $meta( 'cloak' ),
 		);
 	}
 

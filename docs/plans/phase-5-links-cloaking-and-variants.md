@@ -93,7 +93,7 @@ Grouped by feature, in the order they are worked.
 
 **F24 — Link cloaking, redirects and permalinks**
 
-- [ ] Task CL1: The redirect for a cloaked path
+- [x] Task CL1: The redirect for a cloaked path
 - [ ] Task CL2: Query strings through the redirect
 - [ ] Task CL3: Permalink and Link Cloaking on the product page
 - [ ] Task CL4: A new product's slug and cloaking
@@ -672,12 +672,18 @@ instead; `/tag/x/` stays the tag; an unknown path is the 404; with a prefix only
 **Files:** create the above, `tests/E2E/acceptance/F24.spec.ts` (AC1-AC3), `tests/Unit/Domain/Cloak/CloakPathTest.php`,
 `tests/Integration/CloakedLinkRedirectTest.php`; modify `src/Plugin.php`, `PostTypeProductRepository.php`.
 
-- [ ] **Step 1: Failing tests.** AC1 (a product made through WP-CLI with a slug and a destination; `curl -I` sees 302, the three headers), AC2 (a page with the same slug; a trashed product; an Amazon product's `amzn-` slug), AC3 (the prefix set through WP-CLI). Unit: every R17 case. Expected red: 404.
-- [ ] **Step 2: `CloakPath`, `PublicLink::destination()`.**
-- [ ] **Step 3: Resolver, repository, guard.**
-- [ ] **Step 4: The Module and its filters.**
-- [ ] **Step 5: Run and look.** Checks; by hand the five products and the retired 14771 on a copy with Affibloom's migrated data (or made by WP-CLI until 26G).
-- [ ] **Step 6: Commit** — "Answer cloaked product addresses as Lasso does".
+- [x] **Step 1: Failing tests.** AC1 (a product made through WP-CLI with a slug and a destination; `curl -I` sees 302, the three headers), AC2 (a page with the same slug; a trashed product; an Amazon product's `amzn-` slug), AC3 (the prefix set through WP-CLI). Unit: every R17 case. Expected red: 404.
+- [x] **Step 2: `CloakPath`, `PublicLink::destination()`.**
+- [x] **Step 3: Resolver, repository, guard.**
+- [x] **Step 4: The Module and its filters.**
+- [x] **Step 5: Run and look.** Checks; by hand the five products and the retired 14771 on a copy with Affibloom's migrated data (or made by WP-CLI until 26G).
+- [x] **Step 6: Commit** — "Answer cloaked product addresses as Lasso does".
+
+*Note (2026-11-18):* built as planned; the product gained `cloak` (meta `_affibloom_cloak`, missing = off), read for the robots header and
+stored on every save; CL3 adds its control. The redirect also cancels WordPress's canonical guess for a product path
+(R24) and runs first inside Rank Math's redirect check (R25). Checked with curl on Local: 302 with `X-Redirect-By`,
+`X-Robots-Tag`, `Cache-Control`; unknown path 404; `/about/` stays the page; prefix `go`: `/go/<slug>/` 302, bare and
+`/other/` 404; retired 302; trashed (`__trashed` slug) 404.
 
 ---
 

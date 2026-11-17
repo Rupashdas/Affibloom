@@ -173,6 +173,14 @@ interface ProductRepository {
 	public function repointed_to( int $id ): ?int;
 
 	/**
+	 * The published or retired product with this slug, or null (F24 D3: the cloaked address of a retired product still
+	 * answers, as Lasso's lasso_delete links do).
+	 *
+	 * @param string $slug A slug.
+	 */
+	public function find_by_slug( string $slug ): ?Product;
+
+	/**
 	 * The ID of the product with this slug, whatever its status (F31 A2: Lasso looks a slug up so; the resolver then
 	 * decides what draws), or null.
 	 *

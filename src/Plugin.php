@@ -28,6 +28,7 @@ use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
+use Affibloom\Application\Cloak\CloakResolver;
 use Affibloom\Application\Lifecycle;
 use Affibloom\Application\LinkIndex\DisplayResolver;
 use Affibloom\Application\LinkIndex\LinkIndexer;
@@ -87,6 +88,8 @@ use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
+use Affibloom\Interface\Front\CloakedLinkRedirect;
+use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
 use Affibloom\Interface\Cron\LinkIndexCron;
@@ -434,6 +437,7 @@ final class Plugin {
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
 			$shortcode,
 			new WidgetShortcodes(),
+			new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard() ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),

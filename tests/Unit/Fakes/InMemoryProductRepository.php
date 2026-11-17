@@ -270,6 +270,16 @@ final class InMemoryProductRepository implements ProductRepository {
 		return null;
 	}
 
+	/** Every saved product counts as published; retired ones are in $retired and still found. */
+	public function find_by_slug( string $slug ): ?Product {
+		foreach ( $this->saved as $product ) {
+			if ( '' !== $slug && $slug === $product->slug ) {
+				return $product;
+			}
+		}
+		return null;
+	}
+
 	public function id_by_slug( string $slug ): ?int {
 		foreach ( $this->saved as $product ) {
 			if ( $slug === $product->slug ) {

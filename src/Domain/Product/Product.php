@@ -56,6 +56,7 @@ final class Product {
 	 * @param bool|null    $show_description Show the description in the box; null when never stored, which Lasso reads
 	 *                                       as on (Lasso's show_description; F5 R22).
 	 * @param string       $slug            The product's slug (its post name); the box's `affibloom-url-<slug>` class.
+	 * @param bool         $cloak           Link Cloaking: its links show the cloaked address (F24 D1; meta `_affibloom_cloak`).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -85,6 +86,7 @@ final class Product {
 		public readonly string $old_genius_url2 = '',
 		public readonly ?bool $show_description = null,
 		public readonly string $slug = '',
+		public readonly bool $cloak = false,
 	) {}
 
 	/**
