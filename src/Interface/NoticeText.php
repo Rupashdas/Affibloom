@@ -47,6 +47,12 @@ final class NoticeText {
 				'text'   => __( 'Migrating from Amazon SiteStripe? %s to auto-migrate all your SiteStripe links within 24-48 hours!', 'affibloom' ),
 				'action' => __( 'Turn on Auto Amazon', 'affibloom' ),
 			),
+			// Lasso's link-build-running (F38 R25), while the link index is being built (Task ON4).
+			'link_index_building' => array(
+				/* translators: %s: the "See the progress" link. */
+				'text'   => __( 'We\'re rounding up a list of your links. %s.', 'affibloom' ),
+				'action' => __( 'See the progress', 'affibloom' ),
+			),
 			default            => array(
 				'text'   => '',
 				'action' => '',

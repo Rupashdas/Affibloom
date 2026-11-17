@@ -31,6 +31,7 @@ use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Lifecycle;
 use Affibloom\Application\LinkIndex\DisplayResolver;
 use Affibloom\Application\LinkIndex\LinkIndexer;
+use Affibloom\Application\LinkIndex\LinkIndexBuildingNotice;
 use Affibloom\Application\LinkIndex\LinkIndexJobStatus;
 use Affibloom\Application\LinkIndex\LinkIndexRebuild;
 use Affibloom\Application\Products\BulkAddJobStatus;
@@ -564,7 +565,8 @@ final class Plugin {
 
 	/**
 	 * The notices for the region under the header (F38 D8, D10), in this order: the update notice, a failed upgrade,
-	 * then C1's (the bulk Amazon sync banner, the SiteStripe notice). F11, F21 and F33 add their providers here. A provider that fails is
+	 * then C1's (the bulk Amazon sync banner, the SiteStripe notice), then F21's while the link index builds (ON4). F11
+	 * adds its provider here. A provider that fails is
 	 * reported to the debug log.
 	 */
 	private function notice_board(): NoticeBoard {
@@ -574,6 +576,7 @@ final class Plugin {
 				$this->upgrade_hooks(),
 				new AmazonNotices( $this->bulk_sync() ),
 				new SiteStripeNotice( $this->settings_repository() ),
+				new LinkIndexBuildingNotice( new OptionLinkIndexState(), admin_url( 'admin.php?page=affibloom-settings&tab=general#affibloom-card-link-index' ) ),
 			),
 			static function ( Throwable $error ): void {
 				wp_trigger_error( '', 'Affibloom skipped a notice: ' . $error->getMessage(), E_USER_WARNING );

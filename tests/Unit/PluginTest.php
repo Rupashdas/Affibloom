@@ -13,6 +13,8 @@ final class PluginTest extends TestCase {
 		Functions\when( 'plugin_basename' )->justReturn( 'affibloom/affibloom.php' );
 		// The link index's classifier tells the site's own links by its address (Task 35A).
 		Functions\when( 'site_url' )->justReturn( 'https://example.test' );
+		// The link index notice links to the Link Index card (Task ON4).
+		Functions\when( 'admin_url' )->alias( static fn( string $path = '' ): string => 'https://example.test/wp-admin/' . $path );
 	}
 
 	/** Task ON2: other plugins' notices leave Affibloom's pages late in admin_head. */

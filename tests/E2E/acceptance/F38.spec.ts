@@ -222,6 +222,26 @@ test.describe( 'F38 Admin shell', () => {
 		await expect( notices.first() ).toHaveText( 'Please Enter GA Tracking ID Before Enable Click Tracking' );
 	} );
 
+	test( 'AC8 while the link index is being built, every Affibloom page says so and links to its progress', async ( { page } ) => {
+		const notice = page.locator( '.affibloom-notices' ).getByText( "We're rounding up a list of your links." );
+		wp( 'option', 'delete', 'affibloom_link_index_state' );
+		await page.goto( DASHBOARD );
+		await expect( notice ).toHaveCount( 0 );
+
+		wp( 'eval', 'do_action( "affibloom_link_index_start" );' );
+		try {
+			for ( const url of [ DASHBOARD, '/wp-admin/admin.php?page=affibloom-groups' ] ) {
+				await page.goto( url );
+				await expect( notice, url ).toBeVisible();
+			}
+			await page.getByRole( 'link', { name: 'See the progress' } ).click();
+			await expect( page.locator( '#affibloom-card-link-index' ) ).toBeVisible();
+		} finally {
+			wp( 'option', 'delete', 'affibloom_link_index_state' );
+			wp( 'cron', 'event', 'delete', 'affibloom_link_index_batch' );
+		}
+	} );
+
 	test( 'AC6 an update of Affibloom is announced on every page with WordPress\'s update link', async ( { page } ) => {
 		// Keep the site's own update_plugins transient in a test option and put it back after.
 		wp(
