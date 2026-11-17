@@ -2946,9 +2946,17 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table.affibloom-table--variants { min-width: 640px; }
 .affibloom-table--variants .affibloom-col-key { width: 26%; }
 .affibloom-table--variants .affibloom-col-copy { width: 130px; }
-.affibloom-table--variants .affibloom-col-actions { width: 200px; text-align: right; }
+.affibloom-table--variants .affibloom-col-actions { width: 240px; text-align: right; }
 .affibloom-table--variants th .affibloom-help { margin-left: 4px; vertical-align: middle; }
 .affibloom-variant__name { display: block; overflow: hidden; color: var(--affibloom-ink-900); font: 600 15px/22px var(--affibloom-font); text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-admin .affibloom-table--variants .affibloom-row__url { color: var(--affibloom-ink-500); }
 .affibloom-variant__key { padding: 2px 6px; border-radius: 6px; border: 1px solid var(--affibloom-line); background: var(--affibloom-subtle); color: var(--affibloom-ink-700); font-size: 13px; overflow-wrap: anywhere; }
 .affibloom-variants__none { margin: 0; padding: 20px; border-top: 1px solid var(--affibloom-line); color: var(--affibloom-ink-600); text-align: center; }
+.affibloom-variant__actions { display: inline-flex; justify-content: flex-end; gap: 8px; white-space: nowrap; }
+/* Lasso's red Remove (url-variants.js 185-282): a small button in danger text, outlined like the row's others. */
+.affibloom-admin .affibloom-button--danger-text { border: 1px solid var(--affibloom-line); background: var(--affibloom-white); color: var(--affibloom-danger-700); }
+.affibloom-admin .affibloom-button--danger-text:hover,
+.affibloom-admin .affibloom-button--danger-text:focus-visible { border-color: var(--affibloom-danger-700); color: var(--affibloom-danger-800); }
+.affibloom-table--variants tr[data-variant-editing] td { vertical-align: top; background: var(--affibloom-brand-25); }
+.affibloom-table--variants tr[data-variant-editing] .affibloom-input { width: 100%; max-width: none; }
+.affibloom-variants .affibloom-empty__action { display: inline-flex; gap: 8px; align-items: center; }

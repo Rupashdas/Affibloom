@@ -82,6 +82,7 @@ use Affibloom\Infrastructure\WordPress\PostContentSource;
 use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
 use Affibloom\Infrastructure\WordPress\TableLinkLocationRepository;
 use Affibloom\Infrastructure\WordPress\TableVariantRepository;
+use Affibloom\Infrastructure\WordPress\WpSlugTaken;
 use Affibloom\Infrastructure\WordPress\TransientSearchResults;
 use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaBannerDismissals;
@@ -145,6 +146,7 @@ use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
+use Affibloom\Interface\Rest\VariantsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
 use Affibloom\Interface\Rest\EditorController;
 use Affibloom\Interface\Rest\ProductPreviewController;
@@ -402,6 +404,7 @@ final class Plugin {
 		$data       = $this->amazon_data();
 		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
 		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository(), $cloaked->product_at( ... ) );
+		$variants   = new VariantService( new TableVariantRepository(), new WpSlugTaken( new PostTypeProductRepository() ) );
 		$bulk       = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$genius     = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );
 		$per_page   = new PerPage();
@@ -455,7 +458,7 @@ final class Plugin {
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ) ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), new VariantService( new TableVariantRepository() ) ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -480,6 +483,7 @@ final class Plugin {
 			new HelpTips( $settings ),
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
+			new VariantsController( $products, $variants, $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ) ),

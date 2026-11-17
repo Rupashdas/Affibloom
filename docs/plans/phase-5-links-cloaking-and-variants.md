@@ -108,7 +108,7 @@ Grouped by feature, in the order they are worked.
 **F27 — URL variants**
 
 - [x] Task V1: The Variants tab
-- [ ] Task V2: Add, edit, remove and save variants
+- [x] Task V2: Add, edit, remove and save variants
 - [ ] Task V3: A variant permalink answers
 - [ ] Task V4: Amazon variant tags are kept
 - [ ] Task V5: Find products by their variants on the Dashboard
@@ -1075,11 +1075,13 @@ says "Copied!"; the tab count follows.
 **Files:** the above; tests F27 AC3-AC5, unit `VariantRulesTest`, `VariantKeyTest`, integration
 `TableVariantRepositoryTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Rules and replace.**
-- [ ] **Step 3: Route and script.**
-- [ ] **Step 4: Run and look** (keyboard only; 375 px).
-- [ ] **Step 5: Commit** — "Edit a product's URL variants".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Rules and replace.**
+- [x] **Step 3: Route and script.**
+- [x] **Step 4: Run and look** (keyboard only; 375 px).
+- [x] **Step 5: Commit** — "Edit a product's URL variants".
+
+*Note (2026-11-18):* *Note:* keys are normalised in `VariantsController` (WordPress's `sanitize_title`/`sanitize_text_field`, kept out of the Domain), so no `VariantKey` class; a refusal uses the shared 422 `affibloom_invalid_field` with `variants.<i>.key` (FieldError), not a code of its own. Rows moved to `Interface\Admin\VariantRows` (its second use). Seen at 1280 px: Add suggests "Example"/`example-renamed-2`; the own slug is refused under the key; "Example TikTok" saves as `example-tiktok` (count 3); Remove asks and leaves 2. Fixed in passing: a new row was left out of the list (`null === null`).
 
 ---
 

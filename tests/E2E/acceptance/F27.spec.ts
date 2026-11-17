@@ -42,4 +42,57 @@ test.describe( 'F27 URL variants', () => {
 		await expect( page.locator( '[data-variant-row]:visible' ) ).toContainText( 'Newsletter' );
 		expect( requests ).toBe( 0 );
 	} );
+
+	test( 'AC3 Add Variant suggests a name and key; Save stores the list and the count follows', async ( { page } ) => {
+		const name = unique( 'F27 add' );
+		const product = createProduct( { name, url: 'https://www.example.com/f27-add' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }&tab=variants` );
+		await page.getByRole( 'button', { name: 'Add Variant' } ).first().click();
+		await expect( page.getByRole( 'textbox', { name: 'Name' } ) ).toHaveValue( name );
+		await expect( page.getByRole( 'textbox', { name: 'Permalink' } ) ).toHaveValue( `${ slug }-2` );
+		await page.getByRole( 'textbox', { name: 'Permalink' } ).fill( `${ slug } IG` );
+		await page.getByRole( 'button', { name: 'Save' } ).click();
+		const row = page.locator( '[data-variant-row]' );
+		await expect( row ).toHaveCount( 1 );
+		await expect( row.locator( 'code' ) ).toHaveText( `${ slug }-ig` );
+		await expect( row.getByRole( 'link' ) ).toHaveAttribute( 'href', new RegExp( `/${ slug }-ig/$` ) );
+		await expect( page.getByRole( 'link', { name: /Variants\s*1/ } ) ).toBeVisible();
+	} );
+
+	test( 'AC4 refusals show under the key and nothing is stored', async ( { page } ) => {
+		const product = createProduct( { name: unique( 'F27 refuse' ), url: 'https://www.example.com/f27-refuse' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		const other = createProduct( { name: unique( 'F27 other' ), url: 'https://www.example.com/f27-other' } );
+		const otherSlug = wp( 'post', 'get', String( other ), '--field=post_name' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }&tab=variants` );
+		const refusal = async ( key: string, words: string ) => {
+			await page.getByRole( 'textbox', { name: 'Permalink' } ).fill( key );
+			await page.getByRole( 'button', { name: 'Save' } ).click();
+			await expect( page.getByRole( 'alert' ) ).toHaveText( words );
+		};
+		await page.getByRole( 'button', { name: 'Add Variant' } ).first().click();
+		await refusal( '', 'Permalink and Tracking ID cannot be empty.' );
+		await refusal( slug, 'Variant permalink cannot match this link’s primary permalink.' );
+		await refusal( 'about', 'That slug is already used by another page or link.' );
+		await refusal( otherSlug, "That slug is already a product's link." );
+		expect( wp( 'eval', `global $wpdb; echo $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}affibloom_url_variants WHERE parent_id = ${ product }" );` ) ).toBe( '0' );
+	} );
+
+	test( 'AC5 Remove asks first and stores the list without the row; Copy says Copied!', async ( { page, context } ) => {
+		await context.grantPermissions( [ 'clipboard-read', 'clipboard-write' ] );
+		const product = createProduct( { name: unique( 'F27 remove' ), url: 'https://www.example.com/f27-remove' } );
+		const key = unique( 'f27-rm' ).toLowerCase();
+		addVariant( product, 'Keep', `${ key }-a` );
+		addVariant( product, 'Drop', `${ key }-b` );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }&tab=variants` );
+		await page.getByRole( 'button', { name: 'Copy' } ).first().click();
+		await expect( page.getByRole( 'button', { name: 'Copied!' } ) ).toBeVisible();
+		await page.getByRole( 'button', { name: 'Remove Drop' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Remove this variant?' } );
+		await expect( dialog ).toContainText( 'Its cloaked URL or tracking branch will stop working. This cannot be undone.' );
+		await dialog.getByRole( 'button', { name: 'Remove' } ).click();
+		await expect( page.locator( '[data-variant-row]' ) ).toHaveCount( 1 );
+		await expect( page.locator( '[data-variant-row]' ) ).toContainText( 'Keep' );
+	} );
 } );

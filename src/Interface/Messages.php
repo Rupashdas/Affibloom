@@ -59,6 +59,13 @@ final class Messages {
 			'amazon_validated'    => __( 'Amazon Creators API credentials verified successfully.', 'affibloom' ),
 			'amazon_rejected'     => __( 'Invalid Amazon Creators API credentials.', 'affibloom' ),
 			'amazon_unavailable'  => __( 'Service temporarily unavailable.', 'affibloom' ),
+			// A product's URL variants (F27 R15, Lasso's words; N1 for the last).
+			'variant_key_empty'         => __( 'Permalink and Tracking ID cannot be empty.', 'affibloom' ),
+			'variant_key_twice'         => __( 'Duplicate variant slug or tracking ID in the same list.', 'affibloom' ),
+			'variant_key_own_slug'      => __( 'Variant permalink cannot match this link’s primary permalink.', 'affibloom' ),
+			'variant_key_other_variant' => __( 'That permalink is already used by another link’s variant.', 'affibloom' ),
+			'variant_key_post'          => __( 'That slug is already used by another page or link.', 'affibloom' ),
+			'variant_key_product'       => __( 'That slug is already a product\'s link.', 'affibloom' ),
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}

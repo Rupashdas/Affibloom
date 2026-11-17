@@ -24,7 +24,6 @@ use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Variant\VariantKind;
-use Affibloom\Domain\Variant\VariantUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Interface\Template;
 
@@ -162,7 +161,9 @@ final class ProductScreen {
 					'public_link' => $public_link,
 					'tabs'        => self::tabs( (int) $this->product->id, 'variants', count( $variants ) ),
 					'kind'        => $kind,
-					'rows'        => self::rows( $variants, $kind, $this->product->url->value() ),
+					'rows'        => VariantRows::of( $this->product, $variants ),
+					// Add Variant's suggestion for an Amazon product: the site's tracking ID (R10).
+					'tracking_id' => $this->settings->current()->string( 'tracking_id' ),
 				)
 			);
 			return;
@@ -245,28 +246,5 @@ final class ProductScreen {
 				),
 			),
 		);
-	}
-
-	/**
-	 * The Variants tab's rows: each variant's name, key and the address it gives out (F27 R8, R9), under the product's
-	 * kind now (R23).
-	 *
-	 * @param list<\Affibloom\Domain\Variant\Variant> $variants    The variants.
-	 * @param VariantKind                             $kind        The product's kind.
-	 * @param string                                  $destination The product's destination.
-	 * @return list<array{id: int, name: string, key: string, url: string}>
-	 */
-	private static function rows( array $variants, VariantKind $kind, string $destination ): array {
-		$rows = array();
-		foreach ( $variants as $variant ) {
-			$rows[] = array(
-				'id'   => $variant->id,
-				'name' => $variant->name,
-				'key'  => $variant->key,
-				'url'  => VariantUrl::of( $kind, $variant->key, home_url(), $destination ),
-			);
-		}
-
-		return $rows;
 	}
 }

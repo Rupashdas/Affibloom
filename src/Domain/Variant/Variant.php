@@ -18,14 +18,14 @@ final class Variant {
 	 * Builds a variant.
 	 *
 	 * @param int         $id     Its row's ID (0 before it is stored; new after every save, R16).
-	 * @param int         $parent The product it belongs to.
+	 * @param int         $product_id The product it belongs to.
 	 * @param string      $name   The editor's label.
 	 * @param string      $key    The permalink slug or the tracking ID.
 	 * @param VariantKind $kind   What the key is.
 	 */
 	public function __construct(
 		public readonly int $id,
-		public readonly int $parent,
+		public readonly int $product_id,
 		public readonly string $name,
 		public readonly string $key,
 		public readonly VariantKind $kind,

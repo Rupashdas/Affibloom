@@ -1,12 +1,13 @@
 <?php
 /**
  * Product page, Variants tab (F27; Lasso's url-variants page): the product's head and tabs as on Details, the toolbar
- * (Search) right of the title, and the list: Name with the address under it, Permalink or Tracking ID, Copy, with
- * Lasso's tips; with no variants, Lasso's empty state. The rows are drawn here on load (no request, so no spinner);
- * the search narrows them in the browser (variants.js).
+ * (Search, Add Variant) right of the title, and the list: Name with the address under it, Permalink or Tracking ID,
+ * Copy, Edit and Remove, with Lasso's tips; with no variants, Lasso's empty state and Add Variant. The rows are drawn
+ * here on load (no request, so no spinner); the search narrows them in the browser; Add, Edit, Save and Remove store
+ * the whole list (variants.js, Task V2). The data for Add Variant's suggestion is Lasso's lassoVariantsData (R17).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, public_link: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}, kind: \Affibloom\Domain\Variant\VariantKind, rows: list<array{id: int, name: string, key: string, url: string}>} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, public_link: string, tracking_id: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}, kind: \Affibloom\Domain\Variant\VariantKind, rows: list<array{id: int, name: string, key: string, url: string}>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -42,7 +43,11 @@ $is_amazon = VariantKind::AmazonTag === $view['kind'];
 		);
 		?>
 
-		<div class="affibloom-page__body affibloom-variants" data-variants data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
+		<div class="affibloom-page__body affibloom-variants" data-variants data-product-id="<?php echo esc_attr( (string) $product->id ); ?>"
+			data-default-name="<?php echo esc_attr( '' !== $product->name ? $product->name : ( $is_amazon ? __( 'Amazon variant', 'affibloom' ) : __( 'New variant', 'affibloom' ) ) ); ?>"
+			data-base-slug="<?php echo esc_attr( '' !== $product->slug ? $product->slug : 'variant' ); ?>"
+			data-amazon="<?php echo $is_amazon ? '1' : ''; ?>" data-tracking-id="<?php echo esc_attr( $view['tracking_id'] ); ?>"
+			data-failed="<?php esc_attr_e( 'Could not save variants.', 'affibloom' ); ?>">
 			<div class="affibloom-card affibloom-card--table" data-variant-table<?php echo array() === $view['rows'] ? ' hidden' : ''; ?>>
 				<div class="affibloom-table-scroll">
 					<table class="affibloom-table affibloom-table--variants">
@@ -103,10 +108,50 @@ $is_amazon = VariantKind::AmazonTag === $view['kind'];
 				<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'link' ) ); ?></span>
 				<p class="affibloom-empty__message"><?php esc_html_e( 'No variants yet', 'affibloom' ); ?></p>
 				<p class="affibloom-empty__text"><?php esc_html_e( 'Create a variant to get a separate permalink or Amazon tracking ID that still points to this link’s primary destination.', 'affibloom' ); ?></p>
+				<button type="button" class="affibloom-button affibloom-button--primary affibloom-empty__action" data-variant-add>
+					<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+					<span><?php esc_html_e( 'Add Variant', 'affibloom' ); ?></span>
+				</button>
 			</div>
+
+			<?php // A row in edit mode (url-variants.js 297-330): the name and key fields, the refusal under the key, Save and Cancel. ?>
+			<template data-variant-edit-template>
+				<tr data-variant-editing>
+					<td class="affibloom-col-name">
+						<label class="screen-reader-text" data-variant-label="name"><?php esc_html_e( 'Name', 'affibloom' ); ?></label>
+						<input type="text" class="affibloom-input" data-variant-name>
+					</td>
+					<td class="affibloom-col-key" colspan="2">
+						<label class="screen-reader-text" data-variant-label="key"><?php echo esc_html( $is_amazon ? __( 'Tracking ID', 'affibloom' ) : __( 'Permalink', 'affibloom' ) ); ?></label>
+						<input type="text" class="affibloom-input" data-variant-key>
+						<p class="affibloom-field__error" role="alert" data-variant-error hidden></p>
+					</td>
+					<td class="affibloom-col-actions">
+						<span class="affibloom-variant__actions">
+							<button type="button" class="affibloom-button affibloom-button--small affibloom-button--primary" data-variant-save data-busy-label="<?php esc_attr_e( 'Saving…', 'affibloom' ); ?>"><?php esc_html_e( 'Save', 'affibloom' ); ?></button>
+							<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-variant-cancel><?php esc_html_e( 'Cancel', 'affibloom' ); ?></button>
+						</span>
+					</td>
+				</tr>
+			</template>
 			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 		</div>
 	</div>
+	<?php
+	// Lasso's url-variant-remove dialog (R12) in the shared delete dialog (D6).
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'            => 'affibloom-variant-remove-modal',
+			'title'         => __( 'Remove this variant?', 'affibloom' ),
+			'text'          => __( 'Its cloaked URL or tracking branch will stop working. This cannot be undone.', 'affibloom' ),
+			'confirm_label' => __( 'Remove', 'affibloom' ),
+			'confirm_attr'  => 'data-variant-remove-confirm',
+			'busy_label'    => __( 'Removing…', 'affibloom' ),
+			'failed_text'   => __( 'Could not save variants.', 'affibloom' ),
+		)
+	);
+	?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>
