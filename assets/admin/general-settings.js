@@ -7,6 +7,7 @@
  *   asks first; the disabled Click Tracking explains itself (9F).
  * - Cloaked Link Prefix: what is typed becomes its slug form, and the example line follows (9G).
  * - Performance Mode: choosing a preset sets its numbers; only Custom shows the CPU level (9H).
+ * - Rebuild Database: "Ready to rebuild?", then the link index is rebuilt in the background (F21 R52, Task 35G).
  *
  * The server applies the same rules where it can, so the form still saves correctly without this script.
  */
@@ -70,6 +71,50 @@
 				.then( function () {
 					busy = false;
 					override.disabled = false;
+				} );
+		} );
+	}
+
+	/**
+	 * Rebuild Database (F21 R52, D17): the button asks "Ready to rebuild?"; Confirm starts the background rebuild and the
+	 * toast says "Rebuild started." or why not ("A rebuild is already running."). The Link Index card's poll shows the
+	 * progress (Task 9J).
+	 */
+	function rebuild() {
+		var modal = document.querySelector( '[data-rebuild-modal]' );
+		if ( ! modal ) {
+			return;
+		}
+		var confirm = modal.querySelector( '[data-rebuild-confirm]' );
+		var busy = false;
+
+		document.addEventListener( 'click', function ( event ) {
+			var button = event.target.closest( '[data-link-index-rebuild]' );
+			if ( button ) {
+				event.preventDefault();
+				window.affibloomModal.show( modal, button );
+			}
+		} );
+
+		confirm.addEventListener( 'click', function () {
+			if ( busy ) {
+				return;
+			}
+			busy = true;
+			confirm.classList.add( 'is-busy' );
+			wp.apiFetch( { path: '/affibloom/v1/link-index/rebuild', method: 'POST' } )
+				.then( function ( response ) {
+					window.affibloomModal.hide();
+					window.affibloomToast( response.message, false );
+					document.dispatchEvent( new CustomEvent( 'affibloom:link-index', { detail: response.status } ) );
+				} )
+				.catch( function ( error ) {
+					window.affibloomModal.hide();
+					window.affibloomToast( error && error.message ? error.message : modal.dataset.failedText, true );
+				} )
+				.then( function () {
+					busy = false;
+					confirm.classList.remove( 'is-busy' );
 				} );
 		} );
 	}
@@ -221,5 +266,6 @@
 		prefix();
 		performance();
 		helpTips();
+		rebuild();
 	} );
 } )();

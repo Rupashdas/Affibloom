@@ -183,4 +183,29 @@ test.describe( 'F21 The content link index', () => {
 		wp( 'cron', 'event', 'run', 'affibloom_link_index_daily' );
 		expect( rows( post ) ).toEqual( [] );
 	} );
+
+	test( 'AC7 the link index status and rebuild routes: figures, 202 then 409 while a rebuild runs', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
+		// The page's own wp.apiFetch carries the REST nonce; with parse: false an error answer is thrown as the Response.
+		const call = ( method: string, path: string ) => page.evaluate( async ( [ m, p ] ) => {
+			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< Response > } };
+			const answer = await w.wp.apiFetch( { path: `/affibloom/v1${ p }`, method: m, parse: false } ).catch( ( response: Response ) => response );
+			return { status: answer.status, body: await answer.json() };
+		}, [ method, path ] );
+
+		wp( 'option', 'delete', 'affibloom_link_index_state' );
+		const idle = await call( 'GET', '/link-index' );
+		expect( idle.status ).toBe( 200 );
+		expect( idle.body ).toMatchObject( { status: 'idle' } );
+		expect( idle.body.links_indexed ).toBeGreaterThan( 0 );
+
+		expect( ( await call( 'POST', '/link-index/rebuild' ) ).status ).toBe( 202 );
+		const busy = await call( 'POST', '/link-index/rebuild' );
+		expect( busy.status ).toBe( 409 );
+		expect( busy.body.code ).toBe( 'affibloom_rebuild_running' );
+		expect( ( await call( 'GET', '/link-index' ) ).body ).toMatchObject( { status: 'running', done: 0 } );
+
+		wp( 'option', 'delete', 'affibloom_link_index_state' );
+		wp( 'cron', 'event', 'delete', 'affibloom_link_index_batch' );
+	} );
 } );

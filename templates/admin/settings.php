@@ -74,6 +74,7 @@ $card_data = array(
 	<?php
 	$this->render( 'admin/partials/update-link-settings-modal' );
 	$this->render( 'admin/partials/ga-pageview-modal' );
+	$this->render( 'admin/partials/rebuild-modal' );
 	$this->render( 'admin/partials/save-modal' );
 	$this->render( 'admin/partials/unsaved-modal' );
 	$this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) );

@@ -76,7 +76,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task 35D: Custom Link Detection — Settings → General
 - [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post` (SiteStripe and Elementor done 2026-11-18; the other plugins wait for the user's answer)
 - [x] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
-- [ ] Task 35G: Settings → General — Link Index and Performance
+- [x] Task 35G: Settings → General — Link Index and Performance
 
 **F9 (part) — the Link Index card**
 
@@ -490,11 +490,17 @@ start with a clean slate." / Cancel, Confirm → "Rebuild started." or "A rebuil
 
 **Files:** the above; `docs/ui/design-system.md` (stat tiles row); tests unit (R56), E2E F21 AC7.
 
-- [ ] **Step 1: Failing tests.** AC7 (status, rebuild, 409 while running, the keys followed); red: no route.
-- [ ] **Step 2: Routes and status.**
-- [ ] **Step 3: The keys' effect and the dialog's call.**
-- [ ] **Step 4: Run and look** (1280, 375 px).
-- [ ] **Step 5: Commit** — "Show and rebuild the link index from Settings".
+- [x] **Step 1: Failing tests.** AC7 (status, rebuild, 409 while running, the keys followed); red: no route.
+- [x] **Step 2: Routes and status.**
+- [x] **Step 3: The keys' effect and the dialog's call.**
+- [x] **Step 4: Run and look** (1280, 375 px).
+- [x] **Step 5: Commit** — "Show and rebuild the link index from Settings".
+
+*Note (2026-11-18):* the routes and the "Ready to rebuild?" dialog with its script are built; the Link Index card, its Rebuild Database
+button (support view) and its 5 s poll are 9J's (next), so the dialog is looked at there. The keys' effects: CPU threshold
+and the catch-up limit are 35F's; Keep Original URL is read by the public link (CL6, 35H); the cron interval has nothing to
+floor (35F). Checked with `rest_do_request`: 200 with the figures, 202 then 409 `affibloom_rebuild_running`, 401 for a
+visitor; the started run finished in the background.
 
 ---
 
