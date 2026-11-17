@@ -8,6 +8,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { Button, Spinner } from '@wordpress/components';
 import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
+import { doAction } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
 import metadata from './block.json';
@@ -92,6 +93,8 @@ function usePreview( key, attributes, token ) {
 						shortcode: answer.data.shortcode,
 						edit_url: answer.data.edit_url,
 					} );
+					// Others that read the drawn displays, such as Rank Math's analysis (Task ED3), redo it.
+					doAction( 'affibloom.previewRendered', key );
 				}
 			} )
 			.catch( ( failure ) => {

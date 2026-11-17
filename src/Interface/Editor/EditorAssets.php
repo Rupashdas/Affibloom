@@ -51,6 +51,20 @@ final class EditorAssets implements Module {
 		add_action( 'admin_footer', array( $this, 'print_modal' ) );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_canvas' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_classic' ) );
+		// After Rank Math registers its analyzer (on admin_enqueue_scripts, priority 10).
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_rank_math' ), 20 );
+	}
+
+	/**
+	 * Rank Math's content analysis reads the blocks' previews (Task ED3, F4 R73-R74): assets/editor/rank-math.js, on
+	 * block-editor screens where Rank Math's analyzer is registered, as Lasso's check.
+	 */
+	public function enqueue_rank_math(): void {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( null === $screen || ! $screen->is_block_editor() || ! wp_script_is( 'rank-math-analyzer', 'registered' ) ) {
+			return;
+		}
+		wp_enqueue_script( 'affibloom-rank-math', $this->plugin_url . 'assets/editor/rank-math.js', array( 'wp-hooks', 'rank-math-analyzer' ), $this->version, true );
 	}
 
 	/**

@@ -454,6 +454,30 @@ test.describe( 'F4 Displays in the editor', () => {
 		}
 	} );
 
+	test( 'AC18 Rank Math reads the rendered displays and refreshes a second after a preview', async ( { page } ) => {
+		const name = unique( 'F4 AC18' );
+		const id = createProduct( { name } );
+		const post = newPostWith( boxBlock( id ) ).replace( '/?p=', '' );
+		await page.goto( `/wp-admin/post.php?post=${ post }&action=edit` );
+		const block = page.frameLocator( 'iframe[name="editor-canvas"]' ).locator( '.affibloom-block' ).first();
+		await expect( block.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( name );
+		const analysed = () => page.evaluate( () => ( window as unknown as { wp: { hooks: { applyFilters: ( name: string, value: string ) => string } } } ).wp.hooks.applyFilters( 'rank_math_content', '' ) );
+		await expect.poll( analysed ).toContain( name );
+
+		// The analysis is refreshed once, a second after a preview is drawn again.
+		await page.evaluate( () => {
+			const w = window as unknown as { rankMathEditor: { refresh: ( what: string ) => unknown }; affibloomRefreshes: string[] };
+			const refresh = w.rankMathEditor.refresh.bind( w.rankMathEditor );
+			w.affibloomRefreshes = [];
+			w.rankMathEditor.refresh = ( what: string ) => {
+				w.affibloomRefreshes.push( what );
+				return refresh( what );
+			};
+		} );
+		await block.getByRole( 'button', { name: 'Update Display' } ).click();
+		await expect.poll( () => page.evaluate( () => ( window as unknown as { affibloomRefreshes: string[] } ).affibloomRefreshes ) ).toContain( 'content' );
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

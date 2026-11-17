@@ -106,4 +106,27 @@ final class EditorAssetsTest extends TestCase {
 		self::assets()->print_modal();
 		self::assertSame( 'MODAL', ob_get_clean() );
 	}
+
+	public function test_rank_maths_analysis_reads_the_displays_where_its_analyzer_is_registered(): void {
+		$scripts = array();
+		Functions\when( 'wp_enqueue_script' )->alias(
+			function ( string $handle, string $src, array $deps ) use ( &$scripts ): void {
+				$scripts[ $handle ] = array( $src, $deps );
+			}
+		);
+		$block = \Mockery::mock();
+		$block->shouldReceive( 'is_block_editor' )->andReturn( true );
+		Functions\when( 'get_current_screen' )->justReturn( $block );
+
+		Functions\when( 'wp_script_is' )->justReturn( false );
+		self::assets()->enqueue_rank_math();
+		self::assertSame( array(), $scripts );
+
+		Functions\when( 'wp_script_is' )->justReturn( true );
+		self::assets()->enqueue_rank_math();
+		self::assertSame(
+			array( 'https://site.test/wp-content/plugins/affibloom/assets/editor/rank-math.js', array( 'wp-hooks', 'rank-math-analyzer' ) ),
+			$scripts['affibloom-rank-math']
+		);
+	}
 }

@@ -72,7 +72,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24E: Preview queue on load
 - [x] Task ED1: Classic editor button
 - [x] Task ED2: Elementor widget
-- [ ] Task ED3: Rank Math content analysis
+- [x] Task ED3: Rank Math content analysis
 - [ ] Task ED4: AMP inline styles
 - [ ] Task ED5: Keep Lasso's link attributes valid in core blocks (N3 accepted)
 - Task ED6: moved to Phase 5, right after Task 27A (on 2026-11-14; it depends on 27A)
@@ -1027,10 +1027,15 @@ after a preview renders.
 
 **Files:** create `assets/editor/rank-math.js`; modify `EditorAssets.php`; tests `tests/E2E/acceptance/F4.spec.ts` (AC18).
 
-- [ ] **Step 1: Failing test** (Rank Math is active on this site).
-- [ ] **Step 2: `rank_math_content` filter, debounced refresh.**
-- [ ] **Step 3: Run and look.** By hand: the analysis word count rises with a display.
-- [ ] **Step 4: Commit** — "Let Rank Math read rendered displays".
+- [x] **Step 1: Failing test** (Rank Math is active on this site).
+- [x] **Step 2: `rank_math_content` filter, debounced refresh.**
+- [x] **Step 3: Run and look.** By hand: the analysis word count rises with a display.
+- [x] **Step 4: Commit** — "Let Rank Math read rendered displays".
+
+*Note (2026-11-17):* The filter reads the block previews inside the editor's canvas frame (Lasso's jQuery looked in the
+outer page, which the framed editor no longer holds). The block signals `affibloom.previewRendered` (edit.js). It is
+loaded on `admin_enqueue_scripts` at priority 20, after Rank Math registers its analyzer. Seen at 1280 px: a 3-word post
+with one box reads "Content is 56 words long", and Update Display is followed by `refresh( 'content' )` a second later.
 
 ---
 
