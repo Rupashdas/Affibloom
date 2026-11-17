@@ -29,9 +29,10 @@ use Affibloom\Module;
 /**
  * Registers `affibloom/product-box` from the built `build/product-box/block.json` (its editor script and style, Task
  * 23A; the source is `blocks/product-box`) and renders it on the server (F5 R1, AC3).
- * A Button, Image, Grid, List or Gallery display (Tasks 23C, 23D; F4 D3) draws as the shortcode draws it, a group found
- * by the ID the block keeps; the single box keeps its own path,
- * with the block's overrides. The editor's preview (EditorController) renders through this same callback.
+ * A block placed from Phase 4 on (it has a `type`: Tasks 23C-24A, F4 D3) draws as the shortcode draws it, with the
+ * overrides it keeps under Lasso's names and a group found by the ID it keeps. A block saved before (no `type`, F5)
+ * keeps its own path with its camelCase overrides. The editor's preview (EditorController) renders through this same
+ * callback.
  */
 final class ProductBoxBlock implements Module {
 
@@ -89,7 +90,7 @@ final class ProductBoxBlock implements Module {
 	public function render( array $attributes ): string {
 		$group   = is_numeric( $attributes['groupId'] ?? null ) ? $this->groups->get( (int) $attributes['groupId'] ) : null;
 		$request = DisplayRequest::from_block( $attributes, null === $group ? '' : $group->slug );
-		if ( null !== $request && DisplayKind::Single !== $request->kind ) {
+		if ( null !== $request && ( DisplayKind::Single !== $request->kind || '' !== ( $attributes['type'] ?? '' ) ) ) {
 			return $this->shortcode->render( $request->attributes );
 		}
 

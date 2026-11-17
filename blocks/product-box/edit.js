@@ -12,6 +12,7 @@ import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import metadata from './block.json';
+import CustomizeDisplay from './customize';
 import { FlowerIcon } from './flower';
 import { loadModal, useModalState } from './modal-loader';
 
@@ -103,6 +104,12 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	return (
 		<div { ...blockProps }>
+			{ hasDisplay && (
+				<CustomizeDisplay
+					attributes={ attributes }
+					setAttributes={ setAttributes }
+				/>
+			) }
 			<div
 				className={
 					hasDisplay

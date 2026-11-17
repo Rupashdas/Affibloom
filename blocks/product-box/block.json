@@ -29,6 +29,10 @@
 			"type": "number",
 			"default": 0
 		},
+		"overrides": {
+			"type": "object",
+			"default": {}
+		},
 		"badge": {
 			"type": "string",
 			"default": ""

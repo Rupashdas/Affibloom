@@ -37,6 +37,24 @@ final class DisplayRequestTest extends TestCase {
 		self::assertFalse( DisplayRequest::names_display( array( 'type' => 'grid', 'productId' => 4 ) ) );
 	}
 
+	public function test_the_blocks_overrides_reach_the_request_as_the_shortcodes(): void {
+		$request = DisplayRequest::from_block(
+			array(
+				'type'      => 'single',
+				'productId' => 12,
+				'overrides' => array(
+					'badge'   => 'Best Overall',
+					'price'   => 'hide',
+					'columns' => '3',
+				),
+			)
+		);
+		self::assertSame( 'Best Overall', $request?->attributes['badge'] );
+		self::assertSame( 'hide', $request?->attributes['price'] );
+		// Not a Single field: dropped.
+		self::assertArrayNotHasKey( 'columns', $request?->attributes ?? array() );
+	}
+
 	public function test_no_product_or_an_unknown_type_asks_for_nothing(): void {
 		self::assertNull( DisplayRequest::from_block( array( 'type' => 'single' ) ) );
 		self::assertNull( DisplayRequest::from_block( array( 'type' => 'single', 'productId' => 0 ) ) );

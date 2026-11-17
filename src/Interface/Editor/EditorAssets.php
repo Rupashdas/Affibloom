@@ -69,7 +69,11 @@ final class EditorAssets implements Module {
 		wp_enqueue_style( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.css', array( 'affibloom-fonts' ), $this->version );
 		wp_enqueue_style( 'affibloom-display-modal', $this->plugin_url . 'assets/editor/display-modal.css', array( 'affibloom-admin' ), $this->version );
 
-		$config = array( 'modalScript' => add_query_arg( 'ver', $this->version, $this->plugin_url . 'assets/editor/display-modal.js' ) );
+		$config = array(
+			'modalScript' => add_query_arg( 'ver', $this->version, $this->plugin_url . 'assets/editor/display-modal.js' ),
+			// The sidebar's Customize Display fields per type (Task 24A).
+			'overrides'   => OverrideTexts::catalog(),
+		);
 		wp_add_inline_script( self::BLOCK_SCRIPT, 'window.affibloomEditor = ' . wp_json_encode( $config ) . ';', 'before' );
 	}
 

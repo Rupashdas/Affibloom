@@ -257,6 +257,34 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( group.locator( '.affibloom-link-row', { hasText: name } ).getByRole( 'button', { name: 'Added' } ) ).toBeDisabled();
 	} );
 
+	test( 'AC11 Customize Display: the type\'s fields; a text field on leaving it, a toggle at once, a cleared field drops', async ( { page } ) => {
+		const name = unique( 'F4 AC11' );
+		const id = createProduct( { name } );
+		await page.goto( newPostWith( boxBlock( id, { type: 'single' } ) ).replace( /\?p=(\d+).*$/, 'wp-admin/post.php?post=$1&action=edit' ) );
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		await canvas.locator( '.affibloom-block' ).first().click();
+
+		const panel = page.locator( '.block-editor-block-inspector' );
+		await expect( panel.getByRole( 'button', { name: 'Customize Display' } ) ).toHaveAttribute( 'aria-expanded', 'true' );
+		await expect( panel.getByLabel( 'Product title', { exact: true } ) ).toBeVisible();
+		await expect( panel.getByLabel( 'Show/Hide the price' ) ).toBeChecked();
+
+		const badge = panel.getByLabel( 'Badge', { exact: true } );
+		await badge.fill( 'Best "Overall"' );
+		await badge.press( 'Tab' );
+		const preview = canvas.locator( '.affibloom-block__preview' );
+		await expect( preview ).toContainText( 'Best Overall' );
+		const stored = () => page.evaluate( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getEditedPostContent: () => string } } } } ).wp.data.select( 'core/editor' ).getEditedPostContent() );
+		expect( await stored() ).toContain( '"overrides":{"badge":"Best Overall"}' );
+
+		await panel.getByLabel( 'Show/Hide the price' ).click();
+		expect( await stored() ).toContain( '"price":"hide"' );
+
+		await badge.fill( '' );
+		await badge.press( 'Enter' );
+		expect( await stored() ).not.toContain( '"badge"' );
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

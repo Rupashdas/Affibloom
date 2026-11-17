@@ -42,6 +42,7 @@ final class EditorAssetsTest extends TestCase {
 			static fn( string $key, string $value, string $url ): string => $url . '?' . $key . '=' . $value
 		);
 		Functions\when( 'wp_json_encode' )->alias( static fn( $data ): string => (string) json_encode( $data, JSON_UNESCAPED_SLASHES ) );
+		Functions\stubTranslationFunctions();
 	}
 
 	/** A template folder whose display modal prints a marker. */
@@ -69,13 +70,16 @@ final class EditorAssetsTest extends TestCase {
 		self::assertContains( 'affibloom-admin', $this->styles['affibloom-display-modal'][1] );
 	}
 
-	public function test_the_block_learns_where_the_modal_script_is(): void {
+	public function test_the_block_learns_where_the_modal_script_is_and_its_sidebars_fields(): void {
 		self::assets()->enqueue();
 
-		self::assertSame(
-			'window.affibloomEditor = {"modalScript":"https://site.test/wp-content/plugins/affibloom/assets/editor/display-modal.js?ver=0.1.0"};',
-			$this->inline[ EditorAssets::BLOCK_SCRIPT ]
-		);
+		$code = $this->inline[ EditorAssets::BLOCK_SCRIPT ];
+		self::assertStringStartsWith( 'window.affibloomEditor = ', $code );
+		$config = json_decode( substr( $code, strlen( 'window.affibloomEditor = ' ), -1 ), true );
+		self::assertSame( 'https://site.test/wp-content/plugins/affibloom/assets/editor/display-modal.js?ver=0.1.0', $config['modalScript'] );
+		// The sidebar's catalogue (Task 24A): the Button type's fields with their labels.
+		self::assertSame( array( 'theme', 'button_type', 'primary_url', 'primary_text', 'anchor_id' ), array_column( $config['overrides']['button'], 'name' ) );
+		self::assertSame( 'Button url', $config['overrides']['button'][2]['label'] );
 	}
 
 	public function test_the_modal_is_printed_on_block_editor_screens_only(): void {

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Domain\Shortcode;
 
 use Affibloom\Domain\Box\BoxOverrides;
+use Affibloom\Domain\Display\OverrideCatalog;
 
 /**
  * One `[affibloom]` request (F31): the display kind, the address and the box's overrides in Lasso's attribute language
@@ -95,12 +96,14 @@ final class DisplayRequest {
 		}
 
 		$type = (string) ( $attributes['type'] ?? '' );
+		// The block's own overrides (Task 24A, R35-R40), under Lasso's names, as the shortcode would carry them.
+		$overrides = OverrideCatalog::overrides( $type, is_array( $attributes['overrides'] ?? null ) ? $attributes['overrides'] : array() );
 		if ( in_array( $type, self::GROUP_TYPES, true ) ) {
 			return '' === $group_slug ? null : self::of(
 				array(
 					'type'  => $type,
 					'group' => $group_slug,
-				)
+				) + $overrides
 			);
 		}
 
@@ -109,7 +112,7 @@ final class DisplayRequest {
 			$shortcode['type'] = $type;
 		}
 
-		return self::of( $shortcode );
+		return self::of( $shortcode + $overrides );
 	}
 
 	/**

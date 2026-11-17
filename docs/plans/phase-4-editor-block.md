@@ -65,7 +65,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 23E: Create Group and "Add to Group" from the modal
 - Task 23F: Table — "Choose a Table" — **moved to Phase 7** (after F25 T12; settled 2026-11-14)
 - [x] Task 23G: Create a Link and the quick detail
-- [ ] Task 24A: Customize Display sidebar
+- [x] Task 24A: Customize Display sidebar
 - [ ] Task 24B: Schema & Structured Data panel
 - [ ] Task 24C: Shortcode box and Update Display
 - [ ] Task 24D: Edit Display
@@ -753,12 +753,20 @@ OverrideCatalog (localised by EditorAssets) → which fields, toggles and textar
 modify `blocks/product-box/edit.js`, `EditorAssets.php`, `DisplayRequest.php`, `blocks/product-box/edit.test.js` (Jest: chooser start, sidebar fields);
 tests `tests/E2E/acceptance/F4.spec.ts` (AC11).
 
-- [ ] **Step 1: Failing tests** (AC11; unit: toggle rules, quote stripping, anchor id, rebuild order R41). Red: no panel.
-- [ ] **Step 2: Catalog.** Texts from Lasso minus the product name; the reference-guide link is left out (D5, deviation
+- [x] **Step 1: Failing tests** (AC11; unit: toggle rules, quote stripping, anchor id, rebuild order R41). Red: no panel.
+- [x] **Step 2: Catalog.** Texts from Lasso minus the product name; the reference-guide link is left out (D5, deviation
   52); the brag field is kept but links nowhere.
-- [ ] **Step 3: Panel.** Blur or Enter reloads; toggles reload at once.
-- [ ] **Step 4: Run and look.** Checks; `npm run test:js`; by hand: type "Best Overall" in Badge, see the preview, publish.
-- [ ] **Step 5: Commit** — "Override a display per placement from the sidebar".
+- [x] **Step 3: Panel.** Blur or Enter reloads; toggles reload at once.
+- [x] **Step 4: Run and look.** Checks; `npm run test:js`; by hand: type "Best Overall" in Badge, see the preview, publish.
+- [x] **Step 5: Commit** — "Override a display per placement from the sidebar".
+
+*Note (2026-11-17):* the catalogue is split by layer: `Domain\Display\OverrideCatalog` (fields per type, toggle and
+cleaning rules, unit-tested) and `Interface\Editor\OverrideTexts` (the translatable labels and help texts, Lasso's
+with its site's examples as example.com, "Lasso Links" as products, the brag line linking nowhere). The block keeps
+its overrides in one `overrides` attribute under Lasso's names; a block with a `type` now renders through the shortcode
+with them (blocks with none keep F5's camelCase path). No Jest test: wp-scripts 37 needs Jest or Vitest installed
+apart, a download not asked for; the rules are unit-tested in PHP and the server cleans the same way. Seen at 1280 px:
+Single's and Grid's fields, Badge "Best Overall" in the preview, the price toggle stored as `hide`.
 
 ---
 
