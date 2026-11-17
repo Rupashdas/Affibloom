@@ -2013,7 +2013,9 @@
 /* 7j. Custom fields on the product page (Task 14C): Lasso's dashed box holding the rows, each row a white sub-card
  * (name, help, switches; the value with Move and Remove beside it), the rating's stars, and the "Add Field" dialog's
  * underline tabs and library list. */
-.affibloom-product__fields { display: grid; justify-items: stretch; gap: 14px; }
+/* One full-width column (the user, 2026-11-17): the box's earlier `justify-content: center` shrank the grid's track to
+ * its content and centred the rows. */
+.affibloom-product__fields { display: grid; grid-template-columns: minmax(0, 1fr); justify-content: stretch; justify-items: stretch; gap: 14px; }
 .affibloom-product__fields > .affibloom-button { justify-self: center; }
 .affibloom-field-list { display: grid; gap: 12px; }
 .affibloom-field-list:empty { display: none; }
