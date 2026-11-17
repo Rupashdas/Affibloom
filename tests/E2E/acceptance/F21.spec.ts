@@ -86,4 +86,28 @@ test.describe( 'F21 The content link index', () => {
 		] );
 		expect( found.every( ( r ) => 'product' === r.link_type ) ).toBe( true );
 	} );
+
+	test( 'AC3 saving, trashing, restoring and deleting a post keep its rows in step, with no rebuild', () => {
+		const post = postWith( '<!-- wp:paragraph --><p><a href="https://www.example.org/one">One</a> <a href="https://www.example.org/two">Two</a></p><!-- /wp:paragraph -->', 'draft' );
+		expect( rows( post ).map( ( r ) => r.url ) ).toEqual( [ 'https://www.example.org/one', 'https://www.example.org/two' ] );
+
+		// A link removed from the post loses its row; each status of decision 6 keeps the post indexed.
+		wp( 'post', 'update', post, '--post_content=<!-- wp:paragraph --><p><a href="https://www.example.org/two">Two</a></p><!-- /wp:paragraph -->' );
+		expect( rows( post ).map( ( r ) => r.url ) ).toEqual( [ 'https://www.example.org/two' ] );
+		for ( const status of [ 'publish', 'pending', 'private', 'draft' ] ) {
+			wp( 'post', 'update', post, `--post_status=${ status }` );
+			expect( rows( post ), status ).toHaveLength( 1 );
+		}
+		const future = postWith( '<p><a href="https://www.example.org/later">Later</a></p>', 'future' );
+		wp( 'post', 'update', future, '--post_date=2099-01-01 00:00:00', '--post_status=future' );
+		expect( rows( future ) ).toHaveLength( 1 );
+
+		wp( 'post', 'delete', post );
+		expect( rows( post ) ).toEqual( [] );
+		wp( 'eval', `wp_untrash_post( ${ post } );` );
+		expect( rows( post ) ).toHaveLength( 1 );
+		wp( 'post', 'delete', post, '--force' );
+		expect( rows( post ) ).toEqual( [] );
+		wp( 'post', 'delete', future, '--force' );
+	} );
 } );

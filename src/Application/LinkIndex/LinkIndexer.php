@@ -13,11 +13,13 @@ use Affibloom\Domain\LinkIndex\LinkClassifier;
 use Affibloom\Domain\LinkIndex\LinkLocation;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\LinkIndex\LocationKey;
+use Closure;
 
 /**
  * One host's rows (F21 R25, R27, R36, D3, D4): each scanned place's links and displays, tied to their products (and a
  * group display to its group), numbered by occurrence, then stored in place of the host's old rows. A post that is
- * not indexed loses its rows. Nothing in the post is written (D3).
+ * not indexed loses its rows. Nothing in the post is written (D3). After a host's rows are written, `$indexed` hears
+ * of it (WordPress's `affibloom_link_index_indexed`, which F35 listens to; Task 35C).
  */
 final class LinkIndexer {
 
@@ -30,6 +32,7 @@ final class LinkIndexer {
 	 * @param DisplayResolver        $displays   Ties a display to its product or group.
 	 * @param LinkClassifier         $classifier Turns a link into a row.
 	 * @param LinkLocationRepository $rows       The index.
+	 * @param Closure|null           $indexed    Called with the host's ID and its rows after they are written.
 	 */
 	public function __construct(
 		private ContentSource $content,
@@ -38,6 +41,7 @@ final class LinkIndexer {
 		private DisplayResolver $displays,
 		private LinkClassifier $classifier,
 		private LinkLocationRepository $rows,
+		private ?Closure $indexed = null,
 	) {}
 
 	/**
@@ -75,6 +79,9 @@ final class LinkIndexer {
 
 		if ( ! $dry_run ) {
 			$this->rows->replace_host( $host->id, $rows );
+			if ( null !== $this->indexed ) {
+				( $this->indexed )( $host->id, $rows );
+			}
 		}
 
 		return $rows;

@@ -82,6 +82,7 @@ use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
+use Affibloom\Interface\Hooks\LinkIndexHooks;
 use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\AmazonBulkSyncCron;
 use Affibloom\Interface\Cron\BulkAddCron;
@@ -195,6 +196,13 @@ final class Plugin {
 	 * @var GuardedCatalog|null
 	 */
 	private ?GuardedCatalog $catalog = null;
+
+	/**
+	 * The link indexer, shared by the rebuild and the save hooks (F21); built on first use.
+	 *
+	 * @var LinkIndexer|null
+	 */
+	private ?LinkIndexer $link_indexer = null;
 
 	/**
 	 * Settings storage, shared by every reader in a request.
@@ -450,25 +458,41 @@ final class Plugin {
 			new UpgradeCommand( $upgrader ),
 			new AmazonCommand( $amazon, $catalog ),
 			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository() ),
+			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository() ),
 			new ForeignNotices( $this->navigation() ),
 		);
 	}
 
 	/**
-	 * The link index's rebuild (F21, Task 35A): the posts, their content, the scanner and the product lookups.
+	 * The link index's rebuild (F21, Task 35A): every indexed post through the indexer.
 	 */
 	private function link_index_rebuild(): LinkIndexRebuild {
-		$links   = new ProductResolver( new PostTypeProductRepository() );
-		$indexer = new LinkIndexer(
+		return new LinkIndexRebuild( new HostQuery(), $this->link_indexer() );
+	}
+
+	/**
+	 * The link indexer (F21, Tasks 35A-35C): a post's content, the scanner, the product and group lookups, and the
+	 * event after each host is written.
+	 */
+	private function link_indexer(): LinkIndexer {
+		if ( null !== $this->link_indexer ) {
+			return $this->link_indexer;
+		}
+		$links = new ProductResolver( new PostTypeProductRepository() );
+
+		$this->link_indexer = new LinkIndexer(
 			new PostContentSource(),
 			new WpLinkScanner(),
 			$links,
 			new DisplayResolver( new PostTypeProductRepository(), new TermGroupRepository(), $links ),
 			new LinkClassifier( site_url() ),
-			new TableLinkLocationRepository()
+			new TableLinkLocationRepository(),
+			static function ( int $host, array $rows ): void {
+				do_action( 'affibloom_link_index_indexed', $host, $rows );
+			}
 		);
 
-		return new LinkIndexRebuild( new HostQuery(), $indexer );
+		return $this->link_indexer;
 	}
 
 	/**

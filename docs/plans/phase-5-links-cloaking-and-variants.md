@@ -72,7 +72,7 @@ Grouped by feature, in the order they are worked.
 
 - [x] Task 35A: The index of anchors in post content — `wp affibloom links rebuild`
 - [x] Task 35B: Displays in the index — shortcodes and blocks
-- [ ] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
+- [x] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
 - [ ] Task 35D: Custom Link Detection — Settings → General
 - [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post`
 - [ ] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
@@ -332,10 +332,15 @@ fixture post (Single, Button, Image, Grid and List rows; the group displays carr
 
 **Files:** the module, `Plugin.php`, `tests/Integration/LinkIndexHooksTest.php`, E2E F21 AC3.
 
-- [ ] **Step 1: Failing tests.** AC3 (save, schedule, draft, trash, restore, delete) and the event fired once per host; red: no hooks.
-- [ ] **Step 2: Hooks and the event.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Keep a post's link rows in step with the post".
+- [x] **Step 1: Failing tests.** AC3 (save, schedule, draft, trash, restore, delete) and the event fired once per host; red: no hooks.
+- [x] **Step 2: Hooks and the event.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Keep a post's link rows in step with the post".
+
+*Note (2026-11-18):* the event is fired by the indexer (a callback `Plugin` turns into `do_action`), once per written host, for saves and
+rebuilds alike. A deleted post's rows are removed directly: at `deleted_post` WordPress's cache still returns the post,
+so indexing it wrote the rows again (seen on Local and fixed). Checked through WP-CLI: create 2 rows, edit 1, private 1,
+trash 0, restore 1, delete 0. Only the indexed post types are handled on save.
 
 ---
 
