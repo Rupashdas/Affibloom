@@ -22,10 +22,10 @@ final class Lifecycle {
 	/**
 	 * Builds the lifecycle.
 	 *
-	 * @param Schedules   $schedules Every Affibloom WP-Cron hook.
-	 * @param PluginState $state     The plugin's own records and the site's rewrite rules.
-	 * @param Upgrader    $upgrader  The pending schema and data steps.
-	 * @param string      $version   The running plugin version (AFFIBLOOM_VERSION).
+	 * @param Schedules    $schedules Every Affibloom WP-Cron hook.
+	 * @param PluginState  $state     The plugin's own records and the site's rewrite rules.
+	 * @param Upgrader     $upgrader  The pending schema and data steps.
+	 * @param string       $version   The running plugin version (AFFIBLOOM_VERSION).
 	 * @param Closure|null $activated Called at the end of an activation (the link index's first rebuild, Task 35F).
 	 */
 	public function __construct(
