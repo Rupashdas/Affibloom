@@ -58,7 +58,7 @@ them when the task is worked, and record any code that differs from the text bel
 
 ### F4 — Displays in the editor
 
-- [ ] Task 23A: The block and "Choose a Display Type"
+- [x] Task 23A: The block and "Choose a Display Type"
 - [ ] Task 23B: "Choose a Link" — product search
 - [ ] Task 23C: Insert Single, Button and Image; stored markup; the published page
 - [ ] Task 23D: Grid, List and Gallery — "Choose a Group"
@@ -447,25 +447,35 @@ Editor → blocks/product-box/edit.js (panel) → assets/editor/display-modal.js
 - Modify: `package.json`, `blocks/product-box/block.json`, `ProductBoxBlock.php` (registers from `build/product-box`),
   `src/Plugin.php`, `docs/ui/design-system.md` (modal, chooser tiles)
 
-- [ ] **Step 1: Failing tests.** `tests/E2E/acceptance/F4.spec.ts`: AC3 (the empty panel, "Loading..." then ready;
+- [x] **Step 1: Failing tests.** `tests/E2E/acceptance/F4.spec.ts`: AC3 (the empty panel, "Loading..." then ready;
   a blocked modal script gives "Retry Add a Display") and AC4 (the tiles, closing three ways, reopening at the
   chooser). Expected red: there is no chooser. Run `npm run test:e2e -- acceptance/F4`.
-- [ ] **Step 2: Build tooling.** `npm install --save-dev @wordpress/scripts`; `package.json` scripts `build`
+- [x] **Step 2: Build tooling.** `npm install --save-dev @wordpress/scripts`; `package.json` scripts `build`
   (`wp-scripts build --webpack-src-dir=blocks --output-path=build`), `start`, `lint:js`, `test:js`. `build/` stays
   gitignored; the release zip (Task 39) is built from a fresh build. `ProductBoxBlock` is registered from the built
   folder (`dirname( $this->file ) . '/build/product-box'`). `block.json` gains `editorScript` and `editorStyle`
   (`affibloom-box`, the front-end stylesheet `BoxAssets` registered, then the block's own).
-- [ ] **Step 3: Block registration, panel and `EditorAssets`.** The attributes of D3; the panel with the prompt text
+- [x] **Step 3: Block registration, panel and `EditorAssets`.** The attributes of D3; the panel with the prompt text
   and the button states (R5, R6); the assets printed on post/page/CPT editor screens (R57, without Lasso's
   libraries).
-- [ ] **Step 4: The modal and chooser.** Open, close, the Escape stack (R11), reset to the chooser on close (R10);
+- [x] **Step 4: The modal and chooser.** Open, close, the Escape stack (R11), reset to the chooser on close (R10);
   disabled "Coming soon" tiles; tiles focusable. Aurora look (ADR-8), Lasso's labels.
-- [ ] **Step 5: Run and look.** `npm run build`, `composer lint`, `composer analyse`, `npm run lint:js`, `npm run
+- [x] **Step 5: Run and look.** `npm run build`, `composer lint`, `composer analyse`, `npm run lint:js`, `npm run
   test:e2e -- acceptance/F4`. By hand in Brave at 1280 and 375 px: insert the block, open and close the modal all three
   ways, tab through the tiles. Compare labels and steps with `baselines/admin/block-display-type.png` (look follows
   the design system).
-- [ ] **Step 6: Commit** — "Open Lasso's display-type chooser from the block". Body: why the chooser is back (all
+- [x] **Step 6: Commit** — "Open Lasso's display-type chooser from the block". Body: why the chooser is back (all
   seven types are in scope) and that types without a renderer are disabled.
+
+*Note (2026-11-17):* `@wordpress/scripts` 37.1.0 installed at the user's word; `eslint.config.cjs` tells the import
+rules that `@wordpress/*` are WordPress's scripts. The block loads `display-modal.js` on first use (`modal-loader.js`),
+so R6's states are real; the modal's markup is printed by `EditorAssets` (`templates/editor/display-modal.php`) on
+block-editor screens with `admin.css` for Meadow's tokens. A tile is enabled once its step exists (`EditorAssets::STEPS`:
+23B links, 23D groups), so until then all seven say "Soon"; Table stays "Soon" until F25. "Loading…" uses the ellipsis
+character (WordPress's i18n rule). `affibloom-box` is not in `editorStyle` yet: no box is drawn in the editor before
+23C. block.json keeps the existing override attributes (camelCase, F5) beside D3's `type`, `groupId`, `tableId`.
+Checked: unit, phpcs, `npm run lint:js`, build; at 1280 and 375 px the panel, the chooser, × / Escape / backdrop, the
+focus returning to the button, and a failed load retried. The Playwright ACs are written, not run.
 
 ---
 

@@ -23,7 +23,8 @@ use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Module;
 
 /**
- * Registers `affibloom/product-box` from `blocks/product-box/block.json` and renders it on the server (F5 R1, AC3).
+ * Registers `affibloom/product-box` from the built `build/product-box/block.json` (its editor script and style, Task
+ * 23A; the source is `blocks/product-box`) and renders it on the server (F5 R1, AC3).
  * The editor side (inserter, sidebar, preview) is Phase 4.
  */
 final class ProductBoxBlock implements Module {

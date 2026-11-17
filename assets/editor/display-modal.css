@@ -1,0 +1,60 @@
+/*
+ * The display modal in the editor (F4, Task 23A): the design system's Modal (admin.css, which the editor loads too) on
+ * a root that carries `.affibloom-admin` for the tokens. These rules undo what that class does to a page and add the
+ * steps' parts: the chooser's tiles in two rows of four (Lasso's R9).
+ */
+.affibloom-admin.affibloom-block-modal {
+	margin: 0;
+	min-height: 0;
+	background: none;
+	/* Over the editor's own panels and popovers. */
+	z-index: 160000;
+}
+.affibloom-block-modal[hidden] { display: none; }
+.affibloom-block-modal .affibloom-modal__panel { max-width: 640px; }
+.affibloom-block-modal .affibloom-modal__close { z-index: 1; }
+.affibloom-block-modal .affibloom-modal-step[hidden] { display: none; }
+
+.affibloom-admin .affibloom-type-tiles {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.affibloom-admin .affibloom-type-tiles li { margin: 0; }
+.affibloom-admin .affibloom-type-tile {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 112px;
+	padding: 18px 10px 14px;
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-900);
+	font: 600 14px/20px var(--affibloom-font);
+	cursor: pointer;
+	transition: border-color var(--affibloom-ease), background-color var(--affibloom-ease), box-shadow var(--affibloom-ease);
+}
+.affibloom-admin .affibloom-type-tile:hover:not([aria-disabled="true"]) {
+	border-color: var(--affibloom-brand-600);
+	background: var(--affibloom-brand-25);
+	box-shadow: var(--affibloom-shadow-card);
+}
+.affibloom-admin .affibloom-type-tile:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+.affibloom-type-tile__chip { width: 44px; height: 44px; }
+.affibloom-type-tile__chip .affibloom-icon { width: 22px; height: 22px; }
+/* A type whose area comes later: readable, not a button that works, with its "Soon" chip in the corner. */
+.affibloom-admin .affibloom-type-tile[aria-disabled="true"] { background: var(--affibloom-subtle); color: var(--affibloom-ink-500); cursor: default; }
+.affibloom-type-tile[aria-disabled="true"] .affibloom-type-tile__chip { background: var(--affibloom-sunk); color: var(--affibloom-ink-400); }
+.affibloom-type-tile .affibloom-soon { position: absolute; top: 8px; right: 8px; }
+
+@media (max-width: 600px) {
+	.affibloom-admin .affibloom-type-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -101,6 +101,7 @@ use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
+use Affibloom\Interface\Editor\EditorAssets;
 use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\SchemaMarkup;
@@ -359,7 +360,8 @@ final class Plugin {
 			new ProductPostType(),
 			new GroupTaxonomy(),
 			new ProductBoxBlock(
-				dirname( $this->file ) . '/blocks/product-box',
+				// Built by `npm run build` (wp-scripts, Task 23A): block.json with the editor script and style.
+				dirname( $this->file ) . '/build/product-box',
 				new RepointResolver( new PostTypeProductRepository() ),
 				$display,
 				$this->settings_repository(),
@@ -398,6 +400,7 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+			new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template() ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ), $settings, $display, $amazon, $genius, $this->template() ),
 			new HelpTips( $settings ),

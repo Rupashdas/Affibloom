@@ -50,6 +50,11 @@ $icon_paths = array(
 	'list'         => '<circle cx="5" cy="6" r="1"/><circle cx="5" cy="10" r="1"/><circle cx="5" cy="14" r="1"/><path d="M8.5 6H16M8.5 10H16M8.5 14H16"/>',
 	'list-ordered' => '<path d="M8.5 6H16M8.5 10H16M8.5 14H16M4.5 4.5l1-.5v4M4 12.5h2l-2 3h2"/>',
 	'menu'         => '<path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13"/>',
+	// The display types in the editor's "Choose a Display Type" (Task 23A); Single, List and Image use box, list, image.
+	'grid'         => '<path d="M3.5 3.5h5v5h-5zM11.5 3.5h5v5h-5zM3.5 11.5h5v5h-5zM11.5 11.5h5v5h-5z"/>',
+	'table'        => '<path d="M3.5 4.5h13v11h-13zM3.5 8h13M3.5 11.75h13M8 8v7.5"/>',
+	'button'       => '<path d="M5 6.5h10a3.5 3.5 0 0 1 0 7H5a3.5 3.5 0 0 1 0-7zM7 10h6"/>',
+	'gallery'      => '<path d="M6.5 6.5h10v10h-10z"/><path d="M3.5 13.5v-10h10"/><circle cx="10" cy="10" r="1.3"/><path d="m16.5 14-3-3-5 5.5"/>',
 );
 
 if ( ! isset( $icon_paths[ $view['name'] ] ) ) {

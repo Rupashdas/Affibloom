@@ -4,10 +4,28 @@
 	"name": "affibloom/product-box",
 	"title": "Product box",
 	"category": "widgets",
-	"description": "Shows one product's box.",
+	"description": "Shows a product, a group or a table as a display in your post.",
 	"textdomain": "affibloom",
+	"keywords": [
+		"link",
+		"affiliate",
+		"product",
+		"display"
+	],
 	"attributes": {
+		"type": {
+			"type": "string",
+			"default": ""
+		},
 		"productId": {
+			"type": "number",
+			"default": 0
+		},
+		"groupId": {
+			"type": "number",
+			"default": 0
+		},
+		"tableId": {
 			"type": "number",
 			"default": 0
 		},
@@ -161,5 +179,7 @@
 	},
 	"supports": {
 		"html": false
-	}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
 }
