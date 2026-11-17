@@ -89,7 +89,7 @@ Grouped by feature, in the order they are worked.
 
 **F21 — a product's save and repoint**
 
-- [ ] Task 35I: A product's save and repoint keep its rows — `PATCH /products/{id}`
+- [x] Task 35I: A product's save and repoint keep its rows — `PATCH /products/{id}`
 
 **F24 — Link cloaking, redirects and permalinks**
 
@@ -631,10 +631,16 @@ rebuild the Dashboard shows "We're rounding up a list of your links. See the pro
 
 **Files:** `ProductService.php`, repository; integration test; E2E F21 AC9.
 
-- [ ] **Step 1: Failing tests.** AC9: a new Primary URL, a repoint; rows follow, `post_content` unchanged; red: rows keep the old URL.
-- [ ] **Step 2: Calls.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Move a product's link rows with its URL and repoint".
+- [x] **Step 1: Failing tests.** AC9: a new Primary URL, a repoint; rows follow, `post_content` unchanged; red: rows keep the old URL.
+- [x] **Step 2: Calls.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Move a product's link rows with its URL and repoint".
+
+*Note (2026-11-18):* built as a pin, not as the planned `set_url_for_product()`: a row's identity is the link as the post holds it (D4), so
+rewriting its URL would lose it at the next rescan, and the post's old link would no longer resolve. A new Primary URL
+pins the product's rows (`assigned_product_id`, which a rescan keeps and which now wins over the resolver); a repoint
+(`move_product()`) moves tied and pinned rows to the target, pinned there. Checked on Local through the REST routes:
+tied → PATCH → pinned to the product → repoint → tied and pinned to the target; the post unchanged.
 
 ---
 

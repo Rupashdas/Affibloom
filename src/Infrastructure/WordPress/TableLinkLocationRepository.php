@@ -111,6 +111,31 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * Pins a product's rows to it.
+	 *
+	 * @param int $product_id The product.
+	 */
+	public function pin_product( int $product_id ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, on a product's save.
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET assigned_product_id = %d WHERE product_id = %d', $wpdb->prefix . self::TABLE, $product_id, $product_id ) );
+	}
+
+	/**
+	 * Moves a retired product's rows (tied or pinned to it) to the product it points to, pinned there.
+	 *
+	 * @param int $from The retired product.
+	 * @param int $to   The product it points to.
+	 */
+	public function move_product( int $from, int $to ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, on a repoint.
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET product_id = %d, assigned_product_id = %d WHERE product_id = %d OR assigned_product_id = %d', $wpdb->prefix . self::TABLE, $to, $to, $from, $from ) );
+	}
+
+	/**
 	 * Every host post that has rows.
 	 *
 	 * @return list<int>

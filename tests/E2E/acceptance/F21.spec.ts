@@ -208,4 +208,29 @@ test.describe( 'F21 The content link index', () => {
 		wp( 'option', 'delete', 'affibloom_link_index_state' );
 		wp( 'cron', 'event', 'delete', 'affibloom_link_index_batch' );
 	} );
+
+	test( 'AC9 a product\'s new Primary URL and a repoint keep its rows tied, and no post changes', async ( { page } ) => {
+		const first = `https://www.example.com/${ unique( 'f21i' ) }`;
+		const product = createProduct( { name: unique( 'F21 save' ), url: first } );
+		const post = postWith( `<p><a href="${ first }">Old link</a></p>` );
+		const before = wp( 'eval', `echo md5( get_post_field( 'post_content', ${ post } ) );` );
+		expect( rows( post )[ 0 ] ).toMatchObject( { product_id: String( product ) } );
+
+		// Saved through the product page's route: the post still links to the old address, and stays tied.
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }` );
+		const saved = await page.evaluate( async ( [ id, url ] ) => {
+			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< unknown > } };
+			return w.wp.apiFetch( { path: `/affibloom/v1/products/${ id }`, method: 'PATCH', data: { url } } ).then( () => true );
+		}, [ String( product ), `https://www.example.com/${ unique( 'f21i-new' ) }` ] );
+		expect( saved ).toBe( true );
+		wp( 'affibloom', 'links', 'rebuild', `--post=${ post }` );
+		expect( rows( post )[ 0 ] ).toMatchObject( { product_id: String( product ) } );
+
+		// A repoint moves the rows to the product it points to.
+		const target = createProduct( { name: unique( 'F21 target' ), url: `https://www.example.com/${ unique( 'f21i-target' ) }` } );
+		wp( 'eval', `( new \\Affibloom\\Infrastructure\\WordPress\\TableLinkLocationRepository() )->move_product( ${ product }, ${ target } );` );
+		wp( 'affibloom', 'links', 'rebuild', `--post=${ post }` );
+		expect( rows( post )[ 0 ] ).toMatchObject( { product_id: String( target ) } );
+		expect( wp( 'eval', `echo md5( get_post_field( 'post_content', ${ post } ) );` ) ).toBe( before );
+	} );
 } );

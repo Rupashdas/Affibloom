@@ -1,6 +1,7 @@
 <?php
 namespace Affibloom\Tests\Unit\Application;
 
+use Affibloom\Tests\Unit\Fakes\InMemoryLinkLocations;
 use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
 
 use Affibloom\Application\Products\DuplicateLink;
@@ -31,12 +32,14 @@ final class ProductServiceRepointTest extends TestCase {
 		$this->repo = new InMemoryProductRepository();
 	}
 
+	public ?InMemoryLinkLocations $locations = null;
+
 	private function service(): ProductService {
 		$settings = new InMemorySettingsRepository( array( 'tracking_id' => 'vbvault-20' ) );
 		$resolver = new LinkResolver( new FakePageFetcher() );
 		$links    = new LinkNormaliser( $resolver, $settings );
 
-		return new ProductService( $this->repo, $resolver, $settings, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon() );
+		return new ProductService( $this->repo, $resolver, $settings, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon(), $this->locations );
 	}
 
 	private function product( string $name, string $url, string $asin = '' ): Product {
@@ -89,6 +92,18 @@ final class ProductServiceRepointTest extends TestCase {
 		self::assertSame( array( (int) $mine->id => (int) $other->id ), $this->repo->retired );
 		self::assertNull( $this->repo->get( (int) $mine->id ) ); // in the trash: no longer published
 		self::assertNotNull( $this->repo->get( (int) $other->id ) );
+	}
+
+	public function test_a_repoint_moves_the_index_rows_and_a_new_link_pins_them_task_35i(): void {
+		$this->locations = new InMemoryLinkLocations();
+		$mine            = $this->product( 'Mine', 'https://www.example.com/mine' );
+		$other           = $this->product( 'Other', 'https://www.example.com/other' );
+
+		$this->service()->update( (int) $mine->id, array( 'name' => 'Mine' ) );
+		$this->service()->update( (int) $mine->id, array( 'url' => 'https://www.example.com/mine-new' ) );
+		$this->service()->repoint( (int) $mine->id, (int) $other->id, 'www.example.com/other' );
+
+		self::assertSame( array( 'pin ' . $mine->id, 'move ' . $mine->id . ' ' . $other->id ), $this->locations->calls );
 	}
 
 	/**

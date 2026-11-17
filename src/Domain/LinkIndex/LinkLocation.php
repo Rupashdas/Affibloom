@@ -76,7 +76,8 @@ final class LinkLocation {
 	}
 
 	/**
-	 * The same row with what a rescan keeps from the stored one (D10): the first URL, a dismissal, an assignment.
+	 * The same row with what a rescan keeps from the stored one (D10): the first URL, a dismissal, an assignment. An
+	 * assignment ties the row to its product whatever the link resolves to (F22 N1-A; Task 35I's pinned rows).
 	 *
 	 * @param string $original_url        The stored row's first URL.
 	 * @param bool   $is_ignored          Whether it was dismissed.
@@ -87,6 +88,11 @@ final class LinkLocation {
 		$values['original_url']        = '' !== $original_url ? $original_url : $this->url;
 		$values['is_ignored']          = $is_ignored;
 		$values['assigned_product_id'] = $assigned_product_id;
+		if ( $assigned_product_id > 0 ) {
+			$values['product_id'] = $assigned_product_id;
+			$values['link_type']  = LinkType::Product->value;
+			$values['domain']     = null;
+		}
 
 		return new self( ...$values );
 	}

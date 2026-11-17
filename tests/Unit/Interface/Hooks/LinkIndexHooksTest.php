@@ -57,6 +57,8 @@ final class LinkIndexHooksTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
+			public function pin_product( int $product_id ): void {}
+			public function move_product( int $from, int $to ): void {}
 			public function host_ids(): array {
 				return array();
 			}

@@ -386,7 +386,7 @@ final class Plugin {
 		$links      = new LinkNormaliser( $resolver, $this->settings_repository() );
 		$catalog    = $this->catalog();
 		$data       = $this->amazon_data();
-		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data );
+		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository() );
 		$bulk       = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$genius     = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );
 		$per_page   = new PerPage();

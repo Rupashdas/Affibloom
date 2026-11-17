@@ -68,6 +68,8 @@ final class LinkIndexerTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
+			public function pin_product( int $product_id ): void {}
+			public function move_product( int $from, int $to ): void {}
 			public function host_ids(): array {
 				return array();
 			}
@@ -185,6 +187,8 @@ final class LinkIndexerTest extends TestCase {
 			public function delete_host( int $host_id ): void {
 				$this->test->deleted( $host_id );
 			}
+			public function pin_product( int $product_id ): void {}
+			public function move_product( int $from, int $to ): void {}
 			public function host_ids(): array {
 				return $this->test->stored_hosts;
 			}

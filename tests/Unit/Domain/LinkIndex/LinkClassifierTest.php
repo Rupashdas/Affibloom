@@ -81,4 +81,10 @@ final class LinkClassifierTest extends TestCase {
 		$row = self::row( new LinkCandidate( 'https://ws-na.amazon-adsystem.com/widgets/q?asins=B0F21TEST1&tracking_id=site-20', '', '', false, '', LinkCandidate::SITESTRIPE_IFRAME ), 5 );
 		self::assertSame( array( 'sitestripe', 'Product Box', 'B0F21TEST1', 'site-20', null ), array( $row->link_type, $row->display_type, $row->asin, $row->tracking_id, $row->domain ) );
 	}
+
+	public function test_an_assignment_ties_the_row_to_its_product_on_a_rescan(): void {
+		$kept = self::row( new LinkCandidate( 'https://old.test/link' ) )->keeping( 'https://old.test/link', false, 12 );
+
+		self::assertSame( array( 12, 'product', null ), array( $kept->product_id, $kept->link_type, $kept->domain ) );
+	}
 }

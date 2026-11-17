@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Products;
 
+use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
@@ -33,12 +34,13 @@ final class ProductService {
 	/**
 	 * Builds the service.
 	 *
-	 * @param ProductRepository  $products Product storage.
-	 * @param LinkResolver       $links    Where a new link leads and what to call it.
-	 * @param SettingsRepository $settings Site settings (keep_genius_formatting, the link defaults, the Amazon tag rule).
-	 * @param ProductInput       $input    The product page's field rules (Task 15A).
-	 * @param LinkNormaliser     $rules    The link rules the add flow and the product page share.
-	 * @param AmazonDataService  $amazon   What a new Amazon product takes from Amazon (C1C).
+	 * @param ProductRepository           $products Product storage.
+	 * @param LinkResolver                $links    Where a new link leads and what to call it.
+	 * @param SettingsRepository          $settings Site settings (keep_genius_formatting, the link defaults, the Amazon tag rule).
+	 * @param ProductInput                $input    The product page's field rules (Task 15A).
+	 * @param LinkNormaliser              $rules    The link rules the add flow and the product page share.
+	 * @param AmazonDataService           $amazon   What a new Amazon product takes from Amazon (C1C).
+	 * @param LinkLocationRepository|null $locations The link index, whose rows follow a new link and a repoint (35I).
 	 */
 	public function __construct(
 		private ProductRepository $products,
@@ -47,6 +49,7 @@ final class ProductService {
 		private ProductInput $input,
 		private LinkNormaliser $rules,
 		private AmazonDataService $amazon,
+		private ?LinkLocationRepository $locations = null,
 	) {}
 
 	/** Products per Dashboard page on a fresh install: Lasso's default (Lasso_Helper::get_dashboard_page_size_options). */
@@ -172,6 +175,10 @@ final class ProductService {
 		$changed = $product->with( $changes );
 		if ( null !== $typed ) {
 			$changed = self::with_genius( $this->with_link( $changed, $product, $typed ), $typed );
+		}
+		// Task 35I (F21 D16): the posts still hold the old link, so the product's index rows are pinned to it first.
+		if ( null !== $this->locations && $changed->url->key() !== $product->url->key() ) {
+			$this->locations->pin_product( $id );
 		}
 
 		return $this->products->save( $changed );
@@ -373,6 +380,8 @@ final class ProductService {
 		}
 
 		$this->products->retire( $source, $to );
+		// Task 35I (F21 R60): the retired product's Locations become the target's; no post changes.
+		$this->locations?->move_product( $from, $to );
 
 		return $target;
 	}
