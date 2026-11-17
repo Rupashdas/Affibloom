@@ -81,6 +81,9 @@ final class EditorAssets implements Module {
 	 */
 	public function enqueue(): void {
 		$this->enqueue_for( self::BLOCK_SCRIPT );
+		// Task ED5 (F4 R80-R84): the posts' stored Lasso link attributes stay valid in core and GenerateBlocks blocks. In
+		// the head, so its filters are in place before the editor registers those blocks.
+		wp_enqueue_script( 'affibloom-core-link-attributes', $this->plugin_url . 'assets/editor/core-link-attributes.js', array( 'wp-hooks', 'wp-element', 'wp-blocks', 'wp-html-entities' ), $this->version, false );
 	}
 
 	/**

@@ -74,7 +74,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task ED2: Elementor widget
 - [x] Task ED3: Rank Math content analysis
 - [x] Task ED4: AMP inline styles
-- [ ] Task ED5: Keep Lasso's link attributes valid in core blocks (N3 accepted)
+- [x] Task ED5: Keep Lasso's link attributes valid in core blocks (N3 accepted)
 - Task ED6: moved to Phase 5, right after Task 27A (on 2026-11-14; it depends on 27A)
 - Task MCP1: dropped (decision A10)
 
@@ -1096,11 +1096,18 @@ editor-blocks/ blocks (R82).
 **Files:** create `assets/editor/core-link-attributes.js`; modify `EditorAssets.php`; test fixtures from
 `tests/fixtures/inventory`; `tests/E2E/acceptance/F4.spec.ts` (AC20).
 
-- [ ] **Step 1: Failing test** (open a fixture post with an image and a GenerateBlocks button carrying `data-lasso-*`;
+- [x] **Step 1: Failing test** (open a fixture post with an image and a GenerateBlocks button carrying `data-lasso-*`;
   no invalid-block notice; save keeps the attributes).
-- [ ] **Step 2: parse/save filters.**
-- [ ] **Step 3: Run and look.** By hand with a real post of the 147.
-- [ ] **Step 4: Commit** — "Keep stored link attributes valid in the block editor".
+- [x] **Step 2: parse/save filters.**
+- [x] **Step 3: Run and look.** By hand with a real post of the 147.
+- [x] **Step 4: Commit** — "Keep stored link attributes valid in the block editor".
+
+*Note (2026-11-17):* Lasso's filters, ported, minus its Stackable parts (R83: Stackable is not installed and no post
+holds a Stackable block) and its `data-dev` copy of the id (no stored post has one). They step aside while Lasso's own
+filters are registered, so a block is processed once; AC20 holds Lasso's script back. Before: copies of posts 2622,
+4468 and 5931 had 24, 4 and 1 invalid blocks with Lasso's script held back. After: 0, and with Lasso loaded 0. Saving
+kept every `data-lasso-*` (101, 13, 15); 4468 and 5931 came back byte-identical. In 2622 only the unregistered
+`affiliate-plugin/lasso` block's JSON re-encoded `&` as `&` (ED6, Phase 5).
 
 ---
 
