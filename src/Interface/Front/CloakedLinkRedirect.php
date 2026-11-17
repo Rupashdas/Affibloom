@@ -171,6 +171,13 @@ final class CloakedLinkRedirect implements Module {
 			}
 		}
 
-		return null;
+		// A URL variant answers at the root whatever the prefix (F27 D4, R18; Task V3), after every product's address and
+		// never over a post or a term's page.
+		$slug = CloakPath::slug( $uri, '', $home );
+		if ( null === $slug || $this->guard->post_has( $slug ) || $this->guard->term_path( '', $slug ) ) {
+			return null;
+		}
+
+		return $this->resolver->product_for_variant( $slug );
 	}
 }

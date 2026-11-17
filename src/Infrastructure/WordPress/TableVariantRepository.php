@@ -104,4 +104,23 @@ KEY key_kind (variant_key,variant_kind)';
 
 		return $this->for_parent( $product_id );
 	}
+
+	/**
+	 * The slug of the published or retired product a permalink variant's key belongs to, or null (R18; Task V3): the key
+	 * as typed in the path, or its sanitize_title form, as Lasso looks it up; the oldest row wins.
+	 *
+	 * @param string $key A path's last part.
+	 */
+	public function parent_slug_for_permalink( string $key ): ?string {
+		global $wpdb;
+
+		$clean = sanitize_title( $key );
+		if ( '' === trim( $key ) ) {
+			return null;
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, only for an address no post or product answers.
+		$slug = $wpdb->get_var( $wpdb->prepare( 'SELECT p.post_name FROM %i AS v INNER JOIN %i AS p ON p.ID = v.parent_id WHERE v.variant_key IN ( %s, %s ) AND v.variant_kind = %s AND p.post_type = %s AND p.post_status IN ( %s, %s ) ORDER BY v.id LIMIT 1', $wpdb->prefix . self::TABLE, $wpdb->posts, $key, $clean, VariantKind::Permalink->value, ProductPostType::NAME, 'publish', ProductPostType::RETIRED ) );
+
+		return is_string( $slug ) && '' !== $slug ? $slug : null;
+	}
 }

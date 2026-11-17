@@ -34,4 +34,26 @@ final class CloakResolverTest extends TestCase {
 			)
 		);
 	}
+
+	/** F27 R18 (Task V3): a permalink variant's key answers as its product. */
+	public function test_a_variant_permalink_finds_its_product(): void {
+		$repo     = new InMemoryProductRepository();
+		$shoe     = $repo->save( self::product( 'Shoe', 'shoe', array() ) );
+		$variants = new class() implements \Affibloom\Domain\Variant\VariantRepository {
+			public function for_parent( int $product_id ): array {
+				return array();
+			}
+			public function replace( int $product_id, array $variants ): array {
+				return array();
+			}
+			public function parent_slug_for_permalink( string $key ): ?string {
+				return 'shoe-ig' === $key ? 'shoe' : null;
+			}
+		};
+		$resolver = new CloakResolver( $repo, $variants );
+
+		self::assertSame( $shoe->id, $resolver->product_for_variant( 'shoe-ig' )?->id );
+		self::assertNull( $resolver->product_for_variant( 'nothing' ) );
+		self::assertNull( ( new CloakResolver( $repo ) )->product_for_variant( 'shoe-ig' ) );
+	}
 }

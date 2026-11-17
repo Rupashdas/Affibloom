@@ -31,4 +31,12 @@ interface VariantRepository {
 	 * @throws \RuntimeException When the list cannot be stored; nothing changed.
 	 */
 	public function replace( int $product_id, array $variants ): array;
+
+	/**
+	 * The slug of the published or retired product a permalink variant's key belongs to, or null (R18; Task V3). Amazon
+	 * tags are never looked up by path.
+	 *
+	 * @param string $key A path's last part.
+	 */
+	public function parent_slug_for_permalink( string $key ): ?string;
 }

@@ -95,4 +95,20 @@ test.describe( 'F27 URL variants', () => {
 		await expect( page.locator( '[data-variant-row]' ) ).toHaveCount( 1 );
 		await expect( page.locator( '[data-variant-row]' ) ).toContainText( 'Keep' );
 	} );
+
+	test( 'AC6 a variant permalink answers like its product, at the root, and a product slug wins', async ( { request } ) => {
+		const product = createProduct( { name: unique( 'F27 answer' ), url: 'https://www.example.com/f27-answer' } );
+		const key = unique( 'f27-go' ).toLowerCase();
+		addVariant( product, 'Answer', key );
+		const answer = await request.get( `/${ key }/?utm_source=ig`, { maxRedirects: 0 } );
+		expect( answer.status() ).toBe( 302 );
+		expect( answer.headers().location ).toBe( 'https://www.example.com/f27-answer?utm_source=ig' );
+		expect( answer.headers()[ 'x-robots-tag' ] ).toContain( 'noindex' );
+
+		const owner = createProduct( { name: unique( 'F27 owner' ), url: 'https://www.example.com/f27-owner' } );
+		const ownerSlug = wp( 'post', 'get', String( owner ), '--field=post_name' );
+		addVariant( product, 'Clash', ownerSlug );
+		const clash = await request.get( `/${ ownerSlug }/`, { maxRedirects: 0 } );
+		expect( clash.headers().location ).toBe( 'https://www.example.com/f27-owner' );
+	} );
 } );

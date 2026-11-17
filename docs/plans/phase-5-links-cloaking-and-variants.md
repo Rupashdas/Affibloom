@@ -109,7 +109,7 @@ Grouped by feature, in the order they are worked.
 
 - [x] Task V1: The Variants tab
 - [x] Task V2: Add, edit, remove and save variants
-- [ ] Task V3: A variant permalink answers
+- [x] Task V3: A variant permalink answers
 - [ ] Task V4: Amazon variant tags are kept
 - [ ] Task V5: Find products by their variants on the Dashboard
 
@@ -1104,10 +1104,12 @@ product with that slug wins; the prefix does not apply.
 
 **Files:** the above; tests F27 AC6, F24 AC1-AC3 rerun.
 
-- [ ] **Step 1: Failing tests.** An integration test for `parent_by_permalink_key()`; AC6's E2E case; F24 AC1-AC3 rerun.
-- [ ] **Step 2: Repository lookup and the arm.** `TableVariantRepository::parent_by_permalink_key()` and the variant arm of `CloakResolver`.
-- [ ] **Step 3: Run and look** (`curl -I` on a variant's permalink).
-- [ ] **Step 4: Commit** — "Answer URL variant permalinks".
+- [x] **Step 1: Failing tests.** An integration test for `parent_by_permalink_key()`; AC6's E2E case; F24 AC1-AC3 rerun.
+- [x] **Step 2: Repository lookup and the arm.** `TableVariantRepository::parent_by_permalink_key()` and the variant arm of `CloakResolver`.
+- [x] **Step 3: Run and look** (`curl -I` on a variant's permalink).
+- [x] **Step 4: Commit** — "Answer URL variant permalinks".
+
+*Note (2026-11-18):* *Note:* `parent_slug_for_permalink()` (joined to posts: published or retired parents only, edge case 3) instead of a parent ID, so `CloakResolver::product_for_variant()` reuses `find_by_slug()`; the arm runs in `CloakedLinkRedirect` after every prefix, at the root, behind the post and term guard. Checked with curl: `/example-ig/` 302 with `X-Robots-Tag` and `utm_source` passed through; `/go/example-ig/` 404.
 
 ---
 

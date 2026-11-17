@@ -402,7 +402,7 @@ final class Plugin {
 		$links      = new LinkNormaliser( $resolver, $this->settings_repository() );
 		$catalog    = $this->catalog();
 		$data       = $this->amazon_data();
-		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
+		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository(), new TableVariantRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
 		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository(), $cloaked->product_at( ... ) );
 		$variants   = new VariantService( new TableVariantRepository(), new WpSlugTaken( new PostTypeProductRepository() ) );
 		$bulk       = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
