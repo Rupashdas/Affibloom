@@ -62,7 +62,7 @@ test.describe( 'F24 Link cloaking', () => {
 		expect( ( await hit( request, '/category/uncategorized/' ) ).status() ).not.toBe( 302 );
 	} );
 
-	test( 'AC4 the request's query passes through: utm replaces, others fill, sid becomes the network's sub-ID', async ( { request } ) => {
+	test( 'AC4 the request query passes through: utm replaces, others fill, sid becomes the network sub-ID', async ( { request } ) => {
 		const slug = unique( 'f24-q' );
 		cloaked( slug, 'https://www.example.com/p?a=1&utm_source=site' );
 		const answer = await request.get( `/${ slug }/?utm_source=ig&a=2&foo=bar&doing_wp_cron=1&lcid=x`, { maxRedirects: 0, failOnStatusCode: false } );
@@ -100,7 +100,7 @@ test.describe( 'F24 Link cloaking', () => {
 		expect( ( await request.get( '/my-shoe-2/', { maxRedirects: 0, failOnStatusCode: false } ) ).status() ).toBe( 302 );
 	} );
 
-	test( 'AC8 Add Link gives a new product its name's slug (amzn- for Amazon) and the site's Link Cloaking', async ( { page } ) => {
+	test( 'AC8 Add Link gives a new product its name as slug (amzn- for Amazon) and the site Link Cloaking', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		const added = await page.evaluate( async ( url ) => {
 			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { id?: number; data?: { id: number } } > } };
@@ -109,5 +109,23 @@ test.describe( 'F24 Link cloaking', () => {
 		const id = String( added.id ?? added.data?.id );
 		expect( wp( 'post', 'get', id, '--field=post_name' ) ).toMatch( /^amzn-mikasa-v200w/ );
 		expect( wp( 'post', 'meta', 'get', id, '_affibloom_cloak' ) ).toBe( '1' );
+	} );
+
+	test( 'AC9 a new prefix moves the links, old prefixes keep answering, and Override All Links sets every product', async ( { request } ) => {
+		const product = createProduct( { name: unique( 'F24 prefix' ), url: 'https://www.example.com/prefix-product' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_cloak', '1' );
+		const status = async ( path: string ) => ( await request.get( path, { maxRedirects: 0, failOnStatusCode: false } ) ).status();
+
+		for ( const prefix of [ 'go', 'shop', '' ] ) {
+			wp( 'eval', `wp_set_current_user( 1 ); $r = new WP_REST_Request( 'POST', '/affibloom/v1/settings/tabs/general' ); $r->set_body_params( array( 'settings' => array( 'link_prefix' => '${ prefix }' ) ) ); rest_do_request( $r );` );
+		}
+		expect( await status( `/${ slug }/` ) ).toBe( 302 );
+		expect( await status( `/go/${ slug }/` ) ).toBe( 302 );
+		expect( await status( `/shop/${ slug }/` ) ).toBe( 302 );
+
+		wp( 'eval', "wp_set_current_user( 1 ); $r = new WP_REST_Request( 'POST', '/affibloom/v1/settings/link-defaults/apply' ); $r->set_body_params( array( 'key' => 'link_cloaking', 'value' => false ) ); rest_do_request( $r );" );
+		expect( wp( 'post', 'meta', 'get', String( product ), '_affibloom_cloak' ) ).toBe( '0' );
+		wp( 'eval', "wp_set_current_user( 1 ); $r = new WP_REST_Request( 'POST', '/affibloom/v1/settings/link-defaults/apply' ); $r->set_body_params( array( 'key' => 'link_cloaking', 'value' => true ) ); rest_do_request( $r );" );
 	} );
 } );

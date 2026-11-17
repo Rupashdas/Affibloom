@@ -20,7 +20,7 @@ $rows = array(
 	'sponsored'            => array( __( 'Sponsored', 'affibloom' ), __( 'When enabled, this link will be set to sponsored.', 'affibloom' ), true ),
 	'show_disclosure'      => array( __( 'Show Disclosure', 'affibloom' ), __( 'When enabled, this link will show the disclosure.', 'affibloom' ), true ),
 	'allow_duplicates'     => array( __( 'Allow duplicate destinations', 'affibloom' ), __( 'Allows you to have links from different networks to the same product.', 'affibloom' ), false ),
-	'link_cloaking'        => array( __( 'Link Cloaking', 'affibloom' ), __( 'Toggle on to brand your link with your domain. Toggle off to show readers your Primary Destination URL.', 'affibloom' ), false ),
+	'link_cloaking'        => array( __( 'Link Cloaking', 'affibloom' ), __( 'Toggle on to brand your link with your domain. Toggle off to show readers your Primary Destination URL.', 'affibloom' ), true ),
 	'detect_opportunities' => array( __( 'Detect Opportunities', 'affibloom' ), __( 'When off, Link Opportunities won’t show for affected links. Doesn’t change how Affibloom finds opportunities in the background.', 'affibloom' ), false ),
 	'auto_detect_links'    => array( __( 'Auto-Detect Affiliate Links', 'affibloom' ), __( 'Add all detected affiliate links to your dashboard as individual products.', 'affibloom' ), false ),
 );

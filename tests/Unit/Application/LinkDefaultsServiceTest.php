@@ -25,6 +25,16 @@ final class LinkDefaultsServiceTest extends TestCase {
 
 	public function test_an_unknown_key_is_refused(): void {
 		$this->expectException( \InvalidArgumentException::class );
-		( new LinkDefaultsService( new InMemoryProductRepository() ) )->apply_to_all( 'link_cloaking', true );
+		( new LinkDefaultsService( new InMemoryProductRepository() ) )->apply_to_all( 'detect_opportunities', true );
+	}
+
+	public function test_link_cloaking_is_pushed_to_the_products_cloak_flag(): void {
+		$repo = new InMemoryProductRepository();
+		$repo->save( Product::draft( 'One', AffiliateUrl::from_string( 'https://a.example/1' ), Settings::from_array( array() ) ) );
+
+		( new LinkDefaultsService( $repo ) )->apply_to_all( 'link_cloaking', false );
+
+		self::assertSame( array( 'cloak' => false ), $repo->flags_set );
+		self::assertFalse( $repo->saved[ array_key_first( $repo->saved ) ]->cloak );
 	}
 }

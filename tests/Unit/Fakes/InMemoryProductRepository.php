@@ -104,7 +104,7 @@ final class InMemoryProductRepository implements ProductRepository {
 	public array $flags_set = array();
 
 	public function set_flag_for_all( string $field, bool $value ): int {
-		if ( ! in_array( $field, array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure' ), true ) ) {
+		if ( ! in_array( $field, array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'cloak' ), true ) ) {
 			throw new \InvalidArgumentException( 'Not a link switch.' );
 		}
 		$this->flags_set[ $field ] = $value;

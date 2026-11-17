@@ -11,6 +11,7 @@ namespace Affibloom\Interface\Front;
 
 use Affibloom\Application\Cloak\CloakResolver;
 use Affibloom\Domain\Cloak\CloakPath;
+use Affibloom\Domain\Cloak\CloakPrefix;
 use Affibloom\Domain\Cloak\NetworkSubIds;
 use Affibloom\Domain\Cloak\PublicLink;
 use Affibloom\Domain\Cloak\RedirectQuery;
@@ -121,12 +122,20 @@ final class CloakedLinkRedirect implements Module {
 	 * @return array{product: int, destination: string, robots: bool}|null
 	 */
 	public function target( string $uri ): ?array {
-		$prefix = $this->settings->get()->string( 'link_prefix' );
-		$slug   = CloakPath::slug( $uri, $prefix, (string) wp_parse_url( home_url(), PHP_URL_PATH ) );
-		if ( null === $slug || ( '' === $prefix && $this->guard->post_has( $slug ) ) || $this->guard->term_path( $prefix, $slug ) ) {
-			return null;
+		$settings = $this->settings->get();
+		$home     = (string) wp_parse_url( home_url(), PHP_URL_PATH );
+		$product  = null;
+		// The current prefix first, then the old ones, '' for "no prefix" (F24 N2; Task CL5).
+		foreach ( CloakPrefix::all( $settings->string( 'link_prefix' ), $settings->list( 'cloak_prefix_history' ) ) as $prefix ) {
+			$slug = CloakPath::slug( $uri, $prefix, $home );
+			if ( null === $slug || ( '' === $prefix && $this->guard->post_has( $slug ) ) || $this->guard->term_path( $prefix, $slug ) ) {
+				continue;
+			}
+			$product = $this->resolver->product_for( $slug );
+			if ( null !== $product ) {
+				break;
+			}
 		}
-		$product = $this->resolver->product_for( $slug );
 		if ( null === $product ) {
 			return null;
 		}

@@ -12,6 +12,7 @@ namespace Affibloom\Application\Settings;
 use Closure;
 use InvalidArgumentException;
 use LogicException;
+use Affibloom\Domain\Cloak\CloakPrefix;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Settings\CustomCss;
 use Affibloom\Domain\Settings\PerformanceMode;
@@ -172,6 +173,8 @@ final class SettingsService {
 
 		if ( 'general' === $tab ) {
 			$after = self::analytics_rules( $after );
+			// F24 N2 (Task CL5): the addresses under the old prefix keep answering.
+			$after = $after->with( array( 'cloak_prefix_history' => CloakPrefix::history( $before->list( 'cloak_prefix_history' ), $before->string( 'link_prefix' ), $after->string( 'link_prefix' ) ) ) );
 		}
 
 		// Lasso adds every ID removed from the whitelist to a blacklist, which the link rewriter uses to replace

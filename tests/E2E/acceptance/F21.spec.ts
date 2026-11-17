@@ -66,7 +66,7 @@ test.describe( 'F21 The content link index', () => {
 		expect( wp( 'affibloom', 'links', 'status' ) ).toMatch( /links indexed/i );
 	} );
 
-	test( 'AC2 the rebuild indexes Affibloom's displays: the shortcode by type, the block, and a group display with its group', () => {
+	test( 'AC2 the rebuild indexes Affibloom displays: the shortcode by type, the block, and a group display with its group', () => {
 		const product = createProduct( { name: unique( 'F21 box' ), url: `https://www.example.com/${ unique( 'f21b' ) }` } );
 		const group = createGroup( unique( 'F21 group' ), [ product ] );
 		const groupId = wp( 'term', 'get', 'affibloom_group', group, '--by=slug', '--field=term_id' );
@@ -75,8 +75,7 @@ test.describe( 'F21 The content link index', () => {
 			`<!-- wp:paragraph --><p>[affibloom id="${ product }" type="button"] [affibloom group="${ group }" type="list"]</p><!-- /wp:paragraph -->`,
 			boxBlock( product, { type: 'image' } ),
 			`<!-- wp:affibloom/product-box {"type":"grid","groupId":${ groupId }} /-->`,
-		].join( '
-' ) );
+		].join( '\n' ) );
 
 		expect( wp( 'affibloom', 'links', 'rebuild', `--post=${ post }` ) ).toMatch( /Indexed 1 post: 5 links/ );
 		const found = rows( post ) as ( Row & { display_ref: string | null } )[];

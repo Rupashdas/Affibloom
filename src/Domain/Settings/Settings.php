@@ -35,6 +35,8 @@ final class Settings {
 		'ga_anonymize_ip'                 => false,
 		// General: Cloaked Link Prefix and Smart CSS Loading (Task 9G). Smart CSS is on for a fresh install (decision C5).
 		'link_prefix'                     => '',
+		// Earlier prefixes, which keep answering (F24 N2; Task CL5). Kept by the save, not a field.
+		'cloak_prefix_history'            => array(),
 		'smart_css'                       => true,
 		// General: Performance (Task 9H). Lasso's default mode is Balanced, whose CPU level is 65.
 		'performance_mode'                => 'balanced',

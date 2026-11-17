@@ -455,4 +455,16 @@ final class SettingsServiceTest extends TestCase {
 
 		self::assertSame( 2, $rebuilds );
 	}
+
+	public function test_a_changed_prefix_keeps_the_old_one_answering(): void {
+		$repo    = $this->repository();
+		$service = new SettingsService( $repo );
+
+		$service->update_tab( 'general', array( 'link_prefix' => 'go' ) );
+		$service->update_tab( 'general', array( 'link_prefix' => 'Shop Now' ) );
+		$service->update_tab( 'general', array( 'new_tab' => '1' ) ); // the prefix not posted: no change.
+
+		self::assertSame( 'shop-now', $repo->get()->string( 'link_prefix' ) );
+		self::assertSame( array( '', 'go' ), $repo->get()->list( 'cloak_prefix_history' ) );
+	}
 }

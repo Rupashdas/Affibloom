@@ -97,7 +97,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL2: Query strings through the redirect
 - [x] Task CL3: Permalink and Link Cloaking on the product page
 - [x] Task CL4: A new product's slug and cloaking
-- [ ] Task CL5: The General settings take effect
+- [x] Task CL5: The General settings take effect
 - [ ] Task CL6: The public link in front-end output
 - [ ] Task CL7: The Dashboard row's link
 - [ ] Task CL8: Products in the block editor's link search
@@ -820,11 +820,13 @@ answering (N2). Switching **Link Cloaking** → "Update Link Settings" → **Ove
 
 **Files:** the above; tests F24 AC9, F9 AC10 rerun; unit `CloakPrefixTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: History and override arm.**
-- [ ] **Step 3: Resolver arm.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Apply the cloaked link prefix and cloaking override".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: History and override arm.**
+- [x] **Step 3: Resolver arm.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Apply the cloaked link prefix and cloaking override".
+
+*Note (2026-11-18):* *Note:* the history is a settings key (`cloak_prefix_history`), set by `SettingsService::update_tab('general')`; the old-prefix arm is a loop in `CloakedLinkRedirect::target()` (`CloakResolver` unchanged). The override maps `link_cloaking` → the `cloak` flag in `LinkDefaultsService`. Checked on Local: '' → go → shop, `/slug/`, `/go/slug/`, `/shop/slug/` all 302; Override All Links set 511 products off and on.
 
 ---
 
