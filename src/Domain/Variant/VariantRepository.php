@@ -39,4 +39,11 @@ interface VariantRepository {
 	 * @param string $key A path's last part.
 	 */
 	public function parent_slug_for_permalink( string $key ): ?string;
+
+	/**
+	 * Whether any product has an Amazon variant with this tag (R19; Task V4).
+	 *
+	 * @param string $tag An Amazon tracking ID.
+	 */
+	public function amazon_tag_exists( string $tag ): bool;
 }

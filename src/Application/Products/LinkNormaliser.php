@@ -15,6 +15,7 @@ use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
+use Affibloom\Domain\Variant\VariantRepository;
 
 /**
  * The link rules the add flow and the product page share. `tagged()` was the add flow's own Amazon step (Task 12A);
@@ -26,20 +27,21 @@ final class LinkNormaliser {
 	/**
 	 * Builds the rules.
 	 *
-	 * @param LinkResolver       $links    Follows a geni.us link to where it leads.
-	 * @param SettingsRepository $settings The tracking ID rule, "Shorten Amazon links", "Keep geni.us formatting".
+	 * @param LinkResolver           $links    Follows a geni.us link to where it leads.
+	 * @param SettingsRepository     $settings The tracking ID rule, "Shorten Amazon links", "Keep geni.us formatting".
+	 * @param VariantRepository|null $variants The products' URL variants, whose Amazon tags are kept (F27 R19; Task V4).
 	 */
-	public function __construct( private LinkResolver $links, private SettingsRepository $settings ) {}
+	public function __construct( private LinkResolver $links, private SettingsRepository $settings, private ?VariantRepository $variants = null ) {}
 
 	/**
 	 * An Amazon link with the site's tag rule applied (Lasso's get_amazon_product_url with $monetize): the tag
-	 * whitelist, "Shorten Amazon links"; short and protected links are left as they are.
+	 * whitelist and the Amazon variants' tags, "Shorten Amazon links"; short and protected links are left as they are.
 	 *
 	 * @param AmazonUrl $amazon   The link.
 	 * @param Settings  $settings The site's settings.
 	 */
 	public function tagged( AmazonUrl $amazon, Settings $settings ): AffiliateUrl {
-		return $amazon->monetized( TrackingIds::from_settings( $settings ), $settings->bool( 'shorten_amazon_links' ) );
+		return $amazon->monetized( TrackingIds::from_settings( $settings, $this->variants ), $settings->bool( 'shorten_amazon_links' ) );
 	}
 
 	/**

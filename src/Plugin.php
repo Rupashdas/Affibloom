@@ -361,7 +361,7 @@ final class Plugin {
 			new WpCronBackgroundJob( AmazonBulkSyncCron::HOOK ),
 			$this->amazon_data(),
 			new PostTypeProductRepository(),
-			new LinkNormaliser( new LinkResolver( new WpPageFetcher() ), $this->settings_repository() ),
+			new LinkNormaliser( new LinkResolver( new WpPageFetcher() ), $this->settings_repository(), new TableVariantRepository() ),
 			$this->settings_repository()
 		);
 		return $this->bulk_sync;
@@ -399,7 +399,7 @@ final class Plugin {
 		);
 		$notice     = new Notice();
 		$resolver   = new LinkResolver( new WpPageFetcher() );
-		$links      = new LinkNormaliser( $resolver, $this->settings_repository() );
+		$links      = new LinkNormaliser( $resolver, $this->settings_repository(), new TableVariantRepository() );
 		$catalog    = $this->catalog();
 		$data       = $this->amazon_data();
 		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository(), new TableVariantRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
@@ -421,7 +421,7 @@ final class Plugin {
 		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
 
 		$public_links = new PublicLinks( $this->settings_repository() );
-		$box_builder  = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ), null, $public_links->for( ... ) );
+		$box_builder  = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ), null, $public_links->for( ... ), new TableVariantRepository() );
 		$box_html     = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
 		// The block draws its Button and Image displays through the shortcode (Task 23C).
 		$shortcode = new AffibloomShortcode(

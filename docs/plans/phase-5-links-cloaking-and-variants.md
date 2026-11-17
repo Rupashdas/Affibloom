@@ -110,7 +110,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task V1: The Variants tab
 - [x] Task V2: Add, edit, remove and save variants
 - [x] Task V3: A variant permalink answers
-- [ ] Task V4: Amazon variant tags are kept
+- [x] Task V4: Amazon variant tags are kept
 - [ ] Task V5: Find products by their variants on the Dashboard
 
 **F21 — render-time link attributes and displays (after the cloaking block)**
@@ -1131,10 +1131,12 @@ product with that slug wins; the prefix does not apply.
 
 **Files:** `LinkNormaliser.php` and its port; tests F27 AC7, F2 AC rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Port and arm.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Keep Amazon tags saved as URL variants".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Port and arm.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Keep Amazon tags saved as URL variants".
+
+*Note (2026-11-18):* *Note:* the arm is in the domain's `TrackingIds` (optional `VariantRepository`), so `LinkNormaliser` (save, Add Link) and `BoxBuilder` (a box's `tracking_id`) both get it; the table caches each tag per request and clears on a save. Checked on Local: an Amazon variant `insta-20` on 20490; Add Link with `tag=insta-20` kept it, `tag=random-20` became `vbvault-20`, a box with `tracking_id="insta-20"` printed it; the tab reads "Tracking ID".
 
 ---
 

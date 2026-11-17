@@ -51,4 +51,16 @@ final class TrackingIdsTest extends TestCase {
 	public function test_the_site_id_is_trimmed_as_lasso_trims_it(): void {
 		self::assertSame( 'vbvault-20', $this->ids( ' vbvault-20 ', true, array() )->tag_for( 'x-20' ) );
 	}
+
+	/** F27 R19 (Task V4): a tag that is any product's Amazon variant is kept as pasted. */
+	public function test_an_amazon_variant_tag_is_kept(): void {
+		$variants          = new \Affibloom\Tests\Unit\Fakes\InMemoryVariantRepository();
+		$variants->saved[] = new \Affibloom\Domain\Variant\Variant( 1, 9, 'Instagram', 'insta-20', \Affibloom\Domain\Variant\VariantKind::AmazonTag );
+		$variants->saved[] = new \Affibloom\Domain\Variant\Variant( 2, 9, 'Shoe page', 'shoe-20', \Affibloom\Domain\Variant\VariantKind::Permalink );
+		$ids               = TrackingIds::from_settings( Settings::from_array( array( 'tracking_id' => 'vbvault-20' ) ), $variants );
+
+		self::assertSame( 'insta-20', $ids->tag_for( 'insta-20' ) );
+		self::assertSame( 'vbvault-20', $ids->tag_for( 'shoe-20' ) );
+		self::assertSame( 'vbvault-20', $ids->tag_for( 'other-20' ) );
+	}
 }

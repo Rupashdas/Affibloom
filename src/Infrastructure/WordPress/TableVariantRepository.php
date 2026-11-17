@@ -35,6 +35,13 @@ KEY parent_id (parent_id),
 KEY key_kind (variant_key,variant_kind)';
 
 	/**
+	 * The request's answers of amazon_tag_exists(), by tag; a save of variants clears them.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static array $tags = array();
+
+	/**
 	 * A product's variants, in the order they were stored.
 	 *
 	 * @param int $product_id The product's ID.
@@ -101,6 +108,7 @@ KEY key_kind (variant_key,variant_kind)';
 		}
 		$wpdb->query( 'COMMIT' );
 		// phpcs:enable
+		self::$tags = array();
 
 		return $this->for_parent( $product_id );
 	}
@@ -122,5 +130,25 @@ KEY key_kind (variant_key,variant_kind)';
 		$slug = $wpdb->get_var( $wpdb->prepare( 'SELECT p.post_name FROM %i AS v INNER JOIN %i AS p ON p.ID = v.parent_id WHERE v.variant_key IN ( %s, %s ) AND v.variant_kind = %s AND p.post_type = %s AND p.post_status IN ( %s, %s ) ORDER BY v.id LIMIT 1', $wpdb->prefix . self::TABLE, $wpdb->posts, $key, $clean, VariantKind::Permalink->value, ProductPostType::NAME, 'publish', ProductPostType::RETIRED ) );
 
 		return is_string( $slug ) && '' !== $slug ? $slug : null;
+	}
+
+	/**
+	 * Whether any product has an Amazon variant with this tag (R19; Task V4), asked once per tag per request, as Lasso
+	 * caches it: every Amazon link a page formats passes here.
+	 *
+	 * @param string $tag An Amazon tracking ID.
+	 */
+	public function amazon_tag_exists( string $tag ): bool {
+		global $wpdb;
+
+		if ( '' === $tag ) {
+			return false;
+		}
+		if ( ! isset( self::$tags[ $tag ] ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, cached for the request above.
+			self::$tags[ $tag ] = null !== $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE variant_key = %s AND variant_kind = %s LIMIT 1', $wpdb->prefix . self::TABLE, $tag, VariantKind::AmazonTag->value ) );
+		}
+
+		return self::$tags[ $tag ];
 	}
 }

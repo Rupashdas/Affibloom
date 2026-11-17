@@ -38,6 +38,7 @@ use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\Settings;
+use Affibloom\Domain\Variant\VariantRepository;
 
 /**
  * The box engine (F5 D1, D2): Lasso's Single rules, computed without side effects. Every box caller (the block, the
@@ -71,17 +72,26 @@ final class BoxBuilder {
 	private readonly ?\Closure $public_link;
 
 	/**
+	 * The products' URL variants, whose Amazon tags a box's tracking ID keeps (F27 R19; Task V4); null keeps none.
+	 *
+	 * @var VariantRepository|null
+	 */
+	private readonly ?VariantRepository $variants;
+
+	/**
 	 * Builds the engine.
 	 *
 	 * @param string                             $default_thumbnail Affibloom's own picture for a product without one (F5 D14).
 	 * @param \Closure(string): int|null         $post_of_url       Which post a URL points to, for the self-link check (R40).
 	 * @param \Closure(): DateTimeImmutable|null $clock     The current moment (tests); null is now.
 	 * @param \Closure(Product): string|null     $public_link The product's public link (F24 R13; Task CL6); null is its destination.
+	 * @param VariantRepository|null             $variants    The URL variants, whose Amazon tags are kept (F27 R19; Task V4).
 	 */
-	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null, ?\Closure $clock = null, ?\Closure $public_link = null ) {
+	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null, ?\Closure $clock = null, ?\Closure $public_link = null, ?VariantRepository $variants = null ) {
 		$this->post_of_url = $post_of_url;
 		$this->clock       = $clock;
 		$this->public_link = $public_link;
+		$this->variants    = $variants;
 	}
 
 	/**
@@ -109,7 +119,7 @@ final class BoxBuilder {
 			$product         = $product->with( array( 'price' => $shown->price ) );
 			$amazon_discount = $shown->discount;
 		}
-		$product = self::applied( $product, $overrides, $settings );
+		$product = self::applied( $product, $overrides, $settings, $this->variants );
 		// R3, R65: the Single type's theme, then the product's own, then the box's.
 		$theme = ThemeResolver::resolve( $config->theme(), $product->theme, $overrides->theme );
 		$id    = (int) $product->id;
@@ -243,11 +253,12 @@ final class BoxBuilder {
 	 * button. `hide` stays the text, as Lasso prints
 	 * it in classic rendering (edge case 10); advanced rendering hides the button (R60).
 	 *
-	 * @param Product      $product   The product.
-	 * @param BoxOverrides $overrides The box's values.
-	 * @param Settings     $settings  The site's settings, for the tracking ID whitelist.
+	 * @param Product                $product   The product.
+	 * @param BoxOverrides           $overrides The box's values.
+	 * @param Settings               $settings  The site's settings, for the tracking ID whitelist.
+	 * @param VariantRepository|null $variants  The URL variants, whose Amazon tags are kept too (F27 R19).
 	 */
-	private static function applied( Product $product, BoxOverrides $overrides, Settings $settings ): Product {
+	private static function applied( Product $product, BoxOverrides $overrides, Settings $settings, ?VariantRepository $variants ): Product {
 		$changes = array();
 		$url     = $product->url;
 		$buttons = $product->buttons->all();
@@ -256,7 +267,7 @@ final class BoxBuilder {
 		// tag is kept only when the site's whitelist allows it (F31 A38, Lasso's get_amazon_product_url), else the site's.
 		$amazon = AmazonUrl::from( $url );
 		if ( '' !== $overrides->tracking_id && null !== $amazon ) {
-			$tag    = TrackingIds::from_settings( $settings )->tag_for( $overrides->tracking_id );
+			$tag    = TrackingIds::from_settings( $settings, $variants )->tag_for( $overrides->tracking_id );
 			$url    = $amazon->retagged( $tag );
 			$second = isset( $buttons[0] ) ? AmazonUrl::from( AffiliateUrl::from_string( $buttons[0]->url ) ) : null;
 			if ( null !== $second ) {

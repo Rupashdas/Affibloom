@@ -111,4 +111,21 @@ test.describe( 'F27 URL variants', () => {
 		const clash = await request.get( `/${ ownerSlug }/`, { maxRedirects: 0 } );
 		expect( clash.headers().location ).toBe( 'https://www.example.com/f27-owner' );
 	} );
+
+	test( 'AC7 an Amazon link with a variant tag keeps it on Add Link and in a box; another tag becomes the site tag', async ( { page } ) => {
+		const amazon = createProduct( { name: unique( 'F27 amazon' ), url: `https://www.amazon.com/dp/B0F27${ Date.now() % 100000 }`, type: 'amazon' } );
+		const tag = `${ unique( 'f27' ).toLowerCase().replace( /[^a-z0-9]/g, '' ).slice( -10 ) }-20`;
+		addVariant( amazon, 'Instagram', tag, 'amazon_tag' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const add = ( url: string ) => page.evaluate( async ( link ) => {
+			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { id?: number; data?: { id: number } } > } };
+			const added = await w.wp.apiFetch( { path: '/affibloom/v1/products', method: 'POST', data: { url: link } } );
+			return added.id ?? added.data?.id;
+		}, url );
+		const kept = await add( `https://www.amazon.com/dp/B0K${ Date.now() % 1000000 }?tag=${ tag }` );
+		expect( wp( 'post', 'meta', 'get', String( kept ), '_affibloom_url' ) ).toContain( `tag=${ tag }` );
+		const replaced = await add( `https://www.amazon.com/dp/B0R${ Date.now() % 1000000 }?tag=nobody-20` );
+		expect( wp( 'post', 'meta', 'get', String( replaced ), '_affibloom_url' ) ).not.toContain( 'tag=nobody-20' );
+		expect( wp( 'eval', `echo do_shortcode( '[affibloom id="${ amazon }" tracking_id="${ tag }"]' );` ) ).toContain( `tag=${ tag }` );
+	} );
 } );

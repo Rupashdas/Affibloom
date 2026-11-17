@@ -6,6 +6,7 @@ use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Tests\Unit\Fakes\InMemoryVariantRepository;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -39,17 +40,7 @@ final class CloakResolverTest extends TestCase {
 	public function test_a_variant_permalink_finds_its_product(): void {
 		$repo     = new InMemoryProductRepository();
 		$shoe     = $repo->save( self::product( 'Shoe', 'shoe', array() ) );
-		$variants = new class() implements \Affibloom\Domain\Variant\VariantRepository {
-			public function for_parent( int $product_id ): array {
-				return array();
-			}
-			public function replace( int $product_id, array $variants ): array {
-				return array();
-			}
-			public function parent_slug_for_permalink( string $key ): ?string {
-				return 'shoe-ig' === $key ? 'shoe' : null;
-			}
-		};
+		$variants = new InMemoryVariantRepository( array( 'shoe-ig' => 'shoe' ) );
 		$resolver = new CloakResolver( $repo, $variants );
 
 		self::assertSame( $shoe->id, $resolver->product_for_variant( 'shoe-ig' )?->id );
