@@ -62,4 +62,15 @@ final class Messages {
 			default       => __( 'This value is not valid.', 'affibloom' ),
 		};
 	}
+
+	/**
+	 * The Permalink's conflict warning (F24 R5, N7: the truthful wording the user accepted).
+	 *
+	 * @param string $slug The product's slug.
+	 * @param string $type What uses it ("Page").
+	 */
+	public static function slug_in_use( string $slug, string $type ): string {
+		/* translators: 1: a product's slug, 2: a post type's name. */
+		return sprintf( __( 'Permalink %1$s is being used by %2$s. This product\'s link will not open until you change it.', 'affibloom' ), $slug, $type );
+	}
 }

@@ -23,6 +23,7 @@ use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Amazon\SearchPage;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\ProductScreen;
@@ -44,12 +45,13 @@ final class ProductsController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param ProductService      $products         Product use cases.
-	 * @param ProductResource     $product_resource Products as arrays.
-	 * @param GroupService        $groups           The groups a product is in (F23).
-	 * @param AmazonSearchService $search       The Amazon tab's selections (C1M).
+	 * @param ProductService       $products         Product use cases.
+	 * @param ProductResource      $product_resource Products as arrays.
+	 * @param GroupService         $groups           The groups a product is in (F23).
+	 * @param AmazonSearchService  $search           The Amazon tab's selections (C1M).
+	 * @param WpSlugConflicts|null $conflicts       Who else uses a saved slug (F24 R5; Task CL3).
 	 */
-	public function __construct( private ProductService $products, private ProductResource $product_resource, private GroupService $groups, private AmazonSearchService $search ) {}
+	public function __construct( private ProductService $products, private ProductResource $product_resource, private GroupService $groups, private AmazonSearchService $search, private ?WpSlugConflicts $conflicts = null ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -189,10 +191,10 @@ final class ProductsController implements Module {
 	 */
 	public static function field_args(): array {
 		$args = array();
-		foreach ( array( 'name', 'url', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure' ) as $field ) {
+		foreach ( array( 'name', 'url', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure', 'permalink' ) as $field ) {
 			$args[ $field ] = array( 'type' => 'string' );
 		}
-		foreach ( array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' ) as $field ) {
+		foreach ( array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'link_cloaking' ) as $field ) {
 			$args[ $field ] = array( 'type' => 'boolean' );
 		}
 		$args['image_id']         = array(
@@ -283,7 +285,19 @@ final class ProductsController implements Module {
 		}
 		$of = $this->groups->for_products( array( (int) $product->id ) );
 
-		return new WP_REST_Response( array( 'data' => $this->product_resource->full( $product, $of[ (int) $product->id ] ?? array() ) ) );
+		$answer = array( 'data' => $this->product_resource->full( $product, $of[ (int) $product->id ] ?? array() ) );
+		// F24 R5, N7 (Task CL3): a post or page with the slug takes its address; the save stands, the editor is told.
+		$conflict = ProductType::Amazon === $product->type || null === $this->conflicts ? null : $this->conflicts->used_by( $product->slug );
+		if ( null !== $conflict ) {
+			$answer['warnings'] = array(
+				array(
+					'text' => Messages::slug_in_use( $product->slug, $conflict['type'] ),
+					'link' => $conflict['edit'],
+				),
+			);
+		}
+
+		return new WP_REST_Response( $answer );
 	}
 
 	/**

@@ -7,7 +7,7 @@
  * as two cards, *Display content* and *Disclosure & link attributes*, in the same order.
  *
  * Placeholders until their tasks: the live preview (14E, Phase 3), Detect Opportunities (the Opportunities area),
- * Link Cloaking (link cloaking) and the Amazon price shown from Amazon's data (C1F). Lasso's Commission Upgrades is its
+ * and the Amazon price shown from Amazon's data (C1F). Lasso's Commission Upgrades is its
  * cloud's and is left out (deviation 52). Nothing here is stored until Save Changes (Task 15, D2), except Refresh's
  * answer (C1D), which Lasso stores at once.
  *
@@ -297,7 +297,7 @@ endif;
 		);
 		if ( ! $is_amazon ) {
 			// Lasso hides Link Cloaking for Amazon links (url-details.php 491).
-			$switches[] = array( 'affibloom-cloaking', 'link_cloaking', __( 'Link Cloaking', 'affibloom' ), false, __( 'The destination of this URL will be redirected from a pretty url on your domain. All non-Amazon Affiliate links should have this enabled.', 'affibloom' ), true );
+			$switches[] = array( 'affibloom-cloaking', 'link_cloaking', __( 'Link Cloaking', 'affibloom' ), $product->cloak, __( 'The destination of this URL will be redirected from a pretty url on your domain. All non-Amazon Affiliate links should have this enabled.', 'affibloom' ), false );
 		} else {
 			// Not on Lasso's page (its Amazon data sets it); kept so the editor can set it until C1 (interface spec, D7).
 			$switches[] = array( 'affibloom-prime', 'prime', __( 'Show Prime Logo', 'affibloom' ), $product->prime, __( 'Show the blue Prime logo for this Amazon product.', 'affibloom' ), false );

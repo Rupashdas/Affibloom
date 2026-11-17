@@ -1,7 +1,7 @@
 <?php
 /**
  * Lasso 370's Share kit (dashboard/header.php; F1 requirements B9, Task 14D): five buttons that copy a snippet and
- * flash "Copied!" for 1.5 seconds (product.js). The shareable URL is the destination until link cloaking exists (D5);
+ * flash "Copied!" for 1.5 seconds (product.js). The shareable URL is the public link under the heading (F24 R14);
  * the destination is the Primary Destination URL as it is typed; the disclosure is the field's, else the site's text.
  * Copy shortcode copies `[affibloom id]` (F31 R31, D9; Task 18S11), disabled for a product not yet saved; Copy block
  * waits for the editor block (Phase 4).

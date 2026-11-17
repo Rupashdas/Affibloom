@@ -73,4 +73,30 @@ test.describe( 'F24 Link cloaking', () => {
 		const sid = await request.get( `/${ impact }/?sid=youtube`, { maxRedirects: 0, failOnStatusCode: false, headers: { referer: 'https://www.youtube.com/' } } );
 		expect( sid.headers().location ).toBe( 'https://shop.sjv.io/c/1/2/3?subId1=youtube' );
 	} );
+
+	test( 'AC5-AC7 Permalink and Link Cloaking on the product page: stored, unique, warned, and the old slug kept', async ( { page, request } ) => {
+		const product = createProduct( { name: unique( 'F24 page' ), url: 'https://www.example.com/page-product' } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }` );
+		const permalink = page.getByLabel( 'Permalink' );
+		await permalink.fill( '' );
+		await permalink.pressSequentially( 'My Shoe!! 2' );
+		await expect( permalink ).toHaveValue( 'My-Shoe-2' );
+		await page.getByLabel( 'Link Cloaking' ).check();
+		await expect( page.locator( '.affibloom-product-url' ) ).toHaveText( /\/my-shoe-2\/$/ );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved.' );
+		await expect( page.locator( '.affibloom-product-url' ) ).toHaveAttribute( 'href', /\/my-shoe-2\/$/ );
+
+		// Another product's slug becomes "-2"; a page's slug is kept with the warning; the old address still answers (CL10).
+		const other = createProduct( { name: unique( 'F24 other' ), url: 'https://www.example.com/other-product' } );
+		const saved = ( slug: string ) => page.evaluate( async ( [ id, s ] ) => {
+			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { data: { slug: string }; warnings?: { text: string }[] } > } };
+			return w.wp.apiFetch( { path: `/affibloom/v1/products/${ id }`, method: 'PATCH', data: { permalink: s } } );
+		}, [ String( other ), slug ] );
+		expect( ( await saved( 'my-shoe-2' ) ).data.slug ).toBe( 'my-shoe-2-2' );
+		expect( ( await saved( 'shoe-2-2-2' ) ).data.slug ).toBe( 'shoe' );
+		const warned = await saved( 'about' );
+		expect( warned.warnings?.[ 0 ].text ).toBe( "Permalink about is being used by Page. This product's link will not open until you change it." );
+		expect( ( await request.get( '/my-shoe-2/', { maxRedirects: 0, failOnStatusCode: false } ) ).status() ).toBe( 302 );
+	} );
 } );

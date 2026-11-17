@@ -59,6 +59,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_sponsored'        => self::flag( $product->sponsored ),
 				'_affibloom_show_disclosure'  => self::flag( $product->show_disclosure ),
 				'_affibloom_cloak'            => self::flag( $product->cloak ),
+				'_affibloom_old_slugs'        => $product->old_slugs,
 				'_affibloom_button_text'      => $product->button_text,
 				'_affibloom_primary_position' => (string) $product->buttons->main_position(),
 				// '' is the display type's theme, and the site's Show Price (hydrate() reads them back that way).
@@ -101,7 +102,16 @@ final class PostTypeProductRepository implements ProductRepository {
 		if ( null === $product->id ) {
 			$id = wp_insert_post( wp_slash( $post ), true );
 		} else {
-			$id = wp_update_post( wp_slash( array( 'ID' => $product->id ) + $post ), true );
+			// The slug as stored, or '' for the name's (F24 R4, D12); WordPress makes it unique among products (R3).
+			$id = wp_update_post(
+				wp_slash(
+					array(
+						'ID'        => $product->id,
+						'post_name' => $product->slug,
+					) + $post
+				),
+				true
+			);
 		}
 		if ( is_wp_error( $id ) ) {
 			throw new RuntimeException( esc_html( $id->get_error_message() ) );
@@ -124,7 +134,12 @@ final class PostTypeProductRepository implements ProductRepository {
 			delete_post_meta( $id, '_affibloom_url_plain_key' );
 		}
 
-		return $product->with( array( 'id' => $id ) );
+		return $product->with(
+			array(
+				'id'   => $id,
+				'slug' => (string) get_post_field( 'post_name', $id ),
+			)
+		);
 	}
 
 	/**
@@ -854,6 +869,16 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The stored old slugs as a list of strings (F24 N1).
+	 *
+	 * @param mixed $stored The meta's value.
+	 * @return list<string>
+	 */
+	private static function old_slugs( mixed $stored ): array {
+		return is_array( $stored ) ? array_values( array_filter( array_map( 'strval', $stored ), static fn( string $slug ): bool => '' !== $slug ) ) : array();
+	}
+
+	/**
 	 * A product from its post and meta.
 	 *
 	 * @param WP_Post $post A product post.
@@ -896,6 +921,7 @@ final class PostTypeProductRepository implements ProductRepository {
 			slug: $post->post_name,
 			// Missing is off, as Lasso reads link_cloaking with intval (F24 D1).
 			cloak: '1' === $meta( 'cloak' ),
+			old_slugs: self::old_slugs( get_post_meta( $post->ID, '_affibloom_old_slugs', true ) ),
 		);
 	}
 

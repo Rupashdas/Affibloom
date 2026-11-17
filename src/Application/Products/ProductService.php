@@ -176,6 +176,10 @@ final class ProductService {
 		if ( null !== $typed ) {
 			$changed = self::with_genius( $this->with_link( $changed, $product, $typed ), $typed );
 		}
+		// F24 N1 (Task CL3): a new slug keeps the old one answering, since no post is rewritten.
+		if ( $changed->slug !== $product->slug && '' !== $product->slug ) {
+			$changed = $changed->with( array( 'old_slugs' => array_values( array_diff( array_unique( array_merge( $product->old_slugs, array( $product->slug ) ) ), array( $changed->slug ) ) ) ) );
+		}
 		// Task 35I (F21 D16): the posts still hold the old link, so the product's index rows are pinned to it first.
 		if ( null !== $this->locations && $changed->url->key() !== $product->url->key() ) {
 			$this->locations->pin_product( $id );

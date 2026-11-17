@@ -57,6 +57,7 @@ final class Product {
 	 *                                       as on (Lasso's show_description; F5 R22).
 	 * @param string       $slug            The product's slug (its post name); the box's `affibloom-url-<slug>` class.
 	 * @param bool         $cloak           Link Cloaking: its links show the cloaked address (F24 D1; meta `_affibloom_cloak`).
+	 * @param list<string> $old_slugs       Slugs it had before, which keep answering (F24 N1; meta `_affibloom_old_slugs`).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -87,6 +88,7 @@ final class Product {
 		public readonly ?bool $show_description = null,
 		public readonly string $slug = '',
 		public readonly bool $cloak = false,
+		public readonly array $old_slugs = array(),
 	) {}
 
 	/**

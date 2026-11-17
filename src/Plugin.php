@@ -89,6 +89,8 @@ use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
+use Affibloom\Interface\PublicLinks;
+use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Interface\Rest\JobsController;
@@ -443,7 +445,7 @@ final class Plugin {
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ) ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -466,7 +468,7 @@ final class Plugin {
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ), $settings, $display, $amazon, $genius, $this->template() ),
 			new HelpTips( $settings ),
-			new ProductsController( $products, new ProductResource(), $groups, $search ),
+			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
 			new BulkAddCron( $bulk ),

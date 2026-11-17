@@ -95,7 +95,7 @@ Grouped by feature, in the order they are worked.
 
 - [x] Task CL1: The redirect for a cloaked path
 - [x] Task CL2: Query strings through the redirect
-- [ ] Task CL3: Permalink and Link Cloaking on the product page
+- [x] Task CL3: Permalink and Link Cloaking on the product page
 - [ ] Task CL4: A new product's slug and cloaking
 - [ ] Task CL5: The General settings take effect
 - [ ] Task CL6: The public link in front-end output
@@ -749,12 +749,20 @@ link. Amazon products show neither control.
 `assets/admin/{product,product-save}.js`, `docs/ui/design-system.md` (warning toast with a link); tests F24 AC5-AC7,
 F1 AC2, AC7, AC11, AC16 rerun; unit `ProductSlugTest`, `PublicLinkTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain rules.**
-- [ ] **Step 3: PATCH, resource, warning.**
-- [ ] **Step 4: The partial and scripts.**
-- [ ] **Step 5: Run and look** (1280, 375 px; keyboard).
-- [ ] **Step 6: Commit** — "Edit a product's permalink and link cloaking, as Lasso does".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain rules.**
+- [x] **Step 3: PATCH, resource, warning.**
+- [x] **Step 4: The partial and scripts.**
+- [x] **Step 5: Run and look** (1280, 375 px; keyboard).
+- [x] **Step 6: Commit** — "Edit a product's permalink and link cloaking, as Lasso does".
+
+*Note (2026-11-18):* `PublicLink::for()` needs no `KeptDomains`: the stored Primary URL already is the destination the save made (Keep
+Original URL and geni.us kept as typed), so R13's kept-URL branch gives the same address. The conflict check and N7's
+warning sit in the controller (`WpSlugConflicts`), not behind a port in the service; the toast shows the text, the
+edit link rides in the answer. The typing rule keeps a trailing hyphen while typing and trims on leaving the field
+(Lasso's trim on every key swallows a space, seen in Brave); the heading line shows the address in lower case, as it
+will be stored. Checked in Brave at 1280 px: "Air Cat Pro" → `air-cat-pro`, Link Cloaking on, heading link the
+cloaked address, old slugs kept, `/air-cat-pro/` 302; a page's slug saved with the warning.
 
 ---
 

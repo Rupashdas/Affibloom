@@ -9,7 +9,8 @@
 
 	/**
 	 * Lasso 370's Share kit (Task 14D): each button copies its snippet from the page as it is now and says "Copied!" for
-	 * 1.5 seconds; its name stays the action. The shareable URL is the destination until link cloaking exists (D5).
+	 * 1.5 seconds; its name stays the action. The shareable URL is the public link under the heading (F24 R14), the
+	 * destination URL the Primary Destination URL as typed.
 	 *
 	 * @param {HTMLElement} kit The Share kit card.
 	 */
@@ -17,7 +18,11 @@
 		var snippet = function ( target ) {
 			var destination = document.getElementById( 'affibloom-url' );
 			var disclosure = document.getElementById( 'affibloom-disclosure' );
-			if ( 'public' === target || 'destination' === target ) {
+			if ( 'public' === target ) {
+				var line = document.querySelector( '.affibloom-product-url' );
+				return line ? line.getAttribute( 'href' ) || '' : '';
+			}
+			if ( 'destination' === target ) {
 				return destination ? destination.value.trim() : '';
 			}
 			if ( 'shortcode' === target ) {
@@ -166,8 +171,51 @@
 		renumber();
 	}
 
+	/**
+	 * Permalink (F24 R8, D10; Task CL3): as Lasso's, what is typed becomes its slug form (anything that is not a letter
+	 * or digit one hyphen, no hyphens at the ends once the field is left); while Link Cloaking is on, the line under the heading shows the
+	 * address it will have, prefix included. The line's link changes only with the save.
+	 *
+	 * @param {HTMLFormElement} form The product form.
+	 */
+	function permalink( form ) {
+		var input = document.getElementById( 'affibloom-permalink' );
+		var cloak = document.getElementById( 'affibloom-cloaking' );
+		var line = document.querySelector( '.affibloom-product-url' );
+		if ( ! input || ! line || ! form.dataset.cloakBase ) {
+			return;
+		}
+		var show = function () {
+			if ( cloak && cloak.checked && '' !== input.value ) {
+				line.textContent = form.dataset.cloakBase + input.value.toLowerCase().replace( /-+$/, '' ) + '/';
+			}
+		};
+		// While typing, a separator becomes a hyphen at once, so "Air Cat" can be typed; leaving the field takes the
+		// hyphens off its ends (Lasso trims on every key, which swallows a space before it can become a hyphen).
+		var tidy = function ( ends ) {
+			var slug = input.value.replace( /[\W_]+/g, '-' ).replace( ends ? /^-+|-+$/g : /^-+/g, '' );
+			if ( slug !== input.value ) {
+				input.value = slug;
+			}
+			show();
+		};
+		input.addEventListener( 'input', function () {
+			tidy( false );
+		} );
+		input.addEventListener( 'change', function () {
+			tidy( true );
+		} );
+		if ( cloak ) {
+			cloak.addEventListener( 'change', show );
+		}
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var features = document.querySelector( '[data-features]' );
+		var productForm = document.getElementById( 'affibloom-product-form' );
+		if ( productForm ) {
+			permalink( productForm );
+		}
 		if ( features ) {
 			featureList( features );
 		}

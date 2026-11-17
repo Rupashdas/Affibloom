@@ -25,8 +25,8 @@
 ( function () {
 	'use strict';
 
-	var TEXTS = [ 'name', 'url', 'button_text', 'badge', 'disclosure', 'theme', 'image_url' ];
-	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' ];
+	var TEXTS = [ 'name', 'url', 'button_text', 'badge', 'disclosure', 'theme', 'image_url', 'permalink' ];
+	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'link_cloaking' ];
 	var toast = window.affibloomToast;
 	var dialog = window.affibloomSaveDialog;
 	var errors = window.affibloomFieldErrors;
@@ -220,14 +220,17 @@
 		};
 
 		// The page as stored (S15): the heading, the name, the links, the image and the price. The line under the heading
-		// is the destination until link cloaking exists (D5).
+		// is the public link (F24 R9, R14), and the Permalink the slug WordPress stored (made unique).
 		var showStored = function ( data, sent ) {
 			title.textContent = '' !== data.name ? data.name : form.dataset.emptyName;
 			title.title = title.textContent; // The head cuts a long name to two lines (MD5).
 			field( 'name' ).value = data.name;
 			field( 'url' ).value = data.url;
-			linkLine.textContent = data.url;
-			linkLine.href = data.url;
+			if ( field( 'permalink' ) ) {
+				field( 'permalink' ).value = data.slug;
+			}
+			linkLine.textContent = data.public_link;
+			linkLine.href = data.public_link;
 			// Blocks left empty were not stored (Buttons' rule); the others line up with the stored list.
 			extraBlocks().filter( function ( block ) {
 				return ! isEmpty( block );
@@ -293,6 +296,10 @@
 						showStored( response.data, sent );
 						keepBaseline();
 						toast( form.dataset.savedText, false );
+						// F24 R5, N7: a post or page with the slug takes its address; the save stands, the editor is told.
+						if ( response.warnings && response.warnings.length ) {
+							toast( response.warnings[ 0 ].text, true );
+						}
 						// "Unsaved Changes" → Save Changes: once saved, go where the link led (Lasso's pending action).
 						if ( afterSave ) {
 							go( afterSave );

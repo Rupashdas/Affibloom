@@ -11,11 +11,19 @@ namespace Affibloom\Interface\Rest;
 
 use Affibloom\Domain\Group\Group;
 use Affibloom\Domain\Product\Product;
+use Affibloom\Interface\PublicLinks;
 
 /**
  * Products as REST arrays.
  */
 final class ProductResource {
+
+	/**
+	 * Builds the resource.
+	 *
+	 * @param PublicLinks|null $links The public link (F24, Task CL3); without it, the destination.
+	 */
+	public function __construct( private ?PublicLinks $links = null ) {}
 
 	/**
 	 * The short form returned after adding.
@@ -58,6 +66,9 @@ final class ProductResource {
 			'sponsored'        => $product->sponsored,
 			'show_disclosure'  => $product->show_disclosure,
 			'prime'            => $product->prime,
+			'slug'             => $product->slug,
+			'cloak'            => $product->cloak,
+			'public_link'      => null === $this->links ? $product->url->value() : $this->links->for( $product ),
 			'groups'           => array_map(
 				static fn( Group $group ): array => array(
 					'id'   => $group->id,

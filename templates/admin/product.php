@@ -24,7 +24,9 @@ use Affibloom\Interface\Admin\ProductScreen;
 $product = $view['product'];
 // Lasso hides Permalink and Link Cloaking for an Amazon link, a search page included (url-details.php 194, 491).
 $is_amazon = ProductType::Amazon === $product->type;
-// D5: the link under the title is the destination until link cloaking exists (Lasso's rule when cloaking is off).
+// F24 R13, R14 (Task CL3): the link under the title is the public link, cloaked or the destination.
+$public_link = $view['public_link'];
+// The Primary Destination URL as stored: the default button's link.
 $destination = $product->url->value();
 ?>
 <div class="wrap affibloom-admin">
@@ -46,7 +48,7 @@ $destination = $product->url->value();
 					'label' => __( 'Dashboard', 'affibloom' ),
 				),
 				'image'       => $product->image_url,
-				'link'        => $destination,
+				'link'        => $public_link,
 				'below'       => 'admin/partials/section-tabs',
 				'below_args'  => array(
 					'label' => __( 'Product sections', 'affibloom' ),
@@ -88,7 +90,7 @@ $destination = $product->url->value();
 					<form id="affibloom-product-form" class="affibloom-product__form" data-product-id="<?php echo esc_attr( (string) $product->id ); ?>" data-product-type="<?php echo esc_attr( $product->type->value ); ?>" novalidate
 						data-saved-text="<?php esc_attr_e( 'Product saved.', 'affibloom' ); ?>"
 						data-failed-text="<?php esc_attr_e( "Try again. For some reason your product didn't save.", 'affibloom' ); ?>"
-						data-empty-name="<?php esc_attr_e( 'Enter a URL Name', 'affibloom' ); ?>">
+						data-empty-name="<?php esc_attr_e( 'Enter a URL Name', 'affibloom' ); ?>" data-cloak-base="<?php echo esc_attr( $view['cloak_base'] ); ?>">
 						<section class="affibloom-card affibloom-product__card affibloom-product__card--link" aria-labelledby="affibloom-card-links">
 							<h2 class="affibloom-card__title" id="affibloom-card-links"><?php esc_html_e( 'Links & buttons', 'affibloom' ); ?></h2>
 							<?php
@@ -111,10 +113,9 @@ $destination = $product->url->value();
 										'id'          => 'affibloom-permalink',
 										'name'        => 'permalink',
 										'label'       => __( 'Permalink', 'affibloom' ),
-										'value'       => '',
+										'value'       => $product->slug,
 										'help'        => __( 'This slug will be used to cloak the original target URL', 'affibloom' ),
 										'placeholder' => 'affiliate-name',
-										'soon'        => true,
 									)
 								);
 							}

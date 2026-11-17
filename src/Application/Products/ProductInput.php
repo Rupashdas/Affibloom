@@ -11,6 +11,7 @@ namespace Affibloom\Application\Products;
 
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\ProductSlug;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Button;
 use Affibloom\Domain\Product\Buttons;
@@ -93,6 +94,13 @@ final class ProductInput {
 				throw new ValidationFailed( array( 'name' => 'required' ) );
 			}
 			$changes['name'] = $name;
+		}
+		// F24 (Task CL3): Lasso's Permalink and Link Cloaking, under their form names.
+		if ( array_key_exists( 'permalink', $input ) ) {
+			$changes['slug'] = ProductSlug::clean( self::text( $input['permalink'] ) );
+		}
+		if ( array_key_exists( 'link_cloaking', $input ) ) {
+			$changes['cloak'] = (bool) $input['link_cloaking'];
 		}
 		if ( array_key_exists( 'disclosure', $input ) ) {
 			$changes['disclosure'] = self::text( $input['disclosure'] );

@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Fields\FieldsService;
@@ -52,6 +53,7 @@ final class ProductScreen {
 	 * @param Notice                 $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
 	 * @param GroupService           $groups   The product's groups and the site's, for the group picker (Task G3).
 	 * @param AmazonDataService      $amazon   Whether Refresh can ask Amazon (C1D).
+	 * @param PublicLinks|null       $links    The public link and the cloaked address's start (F24, Task CL3).
 	 */
 	public function __construct(
 		private Template $template,
@@ -63,6 +65,7 @@ final class ProductScreen {
 		private Notice $notice,
 		private GroupService $groups,
 		private AmazonDataService $amazon,
+		private ?PublicLinks $links = null,
 	) {}
 
 	/**
@@ -154,6 +157,9 @@ final class ProductScreen {
 			'admin/product',
 			array(
 				'product'      => $this->product,
+				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
+				'public_link'  => null === $this->links ? $this->product->url->value() : $this->links->for( $this->product ),
+				'cloak_base'   => null === $this->links ? '' : $this->links->base(),
 				// Lasso's placeholders are the site's button texts (get_lasso_url: *_button_text_default).
 				'button_text'  => $palette->value( 'primary_button_text' ),
 				'button_text2' => $palette->value( 'secondary_button_text' ),
