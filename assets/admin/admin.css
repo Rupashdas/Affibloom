@@ -414,18 +414,28 @@
 .affibloom-page__search { position: relative; flex: 0 0 300px; min-width: 0; }
 .affibloom-page__search--wide { margin-top: 24px; }
 .affibloom-admin .affibloom-page__search .affibloom-search { width: 100%; max-width: none; height: 42px; min-height: 42px; }
-.affibloom-admin .affibloom-page__search--wide .affibloom-search { padding-right: 110px; }
-/* Lasso's shortcut hint, inside the search box on its right. */
+/* The Dashboard's: 48px across the column, raised like a card (Task MD4; 0b.4). Focus keeps the field ring. */
+.affibloom-admin .affibloom-page__search--wide .affibloom-search {
+	height: 48px;
+	min-height: 48px;
+	padding: 0 124px 0 20px;
+	box-shadow: var(--affibloom-shadow-card);
+	font-size: 15px;
+	transition: border-color var(--affibloom-ease);
+}
+.affibloom-admin .affibloom-page__search--wide .affibloom-search:hover:not(:focus) { border-color: var(--affibloom-line-strong); }
+/* Lasso's shortcut hint, inside the search box on its right, drawn as a key. */
 .affibloom-search-kbd {
 	position: absolute;
 	top: 50%;
-	right: 12px;
-	padding: 2px 6px;
+	right: 14px;
+	padding: 2px 8px;
 	border: 1px solid var(--affibloom-control-line);
+	border-bottom-width: 2px;
 	border-radius: 6px;
-	background: var(--affibloom-subtle);
+	background: var(--affibloom-page);
 	color: var(--affibloom-ink-600);
-	font: 500 11px/16px var(--affibloom-font);
+	font: 600 11px/16px var(--affibloom-font);
 	pointer-events: none;
 	transform: translateY(-50%);
 }
@@ -1081,57 +1091,85 @@
 .affibloom-help.is-open .affibloom-help__text { position: fixed; bottom: auto; }
 
 /*
- * 7d. The Dashboard (Tasks 13A-13C): the overview tiles (U9), the toolbar, Lasso's selection bar, and the products
- * table inside its card with the pager in the card's footer. The arrangement is Lasso's (the user's gate 4 answer
- * for F19, 2026-11-13); the colours, type and shapes are Aurora's (docs/ui/design-system.md, "Table", "Overview
- * tile", "Small button").
+ * 7d. The Dashboard (Tasks 13A-13C; Meadow, Task MD4, design system 0b.4): the counts in the page head (U9: stat
+ * cards right of the title, the summary line under the subtitle), then one table card holding the toolbar (saved
+ * views, Filters, Lasso's selection bar), the products table and the pager in its footer. The arrangement is Lasso's
+ * (the user's gate 4 answer for F19, 2026-11-13); the colours, type and shapes are Meadow's.
  */
-.affibloom-tiles {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-	gap: 24px;
-	margin-bottom: 36px;
-}
+/* Stat cards: an icon chip, the 26px number (or a dash) over its label and note, in one row right of the title. */
+.affibloom-tiles { display: flex; flex-wrap: wrap; gap: 12px; }
 .affibloom-tile {
 	display: grid;
-	grid-template-columns: auto 1fr;
-	grid-template-rows: auto auto auto;
+	grid-template-columns: auto minmax(0, 1fr);
 	align-content: center;
 	align-items: center;
-	gap: 2px 14px;
-	min-width: 0;
-	padding: 22px 24px;
+	gap: 0 12px;
+	box-sizing: border-box;
+	min-width: 168px;
+	padding: 12px 20px 12px 12px;
+	border: 1px solid var(--affibloom-line);
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
 }
-.affibloom-tile .affibloom-chip { grid-row: 1 / span 3; }
-.affibloom-tile__number { color: var(--affibloom-ink-900); font: 800 26px/30px var(--affibloom-font-display); font-variant-numeric: tabular-nums; }
-.affibloom-tile__label { overflow: hidden; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
-.affibloom-tile__note { color: var(--affibloom-brand-600); font-size: 11px; font-weight: 600; line-height: 16px; }
+.affibloom-tile .affibloom-chip { grid-row: 1 / span 3; width: 42px; height: 42px; }
+.affibloom-tile .affibloom-chip .affibloom-icon { width: 20px; height: 20px; }
+.affibloom-tile__number { color: var(--affibloom-ink-900); font: 800 26px/1 var(--affibloom-font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.affibloom-tile__label { margin-top: 5px; overflow: hidden; color: var(--affibloom-ink-600); font-size: 13px; font-weight: 500; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-tile__note { color: var(--affibloom-brand-600); font-size: 11px; font-weight: 600; line-height: 16px; white-space: nowrap; }
 /* A tile whose number comes later: the chip and the dash step back, the label stays readable. */
-.affibloom-tile--soon .affibloom-chip { background: var(--affibloom-subtle); color: var(--affibloom-ink-400); }
+.affibloom-tile--soon .affibloom-chip { background: var(--affibloom-sunk); color: var(--affibloom-ink-400); }
 .affibloom-tile--soon .affibloom-tile__number { color: var(--affibloom-ink-400); }
+/* The summary line under the subtitle: "Products 263 · Clicks (30 days) —", quiet, the numbers in ink. */
+.affibloom-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px 0 0; color: var(--affibloom-ink-600); font-size: 14px; line-height: 20px; }
+.affibloom-tile--line { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.affibloom-tile--line .affibloom-tile__label { margin: 0; font-size: 14px; font-weight: 400; }
+.affibloom-tile--line .affibloom-tile__number { color: var(--affibloom-ink-900); font: 600 14px/20px var(--affibloom-font); letter-spacing: 0; }
+.affibloom-summary__sep { width: 4px; height: 4px; border-radius: 50%; background: var(--affibloom-line-strong); }
 
-/*
- * The toolbar under the tiles: the selection bar (or, with Task 13E, Lasso's saved-view bar) on the left and the
- * Filters button on the right. It keeps a height of its own, so the selection bar appearing moves nothing.
- */
-/* The one-time Lasso import (the user, 2026-11-13): one row between the tiles and the toolbar, gone once it has run. */
+/* The one-time Lasso import (the user, 2026-11-13): one row above the table card, gone once it has run. */
 .affibloom-import {
 	display: flex;
 	align-items: center;
 	gap: 18px;
-	margin: -12px 0 32px;
+	margin: 0 0 24px;
 	padding: 20px 24px;
-	border: 1px solid var(--affibloom-brand-50);
+	border: 1px solid var(--affibloom-brand-line);
 }
 .affibloom-import__text { flex: 1 1 auto; min-width: 0; }
 .affibloom-admin .affibloom-import__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 700 16px/24px var(--affibloom-font); }
 .affibloom-import__intro { margin: 2px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 19px; }
 .affibloom-import__form { flex: 0 0 auto; margin: 0; }
+/*
+ * The toolbar: the saved views (or, with rows ticked, Lasso's selection bar in their place) on the left and the
+ * Filters button on the right. It keeps a height of its own, so the selection bar appearing moves nothing.
+ */
 .affibloom-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 40px; margin-bottom: 20px; }
 .affibloom-admin .affibloom-search { border-radius: var(--affibloom-radius-full); padding-left: 16px; }
+
+/*
+ * The table card (MD4): the toolbar is its top row; the list region's own card (table, empty state, error) gives up
+ * its frame inside it. No overflow clipping here, so the Filters panel can open below the toolbar.
+ */
+.affibloom-card--list .affibloom-toolbar {
+	margin: 0;
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-card) var(--affibloom-radius-card) 0 0;
+	transition: background-color var(--affibloom-ease), border-color var(--affibloom-ease);
+}
+/* While rows are ticked the selection bar takes the views' place and the whole row turns green (0b.4). */
+.affibloom-card--list .affibloom-toolbar:has(> .affibloom-selection:not([hidden])) {
+	border-bottom-color: var(--affibloom-brand-line);
+	background: var(--affibloom-brand-50);
+}
+.affibloom-card--list .affibloom-selection { padding: 0; border: 0; border-radius: 0; background: none; }
+.affibloom-card--list .affibloom-selection__count { color: var(--affibloom-brand-600); font-weight: 600; }
+.affibloom-card--list .affibloom-list > .affibloom-card {
+	border: 0;
+	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
+	box-shadow: none;
+}
 
 /*
  * Lasso's selection bar, shown with the first ticked row. It sits in the toolbar's left side, in the row the search
@@ -1169,15 +1207,16 @@
 .affibloom-table { width: 100%; min-width: 1076px; table-layout: fixed; border-collapse: collapse; }
 .affibloom-table th,
 .affibloom-table td { box-sizing: border-box; }
+/* Table header (0b.2): Inter 12px/600 in ink-600, sentence case (Aurora's uppercase is dropped). */
 .affibloom-admin .affibloom-table th {
-	padding: 16px 20px;
+	height: 44px;
+	padding: 0 20px;
 	border-bottom: 1px solid var(--affibloom-line);
 	background: var(--affibloom-subtle);
 	color: var(--affibloom-ink-600);
-	font: 700 12px/16px var(--affibloom-font);
+	font: 600 12px/16px var(--affibloom-font);
 	text-align: left;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.01em;
 	white-space: nowrap;
 }
 .affibloom-table td {
@@ -1207,6 +1246,44 @@
 .affibloom-table th.affibloom-col-actions .affibloom-th { align-items: center; }
 
 /*
+ * The Dashboard's rows (MD4; 0b.3): 80px with 16px side padding, the columns narrowed so all eight fit the column of a
+ * 1280px window (788px fixed, the Link Name keeps at least 200px before the table scrolls inside its card).
+ */
+.affibloom-card--list .affibloom-table { min-width: 990px; }
+.affibloom-card--list .affibloom-table th,
+.affibloom-card--list .affibloom-table td { padding-right: 16px; padding-left: 16px; }
+.affibloom-card--list .affibloom-table td { height: 80px; padding-top: 0; padding-bottom: 0; }
+.affibloom-card--list .affibloom-table .affibloom-col-select { width: 52px; padding-right: 0; padding-left: 20px; }
+.affibloom-card--list .affibloom-table .affibloom-col-image { width: 84px; }
+.affibloom-card--list .affibloom-table .affibloom-col-groups { width: 140px; }
+.affibloom-card--list .affibloom-table .affibloom-col-alert { width: 88px; padding-right: 12px; padding-left: 12px; }
+.affibloom-card--list .affibloom-table .affibloom-col-locations { width: 104px; padding-right: 12px; padding-left: 12px; }
+.affibloom-card--list .affibloom-table .affibloom-col-clicks { width: 88px; padding-right: 12px; padding-left: 12px; }
+.affibloom-card--list .affibloom-table .affibloom-col-actions { width: 232px; padding-right: 20px; }
+/* Locations and Clicks counts in the display face (0b.2), once their tasks fill them. */
+.affibloom-card--list .affibloom-table td.affibloom-col-locations,
+.affibloom-card--list .affibloom-table td.affibloom-col-clicks { color: var(--affibloom-ink-900); font: 700 20px/1 var(--affibloom-font-display); font-variant-numeric: tabular-nums; }
+/* A placeholder dash keeps the body face, so it lines up with the other columns' dashes. */
+.affibloom-card--list .affibloom-table td .affibloom-soon-cell { font: 400 14px/20px var(--affibloom-font); }
+.affibloom-card--list .affibloom-thumb { width: 52px; height: 52px; }
+.affibloom-card--list .affibloom-list.is-loading tbody .affibloom-col-image::after { width: 52px; height: 52px; margin-top: -26px; }
+.affibloom-admin .affibloom-card--list .affibloom-row__name { text-decoration: none; }
+.affibloom-admin .affibloom-card--list .affibloom-row__name:hover { color: var(--affibloom-brand-600); text-decoration: underline; text-underline-offset: 3px; }
+.affibloom-admin .affibloom-card--list .affibloom-row__url { color: var(--affibloom-ink-500); }
+/* Edit and Shortcode: small outlined buttons that strengthen on row hover and turn green on their own hover. */
+.affibloom-card--list .affibloom-row__actions .affibloom-button {
+	border-color: var(--affibloom-line);
+	color: var(--affibloom-ink-600);
+	transition: border-color var(--affibloom-ease), color var(--affibloom-ease), background-color var(--affibloom-ease);
+}
+.affibloom-card--list tbody tr:hover .affibloom-row__actions .affibloom-button { border-color: var(--affibloom-line-strong); color: var(--affibloom-ink-900); }
+.affibloom-card--list tbody tr .affibloom-row__actions .affibloom-button:hover {
+	border-color: var(--affibloom-brand-600);
+	background: var(--affibloom-brand-25);
+	color: var(--affibloom-brand-600);
+}
+
+/*
  * The select box. wp-admin's forms.css removes the native box (appearance: none) and draws a white tick in
  * ::before, expecting a coloured fill that it does not give here: a ticked box looked empty. So the box is drawn
  * in full: brand-600 fill when ticked, wp-admin's tick on it, a bar when part of the page is selected.
@@ -1231,6 +1308,8 @@
 .affibloom-admin .affibloom-check:checked::before { width: 16px; height: 16px; margin: 0; }
 .affibloom-admin .affibloom-check:indeterminate::before { content: ""; width: 8px; height: 2px; margin: 0; border-radius: 1px; background: var(--affibloom-white); }
 .affibloom-admin .affibloom-check:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+/* wp-admin's blue focus shadow on checkboxes would sit beside the green ring. */
+.affibloom-admin .affibloom-check:focus { box-shadow: none; }
 
 /* The product's image, 40px and rounded (design system, "Table"); a quiet tile when there is none. */
 .affibloom-thumb {
@@ -1279,14 +1358,14 @@
  */
 .affibloom-table-scroll { container-type: inline-size; }
 .affibloom-table tbody tr.affibloom-quick,
-.affibloom-table tbody tr.affibloom-quick:hover { background: var(--affibloom-brand-50); }
-.affibloom-table .affibloom-quick > td { padding: 20px; }
+.affibloom-table tbody tr.affibloom-quick:hover { background: var(--affibloom-brand-25); }
+.affibloom-table .affibloom-quick > td { height: auto; padding: 20px; }
 .affibloom-quick__card {
 	position: sticky;
 	left: 20px;
 	box-sizing: border-box;
 	width: calc(100cqi - 40px);
-	padding: 24px;
+	padding: 24px 28px;
 	border: 1px solid var(--affibloom-brand-line);
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
@@ -1441,7 +1520,8 @@
  */
 .affibloom-views { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; margin-right: auto; }
 .affibloom-views[hidden] { display: none; }
-.affibloom-views__label { color: var(--affibloom-ink-600); font: 700 11px/16px var(--affibloom-font); letter-spacing: 0.06em; text-transform: uppercase; }
+/* "SAVED VIEW" is an eyebrow (0b.2); the pills are round view chips, the current one tinted with a tick. */
+.affibloom-views__label { color: var(--affibloom-ink-600); font: 600 11px/16px var(--affibloom-font); letter-spacing: 0.08em; text-transform: uppercase; }
 .affibloom-admin .affibloom-views__list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .affibloom-admin .affibloom-views__item { position: relative; display: inline-flex; align-items: center; margin: 0; }
 .affibloom-admin .affibloom-pill {
@@ -1449,20 +1529,32 @@
 	align-items: center;
 	box-sizing: border-box;
 	max-width: 240px;
-	height: 30px;
+	height: 32px;
 	padding: 0 14px;
 	overflow: hidden;
 	border: 1px solid var(--affibloom-control-line);
 	border-radius: var(--affibloom-radius-full);
 	background: var(--affibloom-white);
-	color: var(--affibloom-ink-700);
-	font: 600 13px/18px var(--affibloom-font);
+	color: var(--affibloom-ink-600);
+	font: 500 13px/18px var(--affibloom-font);
 	text-decoration: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	transition: border-color var(--affibloom-ease), color var(--affibloom-ease);
 }
-.affibloom-admin .affibloom-pill:hover { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
-.affibloom-admin .affibloom-pill[aria-current="true"] { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-pill:hover { border-color: var(--affibloom-line-strong); color: var(--affibloom-ink-900); }
+.affibloom-admin .affibloom-pill[aria-current="true"] { border-color: var(--affibloom-brand-line); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); font-weight: 600; }
+/* The tick says "current" without colour (WCAG 1.4.1). */
+.affibloom-admin .affibloom-pill[aria-current="true"]::before {
+	content: "";
+	flex: none;
+	width: 14px;
+	height: 14px;
+	margin-right: 6px;
+	background: currentcolor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5 8.5 14 15 6.5'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5 8.5 14 15 6.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 .affibloom-admin .affibloom-pill:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
 .affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove) .affibloom-pill { padding-right: 32px; }
 .affibloom-admin .affibloom-pill__remove {
@@ -1572,7 +1664,7 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	padding: 18px 24px;
+	padding: 12px 20px;
 	border-top: 1px solid var(--affibloom-line);
 	border-radius: 0 0 var(--affibloom-radius-card) var(--affibloom-radius-card);
 	background: var(--affibloom-subtle);
@@ -1581,6 +1673,7 @@
 .affibloom-admin .affibloom-pager__size .affibloom-select { width: auto; height: 32px; min-height: 32px; line-height: 30px; }
 .affibloom-pager__per-page,
 .affibloom-pager__range { color: var(--affibloom-ink-600); font-size: 13px; }
+.affibloom-pager__range { color: var(--affibloom-ink-900); font-weight: 500; font-variant-numeric: tabular-nums; }
 .affibloom-pager__sep { color: var(--affibloom-ink-400); }
 .affibloom-pagination { display: flex; align-items: center; gap: 4px; }
 .affibloom-admin .affibloom-pagination .page-numbers {
@@ -1589,18 +1682,22 @@
 	min-width: 32px;
 	height: 32px;
 	padding: 0 8px;
-	border: 1px solid var(--affibloom-control-line);
+	border: 1px solid transparent;
 	border-radius: var(--affibloom-radius-nav);
-	background: var(--affibloom-white);
-	color: var(--affibloom-ink-700);
+	background: transparent;
+	color: var(--affibloom-ink-600);
 	font: 600 13px/13px var(--affibloom-font);
+	font-variant-numeric: tabular-nums;
 	text-decoration: none;
+	transition: background-color var(--affibloom-ease), color var(--affibloom-ease);
 }
-.affibloom-admin .affibloom-pagination .page-numbers:hover { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
+.affibloom-admin .affibloom-pagination .page-numbers:hover { background: var(--affibloom-segment-bg); color: var(--affibloom-ink-900); }
+/* The current page: a white raised chip (0b.4); its border and weight mark it as well as its colour. */
 .affibloom-admin .affibloom-pagination .page-numbers.current {
-	border-color: var(--affibloom-brand-600);
-	background: var(--affibloom-brand-600);
-	color: var(--affibloom-white);
+	border-color: var(--affibloom-control-line);
+	background: var(--affibloom-white);
+	box-shadow: var(--affibloom-shadow-card);
+	color: var(--affibloom-ink-900);
 }
 .affibloom-admin .affibloom-pagination .page-numbers.dots { border-color: transparent; background: none; }
 .affibloom-admin .affibloom-pagination .prev::before,
@@ -2556,14 +2653,15 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-search-kbd { display: none; }
 	.affibloom-admin .affibloom-page__search--wide .affibloom-search { padding-right: 16px; }
 	.affibloom-admin .affibloom-page__title { font-size: 28px; }
-	/* Two tiles a row on a phone, so the five do not fill the first screen on their own. */
-	.affibloom-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-	.affibloom-tile { padding: 12px 14px; }
-	.affibloom-import { flex-wrap: wrap; margin-top: -4px; padding: 16px; }
+	/* The stat cards fill the head's width two a row on a phone, smaller, so they do not fill the first screen. */
+	.affibloom-tiles { flex: 1 1 100%; gap: 10px; }
+	.affibloom-tiles .affibloom-tile { flex: 1 1 140px; min-width: 0; padding: 10px 14px 10px 10px; }
+	.affibloom-tiles .affibloom-chip { width: 32px; height: 32px; }
+	.affibloom-tiles .affibloom-tile__number { font-size: 22px; }
+	.affibloom-card--list .affibloom-toolbar { padding: 12px 16px; }
+	.affibloom-import { flex-wrap: wrap; padding: 16px; }
 	.affibloom-import__form,
 	.affibloom-import__form .affibloom-button { width: 100%; }
-	.affibloom-tile .affibloom-chip { width: 32px; height: 32px; }
-	.affibloom-tile__number { font-size: 22px; line-height: 26px; }
 	.affibloom-table th,
 	.affibloom-table td { padding-right: 16px; padding-left: 16px; }
 	.affibloom-product__pair { grid-template-columns: 1fr; }

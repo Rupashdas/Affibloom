@@ -11,6 +11,9 @@ const WHITE = 'rgb(255, 255, 255)';
 const CONTROL_LINE = 'rgb(211, 219, 209)'; // #D3DBD1
 const LINE = 'rgb(227, 232, 225)'; // #E3E8E1
 const INK_900 = 'rgb(22, 32, 26)'; // #16201A
+const BRAND_50 = 'rgb(227, 240, 231)'; // #E3F0E7
+const BRAND_25 = 'rgb(241, 247, 242)'; // #F1F7F2
+const LINE_STRONG = 'rgb(182, 193, 180)'; // #B6C1B4
 
 const css = ( locator: Locator, property: string ) =>
 	locator.evaluate( ( el, prop ) => getComputedStyle( el ).getPropertyValue( prop ), property );
@@ -128,6 +131,79 @@ test( 'the Dashboard uses the Affibloom design system', async ( { page } ) => {
 	expect( noticeBox.y ).toBeGreaterThanOrEqual( headerBox.y + headerBox.height );
 	expect( Math.abs( noticeBox.x - column.x ) ).toBeLessThanOrEqual( 1 );
 	expect( Math.abs( noticeBox.width - column.width ) ).toBeLessThanOrEqual( 1 );
+} );
+
+test( 'the Dashboard has its counts beside the title and Meadow list', async ( { page } ) => {
+	await page.goto( '/wp-admin/admin.php?page=affibloom' );
+	const head = page.locator( '.affibloom-page__head' );
+	const title = head.getByRole( 'heading', { level: 1, name: 'Dashboard' } );
+
+	// MD4 (0b.4): the three attention counts are stat cards right of the title, level with it; the numbers in the
+	// display face at 26px.
+	const stats = head.locator( '.affibloom-page__actions .affibloom-tile' );
+	await expect( stats.locator( '.affibloom-tile__label' ) ).toHaveText( [ 'Broken links', 'Out of stock', 'Opportunities' ] );
+	const [ titleBox, firstStat ] = [ await box( title ), await box( stats.first() ) ];
+	expect( firstStat.x ).toBeGreaterThan( titleBox.x + titleBox.width );
+	expect( firstStat.y ).toBeLessThan( titleBox.y + titleBox.height );
+	const number = stats.first().locator( '.affibloom-tile__number' );
+	expect( await css( number, 'font-family' ) ).toMatch( /^"?Plus Jakarta Sans"?,/ );
+	expect( await css( number, 'font-size' ) ).toBe( '26px' );
+	expect( await css( stats.first(), 'border-top-color' ) ).toBe( LINE );
+
+	// Products and Clicks (30 days) are one quiet line under the subtitle; Products is the live count.
+	const summary = head.locator( '.affibloom-page__head-text .affibloom-summary' );
+	await expect( summary.locator( '.affibloom-tile__label' ) ).toHaveText( [ 'Products', 'Clicks (30 days)' ] );
+	await expect( summary.locator( '[data-library-count]' ) ).toHaveText( /^\d[\d,]*$/ );
+	expect( ( await box( summary ) ).y ).toBeGreaterThan( ( await box( head.locator( '.affibloom-page__subtitle' ) ) ).y );
+
+	// The search: 48px, round, as wide as the column under it.
+	const search = page.getByLabel( 'Search', { exact: true } );
+	expect( await css( search, 'height' ) ).toBe( '48px' );
+	expect( await css( search, 'border-top-left-radius' ) ).toBe( '999px' );
+	const listCard = page.locator( '.affibloom-card--list' );
+	expect( Math.abs( ( await box( search ) ).width - ( await box( listCard ) ).width ) ).toBeLessThanOrEqual( 1 );
+
+	// The table card holds the toolbar ("SAVED VIEW" chips and Filters) above the table; nothing scrolls sideways at
+	// 1280px; headers in sentence case; 80px rows with 52px image tiles.
+	await expect( listCard.locator( '.affibloom-toolbar' ) ).toHaveCount( 1 );
+	const eyebrow = listCard.locator( '.affibloom-views__label' );
+	expect( await css( eyebrow, 'text-transform' ) ).toBe( 'uppercase' );
+	expect( await css( eyebrow, 'font-size' ) ).toBe( '11px' );
+	const scroll = listCard.locator( '.affibloom-table-scroll' );
+	expect( await scroll.evaluate( ( el ) => el.scrollWidth <= el.clientWidth ) ).toBe( true );
+	const th = listCard.locator( 'th.affibloom-col-name' );
+	expect( await css( th, 'text-transform' ) ).toBe( 'none' );
+	expect( await css( th, 'font-weight' ) ).toBe( '600' );
+	const row = listCard.locator( 'tbody tr[data-product-id]' ).first();
+	expect( Math.round( ( await box( row ) ).height ) ).toBe( 80 );
+	const thumb = row.locator( '.affibloom-thumb' );
+	expect( await css( thumb, 'width' ) ).toBe( '52px' );
+
+	// Edit and Shortcode are outlined and strengthen on row hover.
+	const edit = row.getByRole( 'button', { name: 'Edit' } );
+	expect( await css( edit, 'border-top-color' ) ).toBe( LINE );
+	await row.locator( '.affibloom-col-groups' ).hover();
+	await expect.poll( () => css( edit, 'border-top-color' ) ).toBe( LINE_STRONG );
+
+	// The pager's current page is a white raised chip.
+	const current = listCard.locator( '.affibloom-pagination .page-numbers.current' );
+	if ( await current.count() ) {
+		expect( await css( current, 'background-color' ) ).toBe( WHITE );
+		expect( await css( current, 'box-shadow' ) ).not.toBe( 'none' );
+	}
+
+	// A ticked row turns the toolbar's row green while the selection bar shows.
+	await row.locator( '.affibloom-check' ).check();
+	await expect( listCard.locator( '.affibloom-selection' ) ).toBeVisible();
+	expect( await css( listCard.locator( '.affibloom-toolbar' ), 'background-color' ) ).toBe( BRAND_50 );
+	await row.locator( '.affibloom-check' ).uncheck();
+
+	// Quick edit opens as a pale green band holding a white card.
+	await edit.click();
+	const quick = listCard.locator( 'tr.affibloom-quick' );
+	await expect( quick ).toBeVisible();
+	expect( await css( quick, 'background-color' ) ).toBe( BRAND_25 );
+	expect( await css( quick.locator( '.affibloom-quick__card' ), 'background-color' ) ).toBe( WHITE );
 } );
 
 test( 'Settings uses the Affibloom design system', async ( { page } ) => {

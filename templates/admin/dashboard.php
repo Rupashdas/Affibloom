@@ -1,8 +1,9 @@
 <?php
 /**
- * Dashboard screen: the page head with the title, subtitle (U10) and search, the overview tiles (U9), the toolbar,
- * Lasso's selection bar and the list region. The arrangement is Lasso's (the user's gate 4 answer for F19,
- * 2026-11-13); the look is Meadow's. Every Lasso column and control is present (the user, 2026-11-13: "Complete
+ * Dashboard screen: the page head with the title, subtitle (U10), the counts (U9: the summary line under the subtitle,
+ * the stat cards right of the title) and the search; then the table card holding the toolbar, Lasso's selection bar
+ * and the list region (Meadow, Task MD4). The arrangement is Lasso's (the user's gate 4 answer for F19, 2026-11-13);
+ * the look is Meadow's. Every Lasso column and control is present (the user, 2026-11-13: "Complete
  * the entire Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
@@ -21,14 +22,24 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 
 	<div class="affibloom-page">
 		<?php
-		// Meadow's head (0b.4): the title and subtitle, then the full-width search under it.
+		// Meadow's head (0b.4): the title, subtitle and summary line; the stat cards on the right; the search under it.
 		$this->render(
 			'admin/partials/page-head',
 			array(
-				'title'      => __( 'Dashboard', 'affibloom' ),
-				'subtitle'   => __( 'Your affiliate products, their links and where they are used.', 'affibloom' ),
-				'below'      => 'admin/partials/dashboard-search',
-				'below_args' => array(
+				'title'        => __( 'Dashboard', 'affibloom' ),
+				'subtitle'     => __( 'Your affiliate products, their links and where they are used.', 'affibloom' ),
+				'meta'         => 'admin/partials/dashboard-tiles',
+				'meta_args'    => array(
+					'part'    => 'summary',
+					'library' => $view['library'],
+				),
+				'actions'      => 'admin/partials/dashboard-tiles',
+				'actions_args' => array(
+					'part'    => 'stats',
+					'library' => $view['library'],
+				),
+				'below'        => 'admin/partials/dashboard-search',
+				'below_args'   => array(
 					'args'             => $view['args'],
 					'term'             => $view['term'],
 					'placeholder'      => $placeholder,
@@ -39,56 +50,57 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 		?>
 
 		<div class="affibloom-page__body affibloom-dashboard">
-			<?php $this->render( 'admin/partials/dashboard-tiles', array( 'library' => $view['library'] ) ); ?>
-
 			<?php if ( $view['lasso_pending'] > 0 ) : ?>
 				<?php $this->render( 'admin/partials/lasso-import', array( 'pending' => $view['lasso_pending'] ) ); ?>
 			<?php endif; ?>
 
-			<div class="affibloom-toolbar">
-				<?php
-				// Lasso's views bar on the left, the Filters button on the right. With rows ticked, the selection bar
-				// takes the views bar's place in the same row, so appearing moves nothing under the pointer.
-				$this->render( 'admin/partials/selection-bar' );
-				$this->render(
-					'admin/partials/saved-views',
-					array(
-						'views'     => $view['views'],
-						'term'      => $view['term'],
-						'link_kind' => $view['link_kind'],
-						'per_page'  => $products->per_page,
-						'group'     => $view['group'],
-						'group_ids' => array_map( static fn( $choice ): int => $choice->id, $view['group_list'] ),
-					)
-				);
-				$this->render(
-					'admin/partials/filters-panel',
-					array(
-						'link_kind'  => $view['link_kind'],
-						'group'      => $view['group'],
-						'group_list' => $view['group_list'],
-						'args'       => $view['args'],
-					)
-				);
-				?>
-			</div>
+			<?php // One table card (0b.4): the toolbar as its top row, the list under it; only the list region reloads. ?>
+			<div class="affibloom-card affibloom-card--list">
+				<div class="affibloom-toolbar">
+					<?php
+					// Lasso's views bar on the left, the Filters button on the right. With rows ticked, the selection bar
+					// takes the views bar's place in the same row, so appearing moves nothing under the pointer.
+					$this->render( 'admin/partials/selection-bar' );
+					$this->render(
+						'admin/partials/saved-views',
+						array(
+							'views'     => $view['views'],
+							'term'      => $view['term'],
+							'link_kind' => $view['link_kind'],
+							'per_page'  => $products->per_page,
+							'group'     => $view['group'],
+							'group_ids' => array_map( static fn( $choice ): int => $choice->id, $view['group_list'] ),
+						)
+					);
+					$this->render(
+						'admin/partials/filters-panel',
+						array(
+							'link_kind'  => $view['link_kind'],
+							'group'      => $view['group'],
+							'group_list' => $view['group_list'],
+							'args'       => $view['args'],
+						)
+					);
+					?>
+				</div>
 
-			<?php // The quick edit's toasts (Task 16A; F1 D23), the product page's words. ?>
-			<div id="affibloom-list" class="affibloom-list"
-				data-saved-text="<?php esc_attr_e( 'Product saved.', 'affibloom' ); ?>"
-				data-failed-text="<?php esc_attr_e( "Try again. For some reason your product didn't save.", 'affibloom' ); ?>">
-				<?php
-				$this->render(
-					'admin/partials/product-list',
-					array(
-						'products'  => $products,
-						'term'      => $view['term'],
-						'url'       => $view['url'],
-						'args'      => $view['args'],
-						'groups_of' => $view['groups_of'],
-					)
-				);
-				?>
+				<?php // The quick edit's toasts (Task 16A; F1 D23), the product page's words. ?>
+				<div id="affibloom-list" class="affibloom-list"
+					data-saved-text="<?php esc_attr_e( 'Product saved.', 'affibloom' ); ?>"
+					data-failed-text="<?php esc_attr_e( "Try again. For some reason your product didn't save.", 'affibloom' ); ?>">
+					<?php
+					$this->render(
+						'admin/partials/product-list',
+						array(
+							'products'  => $products,
+							'term'      => $view['term'],
+							'url'       => $view['url'],
+							'args'      => $view['args'],
+							'groups_of' => $view['groups_of'],
+						)
+					);
+					?>
+				</div>
 			</div>
 
 			<?php // Every group picker on the page (the quick edit's, the bulk Add to Group's) reads the site's groups from here (Task G3). ?>

@@ -51,7 +51,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task MD1: Meadow's fonts and colours
 - [x] Task MD2: The white header and notice cards
 - [x] Task MD3: A page head instead of the band
-- [ ] Task MD4: The Dashboard: counts beside the title, search, list
+- [x] Task MD4: The Dashboard: counts beside the title, search, list
 - [ ] Task MD5: The product page: head, sticky preview, save bar
 - [ ] Task MD6: Settings, Groups, Fields, dialogs and the toast
 - [ ] Task MD7: The design system rewritten for Meadow
@@ -288,10 +288,16 @@ filters: the stat cards become buttons in 31B and O8.
 `assets/admin/admin.css`, `tests/E2E/admin-design.spec.ts` (the Dashboard part). Read F19's spec for layout checks
 on the tiles and the toolbar (`boundingBox`) and update only those.
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: Head and search.** - [ ] **Step 3: List, selection bar, quick edit, pager.**
-- [ ] **Step 4: Check and look.** `phpcs`; the Dashboard at 1280 px: a ticked row, a quick edit open, a search with
+- [x] **Step 1: Test.** - [x] **Step 2: Head and search.** - [x] **Step 3: List, selection bar, quick edit, pager.**
+- [x] **Step 4: Check and look.** `phpcs`; the Dashboard at 1280 px: a ticked row, a quick edit open, a search with
   no match.
-- [ ] **Step 5: Commit** — "Put the Dashboard's counts beside its title and restyle its list".
+- [x] **Step 5: Commit** — "Put the Dashboard's counts beside its title and restyle its list".
+
+*Note (2026-11-17):* `page-head.php` gained a `meta` slot under the subtitle for the summary line; `dashboard-tiles.php`
+prints either part (`part`: `stats` or `summary`). The toolbar and the list sit in one table card (`.affibloom-card--list`,
+0b.4), the selection bar tinting the toolbar's row; thumbnails keep the 8px radius (the user's smaller radii, not 0b.3's
+14px). The table header (sentence case) and the pager changed for every list; rows, columns and thumbnails only on the
+Dashboard. Seen at 1280 px: all eight columns fit (no sideways scroll), 80px rows, ticked row, quick edit, no match.
 
 #### Task MD5: The product page: head, sticky preview, save bar
 
