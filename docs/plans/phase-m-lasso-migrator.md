@@ -913,6 +913,9 @@ product, it sets the row's `assigned_product_id` to it (kept across a rescan), s
 as LM3; revert also clears the assignments it made. Afterwards those posts open in the editor without "This block
 contains unexpected or invalid content".
 
+*Note (2026-11-18, from Phase 5):* Lasso's `lasso-scan-ignore` class also becomes `affibloom-scan-ignore` here, the
+class Affibloom's scanner skips (35A/LC2), so the links an editor kept out of Lasso's scan stay out of Affibloom's.
+
 **What this task creates, and who calls it:**
 
 | New | Called by |

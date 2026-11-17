@@ -25,7 +25,7 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
 | 2 | Settings and product library | 2X0-2X6, 8, 9, 9A, 9B-9I, 9K, 9L, 10A-10C, 10E, 10F, 11A-11E, 12A-12E, 13A-13J, 14A-14D, 14F-14H, 15A-15D, 16A-16C, 17A-17D, C1A-C1D, C1I, C1K-C1P, C1Q0-C1Q6b, G1-G5, FL1-FL5, TL1, TL2, ON1, ON2 (+ the one-time Lasso import button, deviation 87) | — (C1J is no code) | **Done**, signed off 2026-11-15. Audited 2026-11-15 (deviation 107): everything but C1 is built, recorded and passes its acceptance tests; C1A done 2026-11-15 (deviation 110); C1B done (deviation 112); C1C done (deviation 113); C1D done (deviation 114); C1I done (deviation 116); C1Q0-C1Q6b done (deviations 117-128; rechecked 2026-11-15: unit, lint, analyse and the 18 C1 ACs pass); Batch 2.2 done 2026-11-15 (C1K, C1L; lint, analyse, AC17 and AC18 pass); Batch 2.3 done 2026-11-15 (C1M, C1N; AC15, AC19 pass); Batch 2.4 done 2026-11-15 (C1O, C1P); **exit check passed 2026-11-15** |
 | 3 | Product displays | 18A-18K, 19A, 20A-20D, 21A-21C, 22A-22C, 22E, 10D, 14E, C1F, C1G, 18S1-18S12, 18S14, DT1-DT9 | — (18S13 is in Phase 7) | **Done**, signed off 2026-11-16 (Batches 3.1-3.26; 3.5-3.26 in one session at the user's word); exit check passed 2026-11-16 |
 | 4 | Editors | MD1-MD7, 23A-23E, 23G, 24A-24E, ED1-ED5 | — (MCP1 dropped, 23F in Phase 7, ED6 in Phase 5) | All batches done 2026-11-17 (4.M1-4.M5, 4.1-4.9). **Done**, signed off 2026-11-17 (Batches 4.M1-4.M5, 4.1-4.9); exit check passed 2026-11-17 (F4 22/22, admin-design 6/6, F5 AC1 7/7) |
-| 5 | Links: the link index, cloaking and URL variants (core only, rewritten 2026-11-17, deviation 146) | LC1, LC2 | 29: 35A-35J, 9J, ON3-ON4, CL1-CL11, V1-V5 | In progress (Batch 5.1 done 2026-11-18) |
+| 5 | Links: the link index, cloaking and URL variants (core only, rewritten 2026-11-17, deviation 146) | LC1, LC2, 35A-35D, 35F-35I, 9J, ON3, ON4, CL1-CL11, V1-V5 | 35E, 35J (part built; Kadence and the other builders wait for the integrations decision) | All batches run 2026-11-18 at the user's word; exit check (Playwright F21/F24/F27, F9 AC13, F38 AC7-AC8) and sign-off to come |
 | 6 | Link health | — | 12: 30A-30C, 31A-31D, 32A-32E (26K moved to Phase M) | Planned |
 | 7 | Locations, clicks, opportunities, auto-detect, tables | — | 56: 36A-36E, 33A-34C, C3A-C3C, 13K, 26J, C1E, C1H, O1-O10, C2A-C2C, AM1-AM6, T1-T17, 18S13 (26I, 26N, 29C moved to Phase M; 27E, IM11, IM18, IM20 dropped) | Planned |
 | 8 | Hardening and documentation | — | 16: 37A-37D, 38, TL3-TL7 (not TL5, in 38), ON5-ON9, 39, 39A | Planned |
@@ -51,9 +51,11 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    **Phase 4 signed off by the user 2026-11-17.** **Plan changed 2026-11-17 (the user, deviation 146):** Affibloom is standalone; the Lasso migration and the
    conversion of every `[lasso]` box to Affibloom's format are a separate plugin, the Affibloom Lasso Migrator
    (`plans/phase-m-lasso-migrator.md`, Phase M, after Phase 8); other affiliate plugins' compatibility is dropped.
-   **Batch 5.1 done 2026-11-18** (LC1, LC2: no Lasso code in core; `NoLassoInCoreTest` guards it). **Next: Batch 5.2
-   (35A, the link index)**, at the
-   user's word, one batch per session (`plans/batches.md`). Open for the user: whether the non-affiliate integrations
+   **Batch 5.1 done 2026-11-18** (LC1, LC2: no Lasso code in core; `NoLassoInCoreTest` guards it). **Batches 5.2-5.17
+   done 2026-11-18** in one session at the user's word ("Yes, all of Phase 5"): the link index (35A-35I, 9J, ON3, ON4),
+   cloaking (CL1-CL11), URL variants (V1-V5), render-time links (35H) and SiteStripe (35J, part). **Next: the user's
+   manual test of Phase 5, then the Phase 5 exit check** (Playwright F21, F24, F27, F9 AC13, F38 AC7-AC8) and sign-off;
+   35E/35J's builders wait for the integrations decision. Open for the user: whether the non-affiliate integrations
    (Elementor, ACF, Kadence, builders) stay (`open-decisions.md`; recommended: keep). The block and the Elementor script build into `build/` (`npm run build`,
    webpack.config.js; a release zip needs a fresh build, Task 39).
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only
