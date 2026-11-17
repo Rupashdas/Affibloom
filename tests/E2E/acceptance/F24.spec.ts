@@ -168,4 +168,15 @@ test.describe( 'F24 Link cloaking', () => {
 		const visitor = await ( await request.get( `/wp-json/wp/v2/search?type=post&search=${ encodeURIComponent( name ) }`, { headers: { cookie: '' } } ) ).json();
 		expect( visitor ).toEqual( [] );
 	} );
+
+	test( 'AC13 the classic Insert/edit link search lists a product with its public link', () => {
+		const name = unique( 'F24 classic' );
+		const product = createProduct( { name, url: 'https://www.example.com/classic-product' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_cloak', '1' );
+		const found = JSON.parse( wp( 'eval', `wp_set_current_user( 1 ); require_once ABSPATH . WPINC . '/class-wp-editor.php'; echo wp_json_encode( _WP_Editors::wp_link_query( array( 's' => '${ name }' ) ) );` ) ) as { title: string; permalink: string; info: string }[];
+		const row = found.find( ( item ) => item.title === name );
+		expect( row?.info ).toBe( 'Product' );
+		expect( row?.permalink ).toMatch( new RegExp( `/${ slug }/$` ) );
+	} );
 } );

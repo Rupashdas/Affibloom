@@ -109,6 +109,7 @@ use Affibloom\Interface\Admin\AdminNavigation;
 use Affibloom\Interface\Admin\AmazonNotices;
 use Affibloom\Interface\Admin\SiteStripeNotice;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\Admin\ClassicLinkSearch;
 use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\FieldScreen;
 use Affibloom\Interface\Admin\FieldsScreen;
@@ -473,6 +474,7 @@ final class Plugin {
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
+			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ) ),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),

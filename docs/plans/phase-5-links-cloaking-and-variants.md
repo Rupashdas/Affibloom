@@ -101,7 +101,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL6: The public link in front-end output
 - [x] Task CL7: The Dashboard row's link
 - [x] Task CL8: Products in the block editor's link search
-- [ ] Task CL9: Products in the classic editor's link dialog
+- [x] Task CL9: Products in the classic editor's link dialog
 - [ ] Task CL10: Old addresses (Lasso's hand-over moved to Phase M, 26G)
 - [ ] Task CL11: A pasted cloaked URL finds its product
 
@@ -932,10 +932,12 @@ public link.
 
 **Files:** `src/Interface/Admin/ClassicLinkSearch.php`, `src/Plugin.php`; tests F24 **AC13**, integration `tests/Integration/ClassicLinkSearchTest.php`.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Filter.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Find products in the classic link dialog".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Filter.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Find products in the classic link dialog".
+
+*Note (2026-11-18):* *Note:* a `wp_link_query` filter only: WordPress labels results by the public post types, so adding the private product type to its query would raise warnings. Products follow the posts on a search's first page, found by the Dashboard's search (name or URL), for `edit_posts`. Checked through `_WP_Editors::wp_link_query()` on Local (the dialog's own call): "Example … Product … /example-22/". No integration test (lean method); unit `ClassicLinkSearchTest`.
 
 ---
 
