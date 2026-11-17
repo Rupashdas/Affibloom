@@ -99,7 +99,7 @@ final class LinkAttributesFilter implements Module {
 		$seen  = array();
 		$tags  = new WP_HTML_Tag_Processor( $html );
 		$moved = false;
-		while ( $tags->next_tag( 'a' ) ) {
+		while ( $tags->next_tag( array( 'tag_name' => 'a' ) ) ) {
 			$href = $tags->get_attribute( 'href' );
 			if ( ! is_string( $href ) || null !== $tags->get_attribute( 'data-affibloom-id' ) ) {
 				continue;

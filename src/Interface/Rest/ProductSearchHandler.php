@@ -86,10 +86,10 @@ final class ProductSearchHandler extends WP_REST_Post_Search_Handler {
 			return $data;
 		}
 		$product = $this->products->get( (int) $id );
-		if ( null !== $product && isset( $data[ WP_REST_Search_Controller::PROP_URL ] ) ) {
+		if ( null !== $product && in_array( WP_REST_Search_Controller::PROP_URL, $fields, true ) ) {
 			$data[ WP_REST_Search_Controller::PROP_URL ] = $this->links->for( $product );
 		}
-		if ( isset( $data[ WP_REST_Search_Controller::PROP_SUBTYPE ] ) ) {
+		if ( in_array( WP_REST_Search_Controller::PROP_SUBTYPE, $fields, true ) ) {
 			$data[ WP_REST_Search_Controller::PROP_SUBTYPE ] = __( 'Product', 'affibloom' );
 		}
 

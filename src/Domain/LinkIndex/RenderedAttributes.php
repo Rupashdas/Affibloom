@@ -55,14 +55,15 @@ final class RenderedAttributes {
 	 * @return array<string, string|null>
 	 */
 	public static function untied( string $target, string $rel ): array {
-		$tokens = array_values( array_diff( preg_split( '/\s+/', trim( $rel ) ) ?: array(), array( '', '1' ) ) );
+		$split  = preg_split( '/\s+/', trim( $rel ) );
+		$tokens = array_values( array_diff( false === $split ? array() : $split, array( '', '1' ) ) );
 		if ( '_blank' === $target ) {
 			$tokens   = array_values( array_diff( $tokens, array( 'noreferrer' ) ) );
 			$tokens[] = 'noopener';
 		}
 		$tokens = array_values( array_unique( $tokens ) );
 		$joined = implode( ' ', $tokens );
-		if ( $joined === trim( $rel ) ) {
+		if ( trim( $rel ) === $joined ) {
 			return array();
 		}
 
