@@ -13,6 +13,7 @@ use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\ProductSlug;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\PlaceholderName;
@@ -586,6 +587,8 @@ final class ProductService {
 				'asin'           => $asin,
 				'amazon_country' => '' === $asin ? '' : $amazon->country(),
 				'search_key'     => $amazon->search_key(),
+				// F24 R3 (Task CL4): an Amazon product's slug starts with amzn-.
+				'slug'           => ProductSlug::for_new( $amazon->starting_name(), true ),
 			)
 		);
 

@@ -99,4 +99,15 @@ test.describe( 'F24 Link cloaking', () => {
 		expect( warned.warnings?.[ 0 ].text ).toBe( "Permalink about is being used by Page. This product's link will not open until you change it." );
 		expect( ( await request.get( '/my-shoe-2/', { maxRedirects: 0, failOnStatusCode: false } ) ).status() ).toBe( 302 );
 	} );
+
+	test( 'AC8 Add Link gives a new product its name's slug (amzn- for Amazon) and the site's Link Cloaking', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const added = await page.evaluate( async ( url ) => {
+			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { id?: number; data?: { id: number } } > } };
+			return w.wp.apiFetch( { path: '/affibloom/v1/products', method: 'POST', data: { url } } );
+		}, `https://www.amazon.com/Mikasa-V200W/dp/B0F24NEW${ Date.now() % 100 }` );
+		const id = String( added.id ?? added.data?.id );
+		expect( wp( 'post', 'get', id, '--field=post_name' ) ).toMatch( /^amzn-mikasa-v200w/ );
+		expect( wp( 'post', 'meta', 'get', id, '_affibloom_cloak' ) ).toBe( '1' );
+	} );
 } );

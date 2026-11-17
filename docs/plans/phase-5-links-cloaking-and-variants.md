@@ -96,7 +96,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL1: The redirect for a cloaked path
 - [x] Task CL2: Query strings through the redirect
 - [x] Task CL3: Permalink and Link Cloaking on the product page
-- [ ] Task CL4: A new product's slug and cloaking
+- [x] Task CL4: A new product's slug and cloaking
 - [ ] Task CL5: The General settings take effect
 - [ ] Task CL6: The public link in front-end output
 - [ ] Task CL7: The Dashboard row's link
@@ -785,10 +785,15 @@ equals the General setting; an Amazon URL's slug starts with `amzn-`.
 
 **Files:** `ProductService.php`, `Product.php`, `BulkAddService.php`; tests F24 AC8, F18's Add Link specs rerun.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain and service.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Give new products Lasso's slug and cloaking default".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain and service.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Give new products Lasso's slug and cloaking default".
+
+*Note (2026-11-18):* the draft takes the name's slug and the General Link Cloaking setting; the Amazon draft's slug starts with `amzn-`;
+the repository inserts the slug and WordPress makes it unique. Bulk add goes through the same create path, so it needs
+no change. Checked on Local through `POST /products`: a merchant link → `example-27`, cloak 1; an Amazon link →
+`amzn-mikasa-volleyball`, cloak 1.
 
 ---
 

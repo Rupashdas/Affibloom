@@ -94,8 +94,9 @@ final class Product {
 	/**
 	 * A new, unsaved product with the site's link defaults as they are now. Lasso copies them when it creates a link
 	 * (save_lasso_url reads get_lasso_url( 0 )'s new-record values and writes them as meta), so a later change of a
-	 * site default does not reach products that already exist. The secondary button's defaults, Detect
-	 * Opportunities, link cloaking and Commission Upgrades join this copy with their settings (Task 11E).
+	 * site default does not reach products that already exist. Link Cloaking is copied too, and the slug is the name's
+	 * (F24 R3, R12; Task CL4). The secondary button's defaults, Detect Opportunities and Commission Upgrades join this
+	 * copy with their settings (Task 11E).
 	 *
 	 * @param string       $name     Name.
 	 * @param AffiliateUrl $url      Primary destination.
@@ -112,6 +113,8 @@ final class Product {
 			$defaults->bool( 'sponsored' ),
 			$defaults->bool( 'show_disclosure' ),
 			prime: true,
+			slug: ProductSlug::for_new( $name, false ),
+			cloak: $defaults->bool( 'link_cloaking' ),
 		);
 	}
 

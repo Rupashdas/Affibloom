@@ -40,4 +40,10 @@ final class PublicLinkTest extends TestCase {
 		self::assertSame( 'shoe-2', ProductSlug::clean( 'shoe-2' ) );
 		self::assertSame( '', ProductSlug::clean( ' -- ' ) );
 	}
+
+	public function test_a_new_product_s_slug_is_its_name_s_with_amzn_for_amazon(): void {
+		self::assertSame( 'mikasa-v200w', ProductSlug::for_new( 'Mikasa V200W', false ) );
+		self::assertSame( 'amzn-mikasa-v200w', ProductSlug::for_new( 'Mikasa V200W', true ) );
+		self::assertSame( 200, strlen( ProductSlug::for_new( str_repeat( 'a', 300 ), true ) ) );
+	}
 }

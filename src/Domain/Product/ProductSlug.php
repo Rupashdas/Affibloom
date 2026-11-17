@@ -22,8 +22,26 @@ final class ProductSlug {
 	 * @param string $typed What the Permalink field holds.
 	 */
 	public static function clean( string $typed ): string {
-		$slug = strtolower( trim( (string) preg_replace( '/[\W_]+/u', '-', trim( $typed ) ), '-' ) );
+		return (string) preg_replace( '/(-\d+)(-\d+)+$/', '', self::form( $typed ) );
+	}
 
-		return (string) preg_replace( '/(-\d+)(-\d+)+$/', '', $slug );
+	/**
+	 * A new product's slug (F24 R3, D11): its name's, with `amzn-` in front for an Amazon product, cut to the column's
+	 * 200 characters; WordPress makes it unique among products when it is stored.
+	 *
+	 * @param string $name   The new product's name.
+	 * @param bool   $amazon Whether it is an Amazon product.
+	 */
+	public static function for_new( string $name, bool $amazon ): string {
+		return substr( ( $amazon ? 'amzn-' : '' ) . self::form( $name ), 0, 200 );
+	}
+
+	/**
+	 * Lasso's slug form: anything that is not a letter or digit one hyphen, none at the ends, lower case.
+	 *
+	 * @param string $text A name or what the Permalink field holds.
+	 */
+	private static function form( string $text ): string {
+		return strtolower( trim( (string) preg_replace( '/[\W_]+/u', '-', trim( $text ) ), '-' ) );
 	}
 }

@@ -100,7 +100,8 @@ final class PostTypeProductRepository implements ProductRepository {
 		// wp_insert_post() unslashes what it is given, so a link's backslashes survive only if slashed first.
 		// wp_update_post() keeps what is not given (author, dates, slug) and expects the same slashing.
 		if ( null === $product->id ) {
-			$id = wp_insert_post( wp_slash( $post ), true );
+			// A new product's slug (F24 R3; Task CL4), made unique by WordPress; '' lets WordPress take the name's.
+			$id = wp_insert_post( wp_slash( array( 'post_name' => $product->slug ) + $post ), true );
 		} else {
 			// The slug as stored, or '' for the name's (F24 R4, D12); WordPress makes it unique among products (R3).
 			$id = wp_update_post(
