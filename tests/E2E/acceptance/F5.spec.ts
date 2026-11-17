@@ -155,6 +155,9 @@ const BASELINE_TOP: Record< string, Record< 'desktop' | 'mobile', number > > = {
 	rating: { desktop: 4787.391, mobile: 9191.688 },
 };
 
+/** The post's box: the site's sidebar may hold a text widget with a box of its own (F31's widget check). */
+const POST_BOX = 'main .affibloom-box';
+
 /**
  * The text of every style element (matched by `selector`) holding Affibloom's `:root` block, read in the page:
  * Playwright's text matching (`hasText`) skips what is inside <style> and <script>, so a locator never finds one.
@@ -165,7 +168,7 @@ async function rootBlocks( page: Page, selector: string ): Promise< string[] > {
 
 /** Shifts the box down by less than a pixel (a layout offset), so its top has the baseline's fractional part. */
 async function onBaselineSubpixel( page: Page, baselineTop: number ): Promise< void > {
-	await page.locator( '.affibloom-box' ).evaluate( ( el, target ) => {
+	await page.locator( POST_BOX ).evaluate( ( el, target ) => {
 		const now = el.getBoundingClientRect().top + window.scrollY;
 		const shift = ( ( ( target % 1 ) - ( now % 1 ) ) % 1 + 1 ) % 1;
 		Object.assign( ( el as HTMLElement ).style, { position: 'relative', top: `${ shift }px` } );
@@ -203,7 +206,7 @@ async function matchesThemeBaseline( page: Page, path: string, cell: string ): P
 		await page.goto( path );
 		await page.addStyleTag( { content: SITE_CSS } );
 		await onBaselineSubpixel( page, THEME_TOP[ cell ][ name ] );
-		await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'site', `${ cell }-${ name }.png` ] );
+		await expect( page.locator( POST_BOX ) ).toHaveScreenshot( [ 'themes', 'site', `${ cell }-${ name }.png` ] );
 	}
 }
 
@@ -235,7 +238,7 @@ async function matchesGroupBaseline( page: Page, path: string, cell: string ): P
 		if ( undefined !== top ) {
 			await onBaselineSubpixel( page, top );
 		}
-		await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', ...cell.split( '/' ).slice( 0, -1 ), `${ cell.split( '/' ).pop() }-${ name }.png` ] );
+		await expect( page.locator( POST_BOX ) ).toHaveScreenshot( [ 'themes', ...cell.split( '/' ).slice( 0, -1 ), `${ cell.split( '/' ).pop() }-${ name }.png` ] );
 	}
 }
 
@@ -393,7 +396,7 @@ test.describe( 'F5 Box design', () => {
 				await page.goto( path );
 				await page.addStyleTag( { content: SITE_CSS } );
 				await onBaselineSubpixel( page, BASELINE_TOP[ variant ][ name ] );
-				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'variants', `${ variant }-${ name }.png` ] );
+				await expect( page.locator( POST_BOX ) ).toHaveScreenshot( [ 'variants', `${ variant }-${ name }.png` ] );
 			}
 		} );
 	}
@@ -446,7 +449,7 @@ test.describe( 'F5 Box design', () => {
 		await page.goto( newPostWith( `<!-- wp:block {"ref":${ pattern }} /-->` ) );
 		expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
 		expect( await rootBlocks( page, 'style' ) ).toHaveLength( 1 );
-		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 1 );
+		await expect( page.locator( POST_BOX ) ).toHaveCount( 1 );
 
 		// The phone layout (R48): below 768px the wrapper takes its data-layout-m-* values, and gives them back above.
 		useSiteDisplay();
@@ -497,7 +500,7 @@ test.describe( 'F5 Box design', () => {
 		wp( 'post', 'update', String( retired ), '--post_status=affibloom_retired' );
 
 		await page.goto( newPostWith( boxBlock( 999999999 ) + boxBlock( draft ) ) );
-		await expect( page.locator( '.affibloom-box' ) ).toHaveCount( 0 );
+		await expect( page.locator( POST_BOX ) ).toHaveCount( 0 );
 
 		await page.goto( newPostWith( boxBlock( retired ) ) );
 		await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( 'F5 AC3 target' );
@@ -787,7 +790,7 @@ test.describe( 'F5 Box design', () => {
 				await page.goto( path );
 				await page.addStyleTag( { content: SITE_CSS } );
 				await onBaselineSubpixel( page, GROUP_TOP[ 'themes/classic/Cactus-plain' ][ name ] );
-				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'classic', `Cactus-plain-${ name }.png` ] );
+				await expect( page.locator( POST_BOX ) ).toHaveScreenshot( [ 'themes', 'classic', `Cactus-plain-${ name }.png` ] );
 			}
 		} finally {
 			useSiteDisplay();
@@ -915,7 +918,7 @@ test.describe( 'F5 Box design', () => {
 				await page.goto( path );
 				await page.addStyleTag( { content: SITE_CSS } );
 				await onBaselineSubpixel( page, GROUP_TOP[ 'themes/sitestripe/Lab-sitestripe' ][ name ] );
-				await expect( page.locator( '.affibloom-box' ) ).toHaveScreenshot( [ 'themes', 'sitestripe', `Lab-sitestripe-${ name }.png` ] );
+				await expect( page.locator( POST_BOX ) ).toHaveScreenshot( [ 'themes', 'sitestripe', `Lab-sitestripe-${ name }.png` ] );
 			}
 
 			setSettings( { keep_site_stripe_ui: false } );

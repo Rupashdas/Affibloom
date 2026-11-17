@@ -195,7 +195,8 @@ test( 'the Dashboard has its counts beside the title and Meadow list', async ( {
 	// A ticked row turns the toolbar's row green while the selection bar shows.
 	await row.locator( '.affibloom-check' ).check();
 	await expect( listCard.locator( '.affibloom-selection' ) ).toBeVisible();
-	expect( await css( listCard.locator( '.affibloom-toolbar' ), 'background-color' ) ).toBe( BRAND_50 );
+	// The row fades to green (a background transition): read it once it has settled.
+	await expect.poll( () => css( listCard.locator( '.affibloom-toolbar' ), 'background-color' ) ).toBe( BRAND_50 );
 	await row.locator( '.affibloom-check' ).uncheck();
 
 	// Quick edit opens as a pale green band holding a white card.
@@ -356,8 +357,10 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	await expect( rail.getByRole( 'tab' ) ).toHaveText( [ 'Layout & spacing', 'Colors & labels' ] );
 	await expect( rail.getByRole( 'tab', { name: 'Layout & spacing' } ) ).toHaveAttribute( 'aria-selected', 'true' );
 	await expect( rail.locator( '.affibloom-chip-option' ) ).toHaveText( [ 'Compact', 'Balanced', 'Spacious' ] );
-	const balanced = rail.locator( '.affibloom-chip-option' ).filter( { hasText: 'Balanced' } );
-	expect( await css( balanced, 'border-top-color' ) ).toBe( BRAND_600 ); // the stored preset, in our brand colour
+	// The stored preset (whichever one other tests left) is marked in our brand colour.
+	const stored = rail.locator( '.affibloom-chip-option:has(input:checked)' );
+	await expect( stored ).toHaveCount( 1 );
+	expect( await css( stored, 'border-top-color' ) ).toBe( BRAND_600 );
 
 	await rail.getByRole( 'tab', { name: 'Colors & labels' } ).click();
 	await expect( rail.getByRole( 'tab', { name: 'Colors & labels' } ) ).toHaveAttribute( 'aria-selected', 'true' );
@@ -405,7 +408,7 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	// Amazon: Lasso's two columns of cards (the user, 2026-11-13), switches left of their labels.
 	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
 	await expectShell( page, 'Settings' );
-	await expect( page.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Amazon Associates Accounts', 'Auto-Monetize Amazon Links', 'Amazon Preferences' ] );
+	await expect( page.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Amazon Associates Accounts', 'Amazon Product Data API', 'Auto-Monetize Amazon Links', 'Amazon Preferences' ] );
 	const columns = page.locator( '.affibloom-columns__column' );
 	await expect( columns ).toHaveCount( 2 );
 	const [ left, right ] = [ await box( columns.nth( 0 ) ), await box( columns.nth( 1 ) ) ];
