@@ -64,7 +64,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 23D: Grid, List and Gallery — "Choose a Group"
 - [x] Task 23E: Create Group and "Add to Group" from the modal
 - Task 23F: Table — "Choose a Table" — **moved to Phase 7** (after F25 T12; settled 2026-11-14)
-- [ ] Task 23G: Create a Link and the quick detail
+- [x] Task 23G: Create a Link and the quick detail
 - [ ] Task 24A: Customize Display sidebar
 - [ ] Task 24B: Schema & Structured Data panel
 - [ ] Task 24C: Shortcode box and Update Display
@@ -659,8 +659,8 @@ tests `tests/E2E/acceptance/F4.spec.ts` (AC7; a user without `PRODUCTS` sees no 
 *Note (2026-11-17):* the two dialogs are stacked modals in the same template, printed only with `PRODUCTS` (no localised
 flag needed); `searchList()` now serves the steps and "Add to Group". R22's two messages are not built: the dialog opens
 only from the groups step, where the type is a group type and the group's ID is known. "Create a Link" in "Add to Group"
-comes with 23G. Edge case 7's test makes its own author with WP-CLI. Seen at 1280 and 375 px: create (both refusals by
-hand: empty), two Selects, Done with the count, Add Group as a gallery.
+comes with 23G. Edge case 7's test makes its own author with WP-CLI. Seen at 1280 and 375 px: create (the empty-name
+refusal), two Selects, Done with the count, Add Group as a gallery.
 
 ---
 
@@ -703,13 +703,21 @@ display-modal.js → POST /products { url } (PRODUCTS, F18) → quick detail (fo
 **Files:** create `assets/editor/quick-detail.{js,css}`; modify `assets/editor/display-modal.js`, `EditorAssets.php`,
 the F1 form template (only to make it usable inside a modal); tests `tests/E2E/acceptance/F4.spec.ts` (AC9, both paths).
 
-- [ ] **Step 1: Failing tests** (AC9: the Single path and the "Add to Group" path; an invalid URL; Cancel; a user
+- [x] **Step 1: Failing tests** (AC9: the Single path and the "Add to Group" path; an invalid URL; Cancel; a user
   without `PRODUCTS`).
-- [ ] **Step 2: The modal shells.** Add A New Link, quick detail; Escape closes the topmost first (edge case 6).
-- [ ] **Step 3: Save and insert.** `PATCH`, errors, insert or add to group.
-- [ ] **Step 4: Run and look.** Checks; by hand: create a product from a pasted URL, edit its badge in the preview,
+- [x] **Step 2: The modal shells.** Add A New Link, quick detail; Escape closes the topmost first (edge case 6).
+- [x] **Step 3: Save and insert.** `PATCH`, errors, insert or add to group.
+- [x] **Step 4: Run and look.** Checks; by hand: create a product from a pasted URL, edit its badge in the preview,
   insert it, publish, 375 px.
-- [ ] **Step 5: Commit** — "Create a product from the editor and insert it".
+- [x] **Step 5: Commit** — "Create a product from the editor and insert it".
+
+*Note (2026-11-17):* the quick detail is the product page itself in a frame (`?affibloom_frame=1`;
+`AdminAssets::framed()` adds the body class, admin.css shows only the head, the form and the live preview), so every
+field of R26 with its help text, the preview, theme reload and the Media Library are the product page's; no
+`quick-detail.js` or form-partial route. `product-save.js` tells the frame's parent `affibloom:product-saved` /
+`-save-failed`; the dialog's + Add submits the framed form. The frame is removed on close, so a half-edited form never
+asks to be saved. The display modal stays under the dialogs (Cancel returns to "Choose a Link", R30). Seen at 1280 px:
+an invalid link, a new product named in the quick detail and inserted.
 
 ---
 

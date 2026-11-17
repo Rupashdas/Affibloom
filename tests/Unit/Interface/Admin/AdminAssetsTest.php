@@ -36,6 +36,24 @@ final class AdminAssetsTest extends TestCase {
 		self::assertContains( 'affibloom-fonts', $this->styles['affibloom-admin'][1] );
 	}
 
+	public function test_the_product_page_in_a_frame_is_marked_for_the_quick_detail(): void {
+		$_GET = array(
+			'page'            => 'affibloom-product',
+			'affibloom_frame' => '1',
+		);
+		self::assertSame( 'folded affibloom-framed', self::assets()->framed( 'folded' ) );
+
+		$_GET = array( 'page' => 'affibloom-product' );
+		self::assertSame( 'folded', self::assets()->framed( 'folded' ) );
+
+		$_GET = array(
+			'page'            => 'affibloom',
+			'affibloom_frame' => '1',
+		);
+		self::assertSame( 'folded', self::assets()->framed( 'folded' ) );
+		$_GET = array();
+	}
+
 	public function test_another_admin_page_loads_nothing(): void {
 		self::assets()->enqueue( 'edit.php' );
 

@@ -29,6 +29,23 @@ final class AdminAssets implements Module {
 	 */
 	public function register(): void {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+		add_filter( 'admin_body_class', array( $this, 'framed' ) );
+	}
+
+	/**
+	 * The product page inside the editor's Quick Detail (F4 R26, Task 23G): with `affibloom_frame=1` its body gets
+	 * `affibloom-framed`, which shows only the form and the live preview (admin.css). A look only: the page, its checks and
+	 * its scripts are the product page's.
+	 *
+	 * @param string $classes The body's classes.
+	 */
+	public function framed( string $classes ): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a display switch for a screen the capability already guards.
+		if ( isset( $_GET['page'], $_GET['affibloom_frame'] ) && ProductScreen::SLUG === $_GET['page'] ) {
+			$classes .= ' affibloom-framed';
+		}
+
+		return $classes;
 	}
 
 	/**

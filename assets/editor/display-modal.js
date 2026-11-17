@@ -483,10 +483,11 @@
 	 * A dialog stacked over the display modal (Task 23E): Escape and × close it first (R11); the focus returns to what
 	 * opened it.
 	 *
-	 * @param {HTMLElement} element The dialog's root (`.affibloom-modal`).
+	 * @param {HTMLElement} element  The dialog's root (`.affibloom-modal`).
+	 * @param {() => void}  [onHide] Runs when it closes, however it closes.
 	 * @return {Object} show( opener ) and hide().
 	 */
-	const stacked = function ( element ) {
+	const stacked = function ( element, onHide ) {
 		let opener = null;
 		const dialog = {
 			show( from ) {
@@ -506,6 +507,9 @@
 				}
 				element.hidden = true;
 				modalStack.pop( element );
+				if ( onHide ) {
+					onHide();
+				}
 				if ( opener && opener.isConnected ) {
 					opener.focus();
 				}
@@ -534,10 +538,11 @@
 	 * "Add to Group" (Task 23E; R20-R23): the group's search of products, Select to add one ("Added" for members and this
 	 * session's adds), Add Group to insert the group as the chosen type, Done to close and redraw the group list.
 	 *
-	 * @param {HTMLElement} element The dialog (`[data-add-to-group-modal]`).
+	 * @param {HTMLElement} element    The dialog (`[data-add-to-group-modal]`).
+	 * @param {Object|null} createLink "Add A New Link" (Task 23G), or null.
 	 * @return {Object} open( id, name, opener ).
 	 */
-	const addToGroupDialog = function ( element ) {
+	const addToGroupDialog = function ( element, createLink ) {
 		const dialog = stacked( element );
 		const title = element.querySelector( '[data-group-name]' );
 		const error = element.querySelector( '[data-add-error]' );
@@ -607,6 +612,30 @@
 					groupId: group,
 				} );
 			} );
+
+		// Create a Link (R29, Task 23G): the new product joins this group, and the list shows it Added.
+		const createButton = element.querySelector( '[data-create-link]' );
+		if ( createLink && createButton ) {
+			createButton.addEventListener( 'click', function () {
+				createLink.open( createButton, function ( product ) {
+					window.wp
+						.apiFetch( {
+							path: '/affibloom/v1/groups/' + group + '/products',
+							method: 'POST',
+							data: { product },
+						} )
+						.then( function () {
+							added.add( product );
+							products.reload();
+						} )
+						.catch( function () {
+							error.textContent =
+								element.getAttribute( 'data-group-failed' );
+							error.hidden = false;
+						} );
+				} );
+			} );
+		}
 
 		// Done (R23): closes; the group list shows the new counts.
 		element
@@ -708,12 +737,208 @@
 		} );
 	};
 
-	// The two dialogs are printed only for those who may manage products (F4 D8, edge case 7).
+	/**
+	 * The quick detail (Task 23G; R26-R30): the new product's page, framed to its form and live preview, in the dialog.
+	 * + Add saves that form (the product page's own save, PATCH /products/{id}) and hands the product on; a refused field
+	 * shows on the page. Cancel, ×, Escape (inside the frame too) close it; the frame goes with it, so a half-edited form
+	 * never asks to be saved later.
+	 *
+	 * @param {HTMLElement} element The dialog (`[data-quick-detail-modal]`).
+	 * @return {Object} open( product, opener, done ).
+	 */
+	const quickDetailDialog = function ( element ) {
+		const holder = element.querySelector( '[data-quick-frame]' );
+		const add = element.querySelector( '[data-quick-add]' );
+		let frame = null;
+		let done = null;
+		const dialog = stacked( element, function () {
+			busy( add, false );
+			if ( frame ) {
+				frame.remove();
+				frame = null;
+			}
+		} );
+
+		const productForm = function () {
+			const page = frame && frame.contentDocument;
+			return page
+				? page.getElementById( 'affibloom-product-form' )
+				: null;
+		};
+
+		element
+			.querySelector( '[data-quick-cancel]' )
+			.addEventListener( 'click', dialog.hide );
+
+		add.addEventListener( 'click', function () {
+			const product = productForm();
+			const save =
+				product &&
+				product.ownerDocument.getElementById( 'affibloom-save' );
+			if ( ! product || ! save ) {
+				return;
+			}
+			busy( add, true );
+			product.requestSubmit( save );
+		} );
+
+		return {
+			open( product, from, then ) {
+				done = then;
+				holder.innerHTML = '';
+				frame = document.createElement( 'iframe' );
+				frame.className = 'affibloom-quick-detail__page';
+				frame.title = element.getAttribute( 'data-frame-title' );
+				const address = new URL(
+					element.getAttribute( 'data-product-page' ),
+					window.location.href
+				);
+				address.searchParams.set( 'id', String( product ) );
+				frame.src = address.toString();
+				frame.addEventListener( 'load', function () {
+					const page = frame && frame.contentDocument;
+					if ( ! page ) {
+						return;
+					}
+					// Escape inside the frame closes the dialog, unless the page has a dialog of its own open.
+					page.addEventListener( 'keydown', function ( event ) {
+						if (
+							'Escape' === event.key &&
+							! page.querySelector(
+								'.affibloom-modal:not([hidden])'
+							)
+						) {
+							event.preventDefault();
+							dialog.hide();
+						}
+					} );
+					const saved = productForm();
+					if ( ! saved ) {
+						return;
+					}
+					saved.addEventListener(
+						'affibloom:product-saved',
+						function ( event ) {
+							const next = done;
+							dialog.hide();
+							if ( next ) {
+								next( event.detail.id );
+							}
+						}
+					);
+					saved.addEventListener(
+						'affibloom:product-save-failed',
+						function () {
+							busy( add, false );
+						}
+					);
+				} );
+				holder.appendChild( frame );
+				dialog.show( from );
+			},
+		};
+	};
+
+	/**
+	 * "Add A New Link", the editor's variant (Task 23G; R25, F18 D6): a URL; Add Link creates the product (POST
+	 * /products, F18) and opens its quick detail. A refused link says why under the field.
+	 *
+	 * @param {HTMLElement} element     The dialog (`[data-create-link-modal]`).
+	 * @param {Object}      quickDetail The quick detail.
+	 * @return {Object} open( opener, done ): done( product ) runs once the quick detail's + Add has saved it.
+	 */
+	const createLinkDialog = function ( element, quickDetail ) {
+		const dialog = stacked( element );
+		const form = element.querySelector( 'form' );
+		const url = form.elements.namedItem( 'url' );
+		const error = element.querySelector( '[data-url-error]' );
+		const save = element.querySelector( '[data-create-link-save]' );
+		let opener = null;
+		let done = null;
+
+		const refuse = function ( text ) {
+			error.textContent = text;
+			error.hidden = '' === text;
+			url.setAttribute( 'aria-invalid', '' === text ? 'false' : 'true' );
+		};
+
+		form.addEventListener( 'submit', function ( event ) {
+			event.preventDefault();
+			refuse( '' );
+			busy( save, true );
+			window.wp
+				.apiFetch( {
+					path: '/affibloom/v1/products',
+					method: 'POST',
+					data: { url: url.value.trim() },
+				} )
+				.then( function ( answer ) {
+					busy( save, false );
+					dialog.hide();
+					quickDetail.open( answer.data.id, opener, done );
+				} )
+				.catch( function ( failure ) {
+					busy( save, false );
+					const said =
+						failure &&
+						failure.data &&
+						failure.data.fields &&
+						failure.data.fields.url;
+					refuse(
+						said ||
+							( failure && failure.message ) ||
+							element.getAttribute( 'data-failed' )
+					);
+					url.focus();
+				} );
+		} );
+
+		return {
+			open( from, then ) {
+				opener = from;
+				done = then;
+				form.reset();
+				refuse( '' );
+				dialog.show( from );
+			},
+		};
+	};
+
+	// The Create dialogs are printed only for those who may manage products (F4 D8, edge case 7).
+	const quickDetailElement = document.querySelector(
+		'[data-quick-detail-modal]'
+	);
+	const createLinkElement = document.querySelector(
+		'[data-create-link-modal]'
+	);
+	const createLink =
+		quickDetailElement && createLinkElement
+			? createLinkDialog(
+					createLinkElement,
+					quickDetailDialog( quickDetailElement )
+				)
+			: null;
+
+	// "Choose a Link"'s Create a Link (R25): the new product as the chosen Single, Button or Image display (R28).
+	const linksCreate = root.querySelector(
+		'[data-step="links"] [data-create-link]'
+	);
+	if ( createLink && linksCreate ) {
+		linksCreate.addEventListener( 'click', function () {
+			createLink.open( linksCreate, function ( product ) {
+				window.affibloomDisplayModal.insert( {
+					type: context.type,
+					productId: product,
+				} );
+			} );
+		} );
+	}
+
 	const addToGroupElement = document.querySelector(
 		'[data-add-to-group-modal]'
 	);
 	if ( groupsSection && addToGroupElement ) {
-		const addToGroup = addToGroupDialog( addToGroupElement );
+		const addToGroup = addToGroupDialog( addToGroupElement, createLink );
 		groupsSection.addEventListener( 'click', function ( event ) {
 			const name = event.target.closest( '[data-row-open]' );
 			if ( name ) {

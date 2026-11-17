@@ -69,6 +69,12 @@ $display_types = array(
 			data-page-label="<?php /* translators: %d: a page number. */ esc_attr_e( 'Page %d', 'affibloom' ); ?>">
 			<div class="affibloom-modal__head">
 				<h2 id="affibloom-display-links-title" class="affibloom-modal__title"><?php esc_html_e( 'Choose a Link', 'affibloom' ); ?></h2>
+				<?php if ( $view['can_manage'] ) : ?>
+					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-modal__head-action" data-create-link aria-haspopup="dialog">
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+						<span><?php esc_html_e( 'Create a Link', 'affibloom' ); ?></span>
+					</button>
+				<?php endif; ?>
 			</div>
 			<div class="affibloom-modal__body">
 				<label class="screen-reader-text" for="affibloom-display-links-search"><?php esc_html_e( 'Search URLs', 'affibloom' ); ?></label>
@@ -201,6 +207,10 @@ if ( ! $view['can_manage'] ) {
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
 				<span><?php esc_html_e( 'Add Group', 'affibloom' ); ?></span>
 			</button>
+			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-create-link aria-haspopup="dialog">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+				<span><?php esc_html_e( 'Create a Link', 'affibloom' ); ?></span>
+			</button>
 			<p class="affibloom-modal__intro" id="affibloom-add-to-group-name" data-group-name></p>
 		</div>
 		<div class="affibloom-modal__body">
@@ -231,5 +241,62 @@ if ( ! $view['can_manage'] ) {
 				</button>
 			</li>
 		</template>
+	</div>
+</div>
+
+<?php
+// "Add A New Link", the editor's variant (Task 23G; F18 D6, Lasso's url-add.php 127-206, R25): the URL tab only (F18 D5).
+?>
+<div id="affibloom-create-link-modal" class="affibloom-admin affibloom-modal affibloom-block-modal affibloom-sub-modal" hidden data-create-link-modal
+	data-failed="<?php esc_attr_e( 'Could not add the link. Please try again.', 'affibloom' ); ?>">
+	<div class="affibloom-modal__backdrop" data-modal-close></div>
+	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-create-link-title" aria-describedby="affibloom-create-link-intro">
+		<button type="button" class="affibloom-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
+		</button>
+		<div class="affibloom-modal__head">
+			<h2 id="affibloom-create-link-title" class="affibloom-modal__title"><?php esc_html_e( 'Add A New Link', 'affibloom' ); ?></h2>
+			<p id="affibloom-create-link-intro" class="affibloom-modal__intro"><?php esc_html_e( 'Enter the destination URL your Affibloom link will redirect to.', 'affibloom' ); ?></p>
+		</div>
+		<form class="affibloom-modal__body affibloom-modal-form" id="affibloom-create-link-form" novalidate>
+			<div class="affibloom-field">
+				<label class="screen-reader-text" for="affibloom-create-link-url"><?php esc_html_e( 'Destination URL', 'affibloom' ); ?></label>
+				<input type="text" class="affibloom-input" id="affibloom-create-link-url" name="url" autocomplete="off" spellcheck="false"
+					placeholder="https://www.example.com/affiliate-id" aria-describedby="affibloom-create-link-error">
+				<p class="affibloom-field__error" id="affibloom-create-link-error" data-url-error role="alert" hidden></p>
+			</div>
+		</form>
+		<div class="affibloom-modal__foot">
+			<button type="submit" form="affibloom-create-link-form" class="affibloom-button affibloom-button--primary" data-create-link-save><?php esc_html_e( 'Add Link', 'affibloom' ); ?></button>
+		</div>
+	</div>
+</div>
+
+<?php
+// The quick detail (Task 23G; Lasso's url-quick-detail.php, R26-R30): the product's page, framed to its form and live
+// preview (AdminAssets::framed), so every field, help text, the preview and the Media Library are the product page's.
+// + Add saves that form, then inserts the product, or adds it to the pending group; Cancel returns to the list.
+?>
+<div id="affibloom-quick-detail-modal" class="affibloom-admin affibloom-modal affibloom-block-modal affibloom-sub-modal affibloom-quick-detail" hidden data-quick-detail-modal
+	data-product-page="<?php echo esc_url( add_query_arg( array( 'affibloom_frame' => '1' ), \Affibloom\Interface\Admin\ProductScreen::url( 0 ) ) ); ?>"
+	data-frame-title="<?php esc_attr_e( 'The new product', 'affibloom' ); ?>"
+	data-group-failed="<?php esc_attr_e( 'The link was saved but could not be added to the group. Please try again.', 'affibloom' ); ?>">
+	<div class="affibloom-modal__backdrop" data-modal-close></div>
+	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-quick-detail-title">
+		<button type="button" class="affibloom-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
+		</button>
+		<div class="affibloom-modal__head">
+			<h2 id="affibloom-quick-detail-title" class="affibloom-modal__title"><?php esc_html_e( 'Quick Detail', 'affibloom' ); ?></h2>
+		</div>
+		<div class="affibloom-quick-detail__frame" data-quick-frame></div>
+		<div class="affibloom-modal__foot">
+			<p class="affibloom-field__error affibloom-quick-detail__error" data-quick-error role="alert" hidden></p>
+			<button type="button" class="affibloom-button affibloom-button--secondary" data-quick-cancel><?php esc_html_e( 'Cancel', 'affibloom' ); ?></button>
+			<button type="button" class="affibloom-button affibloom-button--primary" data-quick-add>
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+				<span><?php esc_html_e( 'Add', 'affibloom' ); ?></span>
+			</button>
+		</div>
 	</div>
 </div>

@@ -2900,3 +2900,27 @@ body.affibloom-has-modal { overflow: hidden; }
 .affibloom-image-frame.has-box { display: block; padding: 0; aspect-ratio: auto; height: auto; }
 .affibloom-image-frame.has-box .affibloom-image-frame__update { display: none; }
 .affibloom-image-frame .affibloom-preview-frame { display: block; width: 100%; min-height: 200px; border: 0; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
+
+/*
+ * The product page inside the editor's Quick Detail (F4 R26, Task 23G; AdminAssets::framed): only the head with the
+ * name, the form and the live preview. WordPress's bar, menu and footer, Affibloom's header, the tabs, the Share kit,
+ * the Amazon data and the save bar give way; the dialog's own + Add saves the form.
+ */
+html.wp-toolbar:has(> body.affibloom-framed) { padding-top: 0; }
+body.affibloom-framed #wpadminbar,
+body.affibloom-framed #adminmenumain,
+body.affibloom-framed #wpfooter,
+.affibloom-framed .affibloom-header,
+.affibloom-framed .affibloom-notices,
+.affibloom-framed .affibloom-page__back,
+.affibloom-framed .affibloom-product-page .affibloom-tabs,
+.affibloom-framed .affibloom-share-kit,
+.affibloom-framed .affibloom-amazon-data,
+.affibloom-framed .affibloom-product__footer,
+.affibloom-framed .affibloom-footer { display: none; }
+body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
+.affibloom-framed .affibloom-admin { margin-left: 0; min-height: 0; }
+.affibloom-framed .affibloom-page__head { padding-top: 20px; padding-bottom: 20px; }
+.affibloom-framed .affibloom-page__body { padding-bottom: 24px; }
+.affibloom-framed .affibloom-product__aside { top: 16px; max-height: calc(100vh - 32px); }
+.affibloom-framed .affibloom-admin .affibloom-toast { bottom: 24px; }

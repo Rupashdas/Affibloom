@@ -197,6 +197,66 @@ test.describe( 'F4 Displays in the editor', () => {
 		expect( products ).toHaveLength( 2 );
 	} );
 
+	test( 'AC9 Create a Link: Add Link, the quick detail, + Add inserts it; an invalid link is refused; Cancel returns', async ( { page } ) => {
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '#affibloom-display-modal' );
+		await modal.getByRole( 'button', { name: 'Single' } ).click();
+		await modal.getByRole( 'button', { name: 'Create a Link' } ).click();
+
+		const add = page.getByRole( 'dialog', { name: 'Add A New Link' } );
+		await add.getByLabel( 'Destination URL' ).fill( 'not a link' );
+		await add.getByRole( 'button', { name: 'Add Link' } ).click();
+		await expect( add.locator( '.affibloom-field__error' ) ).not.toBeEmpty();
+
+		// Cancel in the quick detail returns to "Choose a Link".
+		const first = `https://example.test/f4-ac9-${ Date.now() }-a`;
+		await add.getByLabel( 'Destination URL' ).fill( first );
+		await add.getByRole( 'button', { name: 'Add Link' } ).click();
+		const detail = page.getByRole( 'dialog', { name: 'Quick Detail' } );
+		await expect( detail.frameLocator( 'iframe' ).locator( '#affibloom-name' ) ).toBeVisible();
+		await detail.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( detail ).toBeHidden();
+		await expect( page.getByRole( 'dialog', { name: 'Choose a Link' } ) ).toBeVisible();
+
+		// Again: name it in the quick detail, + Add saves it and inserts it as the Single display.
+		await modal.getByRole( 'button', { name: 'Create a Link' } ).click();
+		await add.getByLabel( 'Destination URL' ).fill( `https://example.test/f4-ac9-${ Date.now() }-b` );
+		await add.getByRole( 'button', { name: 'Add Link' } ).click();
+		const name = unique( 'F4 AC9' );
+		await detail.frameLocator( 'iframe' ).locator( '#affibloom-name' ).fill( name );
+		await detail.getByRole( 'button', { name: 'Add' } ).click();
+		await expect( detail ).toBeHidden();
+		await expect( block.locator( '.affibloom-block__preview' ) ).toContainText( name );
+	} );
+
+	test( 'AC9 Create a Link from "Add to Group" adds the new product to the group and returns there', async ( { page } ) => {
+		const stamp = unique( 'F4 AC9 group' );
+		createGroup( stamp, [] );
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '#affibloom-display-modal' );
+		await modal.getByRole( 'button', { name: 'Grid' } ).click();
+		await modal.getByPlaceholder( 'Search groups' ).fill( stamp );
+		await modal.getByPlaceholder( 'Search groups' ).press( 'Enter' );
+		await modal.getByRole( 'button', { name: stamp } ).click();
+		const group = page.getByRole( 'dialog', { name: 'Add to Group' } );
+		await group.getByRole( 'button', { name: 'Create a Link' } ).click();
+
+		const add = page.getByRole( 'dialog', { name: 'Add A New Link' } );
+		await add.getByLabel( 'Destination URL' ).fill( `https://example.test/f4-ac9-${ Date.now() }-c` );
+		await add.getByRole( 'button', { name: 'Add Link' } ).click();
+		const detail = page.getByRole( 'dialog', { name: 'Quick Detail' } );
+		const name = unique( 'F4 AC9 member' );
+		await detail.frameLocator( 'iframe' ).locator( '#affibloom-name' ).fill( name );
+		await detail.getByRole( 'button', { name: 'Add' } ).click();
+
+		await expect( group ).toBeVisible();
+		await group.getByPlaceholder( 'Search URLs' ).fill( name );
+		await group.getByPlaceholder( 'Search URLs' ).press( 'Enter' );
+		await expect( group.locator( '.affibloom-link-row', { hasText: name } ).getByRole( 'button', { name: 'Added' } ) ).toBeDisabled();
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );
@@ -216,6 +276,11 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( modal.locator( '.affibloom-group-row' ).first() ).toBeVisible();
 		await expect( modal.getByRole( 'button', { name: 'Create Group' } ) ).toHaveCount( 0 );
 		await expect( modal.locator( '[data-row-open]' ) ).toHaveCount( 0 );
+		await modal.getByRole( 'button', { name: 'Close' } ).click();
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		await modal.getByRole( 'button', { name: 'Single' } ).click();
+		await expect( modal.locator( '.affibloom-link-row' ).first() ).toBeVisible();
+		await expect( modal.getByRole( 'button', { name: 'Create a Link' } ) ).toHaveCount( 0 );
 		await context.close();
 	} );
 

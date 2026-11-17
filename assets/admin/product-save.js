@@ -280,6 +280,8 @@
 
 			wp.apiFetch( { path: '/affibloom/v1/products/' + form.dataset.productId, method: 'PATCH', data: sent } )
 				.then( function ( response ) {
+					// The editor's Quick Detail (F4, Task 23G) inserts the product once it is saved.
+					form.dispatchEvent( new window.CustomEvent( 'affibloom:product-saved', { bubbles: true, detail: response.data } ) );
 					if ( response.data.type !== form.dataset.productType ) {
 						var reload = new URL( window.location.href );
 						reload.searchParams.delete( 'is_duplicate' );
@@ -298,6 +300,8 @@
 					} );
 				} )
 				.catch( function ( error ) {
+					// The Quick Detail's + Add stops waiting; the page shows why, as always.
+					form.dispatchEvent( new window.CustomEvent( 'affibloom:product-save-failed', { bubbles: true } ) );
 					afterSave = null; // A refused or offered save stays on the page.
 					if ( error && 'affibloom_duplicate' === error.code && error.data && error.data.to ) {
 						// "This Product Already Exists" (admin.js): Cancel keeps the typed link; Confirm opens the kept product.
