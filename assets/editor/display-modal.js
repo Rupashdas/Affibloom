@@ -133,8 +133,12 @@
 				top.close();
 				return;
 			}
-			if ( 'Tab' === event.key && top.modal === root ) {
-				const items = focusable( panel );
+			// Focus stays in the topmost modal (this one, or a dialog stacked over it).
+			const topPanel = top.modal.querySelector(
+				'.affibloom-modal__panel'
+			);
+			if ( 'Tab' === event.key && topPanel ) {
+				const items = focusable( topPanel );
 				if ( ! items.length ) {
 					return;
 				}
@@ -146,7 +150,7 @@
 					last.focus();
 				} else if (
 					! event.shiftKey &&
-					( active === last || ! panel.contains( active ) )
+					( active === last || ! topPanel.contains( active ) )
 				) {
 					event.preventDefault();
 					first.focus();
@@ -266,23 +270,18 @@
 	};
 
 	/**
-	 * A step that lists search results (Tasks 23B, 23D; R14): five a page, a search on Enter only, grey rows while the
-	 * answer is on its way, page buttons, and the step's empty and failure messages. Extracted on its second use.
+	 * A searchable list (Tasks 23B, 23D, 23E; R14, R20): five a page, a search on Enter only, grey rows while the answer is
+	 * on its way, page buttons, and its section's empty and failure messages (`data-empty`, `data-failed`). Extracted on
+	 * its second use; the steps and "Add to Group" use it.
 	 *
-	 * @param {Object}                                 options        The step.
-	 * @param {string}                                 options.name   The step (`data-step`).
-	 * @param {(query: URLSearchParams) => string}     options.path   The route to ask, with the search and page.
-	 * @param {(item: Object, row: Element) => void}   options.fill   Fills a row from an item of the answer.
-	 * @param {(button: HTMLElement) => Object | null} options.choose The display a row's Add inserts.
-	 * @return {Object|null} The step's own search reload, for steps that redraw it (23E).
+	 * @param {Object}                               options         The list.
+	 * @param {Element}                              options.section Holds the search, list, message, pages and row template.
+	 * @param {(query: URLSearchParams) => string}   options.path    The route to ask, with the search and page.
+	 * @param {(item: Object, row: Element) => void} options.fill    Fills a row from an item of the answer.
+	 * @return {Object} load( page ), reload(), reset(), and the list element.
 	 */
-	const searchStep = function ( options ) {
-		const section = root.querySelector(
-			'[data-step="' + options.name + '"]'
-		);
-		if ( ! section ) {
-			return null;
-		}
+	const searchList = function ( options ) {
+		const section = options.section;
 		const search = section.querySelector( '[data-step-search]' );
 		const list = section.querySelector( '[data-step-list]' );
 		const message = section.querySelector( '[data-step-message]' );
@@ -345,8 +344,54 @@
 				} );
 		};
 
+		search.addEventListener( 'keydown', function ( event ) {
+			if ( 'Enter' === event.key ) {
+				event.preventDefault();
+				load( 1 );
+			}
+		} );
+
+		return {
+			list,
+			load,
+			reload() {
+				load( shown );
+			},
+			reset() {
+				latest++;
+				search.value = '';
+				list.innerHTML = '';
+				nav.innerHTML = '';
+				say( '' );
+			},
+		};
+	};
+
+	/**
+	 * A step of the display modal that lists search results; a row's Add inserts the chosen type with the row's target.
+	 *
+	 * @param {Object}                                 options        The step.
+	 * @param {string}                                 options.name   The step (`data-step`).
+	 * @param {(query: URLSearchParams) => string}     options.path   The route to ask.
+	 * @param {(item: Object, row: Element) => void}   options.fill   Fills a row.
+	 * @param {(button: HTMLElement) => Object | null} options.choose The display a row's Add inserts.
+	 * @return {Object|null} The step's list.
+	 */
+	const searchStep = function ( options ) {
+		const section = root.querySelector(
+			'[data-step="' + options.name + '"]'
+		);
+		if ( ! section ) {
+			return null;
+		}
+		const list = searchList( {
+			section,
+			path: options.path,
+			fill: options.fill,
+		} );
+
 		// Add (R16, R18): the chosen type with this row's target; the modal closes and the block draws it.
-		list.addEventListener( 'click', function ( event ) {
+		list.list.addEventListener( 'click', function ( event ) {
 			const add = event.target.closest( '[data-row-add]' );
 			const display = add ? options.choose( add ) : null;
 			if ( display ) {
@@ -357,34 +402,36 @@
 			}
 		} );
 
-		search.addEventListener( 'keydown', function ( event ) {
-			if ( 'Enter' === event.key ) {
-				event.preventDefault();
-				load( 1 );
-			}
-		} );
-
 		window.affibloomDisplayModal.step( options.name, {
 			show() {
-				search.value = '';
-				load( 1 );
+				list.reset();
+				list.load( 1 );
 			},
-			reset() {
-				latest++;
-				search.value = '';
-				list.innerHTML = '';
-				nav.innerHTML = '';
-				say( '' );
-			},
+			reset: list.reset,
 		} );
 
-		return {
-			section,
-			list,
-			reload() {
-				load( shown );
-			},
-		};
+		return list;
+	};
+
+	/**
+	 * A product row (picture, name, link) in "Choose a Link" and "Add to Group".
+	 *
+	 * @param {Object}  item The product from GET /products.
+	 * @param {Element} row  The row to fill.
+	 */
+	const fillProduct = function ( item, row ) {
+		const image = row.querySelector( '[data-row-image]' );
+		if ( item.image_url ) {
+			image.src = item.image_url;
+			image.hidden = false;
+			row.querySelector( '[data-row-none]' ).hidden = true;
+		}
+		const name = row.querySelector( '[data-row-name]' );
+		name.textContent = item.name;
+		name.title = item.name;
+		const link = row.querySelector( '[data-row-url]' );
+		link.textContent = item.url;
+		link.href = safeHref( item.url );
 	};
 
 	/** "Choose a Link" (Task 23B; R12-R16): products, newest changed first, with their picture and link. */
@@ -392,18 +439,7 @@
 		name: 'links',
 		path: ( query ) => '/affibloom/v1/products?' + query.toString(),
 		fill( item, row ) {
-			const image = row.querySelector( '[data-row-image]' );
-			if ( item.image_url ) {
-				image.src = item.image_url;
-				image.hidden = false;
-				row.querySelector( '[data-row-none]' ).hidden = true;
-			}
-			const name = row.querySelector( '[data-row-name]' );
-			name.textContent = item.name;
-			name.title = item.name;
-			const link = row.querySelector( '[data-row-url]' );
-			link.textContent = item.url;
-			link.href = safeHref( item.url );
+			fillProduct( item, row );
 			row.querySelector( '[data-row-add]' ).dataset.target = String(
 				item.id
 			);
@@ -413,19 +449,23 @@
 		} ),
 	} );
 
-	/** "Choose a Group" (Task 23D; R17-R18): groups with "1 link" / "N links"; Add inserts the group as the chosen type. */
-	searchStep( {
+	/**
+	 * "Choose a Group" (Task 23D; R17-R18): groups with "1 link" / "N links"; Add inserts the group as the chosen type.
+	 * A group's name opens "Add to Group" for it (Task 23E), for those who may manage products.
+	 */
+	const groupsSection = root.querySelector( '[data-step="groups"]' );
+	const groupsList = searchStep( {
 		name: 'groups',
 		path: ( query ) => '/affibloom/v1/groups?' + query.toString(),
 		fill( item, row ) {
-			const section = root.querySelector( '[data-step="groups"]' );
 			const name = row.querySelector( '[data-row-name]' );
 			name.textContent = item.name;
 			name.title = item.name;
+			name.dataset.target = String( item.id );
 			const words =
 				1 === item.count
-					? section.getAttribute( 'data-one' )
-					: section.getAttribute( 'data-many' );
+					? groupsSection.getAttribute( 'data-one' )
+					: groupsSection.getAttribute( 'data-many' );
 			row.querySelector( '[data-row-count]' ).textContent = words.replace(
 				'%s',
 				item.count.toLocaleString()
@@ -438,4 +478,258 @@
 			groupId: parseInt( button.dataset.target, 10 ),
 		} ),
 	} );
+
+	/**
+	 * A dialog stacked over the display modal (Task 23E): Escape and × close it first (R11); the focus returns to what
+	 * opened it.
+	 *
+	 * @param {HTMLElement} element The dialog's root (`.affibloom-modal`).
+	 * @return {Object} show( opener ) and hide().
+	 */
+	const stacked = function ( element ) {
+		let opener = null;
+		const dialog = {
+			show( from ) {
+				opener = from || null;
+				element.hidden = false;
+				modalStack.push( element, dialog.hide );
+				const first = focusable(
+					element.querySelector( '.affibloom-modal__panel' )
+				)[ 0 ];
+				if ( first ) {
+					first.focus();
+				}
+			},
+			hide() {
+				if ( element.hidden ) {
+					return;
+				}
+				element.hidden = true;
+				modalStack.pop( element );
+				if ( opener && opener.isConnected ) {
+					opener.focus();
+				}
+			},
+		};
+		element.addEventListener( 'click', function ( event ) {
+			if ( event.target.closest( '[data-modal-close]' ) ) {
+				dialog.hide();
+			}
+		} );
+		return dialog;
+	};
+
+	/**
+	 * A button that waits for an answer: disabled with the design system's spinner (`.is-busy`).
+	 *
+	 * @param {HTMLButtonElement} button The button.
+	 * @param {boolean}           on     Whether it waits.
+	 */
+	const busy = function ( button, on ) {
+		button.disabled = on;
+		button.classList.toggle( 'is-busy', on );
+	};
+
+	/**
+	 * "Add to Group" (Task 23E; R20-R23): the group's search of products, Select to add one ("Added" for members and this
+	 * session's adds), Add Group to insert the group as the chosen type, Done to close and redraw the group list.
+	 *
+	 * @param {HTMLElement} element The dialog (`[data-add-to-group-modal]`).
+	 * @return {Object} open( id, name, opener ).
+	 */
+	const addToGroupDialog = function ( element ) {
+		const dialog = stacked( element );
+		const title = element.querySelector( '[data-group-name]' );
+		const error = element.querySelector( '[data-add-error]' );
+		let group = 0;
+		const added = new Set();
+
+		const markAdded = function ( button ) {
+			button.disabled = true;
+			button.classList.add( 'is-added' );
+			button.querySelector( '[data-select-label]' ).textContent =
+				element.getAttribute( 'data-added' );
+		};
+
+		const products = searchList( {
+			section: element,
+			path: ( query ) => {
+				query.set( 'group', String( group ) );
+				return '/affibloom/v1/products?' + query.toString();
+			},
+			fill( item, row ) {
+				fillProduct( item, row );
+				const select = row.querySelector( '[data-row-select]' );
+				select.dataset.target = String( item.id );
+				if ( item.in_group || added.has( item.id ) ) {
+					markAdded( select );
+				}
+			},
+		} );
+
+		// Select (R21): adds the product to the group at once; a refusal says why.
+		products.list.addEventListener( 'click', function ( event ) {
+			const select = event.target.closest( '[data-row-select]' );
+			if ( ! select || select.disabled ) {
+				return;
+			}
+			const product = parseInt( select.dataset.target, 10 );
+			error.hidden = true;
+			busy( select, true );
+			window.wp
+				.apiFetch( {
+					path: '/affibloom/v1/groups/' + group + '/products',
+					method: 'POST',
+					data: { product },
+				} )
+				.then( function () {
+					busy( select, false );
+					added.add( product );
+					markAdded( select );
+				} )
+				.catch( function ( failure ) {
+					busy( select, false );
+					error.textContent =
+						failure && failure.message
+							? failure.message
+							: element.getAttribute( 'data-failed' );
+					error.hidden = false;
+				} );
+		} );
+
+		// Add Group (R22): the group as the step's type.
+		element
+			.querySelector( '[data-add-group]' )
+			.addEventListener( 'click', function () {
+				dialog.hide();
+				window.affibloomDisplayModal.insert( {
+					type: context.type,
+					groupId: group,
+				} );
+			} );
+
+		// Done (R23): closes; the group list shows the new counts.
+		element
+			.querySelector( '[data-add-done]' )
+			.addEventListener( 'click', function () {
+				dialog.hide();
+				if ( groupsList ) {
+					groupsList.reload();
+				}
+			} );
+
+		return {
+			open( id, name, from ) {
+				group = id;
+				added.clear();
+				title.textContent = name;
+				error.hidden = true;
+				products.reset();
+				dialog.show( from );
+				products.load( 1 );
+			},
+		};
+	};
+
+	/**
+	 * "Add a New Group" (Task 23E; R19): Name and Description; Save Changes creates it (POST /groups) and opens "Add to
+	 * Group" for it. An empty name is refused here, a name in use by the server (F23 D3).
+	 *
+	 * @param {HTMLElement} element    The dialog (`[data-create-group-modal]`).
+	 * @param {Object}      addToGroup The "Add to Group" dialog.
+	 * @param {HTMLElement} opener     The Create Group button.
+	 */
+	const createGroupDialog = function ( element, addToGroup, opener ) {
+		const dialog = stacked( element );
+		const form = element.querySelector( 'form' );
+		const name = form.elements.namedItem( 'name' );
+		const description = form.elements.namedItem( 'description' );
+		const nameError = element.querySelector( '[data-name-error]' );
+		const formError = element.querySelector( '[data-form-error]' );
+		const save = element.querySelector( '[data-create-save]' );
+
+		const refuse = function ( field, text ) {
+			field.textContent = text;
+			field.hidden = '' === text;
+			if ( field === nameError ) {
+				name.setAttribute(
+					'aria-invalid',
+					'' === text ? 'false' : 'true'
+				);
+			}
+		};
+
+		opener.addEventListener( 'click', function () {
+			form.reset();
+			refuse( nameError, '' );
+			refuse( formError, '' );
+			dialog.show( opener );
+		} );
+
+		form.addEventListener( 'submit', function ( event ) {
+			event.preventDefault();
+			refuse( nameError, '' );
+			refuse( formError, '' );
+			if ( '' === name.value.trim() ) {
+				refuse( nameError, element.getAttribute( 'data-required' ) );
+				name.focus();
+				return;
+			}
+			busy( save, true );
+			window.wp
+				.apiFetch( {
+					path: '/affibloom/v1/groups',
+					method: 'POST',
+					data: { name: name.value, description: description.value },
+				} )
+				.then( function ( answer ) {
+					busy( save, false );
+					dialog.hide();
+					addToGroup.open(
+						answer.data.id,
+						name.value.trim(),
+						opener
+					);
+				} )
+				.catch( function ( failure ) {
+					busy( save, false );
+					const said =
+						failure &&
+						failure.data &&
+						failure.data.fields &&
+						failure.data.fields.name;
+					if ( said ) {
+						refuse( nameError, said );
+						name.focus();
+						return;
+					}
+					refuse( formError, element.getAttribute( 'data-failed' ) );
+				} );
+		} );
+	};
+
+	// The two dialogs are printed only for those who may manage products (F4 D8, edge case 7).
+	const addToGroupElement = document.querySelector(
+		'[data-add-to-group-modal]'
+	);
+	if ( groupsSection && addToGroupElement ) {
+		const addToGroup = addToGroupDialog( addToGroupElement );
+		groupsSection.addEventListener( 'click', function ( event ) {
+			const name = event.target.closest( '[data-row-open]' );
+			if ( name ) {
+				addToGroup.open(
+					parseInt( name.dataset.target, 10 ),
+					name.textContent,
+					name
+				);
+			}
+		} );
+		const createElement = document.querySelector(
+			'[data-create-group-modal]'
+		);
+		const create = groupsSection.querySelector( '[data-create-group]' );
+		if ( createElement && create ) {
+			createGroupDialog( createElement, addToGroup, create );
+		}
+	}
 } )();

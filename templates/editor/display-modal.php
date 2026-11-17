@@ -8,7 +8,9 @@
  * "Soon". The look is the design system's Modal (Meadow); the root carries `.affibloom-admin` for its tokens.
  *
  * @package Affibloom
- * @var array{steps: list<string>} $view
+ * The steps' Create buttons and the dialogs they open (Task 23E) are printed only for those who may manage products (F4 D8).
+ *
+ * @var array{steps: list<string>, can_manage: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -109,6 +111,12 @@ $display_types = array(
 			data-one="<?php echo esc_attr( $group_one ); ?>" data-many="<?php echo esc_attr( $group_many ); ?>">
 			<div class="affibloom-modal__head">
 				<h2 id="affibloom-display-groups-title" class="affibloom-modal__title"><?php esc_html_e( 'Choose a Group', 'affibloom' ); ?></h2>
+				<?php if ( $view['can_manage'] ) : ?>
+					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-modal__head-action" data-create-group aria-haspopup="dialog">
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+						<span><?php esc_html_e( 'Create Group', 'affibloom' ); ?></span>
+					</button>
+				<?php endif; ?>
 			</div>
 			<div class="affibloom-modal__body">
 				<label class="screen-reader-text" for="affibloom-display-groups-search"><?php esc_html_e( 'Search groups', 'affibloom' ); ?></label>
@@ -122,7 +130,12 @@ $display_types = array(
 				<li class="affibloom-link-row affibloom-group-row">
 					<span class="affibloom-link-row__picture affibloom-group-row__chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'layers' ) ); ?></span>
 					<span class="affibloom-link-row__text">
-						<strong class="affibloom-link-row__name" data-row-name></strong>
+						<?php if ( $view['can_manage'] ) : ?>
+							<?php // The name opens "Add to Group" for the group (R17, R20). ?>
+							<button type="button" class="affibloom-link-row__name affibloom-link-row__open" data-row-name data-row-open aria-haspopup="dialog"></button>
+						<?php else : ?>
+							<strong class="affibloom-link-row__name" data-row-name></strong>
+						<?php endif; ?>
 						<span class="affibloom-group-row__count" data-row-count></span>
 					</span>
 					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-row-add>
@@ -132,5 +145,91 @@ $display_types = array(
 				</li>
 			</template>
 		</section>
+	</div>
+</div>
+<?php
+if ( ! $view['can_manage'] ) {
+	return;
+}
+// "Add a New Group" (Task 23E; Lasso's #lasso-create-group-modal, R19): Name, Description, Save Changes.
+?>
+<div id="affibloom-create-group-modal" class="affibloom-admin affibloom-modal affibloom-block-modal affibloom-sub-modal" hidden data-create-group-modal
+	data-required="<?php esc_attr_e( 'Name is required.', 'affibloom' ); ?>"
+	data-failed="<?php esc_attr_e( 'Could not create the group. Please try again.', 'affibloom' ); ?>">
+	<div class="affibloom-modal__backdrop" data-modal-close></div>
+	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-create-group-title">
+		<button type="button" class="affibloom-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
+		</button>
+		<div class="affibloom-modal__head">
+			<h2 id="affibloom-create-group-title" class="affibloom-modal__title"><?php esc_html_e( 'Add a New Group', 'affibloom' ); ?></h2>
+		</div>
+		<form class="affibloom-modal__body affibloom-modal-form" id="affibloom-create-group-form" novalidate>
+			<div class="affibloom-field">
+				<label class="affibloom-label" for="affibloom-create-group-name"><?php esc_html_e( 'Name', 'affibloom' ); ?></label>
+				<input type="text" class="affibloom-input" id="affibloom-create-group-name" name="name" placeholder="<?php esc_attr_e( 'Group Name Goes Here', 'affibloom' ); ?>" aria-describedby="affibloom-create-group-name-error">
+				<p class="affibloom-field__error" id="affibloom-create-group-name-error" data-name-error role="alert" hidden></p>
+			</div>
+			<div class="affibloom-field">
+				<label class="affibloom-label" for="affibloom-create-group-description"><?php esc_html_e( 'Description', 'affibloom' ); ?></label>
+				<textarea class="affibloom-input affibloom-input--area" id="affibloom-create-group-description" name="description" rows="3"></textarea>
+			</div>
+			<p class="affibloom-field__error" data-form-error role="alert" hidden></p>
+		</form>
+		<div class="affibloom-modal__foot">
+			<button type="submit" form="affibloom-create-group-form" class="affibloom-button affibloom-button--primary" data-create-save><?php esc_html_e( 'Save Changes', 'affibloom' ); ?></button>
+		</div>
+	</div>
+</div>
+
+<?php
+// "Add to Group" (Task 23E; Lasso's #lasso-add-links-to-group-modal, R20-R23): the group's search of products, five a page.
+?>
+<div id="affibloom-add-to-group-modal" class="affibloom-admin affibloom-modal affibloom-block-modal affibloom-sub-modal" hidden data-add-to-group-modal
+	data-empty="<?php esc_attr_e( 'No links found.', 'affibloom' ); ?>"
+	data-failed="<?php esc_attr_e( 'Could not add link to this group. Please try again.', 'affibloom' ); ?>"
+	data-added="<?php esc_attr_e( 'Added', 'affibloom' ); ?>"
+	data-page-label="<?php /* translators: %d: a page number. */ esc_attr_e( 'Page %d', 'affibloom' ); ?>">
+	<div class="affibloom-modal__backdrop" data-modal-close></div>
+	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-add-to-group-title" aria-describedby="affibloom-add-to-group-name">
+		<button type="button" class="affibloom-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
+		</button>
+		<div class="affibloom-modal__head">
+			<h2 id="affibloom-add-to-group-title" class="affibloom-modal__title"><?php esc_html_e( 'Add to Group', 'affibloom' ); ?></h2>
+			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--primary affibloom-modal__head-action" data-add-group>
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+				<span><?php esc_html_e( 'Add Group', 'affibloom' ); ?></span>
+			</button>
+			<p class="affibloom-modal__intro" id="affibloom-add-to-group-name" data-group-name></p>
+		</div>
+		<div class="affibloom-modal__body">
+			<label class="screen-reader-text" for="affibloom-add-to-group-search"><?php esc_html_e( 'Search URLs', 'affibloom' ); ?></label>
+			<input type="search" id="affibloom-add-to-group-search" class="affibloom-input affibloom-search affibloom-modal-search" placeholder="<?php esc_attr_e( 'Search URLs', 'affibloom' ); ?>" data-step-search>
+			<p class="affibloom-field__error affibloom-add-error" data-add-error role="alert" hidden></p>
+			<ul class="affibloom-link-rows" data-step-list aria-live="polite"></ul>
+			<p class="affibloom-link-rows__message" data-step-message role="status" hidden></p>
+			<nav class="affibloom-pagination affibloom-modal-pages" aria-label="<?php esc_attr_e( 'Link pages', 'affibloom' ); ?>" data-step-pages
+				data-previous="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>"></nav>
+		</div>
+		<div class="affibloom-modal__foot">
+			<button type="button" class="affibloom-button affibloom-button--secondary" data-add-done><?php esc_html_e( 'Done', 'affibloom' ); ?></button>
+		</div>
+		<template data-step-row>
+			<li class="affibloom-link-row">
+				<span class="affibloom-link-row__picture">
+					<img alt="" width="44" height="44" loading="lazy" data-row-image hidden>
+					<span data-row-none><?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?></span>
+				</span>
+				<span class="affibloom-link-row__text">
+					<strong class="affibloom-link-row__name" data-row-name></strong>
+					<a class="affibloom-link-row__url" target="_blank" rel="noopener noreferrer" data-row-url></a>
+				</span>
+				<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-select-button" data-row-select>
+					<?php $this->render( 'admin/partials/icon', array( 'name' => 'check' ) ); ?>
+					<span data-select-label><?php esc_html_e( 'Select', 'affibloom' ); ?></span>
+				</button>
+			</li>
+		</template>
 	</div>
 </div>

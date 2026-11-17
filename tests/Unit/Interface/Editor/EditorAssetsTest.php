@@ -79,6 +79,7 @@ final class EditorAssetsTest extends TestCase {
 	}
 
 	public function test_the_modal_is_printed_on_block_editor_screens_only(): void {
+		Functions\when( 'current_user_can' )->justReturn( true );
 		$classic = \Mockery::mock();
 		$classic->shouldReceive( 'is_block_editor' )->andReturn( false );
 		Functions\when( 'get_current_screen' )->justReturn( $classic );

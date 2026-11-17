@@ -88,6 +88,27 @@
 /* "Choose a Group" (Task 23D): the rows of "Choose a Link" with a group chip and the link count under the name. */
 .affibloom-admin .affibloom-group-row__chip { border: 0; background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
 .affibloom-group-row__count { color: var(--affibloom-ink-500); font-size: 12px; }
+/* Task 23E: a head with an action beside its title (Create Group, Add Group); the group's name as a link-like button;
+   the dialogs stacked over the display modal; Select and "Added". */
+.affibloom-block-modal .affibloom-modal__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.affibloom-block-modal .affibloom-modal__head .affibloom-modal__intro { flex: 1 0 100%; margin: 0; }
+.affibloom-modal__head-action { margin-left: auto; }
+.affibloom-admin.affibloom-sub-modal { z-index: 160010; }
+.affibloom-sub-modal .affibloom-modal__panel { max-width: 560px; }
+.affibloom-admin .affibloom-link-row__open {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--affibloom-brand-600);
+	text-align: left;
+	cursor: pointer;
+}
+.affibloom-admin .affibloom-link-row__open:hover { text-decoration: underline; text-underline-offset: 3px; }
+.affibloom-select-button .affibloom-icon { display: none; }
+.affibloom-admin .affibloom-select-button.is-added { border-color: var(--affibloom-brand-line); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); opacity: 1; }
+.affibloom-select-button.is-added .affibloom-icon { display: block; }
+.affibloom-add-error { margin: 10px 0 0; }
+.affibloom-modal-form { display: grid; gap: 18px; }
 .affibloom-link-rows__message { margin: 16px 0 4px; color: var(--affibloom-ink-600); text-align: center; }
 .affibloom-modal-pages { justify-content: center; margin-top: 12px; }
 .affibloom-admin .affibloom-modal-pages button.page-numbers { cursor: pointer; }
@@ -95,3 +116,6 @@
 @media (max-width: 600px) {
 	.affibloom-admin .affibloom-type-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* A refused field (design system, "Text field"): the danger border with its message under it. */
+.affibloom-admin .affibloom-modal-form .affibloom-input[aria-invalid="true"] { border-color: var(--affibloom-danger-700); }

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, unique } from '../utils';
+import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, unique, wp } from '../utils';
 
 // F4 Displays in the editor (docs/features/F4/requirements.md). Labels: Lasso's, minus its name (D5).
 const MODAL_SCRIPT = /assets\/editor\/display-modal\.js/;
@@ -140,6 +140,83 @@ test.describe( 'F4 Displays in the editor', () => {
 			expect( stored ).toMatch( new RegExp( `"type":"${ type.toLowerCase() }","groupId":\\d+` ) );
 			await expect( block.locator( '.affibloom-block__preview' ) ).toContainText( `${ stamp } product 1` );
 		}
+	} );
+
+	test( 'AC7 Create Group, then "Add to Group": Select, Added, Done redraws the count, Add Group inserts it', async ( { page } ) => {
+		const stamp = unique( 'F4 AC7' );
+		const products = [ 1, 2 ].map( ( n ) => createProduct( { name: `${ stamp } item ${ n }` } ) );
+		const taken = `${ stamp } taken`;
+		createGroup( taken, [] );
+
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '.affibloom-block-modal' ).first();
+		await modal.getByRole( 'button', { name: 'Grid' } ).click();
+		await modal.getByRole( 'button', { name: 'Create Group' } ).click();
+
+		const create = page.getByRole( 'dialog', { name: 'Add a New Group' } );
+		await expect( create.getByPlaceholder( 'Group Name Goes Here' ) ).toBeVisible();
+		await create.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( create.getByText( 'Name is required.' ) ).toBeVisible();
+		await create.getByLabel( 'Name' ).fill( taken );
+		await create.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( create.getByText( 'A group with this name already exists.' ) ).toBeVisible();
+		await create.getByLabel( 'Name' ).fill( `${ stamp } new` );
+		await create.getByLabel( 'Description' ).fill( 'Made from the editor' );
+		await create.getByRole( 'button', { name: 'Save Changes' } ).click();
+
+		const add = page.getByRole( 'dialog', { name: 'Add to Group' } );
+		await expect( add ).toBeVisible();
+		const search = add.getByPlaceholder( 'Search URLs' );
+		await search.fill( stamp );
+		await search.press( 'Enter' );
+		const first = add.locator( '.affibloom-link-row', { hasText: `${ stamp } item 1` } );
+		await first.getByRole( 'button', { name: 'Select' } ).click();
+		await expect( first.getByRole( 'button', { name: 'Added' } ) ).toBeDisabled();
+		// Escape closes the topmost dialog first (R11).
+		await page.keyboard.press( 'Escape' );
+		await expect( add ).toBeHidden();
+		await expect( page.getByRole( 'dialog', { name: 'Choose a Group' } ) ).toBeVisible();
+
+		// The name opens "Add to Group" again: the member says Added; Done redraws the list with the count.
+		await modal.getByPlaceholder( 'Search groups' ).fill( `${ stamp } new` );
+		await modal.getByPlaceholder( 'Search groups' ).press( 'Enter' );
+		await modal.getByRole( 'button', { name: `${ stamp } new` } ).click();
+		await search.fill( stamp );
+		await search.press( 'Enter' );
+		await expect( first.getByRole( 'button', { name: 'Added' } ) ).toBeDisabled();
+		await add.locator( '.affibloom-link-row', { hasText: `${ stamp } item 2` } ).getByRole( 'button', { name: 'Select' } ).click();
+		await add.getByRole( 'button', { name: 'Done' } ).click();
+		await expect( modal.locator( '.affibloom-group-row', { hasText: `${ stamp } new` } ) ).toContainText( '2 links' );
+
+		// Add Group inserts the group as the chosen type.
+		await modal.getByRole( 'button', { name: `${ stamp } new` } ).click();
+		await add.getByRole( 'button', { name: 'Add Group' } ).click();
+		await expect( add ).toBeHidden();
+		await expect( block.locator( '.affibloom-block__preview' ) ).toContainText( `${ stamp } item 1` );
+		expect( products ).toHaveLength( 2 );
+	} );
+
+	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
+		const login = unique( 'f4author' );
+		const password = unique( 'pw' );
+		wp( 'user', 'create', login, `${ login }@example.test`, '--role=author', `--user_pass=${ password }` );
+		const context = await browser.newContext( { storageState: { cookies: [], origins: [] } } );
+		const page = await context.newPage();
+		await page.goto( '/wp-login.php' );
+		await page.getByLabel( /Username/ ).fill( login );
+		await page.getByLabel( 'Password', { exact: true } ).fill( password );
+		await page.getByRole( 'button', { name: 'Log In' } ).click();
+		await page.waitForURL( /wp-admin/ );
+
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '.affibloom-block-modal' ).first();
+		await modal.getByRole( 'button', { name: 'Grid' } ).click();
+		await expect( modal.locator( '.affibloom-group-row' ).first() ).toBeVisible();
+		await expect( modal.getByRole( 'button', { name: 'Create Group' } ) ).toHaveCount( 0 );
+		await expect( modal.locator( '[data-row-open]' ) ).toHaveCount( 0 );
+		await context.close();
 	} );
 
 	test( 'AC2 the published page shows the box', async ( { page } ) => {

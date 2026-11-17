@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Editor;
 
+use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
@@ -80,6 +81,13 @@ final class EditorAssets implements Module {
 		if ( null === $screen || ! $screen->is_block_editor() ) {
 			return;
 		}
-		$this->template->render( 'editor/display-modal', array( 'steps' => self::STEPS ) );
+		$this->template->render(
+			'editor/display-modal',
+			array(
+				'steps'      => self::STEPS,
+				// Create Group and Add to Group need PRODUCTS (F4 D8); without it they are not printed.
+				'can_manage' => current_user_can( Capabilities::PRODUCTS ),
+			)
+		);
 	}
 }

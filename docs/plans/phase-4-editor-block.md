@@ -62,7 +62,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 23B: "Choose a Link" — product search
 - [x] Task 23C: Insert Single, Button and Image; stored markup; the published page
 - [x] Task 23D: Grid, List and Gallery — "Choose a Group"
-- [ ] Task 23E: Create Group and "Add to Group" from the modal
+- [x] Task 23E: Create Group and "Add to Group" from the modal
 - Task 23F: Table — "Choose a Table" — **moved to Phase 7** (after F25 T12; settled 2026-11-14)
 - [ ] Task 23G: Create a Link and the quick detail
 - [ ] Task 24A: Customize Display sidebar
@@ -651,10 +651,16 @@ display-modal.js → POST /groups (PRODUCTS) → "Add to Group" → GET /product
 **Files:** modify `assets/editor/display-modal.{js,css}`, `src/Interface/Editor/EditorAssets.php`;
 tests `tests/E2E/acceptance/F4.spec.ts` (AC7; a user without `PRODUCTS` sees no Create buttons).
 
-- [ ] **Step 1: Failing tests** (AC7 incl. both refusals, Select/Added, Add Group, Done, counts; edge case 7).
-- [ ] **Step 2: The two dialogs.** Messages verbatim from R19-R22; the save buttons show a spinner.
-- [ ] **Step 3: Run and look.** Checks; by hand: create a group, add two products, insert it as a gallery, 375 px.
-- [ ] **Step 4: Commit** — "Create and fill a group from the display modal".
+- [x] **Step 1: Failing tests** (AC7 incl. both refusals, Select/Added, Add Group, Done, counts; edge case 7).
+- [x] **Step 2: The two dialogs.** Messages verbatim from R19-R22; the save buttons show a spinner.
+- [x] **Step 3: Run and look.** Checks; by hand: create a group, add two products, insert it as a gallery, 375 px.
+- [x] **Step 4: Commit** — "Create and fill a group from the display modal".
+
+*Note (2026-11-17):* the two dialogs are stacked modals in the same template, printed only with `PRODUCTS` (no localised
+flag needed); `searchList()` now serves the steps and "Add to Group". R22's two messages are not built: the dialog opens
+only from the groups step, where the type is a group type and the group's ID is known. "Create a Link" in "Add to Group"
+comes with 23G. Edge case 7's test makes its own author with WP-CLI. Seen at 1280 and 375 px: create (both refusals by
+hand: empty), two Selects, Done with the count, Add Group as a gallery.
 
 ---
 
