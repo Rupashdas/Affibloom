@@ -334,6 +334,24 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( canvas.locator( '.affibloom-block__preview' ) ).toContainText( 'Shop now' );
 	} );
 
+	test( 'AC14 Edit Display opens the product in a new tab; closing it draws the preview again', async ( { page } ) => {
+		const name = unique( 'F4 AC14' );
+		const id = createProduct( { name } );
+		await page.goto( newPostWith( boxBlock( id, { type: 'single' } ) ).replace( /\?p=(\d+).*$/, 'wp-admin/post.php?post=$1&action=edit' ) );
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		await expect( canvas.locator( '.affibloom-block__preview' ) ).toContainText( name );
+
+		const [ tab ] = await Promise.all( [ page.waitForEvent( 'popup' ), canvas.getByRole( 'button', { name: 'Edit Display' } ).click() ] );
+		await expect( tab ).toHaveURL( new RegExp( `page=affibloom-product&id=${ id }` ) );
+		await tab.locator( '#affibloom-name' ).fill( `${ name } renamed` );
+		await tab.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( tab.locator( '.affibloom-toast' ).last() ).toBeVisible();
+		await tab.close();
+		await page.bringToFront();
+		await page.evaluate( () => window.dispatchEvent( new Event( 'focus' ) ) );
+		await expect( canvas.locator( '.affibloom-block__preview' ) ).toContainText( `${ name } renamed` );
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

@@ -22,6 +22,7 @@ use Affibloom\Domain\Shortcode\DisplayRequest;
 use DateTimeImmutable;
 use DateTimeZone;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Module;
 use WP_Block_Type_Registry;
@@ -208,6 +209,9 @@ final class EditorController implements Module {
 					'html'      => $block->render( $block->prepare_attributes_for_render( $attributes ) ),
 					// The block's shortcode box shows the same display as text (Task 24C, R7).
 					'shortcode' => $this->shortcode_text( $attributes ),
+					// Edit Display (Task 24D, R51): a Single, Button or Image display's product page, for those who may
+					// open it; '' otherwise (a group display has none; a table's comes with F25).
+					'edit_url'  => $this->edit_url( $attributes ),
 				),
 			)
 		);
@@ -242,6 +246,21 @@ final class EditorController implements Module {
 				),
 			)
 		);
+	}
+
+	/**
+	 * The page Edit Display opens: the product's, for a product display and someone who manages products.
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 */
+	private function edit_url( array $attributes ): string {
+		$type    = is_string( $attributes['type'] ?? null ) ? $attributes['type'] : '';
+		$product = is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0;
+		if ( $product <= 0 || ! in_array( $type, array( '', 'single', 'button', 'image' ), true ) || ! current_user_can( Capabilities::PRODUCTS ) ) {
+			return '';
+		}
+
+		return ProductScreen::url( $product );
 	}
 
 	/**

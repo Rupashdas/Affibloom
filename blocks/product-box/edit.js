@@ -27,6 +27,28 @@ const DEFAULTS = Object.fromEntries(
 );
 
 /**
+ * Edit Display's tab (R51, D9): one at a time, by its name; when it has been closed, the editor's next focus draws every
+ * block's preview again, so a change made there shows here.
+ */
+let editTab = null;
+const REDRAW = 'affibloom:redraw-previews';
+window.addEventListener( 'focus', () => {
+	if ( editTab && editTab.closed ) {
+		editTab = null;
+		window.dispatchEvent( new window.CustomEvent( REDRAW ) );
+	}
+} );
+
+/**
+ * Opens a display's product page in its tab.
+ *
+ * @param {string} url The page.
+ */
+const openEditTab = ( url ) => {
+	editTab = window.open( url, 'affibloom-edit-display' );
+};
+
+/**
  * Whether the block names a display: a product, or a group for a grid, list or gallery (Tasks 23C, 23D).
  *
  * @param {Object} attributes The block's attributes.
@@ -69,6 +91,7 @@ function usePreview( attributes, token ) {
 						state: 'ready',
 						html: answer.data.html,
 						shortcode: answer.data.shortcode,
+						edit_url: answer.data.edit_url,
 					} );
 				}
 			} )
@@ -95,6 +118,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	const [ token, setToken ] = useState( 0 );
 	const [ broken, setBroken ] = useState( false );
 	const preview = usePreview( attributes, token );
+	useEffect( () => {
+		const redraw = () => setToken( ( current ) => current + 1 );
+		window.addEventListener( REDRAW, redraw );
+		return () => window.removeEventListener( REDRAW, redraw );
+	}, [] );
 	const hasDisplay = namesDisplay( attributes );
 
 	const ready = 'ready' === state;
@@ -206,6 +234,15 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								{ __( 'Update Display', 'affibloom' ) }
 							</Button>
 						</>
+					) }
+					{ hasDisplay && preview.edit_url && (
+						<Button
+							variant="secondary"
+							className="affibloom-block__update"
+							onClick={ () => openEditTab( preview.edit_url ) }
+						>
+							{ __( 'Edit Display', 'affibloom' ) }
+						</Button>
 					) }
 					<Button
 						ref={ button }

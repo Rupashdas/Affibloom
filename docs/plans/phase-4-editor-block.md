@@ -68,7 +68,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24A: Customize Display sidebar
 - [x] Task 24B: Schema & Structured Data panel
 - [x] Task 24C: Shortcode box and Update Display
-- [ ] Task 24D: Edit Display
+- [x] Task 24D: Edit Display
 - [ ] Task 24E: Preview queue on load
 - [ ] Task ED1: Classic editor button
 - [ ] Task ED2: Elementor widget
@@ -881,10 +881,15 @@ edit.js → window.open( edit_url ) → focus event → POST /editor/preview
 
 **Files:** modify `edit.js`, `EditorController.php`; tests `tests/E2E/acceptance/F4.spec.ts` (AC14; the table half skipped until F25 T3).
 
-- [ ] **Step 1: Failing test** (AC14).
-- [ ] **Step 2: Button and redraw on focus.**
-- [ ] **Step 3: Run and look.** By hand: open, change the badge, close the tab, see the box change.
-- [ ] **Step 4: Commit** — "Open a display's product or table from the block".
+- [x] **Step 1: Failing test** (AC14).
+- [x] **Step 2: Button and redraw on focus.**
+- [x] **Step 3: Run and look.** By hand: open, change the badge, close the tab, see the box change.
+- [x] **Step 4: Commit** — "Open a display's product or table from the block".
+
+*Note (2026-11-17):* the preview answer's `edit_url` is the product page for a Single, Button or Image display and a
+user with `PRODUCTS` (the page needs it), else '' and no button; the table half waits for F25 (23F, Phase 7). One named
+tab (`affibloom-edit-display`); its closing is noticed on the editor's next `focus`, which redraws every block. Seen
+at 1280 px: the button row, a rename in the tab shown after it closed.
 
 ---
 
