@@ -107,7 +107,7 @@ Grouped by feature, in the order they are worked.
 
 **F27 — URL variants**
 
-- [ ] Task V1: The Variants tab
+- [x] Task V1: The Variants tab
 - [ ] Task V2: Add, edit, remove and save variants
 - [ ] Task V3: A variant permalink answers
 - [ ] Task V4: Amazon variant tags are kept
@@ -1038,11 +1038,13 @@ and **Add Variant**; a spinner while loading.
 `docs/ui/design-system.md` (variants table row); tests `tests/E2E/acceptance/F27.spec.ts` (AC1, AC2; rows made
 through WP-CLI `eval` into the table), unit `VariantUrlTest`.
 
-- [ ] **Step 1: Failing tests.** Expected red: the tab is "Coming soon".
-- [ ] **Step 2: Table (TL2's Migrator), domain, repository, service.** The parent link is CL3's public link (slug and prefix).
-- [ ] **Step 3: Route, tab, partial, script.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Show a product's URL variants, as Lasso does".
+- [x] **Step 1: Failing tests.** Expected red: the tab is "Coming soon".
+- [x] **Step 2: Table (TL2's Migrator), domain, repository, service.** The parent link is CL3's public link (slug and prefix).
+- [x] **Step 3: Route, tab, partial, script.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Show a product's URL variants, as Lasso does".
+
+*Note (2026-11-18):* *Note:* the rows are drawn by PHP on load (product fields' pattern), so no GET route and no loading spinner; V2's PUT answers with the redrawn rows. Schema step 5 makes the table. The tabs list moved to `ProductScreen::tabs()` (both tabs use it), and `section-tabs` gained `show_zero` for Lasso's always-shown badge. Add Variant comes with V2. Seen at 1280 px: two rows, search "NEWS" leaves Newsletter, the empty state, "Variants 2" on Details.
 
 ---
 

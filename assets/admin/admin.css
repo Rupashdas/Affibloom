@@ -2937,3 +2937,18 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-framed .affibloom-page__body { padding-bottom: 24px; }
 .affibloom-framed .affibloom-product__aside { top: 16px; max-height: calc(100vh - 32px); }
 .affibloom-framed .affibloom-admin .affibloom-toast { bottom: 24px; }
+
+/*
+ * 14. A product's URL variants (F27, Task V1; docs/ui/design-system.md, "Variants table"): the list's card and table with
+ * Lasso's columns, Name (the address under it), Permalink or Tracking ID, Copy and the row's actions; the search sits in
+ * the page head's actions, as on the Groups list.
+ */
+.affibloom-table.affibloom-table--variants { min-width: 640px; }
+.affibloom-table--variants .affibloom-col-key { width: 26%; }
+.affibloom-table--variants .affibloom-col-copy { width: 130px; }
+.affibloom-table--variants .affibloom-col-actions { width: 200px; text-align: right; }
+.affibloom-table--variants th .affibloom-help { margin-left: 4px; vertical-align: middle; }
+.affibloom-variant__name { display: block; overflow: hidden; color: var(--affibloom-ink-900); font: 600 15px/22px var(--affibloom-font); text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-admin .affibloom-table--variants .affibloom-row__url { color: var(--affibloom-ink-500); }
+.affibloom-variant__key { padding: 2px 6px; border-radius: 6px; border: 1px solid var(--affibloom-line); background: var(--affibloom-subtle); color: var(--affibloom-ink-700); font-size: 13px; overflow-wrap: anywhere; }
+.affibloom-variants__none { margin: 0; padding: 20px; border-top: 1px solid var(--affibloom-line); color: var(--affibloom-ink-600); text-align: center; }

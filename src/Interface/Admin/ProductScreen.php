@@ -1,6 +1,6 @@
 <?php
 /**
- * The product page: Lasso's link details page (url-details), Details tab.
+ * The product page: Lasso's link details page (url-details), Details and Variants tabs.
  *
  * @package Affibloom
  */
@@ -16,12 +16,15 @@ use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Application\Variants\VariantService;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Domain\Variant\VariantKind;
+use Affibloom\Domain\Variant\VariantUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Interface\Template;
 
@@ -54,6 +57,7 @@ final class ProductScreen {
 	 * @param GroupService           $groups   The product's groups and the site's, for the group picker (Task G3).
 	 * @param AmazonDataService      $amazon   Whether Refresh can ask Amazon (C1D).
 	 * @param PublicLinks|null       $links    The public link and the cloaked address's start (F24, Task CL3).
+	 * @param VariantService|null    $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
 	 */
 	public function __construct(
 		private Template $template,
@@ -66,6 +70,7 @@ final class ProductScreen {
 		private GroupService $groups,
 		private AmazonDataService $amazon,
 		private ?PublicLinks $links = null,
+		private ?VariantService $variants = null,
 	) {}
 
 	/**
@@ -145,6 +150,23 @@ final class ProductScreen {
 		if ( null === $this->product ) {
 			return;
 		}
+		$variants    = null === $this->variants ? array() : $this->variants->list( $this->product );
+		$public_link = null === $this->links ? $this->product->url->value() : $this->links->for( $this->product );
+		// F27 D3: Variants is a tab of this page (`&tab=variants`).
+		if ( 'variants' === ( isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which tab to show, no action behind it.
+			$kind = VariantKind::of( $this->product );
+			$this->template->render(
+				'admin/product-variants',
+				array(
+					'product'     => $this->product,
+					'public_link' => $public_link,
+					'tabs'        => self::tabs( (int) $this->product->id, 'variants', count( $variants ) ),
+					'kind'        => $kind,
+					'rows'        => self::rows( $variants, $kind, $this->product->url->value() ),
+				)
+			);
+			return;
+		}
 
 		// The description and price editors keep Lasso's toolbars, whatever other plugins do to editors (Task 14B).
 		ProductEditors::apply();
@@ -158,7 +180,8 @@ final class ProductScreen {
 			array(
 				'product'      => $this->product,
 				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
-				'public_link'  => null === $this->links ? $this->product->url->value() : $this->links->for( $this->product ),
+				'public_link'  => $public_link,
+				'tabs'         => self::tabs( (int) $this->product->id, 'details', count( $variants ) ),
 				'cloak_base'   => null === $this->links ? '' : $this->links->base(),
 				// Lasso's placeholders are the site's button texts (get_lasso_url: *_button_text_default).
 				'button_text'  => $palette->value( 'primary_button_text' ),
@@ -191,5 +214,59 @@ final class ProductScreen {
 				'group_list'   => $this->groups->all(),
 			)
 		);
+	}
+
+	/**
+	 * Lasso's four tabs under the product's name (header.php 245-297): Details and Variants, the latter with its count on
+	 * every tab (F27 R4); Locations and Opportunities come with their areas.
+	 *
+	 * @param int    $id       The product's ID.
+	 * @param string $current  The tab shown: 'details' or 'variants'.
+	 * @param int    $variants How many variants the product has.
+	 * @return array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}
+	 */
+	private static function tabs( int $id, string $current, int $variants ): array {
+		return array(
+			'label' => __( 'Product sections', 'affibloom' ),
+			'items' => array(
+				array(
+					'label'   => __( 'Details', 'affibloom' ),
+					'url'     => self::url( $id ),
+					'current' => 'details' === $current,
+				),
+				array( 'label' => __( 'Locations', 'affibloom' ) ),
+				array( 'label' => __( 'Opportunities', 'affibloom' ) ),
+				array(
+					'label'     => __( 'Variants', 'affibloom' ),
+					'url'       => add_query_arg( 'tab', 'variants', self::url( $id ) ),
+					'current'   => 'variants' === $current,
+					'count'     => $variants,
+					'show_zero' => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * The Variants tab's rows: each variant's name, key and the address it gives out (F27 R8, R9), under the product's
+	 * kind now (R23).
+	 *
+	 * @param list<\Affibloom\Domain\Variant\Variant> $variants    The variants.
+	 * @param VariantKind                             $kind        The product's kind.
+	 * @param string                                  $destination The product's destination.
+	 * @return list<array{id: int, name: string, key: string, url: string}>
+	 */
+	private static function rows( array $variants, VariantKind $kind, string $destination ): array {
+		$rows = array();
+		foreach ( $variants as $variant ) {
+			$rows[] = array(
+				'id'   => $variant->id,
+				'name' => $variant->name,
+				'key'  => $variant->key,
+				'url'  => VariantUrl::of( $kind, $variant->key, home_url(), $destination ),
+			);
+		}
+
+		return $rows;
 	}
 }

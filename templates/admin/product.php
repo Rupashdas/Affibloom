@@ -12,14 +12,13 @@
  * (Task 15A, assets/admin/product-save.js).
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, amazon_card: bool, amazon_row: \Affibloom\Domain\Amazon\AmazonProduct|null, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}, button_text: string, button_text2: string, duplicate: bool, choices: \Affibloom\Interface\Admin\IconChoices, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, amazon_card: bool, amazon_row: \Affibloom\Domain\Amazon\AmazonProduct|null, fields: \Affibloom\Domain\Fields\ProductFields, library: \Affibloom\Domain\Fields\FieldLibrary, types: list<\Affibloom\Domain\Fields\FieldType>, tracking: array{tag: string, product: int, settings: string}|null, notice: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Interface\Admin\AdminMenu;
-use Affibloom\Interface\Admin\ProductScreen;
 
 $product = $view['product'];
 // Lasso hides Permalink and Link Cloaking for an Amazon link, a search page included (url-details.php 194, 491).
@@ -35,7 +34,7 @@ $destination = $product->url->value();
 	<div class="affibloom-page affibloom-product-page">
 		<?php
 		// The way back, the image, the name, the link under it and Lasso's four tabs as underline tabs across the column;
-		// Locations, Opportunities and Variants come with their areas.
+		// Locations and Opportunities come with their areas.
 		$this->render(
 			'admin/partials/page-head',
 			array(
@@ -50,19 +49,8 @@ $destination = $product->url->value();
 				'image'       => $product->image_url,
 				'link'        => $public_link,
 				'below'       => 'admin/partials/section-tabs',
-				'below_args'  => array(
-					'label' => __( 'Product sections', 'affibloom' ),
-					'items' => array(
-						array(
-							'label'   => __( 'Details', 'affibloom' ),
-							'url'     => ProductScreen::url( (int) $product->id ),
-							'current' => true,
-						),
-						array( 'label' => __( 'Locations', 'affibloom' ) ),
-						array( 'label' => __( 'Opportunities', 'affibloom' ) ),
-						array( 'label' => __( 'Variants', 'affibloom' ) ),
-					),
-				),
+				// Lasso's four tabs (ProductScreen::tabs(): Variants with its count, F27 R4).
+				'below_args'  => $view['tabs'],
 			)
 		);
 		?>

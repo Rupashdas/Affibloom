@@ -8,7 +8,7 @@
  * left of it (`image`, a URL or '' for none) and the full title as a tooltip (`tooltip`), as its name may be cut.
  *
  * @package Affibloom
- * @var array{title: string, title_id?: string, title_class?: string, tooltip?: bool, back?: array{url: string, label: string}, image?: string, subtitle?: string, link?: string, meta?: string, meta_args?: array<string, mixed>, tabs?: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int}>}, actions?: string, actions_args?: array<string, mixed>, below?: string, below_args?: array<string, mixed>} $view
+ * @var array{title: string, title_id?: string, title_class?: string, tooltip?: bool, back?: array{url: string, label: string}, image?: string, subtitle?: string, link?: string, meta?: string, meta_args?: array<string, mixed>, tabs?: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}, actions?: string, actions_args?: array<string, mixed>, below?: string, below_args?: array<string, mixed>} $view
  */
 
 defined( 'ABSPATH' ) || exit;

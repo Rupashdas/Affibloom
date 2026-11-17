@@ -48,6 +48,7 @@ use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\LinkDefaultsService;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Application\Variants\VariantService;
 use Affibloom\Application\Shell\NoticeBoard;
 use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
@@ -80,6 +81,7 @@ use Affibloom\Infrastructure\WordPress\HostQuery;
 use Affibloom\Infrastructure\WordPress\PostContentSource;
 use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
 use Affibloom\Infrastructure\WordPress\TableLinkLocationRepository;
+use Affibloom\Infrastructure\WordPress\TableVariantRepository;
 use Affibloom\Infrastructure\WordPress\TransientSearchResults;
 use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaBannerDismissals;
@@ -316,6 +318,10 @@ final class Plugin {
 			4 => static function (): void {
 				( new Table( TableLinkLocationRepository::TABLE, TableLinkLocationRepository::COLUMNS ) )->create();
 			},
+			// Task V1: the products' URL variants (F27 D1).
+			5 => static function (): void {
+				( new Table( TableVariantRepository::TABLE, TableVariantRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 
@@ -449,7 +455,7 @@ final class Plugin {
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ) ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ) ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), new VariantService( new TableVariantRepository() ) ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
