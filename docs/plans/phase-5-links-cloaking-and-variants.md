@@ -70,7 +70,7 @@ Grouped by feature, in the order they are worked.
 
 **F21 — the content link index**
 
-- [ ] Task 35A: The index of anchors in post content — `wp affibloom links rebuild`
+- [x] Task 35A: The index of anchors in post content — `wp affibloom links rebuild`
 - [ ] Task 35B: Displays in the index — shortcodes and blocks
 - [ ] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
 - [ ] Task 35D: Custom Link Detection — Settings → General
@@ -256,14 +256,22 @@ M links (T tied to P products)." and with `--dry-run` the per-type counts and no
 **Files:** the above; `src/Plugin.php`; tests `tests/Unit/Domain/LinkIndex/{LinkClassifierTest,AffiliatePlatformTest,LocationKeyTest}.php`,
 `tests/Unit/Application/ProductResolverTest.php`, `tests/Integration/LinkIndexerTest.php`, `tests/E2E/acceptance/F21.spec.ts` (AC1).
 
-- [ ] **Step 1: Failing tests.** AC1 on a fixture post (text, image, internal, external, `#`, `mailto:`, an ignored
+- [x] **Step 1: Failing tests.** AC1 on a fixture post (text, image, internal, external, `#`, `mailto:`, an ignored
   class, a FAQ block, a 1,200-character anchor), rows read through `wp eval`, `post_content` md5 unchanged. Red: no command.
-- [ ] **Step 2: Domain** (R2's exact flag rule, R25's types, platforms, occurrence).
-- [ ] **Step 3: Resolver** (F21 D8 order; published only; lasso.to → untied).
-- [ ] **Step 4: Table (TL2's Migrator), repository** (`replace_host` in a transaction, `is_ignored` and `assigned_product_id` kept, D10).
-- [ ] **Step 5: Scanner, source, indexer, command.**
-- [ ] **Step 6: Run and look.** `--dry-run` on this copy; compare with requirements §2 per host; record differences.
-- [ ] **Step 7: Commit** — "Index every link in post content".
+- [x] **Step 2: Domain** (R2's exact flag rule, R25's types, platforms, occurrence).
+- [x] **Step 3: Resolver** (F21 D8 order; published only; lasso.to → untied).
+- [x] **Step 4: Table (TL2's Migrator), repository** (`replace_host` in a transaction, `is_ignored` and `assigned_product_id` kept, D10).
+- [x] **Step 5: Scanner, source, indexer, command.**
+- [x] **Step 6: Run and look.** `--dry-run` on this copy; compare with requirements §2 per host; record differences.
+- [x] **Step 7: Commit** — "Index every link in post content".
+
+*Note (2026-11-18):* built as planned, with Affibloom's names: the table is `TableLinkLocationRepository` (schema step 4) and the
+scanner `Infrastructure\Html\WpLinkScanner`; no `lasso_location_id` column (deviation 146), no retired-ASIN arm (core
+keeps no ASIN history). Internal means the site's address followed by `/`, `?`, `#`, `:` or the end (Lasso's prefix test
+also took `site.test.other.com`). The scanner's unit test loads WordPress's HTML API and block parser from
+`wp-includes`; AC1's E2E replaces the integration test (the suite never runs). On this copy: 1,105 posts, 3,555 links,
+only 217 tied to 8 products, because the one-time import stored Lasso's Amazon products as "other" without ASINs;
+Phase M (26A, 29C) checks the figures again.
 
 ---
 

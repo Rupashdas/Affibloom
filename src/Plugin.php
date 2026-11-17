@@ -29,6 +29,10 @@ use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Lifecycle;
+use Affibloom\Application\LinkIndex\LinkIndexer;
+use Affibloom\Application\LinkIndex\LinkIndexRebuild;
+use Affibloom\Application\LinkIndex\ProductResolver;
+use Affibloom\Domain\LinkIndex\LinkClassifier;
 use Affibloom\Application\Products\BulkAddService;
 use Affibloom\Application\Products\GeniusCleanupService;
 use Affibloom\Application\Products\LinkNormaliser;
@@ -42,6 +46,7 @@ use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Infrastructure\Http\CreatorsApiCatalog;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
+use Affibloom\Infrastructure\Html\WpLinkScanner;
 use Affibloom\Infrastructure\Schema\Migrator;
 use Affibloom\Infrastructure\Schema\Table;
 use Affibloom\Infrastructure\WordPress\BoxDetector;
@@ -63,7 +68,10 @@ use Affibloom\Infrastructure\WordPress\PostMetaPendingAmazonSync;
 use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
+use Affibloom\Infrastructure\WordPress\HostQuery;
+use Affibloom\Infrastructure\WordPress\PostContentSource;
 use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
+use Affibloom\Infrastructure\WordPress\TableLinkLocationRepository;
 use Affibloom\Infrastructure\WordPress\TransientSearchResults;
 use Affibloom\Infrastructure\WordPress\TermGroupRepository;
 use Affibloom\Infrastructure\WordPress\UserMetaBannerDismissals;
@@ -72,6 +80,7 @@ use Affibloom\Infrastructure\WordPress\WpDetectionChoices;
 use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
+use Affibloom\Interface\Cli\LinksCommand;
 use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\AmazonBulkSyncCron;
 use Affibloom\Interface\Cron\BulkAddCron;
@@ -264,6 +273,10 @@ final class Plugin {
 			3 => static function (): void {
 				( new Table( TableAmazonProductRepository::TABLE, TableAmazonProductRepository::COLUMNS ) )->create();
 			},
+			// Task 35A: the content link index (F21 D1).
+			4 => static function (): void {
+				( new Table( TableLinkLocationRepository::TABLE, TableLinkLocationRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 
@@ -435,8 +448,24 @@ final class Plugin {
 			$this->upgrade_hooks(),
 			new UpgradeCommand( $upgrader ),
 			new AmazonCommand( $amazon, $catalog ),
+			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository() ),
 			new ForeignNotices( $this->navigation() ),
 		);
+	}
+
+	/**
+	 * The link index's rebuild (F21, Task 35A): the posts, their content, the scanner and the product lookups.
+	 */
+	private function link_index_rebuild(): LinkIndexRebuild {
+		$indexer = new LinkIndexer(
+			new PostContentSource(),
+			new WpLinkScanner(),
+			new ProductResolver( new PostTypeProductRepository() ),
+			new LinkClassifier( site_url() ),
+			new TableLinkLocationRepository()
+		);
+
+		return new LinkIndexRebuild( new HostQuery(), $indexer );
 	}
 
 	/**

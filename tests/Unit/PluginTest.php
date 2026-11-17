@@ -11,6 +11,8 @@ final class PluginTest extends TestCase {
 		Functions\when( 'plugin_dir_url' )->justReturn( 'https://example.test/wp-content/plugins/affibloom/' );
 		// The update notice's source names the plugin as WordPress does (Task ON2).
 		Functions\when( 'plugin_basename' )->justReturn( 'affibloom/affibloom.php' );
+		// The link index's classifier tells the site's own links by its address (Task 35A).
+		Functions\when( 'site_url' )->justReturn( 'https://example.test' );
 	}
 
 	/** Task ON2: other plugins' notices leave Affibloom's pages late in admin_head. */

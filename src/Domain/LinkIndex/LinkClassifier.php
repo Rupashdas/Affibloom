@@ -1,0 +1,124 @@
+<?php
+/**
+ * Turns a found link into an index row.
+ *
+ * @package Affibloom
+ */
+
+declare( strict_types=1 );
+
+namespace Affibloom\Domain\LinkIndex;
+
+use Affibloom\Domain\Amazon\AmazonUrl;
+use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\AffiliateUrl;
+
+/**
+ * Lasso's classification (F21 R2, R25, D9), including the quirks that change data: `no_follow` only when `rel` is
+ * exactly "nofollow", `new_window` only when `target` is exactly "_blank". A link is Product when it is tied to a
+ * product, Internal when it starts with the site's address (scheme aside), else External; the domain is kept for
+ * External links only. An Amazon link gives its ASIN, tag and store.
+ */
+final class LinkClassifier {
+
+	/** Lasso's anchor_text column holds 1,500 bytes (R1). */
+	private const TEXT_BYTES = 1500;
+
+	/**
+	 * Classifies links for one site.
+	 *
+	 * @param string $site_url The site's address ("https://example.com").
+	 */
+	public function __construct( private string $site_url ) {}
+
+	/**
+	 * The row for one link.
+	 *
+	 * @param LinkCandidate $link        The link.
+	 * @param int           $product_id  The product it is tied to, 0 when none.
+	 * @param int           $host_id     The post it is in.
+	 * @param string        $host_url    Its permalink.
+	 * @param string        $source      Where in the host.
+	 * @param int           $occurrence  Its occurrence (LocationKey).
+	 * @param string        $detected_at Now, UTC.
+	 */
+	public function classify( LinkCandidate $link, int $product_id, int $host_id, string $host_url, string $source, int $occurrence, string $detected_at ): LinkLocation {
+		$type   = $this->type( $link->href, $product_id );
+		$amazon = self::amazon( $link->href );
+		$text   = trim( (string) preg_replace( '/\s+/u', ' ', $link->text ) );
+
+		return new LinkLocation(
+			host_id: $host_id,
+			host_url: $host_url,
+			source: $source,
+			occurrence: $occurrence,
+			product_id: $product_id,
+			link_type: $type->value,
+			display_type: $link->has_image ? DisplayType::IMAGE : DisplayType::TEXT,
+			url: $link->href,
+			url_md5: LocationKey::md5( $link->href ),
+			anchor_text: '' === $text ? null : mb_strcut( $text, 0, self::TEXT_BYTES, 'UTF-8' ),
+			domain: LinkType::External === $type ? self::domain( $link->href ) : null,
+			asin: null !== $amazon && '' !== $amazon->asin() ? $amazon->asin() : null,
+			tracking_id: null !== $amazon && '' !== $amazon->tag() ? $amazon->tag() : null,
+			country: null !== $amazon ? $amazon->country() : 'us',
+			no_follow: 'nofollow' === $link->rel,
+			new_window: '_blank' === $link->target,
+			affiliate_platform: AffiliatePlatform::of( $link->href ),
+			detected_at: $detected_at,
+			original_url: $link->href,
+		);
+	}
+
+	/**
+	 * Product, Internal or External (R25).
+	 *
+	 * @param string $url        The link.
+	 * @param int    $product_id The product it is tied to.
+	 */
+	private function type( string $url, int $product_id ): LinkType {
+		if ( $product_id > 0 ) {
+			return LinkType::Product;
+		}
+		$site = strtolower( self::without_scheme( rtrim( $this->site_url, '/' ) ) );
+		$link = strtolower( self::without_scheme( $url ) );
+		// Lasso's str_starts_with alone also takes "site.test.other.com" for "site.test": the address must end there.
+		$next = substr( $link, strlen( $site ), 1 );
+
+		return '' !== $site && str_starts_with( $link, $site ) && in_array( $next, array( '', '/', '?', '#', ':' ), true ) ? LinkType::Internal : LinkType::External;
+	}
+
+	/**
+	 * The link as an Amazon link, or null.
+	 *
+	 * @param string $url The link.
+	 */
+	private static function amazon( string $url ): ?AmazonUrl {
+		try {
+			return AmazonUrl::from( AffiliateUrl::from_string( $url ) );
+		} catch ( InvalidField ) {
+			return null;
+		}
+	}
+
+	/**
+	 * The host without "www.", or null when there is none.
+	 *
+	 * @param string $url The link.
+	 */
+	private static function domain( string $url ): ?string {
+		$host = strtolower( (string) parse_url( $url, PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
+		$host = str_starts_with( $host, 'www.' ) ? substr( $host, 4 ) : $host;
+
+		return '' === $host ? null : substr( $host, 0, 150 );
+	}
+
+	/**
+	 * The address without "http://", "https://" or "//".
+	 *
+	 * @param string $url An address.
+	 */
+	private static function without_scheme( string $url ): string {
+		return (string) preg_replace( '#^(?:https?:)?//#i', '', $url );
+	}
+}
