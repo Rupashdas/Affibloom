@@ -30,6 +30,7 @@ use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Cloak\CloakResolver;
 use Affibloom\Application\Lifecycle;
+use Affibloom\Application\LinkIndex\RenderedLinks;
 use Affibloom\Application\LinkIndex\DisplayResolver;
 use Affibloom\Application\LinkIndex\LinkIndexer;
 use Affibloom\Application\LinkIndex\LinkIndexBuildingNotice;
@@ -95,6 +96,7 @@ use Affibloom\Interface\Cli\LinksCommand;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
+use Affibloom\Interface\Front\LinkAttributesFilter;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
@@ -454,6 +456,7 @@ final class Plugin {
 			$shortcode,
 			new WidgetShortcodes(),
 			$cloaked,
+			new LinkAttributesFilter( new RenderedLinks( new TableLinkLocationRepository(), new PostTypeProductRepository() ), new PublicLinks( $this->settings_repository() ) ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),

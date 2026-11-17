@@ -232,4 +232,22 @@ test.describe( 'F21 The content link index', () => {
 		expect( rows( post )[ 0 ] ).toMatchObject( { product_id: String( target ) } );
 		expect( wp( 'eval', `echo md5( get_post_field( 'post_content', ${ post } ) );` ) ).toBe( before );
 	} );
+
+	test( 'AC8 a tied text link is printed with its product current link and attributes; the stored post is unchanged', async ( { request } ) => {
+		const product = createProduct( { name: unique( 'F21 render' ), url: 'https://www.example.com/f21-render', nofollow: '1', sponsored: '1', new_tab: '1' } );
+		const content = '<!-- wp:paragraph --><p><a href="https://www.example.com/f21-render">Buy</a> and <a href="https://www.wikipedia.org/" target="_blank" rel="noreferrer">read</a></p><!-- /wp:paragraph -->';
+		const post = wp( 'post', 'create', '--post_status=publish', '--post_title=F21 AC8', `--post_content=${ content }`, '--porcelain' );
+		wp( 'affibloom', 'links', 'rebuild', `--post=${ post }` );
+		const before = wp( 'post', 'get', post, '--field=post_content' );
+
+		const html = async () => ( await ( await request.get( `/?p=${ post }` ) ).text() );
+		let page = await html();
+		expect( page ).toMatch( new RegExp( `<a [^>]*data-affibloom-id="${ product }"[^>]*rel="nofollow sponsored noopener"[^>]*>Buy</a>` ) );
+		expect( page ).toContain( 'href="https://www.wikipedia.org/" target="_blank" rel="noopener"' );
+
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_nofollow', '0' );
+		page = await html();
+		expect( page ).toMatch( /rel="sponsored noopener"[^>]*>Buy<\/a>/ );
+		expect( wp( 'post', 'get', post, '--field=post_content' ) ).toBe( before );
+	} );
 } );

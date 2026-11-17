@@ -57,4 +57,13 @@ interface LinkLocationRepository {
 	 * The whole index's figures.
 	 */
 	public function stats(): LinkIndexStats;
+
+	/**
+	 * A host's links tied to a product and not dismissed, by their key (LocationKey::of()), with the row's ID and the
+	 * product it is tied to, an editor's assignment first (F21 D13; Task 35H).
+	 *
+	 * @param int $host_id The post.
+	 * @return array<string, array{id: int, product: int}>
+	 */
+	public function tied_links( int $host_id ): array;
 }

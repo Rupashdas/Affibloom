@@ -1,0 +1,130 @@
+<?php
+/**
+ * Text links printed with their product's current link and attributes.
+ *
+ * @package Affibloom
+ */
+
+declare( strict_types=1 );
+
+namespace Affibloom\Interface\Front;
+
+use Affibloom\Application\LinkIndex\RenderedLinks;
+use Affibloom\Domain\LinkIndex\LocationKey;
+use Affibloom\Domain\LinkIndex\RenderedAttributes;
+use Affibloom\Interface\PublicLinks;
+use Affibloom\Module;
+use WP_HTML_Tag_Processor;
+
+/**
+ * Lasso rewrites posts so their links follow a product (F21 R37-R40); Affibloom prints the same at render time and
+ * writes nothing (D13-D15; Task 35H). Each anchor is matched to its index row as the scan keyed it (the host, the
+ * source, the URL and its occurrence among the same URL's links, D4): a tied one takes its product's public link, New
+ * Window, rel and the click attributes; any other `_blank` link gets noopener. Affibloom's own displays (anchors that
+ * already carry `data-affibloom-id`) are left as they are drawn.
+ *
+ * Where: `the_content` after blocks and shortcodes (20), Elementor's content, the chosen ACF fields
+ * (`acf/format_value`, source `acf:<meta key>`); widgets, which have no index rows, get the untied rule only.
+ */
+final class LinkAttributesFilter implements Module {
+
+	/**
+	 * Builds the filter.
+	 *
+	 * @param RenderedLinks $links  The post's tied links.
+	 * @param PublicLinks   $public_links The products' public links.
+	 */
+	public function __construct( private RenderedLinks $links, private PublicLinks $public_links ) {}
+
+	/**
+	 * Hooks into WordPress.
+	 */
+	public function register(): void {
+		add_filter( 'the_content', array( $this, 'content' ), 20 );
+		add_filter( 'elementor/frontend/the_content', array( $this, 'content' ), 20 );
+		add_filter( 'widget_block_content', array( $this, 'widget' ), 20 );
+		add_filter( 'widget_text', array( $this, 'widget' ), 20 );
+		add_filter( 'acf/format_value', array( $this, 'acf' ), 20, 3 );
+	}
+
+	/**
+	 * A post's content.
+	 *
+	 * @param mixed $html The content.
+	 * @return mixed
+	 */
+	public function content( mixed $html ): mixed {
+		return is_string( $html ) ? $this->printed( $html, (int) get_the_ID(), 'content' ) : $html;
+	}
+
+	/**
+	 * A widget's HTML: no rows, so the untied rule only.
+	 *
+	 * @param mixed $html The widget's HTML.
+	 * @return mixed
+	 */
+	public function widget( mixed $html ): mixed {
+		return is_string( $html ) ? $this->printed( $html, 0, '' ) : $html;
+	}
+
+	/**
+	 * An ACF field's value on a post: its rows are under `acf:<meta key>` (PostContentSource), ACF giving a sub-field
+	 * its full meta key as its name.
+	 *
+	 * @param mixed $value   The formatted value.
+	 * @param mixed $post_id The post (or 'option', which has no rows).
+	 * @param mixed $field   The field.
+	 * @return mixed
+	 */
+	public function acf( mixed $value, mixed $post_id, mixed $field ): mixed {
+		if ( ! is_string( $value ) || ! is_array( $field ) || ! is_string( $field['name'] ?? null ) ) {
+			return $value;
+		}
+
+		return $this->printed( $value, is_numeric( $post_id ) ? (int) $post_id : 0, 'acf:' . substr( $field['name'], 0, 32 ) );
+	}
+
+	/**
+	 * The HTML with its anchors printed as a reader sees them.
+	 *
+	 * @param string $html    The HTML.
+	 * @param int    $host_id The post it belongs to, 0 for none.
+	 * @param string $source  Where in the post it is stored.
+	 */
+	private function printed( string $html, int $host_id, string $source ): string {
+		if ( false === stripos( $html, '<a' ) ) {
+			return $html;
+		}
+		$tied  = $host_id > 0 ? $this->links->for_host( $host_id ) : array();
+		$seen  = array();
+		$tags  = new WP_HTML_Tag_Processor( $html );
+		$moved = false;
+		while ( $tags->next_tag( 'a' ) ) {
+			$href = $tags->get_attribute( 'href' );
+			if ( ! is_string( $href ) || null !== $tags->get_attribute( 'data-affibloom-id' ) ) {
+				continue;
+			}
+			$md5          = LocationKey::md5( $href );
+			$seen[ $md5 ] = ( $seen[ $md5 ] ?? 0 ) + 1;
+			$link         = $tied[ LocationKey::of( $host_id, $source, $md5, $seen[ $md5 ] ) ] ?? null;
+			if ( null === $link ) {
+				$target  = $tags->get_attribute( 'target' );
+				$rel     = $tags->get_attribute( 'rel' );
+				$changes = RenderedAttributes::untied( is_string( $target ) ? $target : '', is_string( $rel ) ? $rel : '' );
+			} else {
+				$product = $link['product'];
+				$changes = RenderedAttributes::tied( $href, $this->public_links->for( $product ), $product->new_tab, $product->nofollow, $product->sponsored, (int) $product->id, $link['id'] );
+			}
+			foreach ( $changes as $name => $value ) {
+				$moved = true;
+				if ( null === $value ) {
+					$tags->remove_attribute( $name );
+				} else {
+					$tags->set_attribute( $name, $value );
+				}
+			}
+		}
+
+		return $moved ? $tags->get_updated_html() : $html;
+	}
+}

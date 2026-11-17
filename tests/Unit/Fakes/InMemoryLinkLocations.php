@@ -12,8 +12,12 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 	/** @var list<string> */
 	public array $calls = array();
 
+	/** @var array<int, list<\Affibloom\Domain\LinkIndex\LinkLocation>> The rows stored, by host. */
+	public array $rows = array();
+
 	public function replace_host( int $host_id, array $rows ): void {
 		$this->calls[] = 'replace ' . $host_id;
+		$this->rows[ $host_id ] = $rows;
 	}
 
 	public function delete_host( int $host_id ): void {
@@ -34,5 +38,19 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 
 	public function stats(): LinkIndexStats {
 		return new LinkIndexStats();
+	}
+
+	public function tied_links( int $host_id ): array {
+		$links = array();
+		foreach ( $this->rows[ $host_id ] ?? array() as $index => $row ) {
+			$product = $row->assigned_product_id > 0 ? $row->assigned_product_id : $row->product_id;
+			if ( $product > 0 && ! $row->is_ignored ) {
+				$links[ $row->key() ] = array(
+					'id'      => $index + 1,
+					'product' => $product,
+				);
+			}
+		}
+		return $links;
 	}
 }

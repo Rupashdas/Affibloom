@@ -203,4 +203,27 @@ KEY display_type (display_type)";
 			'detected_at'         => $row->detected_at,
 		);
 	}
+
+	/**
+	 * A host's links tied to a product and not dismissed, by their key, with the row's ID and its product (an editor's
+	 * assignment first; Task 35H).
+	 *
+	 * @param int $host_id The post.
+	 * @return array<string, array{id: int, product: int}>
+	 */
+	public function tied_links( int $host_id ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, once per printed post (RenderedLinks keeps it for the request).
+		$found = $wpdb->get_results( $wpdb->prepare( 'SELECT id, source, url_md5, occurrence, product_id, assigned_product_id FROM %i WHERE host_id = %d AND is_ignored = 0 AND ( product_id > 0 OR assigned_product_id > 0 )', $wpdb->prefix . self::TABLE, $host_id ), ARRAY_A );
+		$links = array();
+		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			$links[ LocationKey::of( $host_id, (string) $row['source'], (string) $row['url_md5'], (int) $row['occurrence'] ) ] = array(
+				'id'      => (int) $row['id'],
+				'product' => (int) $row['assigned_product_id'] > 0 ? (int) $row['assigned_product_id'] : (int) $row['product_id'],
+			);
+		}
+
+		return $links;
+	}
 }

@@ -115,7 +115,7 @@ Grouped by feature, in the order they are worked.
 
 **F21 — render-time link attributes and displays (after the cloaking block)**
 
-- [ ] Task 35H: Render-time link attributes — `the_content`
+- [x] Task 35H: Render-time link attributes — `the_content`
 - [ ] Task 35J: SiteStripe, image-block and Kadence displays at render time — `render_block`
 
 ## Cross-phase notes
@@ -1194,11 +1194,13 @@ product with that slug wins; the prefix does not apply.
 **Files:** the above; unit tests (every R38-R39 case); integration `LinkAttributesFilterTest`; E2E F21 AC8 (change a
 product's NoFollow; the post shows it; content md5 unchanged).
 
-- [ ] **Step 1: Failing tests.** AC8: a tied link shows the product's current attributes, an untied link is untouched, the stored post unchanged; red: no filter.
-- [ ] **Step 2: `RenderedAttributes`.**
-- [ ] **Step 3: The filter.**
-- [ ] **Step 4: Run and look** (a guide on this copy: 662 Amazon links keep tag and `rel`).
-- [ ] **Step 5: Commit** — "Give products' text links their current attributes at render time".
+- [x] **Step 1: Failing tests.** AC8: a tied link shows the product's current attributes, an untied link is untouched, the stored post unchanged; red: no filter.
+- [x] **Step 2: `RenderedAttributes`.**
+- [x] **Step 3: The filter.**
+- [x] **Step 4: Run and look** (a guide on this copy: 662 Amazon links keep tag and `rel`).
+- [x] **Step 5: Commit** — "Give products' text links their current attributes at render time".
+
+*Note (2026-11-18):* *Note:* anchors are matched to rows as the scan keys them (host, source, URL md5, occurrence); a link Affibloom's own display printed (`data-affibloom-id`) is skipped. Rows come through `LinkLocationRepository::tied_links()` (an editor's assignment first), read once per post. 35E's other builders' filters are not added (open decision). Checked on Local: a post linking 20489's destination prints `/example-renamed/`, `_blank`, `nofollow sponsored noopener` and the click attributes, NoFollow off shows at once, the stored content is unchanged; guide 9119 renders its 74 Amazon links with `tag=vbvault-20` and `nofollow noopener` as stored (no tied text links in published posts here: the import's untagged products, Phase M).
 
 ---
 
