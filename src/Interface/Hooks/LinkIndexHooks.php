@@ -17,15 +17,15 @@ use WP_Post;
 
 /**
  * F21 D5, D6 (R10-R12): a post of an indexed type is indexed inline when it is saved, trashed or restored, once per
- * post per request (edge case 1: the editor's meta box save comes second); its status decides whether it keeps rows
+ * post, content and status per request (edge case 1: the editor's meta box save repeats it); its status decides whether it keeps rows
  * (a trashed post has none). A deleted post loses its rows. Revisions and autosaves are not hosts.
  */
 final class LinkIndexHooks implements Module {
 
 	/**
-	 * The posts indexed in this request.
+	 * The posts indexed in this request, with their status and content then.
 	 *
-	 * @var array<int, true>
+	 * @var array<int, string>
 	 */
 	private array $done = array();
 
@@ -84,15 +84,17 @@ final class LinkIndexHooks implements Module {
 	}
 
 	/**
-	 * Indexes the post unless it was indexed in this request.
+	 * Indexes the post unless it was indexed in this request as it is now: the same content and status (the editor's
+	 * meta box save repeats the save); a second save that changed either is indexed again.
 	 *
 	 * @param int $post_id The post.
 	 */
 	private function index( int $post_id ): void {
-		if ( isset( $this->done[ $post_id ] ) ) {
+		$as_now = md5( get_post_status( $post_id ) . '|' . get_post_field( 'post_content', $post_id ) );
+		if ( ( $this->done[ $post_id ] ?? '' ) === $as_now ) {
 			return;
 		}
-		$this->done[ $post_id ] = true;
+		$this->done[ $post_id ] = $as_now;
 		$this->indexer->index( $post_id );
 	}
 }

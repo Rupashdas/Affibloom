@@ -27,6 +27,9 @@ final class LinkIndexHooksTest extends TestCase {
 	/** @var list<string> What the index was asked: "replace 7", "delete 7". */
 	public array $calls = array();
 
+	/** The post's content as get_post_field() answers. */
+	public string $content = 'one';
+
 	/** @var list<int> The hosts the event was fired for. */
 	public array $events = array();
 
@@ -99,6 +102,8 @@ final class LinkIndexHooksTest extends TestCase {
 		parent::setUp();
 		Functions\when( 'wp_is_post_revision' )->justReturn( false );
 		Functions\when( 'wp_is_post_autosave' )->justReturn( false );
+		Functions\when( 'get_post_status' )->justReturn( 'publish' );
+		Functions\when( 'get_post_field' )->alias( fn(): string => $this->content );
 	}
 
 	public function test_a_saved_post_is_indexed_once_per_request_and_the_event_fires(): void {
@@ -133,5 +138,14 @@ final class LinkIndexHooksTest extends TestCase {
 		$this->hooks( true, array( 'recipe' ) )->saved( 9, self::post( 9, 'recipe' ) );
 
 		self::assertSame( array( 'replace 9' ), $this->calls );
+	}
+
+	public function test_a_second_save_with_other_content_in_the_same_request_is_indexed_again(): void {
+		$hooks = $this->hooks();
+		$hooks->saved( 7, self::post( 7 ) );
+		$this->content = 'two';
+		$hooks->saved( 7, self::post( 7 ) );
+
+		self::assertSame( array( 'replace 7', 'replace 7' ), $this->calls );
 	}
 }
