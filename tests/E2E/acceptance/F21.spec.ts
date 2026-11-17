@@ -250,4 +250,24 @@ test.describe( 'F21 The content link index', () => {
 		expect( page ).toMatch( /rel="sponsored noopener"[^>]*>Buy<\/a>/ );
 		expect( wp( 'post', 'get', post, '--field=post_content' ) ).toBe( before );
 	} );
+
+	test( 'AC10 with SiteStripe scan on, a tied SiteStripe iframe is drawn as its product box; the stored post is unchanged', async ( { request } ) => {
+		const asin = `B0S${ Date.now() % 10000000 }`.padEnd( 10, '0' );
+		const product = createProduct( { name: unique( 'F21 sitestripe' ), url: `https://www.amazon.com/dp/${ asin }?tag=vbvault-20`, type: 'amazon', asin } );
+		setSettings( { scan_sitestripe_in_post_content: true } );
+		const src = `https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&amp;OneJS=1&amp;Operation=GetAdHtml&amp;MarketPlace=US&amp;ad_type=product_link&amp;tracking_id=vbvault-20&amp;marketplace=amazon&amp;region=US&amp;asins=${ asin }`;
+		const content = `<!-- wp:html --><iframe style="width:120px;height:240px;" src="${ src }"></iframe><!-- /wp:html -->`;
+		const post = wp( 'post', 'create', '--post_status=publish', '--post_title=F21 AC10', `--post_content=${ content }`, '--porcelain' );
+		wp( 'affibloom', 'links', 'rebuild', `--post=${ post }` );
+		const before = wp( 'post', 'get', post, '--field=post_content' );
+		try {
+			const html = await ( await request.get( `/?p=${ post }` ) ).text();
+			expect( html ).toContain( 'affibloom-display' );
+			expect( html ).toContain( `data-affibloom-id="${ product }"` );
+			expect( html ).not.toContain( 'ws-na.amazon-adsystem.com' );
+			expect( wp( 'post', 'get', post, '--field=post_content' ) ).toBe( before );
+		} finally {
+			setSettings( { scan_sitestripe_in_post_content: false } );
+		}
+	} );
 } );

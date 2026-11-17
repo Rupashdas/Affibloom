@@ -1231,6 +1231,8 @@ product image; a `[lasso]` in an image block shows the image; a Kadence button o
 - [ ] **Step 3: Run and look.** One post of each kind on Local at 1280 and 375 px.
 - [ ] **Step 4: Commit** — "Draw SiteStripe and block displays from products at render time".
 
+*Note (2026-11-18):* the SiteStripe half is built (`Front\DisplayRenderFilter`, `the_content` 21: a tied SiteStripe iframe drawn as `[affibloom id sitestripe="true"]`, a SiteStripe image given the product's image; with Keep SiteStripe UI off the box is the Single box, Lasso's rule), committed as "Draw SiteStripe displays from products at render time"; checked on Local (post 20497: iframe → box, content unchanged). The image-block case is LM5's; **Kadence waits** for the non-affiliate integrations decision (open-decisions, 2026-11-17), so the task stays open.
+
 ---
 
 ## Exit check

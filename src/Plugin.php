@@ -96,6 +96,7 @@ use Affibloom\Interface\Cli\LinksCommand;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
+use Affibloom\Interface\Front\DisplayRenderFilter;
 use Affibloom\Interface\Front\LinkAttributesFilter;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Interface\Rest\JobsController;
@@ -399,11 +400,13 @@ final class Plugin {
 			// F5 R53: Lasso's lasso_display_v2_frontend_enabled under Affibloom's name decides the engine last.
 			static fn( bool $customised ): bool => (bool) apply_filters( 'affibloom_display_advanced_enabled', $customised )
 		);
-		$notice     = new Notice();
-		$resolver   = new LinkResolver( new WpPageFetcher() );
-		$links      = new LinkNormaliser( $resolver, $this->settings_repository(), new TableVariantRepository() );
-		$catalog    = $this->catalog();
-		$data       = $this->amazon_data();
+		$notice   = new Notice();
+		$resolver = new LinkResolver( new WpPageFetcher() );
+		$links    = new LinkNormaliser( $resolver, $this->settings_repository(), new TableVariantRepository() );
+		$catalog  = $this->catalog();
+		$data     = $this->amazon_data();
+		// A post's tied links, read once per request for both render-time filters (Tasks 35H, 35J).
+		$rendered   = new RenderedLinks( new TableLinkLocationRepository(), new PostTypeProductRepository() );
 		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository(), new TableVariantRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
 		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository(), $cloaked->product_at( ... ) );
 		$variants   = new VariantService( new TableVariantRepository(), new WpSlugTaken( new PostTypeProductRepository() ) );
@@ -456,7 +459,8 @@ final class Plugin {
 			$shortcode,
 			new WidgetShortcodes(),
 			$cloaked,
-			new LinkAttributesFilter( new RenderedLinks( new TableLinkLocationRepository(), new PostTypeProductRepository() ), new PublicLinks( $this->settings_repository() ) ),
+			new LinkAttributesFilter( $rendered, new PublicLinks( $this->settings_repository() ) ),
+			new DisplayRenderFilter( $rendered, $this->settings_repository() ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
