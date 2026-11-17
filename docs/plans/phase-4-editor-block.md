@@ -397,7 +397,7 @@ history), `assets/admin/admin.css` (drop the retired tokens if any is left: `gre
 - [x] **Step 1: Rewrite** sections 1-8; remove the retired tokens.
 - [x] **Step 2: Check.** `grep` the plugin for the retired token names (none left); `composer lint`.
 - [x] **Step 3: Commit** — "Rewrite the design system for Meadow".
-- [ ] **Step 4 (recommended, the user's call):** the restyle touches every admin screen, so ask whether to run the
+- [x] **Step 4 (recommended, the user's call):** the restyle touches every admin screen, so ask whether to run the
   admin specs once now (F1, F9, F18, F19, F23, F26, F38, C1 and `admin-design.spec.ts`) instead of waiting for
   Phase 4's exit check.
 
@@ -1135,6 +1135,11 @@ the Lasso baseline for the same product (rerun `box-variants`, which uses the sa
 - Every task: `composer lint`, `composer analyse`, the unit and integration tests it touches, `npm run build`, `npm run
   lint:js`, `npm run test:js`, E2E `acceptance/F4`, and the check by hand at 1280 and 375 px.
 - Sign-off: the user signs off the phase before Phase 5 starts.
+
+*Exit check run 2026-11-17:* F4 22/22, admin-design 6/6 (MD7 step 4), F5 AC1 7/7 (the box against Lasso's baselines, the
+block's render path). The F4 tests' first full run found one product bug (`"overrides":{}` stored in every block, fixed
+52eafdc) and test faults (9ff6935, 2538c69). Waits in F4 are 15 s: Local's two PHP workers also serve the editor's own
+requests. `npm run test:js` no longer exists (wp-scripts 37 ships no Jest). Awaiting the user's sign-off.
 
 ## Coverage
 
