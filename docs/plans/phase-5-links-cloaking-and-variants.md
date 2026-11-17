@@ -103,7 +103,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL8: Products in the block editor's link search
 - [x] Task CL9: Products in the classic editor's link dialog
 - [x] Task CL10: Old addresses (Lasso's hand-over moved to Phase M, 26G)
-- [ ] Task CL11: A pasted cloaked URL finds its product
+- [x] Task CL11: A pasted cloaked URL finds its product
 
 **F27 — URL variants**
 
@@ -996,10 +996,12 @@ current address; after `wp affibloom migrate --only=slugs` the seven links in po
 
 **Files:** `LinkResolver`, `ProductService.php`, `BulkAddService.php`; tests F24 **AC15**, F18's Add Link duplicate specs rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Resolver arm.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Recognise the site's own cloaked links when adding".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Resolver arm.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Recognise the site's own cloaked links when adding".
+
+*Note (2026-11-18):* *Note:* not in `LinkResolver` (that one names and follows links): `CloakedLinkRedirect::product_at()` (host check, then the redirect's own path lookup with prefixes and history) is passed to `ProductService` as `own_link` and asked first, with no request; `BulkAddService` goes through `create_from_url()` too. Seen at 1280 px: `/example-27/` (an old slug) opened 20489 with "This product already exists."
 
 ---
 

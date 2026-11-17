@@ -35,13 +35,15 @@ final class ProductService {
 	/**
 	 * Builds the service.
 	 *
-	 * @param ProductRepository           $products Product storage.
-	 * @param LinkResolver                $links    Where a new link leads and what to call it.
-	 * @param SettingsRepository          $settings Site settings (keep_genius_formatting, the link defaults, the Amazon tag rule).
-	 * @param ProductInput                $input    The product page's field rules (Task 15A).
-	 * @param LinkNormaliser              $rules    The link rules the add flow and the product page share.
-	 * @param AmazonDataService           $amazon   What a new Amazon product takes from Amazon (C1C).
-	 * @param LinkLocationRepository|null $locations The link index, whose rows follow a new link and a repoint (35I).
+	 * @param ProductRepository                 $products Product storage.
+	 * @param LinkResolver                      $links    Where a new link leads and what to call it.
+	 * @param SettingsRepository                $settings Site settings (keep_genius_formatting, the link defaults, the Amazon tag rule).
+	 * @param ProductInput                      $input    The product page's field rules (Task 15A).
+	 * @param LinkNormaliser                    $rules    The link rules the add flow and the product page share.
+	 * @param AmazonDataService                 $amazon   What a new Amazon product takes from Amazon (C1C).
+	 * @param LinkLocationRepository|null       $locations The link index, whose rows follow a new link and a repoint (35I).
+	 * @param (\Closure(string): ?Product)|null $own_link The product a link to this site's own cloaked address answers
+	 *                                                  for (F24 R36; Task CL11); null knows none.
 	 */
 	public function __construct(
 		private ProductRepository $products,
@@ -51,6 +53,7 @@ final class ProductService {
 		private LinkNormaliser $rules,
 		private AmazonDataService $amazon,
 		private ?LinkLocationRepository $locations = null,
+		private ?\Closure $own_link = null,
 	) {}
 
 	/** Products per Dashboard page on a fresh install: Lasso's default (Lasso_Helper::get_dashboard_page_size_options). */
@@ -416,6 +419,8 @@ final class ProductService {
 		$typed = $url;
 
 		$existing = $this->products->find_by_url_key( $url->key() );
+		// This site's own cloaked address is the product it answers for (F24 R36; Task CL11), with no request.
+		$existing = $existing ?? ( null === $this->own_link ? null : ( $this->own_link )( $url->value() ) );
 		if ( null !== $existing ) {
 			return $this->found( $existing, $url );
 		}

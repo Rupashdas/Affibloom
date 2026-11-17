@@ -15,6 +15,7 @@ use Affibloom\Domain\Cloak\CloakPrefix;
 use Affibloom\Domain\Cloak\NetworkSubIds;
 use Affibloom\Domain\Cloak\PublicLink;
 use Affibloom\Domain\Cloak\RedirectQuery;
+use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Module;
@@ -122,20 +123,7 @@ final class CloakedLinkRedirect implements Module {
 	 * @return array{product: int, destination: string, robots: bool}|null
 	 */
 	public function target( string $uri ): ?array {
-		$settings = $this->settings->get();
-		$home     = (string) wp_parse_url( home_url(), PHP_URL_PATH );
-		$product  = null;
-		// The current prefix first, then the old ones, '' for "no prefix" (F24 N2; Task CL5).
-		foreach ( CloakPrefix::all( $settings->string( 'link_prefix' ), $settings->list( 'cloak_prefix_history' ) ) as $prefix ) {
-			$slug = CloakPath::slug( $uri, $prefix, $home );
-			if ( null === $slug || ( '' === $prefix && $this->guard->post_has( $slug ) ) || $this->guard->term_path( $prefix, $slug ) ) {
-				continue;
-			}
-			$product = $this->resolver->product_for( $slug );
-			if ( null !== $product ) {
-				break;
-			}
-		}
+		$product = $this->product_at_path( $uri );
 		if ( null === $product ) {
 			return null;
 		}
@@ -145,5 +133,44 @@ final class CloakedLinkRedirect implements Module {
 			'destination' => PublicLink::destination( $product ),
 			'robots'      => $product->nofollow || $product->cloak,
 		);
+	}
+
+	/**
+	 * The product a link to this site's own cloaked address answers for, or null (F24 R36; Task CL11): Add Link takes
+	 * it as that product, as Lasso's get_lasso_post_id_by_url does for its own permalinks.
+	 *
+	 * @param string $url A pasted link.
+	 */
+	public function product_at( string $url ): ?Product {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		$home = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( ! is_string( $host ) || ! is_string( $home ) || strtolower( preg_replace( '/^www\./i', '', $host ) ?? '' ) !== strtolower( preg_replace( '/^www\./i', '', $home ) ?? '' ) ) {
+			return null;
+		}
+
+		return $this->product_at_path( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+	}
+
+	/**
+	 * The product whose cloaked address a request path is, or null.
+	 *
+	 * @param string $uri The request URI or path.
+	 */
+	private function product_at_path( string $uri ): ?Product {
+		$settings = $this->settings->get();
+		$home     = (string) wp_parse_url( home_url(), PHP_URL_PATH );
+		// The current prefix first, then the old ones, '' for "no prefix" (F24 N2; Task CL5).
+		foreach ( CloakPrefix::all( $settings->string( 'link_prefix' ), $settings->list( 'cloak_prefix_history' ) ) as $prefix ) {
+			$slug = CloakPath::slug( $uri, $prefix, $home );
+			if ( null === $slug || ( '' === $prefix && $this->guard->post_has( $slug ) ) || $this->guard->term_path( $prefix, $slug ) ) {
+				continue;
+			}
+			$product = $this->resolver->product_for( $slug );
+			if ( null !== $product ) {
+				return $product;
+			}
+		}
+
+		return null;
 	}
 }

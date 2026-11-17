@@ -394,7 +394,8 @@ final class Plugin {
 		$links      = new LinkNormaliser( $resolver, $this->settings_repository() );
 		$catalog    = $this->catalog();
 		$data       = $this->amazon_data();
-		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository() );
+		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
+		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository(), $cloaked->product_at( ... ) );
 		$bulk       = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$genius     = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );
 		$per_page   = new PerPage();
@@ -443,7 +444,7 @@ final class Plugin {
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
 			$shortcode,
 			new WidgetShortcodes(),
-			new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) ),
+			$cloaked,
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),

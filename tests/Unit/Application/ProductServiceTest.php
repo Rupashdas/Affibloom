@@ -381,4 +381,21 @@ final class ProductServiceTest extends TestCase {
 		self::assertFalse( $again->already_existed );
 		self::assertCount( 2, $this->repo->saved );
 	}
+
+	/** F24 AC15 (Task CL11): this site's own cloaked address is the product it answers for, found with no request. */
+	public function test_a_pasted_cloaked_address_of_this_site_finds_its_product(): void {
+		$aircat     = $this->service()->create_from_url( 'https://www.example.com/aircat' )->product;
+		$resolver   = new LinkResolver( $this->fetcher );
+		$repository = new InMemorySettingsRepository();
+		$links      = new LinkNormaliser( $resolver, $repository );
+		$own        = static fn( string $url ): ?\Affibloom\Domain\Product\Product => 'https://site.test/aircat/' === $url ? $aircat : null;
+		$service    = new ProductService( $this->repo, $resolver, $repository, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon(), null, $own );
+		$asked      = count( $this->fetcher->asked );
+
+		$added = $service->create_from_url( 'https://site.test/aircat/' );
+
+		self::assertTrue( $added->already_existed );
+		self::assertSame( $aircat->id, $added->product->id );
+		self::assertCount( $asked, $this->fetcher->asked );
+	}
 }

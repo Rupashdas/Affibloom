@@ -179,4 +179,15 @@ test.describe( 'F24 Link cloaking', () => {
 		expect( row?.info ).toBe( 'Product' );
 		expect( row?.permalink ).toMatch( new RegExp( `/${ slug }/$` ) );
 	} );
+
+	test( 'AC15 Add Link with this site cloaked address shows the duplicate result for its product', async ( { page, baseURL } ) => {
+		const product = createProduct( { name: unique( 'F24 own' ), url: 'https://www.example.com/own-product' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
+		await page.getByRole( 'dialog', { name: 'Add A New Link' } ).getByRole( 'textbox' ).fill( `${ baseURL }/${ slug }/` );
+		await page.getByRole( 'button', { name: 'Add Link' } ).click();
+		await expect( page ).toHaveURL( new RegExp( `id=${ product }&is_duplicate=1` ) );
+		await expect( page.getByText( 'This product already exists.' ) ).toBeVisible();
+	} );
 } );
