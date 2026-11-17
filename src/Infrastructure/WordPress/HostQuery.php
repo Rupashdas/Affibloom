@@ -47,14 +47,36 @@ final class HostQuery implements Hosts {
 	 * @return list<int>
 	 */
 	public function ids(): array {
+		return $this->query( '' );
+	}
+
+	/**
+	 * The indexed posts changed since a time, in ID order.
+	 *
+	 * @param string $gmt A time, UTC "Y-m-d H:i:s".
+	 * @return list<int>
+	 */
+	public function changed_since( string $gmt ): array {
+		return $this->query( $gmt );
+	}
+
+	/**
+	 * The indexed posts, changed since a time when one is given.
+	 *
+	 * @param string $gmt A time, UTC, or '' for every post.
+	 * @return list<int>
+	 */
+	private function query( string $gmt ): array {
 		global $wpdb;
 
 		$types_list = $this->types();
 		$types      = implode( ', ', array_fill( 0, count( $types_list ), '%s' ) );
 		$statuses   = implode( ', ', array_fill( 0, count( self::STATUSES ), '%s' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one list of IDs per rebuild; the placeholders are built above.
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( {$types} ) AND post_status IN ( {$statuses} ) ORDER BY ID", ...$types_list, ...self::STATUSES ) );
+		$since = '' === $gmt ? '0000-00-00 00:00:00' : $gmt;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one list of IDs per rebuild; the placeholders are built above.
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( {$types} ) AND post_status IN ( {$statuses} ) AND post_modified_gmt >= %s ORDER BY ID", ...$types_list, ...self::STATUSES, ...array( $since ) ) );
 
 		return array_map( 'intval', $ids );
 	}

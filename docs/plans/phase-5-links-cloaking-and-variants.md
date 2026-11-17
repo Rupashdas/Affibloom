@@ -75,7 +75,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
 - [x] Task 35D: Custom Link Detection — Settings → General
 - [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post` (SiteStripe and Elementor done 2026-11-18; the other plugins wait for the user's answer)
-- [ ] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
+- [x] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
 - [ ] Task 35G: Settings → General — Link Index and Performance
 
 **F9 (part) — the Link Index card**
@@ -446,11 +446,18 @@ their output filters for 35H.
 **Files:** the above; unit tests (batch sizing as R16, state, CPU skip); integration (a stopped batch resumes); E2E
 F21 AC6 via `wp cron event run`.
 
-- [ ] **Step 1: Failing tests.** AC6 (batches, resume, CPU skip, daily pass); red: no cron module.
-- [ ] **Step 2: State and batches.**
-- [ ] **Step 3: Cron module.**
-- [ ] **Step 4: Run and look.** `wp cron event run affibloom_link_index_batch` on this copy; `wp affibloom links status` before and after.
-- [ ] **Step 5: Commit** — "Rebuild the link index in the background".
+- [x] **Step 1: Failing tests.** AC6 (batches, resume, CPU skip, daily pass); red: no cron module.
+- [x] **Step 2: State and batches.**
+- [x] **Step 3: Cron module.**
+- [x] **Step 4: Run and look.** `wp cron event run affibloom_link_index_batch` on this copy; `wp affibloom links status` before and after.
+- [x] **Step 5: Commit** — "Rebuild the link index in the background".
+
+*Note (2026-11-18):* batches are Lasso's sizes (R16), chained through the existing `BackgroundJob` (WP-Cron single events) behind a 60 s
+`OptionLock`; a busy server (load ≥ `cpu_threshold`) makes the batch wait a minute; `CpuLoad` returns nothing on
+Windows, so Local never waits (D12). The daily pass drops rows of posts no longer indexed and re-indexes posts changed in
+the last 25 hours, and restarts a broken chain. Activation queues `affibloom_link_index_start` as an event (the modules
+may not be registered then); 35D's settings change now starts the background run. The cron interval floor has nothing to
+floor (no recurring job below daily). Checked on Local: 5 batches of 221 for 1,105 posts, then idle (31 s).
 
 ---
 

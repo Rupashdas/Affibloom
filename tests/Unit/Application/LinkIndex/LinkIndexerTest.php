@@ -8,12 +8,15 @@ use Affibloom\Application\LinkIndex\LinkIndexer;
 use Affibloom\Application\LinkIndex\LinkIndexRebuild;
 use Affibloom\Application\LinkIndex\LinkScanner;
 use Affibloom\Application\LinkIndex\ProductResolver;
+use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Domain\LinkIndex\DisplayCandidate;
 use Affibloom\Domain\LinkIndex\HostContent;
 use Affibloom\Domain\LinkIndex\LinkCandidate;
 use Affibloom\Domain\LinkIndex\LinkClassifier;
 use Affibloom\Domain\LinkIndex\LinkIndexStats;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
+use Affibloom\Domain\LinkIndex\RebuildState;
+use Affibloom\Domain\LinkIndex\RebuildStateRepository;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
@@ -64,6 +67,9 @@ final class LinkIndexerTest extends TestCase {
 			}
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
+			}
+			public function host_ids(): array {
+				return array();
 			}
 		};
 
@@ -124,8 +130,11 @@ final class LinkIndexerTest extends TestCase {
 			public function ids(): array {
 				return array( 7, 8 );
 			}
+			public function changed_since( string $gmt ): array {
+				return array();
+			}
 		};
-		$stats = ( new LinkIndexRebuild( $hosts, $this->indexer() ) )->run_inline();
+		$stats = $this->rebuild( $hosts )->run_inline();
 
 		self::assertSame( array( 1, 3, 1, 1, array( 'external' => 2, 'product' => 1 ) ), array( $stats->hosts, $stats->links, $stats->tied, $stats->products, $stats->by_type ) );
 	}
@@ -143,5 +152,87 @@ final class LinkIndexerTest extends TestCase {
 		self::assertSame( 'group:' . $group?->id, $resolve->reference( new DisplayCandidate( 'Grid', 'x', 0, '', '', (int) $group?->id ) ) );
 		self::assertSame( 'group:' . $group?->id, $resolve->reference( new DisplayCandidate( 'Grid', 'x', 0, '', '', 0, (string) $group?->slug ) ) );
 		self::assertNull( $resolve->reference( new DisplayCandidate( 'Grid', 'x', 0, '', '', 0, 'gone' ) ) );
+	}
+
+	public ?RebuildState $state = null;
+
+	public int $dispatched = 0;
+
+	/** @var list<int> */
+	public array $stored_hosts = array();
+
+	/** @param list<int> $ids */
+	private function rebuild( Hosts $hosts ): LinkIndexRebuild {
+		$test  = $this;
+		$state = new class( $test ) implements RebuildStateRepository {
+			public function __construct( private LinkIndexerTest $test ) {}
+			public function get(): RebuildState {
+				return $this->test->state ?? new RebuildState();
+			}
+			public function save( RebuildState $state ): void {
+				$this->test->state = $state;
+			}
+		};
+		$job   = new class( $test ) implements BackgroundJob {
+			public function __construct( private LinkIndexerTest $test ) {}
+			public function dispatch( int $delay = 0 ): void {
+				++$this->test->dispatched;
+			}
+		};
+		$rows  = new class( $test ) implements LinkLocationRepository {
+			public function __construct( private LinkIndexerTest $test ) {}
+			public function replace_host( int $host_id, array $rows ): void {}
+			public function delete_host( int $host_id ): void {
+				$this->test->deleted( $host_id );
+			}
+			public function host_ids(): array {
+				return $this->test->stored_hosts;
+			}
+			public function stats(): LinkIndexStats {
+				return new LinkIndexStats();
+			}
+		};
+
+		return new LinkIndexRebuild( $hosts, $this->indexer(), $state, $job, $rows );
+	}
+
+	/** @param list<int> $ids */
+	private static function hosts( array $ids ): Hosts {
+		return new class( $ids ) implements Hosts {
+			/** @param list<int> $ids */
+			public function __construct( private array $ids ) {}
+			public function ids(): array {
+				return $this->ids;
+			}
+			public function changed_since( string $gmt ): array {
+				return array( 7 );
+			}
+		};
+	}
+
+	public function test_lassos_batch_sizes(): void {
+		self::assertSame( array( 100, 100, 250, 250, 200, 221, 500 ), array_map( array( LinkIndexRebuild::class, 'batch_size' ), array( 1, 180, 500, 499, 501, 1105, 9000 ) ) );
+	}
+
+	public function test_a_background_run_goes_batch_by_batch_and_resumes_from_its_count(): void {
+		$rebuild = $this->rebuild( self::hosts( range( 1, 250 ) ) );
+
+		self::assertTrue( $rebuild->start() );
+		self::assertFalse( $rebuild->start() );
+		self::assertSame( array( 'running', 0, 250, 1 ), array( $this->state?->status, $this->state?->done, $this->state?->total, $this->dispatched ) );
+
+		self::assertTrue( $rebuild->next_batch() );
+		self::assertSame( 125, $this->state?->done );
+		self::assertFalse( $rebuild->next_batch() );
+		self::assertSame( array( 'idle', 250, 2 ), array( $this->state?->status, $this->state?->last['hosts'], $this->dispatched ) );
+		self::assertFalse( $rebuild->next_batch() );
+	}
+
+	public function test_the_daily_pass_drops_hosts_that_are_gone_and_indexes_changed_ones(): void {
+		$this->stored_hosts = array( 7, 99 );
+		$this->rebuild( self::hosts( array( 7 ) ) )->daily();
+
+		self::assertSame( array( 99 ), $this->deleted );
+		self::assertCount( 3, $this->stored[7] ?? array() );
 	}
 }

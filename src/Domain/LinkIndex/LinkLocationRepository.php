@@ -31,6 +31,13 @@ interface LinkLocationRepository {
 	public function delete_host( int $host_id ): void;
 
 	/**
+	 * Every host post that has rows (the daily pass, Task 35F).
+	 *
+	 * @return list<int>
+	 */
+	public function host_ids(): array;
+
+	/**
 	 * The whole index's figures.
 	 */
 	public function stats(): LinkIndexStats;

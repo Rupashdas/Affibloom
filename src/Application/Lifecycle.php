@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application;
 
+use Closure;
 use Affibloom\Application\Upgrade\Upgrader;
 
 /**
@@ -25,12 +26,14 @@ final class Lifecycle {
 	 * @param PluginState $state     The plugin's own records and the site's rewrite rules.
 	 * @param Upgrader    $upgrader  The pending schema and data steps.
 	 * @param string      $version   The running plugin version (AFFIBLOOM_VERSION).
+	 * @param Closure|null $activated Called at the end of an activation (the link index's first rebuild, Task 35F).
 	 */
 	public function __construct(
 		private Schedules $schedules,
 		private PluginState $state,
 		private Upgrader $upgrader,
-		private string $version
+		private string $version,
+		private ?Closure $activated = null
 	) {}
 
 	/**
@@ -42,6 +45,9 @@ final class Lifecycle {
 		$this->state->record_activation_time();
 		$this->upgrader->run();
 		$this->state->flush_rewrite_rules();
+		if ( null !== $this->activated ) {
+			( $this->activated )();
+		}
 	}
 
 	/**

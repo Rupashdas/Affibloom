@@ -82,6 +82,9 @@ use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
+use Affibloom\Interface\Cron\LinkIndexCron;
+use Affibloom\Infrastructure\System\CpuLoad;
+use Affibloom\Infrastructure\WordPress\OptionLinkIndexState;
 use Affibloom\Interface\Hooks\LinkIndexHooks;
 use Affibloom\Interface\Cli\UpgradeCommand;
 use Affibloom\Interface\Cron\AmazonBulkSyncCron;
@@ -250,7 +253,19 @@ final class Plugin {
 	 * @param Upgrader $upgrader The pending steps.
 	 */
 	private static function lifecycle( Upgrader $upgrader ): Lifecycle {
-		return new Lifecycle( self::cron_registry(), new OptionPluginState(), $upgrader, AFFIBLOOM_VERSION );
+		return new Lifecycle(
+			self::cron_registry(),
+			new OptionPluginState(),
+			$upgrader,
+			AFFIBLOOM_VERSION,
+			// Task 35F: the link index's first rebuild, as Lasso's activation queues its full scan (R15). An event, since
+			// the modules may not be registered in the activation request.
+			static function (): void {
+				if ( false === wp_next_scheduled( LinkIndexCron::START ) ) {
+					wp_schedule_single_event( time(), LinkIndexCron::START );
+				}
+			}
+		);
 	}
 
 	/**
@@ -293,7 +308,7 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS );
 	}
 
 	/**
@@ -350,8 +365,8 @@ final class Plugin {
 		$settings  = new SettingsService(
 			$this->settings_repository(),
 			$detection,
-			// Task 35D: inline until Task 35F runs the rebuild in the background.
-			fn() => $this->link_index_rebuild()->run_inline()
+			// Task 35D: a change of what is scanned starts a background rebuild (Task 35F).
+			fn() => $this->link_index_rebuild()->start()
 		);
 		$display   = new DisplaySettingsService(
 			new OptionDisplaySettingsRepository(),
@@ -462,8 +477,9 @@ final class Plugin {
 			$this->upgrade_hooks(),
 			new UpgradeCommand( $upgrader ),
 			new AmazonCommand( $amazon, $catalog ),
-			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository() ),
+			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository(), new OptionLinkIndexState() ),
 			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
+			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new CpuLoad(), $this->settings_repository() ),
 			new ForeignNotices( $this->navigation() ),
 		);
 	}
@@ -472,7 +488,7 @@ final class Plugin {
 	 * The link index's rebuild (F21, Task 35A): every indexed post through the indexer.
 	 */
 	private function link_index_rebuild(): LinkIndexRebuild {
-		return new LinkIndexRebuild( $this->host_query(), $this->link_indexer() );
+		return new LinkIndexRebuild( $this->host_query(), $this->link_indexer(), new OptionLinkIndexState(), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new TableLinkLocationRepository() );
 	}
 
 	/**

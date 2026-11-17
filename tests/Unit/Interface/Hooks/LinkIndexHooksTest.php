@@ -57,6 +57,9 @@ final class LinkIndexHooksTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
+			public function host_ids(): array {
+				return array();
+			}
 		};
 		$products = new InMemoryProductRepository();
 		$links    = new ProductResolver( $products );

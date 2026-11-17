@@ -159,4 +159,28 @@ test.describe( 'F21 The content link index', () => {
 			setSettings( { scan_sitestripe_in_post_content: false } );
 		}
 	} );
+
+	test( 'AC6 the full rebuild runs in WP-Cron batches and resumes; the daily pass drops the rows of posts that are gone', () => {
+		const state = (): { status: string; done: number; total: number } => JSON.parse( wp( 'option', 'get', 'affibloom_link_index_state', '--format=json' ) );
+		const post = postWith( '<p><a href="https://www.example.org/batch">Batch</a></p>' );
+		wp( 'eval', `global $wpdb; $wpdb->delete( $wpdb->prefix . 'affibloom_link_locations', array( 'host_id' => ${ post } ) );` );
+
+		wp( 'eval', 'do_action( "affibloom_link_index_start" );' );
+		expect( state() ).toMatchObject( { status: 'running', done: 0 } );
+		const total = state().total;
+		expect( total ).toBeGreaterThan( 0 );
+
+		// Each run does one batch and schedules the next; a run that died is resumed from the stored count.
+		let guard = 0;
+		while ( 'running' === state().status && guard++ < 50 ) {
+			wp( 'cron', 'event', 'run', 'affibloom_link_index_batch' );
+		}
+		expect( state() ).toMatchObject( { status: 'idle', done: total } );
+		expect( rows( post ) ).toHaveLength( 1 );
+
+		// A host deleted behind the hooks' back (direct SQL) loses its rows in the daily pass.
+		wp( 'eval', `global $wpdb; $wpdb->delete( $wpdb->posts, array( 'ID' => ${ post } ) );` );
+		wp( 'cron', 'event', 'run', 'affibloom_link_index_daily' );
+		expect( rows( post ) ).toEqual( [] );
+	} );
 } );

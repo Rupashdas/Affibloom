@@ -33,6 +33,9 @@ final class LifecycleHooksTest extends TestCase {
 		Functions\expect( 'flush_rewrite_rules' )->once();
 		Functions\expect( 'wp_unschedule_hook' )->never();
 		Functions\expect( 'delete_option' )->never();
+		// Task 35F: the link index's first rebuild is queued as an event.
+		Functions\when( 'wp_next_scheduled' )->justReturn( false );
+		Functions\expect( 'wp_schedule_single_event' )->once()->with( \Mockery::type( 'int' ), 'affibloom_link_index_start' );
 		// A site whose schema steps are all done (step 1 is Task 13G's), so activation runs none; the steps are
 		// UpgraderTest's and MigratorTest's.
 		Functions\when( 'get_option' )->alias(

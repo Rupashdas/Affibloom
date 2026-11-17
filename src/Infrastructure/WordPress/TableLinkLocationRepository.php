@@ -111,6 +111,18 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * Every host post that has rows.
+	 *
+	 * @return list<int>
+	 */
+	public function host_ids(): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the daily pass, once a day.
+		return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT host_id FROM %i', $wpdb->prefix . self::TABLE ) ) );
+	}
+
+	/**
 	 * The whole index's figures, in two queries.
 	 */
 	public function stats(): LinkIndexStats {

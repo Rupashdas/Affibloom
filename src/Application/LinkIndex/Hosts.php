@@ -20,4 +20,12 @@ interface Hosts {
 	 * @return list<int>
 	 */
 	public function ids(): array;
+
+	/**
+	 * The indexed posts changed since a time, in ID order (the daily pass, Task 35F).
+	 *
+	 * @param string $gmt A time, UTC "Y-m-d H:i:s".
+	 * @return list<int>
+	 */
+	public function changed_since( string $gmt ): array;
 }

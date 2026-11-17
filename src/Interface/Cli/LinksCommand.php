@@ -13,6 +13,7 @@ use Affibloom\Application\LinkIndex\LinkIndexRebuild;
 use Affibloom\Domain\LinkIndex\LinkIndexStats;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\LinkIndex\LinkType;
+use Affibloom\Domain\LinkIndex\RebuildStateRepository;
 use Affibloom\Module;
 use RuntimeException;
 use WP_CLI;
@@ -28,8 +29,9 @@ final class LinksCommand implements Module {
 	 *
 	 * @param LinkIndexRebuild       $rebuild The rebuild.
 	 * @param LinkLocationRepository $rows    The index.
+	 * @param RebuildStateRepository $state   Where a background rebuild stands.
 	 */
-	public function __construct( private LinkIndexRebuild $rebuild, private LinkLocationRepository $rows ) {}
+	public function __construct( private LinkIndexRebuild $rebuild, private LinkLocationRepository $rows, private RebuildStateRepository $state ) {}
 
 	/**
 	 * Adds the commands when WP-CLI is running.
@@ -87,7 +89,11 @@ final class LinksCommand implements Module {
 	public function status( array $args, array $assoc_args ): void {
 		unset( $args, $assoc_args );
 		$stats = $this->rows->stats();
+		$state = $this->state->get();
 		WP_CLI::line( self::by_type( $stats ) );
+		if ( $state->running() ) {
+			WP_CLI::line( sprintf( 'Background rebuild: %1$s of %2$s posts done.', number_format_i18n( $state->done ), number_format_i18n( $state->total ) ) );
+		}
 		WP_CLI::success(
 			sprintf(
 				'%1$s links indexed in %2$s (%3$s tied to %4$s). Last indexed: %5$s.',
@@ -125,7 +131,7 @@ final class LinksCommand implements Module {
 	public static function by_type( LinkIndexStats $stats ): string {
 		$parts = array();
 		foreach ( LinkType::cases() as $type ) {
-			$parts[] = ucfirst( $type->value ) . ': ' . number_format_i18n( $stats->by_type[ $type->value ] ?? 0 );
+			$parts[] = ( LinkType::SiteStripe === $type ? 'SiteStripe' : ucfirst( $type->value ) ) . ': ' . number_format_i18n( $stats->by_type[ $type->value ] ?? 0 );
 		}
 
 		return implode( ' · ', $parts );
