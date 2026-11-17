@@ -71,7 +71,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24D: Edit Display
 - [x] Task 24E: Preview queue on load
 - [x] Task ED1: Classic editor button
-- [ ] Task ED2: Elementor widget
+- [x] Task ED2: Elementor widget
 - [ ] Task ED3: Rank Math content analysis
 - [ ] Task ED4: AMP inline styles
 - [ ] Task ED5: Keep Lasso's link attributes valid in core blocks (N3 accepted)
@@ -993,10 +993,18 @@ the Elementor editor.
 **Files:** create the above; modify `Plugin.php`; tests `tests/E2E/acceptance/F4.spec.ts` (AC17, skipped when Elementor
 is absent from the test site).
 
-- [ ] **Step 1: Failing test** (Elementor installed in a test site; skipped when absent).
-- [ ] **Step 2: Widget, controls, template.** Render with `do_shortcode( shortcode_unautop( setting ) )`; plain content prints the shortcode.
-- [ ] **Step 3: Run and look.** By hand in Elementor.
-- [ ] **Step 4: Commit** — "Place displays with an Elementor widget".
+- [x] **Step 1: Failing test** (Elementor installed in a test site; skipped when absent).
+- [x] **Step 2: Widget, controls, template.** Render with `do_shortcode( shortcode_unautop( setting ) )`; plain content prints the shortcode.
+- [x] **Step 3: Run and look.** By hand in Elementor.
+- [x] **Step 4: Commit** — "Place displays with an Elementor widget".
+
+*Note (2026-11-17):* Built for Elementor 4.4.1 with its editor hooks (`elementor/editor/after_enqueue_scripts`,
+`elementor/editor/footer`, `elementor/preview/enqueue_styles`) in place of Lasso's referrer check. Type-only controls use
+Elementor's `condition` on a hidden `affibloom_type`; settings go through `$e.run( 'document/elements/settings' )`.
+`assets/editor/elementor.js` is built into `build/elementor.js` (webpack.config.js) so it shares the block's preview
+queue (R69). There is no shortcode input in the canvas (Lasso's is hidden); the panel's text area is the shortcode box.
+Seen at 1280 px with Elementor on, then off again: the panel, modal, preview, the Single-only controls, a title edit
+rewriting the shortcode, and the published page.
 
 ---
 

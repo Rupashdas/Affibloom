@@ -398,6 +398,62 @@ test.describe( 'F4 Displays in the editor', () => {
 		}
 	} );
 
+	test( 'AC17 with Elementor, the Affibloom widget places a display and the page renders it', async ( { page } ) => {
+		let installed = true;
+		try {
+			wp( 'plugin', 'is-installed', 'elementor' );
+		} catch {
+			installed = false;
+		}
+		test.skip( ! installed, 'Elementor is not installed on this site.' );
+		const name = unique( 'F4 AC17' );
+		const id = createProduct( { name } );
+		wp( 'plugin', 'activate', 'elementor' );
+		try {
+			const post = wp( 'post', 'create', '--post_type=page', '--post_status=draft', `--post_title=${ unique( 'F4 AC17 page' ) }`, '--porcelain' ).trim();
+			await page.goto( `/wp-admin/post.php?post=${ post }&action=elementor` );
+			await page.locator( '#elementor-loading' ).waitFor( { state: 'hidden', timeout: 120_000 } );
+
+			// The widget is in the panel's widgets; it is placed, in a container (Elementor 4), through Elementor's commands.
+			await page.getByPlaceholder( 'Search Widget...' ).fill( 'Affibloom' );
+			await expect( page.locator( '.elementor-element', { hasText: 'Affibloom' } ) ).toBeVisible();
+			await page.evaluate( () => {
+				const w = window as unknown as { $e: { run: ( command: string, args: object ) => unknown }; elementor: { documents: { getCurrent: () => { container: unknown } } } };
+				const box = w.$e.run( 'document/elements/create', { container: w.elementor.documents.getCurrent().container, model: { elType: 'container' } } );
+				w.$e.run( 'document/elements/create', { container: box, model: { elType: 'widget', widgetType: 'affibloom' } } );
+			} );
+			const canvas = page.frameLocator( '#elementor-preview-iframe' );
+			const widget = canvas.locator( '.elementor-widget-affibloom' ).last();
+			await expect( widget ).toContainText( 'Choose a Link to display.' );
+
+			// The same modal and preview as the block.
+			await widget.getByRole( 'button', { name: 'Add a Display' } ).click();
+			const modal = page.locator( '#affibloom-display-modal' );
+			await modal.getByRole( 'button', { name: 'Single' } ).click();
+			const search = modal.getByPlaceholder( 'Search URLs' );
+			await search.fill( name );
+			await search.press( 'Enter' );
+			await modal.locator( '.affibloom-link-row', { hasText: name } ).getByRole( 'button', { name: 'Add' } ).click();
+			await expect( widget.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( name );
+			await expect( page.locator( '.elementor-control-affibloom_shortcode textarea' ) ).toHaveValue( `[affibloom id="${ id }"]` );
+			await expect( widget.getByRole( 'button', { name: 'Select a New Display' } ) ).toBeVisible();
+
+			// Its controls are the type's overrides: Single's show, Grid's do not; an edit rewrites the shortcode.
+			await expect( page.locator( '.elementor-control-title_single' ) ).toBeVisible();
+			await expect( page.locator( '.elementor-control-title_grid' ) ).toBeHidden();
+			await page.locator( '.elementor-control-title_single input' ).fill( 'Retitled' );
+			await expect( page.locator( '.elementor-control-affibloom_shortcode textarea' ) ).toHaveValue( `[affibloom id="${ id }" title="Retitled"]` );
+			await expect( widget.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( 'Retitled' );
+
+			await page.evaluate( () => ( window as unknown as { $e: { run: ( command: string ) => Promise<unknown> } } ).$e.run( 'document/save/publish' ) );
+			await expect.poll( () => wp( 'post', 'get', post, '--field=post_status' ).trim() ).toBe( 'publish' );
+			await page.goto( `/?page_id=${ post }` );
+			await expect( page.locator( '.affibloom-box .affibloom-title' ) ).toHaveText( 'Retitled' );
+		} finally {
+			wp( 'plugin', 'deactivate', 'elementor' );
+		}
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

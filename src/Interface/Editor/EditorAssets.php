@@ -66,8 +66,18 @@ final class EditorAssets implements Module {
 	 * The modal's styles (the design system's, which its root's `.affibloom-admin` scopes) and its script's address.
 	 */
 	public function enqueue(): void {
+		$this->enqueue_for( self::BLOCK_SCRIPT );
+	}
+
+	/**
+	 * The modal's styles, and `window.affibloomEditor` before a script that opens the modal: the block's, the Classic
+	 * editor's button's (Task ED1) or the Elementor widget's (ED2).
+	 *
+	 * @param string $handle The script's handle.
+	 */
+	public function enqueue_for( string $handle ): void {
 		$this->styles();
-		wp_add_inline_script( self::BLOCK_SCRIPT, $this->config(), 'before' );
+		wp_add_inline_script( $handle, $this->config(), 'before' );
 	}
 
 	/**
@@ -80,10 +90,9 @@ final class EditorAssets implements Module {
 		if ( ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) || ! ClassicButton::active() ) {
 			return;
 		}
-		$this->styles();
 		wp_register_script( 'affibloom-editor-config', false, array( 'wp-api-fetch' ), $this->version, false );
 		wp_enqueue_script( 'affibloom-editor-config' );
-		wp_add_inline_script( 'affibloom-editor-config', $this->config() );
+		$this->enqueue_for( 'affibloom-editor-config' );
 	}
 
 	/**
@@ -96,7 +105,8 @@ final class EditorAssets implements Module {
 	}
 
 	/**
-	 * `window.affibloomEditor`: the modal's address, the sidebar's fields (Task 24A) and the Classic button's words (ED1).
+	 * `window.affibloomEditor`: the modal's address, the sidebar's fields (Task 24A), the Classic button's words (ED1) and the
+	 * Elementor widget's (ED2).
 	 */
 	private function config(): string {
 		$config = array(
@@ -108,6 +118,13 @@ final class EditorAssets implements Module {
 				'loading' => __( 'Loading Display...', 'affibloom' ),
 				'retry'   => __( 'Retry Add A Display', 'affibloom' ),
 			),
+			// The Elementor widget's (ED2): the block's words.
+			'elementor'   => array(
+				'loading' => __( 'Loading…', 'affibloom' ),
+				'retry'   => __( 'Retry Add a Display', 'affibloom' ),
+				'empty'   => __( 'This display has nothing to show: its product is gone or not published.', 'affibloom' ),
+				'failed'  => __( 'The preview could not be loaded.', 'affibloom' ),
+			),
 		);
 
 		return 'window.affibloomEditor = ' . wp_json_encode( $config ) . ';';
@@ -118,9 +135,15 @@ final class EditorAssets implements Module {
 	 */
 	public function print_modal(): void {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( null === $screen || ! ( $screen->is_block_editor() || ( 'post' === $screen->base && ClassicButton::active() ) ) ) {
-			return;
+		if ( null !== $screen && ( $screen->is_block_editor() || ( 'post' === $screen->base && ClassicButton::active() ) ) ) {
+			$this->modal();
 		}
+	}
+
+	/**
+	 * The modal's markup; the Elementor editor prints it in its footer (ED2).
+	 */
+	public function modal(): void {
 		$this->template->render(
 			'editor/display-modal',
 			array(

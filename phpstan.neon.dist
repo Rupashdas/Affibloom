@@ -8,6 +8,7 @@ parameters:
 	phpVersion: 80300
 	scanFiles:
 		- tests/stubs/wp-cli.php
+		- tests/stubs/elementor.php
 	paths:
 		- affibloom.php
 		- src

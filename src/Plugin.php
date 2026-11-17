@@ -103,6 +103,7 @@ use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Editor\ClassicButton;
 use Affibloom\Interface\Editor\EditorAssets;
+use Affibloom\Interface\Editor\ElementorWidget;
 use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\SchemaMarkup;
@@ -354,6 +355,8 @@ final class Plugin {
 		$search     = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
 		$upgrader   = self::upgrader();
 		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector() );
+		// The display modal's assets: the block editor's, the Classic editor's and Elementor's (ED2) share them.
+		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
 
 		$box_builder = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ) );
 		$box_html    = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
@@ -406,8 +409,9 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
-			new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets ),
+			$editor_assets,
 			new ClassicButton( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ), $settings, $display, $amazon, $genius, $this->template() ),
