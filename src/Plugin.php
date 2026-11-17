@@ -29,6 +29,7 @@ use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Lifecycle;
+use Affibloom\Application\LinkIndex\DisplayResolver;
 use Affibloom\Application\LinkIndex\LinkIndexer;
 use Affibloom\Application\LinkIndex\LinkIndexRebuild;
 use Affibloom\Application\LinkIndex\ProductResolver;
@@ -457,10 +458,12 @@ final class Plugin {
 	 * The link index's rebuild (F21, Task 35A): the posts, their content, the scanner and the product lookups.
 	 */
 	private function link_index_rebuild(): LinkIndexRebuild {
+		$links   = new ProductResolver( new PostTypeProductRepository() );
 		$indexer = new LinkIndexer(
 			new PostContentSource(),
 			new WpLinkScanner(),
-			new ProductResolver( new PostTypeProductRepository() ),
+			$links,
+			new DisplayResolver( new PostTypeProductRepository(), new TermGroupRepository(), $links ),
 			new LinkClassifier( site_url() ),
 			new TableLinkLocationRepository()
 		);

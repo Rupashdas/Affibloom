@@ -15,9 +15,9 @@ use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\LinkIndex\LocationKey;
 
 /**
- * One host's rows (F21 R25, R36, D3, D4): each scanned place's links, tied to their products, numbered by occurrence,
- * then stored in place of the host's old rows. A post that is not indexed loses its rows. Nothing in the post is
- * written (D3).
+ * One host's rows (F21 R25, R27, R36, D3, D4): each scanned place's links and displays, tied to their products (and a
+ * group display to its group), numbered by occurrence, then stored in place of the host's old rows. A post that is
+ * not indexed loses its rows. Nothing in the post is written (D3).
  */
 final class LinkIndexer {
 
@@ -27,6 +27,7 @@ final class LinkIndexer {
 	 * @param ContentSource          $content    The host's content.
 	 * @param LinkScanner            $scanner    Finds its links.
 	 * @param ProductResolver        $resolver   Ties a link to its product.
+	 * @param DisplayResolver        $displays   Ties a display to its product or group.
 	 * @param LinkClassifier         $classifier Turns a link into a row.
 	 * @param LinkLocationRepository $rows       The index.
 	 */
@@ -34,6 +35,7 @@ final class LinkIndexer {
 		private ContentSource $content,
 		private LinkScanner $scanner,
 		private ProductResolver $resolver,
+		private DisplayResolver $displays,
 		private LinkClassifier $classifier,
 		private LinkLocationRepository $rows,
 	) {}
@@ -63,6 +65,11 @@ final class LinkIndexer {
 				$md5          = LocationKey::md5( $link->href );
 				$seen[ $md5 ] = ( $seen[ $md5 ] ?? 0 ) + 1;
 				$rows[]       = $this->classifier->classify( $link, $this->resolver->resolve( $link->href ), $host->id, $host->url, $source, $seen[ $md5 ], $now );
+			}
+			foreach ( $this->scanner->displays( $html ) as $display ) {
+				$md5          = LocationKey::md5( $display->markup );
+				$seen[ $md5 ] = ( $seen[ $md5 ] ?? 0 ) + 1;
+				$rows[]       = $this->classifier->display( $display, $this->displays->product( $display ), $this->displays->reference( $display ), $host->id, $host->url, $source, $seen[ $md5 ], $now );
 			}
 		}
 

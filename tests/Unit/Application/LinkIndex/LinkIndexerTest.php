@@ -2,11 +2,13 @@
 namespace Affibloom\Tests\Unit\Application\LinkIndex;
 
 use Affibloom\Application\LinkIndex\ContentSource;
+use Affibloom\Application\LinkIndex\DisplayResolver;
 use Affibloom\Application\LinkIndex\Hosts;
 use Affibloom\Application\LinkIndex\LinkIndexer;
 use Affibloom\Application\LinkIndex\LinkIndexRebuild;
 use Affibloom\Application\LinkIndex\LinkScanner;
 use Affibloom\Application\LinkIndex\ProductResolver;
+use Affibloom\Domain\LinkIndex\DisplayCandidate;
 use Affibloom\Domain\LinkIndex\HostContent;
 use Affibloom\Domain\LinkIndex\LinkCandidate;
 use Affibloom\Domain\LinkIndex\LinkClassifier;
@@ -15,6 +17,7 @@ use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductType;
+use Affibloom\Tests\Unit\Fakes\InMemoryGroupRepository;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -46,6 +49,9 @@ final class LinkIndexerTest extends TestCase {
 			public function scan( string $html ): array {
 				return array_map( static fn( string $name ): LinkCandidate => new LinkCandidate( 'https://shop.test/' . $name ), explode( ' ', $html ) );
 			}
+			public function displays( string $html ): array {
+				return array();
+			}
 		};
 		$test = $this;
 		$rows = new class( $test ) implements LinkLocationRepository {
@@ -61,7 +67,9 @@ final class LinkIndexerTest extends TestCase {
 			}
 		};
 
-		return new LinkIndexer( $content, $scanner, new ProductResolver( $this->products ), new LinkClassifier( 'https://site.test' ), $rows );
+		$links = new ProductResolver( $this->products );
+
+		return new LinkIndexer( $content, $scanner, $links, new DisplayResolver( $this->products, new InMemoryGroupRepository(), $links ), new LinkClassifier( 'https://site.test' ), $rows );
 	}
 
 	/** @param list<\Affibloom\Domain\LinkIndex\LinkLocation> $rows */
@@ -120,5 +128,20 @@ final class LinkIndexerTest extends TestCase {
 		$stats = ( new LinkIndexRebuild( $hosts, $this->indexer() ) )->run_inline();
 
 		self::assertSame( array( 1, 3, 1, 1, array( 'external' => 2, 'product' => 1 ) ), array( $stats->hosts, $stats->links, $stats->tied, $stats->products, $stats->by_type ) );
+	}
+
+	public function test_a_display_s_product_is_found_by_slug_then_id_then_link_and_its_group_by_id_or_slug(): void {
+		$groups  = new InMemoryGroupRepository();
+		$group   = $groups->create( 'Shoes', '' );
+		$id      = (int) $this->products->save( ( new Product( null, 'P', AffiliateUrl::from_string( 'https://shop.test/p' ), ProductType::Other, true, true, false, true ) )->with( array( 'slug' => 'my-p' ) ) )->id;
+		$resolve = new DisplayResolver( $this->products, $groups, new ProductResolver( $this->products ) );
+
+		self::assertSame( $id, $resolve->product( new DisplayCandidate( 'Single', 'x', 999, 'my-p' ) ) );
+		self::assertSame( $id, $resolve->product( new DisplayCandidate( 'Single', 'x', $id ) ) );
+		self::assertSame( $id, $resolve->product( new DisplayCandidate( 'Single', 'x', 0, '', 'https://shop.test/p' ) ) );
+		self::assertSame( 0, $resolve->product( new DisplayCandidate( 'Single', 'x', 999 ) ) );
+		self::assertSame( 'group:' . $group?->id, $resolve->reference( new DisplayCandidate( 'Grid', 'x', 0, '', '', (int) $group?->id ) ) );
+		self::assertSame( 'group:' . $group?->id, $resolve->reference( new DisplayCandidate( 'Grid', 'x', 0, '', '', 0, (string) $group?->slug ) ) );
+		self::assertNull( $resolve->reference( new DisplayCandidate( 'Grid', 'x', 0, '', '', 0, 'gone' ) ) );
 	}
 }

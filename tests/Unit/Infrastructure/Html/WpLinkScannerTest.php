@@ -1,6 +1,7 @@
 <?php
 namespace Affibloom\Tests\Unit\Infrastructure\Html;
 
+use Affibloom\Domain\LinkIndex\DisplayCandidate;
 use Affibloom\Domain\LinkIndex\LinkCandidate;
 use Affibloom\Infrastructure\Html\WpLinkScanner;
 use Brain\Monkey;
@@ -34,6 +35,14 @@ final class WpLinkScannerTest extends TestCase {
 		Monkey\setUp();
 		Functions\when( 'parse_blocks' )->alias( static fn( string $html ): array => ( new \WP_Block_Parser() )->parse( $html ) );
 		Functions\when( '_doing_it_wrong' )->justReturn( null );
+		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
+		// WordPress's parser keeps quoted values; enough for these attributes.
+		Functions\when( 'shortcode_parse_atts' )->alias(
+			static function ( string $text ): array {
+				preg_match_all( '/(\w+)="([^"]*)"/', $text, $pairs, PREG_SET_ORDER );
+				return array_column( $pairs, 2, 1 );
+			}
+		);
 	}
 
 	protected function tearDown(): void {
@@ -80,5 +89,24 @@ final class WpLinkScannerTest extends TestCase {
 
 	public function test_content_without_an_anchor_is_not_parsed(): void {
 		self::assertSame( array(), self::hrefs( '<!-- wp:paragraph --><p>No links.</p><!-- /wp:paragraph -->' ) );
+	}
+
+	public function test_displays_are_the_box_blocks_then_the_shortcodes_outside_ignored_blocks(): void {
+		$html = '<!-- wp:affibloom/product-box {"type":"image","productId":5} /-->'
+			. '<!-- wp:paragraph --><p>[affibloom id="5" type="button"] [affibloom group="shoes" type="list"] [affibloom slug="a-b"] [affibloomx]</p><!-- /wp:paragraph -->'
+			. '<!-- wp:rank-math/faq-block --><div>[affibloom id="9"]</div><!-- /wp:rank-math/faq-block -->';
+
+		$found = array_map( static fn( DisplayCandidate $d ): array => array( $d->display_type, $d->product_id, $d->product_slug, $d->group_slug ), ( new WpLinkScanner() )->displays( $html ) );
+
+		self::assertSame(
+			array(
+				array( 'Image', 5, '', '' ),
+				array( 'Button', 5, '', '' ),
+				array( 'List', 0, '', 'shoes' ),
+				array( 'Single', 0, 'a-b', '' ),
+			),
+			$found
+		);
+		self::assertSame( 'affibloom/product-box {"type":"image","productId":5,"groupId":0}', ( new WpLinkScanner() )->displays( $html )[0]->markup );
 	}
 }

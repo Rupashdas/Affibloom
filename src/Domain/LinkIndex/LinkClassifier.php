@@ -71,6 +71,39 @@ final class LinkClassifier {
 	}
 
 	/**
+	 * The row for one display (R27): a product display whatever it finds (Lasso's Table rows are untied too), named by
+	 * its markup, with its group in `display_ref` (D2).
+	 *
+	 * @param DisplayCandidate $display     The display.
+	 * @param int              $product_id  Its product, 0 when none.
+	 * @param string|null      $display_ref "group:<id>" for a group display.
+	 * @param int              $host_id     The post it is in.
+	 * @param string           $host_url    Its permalink.
+	 * @param string           $source      Where in the host.
+	 * @param int              $occurrence  Its occurrence (LocationKey).
+	 * @param string           $detected_at Now, UTC.
+	 */
+	public function display( DisplayCandidate $display, int $product_id, ?string $display_ref, int $host_id, string $host_url, string $source, int $occurrence, string $detected_at ): LinkLocation {
+		$label = null !== $display->label ? trim( $display->label ) : '';
+
+		return new LinkLocation(
+			host_id: $host_id,
+			host_url: $host_url,
+			source: $source,
+			occurrence: $occurrence,
+			product_id: $product_id,
+			link_type: LinkType::Product->value,
+			display_type: $display->display_type,
+			url: $display->markup,
+			url_md5: LocationKey::md5( $display->markup ),
+			anchor_text: '' === $label ? null : mb_strcut( $label, 0, self::TEXT_BYTES, 'UTF-8' ),
+			detected_at: $detected_at,
+			display_ref: $display_ref,
+			original_url: $display->markup,
+		);
+	}
+
+	/**
 	 * Product, Internal or External (R25).
 	 *
 	 * @param string $url        The link.

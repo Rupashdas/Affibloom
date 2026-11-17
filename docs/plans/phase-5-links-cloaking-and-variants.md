@@ -71,7 +71,7 @@ Grouped by feature, in the order they are worked.
 **F21 — the content link index**
 
 - [x] Task 35A: The index of anchors in post content — `wp affibloom links rebuild`
-- [ ] Task 35B: Displays in the index — shortcodes and blocks
+- [x] Task 35B: Displays in the index — shortcodes and blocks
 - [ ] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
 - [ ] Task 35D: Custom Link Detection — Settings → General
 - [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post`
@@ -299,11 +299,16 @@ Phase M (26A, 29C) checks the figures again.
 **Files:** scanner, resolver (ASIN, `[lasso id]`, import table lookups), tests (unit per shortcode family; integration
 grid with a group; E2E F21 AC2).
 
-- [ ] **Step 1: Failing tests.** AC2 per shortcode family, a grid with a group, the blocks; red: no display rows.
-- [ ] **Step 2: Shortcodes.**
-- [ ] **Step 3: Blocks.**
-- [ ] **Step 4: Run and look** (223 Single and 2 Table rows here).
-- [ ] **Step 5: Commit** — "Index boxes and group displays".
+- [x] **Step 1: Failing tests.** AC2 per shortcode family, a grid with a group, the blocks; red: no display rows.
+- [x] **Step 2: Shortcodes.**
+- [x] **Step 3: Blocks.**
+- [x] **Step 4: Run and look** (223 Single and 2 Table rows here).
+- [x] **Step 5: Commit** — "Index boxes and group displays".
+
+*Note (2026-11-18):* displays are Affibloom's shortcode and block only (deviation 146), resolved by a new `DisplayResolver` (slug, ID, then
+`amazon_url`/`geni_url`; group by ID or slug); a display's "URL" is its markup (the shortcode as written, or the block's
+name and addressing attributes), so repeats count by occurrence. Tables (`table:`) wait for F25. Step 4 was run on a
+fixture post (Single, Button, Image, Grid and List rows; the group displays carry `group:<id>`), not on Lasso's boxes.
 
 ---
 

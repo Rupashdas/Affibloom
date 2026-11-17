@@ -10,7 +10,12 @@ declare( strict_types=1 );
 namespace Affibloom\Infrastructure\Html;
 
 use Affibloom\Application\LinkIndex\LinkScanner;
+use Affibloom\Domain\LinkIndex\DisplayCandidate;
+use Affibloom\Domain\LinkIndex\DisplayType;
 use Affibloom\Domain\LinkIndex\LinkCandidate;
+use Affibloom\Domain\Shortcode\Address;
+use Affibloom\Domain\Shortcode\GroupAttributes;
+use Affibloom\Domain\Shortcode\ShortcodeAttributes;
 use WP_HTML_Tag_Processor;
 
 /**
@@ -18,6 +23,7 @@ use WP_HTML_Tag_Processor;
  * (risk "Parser differences"). Blocks Lasso does not scan are left out whole; anchors inside an element whose class
  * starts like an FAQ or accordion are skipped, as are anchors with an ignored class (Affibloom's own
  * `affibloom-scan-ignore` and Kadence's overlay links), and hrefs that are empty, `#…`, `[…]`, `mailto:` or `tel:`.
+ * Displays are Affibloom's block and shortcode outside those blocks (R27; deviation 146).
  */
 final class WpLinkScanner implements LinkScanner {
 
@@ -29,6 +35,9 @@ final class WpLinkScanner implements LinkScanner {
 
 	/** Anchor classes that keep an anchor out of the index (R24). */
 	private const IGNORED_ANCHORS = array( 'affibloom-scan-ignore', 'info-box-link', 'kb-advanced-image-link', 'kt-svg-icon-link', 'kb-section-link-overlay', 'kt-sc-media-link', 'kt-imageoverlay-link' );
+
+	/** Affibloom's block. */
+	private const BOX_BLOCK = 'affibloom/product-box';
 
 	/** Elements that never have a closing tag. */
 	private const VOID = array( 'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'SOURCE', 'TRACK', 'WBR' );
@@ -44,7 +53,8 @@ final class WpLinkScanner implements LinkScanner {
 			return array();
 		}
 		if ( str_contains( $html, '<!-- wp:' ) ) {
-			$html = self::without_ignored_blocks( parse_blocks( $html ) );
+			$boxes = array();
+			$html  = self::without_ignored_blocks( parse_blocks( $html ), $boxes );
 		}
 
 		$tags   = new WP_HTML_Tag_Processor( $html );
@@ -109,30 +119,71 @@ final class WpLinkScanner implements LinkScanner {
 	}
 
 	/**
-	 * The HTML of the blocks Lasso scans, in order, nested blocks in their places.
+	 * The displays: Product box blocks first, then `[affibloom]` shortcodes, both outside the blocks Lasso skips.
+	 *
+	 * @param string $html Post content or another scanned place.
+	 * @return list<DisplayCandidate>
+	 */
+	public function displays( string $html ): array {
+		if ( ! str_contains( $html, '[affibloom' ) && ! str_contains( $html, 'wp:' . self::BOX_BLOCK ) ) {
+			return array();
+		}
+		$boxes = array();
+		if ( str_contains( $html, '<!-- wp:' ) ) {
+			$html = self::without_ignored_blocks( parse_blocks( $html ), $boxes );
+		}
+
+		preg_match_all( '/\[affibloom(?=[\s\]])([^\]]*)\]/', $html, $shortcodes, PREG_SET_ORDER );
+		foreach ( $shortcodes as $shortcode ) {
+			$attributes = ShortcodeAttributes::repaired( shortcode_parse_atts( trim( $shortcode[1] ) ) );
+			$address    = Address::of( $attributes );
+			$type       = strtolower( $attributes['type'] ?? '' );
+			$boxes[]    = new DisplayCandidate(
+				DisplayType::of_display( '' !== GroupAttributes::slug( $attributes ) && '' === $type ? 'grid' : $type ),
+				$shortcode[0],
+				$address->id,
+				$address->slug,
+				'' !== $address->amazon_url ? $address->amazon_url : $address->destination,
+				0,
+				GroupAttributes::slug( $attributes ),
+				'link' === $type ? ( $attributes['label'] ?? null ) : null
+			);
+		}
+
+		return $boxes;
+	}
+
+	/**
+	 * The HTML of the blocks Lasso scans, in order, nested blocks in their places; Product box blocks are collected.
 	 *
 	 * @param array<int, array<string, mixed>> $blocks parse_blocks()' answer, or a block's innerBlocks.
+	 * @param list<DisplayCandidate>           $boxes  The Product box blocks found so far.
 	 */
-	private static function without_ignored_blocks( array $blocks ): string {
+	private static function without_ignored_blocks( array $blocks, array &$boxes ): string {
 		$html = '';
 		foreach ( $blocks as $block ) {
-			$html .= self::block_html( $block );
+			$html .= self::block_html( $block, $boxes );
 		}
 
 		return $html;
 	}
 
 	/**
-	 * One block's HTML, or '' for a block Lasso does not scan.
+	 * One block's HTML, or '' for a block Lasso does not scan; a Product box block is collected instead.
 	 *
-	 * @param array<string, mixed> $block One parsed block.
+	 * @param array<string, mixed>   $block One parsed block.
+	 * @param list<DisplayCandidate> $boxes The Product box blocks found so far.
 	 */
-	private static function block_html( array $block ): string {
+	private static function block_html( array $block, array &$boxes ): string {
 		$name = (string) ( $block['blockName'] ?? '' );
 		foreach ( self::IGNORED_BLOCKS as $ignored ) {
 			if ( str_starts_with( $name, $ignored ) ) {
 				return '';
 			}
+		}
+		if ( self::BOX_BLOCK === $name ) {
+			$boxes[] = self::box( is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array() );
+			return '';
 		}
 
 		$html  = '';
@@ -142,11 +193,36 @@ final class WpLinkScanner implements LinkScanner {
 			if ( is_string( $chunk ) ) {
 				$html .= $chunk;
 			} elseif ( isset( $inner[ $next ] ) && is_array( $inner[ $next ] ) ) {
-				$html .= self::block_html( $inner[ $next++ ] );
+				$html .= self::block_html( $inner[ $next++ ], $boxes );
 			}
 		}
 
 		return $html;
+	}
+
+	/**
+	 * A Product box block as a display (F4 D3): its type, its product or its group, and its addressing attributes as
+	 * its identity.
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 */
+	private static function box( array $attributes ): DisplayCandidate {
+		$type  = is_string( $attributes['type'] ?? null ) ? $attributes['type'] : '';
+		$id    = static fn( string $name ): int => is_numeric( $attributes[ $name ] ?? null ) ? (int) $attributes[ $name ] : 0;
+		$named = array(
+			'type'      => $type,
+			'productId' => $id( 'productId' ),
+			'groupId'   => $id( 'groupId' ),
+		);
+
+		return new DisplayCandidate(
+			DisplayType::of_display( $type ),
+			self::BOX_BLOCK . ' ' . (string) wp_json_encode( $named ),
+			$named['productId'],
+			'',
+			'',
+			$named['groupId']
+		);
 	}
 
 	/**
