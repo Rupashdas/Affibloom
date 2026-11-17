@@ -55,6 +55,40 @@
 .affibloom-type-tile[aria-disabled="true"] .affibloom-type-tile__chip { background: var(--affibloom-sunk); color: var(--affibloom-ink-400); }
 .affibloom-type-tile .affibloom-soon { position: absolute; top: 8px; right: 8px; }
 
+/* "Choose a Link" (Task 23B): the search across the step, then rows with a 44px picture, the name over its link and
+   Add; page buttons under them (the pager's). */
+.affibloom-admin .affibloom-modal-search { width: 100%; max-width: none; height: 42px; min-height: 42px; }
+.affibloom-admin .affibloom-link-rows { display: grid; min-height: 0; margin: 12px 0 0; padding: 0; list-style: none; }
+.affibloom-admin .affibloom-link-row {
+	display: grid;
+	grid-template-columns: 44px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 14px;
+	margin: 0;
+	padding: 12px 0;
+	border-top: 1px solid var(--affibloom-line);
+}
+.affibloom-admin .affibloom-link-row:first-child { border-top: 0; }
+.affibloom-link-row__picture {
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	overflow: hidden;
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-400);
+}
+.affibloom-link-row__picture img { width: 100%; height: 100%; object-fit: contain; }
+.affibloom-link-row__text { display: grid; gap: 2px; min-width: 0; }
+.affibloom-link-row__name { overflow: hidden; color: var(--affibloom-ink-900); font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-admin .affibloom-link-row__url { overflow: hidden; color: var(--affibloom-ink-500); font-size: 12px; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-admin .affibloom-link-row__url:hover { color: var(--affibloom-brand-600); text-decoration: underline; }
+.affibloom-link-rows__message { margin: 16px 0 4px; color: var(--affibloom-ink-600); text-align: center; }
+.affibloom-modal-pages { justify-content: center; margin-top: 12px; }
+.affibloom-admin .affibloom-modal-pages button.page-numbers { cursor: pointer; }
+
 @media (max-width: 600px) {
 	.affibloom-admin .affibloom-type-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

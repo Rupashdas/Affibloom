@@ -177,4 +177,199 @@
 			steps[ name ] = handlers;
 		},
 	};
+
+	/**
+	 * A link's address as a link may carry it: http(s) only; anything else becomes "#" (R15).
+	 *
+	 * @param {string} address The address from the answer.
+	 * @return {string} A safe href.
+	 */
+	const safeHref = function ( address ) {
+		return /^https?:\/\//i.test( address || '' ) ? address : '#';
+	};
+
+	/**
+	 * Five grey row shapes while a list waits for its answer (the design system's skeleton, deviation 145).
+	 *
+	 * @param {HTMLElement} list The list to fill.
+	 */
+	const skeleton = function ( list ) {
+		list.innerHTML = '';
+		for ( let i = 0; i < 5; i++ ) {
+			const row = document.createElement( 'li' );
+			row.className = 'affibloom-skeleton-row';
+			row.setAttribute( 'aria-hidden', 'true' );
+			row.innerHTML =
+				'<span class="affibloom-skeleton affibloom-skeleton--thumb"></span>' +
+				'<span class="affibloom-skeleton-row__lines"><span class="affibloom-skeleton affibloom-skeleton--line"></span>' +
+				'<span class="affibloom-skeleton affibloom-skeleton--line affibloom-skeleton--short"></span></span>' +
+				'<span class="affibloom-skeleton affibloom-skeleton--button"></span>';
+			list.appendChild( row );
+		}
+	};
+
+	/**
+	 * Page buttons under a list: previous, the pages (the current one marked), next (R14).
+	 *
+	 * @param {HTMLElement}            nav     The list's page navigation.
+	 * @param {number}                 current The page shown.
+	 * @param {number}                 pages   How many pages there are.
+	 * @param {string}                 label   "Page %d".
+	 * @param {(page: number) => void} go      Loads a page.
+	 */
+	const pageLinks = function ( nav, current, pages, label, go ) {
+		nav.innerHTML = '';
+		nav.hidden = pages < 2;
+		if ( pages < 2 ) {
+			return;
+		}
+		const add = function ( text, page, name, isCurrent ) {
+			const button = document.createElement( 'button' );
+			button.type = 'button';
+			button.className = 'page-numbers' + ( isCurrent ? ' current' : '' );
+			button.textContent = text;
+			button.setAttribute( 'aria-label', name );
+			if ( isCurrent ) {
+				button.setAttribute( 'aria-current', 'page' );
+			}
+			button.addEventListener( 'click', function () {
+				go( page );
+			} );
+			nav.appendChild( button );
+		};
+		if ( current > 1 ) {
+			add( '‹', current - 1, nav.getAttribute( 'data-previous' ), false );
+		}
+		for ( let page = 1; page <= pages; page++ ) {
+			// The first, the last and the pages next to the current one; a gap stands for the rest.
+			if (
+				page === 1 ||
+				page === pages ||
+				Math.abs( page - current ) <= 1
+			) {
+				add(
+					String( page ),
+					page,
+					label.replace( '%d', page ),
+					page === current
+				);
+			} else if ( Math.abs( page - current ) === 2 ) {
+				const gap = document.createElement( 'span' );
+				gap.className = 'page-numbers dots';
+				gap.textContent = '…';
+				nav.appendChild( gap );
+			}
+		}
+		if ( current < pages ) {
+			add( '›', current + 1, nav.getAttribute( 'data-next' ), false );
+		}
+	};
+
+	/**
+	 * "Choose a Link" (Task 23B; R12-R15): five products a page, newest changed first; "Search URLs" on Enter only;
+	 * a row's Add hands the product to the block (Task 23C).
+	 */
+	( function linksStep() {
+		const section = root.querySelector( '[data-step="links"]' );
+		if ( ! section ) {
+			return;
+		}
+		const search = section.querySelector( '[data-links-search]' );
+		const list = section.querySelector( '[data-links-list]' );
+		const message = section.querySelector( '[data-links-message]' );
+		const nav = section.querySelector( '[data-links-pages]' );
+		const template = section.querySelector( '[data-link-row]' );
+		let latest = 0;
+
+		const say = function ( text ) {
+			message.textContent = text;
+			message.hidden = '' === text;
+		};
+
+		const row = function ( item ) {
+			const element =
+				template.content.firstElementChild.cloneNode( true );
+			const image = element.querySelector( '[data-row-image]' );
+			if ( item.image_url ) {
+				image.src = item.image_url;
+				image.hidden = false;
+				element.querySelector( '[data-row-none]' ).hidden = true;
+			}
+			const name = element.querySelector( '[data-row-name]' );
+			name.textContent = item.name;
+			name.title = item.name;
+			const link = element.querySelector( '[data-row-url]' );
+			link.textContent = item.url;
+			link.href = safeHref( item.url );
+			element.querySelector( '[data-row-add]' ).dataset.productId =
+				String( item.id );
+			return element;
+		};
+
+		const load = function ( page ) {
+			const ask = ++latest;
+			skeleton( list );
+			say( '' );
+			const query = new URLSearchParams( {
+				search: search.value.trim(),
+				page: String( page ),
+				per_page: '5',
+			} );
+			window.wp
+				.apiFetch( {
+					path: '/affibloom/v1/products?' + query.toString(),
+				} )
+				.then( function ( answer ) {
+					if ( ask !== latest ) {
+						return;
+					}
+					const data = answer.data;
+					list.innerHTML = '';
+					data.items.forEach( function ( item ) {
+						list.appendChild( row( item ) );
+					} );
+					say(
+						data.items.length
+							? ''
+							: section.getAttribute( 'data-empty' )
+					);
+					pageLinks(
+						nav,
+						data.page,
+						data.pages,
+						section.getAttribute( 'data-page-label' ),
+						load
+					);
+				} )
+				.catch( function () {
+					if ( ask !== latest ) {
+						return;
+					}
+					list.innerHTML = '';
+					nav.hidden = true;
+					say( section.getAttribute( 'data-failed' ) );
+				} );
+		};
+
+		search.addEventListener( 'keydown', function ( event ) {
+			if ( 'Enter' === event.key ) {
+				event.preventDefault();
+				load( 1 );
+			}
+		} );
+
+		window.affibloomDisplayModal.step( 'links', {
+			show() {
+				search.value = '';
+				load( 1 );
+			},
+			reset() {
+				latest++;
+				search.value = '';
+				list.innerHTML = '';
+				nav.innerHTML = '';
+				say( '' );
+			},
+		} );
+	} )();
 } )();

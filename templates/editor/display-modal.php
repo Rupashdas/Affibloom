@@ -56,5 +56,42 @@ $display_types = array(
 				<span id="affibloom-display-soon" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 			</div>
 		</section>
+
+		<?php
+		// "Choose a Link" (Task 23B; display-add.php 76-103, R12-R15): Single, Button and Image pick a product here. Five a
+		// page, newest changed first; the search runs on Enter only, spaces as wildcards (GET /products).
+		?>
+		<section class="affibloom-modal-step" data-step="links" aria-labelledby="affibloom-display-links-title" hidden
+			data-empty="<?php esc_attr_e( 'No links found.', 'affibloom' ); ?>"
+			data-failed="<?php esc_attr_e( 'Could not load links. Please try again.', 'affibloom' ); ?>"
+			data-page-label="<?php /* translators: %d: a page number. */ esc_attr_e( 'Page %d', 'affibloom' ); ?>">
+			<div class="affibloom-modal__head">
+				<h2 id="affibloom-display-links-title" class="affibloom-modal__title"><?php esc_html_e( 'Choose a Link', 'affibloom' ); ?></h2>
+			</div>
+			<div class="affibloom-modal__body">
+				<label class="screen-reader-text" for="affibloom-display-links-search"><?php esc_html_e( 'Search URLs', 'affibloom' ); ?></label>
+				<input type="search" id="affibloom-display-links-search" class="affibloom-input affibloom-search affibloom-modal-search" placeholder="<?php esc_attr_e( 'Search URLs', 'affibloom' ); ?>" data-links-search>
+				<ul class="affibloom-link-rows" data-links-list aria-live="polite"></ul>
+				<p class="affibloom-link-rows__message" data-links-message role="status" hidden></p>
+				<nav class="affibloom-pagination affibloom-modal-pages" aria-label="<?php esc_attr_e( 'Link pages', 'affibloom' ); ?>" data-links-pages
+					data-previous="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>"></nav>
+			</div>
+			<template data-link-row>
+				<li class="affibloom-link-row">
+					<span class="affibloom-link-row__picture">
+						<img alt="" width="44" height="44" loading="lazy" data-row-image hidden>
+						<span data-row-none><?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?></span>
+					</span>
+					<span class="affibloom-link-row__text">
+						<strong class="affibloom-link-row__name" data-row-name></strong>
+						<a class="affibloom-link-row__url" target="_blank" rel="noopener noreferrer" data-row-url></a>
+					</span>
+					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-row-add>
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+						<span><?php esc_html_e( 'Add', 'affibloom' ); ?></span>
+					</button>
+				</li>
+			</template>
+		</section>
 	</div>
 </div>

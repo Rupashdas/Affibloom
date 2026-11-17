@@ -39,6 +39,45 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( canvas.locator( '.affibloom-box' ) ).toContainText( name );
 	} );
 
+	test( 'AC5 Single opens "Choose a Link": five a page, newest first, Enter-only search with wildcards', async ( { page } ) => {
+		const stamp = unique( 'F4 AC5' );
+		// Six products sharing the stamp; the last one made is the newest changed.
+		const names = [ 1, 2, 3, 4, 5, 6 ].map( ( n ) => `${ stamp } Wave ${ n } Momentum` );
+		names.forEach( ( name ) => createProduct( { name } ) );
+
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '.affibloom-block-modal' );
+		await modal.getByRole( 'button', { name: 'Single' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Choose a Link' } );
+		await expect( dialog ).toBeVisible();
+
+		// Typing alone does not search (R14); Enter does, spaces as wildcards ("Wave Momentum" finds "Wave 3 Momentum").
+		const search = dialog.getByPlaceholder( 'Search URLs' );
+		await search.fill( `${ stamp } Wave Momentum` );
+		const rows = dialog.locator( '.affibloom-link-row' );
+		await expect( rows.filter( { hasText: stamp } ) ).toHaveCount( 0 );
+		await search.press( 'Enter' );
+		await expect( rows ).toHaveCount( 5 );
+		await expect( rows.first() ).toContainText( names[ 5 ] );
+		await expect( rows.first().getByRole( 'button', { name: 'Add' } ) ).toBeVisible();
+		await expect( rows.first().getByRole( 'link' ) ).toHaveAttribute( 'target', '_blank' );
+
+		// Page links page.
+		await dialog.getByRole( 'button', { name: 'Page 2' } ).click();
+		await expect( rows ).toHaveCount( 1 );
+		await expect( rows.first() ).toContainText( names[ 0 ] );
+
+		await search.fill( `${ stamp } nothing like this` );
+		await search.press( 'Enter' );
+		await expect( dialog.getByText( 'No links found.' ) ).toBeVisible();
+
+		// A failed load says so.
+		await page.route( /affibloom\/v1\/products/, ( route ) => route.abort() );
+		await search.press( 'Enter' );
+		await expect( dialog.getByText( 'Could not load links. Please try again.' ) ).toBeVisible();
+	} );
+
 	test( 'AC2 the published page shows the box', async ( { page } ) => {
 		const name = unique( 'F4 AC2' );
 		const id = createProduct( { name } );

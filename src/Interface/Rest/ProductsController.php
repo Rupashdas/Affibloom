@@ -66,26 +66,33 @@ final class ProductsController implements Module {
 			self::NAMESPACE,
 			'/products',
 			array(
-				// The product search of "Add to Group" (F23 D10; the block's picker is its second caller): ten a page, with a
-				// flag for the products already in the group asked about.
+				// The product search of "Add to Group" (F23 D10) and of the editor's "Choose a Link" (F4 R13, Task 23B, five a
+				// page): newest changed first, with a flag for the products already in the group asked about. Anyone who
+				// may place displays may search (F4 D8).
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'search' ),
-					'permission_callback' => array( $this, 'can_manage' ),
+					'permission_callback' => array( $this, 'can_insert' ),
 					'args'                => array(
-						'search' => array(
+						'search'   => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'page'   => array(
+						'page'     => array(
 							'type'    => 'integer',
 							'minimum' => 1,
 							'default' => 1,
 						),
-						'group'  => array(
+						'group'    => array(
 							'type'    => 'integer',
 							'minimum' => 0,
 							'default' => 0,
+						),
+						'per_page' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 50,
+							'default' => 10,
 						),
 					),
 				),
@@ -280,21 +287,23 @@ final class ProductsController implements Module {
 	}
 
 	/**
-	 * GET /products?search=&page=&group=: ten products a page, by the Dashboard's search rule, each with whether it is in
+	 * GET /products?search=&page=&group=&per_page=: products by the Dashboard's search rule (spaces as wildcards), newest
+	 * changed first, ten a page unless asked (the editor's "Choose a Link" asks five, F4 R13), each with whether it is in
 	 * the group asked about (the "Add to Group" dialog, F23 R20).
 	 *
-	 * @param WP_REST_Request $request Request with search, page and group.
-	 * @phpstan-param WP_REST_Request<array{search: string, page: int, group: int}> $request
+	 * @param WP_REST_Request $request Request with search, page, group and per_page.
+	 * @phpstan-param WP_REST_Request<array{search: string, page: int, group: int, per_page: int}> $request
 	 */
 	public function search( WP_REST_Request $request ): WP_REST_Response {
 		$term  = SearchTerm::from_input( sanitize_text_field( (string) $request['search'] ) );
 		$group = (int) $request['group'];
-		$page  = $this->products->list( $term, LinkKind::All, max( 1, (int) $request['page'] ), 10 );
+		$page  = $this->products->list( $term, LinkKind::All, max( 1, (int) $request['page'] ), max( 1, (int) $request['per_page'] ) );
 		$items = array();
 		foreach ( $page->items as $product ) {
 			$items[] = array(
 				'id'        => (int) $product->id,
-				'name'      => $product->name,
+				// WordPress stores a title's "&" as "&amp;"; the scripts print the name as text.
+				'name'      => wp_specialchars_decode( $product->name, ENT_QUOTES ),
 				'url'       => $product->url->value(),
 				'image_url' => $product->image_url,
 				'in_group'  => $group > 0 && $this->groups->has_member( $group, (int) $product->id ),
@@ -392,6 +401,13 @@ final class ProductsController implements Module {
 	 */
 	public function can_manage(): bool {
 		return current_user_can( Capabilities::PRODUCTS );
+	}
+
+	/**
+	 * Anyone who may place displays in posts may search the products (F4 D8; Lasso's editor actions allow edit_posts).
+	 */
+	public function can_insert(): bool {
+		return current_user_can( Capabilities::INSERT_BOXES );
 	}
 
 	/**

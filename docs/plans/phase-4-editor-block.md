@@ -59,7 +59,7 @@ them when the task is worked, and record any code that differs from the text bel
 ### F4 — Displays in the editor
 
 - [x] Task 23A: The block and "Choose a Display Type"
-- [ ] Task 23B: "Choose a Link" — product search
+- [x] Task 23B: "Choose a Link" — product search
 - [ ] Task 23C: Insert Single, Button and Image; stored markup; the published page
 - [ ] Task 23D: Grid, List and Gallery — "Choose a Group"
 - [ ] Task 23E: Create Group and "Add to Group" from the modal
@@ -509,13 +509,18 @@ display-modal.js (step "links") → GET /affibloom/v1/products?search=&page=&per
 `src/Interface/Rest/ProductResource.php`, `assets/editor/display-modal.{js,css}`; tests `tests/E2E/acceptance/F4.spec.ts`
 (AC5 search), `tests/Unit/Application/ProductSearchTest.php` (search arms).
 
-- [ ] **Step 1: Failing tests.** AC5's search half (five a page, order, Enter-only search, wildcards, the two
+- [x] **Step 1: Failing tests.** AC5's search half (five a page, order, Enter-only search, wildcards, the two
   messages); unit: the search arms. Expected red: no links step.
-- [ ] **Step 2: Route args.** `per_page`, `orderby=modified`, `page`; published products only; `INSERT_BOXES`.
-- [ ] **Step 3: The step.** Rows with a 44 px thumbnail, name, permalink (new tab, `noopener noreferrer`, unsafe
+- [x] **Step 2: Route args.** `per_page`, `orderby=modified`, `page`; published products only; `INSERT_BOXES`.
+- [x] **Step 3: The step.** Rows with a 44 px thumbnail, name, permalink (new tab, `noopener noreferrer`, unsafe
   schemes become `#`), **+ Add**; page links; the two messages.
-- [ ] **Step 4: Run and look.** Checks as 23A; by hand: search "mizuno", an empty search, a failed load (offline), 375 px.
-- [ ] **Step 5: Commit** — "Search products in the display modal".
+- [x] **Step 4: Run and look.** Checks as 23A; by hand: search "mizuno", an empty search, a failed load (offline), 375 px.
+- [x] **Step 5: Commit** — "Search products in the display modal".
+
+*Note (2026-11-17):* the route, its search rule (name or link, spaces as wildcards, `SearchTermTest`) and the newest-first
+order already existed (F23 G4, Task 13I), so 23B adds only `per_page` and opens the search to `INSERT_BOXES`
+(`edit_posts`, new in `Capabilities`); no `orderby`, no new unit test. The JSON's name is decoded (a stored "&amp;"
+showed in the rows; Add to Group reads the same route). The rows' **Add** is wired in 23C. Seen at 1280 and 375 px.
 
 ---
 
