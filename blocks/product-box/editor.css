@@ -65,6 +65,36 @@
 	margin: 0;
 }
 
+/* With a display (Task 23C): the server's preview, as the page draws it, then "Select a New Display". The preview is
+   a picture of the page, so its links and buttons are not followed in the editor. */
+.affibloom-block__panel.has-display { align-items: stretch; text-align: left; }
+.affibloom-block__stage { min-width: 0; }
+.affibloom-block__preview { pointer-events: none; }
+.affibloom-block__panel.has-display .components-button.affibloom-block__add {
+	align-self: center;
+	border: 1px solid #d3dbd1;
+	background: #fff;
+	box-shadow: none;
+	color: var(--affibloom-block-ink);
+}
+.affibloom-block__panel.has-display .components-button.affibloom-block__add:hover:not(:disabled) {
+	border-color: #b6c1b4;
+	background: #fafbf9;
+	color: var(--affibloom-block-ink);
+}
+/* The preview's place while it loads (deviation 145): a box-sized grey shape with the moving band. */
+.affibloom-block__skeleton {
+	height: 220px;
+	border-radius: 12px;
+	background: linear-gradient(90deg, #e6ebe4 25%, #f3f6f2 37%, #e6ebe4 63%);
+	background-size: 400% 100%;
+	animation: affibloom-block-shimmer 1.4s ease infinite;
+}
+@keyframes affibloom-block-shimmer {
+	from { background-position: 100% 50%; }
+	to { background-position: 0 50%; }
+}
+
 /* Lasso's retry state (R6) is amber; here the warning tint with its text colour. */
 .affibloom-block .components-button.affibloom-block__add.is-retry {
 	border: 1px solid var(--affibloom-block-warning);

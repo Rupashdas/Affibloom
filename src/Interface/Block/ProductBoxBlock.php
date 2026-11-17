@@ -19,15 +19,22 @@ use Affibloom\Domain\Fields\FieldRepository;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\SettingsRepository;
+use Affibloom\Domain\Shortcode\DisplayKind;
+use Affibloom\Domain\Shortcode\DisplayRequest;
+use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Module;
 
 /**
  * Registers `affibloom/product-box` from the built `build/product-box/block.json` (its editor script and style, Task
  * 23A; the source is `blocks/product-box`) and renders it on the server (F5 R1, AC3).
- * The editor side (inserter, sidebar, preview) is Phase 4.
+ * A Button or an Image display (Task 23C, F4 D3) draws as the shortcode draws it; the single box keeps its own path,
+ * with the block's overrides. The editor's preview (EditorController) renders through this same callback.
  */
 final class ProductBoxBlock implements Module {
+
+	/** The block's name. */
+	public const NAME = 'affibloom/product-box';
 
 	/**
 	 * Builds the block.
@@ -41,6 +48,7 @@ final class ProductBoxBlock implements Module {
 	 * @param ProductRepository       $catalog   The products, for their custom fields.
 	 * @param FieldRepository         $fields    The field library.
 	 * @param AmazonProductRepository $amazon   The stored Amazon data (C1), for the timestamp.
+	 * @param AffibloomShortcode      $shortcode The shortcode, which draws the Button and Image displays.
 	 */
 	public function __construct(
 		private readonly string $block_dir,
@@ -52,6 +60,7 @@ final class ProductBoxBlock implements Module {
 		private readonly ProductRepository $catalog,
 		private readonly FieldRepository $fields,
 		private readonly AmazonProductRepository $amazon,
+		private readonly AffibloomShortcode $shortcode,
 	) {}
 
 	/**
@@ -74,6 +83,11 @@ final class ProductBoxBlock implements Module {
 	 * @param array<string, mixed> $attributes The block's attributes.
 	 */
 	public function render( array $attributes ): string {
+		$request = DisplayRequest::from_block( $attributes );
+		if ( null !== $request && DisplayKind::Single !== $request->kind ) {
+			return $this->shortcode->render( $request->attributes );
+		}
+
 		$overrides = BoxOverrides::from_block( $attributes );
 		$product   = $this->products->product( $overrides->product_id );
 		if ( null === $product ) {

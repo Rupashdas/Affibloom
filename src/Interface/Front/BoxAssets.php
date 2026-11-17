@@ -154,6 +154,15 @@ final class BoxAssets implements Module {
 	}
 
 	/**
+	 * The box's stylesheets and the `<head>` block's CSS in the block editor's canvas (F4 R34, Task 23C), so a block's
+	 * preview looks as the published page will. EditorAssets calls it on `enqueue_block_assets` in the admin.
+	 */
+	public function enqueue_for_editor(): void {
+		$this->enqueue_box();
+		wp_add_inline_style( self::STYLE, $this->head_css() );
+	}
+
+	/**
 	 * Jetpack's `jetpack_photon_skip_for_url`: true for a drawn box's image, else Jetpack's own answer.
 	 *
 	 * @param mixed $skip Jetpack's answer.

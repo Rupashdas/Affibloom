@@ -351,6 +351,17 @@
 				} );
 		};
 
+		// Add (R16, Task 23C): the chosen type with this product; the modal closes and the block draws it.
+		list.addEventListener( 'click', function ( event ) {
+			const add = event.target.closest( '[data-row-add]' );
+			if ( add ) {
+				window.affibloomDisplayModal.insert( {
+					type: context.type,
+					productId: parseInt( add.dataset.productId, 10 ),
+				} );
+			}
+		} );
+
 		search.addEventListener( 'keydown', function ( event ) {
 			if ( 'Enter' === event.key ) {
 				event.preventDefault();

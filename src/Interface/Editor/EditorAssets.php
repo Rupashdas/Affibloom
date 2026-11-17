@@ -9,13 +9,15 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Editor;
 
+use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
 
 /**
  * The display modal on block-editor screens (F4 D1, Task 23A; Lasso's R57 without its libraries): Meadow's fonts and
  * admin styles plus the modal's own, the modal's markup in the footer, and the address of its script for the block,
- * which loads it on first use (blocks/product-box/modal-loader.js).
+ * which loads it on first use (blocks/product-box/modal-loader.js). In the editor's canvas, the box's own styles, so a
+ * preview looks as the page will (R34, Task 23C).
  */
 final class EditorAssets implements Module {
 
@@ -33,11 +35,12 @@ final class EditorAssets implements Module {
 	/**
 	 * Builds the assets.
 	 *
-	 * @param string   $plugin_url The plugin's URL, with a trailing slash.
-	 * @param string   $version    The plugin's version, for cache busting.
-	 * @param Template $template   Prints the modal's markup.
+	 * @param string    $plugin_url The plugin's URL, with a trailing slash.
+	 * @param string    $version    The plugin's version, for cache busting.
+	 * @param Template  $template   Prints the modal's markup.
+	 * @param BoxAssets $box        The box's stylesheets, for the canvas.
 	 */
-	public function __construct( private string $plugin_url, private string $version, private Template $template ) {}
+	public function __construct( private string $plugin_url, private string $version, private Template $template, private BoxAssets $box ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -45,6 +48,16 @@ final class EditorAssets implements Module {
 	public function register(): void {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue' ) );
 		add_action( 'admin_footer', array( $this, 'print_modal' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_canvas' ) );
+	}
+
+	/**
+	 * The box's styles in the editor's canvas (`enqueue_block_assets` also runs on the site, which BoxAssets serves).
+	 */
+	public function enqueue_canvas(): void {
+		if ( is_admin() ) {
+			$this->box->enqueue_for_editor();
+		}
 	}
 
 	/**

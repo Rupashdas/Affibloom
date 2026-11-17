@@ -60,7 +60,7 @@ them when the task is worked, and record any code that differs from the text bel
 
 - [x] Task 23A: The block and "Choose a Display Type"
 - [x] Task 23B: "Choose a Link" — product search
-- [ ] Task 23C: Insert Single, Button and Image; stored markup; the published page
+- [x] Task 23C: Insert Single, Button and Image; stored markup; the published page
 - [ ] Task 23D: Grid, List and Gallery — "Choose a Group"
 - [ ] Task 23E: Create Group and "Add to Group" from the modal
 - Task 23F: Table — "Choose a Table" — **moved to Phase 7** (after F25 T12; settled 2026-11-14)
@@ -560,16 +560,23 @@ modify `ProductBoxBlock.php`, `EditorAssets.php`, `blocks/product-box/edit.js`, 
 tests `tests/E2E/acceptance/F4.spec.ts` (AC1, AC2, AC10), `tests/Integration/EditorPreviewTest.php`
 (callback = preview HTML; the 400 and 403 answers).
 
-- [ ] **Step 1: Failing tests.** AC1 (insert, chooser, Single, search, Add, the box shows), AC2 (publish, the page shows
+- [x] **Step 1: Failing tests.** AC1 (insert, chooser, Single, search, Add, the box shows), AC2 (publish, the page shows
   it), AC10 (stored markup holds type, target and overrides; editor HTML equals page HTML). Expected red: nothing
   renders in the canvas.
-- [ ] **Step 2: Render callback and route.** One request type; invalid attributes answer 400; no arbitrary
+- [x] **Step 2: Render callback and route.** One request type; invalid attributes answer 400; no arbitrary
   `do_shortcode` (analysis, Security).
-- [ ] **Step 3: Insert and preview.** `+ Add` sets the attributes, closes the modal, draws the preview; the block does
+- [x] **Step 3: Insert and preview.** `+ Add` sets the attributes, closes the modal, draws the preview; the block does
   not write post content other than its own comment.
-- [ ] **Step 4: Run and look.** Checks; rerun the Phase 3 box tests (`box-variants`); by hand: insert, publish, view
+- [x] **Step 4: Run and look.** Checks; rerun the Phase 3 box tests (`box-variants`); by hand: insert, publish, view
   the page, compare with the Lasso baseline for the same product.
-- [ ] **Step 5: Commit** — "Insert a product, button or image display from the block".
+- [x] **Step 5: Commit** — "Insert a product, button or image display from the block".
+
+*Note (2026-11-17):* the request is the shortcode's `DisplayRequest` (new `from_block()`, extracted on this second use),
+not a new `Domain\Display` class; Button and Image render through `AffibloomShortcode`, Single keeps the block's own path
+(F5's tests). The preview route renders through the registered block type, so editor and page share the callback; the
+box styles reach the canvas through `BoxAssets::enqueue_for_editor()`. No integration test (that suite has never run);
+`DisplayRequestTest` covers the request. AC10 compares the display's anchor, classes and product: on Local, wptexturize
+and the active Lasso plugin rewrite the page's text and links. Seen at 1280 px: the three previews, publish, the page.
 
 ---
 

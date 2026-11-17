@@ -1,9 +1,14 @@
 <?php
 namespace Affibloom\Tests\Unit\Interface\Editor;
 
+use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Shell\NoticeBoard;
+use Affibloom\Domain\Display\DisplaySettingsRepository;
+use Affibloom\Domain\Settings\SettingsRepository;
+use Affibloom\Infrastructure\WordPress\BoxDetector;
 use Affibloom\Interface\Admin\AdminNavigation;
 use Affibloom\Interface\Editor\EditorAssets;
+use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Template;
 use Affibloom\Tests\Unit\TestCase;
 use Brain\Monkey\Functions;
@@ -50,7 +55,10 @@ final class EditorAssetsTest extends TestCase {
 	}
 
 	private static function assets(): EditorAssets {
-		return new EditorAssets( 'https://site.test/wp-content/plugins/affibloom/', '0.1.0', self::template() );
+		$settings = \Mockery::mock( SettingsRepository::class );
+		$box      = new BoxAssets( '/plugin/', 'https://site.test/', '0.1.0', new DisplaySettingsService( \Mockery::mock( DisplaySettingsRepository::class ), $settings ), $settings, new BoxDetector() );
+
+		return new EditorAssets( 'https://site.test/wp-content/plugins/affibloom/', '0.1.0', self::template(), $box );
 	}
 
 	public function test_the_modal_styles_follow_meadows_fonts_and_admin_styles(): void {

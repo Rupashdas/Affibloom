@@ -57,4 +57,26 @@ final class DisplayRequest {
 			$attributes
 		);
 	}
+
+	/**
+	 * The request a Product box block asks for (F4 D3, Task 23C), as the shortcode would: its `type` and its product.
+	 * Null when the block names no product or a type the block cannot draw yet (the editor's preview answers 400).
+	 * A block with no `type` is the single box, as blocks saved before Phase 4 are.
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 */
+	public static function from_block( array $attributes ): ?self {
+		$type    = $attributes['type'] ?? '';
+		$product = is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0;
+		if ( $product <= 0 || ! is_string( $type ) || ! in_array( $type, array( '', 'single', 'button', 'image' ), true ) ) {
+			return null;
+		}
+
+		$shortcode = array( 'id' => (string) $product );
+		if ( 'button' === $type || 'image' === $type ) {
+			$shortcode['type'] = $type;
+		}
+
+		return self::of( $shortcode );
+	}
 }

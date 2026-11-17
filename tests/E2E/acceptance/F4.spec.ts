@@ -78,6 +78,42 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( dialog.getByText( 'Could not load links. Please try again.' ) ).toBeVisible();
 	} );
 
+	test( 'AC10 the stored block holds the type and target; the editor and the page draw the same box', async ( { page } ) => {
+		const name = unique( 'F4 AC10' );
+		const id = createProduct( { name } );
+
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '.affibloom-block-modal' );
+		await modal.getByRole( 'button', { name: 'Button' } ).click();
+		const search = modal.getByPlaceholder( 'Search URLs' );
+		await search.fill( name );
+		await search.press( 'Enter' );
+		await modal.locator( '.affibloom-link-row', { hasText: name } ).getByRole( 'button', { name: 'Add' } ).click();
+		await expect( modal ).toBeHidden();
+
+		// A dynamic block: only its comment is stored, with the type and the product.
+		const stored = await page.evaluate( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getEditedPostContent: () => string } } } } ).wp.data.select( 'core/editor' ).getEditedPostContent() );
+		expect( stored ).toContain( `<!-- wp:affibloom/product-box {"type":"button","productId":${ id }} /-->` );
+
+		// The same render callback draws both. The page's content filters (wptexturize, other plugins' link rewriting) may
+		// still touch its text and links, so the display is compared by what Affibloom prints: its anchor, its classes and
+		// the product's link.
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const drawn = async ( root: { locator: ( selector: string ) => import( '@playwright/test' ).Locator } ) => {
+			const display = root.locator( '.affibloom-box' ).first();
+			return {
+				id: await display.getAttribute( 'id' ),
+				classes: await display.getAttribute( 'class' ),
+				product: await display.locator( '[data-affibloom-id]' ).first().getAttribute( 'data-affibloom-id' ),
+			};
+		};
+		const inEditor = await drawn( canvas.locator( '.affibloom-block__preview' ) );
+		await page.goto( newPostWith( boxBlock( id, { type: 'button' } ) ) );
+		expect( await drawn( page.locator( '.entry-content' ) ) ).toEqual( inEditor );
+		expect( inEditor.product ).toBe( String( id ) );
+	} );
+
 	test( 'AC2 the published page shows the box', async ( { page } ) => {
 		const name = unique( 'F4 AC2' );
 		const id = createProduct( { name } );
