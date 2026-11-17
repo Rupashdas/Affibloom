@@ -149,6 +149,7 @@ Everything **not** listed here was settled from Lasso's source and the project r
 | React admin (2026-11-16) | **Dropped:** the admin keeps its current architecture (PHP templates and plain JS); no React ("We're not switching to React"). The proposal file was deleted (2026-11-17). |
 | Saving (2026-11-16) | **One save behaviour on every settings screen** ("We just need to standardize the saving process across all settings"): the screens that still post a form and reload change to the REST save the product, group and field screens already use, staying on the page. Done 2026-11-17 (deviation 143). No save without JavaScript (2026-11-17: "Drop it"). |
 | Phase 4 at once (2026-11-17) | **Every Phase 4 batch in one run** ("complete all batches at once in phase 4"); `@wordpress/scripts` installed, and Classic Editor, Elementor and AMP installed on Local for ED1, ED2 and ED4 (left inactive). |
+| Phase 4 sign-off (2026-11-17) | **Signed off** after the exit check passed (F4 22/22, admin-design 6/6, F5 AC1 7/7). |
 
 ## Open (the user's call)
 
