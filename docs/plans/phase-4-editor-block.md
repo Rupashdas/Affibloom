@@ -54,7 +54,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task MD4: The Dashboard: counts beside the title, search, list
 - [x] Task MD5: The product page: head, sticky preview, save bar
 - [x] Task MD6: Settings, Groups, Fields, dialogs and the toast
-- [ ] Task MD7: The design system rewritten for Meadow
+- [x] Task MD7: The design system rewritten for Meadow
 
 ### F4 — Displays in the editor
 
@@ -394,12 +394,16 @@ toast sits above the product page's save bar. Seen at 1280 px: each screen, the 
 components and their measured values; section 0 and the class-name list kept; 0b shortened to its decision and
 history), `assets/admin/admin.css` (drop the retired tokens if any is left: `grep -n "navy\|on-band\|on-navy\|brand-300\|brand-500"`).
 
-- [ ] **Step 1: Rewrite** sections 1-8; remove the retired tokens.
-- [ ] **Step 2: Check.** `grep` the plugin for the retired token names (none left); `composer lint`.
-- [ ] **Step 3: Commit** — "Rewrite the design system for Meadow".
+- [x] **Step 1: Rewrite** sections 1-8; remove the retired tokens.
+- [x] **Step 2: Check.** `grep` the plugin for the retired token names (none left); `composer lint`.
+- [x] **Step 3: Commit** — "Rewrite the design system for Meadow".
 - [ ] **Step 4 (recommended, the user's call):** the restyle touches every admin screen, so ask whether to run the
   admin specs once now (F1, F9, F18, F19, F23, F26, F38, C1 and `admin-design.spec.ts`) instead of waiting for
   Phase 4's exit check.
+
+*Note (2026-11-17):* the retired tokens had already gone in MD3 (none left in code). Section 0 now also names General
+and Amazon's Lasso structure (deviation 96); 0b keeps the decision and the history. Step 4 is asked at the end of the
+Phase 4 run (the user asked for every batch at once).
 
 ---
 

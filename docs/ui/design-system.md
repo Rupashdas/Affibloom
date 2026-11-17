@@ -1,18 +1,12 @@
-# Affibloom admin design system: Aurora
+# Affibloom admin design system: Meadow
 
-Status: **Approved** by the user on 2026-11-13 (Task 9A). History: a first, plain proposal was approved with ocean
-blue as the brand colour; the user then found it too basic, asked for four richer style directions and chose
-**A — Aurora** (premium SaaS: a navy-to-blue gradient band, floating white cards, segmented tabs, icon chips).
-Decision: ADR-008. Scope: every admin screen, modal and notice, and the block's editor UI. The reader-facing product
-box is **not** covered: it keeps the site's box design (ADR-006).
-
-> **Meadow replaces Aurora (the user, 2026-11-16; deviation 142).** Section 0b below is the admin's design from now
-> on. Sections 1-8 stay as the record of Aurora, which is what the code still draws, until the restyle batch rewrites
-> them as it builds Meadow. Where 0b and sections 1-8 disagree, 0b wins.
+Status: **Approved** by the user on 2026-11-16 (deviation 142), built in Tasks MD1-MD6 (2026-11-17) and written up here
+in Task MD7. Decision: ADR-008 and its Amendments. Scope: every admin screen, modal and notice, and the block's editor
+UI. The reader-facing product box is **not** covered: it keeps the site's box design (ADR-006).
 
 **What stays Lasso's:** labels, help texts, fields, tab and column order, and the steps of every workflow
-(`docs/spec/interface.md`). **What is ours:** everything visual below, plus two content additions the user approved
-with Aurora: overview tiles on the Dashboard (U9) and a one-line subtitle under each page title (U10).
+(`docs/spec/interface.md`). **What is ours:** everything visual below, plus two content additions the user approved:
+counts on the Dashboard (U9) and a one-line subtitle under each page title (U10).
 
 ## 0. Amendment, 2026-11-13: Lasso's structure on the Display screen
 
@@ -20,322 +14,196 @@ The user narrowed ADR-8 for **Settings → Display**: its columns, layout and th
 the preview follow **Lasso exactly** (split card, preview with its toolbar on the left, a 380px settings rail on
 the right holding the theme row, underline tabs, accordions and label-left / control-right rows). **Only the
 colour scheme and the typography below are Affibloom's.** Where this document and Lasso's structure disagree on
-that screen, the structure wins and the tokens still apply. The other admin screens keep the Aurora layout until
-the user says otherwise.
+that screen, the structure wins and the tokens still apply. The same holds for Settings → General and Amazon, which
+have Lasso's two columns of cards and switch rows (deviation 96).
 
-## 0b. Amendment, 2026-11-16: Meadow replaces Aurora
+## 0b. History: Aurora, then Meadow
 
-The user found Aurora's navy band heavy (a long product name made it four lines tall, the Dashboard tiles wrapped to
-two rows, Save sat at the foot of a 2,800px product page) and compared five clickable directions: Meadow, Console
-(own sidebar), Split View (list and detail side by side), Canvas (edit on the box) and Nightshift (dark). **The user
-chose Meadow** and approved this section with its four recommended answers: 1320px column, bundled fonts, no Discard
-button, restyle in its own batch after Phase 3's exit check. Reference prototype:
-https://claude.ai/artifact/VKuvkUctK992ethcke8ZMR (private to the user's claude.ai account).
+The first, plain design (ocean blue) was approved on 2026-11-12 and found too basic; on 2026-11-13 the user chose
+**Aurora** of four directions (a navy header and navy-to-blue gradient band, floating white cards, icon chips). Aurora
+felt heavy (a long product name made the band four lines tall, the Dashboard tiles wrapped to two rows, Save sat at the
+foot of a 2,800px product page), so on 2026-11-16 the user compared five clickable directions (Meadow, Console, Split
+View, Canvas, Nightshift) and **chose Meadow** with its four recommended answers: the 1320px column, bundled fonts, no
+Discard button, the restyle in its own batches after Phase 3's exit check. Reference prototype:
+https://claude.ai/artifact/VKuvkUctK992ethcke8ZMR (private to the user's claude.ai account). The user then made the
+radii smaller (2026-11-17) and asked for one head on every screen (title left, search and buttons right) and for
+skeletons instead of spinners (deviation 145). Aurora's sections are in git history before Task MD7.
 
-Meadow is calm, spacious and light: a white top bar with underline navigation, no band, a botanical green brand,
-cards with a hairline border and a soft shadow, and the product form beside a sticky live preview.
+## 1. Principles
 
-**Unchanged:** ADR-008's rule (features, fields, labels, help texts, tab and column order and workflow steps are
-Lasso's); section 0 (Settings → Display keeps Lasso's structure, only colours and type are ours); the reader-facing
-box (ADR-006); U9 and U10 as content; the class names in section 8; WCAG 2.2 AA, a visible focus ring everywhere,
-status never by colour alone; ON1/ON2's header behaviour (nav order, `aria-current`, the Menu button below 992px,
-the notice region's API).
+1. **Calm and light.** A white top bar with underline navigation, no band, a botanical green brand, cards with a
+   hairline border and a soft shadow; one strong element per screen (the title, the stat cards, the live preview).
+2. **Always in reach.** The search under the Dashboard's head, the product preview sticky beside its form, Save
+   Changes in a bar stuck to the foot of the window.
+3. **Accessible by default.** WCAG 2.2 AA for every pair below, a visible focus ring on every control, help text read
+   with its control (U3), status never by colour alone (a word, an icon or a tick goes with it).
 
-### 0b.1 Colour
+## 2. Colour
 
-Token names stay where the role is the same, so most of `admin.css` changes by value. The navy and band tokens are
-retired.
+Tokens are custom properties on `.affibloom-admin` (`assets/admin/admin.css` section 1).
 
-| Token | Aurora | Meadow | Role |
-|---|---|---|---|
-| `--affibloom-brand-600` | `#1E5BB8` | `#1E6B47` | primary buttons, current nav item and tab, links, switches on, focus ring |
-| `--affibloom-brand-700` (new) | — | `#185A3B` | primary hover |
-| `--affibloom-brand-800` (new) | — | `#124A30` | primary pressed |
-| `--affibloom-brand-500` | `#2563C9` | retired | Meadow's buttons and switches are flat |
-| `--affibloom-brand-50` | `#EAF1FC` | `#E3F0E7` | icon chips, selected rows, count pills, selection bar |
-| `--affibloom-brand-25` (new) | — | `#F1F7F2` | hover wash on menus and quiet buttons, quick-edit band |
-| `--affibloom-brand-line` (new) | — | `#C9E0D1` | border of tinted areas (selection bar, quick-edit card) |
-| `--affibloom-navy-900`, `-brand-300`, `-on-navy`, `-on-band` | | retired | no navy header, no band |
-| `--affibloom-ink-900` | `#14213D` | `#16201A` | headings, body text, toast background |
-| `--affibloom-ink-700` | `#3D4A63` | `#55625A` | secondary text, inactive tabs |
-| `--affibloom-ink-600` | `#5B6880` | `#55625A` | help texts, table headers, subtitles |
-| `--affibloom-ink-500` (new) | — | `#6A766E` | URLs under names, meta, placeholders |
-| `--affibloom-ink-400` | `#8A93A3` | `#8A968C` | switch off |
-| `--affibloom-line` | `#EDF1F7` | `#E3E8E1` | card borders, dividers |
-| `--affibloom-control-line` | `#D5DCE8` | `#D3DBD1` | input and secondary button borders |
-| `--affibloom-line-strong` (new) | — | `#B6C1B4` | hover borders |
-| `--affibloom-page` | `#F3F6FB` | `#F5F7F4` | page background |
-| `--affibloom-subtle` | `#FAFBFE` | `#FAFBF9` | table header, card footers |
-| `--affibloom-sunk` (new) | — | `#F1F4F0` | group chips, disabled fields, empty-state chips |
-| `--affibloom-success-700` / `-50` | `#0B6B3A` / `#E8F7EF` | `#1E6B47` / `#E3F0E7` | OK, saved (always with an icon and a word) |
-| `--affibloom-danger-700` / `-50` | `#A1203A` / `#FDECEF` | `#B42318` / `#FDECEA` | broken links, errors, Delete |
-| `--affibloom-warning-700` / `-50` | `#8A4B00` / `#FFF4E0` | `#86560F` / `#FBF2E1` | out of stock, needs attention (text) |
-| `--affibloom-warning-icon` (new) | — | `#B7791F` | the out-of-stock glyph only |
-| `--affibloom-toast-icon` | `#22C55E` | `#9ED8B4` | the toast's tick |
+| Token | Hex | Role |
+|---|---|---|
+| `--affibloom-brand-600` | `#1E6B47` | primary buttons, current nav item and tab, links, switches on, focus ring |
+| `--affibloom-brand-700` | `#185A3B` | primary hover |
+| `--affibloom-brand-800` | `#124A30` | primary pressed |
+| `--affibloom-brand-50` | `#E3F0E7` | icon chips, selected rows, count pills, the selection row |
+| `--affibloom-brand-25` | `#F1F7F2` | hover wash on quiet buttons, the quick-edit band |
+| `--affibloom-brand-line` | `#C9E0D1` | border of tinted areas (selection row, quick-edit card, current view chip) |
+| `--affibloom-brand-ring` | `rgba(30,107,71,.20)` | the 3px ring round a focused field |
+| `--affibloom-ink-900` | `#16201A` | headings, body text, the toast |
+| `--affibloom-ink-700` / `-600` | `#55625A` | secondary text, help texts, table headers, subtitles, inactive tabs |
+| `--affibloom-ink-500` | `#6A766E` | URLs under names, meta, placeholders |
+| `--affibloom-ink-400` | `#8A968C` | switch off, placeholder dashes |
+| `--affibloom-line` | `#E3E8E1` | card borders, dividers |
+| `--affibloom-control-line` | `#D3DBD1` | input and secondary button borders |
+| `--affibloom-line-strong` | `#B6C1B4` | hover borders |
+| `--affibloom-page` | `#F5F7F4` | page background |
+| `--affibloom-subtle` | `#FAFBF9` | table header, card footers, the pager |
+| `--affibloom-sunk` | `#F1F4F0` | stat chips waiting for their data, disabled fields |
+| `--affibloom-segment-bg` | `#EAEFE9` | segmented control, progress track, pager hover |
+| `--affibloom-skeleton` | `#E6EBE4` → `#F3F6F2` | loading shapes, a lighter band moving across |
+| `--affibloom-success-700` / `-50` | `#1E6B47` / `#E3F0E7` | OK, saved |
+| `--affibloom-danger-700` / `-800` / `-50` | `#B42318` / `#961C13` / `#FDECEA` | broken links, errors, Delete |
+| `--affibloom-warning-700` / `-50` | `#86560F` / `#FBF2E1` | out of stock, needs attention (text) |
+| `--affibloom-warning-icon` | `#B7791F` | warning glyphs, the "Unsaved changes" dot |
+| `--affibloom-toast-icon` / `-tick` | `#9ED8B4` / `#124A30` | the toast's tick circle |
 
 **Contrast (computed, WCAG 2.2):** white on brand-600 6.5:1; brand-600 on white 6.5:1, on brand-50 5.5:1; ink-900 on
 page 15.5:1; ink-600 on white 6.4:1, on page 5.9:1, on brand-50 5.5:1; ink-500 on white 4.7:1, on subtle 4.6:1;
 warning-700 on warning-50 5.6:1; danger-700 on danger-50 5.8:1; white on danger-700 6.6:1; white on ink-900 16.7:1.
-UI parts: switch off on white 3.1:1; warning glyph on its tint 3.3:1; focus ring on page 6.0:1. (The prototype's
-placeholder grey `#7B877F` is 3.7:1; Meadow uses ink-500 for placeholders.)
-
-### 0b.2 Typography
-
-**Faces:** "Plus Jakarta Sans" 700/800 for titles, numbers and the wordmark; "Inter" 400/500/600 for everything else.
-Both are bundled in the plugin (0b.5); the system stack of section 3 is the fallback.
-
-| Role | Value |
-|---|---|
-| Page title | Plus Jakarta Sans 36px / 1.12 / 800, letter-spacing −0.025em |
-| Card title | Plus Jakarta Sans 18px / 1.3 / 700 |
-| Dialog title | Plus Jakarta Sans 22px / 1.25 / 800 |
-| Big number (Dashboard stat buttons) | Plus Jakarta Sans 26px / 1 / 800, tabular figures |
-| Table numbers (Locations, Clicks) | Plus Jakarta Sans 20px / 1 / 700, tabular figures |
-| Wordmark | Plus Jakarta Sans 19px / 800 |
-| Body, controls | Inter 14px / 1.5 / 400; labels and setting names 13–14px / 600 |
-| Subtitle (U10) | Inter 15px, ink-600 |
-| Help text, URLs, small | Inter 12–13px / 1.45 |
-| Table header | Inter 12px / 600, ink-600, sentence case (Aurora's uppercase is dropped) |
-| Eyebrow ("SAVED VIEW") | Inter 11px / 600, uppercase, 0.08em letter spacing |
-
-### 0b.3 Space, shape, depth
-
-- **Spacing:** 4px base. Side gutters 40px (20px from 960px down); 32px between sections; card padding 28px (24px
-  above the card title); 22px between fields; settings rows 16px top and bottom.
-- **Rows and images:** Dashboard rows 80px with 52px image tiles (14px radius), as Aurora and Lasso.
-- **Radius (smaller, the user 2026-11-17):** cards, tiles, notices, dialogs and icon cells 12px (`--affibloom-radius-card`);
-  buttons, fields, thumbnails and icon chips 8px (`-control`, `-chip`); small buttons, menu items and tooltips 6px
-  (`-nav`); segments 5px (`-segment`); pills, view chips, search fields and switches fully round. A link styled as a
-  button keeps its corners when focused or pressed (wp-admin's `a:focus` would square them).
-- **Heads and forms (the user, 2026-11-17):** every screen's head puts the title and what is under it on the left and
-  its search and buttons in one row on the right, level with the title; form cards (a field, a group) fill the column
-  like every other card, short fields two to a row, the description across both.
-- **Depth:** cards have a 1px `line` border and the shadow `0 1px 2px rgba(22,32,26,.04), 0 6px 16px -10px
-  rgba(22,32,26,.10)`; menus and dialogs `0 18px 40px -12px rgba(22,32,26,.24), 0 2px 6px rgba(22,32,26,.06)`.
-- **Focus:** a 2px brand-600 outline with a 2px offset; fields take a brand-600 border and a 3px
-  `rgba(30,107,71,.20)` ring.
-- **Motion:** 150ms on hover and switches, 140ms menu fade-in, the save bar slides up over 240ms; all off under
-  `prefers-reduced-motion`.
-
-### 0b.4 Layout
-
-- **Header (replaces the navy bar):** white, 64px, a 1px `line` bottom border, sticky under the WordPress admin bar.
-  Left: the flower mark (five brand-600 petals around a white centre) and the wordmark in ink-900, linking to the
-  Dashboard. Then ON1's navigation as text tabs (14px/500 ink-600); the current one brand-600 with a 3px brand-600
-  underline. Right: **Add New Link** as a primary split button (its caret opens the Menu), and left of it, once ON3
-  builds it, the Automations button (an outlined round pill with the spinner and the count). Below 992px the tabs fold
-  behind the Menu button.
-- **No band.** The page head sits on the page background.
-- **Page head:** the title with the U10 subtitle under it on the left; the screen's head actions on the right
-  (Dashboard: the stat buttons; Groups: the search and Add New Group). A product page: "‹ Dashboard", a 76px image
-  tile, the name (two lines at most, the full name as its tooltip) and the URL. (Save Changes stays in the footer
-  bar: one button, see the product page below.)
-- **Notices (replace the navy strip):** white cards at the top of the column (14px radius, `line` border, a 36px icon
-  chip in the tone's tint); the tones, the ×, the newest-last order and `affibloomNotice()` stay as ON2 built them.
-  The product's "This product may be out of stock." is a warning-50 card.
-- **Column:** centred, at most 1320px (`--affibloom-content-width`, unchanged).
-- **Footer:** "Version x.y.z" under a hairline, 12px ink-600.
-- **Dashboard (U9):** Broken links, Out of stock and Opportunities become **stat buttons** beside the title (icon chip,
-  26px number, label). They become buttons that filter the list (pressed with a ×, plus a removable filter chip) in
-  the tasks that bring their filters (31B, O8); until then each shows its number or its placeholder as today. The
-  `.affibloom-tile*` class names stay, so those tasks need no change. Products and Clicks (30 days) form a quiet
-  summary line under the subtitle. Then a
-  full-width 48px search with the Ctrl+Shift+L hint, then the table card: the toolbar (SAVED VIEW chips, Filters), the
-  selection bar in brand-50 while rows are ticked, 80px rows, Edit and Shortcode as small outlined buttons that
-  strengthen on row hover, and the footer (range, per page, pages).
-- **Quick edit:** Task 16A's structure: the row becomes a brand-25 band holding a white card with a brand-line border;
-  fields 2/3, image 1/3; Save Changes and Cancel right.
-- **Product page:** underline tabs with count pills; the Share kit as one quiet card row (title left, its buttons
-  right); two columns, **58% form, 42% preview**. The right column is **sticky**: the live preview card (the real box,
-  which still opens the Media Library for "Update Image", Task 14E); a summary card (Alert, Locations, Clicks) joins it
-  in the tasks that bring those numbers (31B, 34B, 36B). The form is grouped in cards that keep
-  Lasso's field order: *Links & buttons* (Name, the buttons, Add Another Button), *Organize* (Groups, Primary Rating,
-  Add Custom Field), *Display content* (Display Theme, Amazon Image, Badge Text, Price, Description, Features),
-  *Disclosure & link attributes* (Disclosure, Sponsored, Show Disclosure, Detect Opportunities, Show Prime Logo),
-  *Amazon Data*. **Save bar:** Lasso's footer (Delete This Link left, Save Changes right) becomes a white bar stuck
-  to the foot of the screen, so Save Changes is always in reach; while the form has unsaved changes it says "Unsaved
-  changes" beside Save Changes (no Discard: Lasso has none). There is one Save Changes button only (the tests find it
-  by its name). U7's leave-guard stays.
-- **Locations, Groups, Group, Fields, Tables, Opportunities:** the same page head, tabs and table card.
-- **Settings:** General / Display / Amazon as a segmented control under the title; each section a card of rows (label
-  and visible help text left, the control right; no icon chips). Display as section 0 says.
-- **Dialogs:** 28px padding, a 44px icon chip (danger tint for destructive ones), the dialog title, actions right.
-- **Toast:** the ink-900 card with the tick, bottom centre.
-- **Loading (the user, 2026-11-17; deviation 145):** content that waits for the server shows a **skeleton** of itself:
-  grey shapes (`--affibloom-skeleton`, a lighter band moving across in 1.4s, still under reduced motion) where its
-  rows, pictures and lines will be. Lists that wait for a first answer get rows from `affibloomSkeleton()`; the box
-  previews show `partials/box-skeleton.php` until the first box, then the moving bar on a redraw; the Dashboard,
-  Groups and Fields lists turn their rows to skeleton bars while they reload. An action (Save, Add, Delete, Validate)
-  shows its button busy (`.is-busy`, a 14px spinner before the words, disabled). No other spinners.
-
-### 0b.5 Implementation notes
-
-- **Fonts:** WOFF2 files of Inter (400, 500, 600) and Plus Jakarta Sans (700, 800), Latin subset, about 120 KB in all,
-  in `assets/admin/fonts/` with their SIL Open Font License texts; loaded only on Affibloom's admin pages and in the
-  block's editor UI, `font-display: swap`. No request to Google or any other host.
-- **Code:** token values change in `assets/admin/admin.css`; the rules for the navy header, the band and the notice
-  strip give way to the white header, the page head and the notice cards. Components keep using tokens only. No PHP
-  logic, REST route or test selector changes; `tests/E2E/admin-design.spec.ts` (which checks Aurora's navy header and
-  band) is rewritten for Meadow first.
-- **When:** after Phase 3's sign-off and before F4's tasks: Tasks MD1-MD7 in `plans/phase-4-editor-block.md`
-  (Batches 4.M1-4.M5). Meadow is a look, so it holds whether the admin stays PHP-rendered (ADR-7) or a React admin is
-  approved.
-
-## 1. Principles
-
-1. **Rich but calm.** One strong moment per screen (the gradient band); everything else is white cards on a cool grey
-   page, with soft depth instead of borders.
-2. **Scannable.** Every setting and every number has an icon; big numbers for counts; descriptions visible.
-3. **Accessible by default.** WCAG 2.2 AA for every pair below, a visible focus ring on every control (white on navy,
-   blue on light), help text read with its control (U3), status never by colour alone.
-
-## 2. Colour
-
-| Token | Hex | Role |
-|---|---|---|
-| `--affibloom-navy-900` | `#0B2A5B` | header bar, start of the band gradient |
-| `--affibloom-brand-600` | `#1E5BB8` | end of the band gradient, primary buttons (bottom), toggles on, active tab bar, links, focus ring |
-| `--affibloom-brand-500` | `#2563C9` | primary button gradient (top), toggle gradient end |
-| `--affibloom-brand-300` | `#7FB0F5` | logo petals on navy (decorative) |
-| `--affibloom-brand-50` | `#EAF1FC` | icon chips, brand tiles |
-| `--affibloom-on-navy` | `#C9D8F0` | header navigation text on navy |
-| `--affibloom-on-band` | `#D6E2F5` | subtitle and inactive band tabs on the band |
-| `--affibloom-ink-900` | `#14213D` | headings, body text, toast background |
-| `--affibloom-ink-700` | `#3D4A63` | secondary text, inactive segmented tabs |
-| `--affibloom-ink-600` | `#5B6880` | descriptions, URLs, table headers, tile labels |
-| `--affibloom-ink-400` | `#8A93A3` | toggle off |
-| `--affibloom-line` | `#EDF1F7` | dividers inside cards (decorative) |
-| `--affibloom-control-line` | `#D5DCE8` | secondary button and input borders |
-| `--affibloom-page` | `#F3F6FB` | page background |
-| `--affibloom-subtle` | `#FAFBFE` | card footers, table header |
-| `--affibloom-white` | `#FFFFFF` | cards, white button on navy |
-| `--affibloom-success-700` / `-50` | `#0B6B3A` / `#E8F7EF` | OK, saved |
-| `--affibloom-danger-700` / `-50` | `#A1203A` / `#FDECEF` | broken links, errors, `Delete This Link` |
-| `--affibloom-warning-700` / `-50` | `#8A4B00` / `#FFF4E0` | notices that need the editor's attention (Task 14A: "This product already exists."); 6.2:1 on its tint, 6.8:1 on white |
-| `--affibloom-toast-icon` | `#22C55E` | the toast's check circle (with a `#06210F` tick) |
-
-**Contrast (computed, WCAG 2.2):** white on navy-900 14.0:1, on brand-600 6.5:1, on brand-500 5.7:1; on-navy on
-navy-900 9.7:1; on-band on navy-900 10.7:1 and on brand-600 4.95:1 (the band's lightest end); ink-900 on page
-14.8:1; ink-700 on white 8.9:1; ink-600 on white 5.6:1, on subtle 5.4:1, on page 5.2:1; brand-600 on brand-50 5.7:1;
-white on ink-900 16.0:1; success-700 on success-50 6.0:1; danger-700 on danger-50 6.6:1; navy-900 on white 14.0:1.
-UI parts: toggle off (ink-400) on white 3.1:1; focus ring brand-600 on page 6.0:1, white on navy 14.0:1.
+UI parts: switch off on white 3.1:1; warning glyph on its tint 3.3:1; focus ring on page 6.0:1.
 
 ## 3. Typography
 
-- **Font:** the system stack WordPress uses: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
-  Ubuntu, Cantarell, "Helvetica Neue", sans-serif`. No web font, no third-party request.
+**Faces:** "Plus Jakarta Sans" 700/800 for titles, numbers and the wordmark; "Inter" 400/500/600 for everything else.
+Both are bundled (WOFF2, Latin subset, `assets/admin/fonts/`, `fonts.css`, `font-display: swap`; Fontsource 5.3.0,
+SIL OFL); loaded only on Affibloom's pages; no request to any other host. Tokens: `--affibloom-font`,
+`--affibloom-font-display`, with `--affibloom-font-system` (WordPress's stack) as the fallback.
 
 | Role | Value |
 |---|---|
-| Page title (`h1`, on the band, white) | 30px / 38px / 700 |
-| Card title (`h2`) | 18px / 26px / 700 |
-| Tile number | 26px / 30px / 700, tabular figures |
-| Body, controls | 14px / 20px / 400; labels and setting names 600 |
-| Small: descriptions, URLs, subtitles, tile labels | 13px / 18px / 400 (subtitle 14px) |
-| Table header | 12px / 16px / 600, uppercase, 0.04em letter spacing |
-| Wordmark | 17px / 24px / 700 |
+| Page title | Plus Jakarta Sans 36px / 1.12 / 800, −0.025em (28px from 782px down); a product's name two lines at most |
+| Card title | Plus Jakarta Sans 18px / 26px / 700 (15px in the Share kit and the preview card) |
+| Dialog title | Plus Jakarta Sans 22px / 1.25 / 800, −0.015em |
+| Stat number | Plus Jakarta Sans 26px / 1 / 800, tabular figures |
+| Table numbers (Locations, Clicks) | Plus Jakarta Sans 20px / 1 / 700, tabular figures |
+| Wordmark | Plus Jakarta Sans 19px / 800 |
+| Body, controls | Inter 14px / 20px / 400; labels and setting names 13–14px / 600 |
+| Subtitle (U10) | Inter 15px / 22px, ink-600, at most 640px wide |
+| Help text, URLs, small | Inter 12–13px / 1.45 |
+| Table header | Inter 12px / 16px / 600, ink-600, sentence case |
+| Eyebrow ("SAVED VIEW") | Inter 11px / 600, uppercase, 0.08em |
 
 ## 4. Space, shape, depth
 
-- **Spacing (4px base):** 4, 8, 12, 16, 20, 24, 32, 40, 48.
-- **Room (the user, 2026-11-13: "make all admin pages spacious"):** every screen gets Lasso's breathing room, which
-  uses 24px inside a row and 48px around a section. Three tokens carry it: `--affibloom-space-gutter` 40px (the page's
-  side gutters; 20px from 960px down), `--affibloom-space-section` 28px (between cards and sections),
-  `--affibloom-space-card` 32px (a card's inner padding). Table rows have 20px padding and 48px images, so a row is
-  about 80px tall, as Lasso's is; settings rows 20px. The Display screen's rail keeps Lasso's measurements (section 0).
-- **Radius:** 16px cards and tiles; 12px icon chips; 10px buttons and the segmented control; 7px segments; 8px
-  header navigation items; full round for toggles and status pills.
-- **Depth:** cards and tiles `0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08)`, no border; toast
-  `0 12px 32px rgba(16,24,40,.25)`; the active segment `0 1px 3px rgba(16,24,40,.12)`.
-- **Motion:** 150 ms ease on hover and toggles; the toast slides in over 200 ms and leaves after 4 s; all off under
-  `prefers-reduced-motion`.
+- **Spacing:** 4px base. `--affibloom-space-gutter` 40px (the page's side gutters; 20px from 960px down); 32px between
+  the head and the body and between sections; cards 24px above their title, 28px at the sides and foot; 22px between
+  fields.
+- **Rows and images:** Dashboard rows 80px with 52px image tiles; Groups and Fields rows keep their own height.
+- **Radius (the user, 2026-11-17):** cards, stat cards, notices, dialogs, the save bar and icon cells 12px
+  (`--affibloom-radius-card`); buttons, fields, thumbnails and icon chips 8px (`-control`, `-chip`); small buttons,
+  menu items, page links and tooltips 6px (`-nav`); segments 5px (`-segment`); pills, view chips, search fields and
+  switches fully round. A link styled as a button keeps its corners when focused or pressed.
+- **Depth:** cards have a 1px `line` border and `--affibloom-shadow-card` (`0 1px 2px rgba(22,32,26,.04), 0 6px 16px
+  -10px rgba(22,32,26,.10)`); menus, dialogs and the toast `--affibloom-shadow-toast` (`0 18px 40px -12px
+  rgba(22,32,26,.24), 0 2px 6px rgba(22,32,26,.06)`); the save bar a shadow upwards.
+- **Focus:** a 2px brand-600 outline with a 2px offset (inside tabs: −2px); fields take a brand-600 border and the
+  3px brand-ring.
+- **Motion:** 150ms on hover and switches, 140ms menu fade-in, 160ms quick-edit fade-in; skeletons move over 1.4s;
+  all off under `prefers-reduced-motion`.
 
 ## 5. Layout
 
-- **Header:** navy-900 bar, 60px. Left: the logo mark (five petals in brand-300 around a navy ring and a white dot,
-  28px) and the wordmark in white; together they link to the Dashboard (Task ON1). Then the navigation in Lasso's order
-  (Dashboard, Opportunities, Tables, Groups, each once its screen exists, then Settings; Task ON1), each an icon plus
-  label in on-navy text, 8px radius; the current one white text on `rgba(255,255,255,.12)`. Right: the screen's main
-  action as a white button with navy text (`Add New Link`, from Task 11A), split as in Lasso: its caret opens a Menu of
-  other ways to add (Task 11C). Below 992px the tabs fold behind the **Menu button** (see Components).
-- **Notice region:** right under the header (see Components, "Notice region"); other plugins' notices are not shown on
-  Affibloom's pages (Task ON2).
-- **Footer:** the last thing on every Affibloom page: "Version x.y.z", 12px/500 ink-600, centred under the column, 40px
-  above it and 28px below (Task ON1). WordPress's own version line is blank on Affibloom's pages.
-- **Band:** under the header, full width, `linear-gradient(120deg, navy-900, brand-600)`, padding 28px 32px 72px. It
-  holds the page title, the subtitle (U10) and, on screens with sections, the section tabs (segmented control on the
-  band: inactive on-band text on `rgba(255,255,255,.12)`, active white segment with ink-900 text).
-- **One centred column** (the user, 2026-11-13: "centred, like Lasso"): the band's content and the body share a column
-  of at most 1320px (`--affibloom-content-width`; the user raised it from 1080px on 2026-11-14, so every page, Settings included, uses
-  Lasso's own container width on large screens), centred in the content area, with 32px gutters (20px from 960px
-  down). The band's gradient still runs the full width; the header stays full width with the logo on the left.
-- **Body:** the first row of tiles or the first card overlaps the band by 48px, so content floats over it. Cards fill
-  the column's width (forms included).
-- **Dashboard:** a row of overview tiles (U9), then the products card. Each tile appears with the task that provides
-  its number (products: Task 13, broken links: Task 31, clicks over 30 days: Task 34).
-- **Cards:** the full width of the column. Header (title and intro), body, footer (subtle background,
-  actions right-aligned: secondary then primary).
-- **Settings rows:** a 40px icon chip, the setting's label (600) with its description below it in ink-600 (Lasso's
-  help text, visible, linked with `aria-describedby`), the switch on the right; rows divided by `line`.
-- **Breakpoints:** 960px and below: side padding 20px. 991px and below (Lasso's 992px point): the header's tabs fold
-  behind the Menu button. 782px (wp-admin's mobile breakpoint): the Menu and Add New Link buttons show icons only, rows
-  stack (switch under the text), tiles stack, card footer buttons go full width.
+- **Header:** white, 64px, a 1px `line` bottom border, sticky under the WordPress toolbar. Left: the flower mark (five
+  brand-600 petals round a white centre) and the wordmark in ink-900, linking to the Dashboard. Then ON1's navigation
+  as words (14px/500 ink-600), the current one brand-600 with a 3px underline. Right: **Add New Link** as a primary
+  split button whose caret opens the Menu. Below 992px the tabs fold behind the **Menu button**.
+- **Notices:** white cards at the top of the column, under the header (see Components).
+- **Page head** (`partials/page-head.php`): on the page background, in the column; the title with what belongs under
+  it (subtitle, the product's link, the summary line, Settings' segmented tabs) on the left; the screen's head actions
+  on the right, level with the title (the Dashboard's stat cards; Groups' and Fields' search and Add New; a group's
+  Add a Link and Copy Shortcode). Under the row, full width: the Dashboard's search, the product page's tabs. A
+  product page adds "‹ Dashboard" above and its 76px image tile left of the name.
+- **Column:** centred, at most 1320px (`--affibloom-content-width`) inside the gutters; head, notices, body and footer
+  line up with it.
+- **Footer:** "Version x.y.z" under a hairline, 12px ink-600.
+- **Dashboard (U9):** Broken links, Out of stock and Opportunities are stat cards right of the title (the filters come
+  with 31B and O8; `.affibloom-tile*` stays); Products and Clicks (30 days) a quiet line under the subtitle; a
+  full-width 48px search with the Ctrl+Shift+L hint; then one table card: the toolbar (SAVED VIEW chips, Filters) as
+  its top row, which turns brand-50 while the selection bar takes the views' place; 80px rows; the pager in its foot.
+  All eight columns fit a 1280px window.
+- **Product page:** the head as above, underline tabs; the Share kit as one row; two columns, 58% form and 42%
+  sticky aside (under the toolbar and header, 112px from the top; static and above the form from 991px down). The form
+  is in cards in Lasso's order: *Links & buttons*, *Organize*, *Display content*, *Disclosure & link attributes*,
+  then the read-only *Amazon Data*. The aside holds the *Live preview* card (the real box; its picture opens the Media
+  Library). **Save bar:** Delete This Link left, Save Changes right, stuck to the foot of the window; "Unsaved changes"
+  beside Save Changes while the form differs from what is stored. One Save Changes button.
+- **Groups, a group, Fields, a field:** the same head, segmented tabs and table or form cards.
+- **Settings:** General / Display / Amazon as a segmented control under the title; Lasso's structure (section 0).
+- **Breakpoints:** 960px and below: gutters 20px. 991px (Lasso's 992px point): the header's tabs fold behind the Menu
+  button, the product page stacks. 782px (wp-admin's mobile point): Menu and Add New Link show icons only, the head's
+  actions go under the title, stat cards two a row, the Dashboard's table scrolls inside its card, footers stack.
 
 ## 6. Components
 
 | Component | Spec |
 |---|---|
-| **Primary button** | `linear-gradient(180deg, brand-500, brand-600)`, white 14px/600 text, 38px tall, 18px side padding, 10px radius, `0 1px 2px rgba(16,24,40,.12)` plus a 1px inner highlight; hover: brand-600 flat; focus ring. |
-| **White button (on navy)** | white background, navy-900 text; used for the header's main action. |
-| **Secondary button** | white, 1px control-line border, ink-900 text; hover subtle background. |
-| **Danger button** | danger-700 background, white text, only for destructive actions, always explicitly labelled. |
-| **Small button** | 32px tall, 12px padding, 8px radius (table row actions). |
-| **Focus ring** | 2px brand-600 outline, 2px offset; on the navy header and band 2px white. |
-| **Toggle** | 44×24 track, ink-400 off, `linear-gradient(120deg, brand-600, brand-500)` on, 18px white knob with a small shadow; the real checkbox lies over the track (`role="switch"`). |
-| **Icon chip** | 40×40, 12px radius, brand-50 background, brand-600 icon (18px, 1.6px stroke); danger or success tints for status. |
-| **Overview tile** | white card (16px radius, card depth), icon chip, number (26px/700) and label (13px ink-600). |
-| **Segmented tabs** | 4px padding, 10px radius, `aria-current="page"` on the active segment; on light pages ink-700 on `#E6ECF6` with a white active segment; on the band as above. |
-| **Help tip** | for dense places (form fields, table headers): an 18px round "?" button; on hover and focus an ink-900 tooltip with white 13px text, max 280px, 8px radius; text linked with `aria-describedby`. Settings rows show the text as a description instead. |
-| **Text field** | 38px tall, 1px control-line border, 10px radius; focus: brand-600 border and focus ring; error: danger-700 border and message below, linked with `aria-describedby`. |
-| **Table** | inside a card; header row on subtle with the table-header type; rows with 12px padding and `line` dividers; the name 600 with the URL below in ink-600; 40px rounded thumbnails. |
-| **Quick edit row** | a Dashboard row in Lasso's editing mode (Task 16A; Lasso's structure, the user 2026-11-13): the row becomes a brand-50 band (20px) holding a white card (16px radius, card shadow, brand-600 border at 16%, 24px padding, a 160 ms fade-in). Inside, the fields take 2 of 3 columns (13px/600 ink-700 labels, fields 18px apart, Groups as a dashed, inactive field with its placeholder and a Soon chip, then the link with a link icon) and the image panel 1 of 3 (subtle panel, line border, 12px radius, 16px padding): its label, a dashed white frame stretched to the fields' height (at least 200px; picture up to 180px, or the image icon and "No image"), on hover and focus a brand-600 overlay at 92% with a 22px icon and "Update Image", and a 12px hint under it. Footer: a line divider, then Save Changes and Cancel right, 12px apart, at least 128px wide. The card is sized to the visible part of the scrolling table (`container-type` on the scroll area, `100cqi`) and sticks to its left edge; below 720px of it, one column, a 160px frame and full-width buttons. |
-| **Groups list row** | Lasso's Groups page (Task G1; Lasso's arrangement, the user 2026-11-13): the Table in a card with three columns, Name (30%, 600/15px ink-900, no underline until hover), Description (14px ink-700, wraps) and Links (110px, centred, 700); the whole row opens the group (the name's link is stretched over it with `::after`, a pointer cursor, a subtle hover). Footer: the range ("1-10 of 11") left and the page links right, as the Dashboard's, without the page-size select. On the band the right side holds the search (white, 42px, no border) and **Add New Group**, a white button with navy-900 text on the gradient (the White button, 42px). Empty: the empty state with the layers chip. Below 782px: the table has no minimum width, Name 34% and wrapping, Links 64px, the band's actions left-aligned. |
-| **Group picker** | (Tasks G3, G5; F23 D8) a text-field-sized box (38px, control-line border, 10px radius, brand focus ring around the whole box) holding chips and the entry: chips are full-round brand-50 pills with brand-600 13px/600 text and a 20px round × button; the entry grows to the rest of the line; under it a white listbox (max 220px, card shadow, 8px radius) whose options highlight brand-50 on hover and for the arrow keys, ending with "Create “name”" when the text is no group's name. Roles: combobox over listbox, chips' × named "Remove <group>". Used on the product page, in the quick edit and in the selection bar (32px there). |
-| **Group member row** | (Task G4) a row in the Links tab's card: grip (ink-400, grab cursor), tick, Move up / Move down (28px icon buttons, disabled at the ends), a 50px picture, the name (600/15px), the description (13px, two lines, "(blank)" when empty) and a small secondary Remove; 14px 20px padding, line dividers; a ticked row is brand-50, a dragged row lifts (card shadow). Below 782px the row wraps: grip, tick, moves, picture and name first, then the description and Remove. |
-| **Selection bar** | Lasso's links-selected bar (Tasks 13C, 17B), in the toolbar's left side in place of the saved views while rows are ticked: a full-round brand-50 band with a brand-300 border; the count ("2 links selected", 14px ink-900), then small full-round buttons: Select All and Clear Selection secondary, **Delete** danger-700 with the trash icon (Lasso's red), Add to Group. Below 782px it wraps, with a 16px radius instead of the pill. |
-| **Status pill** | full round, 12px/600, tint background with the status-700 text and an icon (`OK`, `Broken`). |
-| **Toast** | ink-900 card, white text, 12px radius, toast shadow, a 24px toast-icon circle with a dark tick; bottom right; `role="status"`. (Its "info" variant went with the Dashboard's duplicate toast in Task 14A: the warning now shows on the product's page, as Lasso's does.) **Error variant** (Task 15A, a failed save): the same card with a white cross on a danger-700 circle. |
-| **Icon tile** | an ink-900 square holding a button icon, so the site's white glyphs show as they do on a button: 48px (12px radius, 26px icon) in the Button icons grid, 28px in the picker, 36px for the add form's preview. A missing image is a warning-50 tile with the warning glyph (F28 D4). |
-| **Icon grid** | Settings → Display, "Button icons" (the user, 2026-11-13): cells of at least 160px, as many as fit (two on a phone), 12px gap; each cell 1px line border, 12px radius, centred: tile, name, class, and at its foot "From your site's CSS" or Remove. |
-| **Notice** | above a page's cards, as Lasso's notifications: a white card (16px radius, card shadow) with a 4px warning-700 left edge, a 40px icon chip in warning-50 / warning-700, and the message (600, ink-900); `role="status"` (Task 14A). |
-| **Notice tones** | (Task ON2) the Notice in four tones, each a left edge and a chip: **warning** (warning-700 on warning-50, the warning glyph), **success** (success-700 `#136C3A` on success-50 `#E7F6ED`, a tick), **error** (danger-700 on danger-50 `#FDECEF`, a cross), **update** (brand-600 on brand-50, the refresh glyph; Lasso's dark purple bar). A link in the words is brand-600, 700, underlined. A × (32px round, ink-600, subtle on hover, named "Dismiss this notice") removes the notice; the update notice has none. |
-| **State chip** | (Task C1A) a full-round pill (3px 10px, 12px/600) with a 6px dot in its colour, saying how something stands: neutral (ink-700 on segment-bg, "Not set up"), **warning** (warning-700 on warning-50, "Saved, not validated"), **success** (success-700 on success-50, "Validated"). Sits beside a card's title. A button waiting for an answer is disabled with a 14px spinner before its words (`.is-busy`). |
-| **Notice region** | (Task ON2, F38 D8) right under the header on every Affibloom page: a navy-900 strip continuing the header into the band, holding the notices in the page's column (32px gutters, 20px from 960px down), 12px apart, newest last, 8px above and 20px below; empty, it takes no room. `aria-live="polite"`. Persistent notices come from PHP providers; a script adds one with `affibloomNotice( tone, message )`. Saved/failed messages after an action stay Toasts. |
-| **Modal** | 560px, 16px radius, toast shadow, backdrop `rgba(11,42,91,.45)`; header, body, footer like cards; focus trapped and returned; Escape closes. |
-| **Menu** | a white card under its button (12px radius, card shadow, 8px padding, 300px wide, at most the screen less 32px); items 8px padded with an 8px radius, a 40px icon chip, a 600 title and a 13px ink-600 description, subtle background on hover. The button has `aria-expanded` and `aria-controls`; choosing an item, Escape or a click elsewhere closes it (Task 11C). |
-| **Menu button** | (Task ON1, Lasso's R6) the header's, only below 992px: 38px, 8px radius, a three-line icon and "Menu" in on-navy text (icon only from 782px down, the text kept for screen readers); hover and open: white text on `rgba(255,255,255,.12)`. `aria-expanded` and `aria-controls` name the navigation, which opens as a navy panel under the bar (full width, 8px 20px 14px padding, card shadow) with the tabs stacked, icon and label, 10px 12px padding. Escape or a click elsewhere folds it, Escape returning the focus to the button; widening the window past 991px folds it too. |
-| **Progress bar** | 8px track in `#E6ECF6`, full round; the fill a `brand-500` to `brand-600` gradient that widens over 300 ms; `role="progressbar"` with `aria-valuenow` (Task 11C). |
-| **Empty state** | inside a card: a 40px icon chip, a one-line message (600) and, where there is one, the primary action. |
-| **Icons** | 20×20 outline set drawn for Affibloom (stroke 1.6, round caps), inline SVG from one partial; never Lasso's icons. |
+| **Primary button** | brand-600, flat, white 14px/600, 38px tall, 18px side padding, 8px radius, `0 1px 2px rgba(18,74,48,.25)`; hover brand-700, pressed brand-800. |
+| **Secondary button** | white, 1px control-line border, ink-900 text; hover subtle. |
+| **Danger button** | danger-700, white text; hover danger-800; destructive actions only, always labelled. |
+| **Small button** | 32px tall, 12px padding, 6px radius, 13px; 16px icons. In Dashboard rows (Edit, Shortcode) outlined in `line` with ink-600 text, `line-strong` and ink-900 on row hover, brand-600 on brand-25 on its own hover. |
+| **Busy button** | `.is-busy`: disabled, a 14px spinner before the words. The only spinner (deviation 145). |
+| **Switch** | 44×24 track, ink-400 off, brand-600 on, flat; the real checkbox lies over the track (`role="switch"`). |
+| **Icon chip** | 40×40, 8px radius, brand-50 with a brand-600 icon; tints `--warning`, `--danger`; 36px in notices, 42px in stat cards, 44px in dialogs. |
+| **Stat card** | (`.affibloom-tile`) white, `line` border, 12px radius, card depth, 12px 20px 12px 12px padding, at least 168px; a 42px chip, the 26px number (or a dash) over its 13px/500 label and an 11px note. Waiting for its data: the chip on `sunk`, the dash ink-400. |
+| **Summary line** | (`.affibloom-summary`) 14px ink-600 label and 600 ink-900 number, items split by a 4px `line-strong` dot. |
+| **Segmented tabs** | 3px padding on `segment-bg`, 8px radius, segments 5px; the current one white with ink-900 text and a soft shadow, `aria-current="page"`; scrolls sideways on a phone. |
+| **Underline tabs** | (the product page) 30px apart on a 1px `line`, 14px/600 ink-600; the current one ink-900 with a 3px brand-600 bar; a later tab disabled with its "Soon" chip. |
+| **Help tip** | an 18px round "?" button; on hover and focus an ink-900 tooltip with white 13px text, at most 280px, 6px radius; linked with `aria-describedby`. |
+| **Text field** | 38px, control-line border, 8px radius; focus brand-600 border and the brand-ring; error danger-700 border and message below; placeholder ink-500. |
+| **Search** | fully round; 42px in a head's actions; the Dashboard's 48px, 15px text, card shadow, the shortcut drawn as a key (2px bottom border). |
+| **Table** | inside a card; the header row on subtle in the table-header type, 44px; rows divided by `line`; the name 15px/600 (brand-600 underlined on hover) with its URL in ink-500 under it; thumbnails with a `line` border and 8px radius. |
+| **View chip** | (saved views) 32px, fully round, control-line border, ink-600 13px/500; hover `line-strong`; the current one brand-50 with a brand-line border, brand-600 600 text and a tick. |
+| **Selection bar** | Lasso's links-selected bar: in the Dashboard's toolbar it takes the views' place and the row turns brand-50 (brand-line under it); the count in brand-600, then Select All, Clear Selection, Delete (danger) and Add to Group. On a group's page it is a brand-50 pill with a brand-line border. |
+| **Quick edit row** | Lasso's editing mode (Task 16A): a brand-25 band holding a white card (brand-line border, 12px radius, 24px 28px padding, a 160ms fade-in); fields 2/3, the image panel 1/3 with its dashed frame and "Update Image" overlay; Save Changes and Cancel right under a divider. Sized to the visible part of the scrolling table; one column below 720px of it. |
+| **Pager** | the card's foot on subtle: page size and range (ink-900, tabular) left, page links right: 32px, transparent, ink-600, `segment-bg` on hover; the current page a white raised chip with a control-line border. |
+| **Group picker** | a field-sized box holding brand-50 chips (brand-600 13px/600, a round ×) and the entry; a white listbox under it (card shadow) ending with "Create “name”". Combobox over listbox. |
+| **Group member row** | grip, tick, a 50px picture, name, description, Remove; drags by its grip; a ticked row brand-50. |
+| **Status pill / state chip** | fully round, 12px/600 with a 6px dot or an icon: neutral (ink-700 on segment-bg), warning (warning-700 on warning-50), success (success-700 on success-50). |
+| **Notice** | a white card (12px radius, `line` border, card shadow, 12px 12px 12px 14px padding), a 36px chip in the tone's tint, the message 600 ink-900; tones warning, success, error, update; a 32px round ×; `aria-live` region `#affibloom-notices`, `affibloomNotice( tone, message )`. |
+| **Toast** | the ink-900 card (12px radius, toast shadow), a 24px tick circle (toast-icon / toast-tick); bottom centre, above the product page's save bar; the error variant a white cross on danger-700, shown longer; `role="status"`. |
+| **Modal** | 560px, 12px radius, toast shadow, backdrop `rgba(22,32,26,.45)`; head 28px padding with an optional 44px chip (danger on deletes, warning on Unsaved Changes) above the 22px title; body 16px 28px 28px; foot on subtle, actions right; focus trapped and returned; Escape closes. |
+| **Menu** | a white card under its button (12px radius, `line` border, toast shadow, 8px padding, 300px); items with a chip, a 600 title and a 13px ink-600 line; brand-25 on hover. |
+| **Menu button** | the header's, below 992px: 38px, a three-line icon and "Menu" (icon only from 782px); opens a white panel under the bar with the tabs stacked. |
+| **Save bar** | the product page's footer: white, `line` border without a bottom edge, 12px top radius, 12px 20px padding, a shadow upwards, sticky at the foot; "Unsaved changes" (13px/600 with an 8px warning-icon dot) while the form has `data-dirty="true"`. |
+| **Progress bar** | 8px track on segment-bg, fully round; a brand-600 fill that widens over 300ms; `role="progressbar"`. |
+| **Skeleton** | content that waits shows its own shape in `--affibloom-skeleton`, a band moving across in 1.4s (still under reduced motion): list rows from `affibloomSkeleton()`, the box previews' `partials/box-skeleton.php`, reloading tables' cells. |
+| **Empty state** | inside a card: a 40px chip, a 600 message, a 14px line and, where there is one, the primary action. |
+| **Icon tile, icon grid** | an ink-900 square holding a button icon (48px in Settings → Display's grid, 28px in the picker); grid cells of at least 160px with a `line` border and 12px radius. |
+| **Icons** | 20×20 outline set drawn for Affibloom (stroke 1.6, round caps), inline SVG from `partials/icon.php`; never Lasso's icons. |
 
 ## 7. Where Lasso and Affibloom differ (looks only)
 
-| | Lasso | Affibloom (Aurora) |
+| | Lasso | Affibloom (Meadow) |
 |---|---|---|
-| Header | purple bar, logo, centred white tabs, 100px | navy bar, petal logo, icon-plus-label navigation on the left, 60px |
-| Page head | title on the page, tabs to the right | navy-to-blue gradient band with title, subtitle and segmented tabs; content floats over it |
-| Brand | purple `#5E36CA`, actions green `#22BAA0` | navy `#0B2A5B` and ocean blue `#1E5BB8` |
-| Type | Helvetica Neue, weight 800, 40px titles | system font, 700 titles at 30px |
-| Settings | two columns of cards, toggle left of the label, hover-only help | one card per section, icon chip, label and visible description, switch on the right |
-| Toast | green box | dark card with a check icon |
+| Header | purple bar, logo, centred white tabs, 100px | white 64px bar, green flower and wordmark, underlined word tabs on the left, green split button |
+| Page head | title on the page, tabs to the right | title and subtitle left, the screen's search, buttons or stat cards right, on the page background |
+| Brand | purple `#5E36CA`, actions green `#22BAA0` | botanical green `#1E6B47` on green-tinted greys |
+| Type | Helvetica Neue, weight 800, 40px titles | Plus Jakarta Sans 800 titles at 36px, Inter for text |
+| Product page | two cards, Save at the foot | 58/42 with a sticky preview, form in cards, a save bar stuck to the window's foot |
+| Toast | green box | ink card with a tick, bottom centre |
 
 ## 8. Implementation notes
 
 - Tokens are CSS custom properties on `.affibloom-admin` in `assets/admin/admin.css`; components use only tokens.
+  The fonts are in `assets/admin/fonts.css`, enqueued before `admin.css` (`AdminAssets`).
 - `admin.css` holds the components that screens already use; each later task adds the components it first needs from
   this document.
 - Class names the tests and later tasks rely on stay: `affibloom-header`, `affibloom-header__tab`,
-  `affibloom-page__title`, `affibloom-tabs__tab`, `affibloom-toggle__input`, `affibloom-toggle__track`,
-  `affibloom-toast`, `#affibloom-settings-save`.
-- Rules that must outrank wp-admin's (`.wrap h1`, `input[type=checkbox]`) are scoped under `.affibloom-admin`.
+  `affibloom-page__title`, `affibloom-page__subtitle`, `affibloom-tabs__tab`, `affibloom-tile*`,
+  `affibloom-toggle__input`, `affibloom-toggle__track`, `affibloom-toast`, `#affibloom-save`, `#affibloom-search`,
+  `#affibloom-settings-save`, `.affibloom-card--list`, `.affibloom-product__footer`.
+- Rules that must outrank wp-admin's (`.wrap h1`, `input[type=checkbox]`, `a:focus`) are scoped under `.affibloom-admin`.
+- `tests/E2E/admin-design.spec.ts` checks the design by computed style, one test per screen part.
 - `docs/ui/tokens.md` keeps Lasso's measured values as a reference only.
