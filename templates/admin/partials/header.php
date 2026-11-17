@@ -1,12 +1,12 @@
 <?php
 /**
  * The Affibloom header: logo mark, wordmark, the plugin's navigation and, on the right, "Add New Link", which
- * Lasso puts in its header on every screen (docs/ui/design-system.md, Aurora; F18 entry point 1). The modal it
+ * Lasso puts in its header on every screen (docs/ui/design-system.md, 0b.4 Header; F18 entry point 1). The modal it
  * opens is printed after the header.
  *
- * The tabs are the navigation's, in Lasso's order (F38 D1, Task ON1); the one the page belongs to is current, so a
- * product page marks Dashboard (R3). Below 992 px they fold behind a Menu button (R6). The notice region follows the
- * header (Task ON2).
+ * The tabs are the navigation's, as words (Meadow, MD2), in Lasso's order (F38 D1, Task ON1); the one the page belongs
+ * to is current, so a product page marks Dashboard (R3). Below 992 px they fold behind a Menu button (R6). The notice
+ * region follows the header (Task ON2).
  *
  * @package Affibloom
  */
@@ -22,16 +22,17 @@ $header_can_add = current_user_can( Capabilities::PRODUCTS );
 ?>
 <header class="affibloom-header">
 	<a class="affibloom-header__brand" href="<?php echo esc_url( admin_url( 'admin.php?page=' . AdminMenu::SLUG ) ); ?>">
-		<svg class="affibloom-header__logo" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-			<g class="affibloom-header__logo-petals">
-				<ellipse cx="14" cy="7" rx="4.2" ry="6"/>
-				<ellipse cx="14" cy="7" rx="4.2" ry="6" transform="rotate(72 14 14)"/>
-				<ellipse cx="14" cy="7" rx="4.2" ry="6" transform="rotate(144 14 14)"/>
-				<ellipse cx="14" cy="7" rx="4.2" ry="6" transform="rotate(216 14 14)"/>
-				<ellipse cx="14" cy="7" rx="4.2" ry="6" transform="rotate(288 14 14)"/>
+		<?php // Meadow's flower: five petals around a white centre with a dot; the colours come from the tokens (admin.css). ?>
+		<svg class="affibloom-header__logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+			<g class="affibloom-header__logo-petals" transform="translate(16 16)">
+				<ellipse cy="-7.4" rx="4.7" ry="7.4"/>
+				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(72)"/>
+				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(144)"/>
+				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(216)"/>
+				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(288)"/>
 			</g>
-			<circle class="affibloom-header__logo-ring" cx="14" cy="14" r="4"/>
-			<circle class="affibloom-header__logo-dot" cx="14" cy="14" r="2.4"/>
+			<circle class="affibloom-header__logo-ring" cx="16" cy="16" r="3.6"/>
+			<circle class="affibloom-header__logo-dot" cx="16" cy="16" r="1.5"/>
 		</svg>
 		<span class="affibloom-header__name"><?php esc_html_e( 'Affibloom', 'affibloom' ); ?></span>
 	</a>
@@ -45,7 +46,6 @@ $header_can_add = current_user_can( Capabilities::PRODUCTS );
 			<a class="affibloom-header__tab<?php echo $header_is_current ? ' is-active' : ''; ?>"
 				href="<?php echo esc_url( admin_url( 'admin.php?page=' . $header_tab->slug ) ); ?>"
 				<?php echo $header_is_current ? 'aria-current="page"' : ''; ?>>
-				<?php $this->render( 'admin/partials/icon', array( 'name' => $header_tab->icon ) ); ?>
 				<span class="affibloom-header__tab-label"><?php echo esc_html( $header_tab->label() ); ?></span>
 			</a>
 		<?php endforeach; ?>

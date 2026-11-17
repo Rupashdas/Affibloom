@@ -1,14 +1,14 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 
 // The Affibloom design system, checked by computed style. Meadow replaces Aurora screen part by screen part (Tasks
-// MD1-MD6, docs/ui/design-system.md section 0b): MD1 brought Meadow's colours and fonts; the header (MD2) and the band
-// (MD3) are still Aurora's shapes until their tasks rewrite those checks.
-const NAVY_900 = 'rgb(11, 42, 91)'; // #0B2A5B (Aurora's header, until MD2)
+// MD1-MD6, docs/ui/design-system.md section 0b): MD1 brought Meadow's colours and fonts, MD2 the white header and the
+// notice cards; the band (MD3) is still Aurora's shape until its task rewrites those checks.
+const NAVY_900 = 'rgb(11, 42, 91)'; // #0B2A5B (Aurora's band, until MD3)
 const BRAND_600 = 'rgb(30, 107, 71)'; // #1E6B47
 const INK_400 = 'rgb(138, 150, 140)'; // #8A968C
+const INK_600 = 'rgb(85, 98, 90)'; // #55625A
 const PAGE = 'rgb(245, 247, 244)'; // #F5F7F4
 const WHITE = 'rgb(255, 255, 255)';
-const ON_NAVY_ACTIVE = 'rgba(255, 255, 255, 0.12)';
 const CONTROL_LINE = 'rgb(211, 219, 209)'; // #D3DBD1
 const LINE = 'rgb(227, 232, 225)'; // #E3E8E1
 const INK_900 = 'rgb(22, 32, 26)'; // #16201A
@@ -38,13 +38,37 @@ async function tabTo( page: Page, target: Locator ) {
 
 // Header, band and page, shared by every screen.
 async function expectShell( page: Page, title: string ) {
+	// Meadow's header (MD2): white, 64px, sticky, a hairline under it; the tabs are words, the current one green with
+	// a 3px green underline; the wordmark in the display face; Add New Link a green split button.
 	const header = page.locator( '.affibloom-header' );
-	expect( await css( header, 'background-color' ) ).toBe( NAVY_900 );
-	expect( await css( header, 'height' ) ).toBe( '60px' );
+	expect( await css( header, 'background-color' ) ).toBe( WHITE );
+	expect( await css( header, 'height' ) ).toBe( '64px' );
+	expect( await css( header, 'position' ) ).toBe( 'sticky' );
+	expect( await css( header, 'border-bottom-width' ) ).toBe( '1px' );
+	expect( await css( header, 'border-bottom-color' ) ).toBe( LINE );
+	await expect( header.locator( '.affibloom-header__nav svg' ) ).toHaveCount( 0 ); // no icon in a tab
 	const current = header.locator( '[aria-current="page"]' );
-	expect( await css( current, 'background-color' ) ).toBe( ON_NAVY_ACTIVE );
-	expect( await css( current, 'color' ) ).toBe( WHITE );
-	await expect( current.locator( 'svg' ) ).toHaveCount( 1 ); // icon plus label
+	expect( await css( current, 'color' ) ).toBe( BRAND_600 );
+	const underline = await current.evaluate( ( el ) => {
+		const after = getComputedStyle( el, '::after' );
+		return { height: after.height, color: after.backgroundColor };
+	} );
+	expect( underline ).toEqual( { height: '3px', color: BRAND_600 } );
+	expect( await css( header.locator( '.affibloom-header__tab:not([aria-current])' ).first(), 'color' ) ).toBe( INK_600 );
+	const wordmark = header.locator( '.affibloom-header__name' );
+	expect( await css( wordmark, 'font-family' ) ).toMatch( /^"?Plus Jakarta Sans"?,/ );
+	expect( await css( wordmark, 'color' ) ).toBe( INK_900 );
+	const add = header.getByRole( 'button', { name: 'Add New Link' } );
+	expect( await css( add, 'background-color' ) ).toBe( BRAND_600 );
+	expect( await css( add, 'color' ) ).toBe( WHITE );
+	expect( await css( header.locator( '.affibloom-header__caret' ), 'background-color' ) ).toBe( BRAND_600 );
+
+	// The footer: the version under a hairline, 12px ink-600.
+	const footer = page.locator( '.affibloom-footer' );
+	expect( await css( footer, 'border-top-width' ) ).toBe( '1px' );
+	expect( await css( footer, 'border-top-color' ) ).toBe( LINE );
+	expect( await css( footer, 'font-size' ) ).toBe( '12px' );
+	expect( await css( footer, 'color' ) ).toBe( INK_600 );
 
 	expect( await css( page.locator( '.affibloom-admin' ), 'background-color' ) ).toBe( PAGE );
 	// Meadow's bundled fonts (MD1): Inter for text, Plus Jakarta Sans for titles; cards have a hairline border.
@@ -85,6 +109,25 @@ async function expectShell( page: Page, title: string ) {
 test( 'the Dashboard uses the Affibloom design system', async ( { page } ) => {
 	await page.goto( '/wp-admin/admin.php?page=affibloom' );
 	await expectShell( page, 'Dashboard' );
+
+	// A script's notice is a white card with a hairline border in the page's column, under the header (MD2).
+	await page.evaluate( () => ( window as unknown as { affibloomNotice: ( tone: string, text: string ) => void } ).affibloomNotice( 'success', 'Test' ) );
+	const notice = page.locator( '#affibloom-notices .affibloom-notice' ).filter( { hasText: 'Test' } );
+	await expect( notice ).toBeVisible();
+	expect( await css( notice, 'background-color' ) ).toBe( WHITE );
+	expect( await css( notice, 'border-left-width' ) ).toBe( '1px' );
+	expect( await css( notice, 'border-left-color' ) ).toBe( LINE );
+	expect( await css( notice, 'border-top-left-radius' ) ).toBe( '12px' );
+	expect( await css( notice.locator( '.affibloom-chip' ), 'width' ) ).toBe( '36px' );
+	await expect( page.locator( '.affibloom-notices-bar' ) ).toHaveCount( 0 ); // no navy strip
+	const [ headerBox, noticeBox, column ] = [
+		await box( page.locator( '.affibloom-header' ) ),
+		await box( notice ),
+		await box( page.locator( '.affibloom-page__body > *' ).first() ),
+	];
+	expect( noticeBox.y ).toBeGreaterThanOrEqual( headerBox.y + headerBox.height );
+	expect( Math.abs( noticeBox.x - column.x ) ).toBeLessThanOrEqual( 1 );
+	expect( Math.abs( noticeBox.width - column.width ) ).toBeLessThanOrEqual( 1 );
 } );
 
 test( 'Settings uses the Affibloom design system', async ( { page } ) => {
@@ -172,7 +215,7 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	// Text field in the rail: Lasso's 34px control height, our radius, border and focus colour.
 	const primary = page.getByLabel( 'Primary button text', { exact: true } );
 	expect( await css( primary, 'height' ) ).toBe( '34px' );
-	expect( await css( primary, 'border-radius' ) ).toBe( '10px' );
+	expect( await css( primary, 'border-radius' ) ).toBe( '8px' );
 	expect( await css( primary, 'border-top-color' ) ).toBe( CONTROL_LINE );
 	await primary.click(); // a click, not focus(): :focus needs the window itself to be focused
 	expect( await css( primary, 'border-top-color' ) ).toBe( BRAND_600 );

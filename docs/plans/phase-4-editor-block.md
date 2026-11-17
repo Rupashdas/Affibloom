@@ -49,7 +49,7 @@ them when the task is worked, and record any code that differs from the text bel
 ### Meadow restyle — runs first (the user, 2026-11-16; deviation 142)
 
 - [x] Task MD1: Meadow's fonts and colours
-- [ ] Task MD2: The white header and notice cards
+- [x] Task MD2: The white header and notice cards
 - [ ] Task MD3: A page head instead of the band
 - [ ] Task MD4: The Dashboard: counts beside the title, search, list
 - [ ] Task MD5: The product page: head, sticky preview, save bar
@@ -213,12 +213,16 @@ version sits under a hairline.
 tab; a notice is a white card inside the column). F38 AC1-AC6 keep passing unchanged (tabs, order, `aria-current`,
 Menu button, notices).
 
-- [ ] **Step 1: Test** (the header and notice part of `admin-design.spec.ts`).
-- [ ] **Step 2: Header and Menu panel.**
-- [ ] **Step 3: Notice cards and footer;** remove the navy tokens' last uses in these sections.
-- [ ] **Step 4: Check and look.** `phpcs` on the partials; Dashboard at 1280 px with a script notice
+- [x] **Step 1: Test** (the header and notice part of `admin-design.spec.ts`).
+- [x] **Step 2: Header and Menu panel.**
+- [x] **Step 3: Notice cards and footer;** remove the navy tokens' last uses in these sections.
+- [x] **Step 4: Check and look.** `phpcs` on the partials; Dashboard at 1280 px with a script notice
   (`affibloomNotice( 'success', 'Test' )` in the console) and the header at 375 px.
-- [ ] **Step 5: Commit** — "Draw the header white with underlined tabs, and notices as cards".
+- [x] **Step 5: Commit** — "Draw the header white with underlined tabs, and notices as cards".
+
+*Note (2026-11-17):* radii are the user's smaller ones (notices and the Menu 12px, menu items 6px; 21acb86), not 0b.3's
+14px. The header, notices and footer line up with the 1320px column (the page body is content-box). Part of the header
+CSS went out in 21acb86 (a parallel session staged the whole file); this commit holds the rest.
 
 #### Task MD3: A page head instead of the band
 

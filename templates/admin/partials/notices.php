@@ -2,7 +2,8 @@
 /**
  * The notice region under the header of every Affibloom page (F38 D8, Task ON2; Lasso's #lasso_notifications): the
  * providers' notices, newest last, and the template affibloomNotice() (admin.js) fills for a script's notice. Saved
- * and failed messages after an action stay toasts.
+ * and failed messages after an action stay toasts. The region is the top of the page's column, its notices white
+ * cards on the page background (Meadow, MD2; no navy strip).
  *
  * @package Affibloom
  * @var array{notices: list<\Affibloom\Domain\Shell\ShellNotice>} $view
@@ -10,16 +11,14 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div class="affibloom-notices-bar">
-	<div id="affibloom-notices" class="affibloom-notices" aria-live="polite">
-		<?php
-		foreach ( $view['notices'] as $shell_notice ) {
-			// The bulk Amazon sync banner has a button and a summary of its own (C1I); every other notice is words.
-			$shell_partial = \Affibloom\Interface\Admin\AmazonNotices::BULK_SYNC === $shell_notice->key ? 'admin/partials/amazon-bulk-sync' : 'admin/partials/shell-notice';
-			$this->render( $shell_partial, array( 'notice' => $shell_notice ) );
-		}
-		?>
-	</div>
+<div id="affibloom-notices" class="affibloom-notices" aria-live="polite">
+	<?php
+	foreach ( $view['notices'] as $shell_notice ) {
+		// The bulk Amazon sync banner has a button and a summary of its own (C1I); every other notice is words.
+		$shell_partial = \Affibloom\Interface\Admin\AmazonNotices::BULK_SYNC === $shell_notice->key ? 'admin/partials/amazon-bulk-sync' : 'admin/partials/shell-notice';
+		$this->render( $shell_partial, array( 'notice' => $shell_notice ) );
+	}
+	?>
 </div>
 <?php // Lasso's words for a failure that brings none of its own (R20). ?>
 <template id="affibloom-notice-template" data-fallback="<?php esc_attr_e( 'An unexpected error has occurred please try again later.', 'affibloom' ); ?>">

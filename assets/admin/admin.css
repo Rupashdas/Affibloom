@@ -6,10 +6,9 @@
 
 /* 1. Tokens (Meadow, 0b.1; contrast ratios there) */
 .affibloom-admin {
-	/* Aurora's header and band, until MD2 and MD3 replace them. */
+	/* Aurora's band, until MD3 replaces it. */
 	--affibloom-navy-900: #0b2a5b;
 	--affibloom-brand-300: #7fb0f5;
-	--affibloom-on-navy: #c9d8f0;
 	--affibloom-on-band: #d6e2f5;
 	--affibloom-on-navy-active: rgba(255, 255, 255, 0.12);
 
@@ -85,12 +84,11 @@
 /* An element the script or the template hides stays hidden, whatever display its component sets. */
 .affibloom-admin [hidden] { display: none !important; }
 
-/* Focus ring: blue on light surfaces, white on the navy header and the band */
+/* Focus ring: green on light surfaces, white on the band (until MD3) */
 .affibloom-admin :focus-visible {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;
 }
-.affibloom-header :focus-visible,
 .affibloom-band :focus-visible { outline-color: var(--affibloom-white); }
 /*
  * wp-admin's `a:focus` gives every focused link 2px corners and a blue ring, so a link styled as a button lost its
@@ -127,7 +125,7 @@
 	align-items: center;
 	gap: 36px;
 	height: 64px;
-	padding: 0 max(var(--affibloom-space-gutter), calc((100% - var(--affibloom-content-width)) / 2 + var(--affibloom-space-gutter)));
+	padding: 0 max(var(--affibloom-space-gutter), calc((100% - var(--affibloom-content-width)) / 2));
 	box-sizing: border-box;
 	border-bottom: 1px solid var(--affibloom-line);
 	background: var(--affibloom-white);
@@ -203,7 +201,7 @@
    column's content */
 .affibloom-footer {
 	width: calc(100% - 2 * var(--affibloom-space-gutter));
-	max-width: calc(var(--affibloom-content-width) - 2 * var(--affibloom-space-gutter));
+	max-width: var(--affibloom-content-width);
 	margin: 8px auto 0;
 	padding: 16px 0 40px;
 	border-top: 1px solid var(--affibloom-line);
@@ -256,7 +254,7 @@
 	padding: 8px;
 	box-sizing: border-box;
 	border: 1px solid var(--affibloom-line);
-	border-radius: var(--affibloom-radius-panel);
+	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-toast);
 }
@@ -267,7 +265,7 @@
 	width: 100%;
 	padding: 10px 12px;
 	border: 0;
-	border-radius: var(--affibloom-radius-control);
+	border-radius: var(--affibloom-radius-nav);
 	background: none;
 	color: var(--affibloom-ink-900);
 	font: 400 14px/20px var(--affibloom-font);
@@ -1719,40 +1717,38 @@
 }
 .affibloom-link-button--danger { color: var(--affibloom-danger-700); }
 .affibloom-link-button[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
-/* Notice (design system, "Notice"): a white card with a tinted icon chip, above the cards (Lasso's notifications). */
+/* Notice (0b.4, "Notices"): a white card with a hairline border and a 36px icon chip in the tone's tint (Lasso's
+   notifications). The tone shows in the chip's icon and colour, never in colour alone. */
 .affibloom-notice {
 	display: flex;
 	align-items: center;
 	gap: 14px;
 	margin-bottom: 24px;
-	padding: 14px 20px;
-	border-left: 4px solid var(--affibloom-warning-700);
+	padding: 12px 12px 12px 14px;
+	border: 1px solid var(--affibloom-line);
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-card);
 }
 .affibloom-notice__text { margin: 0; color: var(--affibloom-ink-900); font-weight: 600; }
+.affibloom-notice > .affibloom-chip { width: 36px; height: 36px; }
 .affibloom-chip--warning { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
 
-/* The notice region (Task ON2, F38 D8; Lasso's notification bars): a navy strip that continues the header into the
-   band, holding the notices in the page's column, newest last. Empty, it takes no room. */
-.affibloom-notices-bar { background: var(--affibloom-navy-900); }
+/* The notice region (Task ON2, F38 D8; Lasso's notification bars): the top of the page's column, under the header,
+   newest last (MD2: no navy strip). Empty, it takes no room. Content-box, as the page body: the column is 1320px
+   inside the gutters. */
 .affibloom-notices {
 	display: grid;
 	gap: 12px;
 	max-width: var(--affibloom-content-width);
 	margin: 0 auto;
-	padding: 0 32px;
-	box-sizing: border-box;
+	padding: 0 var(--affibloom-space-gutter);
 }
-.affibloom-notices:has(.affibloom-notice) { padding-top: 8px; padding-bottom: 20px; }
+.affibloom-notices:has(.affibloom-notice) { padding-top: 24px; padding-bottom: 8px; }
 .affibloom-notices .affibloom-notice { margin: 0; }
 .affibloom-notice--warning .affibloom-chip { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
-.affibloom-notice--success { border-left-color: var(--affibloom-success-700); }
 .affibloom-notice--success .affibloom-chip { background: var(--affibloom-success-50); color: var(--affibloom-success-700); }
-.affibloom-notice--error { border-left-color: var(--affibloom-danger-700); }
 .affibloom-notice--error .affibloom-chip { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
-.affibloom-notice--update { border-left-color: var(--affibloom-brand-600); }
 .affibloom-notice--update .affibloom-chip { background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
 /* The bulk Amazon sync banner (Task C1I): an update notice with a second line, the summary, and its button before the
    ×; below 600px the button and × go under the words. */
@@ -1769,7 +1765,7 @@
 	.affibloom-bulk-sync__actions { flex-basis: 100%; justify-content: space-between; }
 }
 .affibloom-admin .affibloom-notice__link { color: var(--affibloom-brand-600); font-weight: 700; text-decoration: underline; }
-.affibloom-admin .affibloom-notice__link:hover { color: var(--affibloom-navy-900); }
+.affibloom-admin .affibloom-notice__link:hover { color: var(--affibloom-brand-700); }
 .affibloom-admin .affibloom-notice__close {
 	display: inline-flex;
 	flex: 0 0 auto;
@@ -2525,6 +2521,7 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-band { padding-right: 20px; padding-left: 20px; }
 	.affibloom-page__body,
 	.affibloom-notices { padding-right: 20px; padding-left: 20px; }
+	.affibloom-footer { width: calc(100% - 40px); }
 }
 /* Lasso stacks the rail above the preview below 992px; the same point here. */
 @media (max-width: 991px) {
@@ -2545,11 +2542,20 @@ body.affibloom-has-modal { overflow: hidden; }
 		flex-direction: column;
 		gap: 2px;
 		padding: 8px 20px 14px;
-		background: var(--affibloom-navy-900);
-		box-shadow: var(--affibloom-shadow-card);
+		border-bottom: 1px solid var(--affibloom-line);
+		background: var(--affibloom-white);
+		box-shadow: var(--affibloom-shadow-toast);
 	}
 	.affibloom-header__nav.is-open { display: flex; }
-	.affibloom-header__tab { padding: 10px 12px; }
+	/* In the panel the tabs are rows; the current one is a green-tinted row instead of an underline. */
+	.affibloom-header__tab { padding: 10px 12px; border-radius: var(--affibloom-radius-nav); }
+	.affibloom-header__tab:hover { background: var(--affibloom-brand-25); }
+	.affibloom-header__tab.is-active { background: var(--affibloom-brand-50); }
+	.affibloom-header__tab.is-active::after { display: none; }
+}
+/* Below 600px WordPress's toolbar scrolls away with the page, so the header sticks to the very top. */
+@media (max-width: 600px) {
+	.affibloom-header { top: 0; }
 }
 @media (max-width: 782px) {
 	.affibloom-admin { margin-left: -10px; }
