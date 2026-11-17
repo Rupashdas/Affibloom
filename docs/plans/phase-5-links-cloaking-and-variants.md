@@ -98,7 +98,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL3: Permalink and Link Cloaking on the product page
 - [x] Task CL4: A new product's slug and cloaking
 - [x] Task CL5: The General settings take effect
-- [ ] Task CL6: The public link in front-end output
+- [x] Task CL6: The public link in front-end output
 - [ ] Task CL7: The Dashboard row's link
 - [ ] Task CL8: Products in the block editor's link search
 - [ ] Task CL9: Products in the classic editor's link dialog
@@ -850,10 +850,12 @@ Amazon; the post's stored content is unchanged.
 
 **Files:** F5's view-model builder; tests F24 AC10 (content md5 unchanged), F5 box baselines rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Wire.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Link displays to the product's public link".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Wire.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Link displays to the product's public link".
+
+*Note (2026-11-18):* *Note:* wired in `BoxBuilder` (a `public_link` closure from `PublicLinks::for()`), which every box, button and text link builds through; a box's own `primary_url` is printed as given (Lasso's single.php/button.php). Checked on Local with do_shortcode: box, button and link print `/example-27/`; an Amazon product prints Amazon.
 
 ---
 

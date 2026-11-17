@@ -619,4 +619,25 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=box-20', $tag( array( 'tracking_id_whitelist' => array( 'vbvault-20', 'box-20' ) ) ) );
 		self::assertSame( 'https://www.amazon.com/dp/B0D2JFK15W?tag=vbvault-20', $tag( array( 'tracking_id_whitelist' => array( 'box-20' ), 'multiple_tracking_ids' => false ) ) );
 	}
+
+	/**
+	 * F24 AC10 (Task CL6): a cloaked product's links print its public link; Amazon's and a box's own primary URL do not.
+	 */
+	public function test_the_links_print_the_public_link_unless_the_box_gives_its_own(): void {
+		$public  = static fn( Product $p ): string => $p->cloak && ProductType::Amazon !== $p->type ? 'https://site.test/' . $p->slug . '/' : $p->url->value();
+		$builder = new BoxBuilder( self::THUMBNAIL, null, null, $public );
+		$cloaked = self::product(
+			array(
+				'type'  => ProductType::Other,
+				'url'   => AffiliateUrl::from_string( 'https://www.example.com/shoe' ),
+				'cloak' => true,
+			)
+		);
+		$build = static fn( Product $product, array $attributes = array() ): BoxView => $builder->build( $product, self::display(), self::settings(), BoxOverrides::from_block( array( 'productId' => 14727 ) + $attributes ) );
+
+		self::assertSame( 'https://site.test/adidas-ligra-8-kids/', $build( $cloaked )->link['href'] );
+		self::assertSame( 'https://site.test/adidas-ligra-8-kids/', $build( $cloaked )->buttons[0]->attributes['href'] );
+		self::assertSame( 'https://www.example.com/own', $build( $cloaked, array( 'primaryUrl' => 'https://www.example.com/own' ) )->link['href'] );
+		self::assertStringStartsWith( 'https://www.amazon.com/dp/B0D2JFK15W', $build( self::product( array( 'cloak' => true ) ) )->link['href'] );
+	}
 }

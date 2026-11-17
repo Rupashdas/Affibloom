@@ -128,4 +128,18 @@ test.describe( 'F24 Link cloaking', () => {
 		expect( wp( 'post', 'meta', 'get', String( product ), '_affibloom_cloak' ) ).toBe( '0' );
 		wp( 'eval', "wp_set_current_user( 1 ); $r = new WP_REST_Request( 'POST', '/affibloom/v1/settings/link-defaults/apply' ); $r->set_body_params( array( 'key' => 'link_cloaking', 'value' => true ) ); rest_do_request( $r );" );
 	} );
+
+	test( 'AC10 a post box and text link for a cloaked product link to its slug, and the post content is unchanged', async ( { request } ) => {
+		const product = createProduct( { name: unique( 'F24 box' ), url: 'https://www.example.com/box-product' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_cloak', '1' );
+		const content = `[affibloom id="${ product }"] [affibloom id="${ product }" type="link" label="Shoe"]`;
+		const post = wp( 'post', 'create', '--post_status=publish', '--post_title=F24 AC10', `--post_content=${ content }`, '--porcelain' );
+		const before = wp( 'post', 'get', post, '--field=post_content' );
+
+		const html = await ( await request.get( `/?p=${ post }` ) ).text();
+		expect( html ).toContain( `href="${ new URL( `/${ slug }/`, process.env.WP_BASE_URL ?? 'http://volleyballvault.local' ).href }"` );
+		expect( html ).not.toContain( 'href="https://www.example.com/box-product"' );
+		expect( wp( 'post', 'get', post, '--field=post_content' ) ).toBe( before );
+	} );
 } );

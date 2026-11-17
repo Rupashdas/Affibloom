@@ -63,15 +63,25 @@ final class BoxBuilder {
 	private readonly ?\Closure $clock;
 
 	/**
+	 * The product's public link on this site (F24 R13: its cloaked address when Link Cloaking is on); null is its
+	 * destination.
+	 *
+	 * @var \Closure(Product): string|null
+	 */
+	private readonly ?\Closure $public_link;
+
+	/**
 	 * Builds the engine.
 	 *
 	 * @param string                             $default_thumbnail Affibloom's own picture for a product without one (F5 D14).
 	 * @param \Closure(string): int|null         $post_of_url       Which post a URL points to, for the self-link check (R40).
 	 * @param \Closure(): DateTimeImmutable|null $clock     The current moment (tests); null is now.
+	 * @param \Closure(Product): string|null     $public_link The product's public link (F24 R13; Task CL6); null is its destination.
 	 */
-	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null, ?\Closure $clock = null ) {
+	public function __construct( private readonly string $default_thumbnail, ?\Closure $post_of_url = null, ?\Closure $clock = null, ?\Closure $public_link = null ) {
 		$this->post_of_url = $post_of_url;
 		$this->clock       = $clock;
+		$this->public_link = $public_link;
 	}
 
 	/**
@@ -109,9 +119,10 @@ final class BoxBuilder {
 		$name  = BoxOverrides::hides( $overrides->title ) ? '' : ( '' === $overrides->title ? $product->name : $overrides->title );
 		$name  = html_entity_decode( $name, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$links = new LinkAttributes( $id, $name );
-		// The public link (R40) is the destination: Amazon's already holds its tag, and the cloaked permalink of other
-		// products comes with the links area.
-		$link = $links->primary( $product->url->value(), $product->new_tab, $product->nofollow, $product->sponsored );
+		// The public link (R40; F24 R13, Task CL6): the cloaked address of a cloaked non-Amazon product, else the
+		// destination, Amazon's with its tag. A box's own primary URL is printed as given (Lasso's single.php, button.php).
+		$href = '' === $overrides->primary_url && null !== $this->public_link ? ( $this->public_link )( $product ) : $product->url->value();
+		$link = $links->primary( $href, $product->new_tab, $product->nofollow, $product->sponsored );
 		// R76: the box's title URL takes the title and the image elsewhere, with the product's target and rel (R87).
 		$title_link = '' === $overrides->title_url ? $link : array_merge( $link, array( 'href' => $overrides->title_url ) );
 		// R53, R64: advanced rendering reads the Single element switches; the classic box shows every element by its own

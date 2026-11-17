@@ -408,7 +408,8 @@ final class Plugin {
 		// The display modal's assets: the block editor's, the Classic editor's and Elementor's (ED2) share them.
 		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
 
-		$box_builder = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ) );
+		$public_links = new PublicLinks( $this->settings_repository() );
+		$box_builder  = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ), null, $public_links->for( ... ) );
 		$box_html    = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
 		// The block draws its Button and Image displays through the shortcode (Task 23C).
 		$shortcode = new AffibloomShortcode(
