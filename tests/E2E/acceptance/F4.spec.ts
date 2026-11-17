@@ -311,6 +311,29 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( panel.getByText( 'Another display in this post already uses schema.' ) ).toBeVisible();
 	} );
 
+	test( 'AC13 the shortcode box: typed text changes the display and the sidebar; Update Display redraws', async ( { page } ) => {
+		const name = unique( 'F4 AC13' );
+		const id = createProduct( { name } );
+		await page.goto( newPostWith( boxBlock( id, { type: 'single', overrides: { badge: 'Top' } } ) ).replace( /\?p=(\d+).*$/, 'wp-admin/post.php?post=$1&action=edit' ) );
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const box = canvas.getByRole( 'textbox', { name: 'Shortcode' } );
+		await expect( box ).toHaveValue( `[affibloom id="${ id }" badge="Top"]` );
+
+		await box.fill( `[affibloom id="${ id }" type="button" primary_text="Shop now"]` );
+		await box.press( 'Enter' );
+		await expect( canvas.locator( '.affibloom-block__preview' ) ).toContainText( 'Shop now' );
+		await canvas.locator( '.affibloom-block' ).first().click();
+		await expect( page.locator( '.block-editor-block-inspector' ).getByLabel( 'Button text', { exact: true } ) ).toHaveValue( 'Shop now' );
+
+		// Text that names nothing empties the preview and leaves the sidebar as it was (edge case 2).
+		await box.fill( '[affibloom badge="nothing"]' );
+		await box.press( 'Enter' );
+		await expect( canvas.locator( '.affibloom-block__preview' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.block-editor-block-inspector' ).getByLabel( 'Button text', { exact: true } ) ).toHaveValue( 'Shop now' );
+		await canvas.getByRole( 'button', { name: 'Update Display' } ).click();
+		await expect( canvas.locator( '.affibloom-block__preview' ) ).toContainText( 'Shop now' );
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

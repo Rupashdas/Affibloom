@@ -406,7 +406,7 @@ final class Plugin {
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets ),
-			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields ),
+			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
 			new SettingsRestController( new LinkDefaultsService( new PostTypeProductRepository() ), $settings, $display, $amazon, $genius, $this->template() ),
 			new HelpTips( $settings ),

@@ -46,6 +46,16 @@ final class GroupService {
 	}
 
 	/**
+	 * The ID of the group with this slug, or null: a typed `[affibloom type="grid" group="…"]` in the editor's shortcode
+	 * box (F4 R7, Task 24C), whose block keeps the group's ID.
+	 *
+	 * @param string $slug The group's slug.
+	 */
+	public function id_by_slug( string $slug ): ?int {
+		return '' === trim( $slug ) ? null : $this->groups->find_id_by_slug( trim( $slug ) );
+	}
+
+	/**
 	 * Every group by name, for the picker.
 	 *
 	 * @return list<Group>

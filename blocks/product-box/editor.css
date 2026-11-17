@@ -102,3 +102,32 @@
 	color: var(--affibloom-block-warning);
 	box-shadow: none;
 }
+
+/* The shortcode box (Task 24C), Update Display and Select a New Display in one row under the preview (Lasso's R5, R7). */
+.affibloom-block__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.affibloom-block__panel.has-display .affibloom-block__actions { justify-content: flex-start; }
+.affibloom-block__shortcode { display: flex; flex: 1 1 260px; min-width: 0; }
+.affibloom-block__shortcode input {
+	box-sizing: border-box;
+	width: 100%;
+	height: 38px;
+	padding: 0 12px;
+	border: 1px solid #d3dbd1;
+	border-radius: 8px;
+	background: #fafbf9;
+	color: var(--affibloom-block-ink);
+	font: 400 13px/20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.affibloom-block__shortcode input:focus { border-color: var(--affibloom-block-brand); outline: none; box-shadow: 0 0 0 3px rgba(30, 107, 71, 0.2); }
+.affibloom-block__shortcode input[aria-invalid="true"] { border-color: #b42318; }
+.affibloom-block .components-button.affibloom-block__update {
+	height: 38px;
+	padding: 0 14px;
+	border: 1px solid #d3dbd1;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: none;
+	color: var(--affibloom-block-ink);
+	font: 600 14px/20px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.affibloom-block__panel.has-display .components-button.affibloom-block__add { align-self: auto; }

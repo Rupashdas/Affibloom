@@ -67,7 +67,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 23G: Create a Link and the quick detail
 - [x] Task 24A: Customize Display sidebar
 - [x] Task 24B: Schema & Structured Data panel
-- [ ] Task 24C: Shortcode box and Update Display
+- [x] Task 24C: Shortcode box and Update Display
 - [ ] Task 24D: Edit Display
 - [ ] Task 24E: Preview queue on load
 - [ ] Task ED1: Classic editor button
@@ -844,10 +844,16 @@ attributes → ShortcodeFormat → the box's text
 **Files:** modify `edit.js`, `EditorAssets.php` (localised parser rules, D4); create `tests/Unit/Domain/Display/ShortcodeFormatTest.php`;
 tests `tests/E2E/acceptance/F4.spec.ts` (AC13).
 
-- [ ] **Step 1: Failing test** (AC13; unit: parse and format round trip).
-- [ ] **Step 2: Parse/format.** Rebuild order R41.
-- [ ] **Step 3: Run and look.** Checks; by hand: edit a shortcode, watch the sidebar follow.
-- [ ] **Step 4: Commit** — "Edit a display as its shortcode in the block".
+- [x] **Step 1: Failing test** (AC13; unit: parse and format round trip).
+- [x] **Step 2: Parse/format.** Rebuild order R41.
+- [x] **Step 3: Run and look.** Checks; by hand: edit a shortcode, watch the sidebar follow.
+- [x] **Step 4: Commit** — "Edit a display as its shortcode in the block".
+
+*Note (2026-11-17):* writing and reading the text happen on the server (`Domain\Display\ShortcodeFormat`, unit-tested
+round trip; the preview answer carries `shortcode`, `POST /editor/shortcode` reads typed text with WordPress's
+`shortcode_parse_atts`), so no parser rules are localised; a group is written by slug and read back to its ID
+(`GroupService::id_by_slug`). R41's "the edited attribute first" is not kept: the target, then the catalogue's order.
+Update Display gives the box a fresh copy of the display's text. Seen at 1280 px: a typed change, a refused text, Update.
 
 ---
 

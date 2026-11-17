@@ -10,6 +10,9 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Fields\FieldsService;
+use Affibloom\Application\Groups\GroupService;
+use Affibloom\Domain\Display\ShortcodeFormat;
+use Affibloom\Domain\Shortcode\ShortcodeAttributes;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Amazon\ShownPrice;
 use Affibloom\Domain\Fields\ProductFields;
@@ -44,11 +47,13 @@ final class EditorController implements Module {
 	 * @param ProductRepository       $products The products.
 	 * @param AmazonProductRepository $amazon   The stored Amazon data, for the price and currency.
 	 * @param FieldsService           $fields   The products' fields, for the rating.
+	 * @param GroupService            $groups   The groups, between the block's ID and the shortcode's slug (Task 24C).
 	 */
 	public function __construct(
 		private ProductRepository $products,
 		private AmazonProductRepository $amazon,
 		private FieldsService $fields,
+		private GroupService $groups,
 	) {}
 
 	/**
@@ -99,6 +104,22 @@ final class EditorController implements Module {
 						'type'    => 'integer',
 						'minimum' => 0,
 						'default' => 0,
+					),
+				),
+			)
+		);
+		// The shortcode box (Task 24C; R7, R49): typed `[affibloom …]` text as the block's attributes.
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/editor/shortcode',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'shortcode' ),
+				'permission_callback' => static fn(): bool => current_user_can( Capabilities::INSERT_BOXES ),
+				'args'                => array(
+					'text' => array(
+						'type'     => 'string',
+						'required' => true,
 					),
 				),
 			)
@@ -181,6 +202,62 @@ final class EditorController implements Module {
 			return new WP_Error( 'affibloom_invalid_display', __( 'This display cannot be drawn.', 'affibloom' ), array( 'status' => 400 ) );
 		}
 
-		return new WP_REST_Response( array( 'data' => array( 'html' => $block->render( $block->prepare_attributes_for_render( $attributes ) ) ) ) );
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'html'      => $block->render( $block->prepare_attributes_for_render( $attributes ) ),
+					// The block's shortcode box shows the same display as text (Task 24C, R7).
+					'shortcode' => $this->shortcode_text( $attributes ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * POST /editor/shortcode { text }: a typed `[affibloom …]` as the block's attributes (type, product or group,
+	 * overrides). Text that names no product or group, or a group that does not exist, is 400 (F4 edge case 2: the
+	 * preview empties, the sidebar keeps its values).
+	 *
+	 * @param WP_REST_Request $request Request with "text".
+	 * @phpstan-param WP_REST_Request<array{text: string}> $request
+	 * @return WP_REST_Response|WP_Error 200 { type, productId, groupId, overrides }; 400 affibloom_invalid_display.
+	 */
+	public function shortcode( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$text    = trim( (string) $request['text'] );
+		$display = preg_match( '/^\[affibloom(\s[^\]]*)?\]$/', $text, $inner )
+			? ShortcodeFormat::read( ShortcodeAttributes::repaired( shortcode_parse_atts( $inner[1] ?? '' ) ) )
+			: null;
+		$group   = null === $display || '' === $display['group'] ? null : $this->groups->id_by_slug( $display['group'] );
+		if ( null === $display || ( '' !== $display['group'] && null === $group ) ) {
+			return new WP_Error( 'affibloom_invalid_display', __( 'This display cannot be drawn.', 'affibloom' ), array( 'status' => 400 ) );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'type'      => $display['type'],
+					'productId' => $display['product'],
+					'groupId'   => $group ?? 0,
+					'overrides' => (object) $display['overrides'],
+				),
+			)
+		);
+	}
+
+	/**
+	 * A block's display as shortcode text: its group by slug.
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 */
+	private function shortcode_text( array $attributes ): string {
+		$type  = is_string( $attributes['type'] ?? null ) ? $attributes['type'] : '';
+		$group = is_numeric( $attributes['groupId'] ?? null ) ? $this->groups->get( (int) $attributes['groupId'] ) : null;
+
+		return ShortcodeFormat::format(
+			$type,
+			is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0,
+			null === $group ? '' : $group->slug,
+			is_array( $attributes['overrides'] ?? null ) ? $attributes['overrides'] : array()
+		);
 	}
 }

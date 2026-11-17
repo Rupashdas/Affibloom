@@ -14,6 +14,7 @@ import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import CustomizeDisplay from './customize';
 import SchemaPanel from './schema';
+import ShortcodeBox from './shortcode-box';
 import { FlowerIcon } from './flower';
 import { loadModal, useModalState } from './modal-loader';
 
@@ -35,18 +36,24 @@ const namesDisplay = ( attributes ) =>
 	attributes.productId > 0 || attributes.groupId > 0;
 
 /**
- * The display's preview from the server; the latest answer wins.
+ * The display's preview from the server, with its shortcode text (Task 24C); the latest answer wins. A new token asks
+ * again with the same attributes (Update Display, R7).
  *
  * @param {Object} attributes The block's attributes.
- * @return {{state: string, html: string}} 'idle', 'loading', 'ready' or 'error', and the HTML.
+ * @param {number} token      Bumped to draw again.
+ * @return {{state: string, html: string, shortcode: string}} 'idle', 'loading', 'ready' or 'error', the HTML, the text.
  */
-function usePreview( attributes ) {
-	const [ preview, setPreview ] = useState( { state: 'idle', html: '' } );
+function usePreview( attributes, token ) {
+	const [ preview, setPreview ] = useState( {
+		state: 'idle',
+		html: '',
+		shortcode: '',
+	} );
 	const key = JSON.stringify( attributes );
 	useEffect( () => {
 		const asked = JSON.parse( key );
 		if ( ! namesDisplay( asked ) ) {
-			setPreview( { state: 'idle', html: '' } );
+			setPreview( { state: 'idle', html: '', shortcode: '' } );
 			return undefined;
 		}
 		let current = true;
@@ -58,18 +65,26 @@ function usePreview( attributes ) {
 		} )
 			.then( ( answer ) => {
 				if ( current ) {
-					setPreview( { state: 'ready', html: answer.data.html } );
+					setPreview( {
+						state: 'ready',
+						html: answer.data.html,
+						shortcode: answer.data.shortcode,
+					} );
 				}
 			} )
 			.catch( () => {
 				if ( current ) {
-					setPreview( { state: 'error', html: '' } );
+					setPreview( ( previous ) => ( {
+						...previous,
+						state: 'error',
+						html: '',
+					} ) );
 				}
 			} );
 		return () => {
 			current = false;
 		};
-	}, [ key ] );
+	}, [ key, token ] );
 	return preview;
 }
 
@@ -77,7 +92,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	const state = useModalState();
 	const button = useRef();
 	const blockProps = useBlockProps( { className: 'affibloom-block' } );
-	const preview = usePreview( attributes );
+	const [ token, setToken ] = useState( 0 );
+	const [ broken, setBroken ] = useState( false );
+	const preview = usePreview( attributes, token );
 	const hasDisplay = namesDisplay( attributes );
 
 	const ready = 'ready' === state;
@@ -133,7 +150,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								aria-hidden="true"
 							/>
 						) }
-						{ '' !== preview.html && (
+						{ '' !== preview.html && ! broken && (
 							<RawHTML className="affibloom-block__preview">
 								{ preview.html }
 							</RawHTML>
@@ -166,20 +183,45 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						</p>
 					</>
 				) }
-				<Button
-					ref={ button }
-					variant={ hasDisplay ? 'secondary' : 'primary' }
-					className={
-						failed
-							? 'affibloom-block__add is-retry'
-							: 'affibloom-block__add'
-					}
-					disabled={ ! ready && ! failed }
-					onClick={ onClick }
-				>
-					{ ! ready && ! failed && <Spinner /> }
-					{ label }
-				</Button>
+				<div className="affibloom-block__actions">
+					{ hasDisplay && '' !== preview.shortcode && (
+						<>
+							<ShortcodeBox
+								key={ token }
+								shortcode={ preview.shortcode }
+								onRead={ ( display ) =>
+									setAttributes( { ...DEFAULTS, ...display } )
+								}
+								onBroken={ setBroken }
+							/>
+							{ /* Lasso's Update Display (R7): the preview drawn again. */ }
+							<Button
+								variant="secondary"
+								className="affibloom-block__update"
+								onClick={ () => {
+									setBroken( false );
+									setToken( token + 1 );
+								} }
+							>
+								{ __( 'Update Display', 'affibloom' ) }
+							</Button>
+						</>
+					) }
+					<Button
+						ref={ button }
+						variant={ hasDisplay ? 'secondary' : 'primary' }
+						className={
+							failed
+								? 'affibloom-block__add is-retry'
+								: 'affibloom-block__add'
+						}
+						disabled={ ! ready && ! failed }
+						onClick={ onClick }
+					>
+						{ ! ready && ! failed && <Spinner /> }
+						{ label }
+					</Button>
+				</div>
 			</div>
 		</div>
 	);
