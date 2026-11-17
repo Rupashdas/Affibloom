@@ -37,6 +37,21 @@ final class PublicLinks {
 	}
 
 	/**
+	 * Each product's public link by its ID, for a list (the Dashboard, CL7).
+	 *
+	 * @param list<Product> $products The products.
+	 * @return array<int, string>
+	 */
+	public function of( array $products ): array {
+		$links = array();
+		foreach ( $products as $product ) {
+			$links[ (int) $product->id ] = $this->for( $product );
+		}
+
+		return $links;
+	}
+
+	/**
 	 * What a slug's cloaked address would be ("<home>/<prefix>/" before the slug), for the Permalink field's live line.
 	 */
 	public function base(): string {

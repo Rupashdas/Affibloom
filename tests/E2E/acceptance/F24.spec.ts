@@ -142,4 +142,13 @@ test.describe( 'F24 Link cloaking', () => {
 		expect( html ).not.toContain( 'href="https://www.example.com/box-product"' );
 		expect( wp( 'post', 'get', post, '--field=post_content' ) ).toBe( before );
 	} );
+
+	test( 'AC11 the Dashboard row link opens the public link', async ( { page } ) => {
+		const name = unique( 'F24 row' );
+		const product = createProduct( { name, url: 'https://www.example.com/row-product' } );
+		const slug = wp( 'post', 'get', String( product ), '--field=post_name' );
+		wp( 'post', 'meta', 'update', String( product ), '_affibloom_cloak', '1' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		await expect( page.locator( `tr[data-product-id="${ product }"] .affibloom-row__url` ) ).toHaveAttribute( 'href', new RegExp( `/${ slug }/$` ) );
+	} );
 } );

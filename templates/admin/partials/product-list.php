@@ -4,7 +4,7 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -70,6 +70,7 @@ $columns   = array(
 						array(
 							'product' => $product,
 							'groups'  => $view['groups_of'][ (int) $product->id ] ?? array(),
+							'link'    => $view['links_of'][ (int) $product->id ] ?? $product->url->value(),
 						)
 					);
 					?>

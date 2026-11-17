@@ -7,7 +7,7 @@
  * the entire Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -93,6 +93,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 							'url'       => $view['url'],
 							'args'      => $view['args'],
 							'groups_of' => $view['groups_of'],
+							'links_of'  => $view['links_of'] ?? array(),
 						)
 					);
 					?>

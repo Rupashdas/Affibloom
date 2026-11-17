@@ -410,7 +410,7 @@ final class Plugin {
 
 		$public_links = new PublicLinks( $this->settings_repository() );
 		$box_builder  = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ), null, $public_links->for( ... ) );
-		$box_html    = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
+		$box_html     = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
 		// The block draws its Button and Image displays through the shortcode (Task 23C).
 		$shortcode = new AffibloomShortcode(
 			new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups ),
@@ -445,7 +445,7 @@ final class Plugin {
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ) ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ) ),
 				new SettingsScreen(
 					$this->template(),
@@ -471,7 +471,7 @@ final class Plugin {
 			new HelpTips( $settings ),
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
-			new DashboardController( $products, $per_page, $views, $this->template(), $groups ),
+			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ) ),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),
 			new GeniusCleanupCron( $genius ),

@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\ProductService;
@@ -31,6 +32,7 @@ final class DashboardScreen {
 	 * @param SavedViewService $views    This editor's saved views (Task 13E).
 	 * @param Notice           $notice   The toast after a redirect: "Product deleted." (Task 17A).
 	 * @param GroupService     $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
+	 * @param PublicLinks|null $links    The rows' public links (F24 R14; Task CL7).
 	 */
 	public function __construct(
 		private Template $template,
@@ -39,6 +41,7 @@ final class DashboardScreen {
 		private SavedViewService $views,
 		private Notice $notice,
 		private GroupService $groups,
+		private ?PublicLinks $links = null,
 	) {}
 
 	/**
@@ -71,6 +74,7 @@ final class DashboardScreen {
 				'group'      => $group,
 				'group_list' => $this->groups->all(),
 				'groups_of'  => $this->groups->for_products( $ids ),
+				'links_of'   => null === $this->links ? array() : $this->links->of( $products->items ),
 				'views'      => $this->views->list( get_current_user_id() ),
 				'url'        => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
 				// Every list argument but the page, for the GET forms' hidden inputs (Task 13F).

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Dashboard\ViewNotFound;
 use Affibloom\Application\Groups\GroupService;
@@ -51,6 +52,7 @@ final class DashboardController implements Module {
 	 * @param SavedViewService $views    This editor's saved views (Task 13E).
 	 * @param Template         $template Renders the partials.
 	 * @param GroupService     $groups   The Groups column and the Group filter (Task G5).
+	 * @param PublicLinks|null $links    The rows' public links (F24 R14; Task CL7).
 	 */
 	public function __construct(
 		private ProductService $products,
@@ -58,6 +60,7 @@ final class DashboardController implements Module {
 		private SavedViewService $views,
 		private Template $template,
 		private GroupService $groups,
+		private ?PublicLinks $links = null,
 	) {}
 
 	/**
@@ -188,6 +191,7 @@ final class DashboardController implements Module {
 							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
 							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one ),
 							'groups_of' => $this->groups->for_products( $ids ),
+							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
 						)
 					),
 					'term'      => $term->text(),

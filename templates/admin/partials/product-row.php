@@ -6,7 +6,8 @@
  *
  * Placeholders until their tasks: Groups (the Groups area), Alert (Tasks 30-31), Locations (the content link
  * index and Task 36), Clicks (Tasks 33-34). Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
- * (Task 14A), as Lasso's do; the link under the name opens the destination.
+ * (Task 14A), as Lasso's do; the link under the name opens the public link (F24 R14; Task CL7): the cloaked address
+ * of a cloaked product, else the destination.
  *
  * Edit opens Lasso's quick edit (url-row.php 12-67; F1 requirements 10, Task 16A): the row itself becomes a form with
  * Name, Primary Destination URL, Groups, the link and the Image frame. The form is printed here, in a template after
@@ -14,7 +15,7 @@
  * of this one and back.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,6 +27,7 @@ $select_label = sprintf( __( 'Select %s', 'affibloom' ), $product->name );
 $product_id   = (string) $product->id;
 $quick_id     = 'affibloom-quick-' . $product_id;
 $shortcode    = \Affibloom\Interface\ShortcodeText::product( (int) $product->id );
+$public_link  = $view['link'] ?? $product->url->value();
 ?>
 <tr data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
 	<td class="affibloom-col-select">
@@ -46,8 +48,8 @@ $shortcode    = \Affibloom\Interface\ShortcodeText::product( (int) $product->id 
 	</td>
 	<td class="affibloom-col-name">
 		<a class="affibloom-row__name" href="<?php echo esc_url( $product_page ); ?>" title="<?php echo esc_attr( $product->name ); ?>"><?php echo esc_html( $product->name ); ?></a>
-		<a class="affibloom-row__url" href="<?php echo esc_url( $product->url->value() ); ?>" target="_blank"
-			rel="noopener noreferrer" title="<?php echo esc_attr( $product->url->value() ); ?>"><?php echo esc_html( $product->url->value() ); ?></a>
+		<a class="affibloom-row__url" href="<?php echo esc_url( $public_link ); ?>" target="_blank"
+			rel="noopener noreferrer" title="<?php echo esc_attr( $public_link ); ?>"><?php echo esc_html( $public_link ); ?></a>
 	</td>
 	<?php // The product's group names, comma-separated, the whole list as the cell's title (Lasso's view-js.php 365-366; F23 R16). ?>
 	<?php $group_names = implode( ', ', array_map( static fn( $group ): string => wp_specialchars_decode( $group->name, ENT_QUOTES ), $view['groups'] ) ); ?>
@@ -123,10 +125,10 @@ $quick_label = sprintf( __( 'Quick Edit: %s', 'affibloom' ), $product->name );
 							);
 							?>
 						</div>
-						<?php // The public link is the destination until link cloaking exists (D25). ?>
+						<?php // The public link (F24 R14; Task CL7), as the row's. ?>
 						<p class="affibloom-quick__meta">
 							<?php $this->render( 'admin/partials/icon', array( 'name' => 'link' ) ); ?>
-							<a class="affibloom-quick__link" href="<?php echo esc_url( $product->url->value() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $product->url->value() ); ?></a>
+							<a class="affibloom-quick__link" href="<?php echo esc_url( $public_link ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $public_link ); ?></a>
 						</p>
 					</div>
 

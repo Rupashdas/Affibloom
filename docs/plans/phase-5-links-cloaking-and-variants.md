@@ -99,7 +99,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL4: A new product's slug and cloaking
 - [x] Task CL5: The General settings take effect
 - [x] Task CL6: The public link in front-end output
-- [ ] Task CL7: The Dashboard row's link
+- [x] Task CL7: The Dashboard row's link
 - [ ] Task CL8: Products in the block editor's link search
 - [ ] Task CL9: Products in the classic editor's link dialog
 - [ ] Task CL10: Old addresses (Lasso's hand-over moved to Phase M, 26G)
@@ -877,10 +877,12 @@ Amazon; the post's stored content is unchanged.
 
 **Files:** `templates/admin/partials/product-row.php`, `src/Interface/Admin/DashboardScreen.php`, the list route; tests F24 **AC11**, F19's list specs rerun.
 
-- [ ] **Step 1: Failing test** (AC11).
-- [ ] **Step 2: Row.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Show the public link on the Dashboard".
+- [x] **Step 1: Failing test** (AC11).
+- [x] **Step 2: Row.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Show the public link on the Dashboard".
+
+*Note (2026-11-18):* *Note:* `PublicLinks::of()` gives the list's links by ID (`links_of`), passed by `DashboardScreen` and the list route; the quick edit's link line shows it too (D25's placeholder). Seen at 1280 px: a cloaked product's row reads `…/example-27/`.
 
 ---
 
