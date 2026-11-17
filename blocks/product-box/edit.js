@@ -5,7 +5,6 @@
  * (R6). With a display, the block shows its preview, drawn by the server as the published page will draw it
  * (POST /editor/preview, R32-R33), and the button becomes "Select a New Display" (R4).
  */
-import apiFetch from '@wordpress/api-fetch';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Button, Spinner } from '@wordpress/components';
 import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
@@ -17,6 +16,7 @@ import SchemaPanel from './schema';
 import ShortcodeBox from './shortcode-box';
 import { FlowerIcon } from './flower';
 import { loadModal, useModalState } from './modal-loader';
+import { queuePreview } from './preview-queue';
 
 /** Every attribute at its default: a new display replaces the old one and its overrides, as Lasso's insert does. */
 const DEFAULTS = Object.fromEntries(
@@ -61,30 +61,29 @@ const namesDisplay = ( attributes ) =>
  * The display's preview from the server, with its shortcode text (Task 24C); the latest answer wins. A new token asks
  * again with the same attributes (Update Display, R7).
  *
+ * The request waits its turn in the queue (Task 24E, R52).
+ *
+ * @param {string} key        The block's client ID.
  * @param {Object} attributes The block's attributes.
  * @param {number} token      Bumped to draw again.
  * @return {{state: string, html: string, shortcode: string}} 'idle', 'loading', 'ready' or 'error', the HTML, the text.
  */
-function usePreview( attributes, token ) {
+function usePreview( key, attributes, token ) {
 	const [ preview, setPreview ] = useState( {
 		state: 'idle',
 		html: '',
 		shortcode: '',
 	} );
-	const key = JSON.stringify( attributes );
+	const asking = JSON.stringify( attributes );
 	useEffect( () => {
-		const asked = JSON.parse( key );
+		const asked = JSON.parse( asking );
 		if ( ! namesDisplay( asked ) ) {
 			setPreview( { state: 'idle', html: '', shortcode: '' } );
 			return undefined;
 		}
 		let current = true;
 		setPreview( ( previous ) => ( { ...previous, state: 'loading' } ) );
-		apiFetch( {
-			path: '/affibloom/v1/editor/preview',
-			method: 'POST',
-			data: { attributes: asked },
-		} )
+		queuePreview( key, asked )
 			.then( ( answer ) => {
 				if ( current ) {
 					setPreview( {
@@ -95,8 +94,8 @@ function usePreview( attributes, token ) {
 					} );
 				}
 			} )
-			.catch( () => {
-				if ( current ) {
+			.catch( ( failure ) => {
+				if ( current && ! ( failure && failure.superseded ) ) {
 					setPreview( ( previous ) => ( {
 						...previous,
 						state: 'error',
@@ -107,7 +106,7 @@ function usePreview( attributes, token ) {
 		return () => {
 			current = false;
 		};
-	}, [ key, token ] );
+	}, [ key, asking, token ] );
 	return preview;
 }
 
@@ -117,7 +116,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	const blockProps = useBlockProps( { className: 'affibloom-block' } );
 	const [ token, setToken ] = useState( 0 );
 	const [ broken, setBroken ] = useState( false );
-	const preview = usePreview( attributes, token );
+	const preview = usePreview( clientId, attributes, token );
 	useEffect( () => {
 		const redraw = () => setToken( ( current ) => current + 1 );
 		window.addEventListener( REDRAW, redraw );

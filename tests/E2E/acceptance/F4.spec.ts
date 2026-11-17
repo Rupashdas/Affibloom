@@ -352,6 +352,25 @@ test.describe( 'F4 Displays in the editor', () => {
 		await expect( canvas.locator( '.affibloom-block__preview' ) ).toContainText( `${ name } renamed` );
 	} );
 
+	test( 'AC15 a post with twelve displays loads every preview, never more than three at once', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F4 AC15' ) } );
+		const content = Array.from( { length: 12 }, () => boxBlock( id, { type: 'single' } ) ).join( '' );
+		let open = 0;
+		let most = 0;
+		await page.route( /affibloom\/v1\/editor\/preview/, async ( route ) => {
+			open++;
+			most = Math.max( most, open );
+			const response = await route.fetch();
+			await new Promise( ( done ) => setTimeout( done, 150 ) );
+			open--;
+			await route.fulfill( { response } );
+		} );
+		await page.goto( newPostWith( content ).replace( /\?p=(\d+).*$/, 'wp-admin/post.php?post=$1&action=edit' ) );
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		await expect( canvas.locator( '.affibloom-block__preview' ) ).toHaveCount( 12, { timeout: 60000 } );
+		expect( most ).toBeLessThanOrEqual( 3 );
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

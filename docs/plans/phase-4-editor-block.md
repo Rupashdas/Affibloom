@@ -69,7 +69,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24B: Schema & Structured Data panel
 - [x] Task 24C: Shortcode box and Update Display
 - [x] Task 24D: Edit Display
-- [ ] Task 24E: Preview queue on load
+- [x] Task 24E: Preview queue on load
 - [ ] Task ED1: Classic editor button
 - [ ] Task ED2: Elementor widget
 - [ ] Task ED3: Rank Math content analysis
@@ -919,11 +919,16 @@ edit.js → previewQueue (3 at once, per-block token) → POST /editor/preview �
 **Files:** create `blocks/product-box/preview-queue.js`, `preview-queue.test.js`; modify `edit.js`; tests
 `tests/E2E/acceptance/F4.spec.ts` (AC15).
 
-- [ ] **Step 1: Failing test** (AC15: a post with 12 blocks; never more than 3 requests in flight; fast typing, the
+- [x] **Step 1: Failing test** (AC15: a post with 12 blocks; never more than 3 requests in flight; fast typing, the
   latest wins).
-- [ ] **Step 2: Queue (3 at once, latest wins).**
-- [ ] **Step 3: Run and look.** By hand: open a 12-block post, watch the network list.
-- [ ] **Step 4: Commit** — "Load many display previews without flooding the server".
+- [x] **Step 2: Queue (3 at once, latest wins).**
+- [x] **Step 3: Run and look.** By hand: open a 12-block post, watch the network list.
+- [x] **Step 4: Commit** — "Load many display previews without flooding the server".
+
+*Note (2026-11-17):* `preview-queue.js` keeps three requests in flight, starts them 40 ms apart, and a block's waiting
+request is replaced by its newer one (its own `current` flag already drops a late answer). R53's polling for the title
+is not needed: a block asks once it is drawn. No `preview-queue.test.js` (Jest is not installed, as in 24A). Seen:
+twelve displays in a new post, twelve requests, three at most in flight.
 
 ---
 
