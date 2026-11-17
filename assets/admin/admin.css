@@ -52,11 +52,11 @@
 	--affibloom-font: "Inter", var(--affibloom-font-system);
 	--affibloom-font-display: "Plus Jakarta Sans", "Inter", var(--affibloom-font-system);
 
-	--affibloom-radius-card: 16px;
-	--affibloom-radius-chip: 12px;
-	--affibloom-radius-control: 10px;
-	--affibloom-radius-segment: 7px;
-	--affibloom-radius-nav: 8px;
+	--affibloom-radius-card: 12px;
+	--affibloom-radius-chip: 8px;
+	--affibloom-radius-control: 8px;
+	--affibloom-radius-segment: 5px;
+	--affibloom-radius-nav: 6px;
 	--affibloom-radius-full: 999px;
 
 	/* Meadow's depth (0b.3): cards pair this soft shadow with a 1px line border. */
@@ -92,6 +92,16 @@
 }
 .affibloom-header :focus-visible,
 .affibloom-band :focus-visible { outline-color: var(--affibloom-white); }
+/*
+ * wp-admin's `a:focus` gives every focused link 2px corners and a blue ring, so a link styled as a button lost its
+ * corners while pressed (the user, 2026-11-17: "Add New Field"). Here links keep their own shape and show only the
+ * keyboard ring above. `:where()` keeps this rule weak, so a button's own focus shadow still wins.
+ */
+.affibloom-admin :where(a):focus { box-shadow: none; }
+.affibloom-admin a.affibloom-button:focus,
+.affibloom-admin a.affibloom-button:active { border-radius: var(--affibloom-radius-control); }
+.affibloom-admin a.affibloom-button--small:focus,
+.affibloom-admin a.affibloom-button--small:active { border-radius: var(--affibloom-radius-nav); }
 
 /* Icons: 20 x 20 outline set, drawn at 18px */
 .affibloom-icon {
@@ -106,17 +116,22 @@
 	stroke-linejoin: round;
 }
 
-/* 2. Header: navy bar, logo, icon-plus-label navigation */
+/* 2. Header (Meadow, 0b.4): a white 64px bar under a hairline, sticky under the WordPress toolbar; the flower and the
+   wordmark, the tabs as words with a green underline on the current one, and Add New Link as a green split button.
+   Its content lines up with the page's column (the padding grows with the window past the column's width). */
 .affibloom-header {
-	position: relative;
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 32px);
+	z-index: 900;
 	display: flex;
 	align-items: center;
-	gap: 28px;
-	height: 60px;
-	padding: 0 32px;
+	gap: 36px;
+	height: 64px;
+	padding: 0 max(var(--affibloom-space-gutter), calc((100% - var(--affibloom-content-width)) / 2 + var(--affibloom-space-gutter)));
 	box-sizing: border-box;
-	background: var(--affibloom-navy-900);
-	color: var(--affibloom-white);
+	border-bottom: 1px solid var(--affibloom-line);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-900);
 }
 /* The logo opens the Dashboard, as Lasso's (F38 R1). */
 .affibloom-header__brand {
@@ -125,68 +140,78 @@
 	align-items: center;
 	gap: 10px;
 	border-radius: var(--affibloom-radius-nav);
-	color: var(--affibloom-white);
-	font: 700 17px/24px var(--affibloom-font);
+	color: var(--affibloom-ink-900);
+	font: 800 19px/24px var(--affibloom-font-display);
+	letter-spacing: -0.015em;
 	text-decoration: none;
 }
 .affibloom-header__brand:hover,
-.affibloom-header__brand:focus { color: var(--affibloom-white); }
-/* Menu button (Task ON1, Lasso's R6): only below 992px, where it folds the tabs into a navy panel under the bar. */
+.affibloom-header__brand:focus { color: var(--affibloom-ink-900); }
+.affibloom-header__logo { display: block; width: 30px; height: 30px; }
+.affibloom-header__logo-petals { fill: var(--affibloom-brand-600); fill-opacity: 0.86; }
+.affibloom-header__logo-ring { fill: var(--affibloom-white); }
+.affibloom-header__logo-dot { fill: var(--affibloom-brand-600); }
+/* Menu button (Task ON1, Lasso's R6): only below 992px, where it folds the tabs into a white panel under the bar. */
 .affibloom-admin .affibloom-header__menu-button {
 	display: none;
 	align-items: center;
 	gap: 8px;
 	height: 38px;
 	padding: 0 12px;
-	border: 0;
-	border-radius: var(--affibloom-radius-nav);
-	background: transparent;
-	color: var(--affibloom-on-navy);
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-control);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-900);
 	font: 500 14px/20px var(--affibloom-font);
 	cursor: pointer;
-	transition: background-color var(--affibloom-ease), color var(--affibloom-ease);
+	transition: background-color var(--affibloom-ease), border-color var(--affibloom-ease);
 }
-.affibloom-admin .affibloom-header__menu-button:hover,
-.affibloom-admin .affibloom-header__menu-button[aria-expanded="true"] {
-	background: var(--affibloom-on-navy-active);
-	color: var(--affibloom-white);
-}
-.affibloom-header__logo { display: block; width: 28px; height: 28px; }
-.affibloom-header__logo-petals { fill: var(--affibloom-brand-300); }
-.affibloom-header__logo-ring { fill: var(--affibloom-navy-900); }
-.affibloom-header__logo-dot { fill: var(--affibloom-white); }
-.affibloom-header__nav { display: flex; gap: 6px; }
+.affibloom-admin .affibloom-header__menu-button:hover { border-color: var(--affibloom-line-strong); background: var(--affibloom-brand-25); }
+.affibloom-admin .affibloom-header__menu-button[aria-expanded="true"] { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-25); }
+/* The tabs fill the bar's height, so the current one's underline sits on the bar's hairline. */
+.affibloom-header__nav { display: flex; align-self: stretch; gap: 4px; }
 .affibloom-header__tab {
+	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 7px 12px;
-	border-radius: var(--affibloom-radius-nav);
-	color: var(--affibloom-on-navy);
+	padding: 0 14px;
+	border-radius: var(--affibloom-radius-nav) var(--affibloom-radius-nav) 0 0;
+	color: var(--affibloom-ink-600);
 	font-weight: 500;
 	text-decoration: none;
 	white-space: nowrap;
-	transition: background-color var(--affibloom-ease), color var(--affibloom-ease);
+	transition: color var(--affibloom-ease);
 }
 .affibloom-header__tab:hover,
-.affibloom-header__tab:focus { color: var(--affibloom-white); }
-.affibloom-header__tab.is-active {
-	background: var(--affibloom-on-navy-active);
-	color: var(--affibloom-white);
+.affibloom-header__tab:focus { color: var(--affibloom-ink-900); }
+.affibloom-header__tab.is-active,
+.affibloom-header__tab.is-active:hover,
+.affibloom-header__tab.is-active:focus { color: var(--affibloom-brand-600); }
+.affibloom-header__tab.is-active::after {
+	position: absolute;
+	right: 14px;
+	bottom: -1px;
+	left: 14px;
+	height: 3px;
+	border-radius: 3px 3px 0 0;
+	background: var(--affibloom-brand-600);
+	content: "";
 }
+.affibloom-admin .affibloom-header__tab:focus-visible { outline-offset: -4px; }
 
-/* Footer (Task ON1, Lasso's version badge, F38 R16): the version, small and quiet, centred under the column */
+/* Footer (Task ON1, Lasso's version badge, F38 R16): the version, small and quiet, under a hairline as wide as the
+   column's content */
 .affibloom-footer {
-	max-width: var(--affibloom-content-width);
-	margin: 40px auto 0;
-	padding: 0 32px 28px;
-	box-sizing: border-box;
+	width: calc(100% - 2 * var(--affibloom-space-gutter));
+	max-width: calc(var(--affibloom-content-width) - 2 * var(--affibloom-space-gutter));
+	margin: 8px auto 0;
+	padding: 16px 0 40px;
+	border-top: 1px solid var(--affibloom-line);
 	color: var(--affibloom-ink-600);
-	font: 500 12px/16px var(--affibloom-font);
-	text-align: center;
+	font: 400 12px/16px var(--affibloom-font);
 }
-/* The screen's main action, right of the navigation: a white split button with navy text (design system, "Layout"):
-   the main part and a caret that opens the menu of other ways to add */
+/* The screen's main action, right of the navigation: a green split button (0b.4): the main part and a caret that opens
+   the menu of other ways to add */
 .affibloom-header__add {
 	position: relative;
 	display: flex;
@@ -197,27 +222,30 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	height: 38px;
-	padding: 0 16px;
+	height: 40px;
+	padding: 0 14px 0 16px;
 	border: 0;
 	border-radius: var(--affibloom-radius-control) 0 0 var(--affibloom-radius-control);
-	background: var(--affibloom-white);
-	color: var(--affibloom-navy-900);
+	background: var(--affibloom-brand-600);
+	color: var(--affibloom-white);
 	font: 600 14px/20px var(--affibloom-font);
 	white-space: nowrap;
 	cursor: pointer;
 	transition: background-color var(--affibloom-ease);
 }
 .affibloom-admin .affibloom-header__caret {
-	padding: 0 9px;
-	border-left: 1px solid var(--affibloom-control-line);
+	padding: 0 10px;
+	border-left: 1px solid rgba(255, 255, 255, 0.28);
 	border-radius: 0 var(--affibloom-radius-control) var(--affibloom-radius-control) 0;
 }
 .affibloom-admin .affibloom-header__action:hover,
 .affibloom-admin .affibloom-header__caret:hover,
-.affibloom-admin .affibloom-header__caret[aria-expanded="true"] { background: var(--affibloom-brand-50); }
+.affibloom-admin .affibloom-header__caret[aria-expanded="true"] { background: var(--affibloom-brand-700); }
+.affibloom-admin .affibloom-header__action:active,
+.affibloom-admin .affibloom-header__caret:active { background: var(--affibloom-brand-800); }
 
-/* Menu (design system, "Menu"): a white card under its button, items with an icon chip, a title and a description */
+/* Menu (0b.3, 0b.4): a white card under its button with a hairline and the menus' shadow; items with an icon chip, a
+   title and a description, a green wash on hover */
 .affibloom-menu {
 	position: absolute;
 	top: calc(100% + 8px);
@@ -227,25 +255,27 @@
 	max-width: calc(100vw - 32px);
 	padding: 8px;
 	box-sizing: border-box;
-	border-radius: var(--affibloom-radius-chip);
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-panel);
 	background: var(--affibloom-white);
-	box-shadow: var(--affibloom-shadow-card);
+	box-shadow: var(--affibloom-shadow-toast);
 }
 .affibloom-menu__item {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 	width: 100%;
-	padding: 8px;
+	padding: 10px 12px;
 	border: 0;
-	border-radius: var(--affibloom-radius-nav);
+	border-radius: var(--affibloom-radius-control);
 	background: none;
 	color: var(--affibloom-ink-900);
 	font: 400 14px/20px var(--affibloom-font);
 	text-align: left;
 	cursor: pointer;
 }
-.affibloom-menu__item:hover { background: var(--affibloom-subtle); }
+.affibloom-menu__item:hover { background: var(--affibloom-brand-25); }
+.affibloom-admin .affibloom-menu__item:focus-visible { outline-offset: -2px; }
 .affibloom-menu__text { display: flex; flex-direction: column; }
 .affibloom-menu__title { font-weight: 600; }
 .affibloom-menu__desc { color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
@@ -293,8 +323,8 @@
 .affibloom-skeleton--line { width: 70%; height: 12px; }
 .affibloom-skeleton--short { width: 42%; }
 .affibloom-skeleton--title { width: 80%; height: 18px; }
-.affibloom-skeleton--thumb { flex: none; width: 48px; height: 48px; border-radius: 10px; }
-.affibloom-skeleton--button { flex: none; width: 64px; height: 32px; border-radius: 9px; }
+.affibloom-skeleton--thumb { flex: none; width: 48px; height: 48px; border-radius: var(--affibloom-radius-control); }
+.affibloom-skeleton--button { flex: none; width: 64px; height: 32px; border-radius: var(--affibloom-radius-nav); }
 /* A list row's shape (admin.js affibloomSkeleton): a picture when results have one, two lines, the row's button. */
 .affibloom-skeleton-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; list-style: none; }
 .affibloom-skeleton-row + .affibloom-skeleton-row { border-top: 1px solid var(--affibloom-line); }
@@ -334,7 +364,7 @@
 }
 /* The cells keep their own shapes: a box for the tick, the picture's tile, the name over its link. */
 .affibloom-list.is-loading tbody .affibloom-col-select::after { width: 18px; height: 18px; margin-top: -9px; border-radius: 5px; }
-.affibloom-list.is-loading tbody .affibloom-col-image::after { width: 48px; height: 48px; margin-top: -24px; border-radius: 10px; }
+.affibloom-list.is-loading tbody .affibloom-col-image::after { width: 48px; height: 48px; margin-top: -24px; border-radius: var(--affibloom-radius-control); }
 .affibloom-list.is-loading tbody .affibloom-col-name::after { width: min(60%, 260px); height: 14px; margin-top: -14px; }
 .affibloom-list.is-loading tbody .affibloom-col-name::before {
 	content: "";
@@ -376,15 +406,22 @@
 .affibloom-list .affibloom-card:focus { outline: none; }
 
 /* A band with something on its right, as the Dashboard's search beside its title (Lasso's title row). */
+/*
+ * One head on every screen (the user, 2026-11-17: "inconsistency"): the title and what sits under it (subtitle, tabs)
+ * on the left; the screen's search and buttons on the right, in one row level with the title. The text takes the room
+ * left over, so the row only wraps when the window is too narrow for both.
+ */
 .affibloom-band__inner--split {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 16px 32px;
 }
-.affibloom-band__text { min-width: 0; }
-.affibloom-band__search { position: relative; flex: 0 1 380px; min-width: 240px; }
+.affibloom-band__text { flex: 1 1 320px; min-width: 0; }
+.affibloom-band__search { position: relative; flex: 0 1 340px; min-width: 220px; }
+.affibloom-band__inner--split > .affibloom-band__search,
+.affibloom-band__inner--split > .affibloom-band__actions { margin-top: -2px; }
 /* Lasso's shortcut hint, inside the search box on its right. */
 .affibloom-search-kbd {
 	position: absolute;
@@ -1037,7 +1074,7 @@
 	width: max-content;
 	max-width: 280px;
 	padding: 8px 10px;
-	border-radius: 8px;
+	border-radius: var(--affibloom-radius-nav);
 	background: var(--affibloom-ink-900);
 	box-shadow: var(--affibloom-shadow-segment);
 	color: var(--affibloom-white);
@@ -1212,7 +1249,7 @@
 	width: 48px;
 	height: 48px;
 	border: 1px solid var(--affibloom-line);
-	border-radius: 10px;
+	border-radius: var(--affibloom-radius-control);
 	background: var(--affibloom-white);
 	object-fit: contain;
 	vertical-align: middle;
@@ -1770,10 +1807,10 @@
 	margin: 0;
 	padding: 16px 12px 12px;
 	border: 1px solid var(--affibloom-line);
-	border-radius: 12px;
+	border-radius: var(--affibloom-radius-card);
 	text-align: center;
 }
-.affibloom-icon-set__item .affibloom-icon-set__tile { width: 48px; height: 48px; border-radius: 12px; }
+.affibloom-icon-set__item .affibloom-icon-set__tile { width: 48px; height: 48px; border-radius: var(--affibloom-radius-control); }
 .affibloom-icon-set__item .affibloom-icon-set__image { width: 26px; height: 26px; }
 /* The site's icons are white glyphs made for coloured buttons, so each sits on a dark tile like a button. */
 .affibloom-icon-set__tile {
@@ -2305,7 +2342,8 @@ body.affibloom-has-modal { overflow: hidden; }
  * group through the name's link stretched over it. The band's right side holds the search and Add New Group, a white
  * button on the gradient as the header's is.
  */
-.affibloom-band__actions { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; }
+.affibloom-band__actions { display: flex; flex: 0 0 auto; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 12px; }
+.affibloom-band__actions .affibloom-band__search { flex: 0 0 300px; min-width: 0; }
 .affibloom-admin .affibloom-button--on-band,
 .affibloom-admin .affibloom-button--on-band:focus {
 	height: 42px;
@@ -2327,13 +2365,14 @@ body.affibloom-has-modal { overflow: hidden; }
 .affibloom-admin .affibloom-row__link:hover { text-decoration: underline; }
 .affibloom-row__link::after { content: ""; position: absolute; inset: 0; }
 .affibloom-row__link:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
-/* A group's form: the card itself keeps a readable measure (760px of fields plus the card's padding), so the fields
- * fill it with no empty white space beside them. It sits in the middle of the page, and Delete This Group below it
- * lines up with its left edge, as does "Add a New Group" in the band above (band and body share the gutters). */
-#affibloom-group-form,
-#affibloom-group-form + .affibloom-group__footer,
-.affibloom-band__inner--group-form { max-width: calc(760px + 2 * var(--affibloom-space-card)); margin-right: auto; margin-left: auto; }
-.affibloom-group__fields { display: grid; gap: 20px; padding-top: 28px; padding-bottom: 28px; }
+/* A group's form fills the column like every other card (the user, 2026-11-17: the narrow, centred card did not line
+ * up with the title): Name and Slug side by side, Description under both; a new group's Name takes the whole row. */
+.affibloom-group__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; padding-top: 28px; padding-bottom: 28px; }
+.affibloom-group__fields > .affibloom-field:last-child,
+.affibloom-group__fields:not(:has(#affibloom-group-slug)) > .affibloom-field { grid-column: 1 / -1; }
+@media (max-width: 782px) {
+	.affibloom-group__fields { grid-template-columns: minmax(0, 1fr); }
+}
 .affibloom-group .affibloom-card__foot { justify-content: flex-end; align-items: center; }
 .affibloom-group__footer { display: flex; align-items: center; justify-content: flex-start; padding: 20px 4px 0; }
 
@@ -2524,6 +2563,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-grid { grid-template-columns: 1fr; }
 	.affibloom-modal__foot .affibloom-button { width: 100%; }
 	.affibloom-pager { flex-direction: column; align-items: flex-start; }
+	/* The page links wrap inside the card instead of running past its edge (seen at 375px, 2026-11-17). */
+	.affibloom-pagination { flex-wrap: wrap; }
 	/* The selection bar wraps to two lines on a phone: a card's corners, not a stretched pill. */
 	.affibloom-selection { padding: 8px 10px; border-radius: var(--affibloom-radius-card); }
 	.affibloom-search-kbd { display: none; }
@@ -2542,7 +2583,8 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-product__switches { grid-template-columns: 1fr; }
 	.affibloom-product__card { padding: 20px; }
 	/* Groups: three columns fit a phone, the description wraps and the Links count keeps a narrow column. */
-	.affibloom-band__actions { justify-content: flex-start; }
+	.affibloom-band__actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; }
+	.affibloom-band__actions .affibloom-band__search { flex: 1 1 220px; }
 	.affibloom-table--groups .affibloom-col-name { width: 34%; }
 	.affibloom-table--groups .affibloom-col-links { width: 64px; }
 	.affibloom-table--groups .affibloom-row__name { white-space: normal; overflow-wrap: anywhere; }

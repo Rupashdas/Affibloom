@@ -103,8 +103,13 @@ Both are bundled in the plugin (0b.5); the system stack of section 3 is the fall
 - **Spacing:** 4px base. Side gutters 40px (20px from 960px down); 32px between sections; card padding 28px (24px
   above the card title); 22px between fields; settings rows 16px top and bottom.
 - **Rows and images:** Dashboard rows 80px with 52px image tiles (14px radius), as Aurora and Lasso.
-- **Radius:** cards 16px; stat buttons, notices, the search field and dialogs 14px; buttons and fields 10px; small
-  buttons 9px; group chips 7px; pills, view chips and switches fully round.
+- **Radius (smaller, the user 2026-11-17):** cards, tiles, notices, dialogs and icon cells 12px (`--affibloom-radius-card`);
+  buttons, fields, thumbnails and icon chips 8px (`-control`, `-chip`); small buttons, menu items and tooltips 6px
+  (`-nav`); segments 5px (`-segment`); pills, view chips, search fields and switches fully round. A link styled as a
+  button keeps its corners when focused or pressed (wp-admin's `a:focus` would square them).
+- **Heads and forms (the user, 2026-11-17):** every screen's head puts the title and what is under it on the left and
+  its search and buttons in one row on the right, level with the title; form cards (a field, a group) fill the column
+  like every other card, short fields two to a row, the description across both.
 - **Depth:** cards have a 1px `line` border and the shadow `0 1px 2px rgba(22,32,26,.04), 0 6px 16px -10px
   rgba(22,32,26,.10)`; menus and dialogs `0 18px 40px -12px rgba(22,32,26,.24), 0 2px 6px rgba(22,32,26,.06)`.
 - **Focus:** a 2px brand-600 outline with a 2px offset; fields take a brand-600 border and a 3px

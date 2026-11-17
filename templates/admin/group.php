@@ -25,7 +25,7 @@ $gid         = $is_new ? 0 : $group->id;
 
 	<div class="affibloom-page">
 		<div class="affibloom-band">
-			<div class="affibloom-band__inner<?php echo $is_new ? ' affibloom-band__inner--group-form' : ' affibloom-band__inner--split'; ?>">
+			<div class="affibloom-band__inner<?php echo $is_new ? '' : ' affibloom-band__inner--split'; ?>">
 				<div class="affibloom-band__text">
 					<h1 class="affibloom-page__title" id="affibloom-group-title"><?php echo esc_html( $heading ); ?></h1>
 					<?php if ( ! $is_new ) : ?>
