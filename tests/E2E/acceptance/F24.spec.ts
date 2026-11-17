@@ -61,4 +61,16 @@ test.describe( 'F24 Link cloaking', () => {
 		}
 		expect( ( await hit( request, '/category/uncategorized/' ) ).status() ).not.toBe( 302 );
 	} );
+
+	test( 'AC4 the request's query passes through: utm replaces, others fill, sid becomes the network's sub-ID', async ( { request } ) => {
+		const slug = unique( 'f24-q' );
+		cloaked( slug, 'https://www.example.com/p?a=1&utm_source=site' );
+		const answer = await request.get( `/${ slug }/?utm_source=ig&a=2&foo=bar&doing_wp_cron=1&lcid=x`, { maxRedirects: 0, failOnStatusCode: false } );
+		expect( answer.headers().location ).toBe( 'https://www.example.com/p?a=1&utm_source=ig&foo=bar' );
+
+		const impact = unique( 'f24-impact' );
+		cloaked( impact, 'https://shop.sjv.io/c/1/2/3' );
+		const sid = await request.get( `/${ impact }/?sid=youtube`, { maxRedirects: 0, failOnStatusCode: false, headers: { referer: 'https://www.youtube.com/' } } );
+		expect( sid.headers().location ).toBe( 'https://shop.sjv.io/c/1/2/3?subId1=youtube' );
+	} );
 } );

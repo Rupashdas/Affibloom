@@ -11,7 +11,9 @@ namespace Affibloom\Interface\Front;
 
 use Affibloom\Application\Cloak\CloakResolver;
 use Affibloom\Domain\Cloak\CloakPath;
+use Affibloom\Domain\Cloak\NetworkSubIds;
 use Affibloom\Domain\Cloak\PublicLink;
+use Affibloom\Domain\Cloak\RedirectQuery;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Module;
@@ -23,7 +25,8 @@ use Affibloom\Module;
  * empty destination goes to the home page. Like Lasso's, it does not look at the cloaking flag (an Amazon product's
  * slug answers too). A post or page with the slug wins; requests in the admin are never redirected. WordPress's
  * canonical guess for a product's path is cancelled, and Rank Math's redirections step aside for it.
- * `affibloom_before_link_redirect( product ID, referrer )` runs first.
+ * `affibloom_before_link_redirect( product ID, referrer )` runs first. The request's query passes through by Lasso's
+ * rules (RedirectQuery; Task CL2).
  */
 final class CloakedLinkRedirect implements Module {
 
@@ -33,8 +36,9 @@ final class CloakedLinkRedirect implements Module {
 	 * @param CloakResolver      $resolver Finds the product.
 	 * @param SettingsRepository $settings The Cloaked Link Prefix.
 	 * @param WpPostSlugGuard    $guard    The site's own posts and terms.
+	 * @param NetworkSubIds      $networks The networks whose links take a reader's `sid` (CL2).
 	 */
-	public function __construct( private CloakResolver $resolver, private SettingsRepository $settings, private WpPostSlugGuard $guard ) {}
+	public function __construct( private CloakResolver $resolver, private SettingsRepository $settings, private WpPostSlugGuard $guard, private NetworkSubIds $networks ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -60,9 +64,11 @@ final class CloakedLinkRedirect implements Module {
 		if ( $target['robots'] ) {
 			header( 'X-Robots-Tag: noindex, nofollow' );
 		}
-		do_action( 'affibloom_before_link_redirect', $target['product'], (string) wp_get_referer() );
+		$referer     = isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+		$destination = '' === $target['destination'] ? home_url( '/' ) : RedirectQuery::apply( $target['destination'], self::request(), $referer, site_url(), $this->networks );
+		do_action( 'affibloom_before_link_redirect', $target['product'], $referer );
 		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- a product's destination is another site by design.
-		wp_redirect( '' !== $target['destination'] ? $target['destination'] : home_url( '/' ), 302, 'Affibloom' );
+		wp_redirect( $destination, 302, 'Affibloom' );
 		header( 'Cache-Control: private, no-store, no-cache, must-revalidate' );
 		exit;
 	}
@@ -88,6 +94,24 @@ final class CloakedLinkRedirect implements Module {
 		$uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
 		return is_string( $redirect_url ) && null !== $this->target( $uri ) ? false : $redirect_url;
+	}
+
+	/**
+	 * The request's parameters: the first value of each, as Lasso flattens them (R22).
+	 *
+	 * @return array<string, string>
+	 */
+	private static function request(): array {
+		$params = array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a reader's link parameters, passed on, never acted on.
+		foreach ( wp_unslash( $_GET ) as $key => $value ) {
+			while ( is_array( $value ) ) {
+				$value = reset( $value );
+			}
+			$params[ (string) $key ] = sanitize_text_field( (string) $value );
+		}
+
+		return $params;
 	}
 
 	/**

@@ -94,7 +94,7 @@ Grouped by feature, in the order they are worked.
 **F24 — Link cloaking, redirects and permalinks**
 
 - [x] Task CL1: The redirect for a cloaked path
-- [ ] Task CL2: Query strings through the redirect
+- [x] Task CL2: Query strings through the redirect
 - [ ] Task CL3: Permalink and Link Cloaking on the product page
 - [ ] Task CL4: A new product's slug and cloaking
 - [ ] Task CL5: The General settings take effect
@@ -707,11 +707,16 @@ becomes the network's sub-ID; `{url}` in a destination becomes the referring pag
 
 **Files:** the above; `tests/Unit/Domain/Cloak/RedirectQueryTest.php` (every R22 rule), F24 AC4.
 
-- [ ] **Step 1: Failing tests** (AC4; unit per rule).
-- [ ] **Step 2: `RedirectQuery` and the data file.**
-- [ ] **Step 3: Wire into the redirect.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Pass query strings through cloaked links".
+- [x] **Step 1: Failing tests** (AC4; unit per rule).
+- [x] **Step 2: `RedirectQuery` and the data file.**
+- [x] **Step 3: Wire into the redirect.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Pass query strings through cloaked links".
+
+*Note (2026-11-18):* the data file holds 32 networks (Lasso's 33 with sub-IDs less TradeTracker, which Lasso never rewrites) and Impact's
+805 domains, generated from Lasso's two JSON files; Post Affiliate Pro keeps Lasso's own rule in `FileNetworkSubIds`.
+`lcid` is dropped, never appended (N5). Checked with curl on Local through a CJ link with a YouTube referrer:
+`?utm_source=ig&sid=yt&foo=1&doing_wp_cron=9&lcid=z` → `…?url=x&utm_source=ig&sid=yt&foo=1` (CJ's sub-ID is `sid`).
 
 ---
 

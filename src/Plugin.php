@@ -53,6 +53,7 @@ use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Infrastructure\Http\CreatorsApiCatalog;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
+use Affibloom\Infrastructure\Data\FileNetworkSubIds;
 use Affibloom\Infrastructure\Html\WpLinkScanner;
 use Affibloom\Infrastructure\Schema\Migrator;
 use Affibloom\Infrastructure\Schema\Table;
@@ -437,7 +438,7 @@ final class Plugin {
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
 			$shortcode,
 			new WidgetShortcodes(),
-			new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard() ),
+			new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
