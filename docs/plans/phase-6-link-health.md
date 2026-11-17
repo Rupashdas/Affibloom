@@ -15,8 +15,8 @@ Planned; gate 4 given by the user 2026-11-14 for every open task. Phase 5's exit
 - **F37 (part): Tools and diagnostics** — TL1 and TL2 moved to Phase 2 (2026-11-14). TL3-TL7 are Phase 8. `wp-content/plugins/affibloom/docs/features/F37/{requirements,analysis}.md`
 - **F11: Link health** — Tasks 30A-30C, 31A-31D, 32A-32E.
   `wp-content/plugins/affibloom/docs/features/F11/{requirements,analysis}.md`
-- **F10 (part): Lasso's data, migrated** — Task 26K only (link issues and dismissals, which need F11's table). The
-  other F10 tasks are in Phase 5 and Phase 7. `wp-content/plugins/affibloom/docs/features/F10/{requirements,analysis}.md`
+- **F10 (part):** none since 2026-11-17. Task 26K (Lasso's link issues and dismissals) moved to the Affibloom Lasso
+  Migrator plugin (Phase M, deviation 146); this phase builds F11 for any site, with no Lasso data.
 
 ## Decisions that change this phase
 
@@ -38,7 +38,7 @@ the text below as a deviation in `progress.md`.
 - **Decided (the user accepted the recommendation, 2026-11-14):** Extend products (7 Walmart here): plain HTTP check, broken only, no out of stock (F11 N2,
   recommended: the plain HTTP check).
 - **Decided (the user accepted the recommendation, 2026-11-14):** Lasso's last Amazon results at cutover (109 out of stock, 3 broken, checked 2026-11-09)
-  (F11 N3, recommended: migrate them with D7's line; C1's first check clears or confirms them; Task 26K carries them).
+  (F11 N3, recommended: migrate them with D7's line; C1's first check clears or confirms them; Task 26K carries them, now in Phase M).
 - **Decided (the user accepted the recommendation, 2026-11-14):** the second button: Lasso checks only the primary destination (F11 N4, recommended: Lasso's
   rule, as the 30A draft assumes).
 - **Decided (the user, 2026-11-14), E14:** missed scheduled posts (inventory E13: a Lasso cron job, not affiliate-related) are not built; no Task 32F.
@@ -47,7 +47,7 @@ the text below as a deviation in `progress.md`.
 - **Decided (the user, 2026-11-14), B1:** Stop Lasso Analytics, licence activation, updates and the flag service are left out. Touches TL1 only in that activation stores no licence.
 - **Decided (the user accepted the recommendation, 2026-11-14):** `SUPPORT_SITES` fixes (F37 N4, recommended: not built).
 - F10's "Needs the user" items (conversion, click history, Amazon credentials, the 9 link-less records, duplicate
-  destinations, stale Amazon values) do not change Task 26K; they are recorded in Phase 5.
+  destinations, stale Amazon values) do not change Task 26K; they are recorded in Phase M.
 
 ## Tasks in this phase
 
@@ -72,7 +72,7 @@ the text below as a deviation in `progress.md`.
 
 ### F10 (part): Lasso's data, migrated
 
-- [ ] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues`
+- Task 26K: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
 ## Cross-phase notes
 
@@ -94,8 +94,8 @@ the text below as a deviation in `progress.md`.
   Task 26C maps one to one. 9H/9L build the controls and storage; 32C builds only their effect on the job runner
   (CPU pause, interval floor, execute limit, rescheduling on save).
 - 32E: the bulk add job (11C) is the second job in the indicator.
-- 26K: needs 26A (Phase 5, products and the Lasso ID map) and the migrate command (Phase 5, 25A); it comes last so F11's
-  table exists.
+- 26K moved to Phase M (deviation 146): the migrator writes Lasso's issues into F11's table through Affibloom's
+  extension API after this phase.
 
 **Inside this phase:** TL2 (Phase 2) builds `Schema\{Migrator, Table}` and the `Upgrader`. Task 30A's draft also lists
 `Schema\{Table, Migrator}`; 30A does not create them, it adds its schema step (the `affibloom_link_issues` table) to
@@ -111,7 +111,7 @@ TL2's runner. `LinkCheckCron` (30A) registers its hooks with TL1's `CronRegistry
 - Task 38 (Phase 8) reuses 31D's CSV writer (`IssueLinksExport`); nothing in this phase waits for it.
 - TL3-TL7 (Phase 8): TL4's DB Status lists the tables registered here (`affibloom_link_issues`); TL3's "Link Alerts" log
   is written by F11 once TL3 exists (not built here).
-- F33 (Phase 5, IM*): F11's analysis assumed F33 migrates the dismiss meta; in this plan it is Task 26K.
+- F33 (imports from other plugins) is dropped (deviation 146); Lasso's dismiss meta is Phase M's Task 26K.
 - **UNRESOLVED:** none of the "Depends on" names is missing from the map. One reference was dangling: 30A named "the
   test stub, Phase 6 Step 6" of the old Task 30A. That step is archived, so the stub is now created in 30A itself.
 
@@ -478,54 +478,7 @@ links (completed/total)" (AC18); when nothing runs it shows Lasso's idle line.
 
 ---
 
-### Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues`
-
-**Feature:** F10 (R16; tables A T14 and K30; D12; AC18, AC23)
-
-**Why:** Lasso shows 113 open alerts here (109 out of stock, 3 broken, 1 error); without this task the Alert column
-starts empty until Affibloom's own first check, and a notice an editor dismissed would come back.
-
-**Depends on:** 26A (Phase 5: products and the Lasso ID map) and F11's table and recorder: 30A (table), 31A (the
-Alert column that shows the result), 31C (the dismissal keys). 30C's recorder for Amazon rows. The command and its
-`MigrationService` are Phase 5's (25A).
-
-**User action:** `wp affibloom migrate --only=issues`: `N issues carried over, N dismissals carried over`, and again:
-`0 created, N unchanged`. Without F11 installed it prints "waiting for F11" and writes nothing. The Dashboard's Alert
-column and the Broken links and Out of stock counts show what Lasso showed, before any Affibloom check has run.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `LassoSource::issues()` on `WpLassoSource` (SELECT only; a missing table reads as empty): `lasso_url_issues` rows and the `dismiss_out_of_stock` / `dismiss_broken` meta | `IssuesStep` |
-| `Application\Migration\IssueMapper` (pure): Lasso row → F11 issue row | `IssuesStep` |
-| `Application\Migration\IssuesStep` (`plan()`, `run()`, idempotent, `--update`) | `MigrationService`, in its fixed family order |
-
-**Files:** create `IssueMapper.php`, `IssuesStep.php`, `tests/Unit/Application/IssueMapperTest.php`,
-`tests/Integration/IssuesStepTest.php`; modify `WpLassoSource.php`, `LassoSource.php`, `MigrationService.php`,
-`Plugin.php`; spec AC18 (and AC23 through `tools/lasso-fingerprint.sh` before and after).
-
-Mapping (F10 D12, F11 analysis "Data"): `lasso_url_issues.id` → `product_id` through the ID map; `issue_type` (HTTP
-status; `000` = out of stock; `200` = fine) → `issue_type`; `issue_slug` → `checked_url`; `detection_date` →
-`detection_date`; `issue_resolved` and `issue_resolved_dt` → `resolved`, `resolved_at`; the last failing check
-(Lasso overwrites `issue_resolved_dt` on every failing check) → `last_checked_at`; `failures` 0. `is_ignored` and
-`total_404_request` are not kept (F11 D3). The dismiss meta → `_affibloom_dismiss_out_of_stock` and
-`_affibloom_dismiss_broken`. Rows whose product is not migrated are skipped with a note. The 41 fixed texts are not
-copied (D12).
-
-- [ ] **Step 1: Failing tests.** Unit: `IssueMapperTest` over rows from the inventory fixtures (open `000`, open `404`,
-  open `400`, resolved `200`). Integration: seed a Lasso data set; `--only=issues` twice (created once, `unchanged` the
-  second time); the Alert state of a carried row; a dismissed notice stays dismissed. Expected red: the family reports
-  "waiting".
-- [ ] **Step 2: Source and mapper** (`LassoSource::issues()`, `IssueMapper`).
-- [ ] **Step 3: The step** (`plan()`, `run()`, `--update`; writes through F11's issue repository and the product
-  meta; "waiting for F11" when its table is absent).
-- [ ] **Step 4: Run and look.** `tools/lasso-fingerprint.sh` before and after (equal); `wp affibloom migrate
-  --only=issues`; open the Dashboard: the same 109 out of stock and 3 broken as Lasso, the same dates; a product's page
-  shows its bar unless it was dismissed. At 1280 and 375 px.
-- [ ] **Step 5: Commit:** "Carry Lasso's link alerts over".
-
----
+### Task 26K: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
 ## Exit check
 
@@ -534,7 +487,7 @@ Phase 6 is done when:
 - **F37:** AC1 (TL1) and AC2 (TL2) moved to Phase 2 with their tasks.
 - **F11:** AC1-AC18 pass (30A: AC1 detection, AC2-AC5; 30B: AC6; 30C: AC7; 31A: AC1 column, AC8, AC9, AC11; 31B: AC1
   filter, AC10; 31C: AC12; 31D: AC13; 32A: AC14; 32B: AC15; 32C: AC16; 32D: AC17; 32E: AC18).
-- **F10:** AC18 (26K) passes, and Lasso's fingerprint is unchanged (AC23).
+- **F10:** none here: AC18 (26K) and AC23 are Phase M's (deviation 146).
 - On Local, a pass records nothing for external links (the Local copy blocks them); the stub's 200, 404 and blank
   links give a tick, a red alert after the second check, and a red alert at once.
 - `composer lint`, `composer analyse`, unit and integration tests, and the E2E acceptance files for F11 pass; every
@@ -582,7 +535,7 @@ Phase 6 is done when:
 | R34, R35 | 32D |
 | R36 | 32E |
 | R37 | F21 (Phase 7, not F11) |
-| R38 | F33 / F21 / F1 / C1 (other features) |
+| R38 | F21 / F1 / C1 (other features; F33 dropped, deviation 146) |
 | R40 | analysis (inventory); E13 not built: decision E14 |
 | AC1 | 30A (detection), 31A (column), 31B (filter) |
 | AC2-AC5 | 30A |
@@ -602,8 +555,8 @@ Phase 6 is done when:
 
 | R / AC | Task |
 |---|---|
-| R16, AC18 | 26K |
-| AC23 (fingerprint, on every write task) | 26K (and 26A, in Phase 5) |
+| R16, AC18 | 26K (Phase M) |
+| AC23 (fingerprint, on every write task) | Phase M (26K, 26A) |
 | every other F10 R and AC | Phase 5 and Phase 7 (see their files) |
 
 **Not built (decision E14, the user, 2026-11-14):** inventory E13, missed scheduled posts (F11 N5). Everything else has a task or an

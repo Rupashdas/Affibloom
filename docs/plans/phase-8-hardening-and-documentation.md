@@ -12,6 +12,22 @@
 Planned; gate 4 given by the user 2026-11-14 for every open task. The
 phase runs after Phases 0-7 are signed off; Task 37A-37D review everything built before them.
 
+**Changed 2026-11-17 (the user; deviation 146):** Affibloom is standalone. The Lasso migration is a separate plugin
+(Phase M, after this phase) and other affiliate plugins' compatibility is dropped (F31's 27X, F33's IM). Where a task
+below names them, read it this way (the note wins over the section's text):
+
+- **ON7:** the wizard's steps are Amazon, Analytics and Done; the Imports step is not built (no import sources).
+- **ON5, ON8:** the closed education boxes and the tour flag are copied from Lasso by Phase M's 26M; these tasks only
+  read Affibloom's keys (`affibloom_settings['education_hidden']`, `affibloom_tour_done`).
+- **37A-37D:** the routes, screens, crons and options to review are Affibloom's own; the Import and History screens,
+  `/import/*`, `/history/*`, `/migration/*`, `affibloom_import_batch` and the `[lasso]` shortcode do not exist. The
+  migrator gets the same security checklist in Phase M. The performance task compares a guide with Lasso active
+  (Lasso's content) against the same guide converted to Affibloom's format by hand (an `[affibloom]` box), and the
+  co-active check (Lasso and Affibloom active together, the cutover window) records no fatal and no duplicate box.
+- **38:** the opt-in removal lists Affibloom's own data only; `affibloom_migration*`, `affibloom_lasso_import`,
+  `affibloom_import_*`, the Lasso ID map and the import keys belong to the migrator, which removes them itself (LM10).
+- **TL3:** there is no Import Log (no imports).
+
 ## Scope and features
 
 - **Reviews of every feature** (Tasks 37A-37D, 39A): `docs/features/*/` (F1-F12, F16-F19, F21-F31, F33-F35, F37, F38,
@@ -79,7 +95,7 @@ the text below as a deviation in `progress.md`.
 
 - [ ] Task ON5: Education boxes: close, remember, reset, hide with help tips
 - [ ] Task ON6: Setup wizard: first visit, Theme, Customize
-- [ ] Task ON7: Setup wizard: Amazon, Analytics, Imports, Done
+- [ ] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
 - [ ] Task ON8: The Dashboard tour
 - [ ] Task ON9: Command palette (Ctrl+Shift+L)
 

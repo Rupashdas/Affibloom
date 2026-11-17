@@ -20,7 +20,7 @@ The full-scope rule (the user, 2026-11-13) replaced the first scope, the 12 feat
 | F7 | Per-box text and overrides | `docs/features/F7/` | 3 | planned |
 | F8 | Star rating | `docs/features/F8/` | 3 | planned |
 | F9 | Settings → General | `docs/features/F9/` | 2, 5, 7, 8 | partly built |
-| F10 | Existing content keeps working (Lasso migration and compatibility) | `docs/features/F10/` | 5, 6, 7 | partly built (one-time import button only) |
+| F10 | Existing content keeps working (Lasso migration and content conversion) | `docs/features/F10/` | M (the separate Affibloom Lasso Migrator plugin, deviation 146) | planned (the one-time import button leaves core in LC1) |
 | F11 | Link health | `docs/features/F11/` | 6 | planned |
 | F12 | Click counts and where used | `docs/features/F12/` | 7 | planned |
 | F16 | Display system (Settings → Display) | `docs/features/F16/` | 2, 3 | partly built (preview planned) |
@@ -37,8 +37,8 @@ The full-scope rule (the user, 2026-11-13) replaced the first scope, the 12 feat
 | F28 | Button icons | `docs/features/F28/` | 2, 3 | built (the box side is Phase 3) |
 | F29 | Any number of buttons | `docs/features/F29/` | 2, 3 | partly built (the box side is Phase 3) |
 | F30 | Display types (Grid, List, Gallery, Button, Image, SiteStripe, AI Text) | `docs/features/F30/` | 3 | planned |
-| F31 | Shortcodes (`[affibloom]`, `[lasso]`, competitors') | `docs/features/F31/` | 3, 5, 7 | planned |
-| F33 | Import from other plugins | `docs/features/F33/` | 5, 7 | planned |
+| F31 | Shortcodes (`[affibloom]`; `[lasso]` is converted by the migrator, competitors' dropped, deviation 146) | `docs/features/F31/` | 3 | `[affibloom]` built |
+| F33 | Import from other plugins | `docs/features/F33/` | — | dropped 2026-11-17 (deviation 146) |
 | F34 | Content changes, history and repair tools | `docs/features/F34/` | 5 | planned |
 | F35 | Auto-monetization | `docs/features/F35/` | 7 | planned |
 | F37 | Tools and diagnostics | `docs/features/F37/` | 2, 8 | planned |

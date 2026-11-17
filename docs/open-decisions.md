@@ -150,9 +150,11 @@ Everything **not** listed here was settled from Lasso's source and the project r
 | Saving (2026-11-16) | **One save behaviour on every settings screen** ("We just need to standardize the saving process across all settings"): the screens that still post a form and reload change to the REST save the product, group and field screens already use, staying on the page. Done 2026-11-17 (deviation 143). No save without JavaScript (2026-11-17: "Drop it"). |
 | Phase 4 at once (2026-11-17) | **Every Phase 4 batch in one run** ("complete all batches at once in phase 4"); `@wordpress/scripts` installed, and Classic Editor, Elementor and AMP installed on Local for ED1, ED2 and ED4 (left inactive). |
 | Phase 4 sign-off (2026-11-17) | **Signed off** after the exit check passed (F4 22/22, admin-design 6/6, F5 AC1 7/7). |
+| Standalone Affibloom (2026-11-17) | **The Lasso migration is a separate plugin, not core** ("Affibloom is a standalone affiliate plugin. no need other plugin's compatibilities"); it converts every `[lasso]` shortcode and legacy block to Affibloom's format, leaves nothing of Lasso behind and is then removed. Reverses A1 and A2; drops F33 and F31's competitors' shortcodes. Deviation 146; Phase M. Defaults taken: name "Affibloom Lasso Migrator" (`affibloom-lasso-migrator`), its own private repository (created at LM1 with the user's OK). |
 
 ## Open (the user's call)
 
 | Item | Question | Recommendation |
 |---|---|---|
-| ED5 Stackable (2026-11-17) | Lasso's link-attribute filters also cover Stackable buttons (F4 R82-R83). Stackable is not installed and no post holds a Stackable block, so ED5 left those parts out. Add them anyway? | Leave them out; add them if Stackable is ever installed. |
+| ~~ED5 Stackable~~ (lapsed 2026-11-17) | ED5 is withdrawn from core by LC2 (deviation 146); the migrator removes Lasso's stamps instead. | — |
+| Non-affiliate integrations (2026-11-17) | "No need other plugin's compatibilities" was read as other **affiliate** plugins (ThirstyAffiliates, AAWP, EasyAzon, Pretty Links …). Elementor, Classic Editor, AMP, Rank Math (built in Phase 4), ACF (35D), Kadence (35J), and the builders and recipe plugins of 35E stay. Drop any of them too? | Keep them: they are site tools, not affiliate plugins, and Phase 4's are already built. |

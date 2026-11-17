@@ -151,6 +151,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 143. Saving (the user, 2026-11-16/17): every settings screen saves over REST and stays on the page; no save without JavaScript.
 - 144. Settings → Display (the user, 2026-11-17): Single, Grid and List switch in place and one save stores every type, as in Lasso.
 - 145. Loading states (the user, 2026-11-17): content that waits for the server shows a skeleton; actions show `.is-busy`.
+- 146. Standalone Affibloom (the user, 2026-11-17): the Lasso migration and content conversion move to a separate Affibloom Lasso Migrator plugin (Phase M); no other plugins' compatibility; Phase 5 core only; A1 and A2 reversed.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2861,3 +2862,38 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     Fields lists turn their rows to skeleton bars while they reload (CSS on `.is-loading`, scripts unchanged); actions
     keep or gain `.is-busy`. Rule for later tasks: content that waits shows a skeleton of itself, an action its busy
     button; no bare spinners. Checked by `tests/E2E/loading-states.spec.ts` (3 tests, answers held back).
+
+146. **Affibloom is standalone; the Lasso migration is a separate plugin (the user, 2026-11-17).** The user: "Since the
+    plugin will replace lasso on only one website and will install newly on a lot websites, so we shouldn't include
+    lasso to affibloom migration as a core feature. maybe we can develop the migration as a separate helper plugin";
+    "I want every existing [lasso] shortcode across all posts and pages to be replaced with the equivalent AffiBloom
+    shortcode. All existing content must be migrated to AffiBloom's native format, so the Lasso helper plugin is no
+    longer needed and can be safely removed. … Do not leave any Lasso shortcodes or legacy Lasso blocks behind. so we
+    don't need any other affiliiate plugins compatibilities"; "All of the migration functiionalties should be developed
+    as a migration plugin. not our core feature. Affibloom is a standalone affiliate plugin. no need other plugin's
+    compatibilities." What changed in the plan:
+    - **Phase M, new** (`plans/phase-m-lasso-migrator.md`, after Phase 8, before Phase 9): the plugin
+      `affibloom-lasso-migrator` in its own repository (LM1, with Affibloom's extension API `affibloom_ready`); F10's
+      data tasks 25A-26P, 26G, 26H moved from Phase 5, 26K from Phase 6, 26I, 26N and 29C from Phase 7; the content
+      conversion LM2-LM9 (blocks to `affibloom/product-box`, bare `[lasso]` to `[affibloom]`, widgets and Elementor
+      data, the other display types and tables, the `data-lasso-*` stamps removed with their ties kept as
+      `assigned_product_id`, the `.lasso-*` Additional CSS translated, the admin run, the leftover check); parity 29A-29E
+      with 29D restored; LM10 Finish and removal. **Decisions A1 and A2 are reversed** (conversion and stamp removal come
+      back as LM2-LM8; ED6 and 27A-27I are not built). ADR-2, ADR-3 and ADR-6 updated in the overview.
+    - **Phase 5 rewritten** (`plans/phase-5-links-cloaking-and-variants.md`, the old file removed): LC1 and LC2 take the
+      Lasso code already built out of core (the one-time import of deviation 87, the Lasso box markers, ED5's editor
+      script, Lasso's and other affiliate plugins' post types, the "Lasso" placeholder name, `lasso-br-code`, the
+      `lasso-*` admin classes; `NoLassoInCoreTest` keeps it out), then F21, F9 9J, F38 ON3-ON4, F24 and F27 with
+      *Changed 2026-11-17* notes where a task read Lasso data or markup (35A, 35B, 35D, 35E, 35G, ON4, CL1, CL10, V2,
+      35H, 35J).
+    - **Dropped** (archived in `plans/archive/phase-5-superseded.md`): 27A-27I and ED6 (Affibloom renders no Lasso
+      shortcode or block), 27X1-27X8 and IM1-IM20 (other affiliate plugins), 27E (the migrator converts
+      `[lasso type="table"]`). F4 ED5 (built) is withdrawn by LC2. Integrations that are not affiliate plugins stay
+      (Elementor, Classic Editor, AMP, Rank Math, ACF, Kadence, 35E's builders and recipe plugins).
+    - Phases 6-9 adjusted: Phase 7's core tasks read Affibloom's own render-time attributes instead of `data-lasso-*`;
+      Phase 8's wizard loses its Imports step and its reviews cover Affibloom only; Phase 9 installs both plugins,
+      converts the content before Lasso is switched off, rolls back by reverting the content first, and Task 42 runs
+      Finish and deletes the migrator. ThirstyAffiliates' one `/recommends/` link (guide 3297) gets a Rank Math redirect
+      at cutover instead of IM2.
+    - Batches re-cut in `plans/batches.md` (Phase 5: 17 batches; Phase M: 20 batches).
+

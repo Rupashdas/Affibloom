@@ -36,11 +36,13 @@ Lean method of 2026-11-15 (the user, deviation 129): few records, few test runs,
    (at most ~10 lines, plus its index line) only when the plan's design or a later task changes. `progress.md`: one
    "Next up" update at the batch's end. `progress-log.md` is closed. Review against
    `.github/pull_request_template.md` once, at the batch's end.
-7. **Phases still run in order** (0 → 9). A phase's exit check and the user's sign-off come after its last batch.
+7. **Phases still run in order** (0 → 8, then M, the migrator plugin, then 9; deviation 146). A phase's exit check and the user's sign-off come after its last batch.
 
 ## How the batches were cut
 
-252 open tasks (2026-11-15) in 139 batches; every open task is in exactly one.
+252 open tasks (2026-11-15) in 139 batches; every open task is in exactly one. Re-cut 2026-11-17 (deviation 146):
+Phase 5 has 31 core tasks in 17 batches; Phase M has 34 tasks in 20 batches; 26K, 26I, 26N and 29C moved there from
+Phases 6 and 7, and 27E, IM11, IM18 and IM20 were dropped.
 
 Consecutive tasks in the phase's run order (never reordered), usually from one feature, 2–3 tasks per batch, at most 4.
 These run **alone**: a feature's first task that lays the foundation, baseline and parity tasks, a task of 40 or more
@@ -118,52 +120,27 @@ MCP1 is dropped (decision A10).
 
 ## Phase 5
 
+Rewritten 2026-11-17 (deviation 146): core tasks only; the Lasso tasks are in Phase M, the other plugins' are dropped.
+
 | Batch | Tasks |
 |---|---|
-| 5.1 | 25A |
-| 5.2 | 25B, 25C, 25D |
-| 5.3 | 26A, 26B |
-| 5.4 | 26C, 26D, 26E |
-| 5.5 | 26F, 26L, 26M |
-| 5.6 | 26O |
-| 5.7 | 26P |
-| 5.8 | 35A |
-| 5.9 | 35B, 35C |
-| 5.10 | 35D, 35E |
-| 5.11 | 35F, 35G |
-| 5.12 | 9J, ON3, ON4 |
-| 5.13 | 35I |
-| 5.14 | 27A, ED6 |
-| 5.15 | 27B, 27C, 27D |
-| 5.16 | 27F, 27G |
-| 5.17 | 27H, 27I |
-| 5.18 | 27X1, 27X2 |
-| 5.19 | 27X3, 27X4 |
-| 5.20 | 27X5, 27X6 |
-| 5.21 | 27X7, 27X8 |
-| 5.22 | CL1, CL2 |
-| 5.23 | CL3 |
-| 5.24 | CL4, CL5 |
-| 5.25 | CL6, CL7 |
-| 5.26 | CL8, CL9 |
-| 5.27 | CL10, CL11 |
-| 5.28 | 26G |
-| 5.29 | V1, V2 |
-| 5.30 | V3, V4 |
-| 5.31 | V5, 26H |
-| 5.32 | 35H, 35J |
-| 5.33 | IM1 |
-| 5.34 | IM2 |
-| 5.35 | IM3 |
-| 5.36 | IM4, IM5, IM6 |
-| 5.37 | IM7, IM8 |
-| 5.38 | IM9, IM10 |
-| 5.39 | IM12, IM13, IM14 |
-| 5.40 | IM15, IM16, IM17 |
-| 5.41 | IM19 |
-| 5.42 | 29A |
-| 5.43 | 29B |
-| 5.44 | 29E |
+| 5.1 | LC1, LC2 |
+| 5.2 | 35A |
+| 5.3 | 35B, 35C |
+| 5.4 | 35D, 35E |
+| 5.5 | 35F, 35G |
+| 5.6 | 9J, ON3, ON4 |
+| 5.7 | 35I |
+| 5.8 | CL1, CL2 |
+| 5.9 | CL3 |
+| 5.10 | CL4, CL5 |
+| 5.11 | CL6, CL7 |
+| 5.12 | CL8, CL9 |
+| 5.13 | CL10, CL11 |
+| 5.14 | V1, V2 |
+| 5.15 | V3, V4 |
+| 5.16 | V5 |
+| 5.17 | 35H, 35J |
 
 ## Phase 6
 
@@ -175,7 +152,6 @@ MCP1 is dropped (decision A10).
 | 6.4 | 31C, 31D |
 | 6.5 | 32A, 32B, 32C |
 | 6.6 | 32D, 32E |
-| 6.7 | 26K |
 
 ## Phase 7
 
@@ -201,7 +177,7 @@ MCP1 is dropped (decision A10).
 | 7.18 | AM1 |
 | 7.19 | AM2, AM3 |
 | 7.20 | AM4, AM5 |
-| 7.21 | AM6, 26N |
+| 7.21 | AM6 |
 | 7.22 | T1 |
 | 7.23 | T2, T3 |
 | 7.24 | T4 |
@@ -212,9 +188,6 @@ MCP1 is dropped (decision A10).
 | 7.29 | T13, T14 |
 | 7.30 | T15, T16, T17 |
 | 7.31 | 23F |
-| 7.32 | 26I, 27E |
-| 7.33 | IM11, IM20, IM18 |
-| 7.34 | 29C |
 
 ## Phase 8
 
@@ -232,6 +205,34 @@ MCP1 is dropped (decision A10).
 | 8.10 | ON8, ON9 |
 | 8.11 | 39 |
 | 8.12 | 39A |
+
+## Phase M (the Affibloom Lasso Migrator plugin; after Phase 8, before Phase 9; deviation 146)
+
+Its tasks run in the migrator's repository (commits there, and in Affibloom's for each extension-API method). The
+same rules apply; checks run in the migrator's folder.
+
+| Batch | Tasks |
+|---|---|
+| M.1 | LM1 |
+| M.2 | 25A |
+| M.3 | 25B, 25C, 25D |
+| M.4 | 26A, 26B |
+| M.5 | 26C, 26D, 26E |
+| M.6 | 26F, 26L, 26M |
+| M.7 | 26G, 26H |
+| M.8 | 26K, 26I, 26N |
+| M.9 | 26O |
+| M.10 | 26P |
+| M.11 | LM2 |
+| M.12 | LM3 |
+| M.13 | LM4, LM5 |
+| M.14 | LM6 |
+| M.15 | LM7, LM8 |
+| M.16 | LM9 |
+| M.17 | 29A |
+| M.18 | 29B, 29C |
+| M.19 | 29D, 29E |
+| M.20 | LM10 |
 
 ## Phase 9
 

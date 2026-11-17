@@ -2366,3 +2366,1203 @@ held); the cleaned posts appear in the list; each is reverted from its row (H2).
 - [ ] **Step 5: Commit** — "Remove Lasso's attributes from the History screen".
 
 ---
+
+---
+
+# Dropped 2026-11-17 by the user's decision (deviation 146)
+
+The user, 2026-11-17: Affibloom is a standalone affiliate plugin, "no need other plugin's compatibilities", and the
+migration is a separate plugin that converts every `[lasso]` shortcode and legacy block to Affibloom's format and is
+then removed. So Affibloom renders no Lasso shortcode or block (27A-27I, ED6, 27E), and no other affiliate plugin's
+shortcodes or data are read (27X1-27X8, IM1-IM20). The conversion that replaces 27A-27I is Phase M's LM2-LM5, which uses
+these sections' attribute rules. Word for word below, with F31's, F33's, F34's and F4 ED6's coverage tables.
+
+### Task 27A: `[lasso]` alias — the single box
+
+**Feature:** F31 (R1 `lasso`, R4-R6, R14, R20, A1-A5, A15-A17, A53, A54, D3, D4; AC15); F10 (AC2)
+
+**Why:** with Lasso off, WordPress renders the 250 blocks' saved `[lasso …]`; something must answer (ADR-3).
+
+**Depends on:** 25A (`LassoIdMap`), 26A (products migrated), 18S1-18S3 (the renderer and every single-box attribute).
+
+**User action:** with Lasso deactivated, each of the 34 guides shows every box as before: badge, description, title,
+`title_url`, `title_type`, image, buttons, `data-lasso-id`; reactivating Lasso hands `[lasso]` back at once.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\LassoShortcode` (`init` 20, only without Lasso) | WordPress |
+| `Application\Legacy\LegacyAddress` (slug > id > link_id > ref; repoint) | `LassoShortcode` |
+| `Infrastructure\Lasso\LassoLocationMap` (`link_id` with no `id`) | `LegacyAddress` |
+| R6 (AAWP box description from the location's original shortcode) | `LegacyAddress` |
+
+**Files:** create the above, `tests/Integration/LassoShortcodeTest.php` (the two tests of the superseded Task 27A, now in the archive, and one per address rule); modify `Plugin.php`, `BoxAssets.php` (`[lasso`, the legacy block).
+
+- [ ] **Step 1: Failing tests** (the superseded Task 27A's two tests, plus `ref` only, `link_id` only, `slug`, repoint, `&quot;` values, a positional attribute).
+- [ ] **Step 2: Alias and address.**
+- [ ] **Step 3: Run and look** (Lasso off, one guide beside its baseline; Lasso on again).
+- [ ] **Step 4: Commit** — "Render [lasso] boxes from migrated products when Lasso is off".
+
+---
+
+### Task ED6: Edit legacy `affiliate-plugin/lasso` blocks (decision A1, the user, 2026-11-14)
+
+> Moved here from Phase 4 on 2026-11-14, word for word. It depends on 27A only (the `[lasso]` alias, just above); 27B-27D are not needed and 27E is in Phase 7. It replaces the dropped conversion 28A-28E (decision A1).
+
+**Feature:** F4 (R1-R4, R50; AC21)
+
+**Why:** without Lasso's script the 248 existing blocks show as "unsupported" in the editor; this registers the block
+name so they stay editable, with no conversion of `post_content` (N2).
+
+**Depends on:** 24A, 24C; Task 27A (`[lasso]` compatibility, earlier in this phase), which the "renders unchanged" half of AC21 uses. Decided: built (the user, 2026-11-14).
+
+**User action:** existing `affiliate-plugin/lasso` blocks open as working blocks (preview, sidebar, **Edit Display**)
+and render unchanged on the site; the block is hidden from the inserter. The 2 bare shortcodes get no editor UI (R50).
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Editor\LegacyLassoBlock` (`register_block_type( 'affiliate-plugin/lasso', supports.inserter=false )`, Lasso's attributes and save format) | `Plugin` |
+| the legacy block's `edit` reusing the panel, sidebar, preview | the editor |
+
+**Files:** create `LegacyLassoBlock.php`, `blocks/legacy-lasso/`; modify `Plugin.php`; tests
+`tests/E2E/acceptance/F4.spec.ts` (AC21, fixture post 2622), `tests/Integration/LegacyBlockTest.php`.
+
+- [ ] **Step 1: Failing test** (fixture post 2622: the block opens without the "unsupported" notice; the sidebar
+  shows the badge; unchanged render).
+- [ ] **Step 2: Register the name, hidden from the inserter, Lasso's save format.** Save canonicalises as R3.
+- [ ] **Step 3: Run and look.** By hand with post 2622 and one of the 248.
+- [ ] **Step 4: Commit** — "Edit the site's existing Lasso blocks".
+
+---
+
+### Task 27B: `[lasso]` button, image, link, SiteStripe and fields
+
+**Feature:** F31 (A10-A14, A40-A43, R10, R11; AC16)
+
+**Why:** with Lasso off, the lone button, image and link forms, SiteStripe, inline fields and the AAWP-style link attributes must still draw (R10, R11).
+
+**Depends on:** 27A, 18S4, 18S5.
+
+**User action:** `[lasso type="button|image|image-link|link"]`, `style="image"`, `sitestripe="true"`, `fields="<x>"
+value="<part>"` draw as in Lasso; AAWP-style `link="<ASIN>"` or EasyAzon `identifier="<ASIN>"` (without `align`) give
+the plain link.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `LegacyAddress` maps `fields` + `value` to `DisplayKind::Field` and A41-A43 to `DisplayKind::Link` | `LassoShortcode` |
+
+**Files:** F31 **AC16**; `LegacyAddressTest`. Create the classes named above; modify `src/Plugin.php` where a Module is registered.
+
+- [ ] **Step 1: Failing tests.**
+- [ ] **Step 2: Mapping.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Render [lasso] buttons, images, links and inline fields".
+
+---
+
+### Task 27C: `[lasso amazon_url|geni_url]`
+
+**Feature:** F31 (A6, A7; AC17)
+
+**Why:** `amazon_url` and `geni_url` place a product without knowing its ID; saved `[lasso]` shortcodes may use them.
+
+**Depends on:** 27A, 18S6.
+
+**User action:** both draw the product they name, or nothing.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `LegacyAddress` passes `amazon_url` and `geni_url` to 18S6's lookups | `LassoShortcode` |
+
+**Files:** F31 **AC17**. Create the classes named above; modify `src/Plugin.php` where a Module is registered.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Mapping.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Render [lasso amazon_url] and [lasso geni_url]".
+
+---
+
+### Task 27D: `[lasso]` group displays
+
+**Feature:** F31 (A8, R12; AC18)
+
+**Why:** the saved `[lasso type=grid|list|gallery]` shortcodes draw the migrated group.
+
+**Depends on:** 27A, 18S7, 26F (groups by slug).
+
+**User action:** `[lasso type="grid|list|gallery" category="<slug>"]` (`categories=`) draws the migrated group.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `LegacyAddress` maps the Lasso category slug to the migrated group (26F's `group_map`) | `LassoShortcode` |
+
+**Files:** F31 **AC18**. Create the classes named above; modify `src/Plugin.php` where a Module is registered.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Mapping.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Render [lasso] group displays".
+
+---
+
+> Task 27E (`[lasso type="table"]`) moved to Phase 7 on 2026-11-14 (it needs F25's table renderer and 26I); its text is in `archive/moving-to-phase-7.md`.
+
+---
+
+### Task 27F: `[lasso prompt]` — Lasso's cached AI text
+
+> **Needs F31 N1 answered first.**
+
+**Feature:** F31 (R15, A9, N1; AC20)
+
+**Why:** `[lasso prompt]` asks Lasso's cloud; with Lasso off the shortcode must answer without a request (R15, N1).
+
+**Depends on:** 27A; **N1 answered.**
+
+**User action:** `[lasso prompt="…"]` with no product shows the text Lasso cached for it in
+`div.lasso-container.lasso-ai`, else nothing; no request leaves the site.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Lasso\LassoAiCache` (the transient key rule), `templates/front/ai-text.php` | `LassoShortcode` |
+
+**Files:** F31 **AC20**; `LassoAiCacheTest`. Create the classes named above; modify `src/Plugin.php` where a Module is registered.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Cache read and template.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Show Lasso's cached AI text for [lasso prompt]".
+
+---
+
+### Task 27G: Lasso's render-time content repairs
+
+**Feature:** F31 (R2 CDATA, R22, D7; AC21)
+
+**Why:** Lasso repairs stored content when it renders it (R2, R22); the same repairs, at render time only, keep pages identical with Lasso off.
+
+**Depends on:** 27A.
+
+**User action:** with Lasso off, a post whose content holds `[lasso ref=">[lasso ref="` or `href=""` renders as with
+Lasso (`href="#"`); content with `shopifycdn.com` loses the CDATA markers; the stored post is unchanged.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\LegacyContentFilter` (`the_content` at 1 and 10, only with Lasso off) | WordPress |
+
+**Files:** F31 **AC21**; integration test asserting `post_content` unchanged.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Filter.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Apply Lasso's content repairs at render time".
+
+---
+
+### Task 27H: `[lasso]` in widgets and on AMP
+
+**Feature:** F31 (R16, R17 for `[lasso]`; AC22)
+
+**Why:** widgets and AMP pages draw `[lasso]` boxes in Lasso; the modules built for `[affibloom]` (18S9) serve `[lasso]` too.
+
+**Depends on:** 27A, 18S9 (the modules; second user).
+
+**User action:** as AC9, for `[lasso]`.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `WidgetShortcodes` and `AmpBoxCss` (18S9) also fire for `[lasso` | WordPress |
+
+**Files:** F31 **AC22**. Modify the two modules' registration in `src/Plugin.php`.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Wire.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Handle [lasso] in widgets and on AMP pages".
+
+---
+
+### Task 27I: `[lasso-attr]`
+
+**Feature:** F31 (R3; AC23)
+
+**Why:** `[lasso-attr]` prints a stored product attribute; with Lasso off a bare shortcode must not appear on the page.
+
+**Depends on:** nothing but Lasso off (no product involved).
+
+**User action:** `[lasso-attr id="<post>" attr_name="<name>"]` prints the stored value with line breaks
+(`wp_kses_post`), or nothing.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\LassoAttrShortcode`, `Infrastructure\Lasso\LassoAttributeMeta` | WordPress (`init`) |
+
+**Files:** F31 **AC23**. Create the classes named above; modify `src/Plugin.php`.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Shortcode.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Answer [lasso-attr] when Lasso is off".
+
+---
+
+### Task 27X1: `[amazon]` and `[aawp]`
+
+> The table branch is built in 27E (Phase 7): `table`, and an imported AAWP table drawing the migrated table.
+
+**Feature:** F31 (R23, R6; AC24; the R21 AAWP table branch is built in 27E, Phase 7)
+
+**Why:** posts written for AAWP carry `[amazon]` and `[aawp]` shortcodes that Lasso takes over; they must keep drawing without Lasso (R23).
+
+**Depends on:** 27A, 27B (fields).
+
+**User action:** `link`, `box`, `fields` (with `value`): a migrated product's box, link or value (a box's
+enclosed content as its description); AAWP active → AAWP renders; neither
+→ `<a href="<tagged Amazon URL>" target="_blank" rel="nofollow">title|link_title|button_text|"Amazon product"</a>`.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\AawpShortcode` | WordPress |
+| `Application\Legacy\CompetitorProduct::by_asin()`, `Infrastructure\Lasso\LassoRevertLookup` | `AawpShortcode` (and 27X2-27X7) |
+
+**Files:** F31 **AC24**; `CompetitorProductTest`. Create the classes named above; modify `src/Plugin.php`.
+
+- [ ] **Step 1: Failing tests.**
+- [ ] **Step 2: Handler.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Answer [amazon] and [aawp] from migrated products".
+
+---
+
+### Task 27X2: `[amalinkspro]`
+
+**Feature:** F31 (R24; AC25)
+
+**Why:** posts written for AmaLinks Pro carry `[amalinkspro]` shortcodes that Lasso takes over (R24).
+
+**Depends on:** 27X1 (`CompetitorProduct`).
+
+**User action:** the ASIN from `apilink` → the product's box; else AmaLinks Pro renders; else the enclosed content.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\AmaLinksShortcode` | WordPress |
+
+**Files:** F31 **AC25**. Create the class named above; modify `src/Plugin.php`; integration test `tests/Integration/AmaLinksShortcodeTest.php`.
+
+- [ ] **Step 1: Failing tests.** AC25 (an `[amalinkspro apilink]` shortcode: the product's box; AmaLinks Pro active: it renders; neither: the enclosed content) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** `AmaLinksShortcode`, using `CompetitorProduct`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Answer [amalinkspro] from migrated products".
+
+---
+
+### Task 27X3: EasyAzon links
+
+**Feature:** F31 (R25 link; AC26)
+
+**Why:** EasyAzon link shortcodes in posts are answered by Lasso (R25); they must keep drawing.
+
+**Depends on:** 27X1.
+
+**User action:** `[easyazon_link]`, `[easyazon-link]`, `[simpleazon-link]` (`asin`/`identifier`): no
+`easyazon_item_<asin>` → nothing; a migrated product → its link/box; else EasyAzon renders; else
+`<a href target="_blank" rel="nofollow">content or item title</a>`.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\EasyAzonShortcodes` (the link names) | WordPress |
+
+**Files:** Create the class named above; modify `src/Plugin.php`; integration test `tests/Integration/EasyAzonShortcodesTest.php`.
+
+- [ ] **Step 1: Failing tests.** AC26 (`[easyazon_link]`, `[easyazon-link]`, `[simpleazon-link]`: nothing without `easyazon_item_<asin>`; a migrated product; EasyAzon active; the plain link) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** `EasyAzonShortcodes` (the link names).
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Answer EasyAzon link shortcodes".
+
+---
+
+### Task 27X4: EasyAzon image, CTA and info block
+
+**Feature:** F31 (R25 image/cta/infoblock; AC27)
+
+**Why:** EasyAzon image, call-to-action and info-block shortcodes are answered by Lasso (R25).
+
+**Depends on:** 27X3.
+
+**User action:** the 9 names → the product's image, button or box; else EasyAzon renders; else the shortcode's own
+text, as Lasso prints it.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| the other names in `EasyAzonShortcodes` | WordPress |
+
+**Files:** F31 **AC27**. Modify the class named above; integration test `tests/Integration/EasyAzonShortcodesTest.php`.
+
+- [ ] **Step 1: Failing tests.** AC27 (the 9 names: the product's image, button or box; EasyAzon active; the shortcode's own text) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** the other names in `EasyAzonShortcodes`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Answer EasyAzon image, CTA and info block shortcodes".
+
+---
+
+### Task 27X5: Earnist
+
+**Feature:** F31 (R26; AC28)
+
+**Why:** Earnist shortcodes in posts are answered by Lasso (R26).
+
+**Depends on:** 27X1 (`LassoRevertLookup`).
+
+**User action:** `[earnist id]` → the product's box; `[earnist_link id]text` → a `nofollow`, new-tab link; unknown →
+nothing.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\EarnistShortcodes` | WordPress |
+
+**Files:** F31 **AC28**. Create the class named above; modify `src/Plugin.php`; integration test `tests/Integration/EarnistShortcodesTest.php`.
+
+- [ ] **Step 1: Failing tests.** AC28 (`[earnist id]`, `[earnist_link id]text`, an unknown id) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** `EarnistShortcodes`, using `LassoRevertLookup`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Answer Earnist shortcodes".
+
+---
+
+### Task 27X6: Easy Affiliate Links
+
+> **Needs F31 N4 answered first.**
+
+**Feature:** F31 (R27, N4; AC29)
+
+**Why:** Easy Affiliate Links' shortcode and block are answered by Lasso for migrated records (R27); N4 decides whether it is built.
+
+**Depends on:** 27A; **N4 answered.**
+
+**User action:** only with EAFL active: `[eafl id text]` and EAFL's block show a migrated record as
+`<span class="lasso">`/`<div class="lasso">` + the link; EAFL's own links unchanged; EAFL's REST routes serve both.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\EaflShortcode` (shortcode, block render, REST) | WordPress, only with EAFL active |
+
+**Files:** Create the class named above; modify `src/Plugin.php`; integration test `tests/Integration/EaflShortcodeTest.php`.
+
+- [ ] **Step 1: Failing tests.** AC29 (with EAFL active: `[eafl id text]`, EAFL's block, EAFL's REST routes; EAFL's own links unchanged) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** `EaflShortcode`: shortcode, block render and REST routes.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Answer Easy Affiliate Links for migrated records".
+
+---
+
+### Task 27X7: ThirstyAffiliates
+
+**Feature:** F31 (R28; AC30)
+
+**Why:** ThirstyAffiliates shortcodes and `<ta>` tags in posts are answered by Lasso (R28); 5 hidden Nelio variants are on this site.
+
+**Depends on:** 27A, 27G (the content filter).
+
+**User action:** `[thirstylink linkid|ids]text` → a migrated record's link; else ThirstyAffiliates renders; else a link
+to `_ta_destination_url` with the post's title. `<ta linkid href>` tags (5 hidden Nelio variants here) → Lasso's
+`<a>`.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Legacy\ThirstyShortcode` | WordPress |
+| the `<ta>` pass in `LegacyContentFilter` (no new parser: `WP_HTML_Tag_Processor`) | `the_content` |
+
+**Files:** F31 **AC30**. Create the class named above; modify `src/Plugin.php`; integration test `tests/Integration/ThirstyShortcodeTest.php`.
+
+- [ ] **Step 1: Failing tests.** AC30 (`[thirstylink linkid|ids]text`; the 5 hidden Nelio `<ta>` variants) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** `ThirstyShortcode` and the `<ta>` pass in `LegacyContentFilter`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Answer ThirstyAffiliates shortcodes and tags".
+
+---
+
+### Task 27X8: `[lasso]` back to the original plugin's shortcode
+
+**Feature:** F31 (R21, D7; AC31)
+
+**Why:** a `[lasso]` whose record was never migrated must still reach its original plugin's shortcode (R21), as Lasso does.
+
+**Depends on:** 27X1-27X7, 27G.
+
+**User action:** a `[lasso]` with AAWP, EasyAzon, ThirstyAffiliates or AmaLinks identifiers whose record was never
+migrated renders that plugin's shortcode (Lasso's conversion rules), at render time only.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| the conversion step in `LegacyContentFilter`; `Domain\Shortcode\OriginalShortcode` (the pure rules of Lasso's `covert_lasso_shortcode_to_original_shortcode`) | `the_content` |
+
+**Files:** F31 **AC31**;
+`OriginalShortcodeTest`. Create the class named above; modify `src/Plugin.php`.
+
+- [ ] **Step 1: Failing tests.** AC31 (a `[lasso]` with AAWP, EasyAzon, ThirstyAffiliates or AmaLinks identifiers whose record was never migrated) in `tests/E2E/acceptance/F31.spec.ts` and the integration or unit test named under Files, written first; expected red: the shortcode prints as text.
+- [ ] **Step 2: Implementation.** `OriginalShortcode` (pure rules) and the conversion step of `LegacyContentFilter`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Give unmigrated [lasso] boxes back to their original plugin".
+
+---
+
+### Task IM1: The Import screen, with ThirstyAffiliates' links
+
+**Feature:** F33 (R1-R10, R42, R43 listing, D6, D12; AC1, AC2, AC10 listing)
+
+**Why:** the screen and its list are the entry point for every source; ThirstyAffiliates comes first because this copy
+holds 49 of its links (real data, no fixture needed for the first look).
+
+**Depends on:** F19's header and list patterns (13C/13D), `Capabilities::PRODUCTS`.
+
+**User action:** Affibloom → **Import**: "Import", **Bulk Import** (disabled until IM3), the source select ("All
+Sources", "Thirsty Affiliates"), "Search URLs to Import", the card (Link Title, Import Target, Source, two cells), ten a
+page, pending first; each row's **Import** (disabled until IM2). Search, source and page redraw in place and stay in
+the address. No rows: an empty card and "All Sources" only.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Domain\Import\{ImportSource, ImportRow, ImportList, ImportQuery}` | `ImportService` |
+| `Application\Import\ImportService::list()` | `ImportScreen`, `ImportController` |
+| `Infrastructure\Import\ThirstySource::rows()` (R42) | `ImportSources` |
+| `Admin\ImportScreen`, submenu "Import" in `AdminMenu` | WordPress |
+| `GET /import/items` in `Rest\ImportController` | `import.js` |
+| `templates/admin/import.php`, partials `import-list.php`, `import-row.php`; `assets/admin/import.js` | the screen, the route |
+
+**Files:** the above; `tests/E2E/acceptance/F33.spec.ts` (AC1, AC2, AC10's list), `tests/Unit/Domain/Import/
+ImportListTest.php`, `tests/Integration/Import/ThirstySourceTest.php`; modify `src/Plugin.php`,
+`src/Interface/Admin/{AdminMenu,AdminAssets}.php`, `assets/admin/admin.css`, `docs/ui/design-system.md` (Import row).
+
+- [ ] **Step 1: Failing tests.** AC1 against the site's 49 rows (order, columns, 100-character cut, search, filter, the address); AC2 with the rows' meta hidden in a test site. Unit: sort and page. Expected red: no Import submenu.
+- [ ] **Step 2: Domain and service.**
+- [ ] **Step 3: ThirstySource rows.**
+- [ ] **Step 4: Screen, route, templates, script.**
+- [ ] **Step 5: Run and look.** Checks; by hand: list, search, filter, paging, 375 px.
+- [ ] **Step 6: Commit** — "Add the Import screen with ThirstyAffiliates' links".
+
+---
+
+### Task IM2: Import one, revert one — ThirstyAffiliates
+
+**Feature:** F33 (R11-R26, R43, D1, D2, D4-D8; AC3, AC4, AC5, AC10)
+
+**Why:** the import itself: a product from the source's data, its record, its old address redirecting and the source's
+shortcode drawing it, with no post rewritten; and the way back.
+
+**Depends on:** IM1; F1/F18 `ProductService::create()`; F23 `GroupService::resolve()`; **F24's old-address list**;
+F31 27X7 (`ThirstyShortcode`, `CompetitorProduct`); F21 35I (repoint keeps rows, earlier in this phase).
+
+**User action:** **Import** → "Import This Link?" (Cancel · Import; no Esc) → the row ticks (and any row of the same
+item); refused → "Import failed.". The imported row shows **Revert** → "Revert This Import?" (Keep · Revert) → the
+product is deleted, the row returns to Import; a product Affibloom's blocks use → "This product is used in N places."
+(N2). `/recommends/<slug>/` answers 301 to the product while ThirstyAffiliates is inactive.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Domain\Import\{ImportedLink, ImportRecord, ImportRecordRepository, OldAddress}`, `Source\ThirstyAddress` (D7) | `ImportService` |
+| `ImportService::import(), revert()` (D8 adopt, groups, record, old address, repoint) | `ImportController` |
+| `ThirstySource::item()` (R43) | `ImportService` |
+| `PostMetaImportRecordRepository` (D5 keys) | `ImportService`, `ImportedProducts` |
+| `Application\Import\ImportedProducts` | F31's `CompetitorProduct` (Thirsty first) |
+| `POST /import/items`, `DELETE /import/items/{source}/{ref}` | `import.js` |
+| partial `import-dialogs.php` (the two confirms) | `ImportScreen` |
+
+**Files:** the above; F33 **AC3-AC5, AC10**; unit `ImportedLinkTest`, `OldAddressTest`, `ThirstyAddressTest`,
+`ImportServiceTest`; integration `ThirstySourceTest` (item).
+
+- [ ] **Step 1: Failing tests.** AC3-AC5 with post 6741: product fields, group "Volleyball Shoes", the 301, a `[thirstylink linkid="6741"]` test post draws the product, `post_content` hashes unchanged; revert; the adopted case.
+- [ ] **Step 2: Domain** (link, record, address rules).
+- [ ] **Step 3: Service and repository.**
+- [ ] **Step 4: Routes, dialogs, script.**
+- [ ] **Step 5: Run and look.**
+- [ ] **Step 6: Commit** — "Import and revert a ThirstyAffiliates link without touching posts".
+
+---
+
+### Task IM3: Import All and Revert All in the background
+
+**Feature:** F33 (R27-R36, D11, D13; AC6, AC7)
+
+**Why:** sources hold hundreds of links; Lasso imports them in a background job that survives the page.
+
+**Depends on:** IM2; `WpCronBackgroundJob` (exists).
+
+**User action:** **Bulk Import** → "Checking" → (job running) "Currently bulk importing links. When this is complete,
+you can import more." (OK) or "Import All Links?" (Cancel · Import All) → "Updating Your Site", a progress line "N of
+M" polled every 5 s, the rows tick; the page may be closed. `&bulk-revert=1` shows **Bulk Revert** → "Revert All
+Links?" (Cancel · Revert All, red). Both use the source select's value.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Domain\Import\ImportRun` | `BulkImportService` |
+| `Application\Import\BulkImportService::start(), status(), batch()` | the routes, the cron |
+| `OptionImportRunRepository` (`affibloom_import_run`) | the service |
+| `GET` / `POST /import/bulk` | `import.js` |
+| WP-Cron `affibloom_import_batch` (registered while a job runs) | WordPress |
+| the processing, confirm-all and progress dialogs in `import-dialogs.php` | `ImportScreen` |
+
+**Files:** the above; F33 **AC6, AC7**; unit `ImportRunTest`, `BulkImportServiceTest`.
+
+- [ ] **Step 1: Failing tests** (49 Thirsty rows imported by the job driven through `wp cron event run`; revert all; one job at a time; a refused row counted, no loop).
+- [ ] **Step 2: Run model, service, repository, cron.**
+- [ ] **Step 3: Routes, dialogs, polling.**
+- [ ] **Step 4: Run and look.**
+- [ ] **Step 5: Commit** — "Import and revert all links in the background".
+
+---
+
+### Task IM4: Pretty Links
+
+**Feature:** F33 (R44; AC11)
+
+**Why:** sites coming from Pretty Links need their links, groups and old addresses in the library (R44).
+
+**Depends on:** IM2 (IM3 serves it unchanged).
+
+**User action:** with Pretty Links' data (Pro's `prli_links.link_cpt_id`), "Pretty Links" appears in the select; its rows
+import with name, slug (last segment), URL, description, NoFollow, Sponsored, groups from categories and tags; the old
+address (with `base_slug_prefix`) redirects.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\PrettyLinksSource` (rows, item), `Domain\Import\Source\PrettyLinkAddress` | `ImportSources`, `ImportService` |
+
+**Files:** F33 **AC11**; `PrettyLinkAddressTest`; integration `PrettyLinksSourceTest` (fixture: the table and posts
+created in the test). Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.**
+- [ ] **Step 2: Address rule and adapter.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Import Pretty Links".
+
+---
+
+### Task IM5: Lasso Lite / Simple URLs
+
+**Feature:** F33 (R45; AC12 import half)
+
+**Why:** sites coming from Lasso Lite or Simple URLs need every Lite field carried over (R45).
+
+**Depends on:** IM2.
+
+**User action:** with Simple URLs (or Lasso Lite) active, its `surl` links are rows; each import carries every Lite field
+(button text, disclosure, description, price, show price, second button, four toggles, badge, custom image) and Lite's
+cached Amazon data; Lite links that came from Lasso are not listed.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\SimpleUrlsSource` (Lite meta, then Lite settings, then Affibloom defaults: R45's order) | `ImportSources` |
+
+**Files:** F33 **AC12**; integration `SimpleUrlsSourceTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.**
+- [ ] **Step 2: Adapter.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Import Lasso Lite and Simple URLs links".
+
+---
+
+### Task IM6: Earnist
+
+**Feature:** F33 (R46, D10; AC13)
+
+**Why:** Earnist's links must be importable with their price, button text and groups (R46).
+
+**Depends on:** IM2.
+
+**User action:** `earnist` posts (any status, not `old_status`) are rows; an import carries URL, description, price, button
+text, the thumbnail or `_earn_image_url`, and the post's term names as groups.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\EarnistSource` | `ImportSources` |
+
+**Files:** F33 **AC13**;
+integration `EarnistSourceTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC13 (`earnist` posts of any status except `old_status`; URL, description, price, button text, thumbnail or `_earn_image_url`, term names as groups) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import Earnist links".
+
+---
+
+### Task IM7: Affiliate URLs
+
+**Feature:** F33 (R47, D10; AC14)
+
+**Why:** Affiliate URLs' links must be importable with their excerpt, thumbnail and groups (R47).
+
+**Depends on:** IM2.
+
+**User action:** `affiliate_url` posts with a redirect are rows; an import carries URL, excerpt, thumbnail, groups.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\AffiliateUrlsSource` | `ImportSources` |
+
+**Files:** F33 **AC14**. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC14 (`affiliate_url` posts with a redirect; URL, excerpt, thumbnail, groups) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import Affiliate URLs links".
+
+---
+
+### Task IM8: Easy Affiliate Links
+
+**Feature:** F33 (R48; AC15)
+
+**Why:** Easy Affiliate Links' text links must be importable with their link settings and categories (R48).
+
+**Depends on:** IM2; F31 27X6 (`[eafl]`) for the shortcode half.
+
+**User action:** text-type `easy_affiliate_link` posts are rows; an import keeps the defined name and carries URL,
+description, new tab / NoFollow ("default" from `eafl_settings`), Sponsored, `eafl_category` groups.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\EaflSource`, `Domain\Import\Source\EaflTarget` | `ImportSources` |
+
+**Files:** Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC15 (text-type `easy_affiliate_link` posts; defined name, URL, description, new tab, NoFollow, Sponsored, `eafl_category` groups) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import Easy Affiliate Links".
+
+---
+
+### Task IM9: AAWP products
+
+**Feature:** F33 (R49, R58, D9; AC16)
+
+**Why:** AAWP's products must become Amazon products from AAWP's own cache, with no call to the cloud (R49, R58).
+
+**Depends on:** IM2; F31 27X1 (`[amazon]`, `[aawp]`); F18's Amazon product.
+
+**User action:** with AAWP's `aawp_products`, its products are rows (target `[amazon link="<ASIN>"]`); an import makes an
+Amazon product from AAWP's cache (title, price, image, Prime, features, savings, rating, reviews), Sponsored on,
+AAWP's button text; with no cache, "Amazon" and the tagged link (D9).
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\AawpProductSource` | `ImportSources` |
+| `ImportedProducts::by_asin()` | 27X1's `CompetitorProduct` |
+
+**Files:** F33 **AC16**; integration `AawpProductSourceTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC16 (an AAWP product with a cache; one without: "Amazon" and the tagged link) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import AAWP products".
+
+---
+
+### Task IM10: AAWP lists
+
+**Feature:** F33 (R50; AC17)
+
+**Why:** AAWP's product lists must become groups of products (R50).
+
+**Depends on:** IM9; F23 groups.
+
+**User action:** each AAWP list is a row (target `[amazon bestseller|new|link="<keywords>" items="<n>"]`); Import imports
+every ASIN and puts the products in a group named after the keywords; Revert reverts each ASIN (kept when another
+record or table uses it).
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\AawpListSource` (an item that expands to ASINs; the group's term-meta record) | `ImportSources` |
+
+**Files:** F33 **AC17**. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC17 (an AAWP list: every ASIN imported, a group named after the keywords; revert keeps an ASIN another record uses) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import AAWP lists into groups".
+
+---
+
+> Task IM11 (AAWP tables) moved to Phase 7 on 2026-11-14 (it needs F25's tables); its text is in `archive/moving-to-phase-7.md`.
+
+---
+
+### Task IM12: EasyAzon
+
+**Feature:** F33 (R52, D9; AC19)
+
+**Why:** EasyAzon's stored items must become Amazon products (R52).
+
+**Depends on:** IM2; F31 27X3-27X4.
+
+**User action:** `easyazon_item_*` options are rows (target `[easyazon_link identifier="<ASIN>"]<title>[/easyazon_link]`);
+an import makes an Amazon product from the option; an item with no identifier is refused.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\EasyAzonSource`, `Domain\Import\Source\EasyAzonItem` | `ImportSources` |
+
+**Files:** F33 **AC19**; `EasyAzonItemTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC19 (`easyazon_item_*` options; an item with no identifier is refused) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import EasyAzon items".
+
+---
+
+### Task IM13: AmaLinks Pro
+
+**Feature:** F33 (R53, D14, D18; AC20)
+
+**Why:** the ASINs in AmaLinks Pro shortcodes must become Amazon products (R53).
+
+**Depends on:** IM2; F21 35B (shortcodes in the index, this phase); F31 27X2.
+
+**User action:** each ASIN of an `[amalinkspro]` in posts is a row (target the shortcode); an import makes the Amazon
+product (title from anchor text or cache); the AmaLinks filter shows imported rows too.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\AmaLinksSource` (reads F21's rows) | `ImportSources` |
+
+**Files:** Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC20 (ASINs of `[amalinkspro]` in posts; the AmaLinks filter shows imported rows) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import AmaLinks Pro products".
+
+---
+
+### Task IM14: SiteStripe
+
+**Feature:** F33 (R54, D18; AC21)
+
+**Why:** the products in SiteStripe markup must become Amazon products (R54).
+
+**Depends on:** IM2; F21 35J (SiteStripe in the index).
+
+**User action:** each SiteStripe product in posts is a row ("<ASIN> Image" / "<ASIN> Product Box"); Import makes the Amazon
+product; Revert is disabled, as Lasso's.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\SiteStripeSource`, `Domain\Import\Source\SiteStripeTitle` | `ImportSources` |
+
+**Files:** F33 **AC21**; `SiteStripeTitleTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC21 (SiteStripe products in posts; Revert disabled) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import SiteStripe products".
+
+---
+
+### Task IM15: WP Recipe Maker
+
+**Feature:** F33 (R55, D8, D18; AC22)
+
+**Why:** WP Recipe Maker's links must be importable as products (R55).
+
+**Depends on:** IM2; F21 35E (recipe links in the index).
+
+**User action:** with WP Recipe Maker active, each distinct recipe link is a row; a URL that is already a product links to
+it (adopted).
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\WprmSource` | `ImportSources` |
+
+**Files:** F33 **AC22**. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC22 (a recipe link; a URL that is already a product is adopted) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import WP Recipe Maker links".
+
+---
+
+### Task IM16: Skimlinks, Genius, Tinyurl, Go.
+
+**Feature:** F33 (R56, D18; AC23)
+
+**Why:** links of Skimlinks, Genius, Tinyurl and Go. found in posts must be importable as products (R56).
+
+**Depends on:** IM2; 35A's `affiliate_platform` column of the link index.
+
+**User action:** platform links in posts (tied to no product) are rows, one per URL, titled after the domain; Import makes a
+product (`is_import_platform`); Revert deletes it.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\PlatformSource`, `Domain\Import\Source\PlatformTitle` | `ImportSources` |
+
+**Files:** F33 **AC23**; `PlatformTitleTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC23 (one row per URL, titled after the domain; `is_import_platform`; revert) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import Skimlinks, Genius, Tinyurl and Go. links".
+
+---
+
+### Task IM17: Lasso as a source
+
+**Feature:** F33 (D3; AC24)
+
+**Why:** Lasso's own records are a source on the Import screen, so one record can be imported through the same screen (D3).
+
+**Depends on:** IM2; F10 26A (products step, `LassoIdMap`, `LassoRecordMapper`).
+
+**User action:** while Lasso's data is on the site, "Lasso" is in the select; its rows are Lasso records with no product;
+Import runs F10's product migration for that record; Revert deletes that product.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Application\Import\LassoImportSource` (an `ImportSource` over F10's classes; no second mapper) | `ImportSources` |
+
+**Files:** F33 **AC24**; F10 AC7 rerun. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC24 ("Lasso" in the select; import runs F10's product migration for one record; revert deletes the product; F10 AC7 rerun) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Offer Lasso's records on the Import screen".
+
+---
+
+### Task IM19: Import notices and the first-build lock
+
+**Feature:** F33 (R10, R38-R41, D15, D16; AC2 lock, AC9, AC12 notice)
+
+**Why:** Lasso tells the user when imports are possible, pending or blocked; the same notices guard Affibloom's index (R10, R38-R41).
+
+**Depends on:** IM3; F9 9K
+(`disable_import_notice`); F21 35F (the first build and the re-resolve).
+
+**User action:** the suggestion banner on Affibloom screens (not Import) while an active source has pending rows and the
+switch is off; "We are creating an index of your links. This will be complete in <time>. Please wait until then to
+begin any Imports." after a bulk import while the index re-resolves; "Check back soon." / "Affibloom is indexing your
+links. When this is complete, you can import links from other plugins." during the first build; the Lite-from-Lasso
+notice on Import.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Application\Import\ImportNotices`, `Admin\ImportNoticesModule`, `affibloom_import_reindex_notice` | `admin_notices`, the Import screen |
+
+**Files:** F33 **AC9**, AC2's lock, AC12's notice. Create the classes named above; modify `src/Plugin.php`.
+
+- [ ] **Step 1: Failing tests.** AC9, AC2's lock and AC12's notice (the suggestion banner; the re-index notice; the first-build lock; the Lite-from-Lasso notice) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the control, notice or hook does not exist.
+- [ ] **Step 2: Implementation.** the route, dialog or hook in the table above.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Show Lasso's import notices".
+
+---
+
+> Task IM20 (WP All Import) moved to Phase 7 on 2026-11-14 (its Export-CSV half needs F11 31D); its text is in `archive/moving-to-phase-7.md`.
+
+---
+
+### Task 27E: `[lasso type="table"]`
+
+> Moved here from Phase 5 on 2026-11-14; runs after F25 T12 and Task 26I. It also builds the table branch of 27X1 (`[aawp table]`) and of 28D (converting `type="table"` boxes, if the conversion is kept).
+
+**Feature:** F31 (A1 table, A50; AC19)
+
+**Why:** the saved `[lasso type="table"]` shortcodes draw the migrated comparison table (the draft 9492 uses one).
+
+**Depends on:** 27A, 26I (the tables migration) and F25 T12 (the table renderer), both in Phase 7.
+
+**User action:** `[lasso type="table" id="2"]` (the draft 9492) draws the migrated table; `table_id` wins over `id`.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `LassoIdMap::table_for()`; the table row in `LegacyAddress` | `LassoShortcode` |
+
+**Files:** F31 **AC19**. Create the classes named above; modify `src/Plugin.php` where a Module is registered.
+
+- [ ] **Step 1: Failing test.**
+- [ ] **Step 2: Mapping.**
+- [ ] **Step 3: Run and look.**
+- [ ] **Step 4: Commit** — "Render [lasso] comparison tables".
+
+---
+
+### Task IM11: AAWP tables
+
+> Moved here from Phase 5 on 2026-11-14; runs after F25's tables.
+
+**Feature:** F33 (R51; AC18)
+
+**Why:** AAWP's tables must become comparison tables (R51).
+
+**Depends on:** IM9; F25 (tables), F26 (`FieldsService`); F31 27X1's table branch.
+
+**User action:** each published `aawp_table` is a row (target `[amazon table="<id>"]`); Import makes a comparison table
+(AAWP's title, column style, Cactus, no title, horizontal headers) of its active products with badges and AAWP's rows as
+fields; `[amazon table]` draws it; Revert deletes the table.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Infrastructure\Import\AawpTableSource`, `Domain\Import\Source\AawpTableMap` | `ImportSources` |
+
+**Files:** F33 **AC18**; `AawpTableMapTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
+
+- [ ] **Step 1: Failing tests.** AC18 (an `aawp_table`: a comparison table with badges and fields; `[amazon table]` draws it; revert deletes it) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
+- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Import AAWP tables as comparison tables".
+
+---
+
+### Task IM20: WP All Import
+
+> Moved here from Phase 5 on 2026-11-14; F11 31D (Phase 6) is done by now.
+
+**Feature:** F33 (R57, D17; AC25)
+
+**Why:** WP All Import files must fill Affibloom's products as they fill Lasso's links (R57).
+
+**Depends on:** F26 (`FieldsService`); F11 D18 (the export columns).
+
+**User action:** with WP All Import active, a CSV imported into Affibloom's products with `lasso_custom_redirect` and
+`lasso_fields` sets the product's link (with its Amazon or store id) and its fields; a file from Export CSV comes back.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `Interface\Integration\WpAllImportHook` (`pmxi_saved_post`) and the `lasso_fields` parser | WP All Import |
+
+**Files:** Create the class named above; modify `src/Plugin.php`.
+
+- [ ] **Step 1: Failing tests.** AC25 (skipped without WP All Import; a CSV with `lasso_custom_redirect` and `lasso_fields`; an Export CSV file comes back) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the control, notice or hook does not exist.
+- [ ] **Step 2: Implementation.** the route, dialog or hook in the table above.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Fill products from WP All Import rows".
+
+---
+
+### Task IM18: See It — the locations of an imported product (moved here from Phase 5)
+
+> **Waits for Phase 7** (F12 36B, the Locations query). See Cross-phase notes.
+
+**Feature:** F33 (R37; AC8)
+
+**Why:** an editor must see where an imported product is used before reverting it (R37).
+
+**Depends on:** IM2; F12 36B (the Locations query).
+
+**User action:** an imported row with locations shows **See It** → "Import Locations": Content (title to the editor,
+address; tip "This is the post or page this table was found in."), Type (icon, "This is <type>."), six a page, the page
+remembered per product.
+
+**What this task creates, and who calls it:**
+
+| New | Called by |
+|---|---|
+| `GET /import/items/{source}/{ref}/locations`; the dialog in `import-dialogs.php`; user meta `affibloom_import_locations_page` | `import.js` |
+
+**Files:** F33 **AC8**. Modify `src/Interface/Rest/ImportController.php`, `templates/admin/partials/import-dialogs.php`, `assets/admin/import.js`.
+
+- [ ] **Step 1: Failing tests.** AC8 (See It: "Import Locations", six a page, the page remembered per product) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the control, notice or hook does not exist.
+- [ ] **Step 2: Implementation.** the route, dialog or hook in the table above.
+- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
+- [ ] **Step 4: Commit** — "Show where an imported product is used".
+
+---
+
+### F31 (legacy part; the `[affibloom]` rows are Phase 3)
+
+| Requirement | Task |
+|---|---|
+| R1 `lasso` / `lasso-attr` / competitors | 27A / 27I / 27X1-27X7 (each its names) |
+| R2 widget, CDATA, content, attrs filter | 27H / 27G / 27G, 27X8 / 27A |
+| R2 Elementor key filter (`builder_content_data`, the "Lasso Shortcode" widget, `class-elementor.php`) | F4 ED2 (Phase 4) — the key filter as well as the widget (assigned 2026-11-14) |
+| R3 | 27I |
+| R4, R5 | 18S1 (Phase 3), re-tested in 27A |
+| R6 | 27A |
+| A3, A4, A15-A17, A53, A54 | 27A (A17 also 18S9, Phase 3) |
+| A6, A7 | 27C (18S6, Phase 3) |
+| A8, A44-A49 | 27D (18S7, Phase 3) |
+| A9 | 27F (N1) |
+| A10-A14 | 27B (18S4, 18S5, Phase 3) |
+| A41-A43 | 27B |
+| A50, A51 | 27E (Phase 7) |
+| R10 | 27B (18S4, Phase 3) |
+| R11 | 27B (18S5, Phase 3) |
+| R12 | 27D (18S7, Phase 3) |
+| R15 | 27F (N1) |
+| R16-R19 | 27H (18S9, Phase 3) |
+| R21 | 27X8 (render-time conversion), 27E (the AAWP table branch of 27X1; Phase 7) |
+| R22 | 27G (`<ta>`: 27X7) |
+| R23 / R24 / R25 / R26 / R27 / R28 | 27X1 / 27X2 / 27X3, 27X4 / 27X5 / 27X6 / 27X7 |
+| R34 | their screens (display modal F4; Display settings F16; product preview F1; tables; MCP): not owned here |
+| R35 | F4 (Phase 4), section 5: not owned here |
+| AC15-AC23 | 27A-27I in order (AC19: 27E, Phase 7) |
+| AC24-AC31 | 27X1-27X8 in order |
+
+### F33
+
+| Requirement | Task |
+|---|---|
+| R1-R10, R42 | IM1 (R10 lock: IM19) |
+| R11-R26, R43 | IM2 |
+| R27-R36 | IM3 |
+| R37 | IM18 (waits for F12 36B, Phase 7) |
+| R38-R41 | IM19 |
+| R44 | IM4 |
+| R45 | IM5 |
+| R46 | IM6 |
+| R47 | IM7 |
+| R48 | IM8 |
+| R49 | IM9 |
+| R50 | IM10 |
+| R51 | IM11 (→ Phase 7) |
+| R52 | IM12 |
+| R53 | IM13 |
+| R54 | IM14 |
+| R55 | IM15 |
+| R56 | IM16 |
+| R57 | IM20 (→ Phase 7) |
+| R58 | IM9 (D9: no cloud fetch; C1 refresh) |
+| R59 | not built ("Needs the user" 5) |
+| R60 | F38 (onboarding; Phase 8) |
+| R61 | not built (D19) |
+| R62 | C: never (Lasso cloud) |
+| AC1, AC2 | IM1 (AC2's lock: IM19) |
+| AC3-AC5, AC10 | IM2 |
+| AC6, AC7 | IM3 |
+| AC8 | IM18 (waits for F12 36B, Phase 7) |
+| AC9 | IM19 |
+| AC11 | IM4 |
+| AC12 | IM5 (notice: IM19) |
+| AC13 | IM6 |
+| AC14 | IM7 |
+| AC15 | IM8 |
+| AC16 | IM9 |
+| AC17 | IM10 |
+| AC18 | IM11 (→ Phase 7) |
+| AC19 | IM12 |
+| AC20 | IM13 |
+| AC21 | IM14 |
+| AC22 | IM15 |
+| AC23 | IM16 |
+| AC24 | IM17 |
+| AC25 | IM20 (→ Phase 7) |
+
+Unowned inside F33: none. R59 and R61 are left out by decision, R60 belongs to F38, R62 is Lasso's cloud.
+
+### F34
+
+| R / AC | Owner |
+|---|---|
+| R1-R5 (Lasso's writer) | not built: decision A1 (no content writer exists) |
+| R6, R7, R8 | F21 35H (this phase; render-time attributes; F1 D13) |
+| R9 | F1 15C (repoint, no content write) |
+| R10 | F1 Task 36 (D34: block only) |
+| R11, R12, R13 | F22 O10 (Phase 7; render-time assignment, pending F22 N1 / F34 N4) |
+| R14 | none: keyword linking left out (deviation 52, the user's) |
+| R15, R16 | F35 (auto-monetize, Phase 7) with F21 35H |
+| R17, R44, R45, R46 | F33 (IM1-IM20) |
+| R18 | not built: decision A2 (stamps kept) and F9 N2 |
+| R19 | F21 35G |
+| R20 | F24 (old prefixes redirect; CL5, CL10) |
+| R21 | C1 / F24 (the Amazon tab's geni.us setting) |
+| R22 | F23 G4 (D6) |
+| R23 | F4 MCP1 / N5 (not built) |
+| R24 | F4 N6 (not built) |
+| R25, R47-R51, R53, R54 | none: not built (N5, waiting for the user) |
+| R52 | 27A's parser (D15: tolerance in memory); 28A dropped (decision A1) |
+| R55-R58 | F10 26A-26P (the migration reads Lasso's upgraded data; nothing here) |
+| R59 | F1 (retired ASINs) and F21 D8 |
+| R26 | F31 N4 (EAFL takeover; 27X6); nothing here |
+| R27-R36 | not built: decision A1 (H1 dropped) |
+| R37-R43 | not built: decision A1 (H2 dropped) |
+| AC1, AC5, AC8 | not built: decision A1 |
+| AC2, AC3, AC4 | not built: decision A1 |
+| AC6 | not built: decision A2 |
+| AC7 | not built: decision A2 |
+
+R25 and R47-R54 (but R52) have no task because N5 recommends building none; R18 is not built (decision A2). R11-R13 are F22 O10's (the F34 draft said "no task ID yet"; F22's task list now has O10).
+
+### F4 (ED6; moved here from Phase 4)
+
+| R / AC | Task |
+|---|---|
+| F4 R50, AC21 | ED6 (R1-R4 of the legacy block, if N2) |

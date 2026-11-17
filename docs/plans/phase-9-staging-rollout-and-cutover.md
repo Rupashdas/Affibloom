@@ -58,10 +58,11 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
 
 ## Cross-phase notes
 
-- Needs every task of Phases 2-8 done, Phase 8's release candidate (Task 39) and the user's sign-off of Phase 8.
-- Uses: F10 25A-25D (dry run and report), 26A-26P (every data family; 26O the admin run), 29A-29E (parity), F31 27A-27X8
-  (`[lasso]` and other plugins' shortcodes with Lasso off), F24 CL1-CL11, F21 35A-35J (index and render-time links),
-  F11 30A-32E, F12 33A-34C, C3A-C3C, F33 IM1-IM20, F4 ED6.
+- Needs every task of Phases 2-8 and Phase M done, Phase 8's release candidate (Task 39), the migrator's release and the user's sign-off of Phase M.
+- Needs Phase M (the Affibloom Lasso Migrator) done and signed off, with its release zip (deviation 146).
+- Uses: the migrator's data families (25A-26P; 26O the admin run), its content conversion (LM2-LM9; LM8 the admin
+  run), parity (29A-29E) and Finish (LM10); Affibloom's F24 CL1-CL11, F21 35A-35J (index and render-time links),
+  F11 30A-32E, F12 33A-34C, C3A-C3C.
 - C1 (Amazon data) ships dormant unless the client has sent Creators API credentials; if they arrive before Task 41,
   C1A's card is filled and validated on staging first.
 
@@ -69,7 +70,7 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
 
 ### Task 40: Staging rehearsal
 
-**Feature:** all · **Depends on:** Phase 8 done and signed off; the release candidate (39); the user's answers in `open-decisions.md` · **Files:** `docs/cutover/staging-log.md` (new), refreshed `tests/fixtures/inventory/` and `tests/fixtures/baselines/`; commit: "Record the staging rehearsal".
+**Feature:** all · **Depends on:** Phase 8 and Phase M done and signed off; the release candidates (39, LM10); the user's answers in `open-decisions.md` · **Files:** `docs/cutover/staging-log.md` (new), refreshed `tests/fixtures/inventory/` and `tests/fixtures/baselines/`; commit: "Record the staging rehearsal".
 
 **Roadmap:** 9.1-9.2 · **Why:** every step of the cutover is done once on a copy of production, timed and undone, so
 cutover day holds no surprises and the way back is proven.
@@ -84,25 +85,27 @@ cutover day holds no surprises and the way back is proven.
   session; the test group, draft page and table clone are deleted after the capture). Copy the site's Additional CSS
   and list its `.lasso-*` rules (33 on the Local copy) with the Affibloom class each becomes: Task 41 step 5 uses the
   list. Commit the refreshed fixtures. Products added since the Local copy are now in them.
-- [ ] 3. **Install and check nothing changes.** Upload the release zip in wp-admin (forward-slash paths, `--no-dev`
-  autoloader; deviation 87) and activate it beside Lasso. Smoke test against staging: no visible change, no notice.
+- [ ] 3. **Install and check nothing changes.** Upload Affibloom's release zip and the migrator's in wp-admin
+  (forward-slash paths, `--no-dev` autoloader; deviation 87) and activate both beside Lasso. Smoke test against staging: no visible change, no notice.
 - [ ] 4. **Migrate.** On the migration screen: dry run (25A-25C) and read the report, including the left-behind list
   (the 9 records with no link, Lasso-cloud data). Then run every family (26O). Compare (26P): every box matches, or only
-  the accepted differences in `docs/parity.md`. Import the other plugins' links (F33; ThirstyAffiliates for
-  `/recommends/`, with the client's approval).
+  the accepted differences in `docs/parity.md`. ThirstyAffiliates' old `/recommends/adidas-dame-8-all-volleyball/`
+  (guide 3297) gets a Rank Math redirect to the matching product, with the client's approval (imports from other plugins
+  are dropped, deviation 146).
 - [ ] 5. **Build the indexes.** Settings → General → Link Index → Rebuild (F21); the counts match the refreshed
   inventory (676 tied links in content). Run the link check (F11): real broken links are content work for the client.
-- [ ] 6. **Switch Lasso off.** Deactivate Lasso, purge the cache. Parity suite against staging in shortcode mode
-  (29A, 29B), every link (29C: cloaked addresses answer, Amazon links carry the right tag, no request to Lasso's
-  hosts), clicks counted (33A), GA events (C3B) with a stub or the site's tag.
-- [ ] 7. **Legacy blocks.** Check that the registered legacy block opens in the editor without a warning (ED6) and that
-  `[lasso]` shortcodes render (27A). Nothing is converted.
+- [ ] 6. **Convert the content.** With Lasso still active, on the migration screen's Content card (LM8): dry run,
+  then convert the boxes, the stamps and the Additional CSS `.lasso-*` rules (LM3-LM7; the rule list of step 2 checks
+  LM7's map); LM9's check reports nothing of Lasso left; converted guides open in the editor without a warning.
+- [ ] 7. **Switch Lasso off.** Deactivate Lasso and the migrator, purge the cache. Parity suite against staging in
+  `converted` mode (29A, 29B), every link (29C: cloaked addresses answer, Amazon links carry the right tag, no request
+  to Lasso's hosts), clicks counted (33A), GA events (C3B) with a stub or the site's tag.
 - [ ] 8. **Editor acceptance.** The client's editors on staging: add an Amazon product and an Impact product, edit one,
   put a box in a draft guide with a badge, find a broken link, read a product's Locations, use Groups and a table.
   Record remarks; fix what blocks the release, build the next RC.
-- [ ] 9. **Rehearse the way back.** Reactivate Lasso, purge. Parity
-  against Lasso's baselines with Lasso on: as before migration (29E rollback drill). Then run steps 6-7 again, so
-  staging ends in the post-cutover state.
+- [ ] 9. **Rehearse the way back.** Activate the migrator, Revert All on its Content card, reactivate Lasso, purge.
+  Parity against Lasso's baselines with Lasso on: as before migration (29D `reverted`, 29E rollback drill). Then run
+  steps 6-7 again, so staging ends in the post-cutover state.
 - [ ] 10. **Sign-off.** The user and the client sign off in `docs/cutover/staging-log.md`; set the cutover date in a
   low-traffic window from the analytics.
 
@@ -117,22 +120,25 @@ the site. Every step is the staging step that was rehearsed.
 
 - [ ] 1. **The day before.** Freeze product edits in Lasso and tell editors. Check that today's production backup
   exists and a restore has been tested by the host.
-- [ ] 2. **Install.** Upload and activate the signed-off release beside Lasso. Smoke-check three guides: no change.
+- [ ] 2. **Install.** Upload and activate the signed-off Affibloom and migrator releases beside Lasso. Smoke-check
+  three guides: no change.
 - [ ] 3. **Migrate.** Dry run; the counts match today's inventory. Run every family; compare (26P) with fixtures
-  refreshed from production. Import the other plugins' links.
+  refreshed from production. Add the Rank Math redirect for guide 3297's `/recommends/` link (Task 40 step 4).
 - [ ] 4. **Indexes.** Rebuild the link index; run the link check.
-- [ ] 5. **Switch.** Deactivate Lasso; purge LiteSpeed and any CDN; add the LiteSpeed JS-delay exclusion if Task 37D
-  found it was needed; add the icon links to Additional CSS, and
-  translate the site's Additional CSS `.lasso-*` rules to Affibloom's classes (list prepared in Task 40 step 2).
-- [ ] 6. **Check.** Parity suite against production in remote mode (29A-29C); then the legacy-block step as on staging
-  (the editor check, ED6). Five high-traffic guides by hand on a phone. The cloaked addresses answer.
+- [ ] 5. **Convert, then switch.** Convert the content on the Content card (LM8) and check that nothing of Lasso is
+  left (LM9). Deactivate Lasso and the migrator (the migrator stays installed for the way back); purge LiteSpeed and any
+  CDN; add the LiteSpeed JS-delay exclusion if Task 37D found it was needed; add the icon links to Additional CSS.
+- [ ] 6. **Check.** Parity suite against production in remote mode (29A-29C). Converted guides open in the editor
+  without a warning. Five high-traffic guides by hand on a phone. The cloaked addresses answer.
 - [ ] 7. **Clicks and events.** Click a box button on production: the click is recorded (33A) and the GA event
   `affibloom_primary_click` reaches the site's tag (C3B, checked in GA4 DebugView by the client if they have access); no
   event named "Lasso …" is sent.
 - [ ] 8. **Tell editors** they can edit again, now in Affibloom. Send them the admin guide (Task 39).
 
-**Rollback**, if any check in steps 6-7 fails and cannot be fixed within 30 minutes: activate Lasso, purge caches, check three guides. Affibloom stays installed and harmless beside Lasso; its products are
-kept for the next attempt. Lasso's data was never changed (ADR-2), so reactivating it restores the old state.
+**Rollback**, if any check in steps 6-7 fails and cannot be fixed within 30 minutes: activate the migrator and Revert
+All on its Content card (every post back byte for byte), activate Lasso, purge caches, check three guides. Affibloom
+stays installed and harmless beside Lasso; its products are kept for the next attempt. Lasso's data was never changed
+(ADR-2), so reactivating it restores the old state.
 
 ---
 
@@ -147,15 +153,17 @@ kept for the next attempt. Lasso's data was never changed (ADR-2), so reactivati
   the PHP error log searched for `Affibloom`; Search Console crawl errors (cloaked and `/recommends/` addresses); the
   page speed of three guides. Click counts and GA events start at cutover (decisions E1, C6): write the cutover date at the top
   of `monitoring.md`, and compare against the Amazon Associates report from that date, not against Lasso's figures.
-- [ ] 2. **After two clean weeks and the client's sign-off:** delete the Lasso plugin (it is deactivated; deleting it
+- [ ] 2. **After two clean weeks and the client's sign-off:** activate the migrator and run **Finish migration**
+  (LM10: its copies, the Lasso ID map and its options removed; the way back is now the backup only), then delete the
+  migrator. Delete the Lasso plugin (it is deactivated; deleting it
   removes its files; Lasso has no uninstall routine, so its data stays). Take a database backup labelled as holding
   Lasso's data.
 - [ ] 3. **After 90 days, with the client's approval:** drop Lasso's tables (`SHOW TABLES LIKE 'wp_lasso%'`, run on
-  staging first), delete the `lasso-urls` posts and their meta and the `lasso_*` options. Record each step. Affibloom's `LassoIdMap` (`_affibloom_lasso_id`) stays: `[lasso]` shortcodes still use it.
+  staging first), delete the `lasso-urls` posts and their meta and the `lasso_*` options. Record each step. Nothing in Affibloom reads them (deviation 146).
 - [ ] 4. **Finish.** The client cancels the Lasso subscription. Tick Phase 9 in the roadmap and record the completion
   date.
 
 ## Exit check
 
-Lasso removed from production; two weeks of monitoring with no regressions; every parity check (29A-29C, 29E) green on
+Lasso and the migrator removed from production; two weeks of monitoring with no regressions; every parity check (29A-29C, 29E) green on
 production; the client's written sign-off.

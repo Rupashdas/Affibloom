@@ -321,7 +321,7 @@ Exit criteria: the F4 acceptance tests pass, and a new box made with the block m
 
 ## Phase 5: Lasso compatibility and migration
 
-**Planned in full 2026-11-14:** tasks in `plans/phase-5-lasso-compatibility-and-migration.md`; the checklist below is the original outline, kept for history.
+**Planned in full 2026-11-14; split 2026-11-17 (deviation 146):** core tasks in `plans/phase-5-links-cloaking-and-variants.md`, the migration in `plans/phase-m-lasso-migrator.md` (a separate plugin); the checklist below is the original outline, kept for history.
 
 Goal: switching Lasso off changes nothing a reader sees. Covers F10, the highest-risk feature, so it gets the most testing. Depends on: Phases 2 and 3; task 5.5 also needs Phase 4.
 

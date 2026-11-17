@@ -8,7 +8,7 @@
 
 ## Status
 
-Planned; gate 4 given by the user 2026-11-14 for every open task (tasks 26J and 34D are dropped, decision E1; 3 tasks moved here from Phase 5 have their sections in the Phase 5 file). Phase 6 (link health) must have its exit check met and be signed off first. Written 2026-11-14; the link index itself (F21 Tasks 35A-35J, F9 9J, F38 ON3 and ON4) was moved to Phase 5 by the coordinator the same day, so this phase starts from Locations (36A).
+Planned; gate 4 given by the user 2026-11-14 for every open task (tasks 26J and 34D are dropped, decision E1; since 2026-11-17 the Lasso tasks 26I, 26N and 29C are in Phase M and 27E, IM11, IM18 and IM20 are dropped, deviation 146). Phase 6 (link health) must have its exit check met and be signed off first. Written 2026-11-14; the link index itself (F21 Tasks 35A-35J, F9 9J, F38 ON3 and ON4) was moved to Phase 5 by the coordinator the same day, so this phase starts from Locations (36A).
 
 ## Scope and features
 
@@ -23,9 +23,9 @@ Phase 7 builds where-used (Locations) on top of the link index that Phase 5 now 
 - **C2** automatic affiliate-link detection, the first slice of F35: `docs/features/C2/` (Tasks C2A-C2C).
 - **F25** comparison tables: `docs/features/F25/` (Tasks T1-T17).
 - **F31** the table's Copy Shortcode: `docs/features/F31/` (Task 18S13, copied from the Phase 3 file).
-- **F10** Lasso migration, parts: `docs/features/F10/` (Tasks 26I tables, 26N opportunities and the new features' settings, 29C parity of every link; 27E is moved here from Phase 5).
+- **F10** Lasso migration: none since 2026-11-17. Tasks 26I, 26N and 29C moved to the Affibloom Lasso Migrator plugin (Phase M, deviation 146); 27E is dropped (the migrator converts `[lasso type="table"]`, LM5).
 - **C1** Amazon product data, parts: `docs/features/C1/` (Tasks C1E scheduled refresh, C1H availability to link health).
-- **F33** import from other plugins, parts moved here from Phase 5: Tasks IM11 (AAWP tables) and IM20 (WP All Import).
+- **F33** import from other plugins: dropped 2026-11-17 (deviation 146); IM11, IM18 and IM20 are archived.
 
 ## Decisions that change this phase
 
@@ -124,7 +124,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 **Migration of the opportunity and auto-detect data (after F22 and F35 exist):**
 
-- [ ] Task 26N: Opportunity switches, dismissals and the new features' settings — `wp affibloom migrate --only=opportunities`
+- Task 26N: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
 ### F25 — Comparison tables (with F31's table Copy Shortcode after T12)
 
@@ -150,18 +150,18 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F10 — migration family: tables
 
-- [ ] Task 26I: Comparison tables — `wp affibloom migrate --only=tables`
+- Task 26I: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
-### Moved here from Phase 5 (sections stay in the Phase 5 file until the coordinator moves them)
+### Moved here from Phase 5, then dropped (deviation 146)
 
-- [ ] Task 27E: `[lasso type="table"]` (moved here from Phase 5)
-- [ ] Task IM11: AAWP tables (moved here from Phase 5)
-- [ ] Task IM20: WP All Import (moved here from Phase 5)
-- [ ] Task IM18: See It — the locations of an imported product (moved here from Phase 5)
+- Task 27E: dropped (deviation 146: the migrator converts `[lasso type="table"]` instead, Task LM5; section in `archive/phase-5-superseded.md`)
+- Task IM11: dropped (deviation 146: Affibloom has no other plugins' compatibility; section in `archive/phase-5-superseded.md`)
+- Task IM20: dropped (deviation 146: Affibloom has no other plugins' compatibility; section in `archive/phase-5-superseded.md`)
+- Task IM18: dropped (deviation 146: Affibloom has no other plugins' compatibility; section in `archive/phase-5-superseded.md`)
 
 ### F10 — parity of every link
 
-- [ ] Task 29C: Parity — every link, and no call to Lasso
+- Task 29C: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
 ## Cross-phase notes
 
@@ -189,23 +189,23 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - **`assigned_product_id` (F22 N1-A):** F22's O10 needs this nullable, indexed column on F21's `affibloom_link_locations` table, kept across rescans by identity (F21 D10). **Phase 5's Task 35A must create it.** The F21 draft of 35A lacks it (I did not edit the draft): when 35A is placed in Phase 5, add the column to 35A's "creates" table; O10 here says "no migration here".
 - **The event `affibloom_link_index_indexed`:** F35's C2B and AM6 listen to it. It must be fired by F21's `LinkIndexer::index()` at the end of each host (`$host`, `$rows`), i.e. by **35A-35C in Phase 5**. C2B here has no code for it, only tests that assert it fires.
 - **The old usage index is superseded:** the table `affibloom_usage`, `wp affibloom usage rebuild`, `UsageIndexer`, `UsageStore`, `UsageHooks` (old Tasks 35A-35C) are replaced by `affibloom_link_locations` and `wp affibloom links rebuild`. The overview (`00-overview.md`) and `tools/README.md` still say `usage rebuild`; they were not touched here and need correcting. The counts are **676 in-content links, not 1,504** (old Task 33's and Tasks 35A-35C's "1,504" figures are retired).
-- **Moved here from Phase 5 (coordinator, 2026-11-14), sections still in the Phase 5 file:** Task 27E (`[lasso type="table"]`, waits for T12), Task IM11 (AAWP tables, waits for F25's store) and Task IM20 (WP All Import). They are listed in the task list at the end, before 29C; the coordinator moves their text. **Copied here from Phase 3:** Task 18S13 (a table's Copy Shortcode), placed right after T12.
+- **Changed 2026-11-17 (deviation 146):** 27E, IM11 and IM20 (moved here from Phase 5 on 2026-11-14) and IM18 are dropped; 26I, 26N and 29C moved to Phase M. Affibloom reads no Lasso data or markup and no other affiliate plugin's: where a section below names `data-lasso-*`, `[lasso]`, `lasso_*` keys or Lasso's tables as an input (F12's click selectors, F22's previews, C2's stored networks), the task reads Affibloom's own equivalent instead (the render-time `data-affibloom-id` and `data-affibloom-location` of 35H, the index's rows, Affibloom's settings), and its figures from this site are checked after Phase M.
 - **Moved to Phase 5 (coordinator):** F21 Tasks 35A-35J (index, displays, save hooks, custom link detection, builders, background rebuild, Link Index and Performance settings, render-time attributes, product save/repoint, SiteStripe and block displays), F9 9J (Link Index card), F38 ON3 (Automations) and ON4 (index notices). Everything here that says "35x" means the Phase 5 task.
 
 ### Earlier phases (named dependencies)
 
 - **Phase 2:** 9B (General layout), 9D (override route), 9E (unsaved guard), 9F (GA card), 9H (Performance card), 9I (Custom Link Detection card), 9L (support view), ON1 (`AdminNavigation`; O1 and T1 register their tabs through it), ON2 (`NoticeBoard`, used by AM4), G1-G5 (F23: group displays in 36A, `GET /products?search=` of G4 used by O10 and T4, `GET /groups` in T5), FL1-FL5 (F26: fields 99989-99994, `POST /fields`), 13A-13J (Dashboard list, filters, saved views, `reset()`), 11A-12E (`ProductService::create_from_url()`, tag rule), 14A-14H (product page tabs, buttons), 15A-15D, 16B (`guarded()`), 17A-17D (delete, bulk), 10F (Amazon tab and switch), C1A-C1D, C1I (C1E needs C1C).
 - **Phase 3:** Tasks 18-22 (box engine, `BoxAssets`, `data-affibloom-id` and `data-affibloom-btn` attributes: 33A; `BoxBuilder`), 18S1 and 18S10-18S13 (shortcode dispatcher and Copy Shortcode buttons: T3, T12), F16 (`show_disclosure_table`: T12).
-- **Phase 5:** 25A-26E, 26C (settings import: 33D's `performance_event_tracking`, C3A's four GA values), 26G and F24 (cloaked addresses: 29C), 27 (`LassoIdMap`, `[lasso]`), 29A (29C), F33's import (the Link Index notices), plus **35A-35J** (see above).
+- **Phase 5:** F24 (cloaked addresses) and **35A-35J** (see above). (Before 2026-11-17 this line also named Phase 5's migration tasks; they are in Phase M now, deviation 146.)
 - **Phase 6:** F11 30A (open issue rows) and 31A (the Alert cell: 13K adds its sort), 30-32 (issue store: C1H), the `affibloom_daily` event registered by F11's `LinkCheckCron` (33C), TL1/TL2 (`Schema\Migrator`, `Schema\Table`: ClickTable, DetectedLinksTable, table post types use them; if their names differ, the Phase 7 tasks follow TL2's).
 
 ### Later phases (what waits, and how it is stubbed)
 
 - **Phase 6's F11 31A** shows the Alert cell with a plain header; its sort arm is added by **13K** here (Alert, Locations and Clicks together). Nothing in Phase 6 waits: the header is plain text until 13K.
 - **Phase 4's "Choose a Table"** in the editor (F4, F25 R55) waits for **T1's `GET /tables`**; until Phase 7 that picker is not shown.
-- **Phase 5's 28D** table part is built in **27E** here (after T12 and 26I); 27E, IM11 and IM20 now sit in this phase.
+- **Phase 5's 28D** table part: Phase M's LM5 converts `[lasso type="table"]` to Affibloom's table display (deviation 146).
 - **Phase 8:** ON5 (education boxes; needs O1's screen) is to replace O1's own `IntroBoxes` and `POST /opportunities/intros/{box}` by its component (second use) and read F9 9K's `disable_help_tips`; ON6-ON7 (wizard) reuse C3A's GA partial (F38 R53-R58, C3 R13) and C1A's card; ON9 (palette) and ON8 (tour) are not here; TL5 (uninstall list of posts still using Affibloom) reads the F21 index; Task 37 checks LiteSpeed's "delay JavaScript" against `clicks.js`; Task 38's library export is not the opportunities CSV (O9).
-- **Phase 9:** Task 42 holds the first Amazon import on staging first (F35 N3), and re-runs 26C and 26N `--update` so the keys added by this phase are imported.
+- **Phase 9:** Task 42 holds the first Amazon import on staging first (F35 N3). The migrator (Phase M) runs after Phase 8, when every key this phase adds exists, so 26C and 26N need no second `--update` run.
 - **Within this phase:** 36C's Clicks cell is a 0 stub until 34C; 36A's and 34A's header sort waits for 13K (their sort tests run there); 26N's F22 parts wait for O5-O7 (26N is listed before them) and its settings keys for each feature's task; 26I waits for T-tasks (it is after them).
 
 ### Overlaps
@@ -685,32 +685,7 @@ No click figures are imported. The section is in `archive/phase-7-superseded.md`
 
 ---
 
-### Task 26N: Opportunity switches, dismissals and the new features' settings — `wp affibloom migrate --only=opportunities`
-
-**Feature:** F10 (R18; analysis tables T1 `is_opportunity`, T19, T20 `is_ignored`, S5, S6; AC21)
-
-**Why:** each product's Detect Opportunities switch, the opportunities an editor dismissed, the ASIN replacements and the scan scope are Lasso's data; without them dismissed suggestions would return and every product would be re-enabled. **Scope (coordinator, 2026-11-14):** this task also carries the settings keys that F21, F22, F35 and C3 add: Lasso's scan keys (Custom Post Types, ACF fields, performance, Keep Original URL, cron interval), opportunity keys, auto-detect keys and the four Google Analytics keys. Where 26C already imports a key (it reports "waiting for <feature>" until the key exists), 26N re-runs that import for the keys the features of this phase and Phase 5 have since built.
-
-**Depends on:** F21 35A-35C and the F21 settings (Phase 5); F22 O5 (the product switch), O6 (the setting), O7 (dismissals); F35 (C2B/AM3 keys); C3A (GA keys); 26A, 26C (Phase 5). The F22 tasks come later in this phase's order (see Cross-phase notes): until they exist the family reports "waiting for F22" and writes nothing, so it can run in parts.
-
-**User action:** `wp affibloom migrate --only=opportunities` reports, per part, what it set (`N products' switch`, `N dismissed opportunities`, ASIN replacements, scan scope, the settings keys of F21, F22, F35 and C3) or "waiting for <feature>"; running again reports "unchanged". The Dashboard and Link Opportunities then show the same opportunities Lasso's did, with the dismissed ones still gone, and Settings → General shows the imported values.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `LassoSource::opportunities()` | `OpportunitiesStep` |
-| `Application\Migration\{OpportunityMapper, OpportunitiesStep}` (`plan()`, `run()`, idempotent, `--update`; writes through F22's service, F21's `is_ignored` identity rule, and `SettingsService` for the keys of F21, F22, F35 and C3) | `MigrationService`, `MigrateCommand` |
-
-**Files:** create the mapper and step; modify `LassoSource.php`, `WpLassoSource.php`; tests `tests/Unit/Application/OpportunityMapperTest.php`, `tests/Integration/OpportunitiesStepTest.php`, `tests/E2E/acceptance/F10.spec.ts` (AC21).
-
-- [ ] **Step 1: Failing tests.** AC21: each product's switch, every dismissed opportunity, the replacements and the listed settings keys carried over; a second run changes nothing; Lasso's fingerprint equal (AC23). Expected red: "waiting for F22".
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step** (the switch and the dismissals after O5-O7 exist; the settings keys as their features exist).
-- [ ] **Step 4: Run and look.** On Local: the command; the Dashboard's opportunities tile; Settings → General; a dismissed row stays dismissed after a rebuild of its host.
-- [ ] **Step 5: Commit** — "Migrate Lasso's opportunity switches, dismissals and scan settings".
-
----
+### Task 26N: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
 ### Task C1E: The scheduled refresh job
 
@@ -2059,175 +2034,17 @@ Also builds 24D's table half (Edit Display for a table box), which Phase 4 left 
 
 ---
 
-### Task 26I: Comparison tables — `wp affibloom migrate --only=tables`
+### Task 26I: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
-**Feature:** F10 (R14; analysis tables T4 (fields 99989-99994), T6, T9-T12, K12; AC16)
+### Task 27E: dropped (deviation 146: the migrator converts `[lasso type="table"]` instead, Task LM5; section in `archive/phase-5-superseded.md`)
 
-**Why:** Lasso's three comparison tables (all Horizontal, used only by the draft post 9492) must exist in Affibloom with their products, order, badges, columns and values before cutover; the migration carries everything Lasso stores.
+### Task IM11: dropped (deviation 146: Affibloom has no other plugins' compatibility; section in `archive/phase-5-superseded.md`)
 
-**Depends on:** F25 T1-T17 (earlier in this phase: the table store, the builder's write paths, the reader's renderer); 26A, 26E (Phase 5); F26's built-in table fields (99989-99994, Phase 2).
+### Task IM20: dropped (deviation 146: Affibloom has no other plugins' compatibility; section in `archive/phase-5-superseded.md`)
 
-**User action:** `wp affibloom migrate --only=tables` prints one line per table and a summary (here `3 tables created`); run again `0 created, 3 unchanged`. The Tables list shows them and each opens in the builder with its products, columns, badges and values; with `[affibloom type="table" id=…]` the reader's table matches Lasso's. Before F25 exists the family reports "waiting for F25" and writes nothing.
+### Task IM18: dropped (deviation 146: Affibloom has no other plugins' compatibility; section in `archive/phase-5-superseded.md`)
 
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `LassoSource::tables()` (the four table tables and their metadata) | `TablesStep` |
-| `Application\Migration\TableMapper` (pure: Lasso rows to F25's `Table` objects, IDs mapped through the product map) | `TablesStep` |
-| `Application\Migration\TablesStep::plan()`, `run()` (writes through F25's `TableService`; records `table_map` in `OptionMigrationLog`; idempotent; `--update`) | `MigrationService`, `MigrateCommand` |
-
-**Files:** create `TableMapper.php`, `TablesStep.php`; modify `LassoSource.php`, `WpLassoSource.php`; tests `tests/Unit/Application/TableMapperTest.php`, `tests/Integration/TablesStepTest.php` (twice; the three tables of this copy), `tests/E2E/acceptance/F10.spec.ts` (AC16).
-
-- [ ] **Step 1: Failing tests.** AC16: the three tables with their products, order, badges, columns, values; a second run changes nothing; the fingerprint of Lasso's tables equal before and after (AC23). Expected red: the family reports "waiting for F25".
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step** (through `TableService`, so F25's validation applies).
-- [ ] **Step 4: Run and look.** On Local: `--only=tables`; the Tables list; tables 2 and 3 in the builder and in the preview against Lasso's.
-- [ ] **Step 5: Commit** — "Migrate Lasso's comparison tables".
-
----
-
-### Task 27E: `[lasso type="table"]`
-
-> Moved here from Phase 5 on 2026-11-14; runs after F25 T12 and Task 26I. It also builds the table branch of 27X1 (`[aawp table]`) and of 28D (converting `type="table"` boxes, if the conversion is kept).
-
-**Feature:** F31 (A1 table, A50; AC19)
-
-**Why:** the saved `[lasso type="table"]` shortcodes draw the migrated comparison table (the draft 9492 uses one).
-
-**Depends on:** 27A, 26I (the tables migration) and F25 T12 (the table renderer), both in Phase 7.
-
-**User action:** `[lasso type="table" id="2"]` (the draft 9492) draws the migrated table; `table_id` wins over `id`.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `LassoIdMap::table_for()`; the table row in `LegacyAddress` | `LassoShortcode` |
-
-**Files:** F31 **AC19**. Create the classes named above; modify `src/Plugin.php` where a Module is registered.
-
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Mapping.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Render [lasso] comparison tables".
-
----
-
-### Task IM11: AAWP tables
-
-> Moved here from Phase 5 on 2026-11-14; runs after F25's tables.
-
-**Feature:** F33 (R51; AC18)
-
-**Why:** AAWP's tables must become comparison tables (R51).
-
-**Depends on:** IM9; F25 (tables), F26 (`FieldsService`); F31 27X1's table branch.
-
-**User action:** each published `aawp_table` is a row (target `[amazon table="<id>"]`); Import makes a comparison table
-(AAWP's title, column style, Cactus, no title, horizontal headers) of its active products with badges and AAWP's rows as
-fields; `[amazon table]` draws it; Revert deletes the table.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `Infrastructure\Import\AawpTableSource`, `Domain\Import\Source\AawpTableMap` | `ImportSources` |
-
-**Files:** F33 **AC18**; `AawpTableMapTest`. Create the class(es) named above and register the source in `ImportSources` (`src/Plugin.php`).
-
-- [ ] **Step 1: Failing tests.** AC18 (an `aawp_table`: a comparison table with badges and fields; `[amazon table]` draws it; revert deletes it) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the source is not offered on the Import screen.
-- [ ] **Step 2: Implementation.** the class(es) in the table above, registered in `ImportSources`.
-- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
-- [ ] **Step 4: Commit** — "Import AAWP tables as comparison tables".
-
----
-
-### Task IM20: WP All Import
-
-> Moved here from Phase 5 on 2026-11-14; F11 31D (Phase 6) is done by now.
-
-**Feature:** F33 (R57, D17; AC25)
-
-**Why:** WP All Import files must fill Affibloom's products as they fill Lasso's links (R57).
-
-**Depends on:** F26 (`FieldsService`); F11 D18 (the export columns).
-
-**User action:** with WP All Import active, a CSV imported into Affibloom's products with `lasso_custom_redirect` and
-`lasso_fields` sets the product's link (with its Amazon or store id) and its fields; a file from Export CSV comes back.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `Interface\Integration\WpAllImportHook` (`pmxi_saved_post`) and the `lasso_fields` parser | WP All Import |
-
-**Files:** Create the class named above; modify `src/Plugin.php`.
-
-- [ ] **Step 1: Failing tests.** AC25 (skipped without WP All Import; a CSV with `lasso_custom_redirect` and `lasso_fields`; an Export CSV file comes back) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the control, notice or hook does not exist.
-- [ ] **Step 2: Implementation.** the route, dialog or hook in the table above.
-- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
-- [ ] **Step 4: Commit** — "Fill products from WP All Import rows".
-
----
-
----
-
-### Task IM18: See It — the locations of an imported product (moved here from Phase 5)
-
-> **Waits for Phase 7** (F12 36B, the Locations query). See Cross-phase notes.
-
-**Feature:** F33 (R37; AC8)
-
-**Why:** an editor must see where an imported product is used before reverting it (R37).
-
-**Depends on:** IM2; F12 36B (the Locations query).
-
-**User action:** an imported row with locations shows **See It** → "Import Locations": Content (title to the editor,
-address; tip "This is the post or page this table was found in."), Type (icon, "This is <type>."), six a page, the page
-remembered per product.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| `GET /import/items/{source}/{ref}/locations`; the dialog in `import-dialogs.php`; user meta `affibloom_import_locations_page` | `import.js` |
-
-**Files:** F33 **AC8**. Modify `src/Interface/Rest/ImportController.php`, `templates/admin/partials/import-dialogs.php`, `assets/admin/import.js`.
-
-- [ ] **Step 1: Failing tests.** AC8 (See It: "Import Locations", six a page, the page remembered per product) in `tests/E2E/acceptance/F33.spec.ts` and the integration or unit test named under Files, written first; expected red: the control, notice or hook does not exist.
-- [ ] **Step 2: Implementation.** the route, dialog or hook in the table above.
-- [ ] **Step 3: Run and look.** Run the user action above on Local (1280 and 375 px where something is drawn or shown) and see the result.
-- [ ] **Step 4: Commit** — "Show where an imported product is used".
-
----
-
-### Task 29C: Parity — every link, and no call to Lasso
-
-**Feature:** F10 (AC29, AC30)
-
-**Why:** Phase 5's 29A and 29B compare boxes and whole pages; this proves the other half of "nothing changes for readers": every `<a href>` in each guide's article goes where it went, the cloaked addresses still redirect, and nothing calls Lasso's services. It stays last in the order because it uses everything built before it.
-
-**Depends on:** 29A (Phase 5); F24 and 26G (cloaked addresses, Phase 5); F21's index and render-time attributes (35A-35C, 35H, now Phase 5).
-
-**User action:** `npm run test:e2e -- parity` now also compares, for each of the 34 guides, every `<a href>` of the article (the 676 in-content links) with `tests/fixtures/inventory/links.json` and a new all-links baseline captured with Lasso on, before the reset; each own-site cloaked address is requested and its redirect compared; no request goes to `codedrink.com`, `lasso.link` or `getlasso.co`.
-
-**What this task creates, and who calls it:**
-
-| New | Called by |
-|---|---|
-| the all-links capture tool (`tools/`, documented in `tools/README.md`) and its baseline `tests/fixtures/baselines/links-all.json` | the parity suite |
-| the links part of `tests/Visual/parity.spec.ts` (hrefs, redirects, request log) | `npm run test:e2e -- parity` |
-
-**Files:** create the capture tool and baseline; modify `tests/Visual/parity.spec.ts`, `docs/parity.md`, `tools/README.md`.
-
-- [ ] **Step 1: Failing tests.** The suite's links part on the 34 guides with Lasso off; red until the cloaked addresses and the render-time attributes agree with the baseline.
-- [ ] **Step 2: The capture tool** (run once with Lasso on, before the reset) and the baseline.
-- [ ] **Step 3: Fix causes** (each with a test at the owning feature), or record in `docs/parity.md`.
-- [ ] **Step 4: Run and look.** The whole parity suite twice; no request to Lasso's hosts in the log.
-- [ ] **Step 5: Commit** — "Prove every link still goes where it went".
-
----
+### Task 29C: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 
 ## Exit check
 
@@ -2239,7 +2056,7 @@ Phase 7 is done when every task above is ticked, `composer lint`, `composer anal
 - **F22:** AC1-AC13.
 - **C2:** AC1-AC9. **F35:** AC1-AC8.
 - **F25:** AC1-AC21. **F31:** AC13 (18S13).
-- **F10:** AC16 (26I), AC21 (26N), AC29, AC30 (29C), AC23 on every write task; **27E, IM11 and IM20** with their Phase 5 acceptance criteria.
+- **F10:** none here since 2026-11-17: AC16 (26I), AC21 (26N), AC29-AC30 (29C) and AC23 are Phase M's; 27E, IM11 and IM20 are dropped (deviation 146).
 - **C1:** AC6, AC10 (C1E), AC13 (C1H).
 - **F21:** the Locations side of AC2, AC3 and the index-versus-inventory check: the published rows of the index match the Phase 1 inventory for all 34 guides (676 in-content links), and Clicks on a test page appear on the Dashboard.
 - The user's sign-off for the phase, recorded in `progress.md`.
@@ -2287,7 +2104,7 @@ Every requirement or criterion of the phase's features that a task here owns. It
 | F22 R24-R28, R32, R33, AC4 | O3 |
 | F22 R29-R31, AC12 | O4 |
 | F22 R34-R39, AC5, AC6 | O5 |
-| F22 R40 | IM20 (WP All Import saves; assigned 2026-11-14); Lasso's importer value: 26N |
+| F22 R40 | not built: IM20 dropped (deviation 146); Lasso's importer value: 26N (Phase M) |
 | F22 R41-R43, AC7 | O6 |
 | F22 R44-R48, AC8 | O7 |
 | F22 R49, R73, R74-R80 | not built (absence checked by O1, AC13) |
@@ -2328,21 +2145,21 @@ Every requirement or criterion of the phase's features that a task here owns. It
 | F25 R54, AC19 | T15 |
 | F25 R55 | T1 (data); the editor screens are F4's |
 | F25 R56 | Phase 5, F21 35B |
-| F25 R57 | IM11 (F33) |
+| F25 R57 | not built: IM11 dropped (deviation 146) |
 | F25 R59, AC20 | T16 |
 | F25 R60, AC21 | T17 |
 | F25 R61 | F26 (N1) |
 | F25 R62 | T1 (left out) |
 | F31 R33, AC13 | 18S13 |
-| F31 27E (`[lasso type="table"]`) | 27E |
-| F10 R14, AC16 | 26I |
+| F31 27E (`[lasso type="table"]`) | dropped; Phase M LM5 converts it (deviation 146) |
+| F10 R14, AC16 | 26I (Phase M) |
 | F10 R11, AC17 | not built: decision E1 (26J dropped) |
-| F10 R18, AC21 | 26N (and the settings keys of F21, F22, F35, C3) |
-| F10 AC29, AC30 | 29C |
-| F10 AC23 | every write task (26I, 26N) |
+| F10 R18, AC21 | 26N (Phase M; the settings keys of F21, F22, F35, C3) |
+| F10 AC29, AC30 | 29C (Phase M) |
+| F10 AC23 | Phase M's write tasks |
 | C1 R37-R39, AC6, AC10 | C1E |
 | C1 R55-R57, AC13 | C1H |
-| F33 AAWP tables, WP All Import | IM11, IM20 |
+| F33 AAWP tables, WP All Import | dropped (deviation 146) |
 | F9 R20-R21, AC13 (Link Index card) | Phase 5, 9J (moved) |
 | F38 R40-R43, AC7; R25, R26, AC8 | Phase 5, ON3, ON4 (moved) |
 
