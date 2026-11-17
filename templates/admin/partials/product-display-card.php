@@ -1,8 +1,10 @@
 <?php
 /**
- * The product page's right card (F1, Task 14B): what a box shows besides the link, in Lasso's order (url-details.php
- * 299-510): the preview with the image and "Update Image", Display Theme beside the image link, Badge Text beside
- * Price, Description, Disclosure, then the toggles. Labels and help texts are Lasso's, with its product name removed.
+ * Lasso's right card on the product page (F1, Task 14B): what a box shows besides the link, in Lasso's order
+ * (url-details.php 299-510): the preview with the image and "Update Image", Display Theme beside the image link, Badge
+ * Text beside Price, Description, Disclosure, then the toggles. Labels and help texts are Lasso's, with its product name
+ * removed. Meadow (Task MD5) prints it in two parts: `preview`, the frame for the sticky aside, and `fields`, the rest
+ * as two cards, *Display content* and *Disclosure & link attributes*, in the same order.
  *
  * Placeholders until their tasks: the live preview (14E, Phase 3), Detect Opportunities (the Opportunities area),
  * Link Cloaking (link cloaking) and the Amazon price shown from Amazon's data (C1F). Lasso's Commission Upgrades is its
@@ -10,7 +12,7 @@
  * answer (C1D), which Lasso stores at once.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, choices: \Affibloom\Interface\Admin\IconChoices, amazon_row: \Affibloom\Domain\Amazon\AmazonProduct|null} $view
+ * @var array{part: string, product: \Affibloom\Domain\Product\Product, theme: string, themes: list<string>, disclosure: string, own_text: string, show_price: bool, amazon_tab: string, can_refresh: bool, choices: \Affibloom\Interface\Admin\IconChoices, amazon_row: \Affibloom\Domain\Amazon\AmazonProduct|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -39,7 +41,9 @@ $editor = static fn( int $height ): array => array(
 	'editor_height' => $height,
 );
 ?>
-<div class="affibloom-card affibloom-product__card affibloom-product__card--display">
+<?php if ( 'preview' === $view['part'] ) : ?>
+<section class="affibloom-card affibloom-product__preview" aria-labelledby="affibloom-preview-title">
+	<h2 class="affibloom-card__title affibloom-product__preview-title" id="affibloom-preview-title"><?php esc_html_e( 'Live preview', 'affibloom' ); ?></h2>
 	<?php // The live preview (Task 14E): the real box replaces the image here once drawn; the image editor stays behind it. Loading until then (product.js). ?>
 	<div class="affibloom-image-frame is-loading" data-image-frame data-preview-title="<?php esc_attr_e( 'Product box preview', 'affibloom' ); ?>">
 		<?php $this->render( 'admin/partials/box-skeleton' ); ?>
@@ -57,7 +61,13 @@ $editor = static fn( int $height ): array => array(
 			<?php esc_html_e( 'The box preview appears here.', 'affibloom' ); ?>
 		</p>
 	</div>
-
+</section>
+	<?php
+	return;
+endif;
+?>
+<section class="affibloom-card affibloom-product__card affibloom-product__card--display" aria-labelledby="affibloom-card-display">
+	<h2 class="affibloom-card__title" id="affibloom-card-display"><?php esc_html_e( 'Display content', 'affibloom' ); ?></h2>
 	<div class="affibloom-product__pair affibloom-product__pair--even">
 		<div class="affibloom-field">
 			<div class="affibloom-field__head">
@@ -256,7 +266,10 @@ $editor = static fn( int $height ): array => array(
 			<?php esc_html_e( 'Add Feature', 'affibloom' ); ?>
 		</button>
 	</div>
+</section>
 
+<section class="affibloom-card affibloom-product__card affibloom-product__card--display" aria-labelledby="affibloom-card-disclosure">
+	<h2 class="affibloom-card__title" id="affibloom-card-disclosure"><?php esc_html_e( 'Disclosure & link attributes', 'affibloom' ); ?></h2>
 	<div class="affibloom-field">
 		<div class="affibloom-field__head">
 			<label class="affibloom-label" for="affibloom-disclosure"><?php esc_html_e( 'Disclosure', 'affibloom' ); ?></label>
@@ -304,4 +317,4 @@ $editor = static fn( int $height ): array => array(
 		}
 		?>
 	</div>
-</div>
+</section>

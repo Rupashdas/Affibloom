@@ -206,6 +206,62 @@ test( 'the Dashboard has its counts beside the title and Meadow list', async ( {
 	expect( await css( quick.locator( '.affibloom-quick__card' ), 'background-color' ) ).toBe( WHITE );
 } );
 
+test( 'the product page has a sticky preview and a save bar', async ( { page } ) => {
+	await page.goto( '/wp-admin/admin.php?page=affibloom' );
+	await page.locator( '.affibloom-card--list .affibloom-row__name' ).first().click();
+	const form = page.locator( '#affibloom-product-form' );
+	await expect( form ).toBeVisible();
+
+	// MD5 (0b.4): "‹ Dashboard", a 76px image tile, the name (two lines at most, the full name as its tooltip), the URL;
+	// underline tabs.
+	const head = page.locator( '.affibloom-page__head' );
+	await expect( head.locator( '.affibloom-page__back' ) ).toHaveText( /Dashboard/ );
+	expect( await css( head.locator( '.affibloom-page__image' ), 'width' ) ).toBe( '76px' );
+	const title = head.locator( '#affibloom-product-title' );
+	expect( await title.getAttribute( 'title' ) ).toBe( ( await title.innerText() ).trim() );
+	expect( await css( title, '-webkit-line-clamp' ) ).toBe( '2' );
+	const details = page.getByRole( 'navigation', { name: 'Product sections' } ).getByRole( 'link', { name: 'Details' } );
+	await expect( details ).toHaveAttribute( 'aria-current', 'page' );
+	const underline = await details.evaluate( ( el ) => {
+		const after = getComputedStyle( el, '::after' );
+		return { height: after.height, color: after.backgroundColor };
+	} );
+	expect( underline ).toEqual( { height: '3px', color: BRAND_600 } );
+
+	// Two columns, 58% / 42%: the form in Lasso's order in cards, the live preview in the sticky aside.
+	const main = page.locator( '.affibloom-product__main' );
+	const aside = page.locator( '.affibloom-product__aside' );
+	await expect( aside.locator( '[data-image-frame]' ) ).toHaveCount( 1 );
+	const [ mainBox, asideBox ] = [ await box( main ), await box( aside ) ];
+	expect( asideBox.x ).toBeGreaterThan( mainBox.x + mainBox.width );
+	expect( mainBox.width / ( mainBox.width + asideBox.width ) ).toBeCloseTo( 0.58, 1 );
+	expect( await css( aside, 'position' ) ).toBe( 'sticky' );
+	expect( ( await form.locator( '.affibloom-card__title' ).allInnerTexts() ).map( ( t ) => t.trim() ) ).toEqual( [
+		'Links & buttons',
+		'Organize',
+		'Display content',
+		'Disclosure & link attributes',
+	] );
+
+	// One Save Changes, in a bar stuck to the foot of the window; the preview stays in view while the form scrolls.
+	await expect( page.getByRole( 'button', { name: 'Save Changes' } ) ).toHaveCount( 1 );
+	const bar = page.locator( '.affibloom-product__footer' );
+	expect( await css( bar, 'position' ) ).toBe( 'sticky' );
+	const viewport = page.viewportSize()!;
+	expect( Math.abs( ( await box( bar ) ).y + ( await box( bar ) ).height - viewport.height ) ).toBeLessThanOrEqual( 2 );
+	await page.evaluate( () => window.scrollTo( 0, 900 ) );
+	const scrolled = await box( aside );
+	expect( scrolled.y ).toBeGreaterThanOrEqual( 0 );
+	expect( scrolled.y ).toBeLessThan( 200 );
+
+	// "Unsaved changes" shows once the form differs from what is stored.
+	const status = bar.getByText( 'Unsaved changes' );
+	await expect( status ).toBeHidden();
+	await page.locator( '#affibloom-name' ).fill( 'MD5 unsaved check' );
+	await expect( status ).toBeVisible();
+	await expect( form ).toHaveAttribute( 'data-dirty', 'true' );
+} );
+
 test( 'Settings uses the Affibloom design system', async ( { page } ) => {
 	await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
 	await expectShell( page, 'Settings' );

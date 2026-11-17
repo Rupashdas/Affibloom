@@ -52,7 +52,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task MD2: The white header and notice cards
 - [x] Task MD3: A page head instead of the band
 - [x] Task MD4: The Dashboard: counts beside the title, search, list
-- [ ] Task MD5: The product page: head, sticky preview, save bar
+- [x] Task MD5: The product page: head, sticky preview, save bar
 - [ ] Task MD6: Settings, Groups, Fields, dialogs and the toast
 - [ ] Task MD7: The design system rewritten for Meadow
 
@@ -332,11 +332,17 @@ sticky, "Unsaved changes" after typing in Name). Grep the product specs (F1, F7,
 and update only those. **One Save Changes:** `#affibloom-save` stays the only one (specs use
 `getByRole( 'button', { name: 'Save Changes' } )`).
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: Head, tabs, Share kit.** - [ ] **Step 3: Grid, aside, cards.**
-- [ ] **Step 4: Save bar and the dirty state.**
-- [ ] **Step 5: Check and look.** Unit tests, `phpcs`; a long-named Amazon product and a plain one at 1280 px:
+- [x] **Step 1: Test.** - [x] **Step 2: Head, tabs, Share kit.** - [x] **Step 3: Grid, aside, cards.**
+- [x] **Step 4: Save bar and the dirty state.**
+- [x] **Step 5: Check and look.** Unit tests, `phpcs`; a long-named Amazon product and a plain one at 1280 px:
   scroll (the preview stays), edit Name (preview and "Unsaved changes"), save (toast, the status clears).
-- [ ] **Step 6: Commit** — "Give the product page a sticky preview and a save bar".
+- [x] **Step 6: Commit** — "Give the product page a sticky preview and a save bar".
+
+*Note (2026-11-17):* `page-head.php` gained `back`, `image` and `tooltip` for the product's head; the tabs are its `below`
+partial, so they run across the column. `product-display-card.php` prints `part` `preview` (the aside's *Live preview*
+card) or `fields` (two cards); the Share kit and the Amazon card changed by CSS only. The head's image follows a save
+(product-save.js). Seen at 1280 px: 585/427px columns, the aside held at 112px while scrolling, the bar on the window's
+foot, "Unsaved changes" on an edit and gone after the save.
 
 #### Task MD6: Settings, Groups, Fields, dialogs and the toast
 

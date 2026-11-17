@@ -1722,7 +1722,77 @@
  * col-lg-5 / col-lg-7) and its footer (Delete left, Save right). Labels sit above their fields and toggles left of
  * their labels, as on Lasso's page.
  */
-.affibloom-admin .affibloom-product__title { overflow-wrap: anywhere; }
+/* MD5 head: "‹ Dashboard" above; the 76px image tile left of the name, which shows two lines at most (its tooltip holds
+   the rest); the tabs as underline tabs across the column. */
+.affibloom-admin .affibloom-page__back {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-bottom: 14px;
+	padding: 2px 6px 2px 0;
+	border-radius: var(--affibloom-radius-nav);
+	color: var(--affibloom-ink-600);
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+}
+.affibloom-admin .affibloom-page__back:hover { color: var(--affibloom-brand-600); }
+.affibloom-page__head-row:has(> .affibloom-page__image) { flex-wrap: nowrap; align-items: center; gap: 20px; }
+.affibloom-page__image {
+	display: grid;
+	flex: none;
+	place-items: center;
+	box-sizing: border-box;
+	width: 76px;
+	height: 76px;
+	overflow: hidden;
+	border: 1px solid var(--affibloom-line);
+	border-radius: var(--affibloom-radius-card);
+	background: var(--affibloom-white);
+	color: var(--affibloom-ink-400);
+}
+.affibloom-page__image img { width: 100%; height: 100%; object-fit: contain; }
+.affibloom-page__image .affibloom-icon { width: 28px; height: 28px; }
+.affibloom-admin .affibloom-product__title {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow-wrap: anywhere;
+}
+/* The bar sits on an inset line, not a border, so the tabs' scroll box does not clip it. */
+.affibloom-product-page .affibloom-tabs {
+	display: flex;
+	gap: 30px;
+	width: 100%;
+	margin-top: 24px;
+	padding: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: inset 0 -1px 0 var(--affibloom-line);
+}
+.affibloom-product-page .affibloom-tabs__tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 0 14px;
+	border-radius: 0;
+	color: var(--affibloom-ink-600);
+	font-size: 14px;
+}
+.affibloom-product-page .affibloom-tabs__tab:hover { color: var(--affibloom-ink-900); }
+.affibloom-product-page .affibloom-tabs__tab.is-active { background: none; box-shadow: none; color: var(--affibloom-ink-900); }
+.affibloom-product-page .affibloom-tabs__tab.is-active::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 3px;
+	border-radius: 3px 3px 0 0;
+	background: var(--affibloom-brand-600);
+}
 .affibloom-product-url {
 	display: block;
 	max-width: 100%;
@@ -1749,13 +1819,32 @@
 .affibloom-tabs__tab.is-disabled:hover { color: var(--affibloom-ink-500); }
 /* wp-admin caps a select's width; this one fills its column like the text fields. */
 .affibloom-admin select.affibloom-input { max-width: none; }
-.affibloom-product__form {
+/*
+ * MD5: two columns, 58% / 42%. The left holds the form's cards (Lasso's left column, then its right one) and the Amazon
+ * data; the right is sticky under the WordPress toolbar and the header (32 + 64 + 16px), scrolling inside itself when
+ * the preview is taller than the room left above the save bar.
+ */
+.affibloom-product__grid {
 	display: grid;
-	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-	gap: 24px;
+	grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+	gap: 32px;
 	align-items: start;
 }
-.affibloom-product__card { padding: var(--affibloom-space-card); }
+.affibloom-product__main,
+.affibloom-product__form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; min-width: 0; }
+.affibloom-product__aside {
+	position: sticky;
+	top: 112px;
+	min-width: 0;
+	max-height: calc(100vh - 112px - 96px);
+	margin: -2px;
+	padding: 2px;
+	overflow: auto;
+	scrollbar-width: thin;
+}
+.affibloom-product__preview { padding: 20px; }
+.affibloom-admin .affibloom-product__preview-title { margin-bottom: 14px; font-size: 15px; line-height: 20px; }
+.affibloom-product__card { padding: 24px 28px 28px; }
 /* One column that may shrink below its content's width, so long links never push past the card's padding. */
 .affibloom-product__card--link { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .affibloom-product__card.affibloom-empty { padding: 72px var(--affibloom-space-card); }
@@ -1785,13 +1874,29 @@
 	color: var(--affibloom-ink-600);
 	cursor: not-allowed;
 }
+/*
+ * The save bar (MD5): Lasso's footer stuck to the foot of the window, so Save Changes is always in reach; "Unsaved
+ * changes" shows beside it while the form differs from what is stored (product-save.js, data-dirty).
+ */
 .affibloom-product__footer {
+	position: sticky;
+	z-index: 30;
+	bottom: 0;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	gap: 16px;
-	margin-top: var(--affibloom-space-section);
+	margin-top: 32px;
+	padding: 12px 20px;
+	border: 1px solid var(--affibloom-line);
+	border-bottom: 0;
+	border-radius: var(--affibloom-radius-card) var(--affibloom-radius-card) 0 0;
+	background: var(--affibloom-white);
+	box-shadow: 0 -10px 30px -14px rgba(22, 32, 26, 0.22);
 }
+.affibloom-product__footer > .affibloom-link-button { margin-right: auto; }
+.affibloom-product__status { display: none; align-items: center; gap: 8px; color: var(--affibloom-ink-900); font-size: 13px; font-weight: 600; }
+.affibloom-product:has(#affibloom-product-form[data-dirty="true"]) .affibloom-product__status { display: inline-flex; }
+.affibloom-product__status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--affibloom-warning-icon); }
 /* Lasso's "Delete This Link": a red text button with a bin, not a filled button. */
 .affibloom-link-button {
 	display: inline-flex;
@@ -2004,7 +2109,7 @@
 .affibloom-product__card--display { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 
 /* The product page's Amazon Data card (C1Q5): the stored Amazon row, read-only, under the form. */
-.affibloom-amazon-data { margin-top: 24px; }
+.affibloom-amazon-data { margin: 0; }
 .affibloom-amazon-data__empty { margin: 0; color: var(--affibloom-ink-600); }
 .affibloom-amazon-data__body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; }
 .affibloom-amazon-data__image { width: 96px; height: 96px; object-fit: contain; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); }
@@ -2197,9 +2302,19 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 .affibloom-field-library__pager { display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--affibloom-ink-600); font-size: 13px; }
 
 /* 7k. The product page's Share kit and the tracking-ID offer (Task 14D). */
-.affibloom-share-kit { margin-bottom: var(--affibloom-space-section); padding: 24px var(--affibloom-space-card); }
-.affibloom-admin .affibloom-share-kit .affibloom-card__title { font-size: 16px; line-height: 22px; }
-.affibloom-share-kit__buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+/* MD5: one quiet row, the title and its line on the left, the buttons on the right (wrapping under on a narrow screen). */
+.affibloom-share-kit {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 2px 24px;
+	margin-bottom: 24px;
+	padding: 14px 16px 14px 22px;
+	box-shadow: none;
+}
+.affibloom-admin .affibloom-share-kit .affibloom-card__title { grid-column: 1; font-size: 15px; line-height: 20px; }
+.affibloom-share-kit .affibloom-card__intro { grid-column: 1; margin: 0; }
+.affibloom-share-kit__buttons { display: flex; flex-wrap: wrap; align-items: center; grid-column: 2; grid-row: 1 / span 2; gap: 6px; }
 .affibloom-share-kit__buttons .affibloom-icon { width: 16px; height: 16px; }
 .affibloom-notice__text strong { font-weight: 800; }
 .affibloom-notice__actions { display: flex; flex: 0 0 auto; gap: 8px; margin-left: auto; }
@@ -2604,7 +2719,9 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-split__body { flex-direction: column; }
 	.affibloom-split__rail { order: -1; width: 100%; flex: none; border-left: 0; border-bottom: 1px solid var(--affibloom-line); }
 	.affibloom-split { min-height: 0; }
-	.affibloom-product__form { grid-template-columns: 1fr; }
+	/* The product page: one column, the preview above the form and no longer sticky (MD5). */
+	.affibloom-product__grid { grid-template-columns: minmax(0, 1fr); }
+	.affibloom-product__aside { position: static; order: -1; max-height: none; overflow: visible; }
 	.affibloom-header { gap: 12px; }
 	.affibloom-admin .affibloom-header__menu-button { display: inline-flex; }
 	.affibloom-header__nav {
@@ -2667,6 +2784,11 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-product__pair { grid-template-columns: 1fr; }
 	.affibloom-product__switches { grid-template-columns: 1fr; }
 	.affibloom-product__card { padding: 20px; }
+	.affibloom-share-kit { grid-template-columns: minmax(0, 1fr); }
+	.affibloom-share-kit__buttons { grid-column: 1; grid-row: auto; margin-top: 10px; }
+	.affibloom-product__footer { flex-wrap: wrap; padding: 10px 16px; }
+	.affibloom-page__head-row:has(> .affibloom-page__image) { align-items: flex-start; gap: 14px; }
+	.affibloom-page__image { width: 56px; height: 56px; }
 	/* Groups: three columns fit a phone, the description wraps and the Links count keeps a narrow column. */
 	.affibloom-page__actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; }
 	.affibloom-page__actions .affibloom-page__search { flex: 1 1 220px; }

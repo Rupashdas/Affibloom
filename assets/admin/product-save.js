@@ -17,6 +17,10 @@
  * after each save. A click on a link that would leave the page while it differs opens Lasso's "Unsaved Changes" (Leave
  * Without Saving goes; Save Changes saves, then goes; × stays), and reloading or closing the tab gets the browser's
  * own question. Custom field rows save themselves (D3), so they are not in the snapshot.
+ *
+ * The save bar (Meadow, Task MD5): the form carries data-dirty="true" while the guard would count a change, so the bar
+ * says "Unsaved changes"; it is checked after every edit (fields, the rich editors, the image, a button or feature
+ * added, moved or removed) and cleared by a save.
  */
 ( function () {
 	'use strict';
@@ -158,11 +162,24 @@
 		var snapshot = function () {
 			return JSON.stringify( collect() );
 		};
-		var keepBaseline = function () {
-			baseline = snapshot();
-		};
 		var hasChanges = function () {
 			return null !== baseline && snapshot() !== baseline;
+		};
+		// The save bar's "Unsaved changes" reads this (admin.css).
+		var markDirty = function () {
+			if ( hasChanges() ) {
+				form.dataset.dirty = 'true';
+			} else {
+				delete form.dataset.dirty;
+			}
+		};
+		// After the event's own handlers have run: a button or a feature row added, moved or removed changes the form then.
+		var markSoon = function () {
+			window.setTimeout( markDirty, 0 );
+		};
+		var keepBaseline = function () {
+			baseline = snapshot();
+			markDirty();
 		};
 		// Fields a control stored by itself (Refresh, C1D): what they hold now is what is stored, so only they move to the
 		// baseline; any other change still counts.
@@ -178,7 +195,21 @@
 				}
 			} );
 			baseline = JSON.stringify( kept );
+			markDirty();
 		} );
+		[ 'input', 'change', 'click', 'drop', 'keyup' ].forEach( function ( type ) {
+			form.addEventListener( type, markSoon );
+		} );
+		document.addEventListener( 'affibloom:image-changed', markSoon );
+		if ( window.tinymce ) {
+			var follow = function ( editor ) {
+				editor.on( 'input keyup change undo redo', markSoon );
+			};
+			window.tinymce.editors.forEach( follow );
+			window.tinymce.on( 'AddEditor', function ( event ) {
+				follow( event.editor );
+			} );
+		}
 		var go = function ( href ) {
 			leaving = true;
 			window.location.assign( href );
@@ -192,6 +223,7 @@
 		// is the destination until link cloaking exists (D5).
 		var showStored = function ( data, sent ) {
 			title.textContent = '' !== data.name ? data.name : form.dataset.emptyName;
+			title.title = title.textContent; // The head cuts a long name to two lines (MD5).
 			field( 'name' ).value = data.name;
 			field( 'url' ).value = data.url;
 			linkLine.textContent = data.url;
@@ -206,6 +238,16 @@
 			} );
 			field( 'image_url' ).value = data.image_url;
 			field( 'image_id' ).value = String( data.image_id );
+			// The head's image tile (MD5) shows the stored picture.
+			var headImage = document.querySelector( '[data-head-image]' );
+			var headNone = document.querySelector( '[data-head-image-none]' );
+			if ( headImage && headNone ) {
+				headImage.hidden = '' === data.image_url;
+				headNone.hidden = '' !== data.image_url;
+				if ( '' !== data.image_url ) {
+					headImage.src = data.image_url;
+				}
+			}
 			// New names are groups now: the chips show the stored ones, with their IDs.
 			var picked = form.querySelector( '[data-group-picker]' );
 			if ( picked && picked.affibloomPicker && data.groups ) {
