@@ -73,18 +73,18 @@ final class AmazonDataServiceTest extends TestCase {
 
 	public function test_stored_data_for_the_asin_and_store_is_reused_without_asking_amazon(): void {
 		$service = $this->service();
-		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'gb', 'Stored name', '£5.00', 'GBP', 'b', 'old', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'lasso', '2026-11-09 00:11:00' ) );
+		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'gb', 'Stored name', '£5.00', 'GBP', 'b', 'old', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'imported', '2026-11-09 00:11:00' ) );
 
 		$product = $service->fill( self::draft( 'B0STUBITEM', 'gb' ) );
 
 		self::assertSame( 'Stored name', $product->name );
 		self::assertSame( 'https://www.amazon.com/dp/B0STUBITEM?tag=vbvault-20', $this->rows->find( 'B0STUBITEM', 'gb' )?->monetized_url, 'stored again with the new link' );
-		self::assertSame( 'lasso', $this->rows->find( 'B0STUBITEM', 'gb' )?->source );
+		self::assertSame( 'imported', $this->rows->find( 'B0STUBITEM', 'gb' )?->source );
 	}
 
 	public function test_another_store_is_another_row(): void {
 		$service = $this->service();
-		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'gb', 'UK name', '', 'GBP', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'lasso', '2026-11-09 00:11:00' ) );
+		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'gb', 'UK name', '', 'GBP', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'imported', '2026-11-09 00:11:00' ) );
 		$this->item();
 
 		self::assertSame( 'Mikasa V200W Official Game Volleyball', $service->fill( self::draft( 'B0STUBITEM', 'us' ) )->name );
@@ -127,7 +127,7 @@ final class AmazonDataServiceTest extends TestCase {
 	}
 
 	public function test_a_newer_row_keeps_the_older_price_and_image_when_its_own_are_empty(): void {
-		$older = new AmazonProduct( 'A', 'us', 'Old', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/old.jpg', false, '', 0, '', array(), 'lasso', '2026-01-01 00:00:00' );
+		$older = new AmazonProduct( 'A', 'us', 'Old', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/old.jpg', false, '', 0, '', array(), 'imported', '2026-01-01 00:00:00' );
 		$newer = new AmazonProduct( 'A', 'us', 'New', '', 'USD', 'b', 'm', '', true, '', 0, '', array(), 'creators', '2026-11-15 00:00:00' );
 
 		$merged = $newer->over( $older );
@@ -138,7 +138,7 @@ final class AmazonDataServiceTest extends TestCase {
 	}
 
 	public function test_a_newer_row_keeps_lassos_prime_flag(): void {
-		$older = new AmazonProduct( 'A', 'us', 'Old', '', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'lasso', '2026-01-01 00:00:00', true );
+		$older = new AmazonProduct( 'A', 'us', 'Old', '', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'imported', '2026-01-01 00:00:00', true );
 		$newer = new AmazonProduct( 'A', 'us', 'New', '', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'creators', '2026-11-15 00:00:00' );
 
 		self::assertTrue( $newer->over( $older )->is_prime );
@@ -147,7 +147,7 @@ final class AmazonDataServiceTest extends TestCase {
 
 	public function test_lasso_stores_http_and_data_images_but_a_product_shows_only_https(): void {
 		$service = $this->service();
-		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'us', 'Old http row', '', 'USD', 'b', 'm', 'http://ecx.images-amazon.com/x.jpg', false, '', 0, '', array(), 'lasso', '2023-08-31 06:20:00' ) );
+		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'us', 'Old http row', '', 'USD', 'b', 'm', 'http://ecx.images-amazon.com/x.jpg', false, '', 0, '', array(), 'imported', '2023-08-31 06:20:00' ) );
 
 		$product = $service->fill( self::draft() );
 
@@ -223,7 +223,7 @@ final class AmazonDataServiceTest extends TestCase {
 
 	public function test_refresh_always_asks_amazon_even_with_stored_data(): void {
 		$service = $this->service();
-		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'us', 'Stored', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', true, '', 0, '', array(), 'lasso', '2023-01-01 00:00:00' ) );
+		$this->rows->save( new AmazonProduct( 'B0STUBITEM', 'us', 'Stored', '$1.00', 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', true, '', 0, '', array(), 'imported', '2023-01-01 00:00:00' ) );
 		$this->item();
 
 		$data = $service->refresh( $this->stored( 'Amazon' ) )['data'];

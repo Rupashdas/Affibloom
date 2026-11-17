@@ -10,13 +10,13 @@ use PHPUnit\Framework\TestCase;
  */
 final class PlaceholderNameTest extends TestCase {
 	public function test_lassos_placeholder_names(): void {
-		foreach ( array( '', '   ', 'Amazon', 'Add a Link Title', 'Lasso', 'add-a-link-title', 'ADD-A-LINK-TITLE', ' Amazon ' ) as $name ) {
+		foreach ( array( '', '   ', 'Amazon', 'Add a Link Title', 'add-a-link-title', 'ADD-A-LINK-TITLE', ' Amazon ' ) as $name ) {
 			self::assertTrue( PlaceholderName::is( $name ), "'$name' is a placeholder" );
 		}
 	}
 
 	public function test_real_names_are_not(): void {
-		foreach ( array( 'Mizuno Wave Momentum 3', 'amazon', 'Amazon Basics Ball', 'lasso' ) as $name ) {
+		foreach ( array( 'Mizuno Wave Momentum 3', 'amazon', 'Amazon Basics Ball', 'Lasso' ) as $name ) {
 			self::assertFalse( PlaceholderName::is( $name ), "'$name' is a name" );
 		}
 	}

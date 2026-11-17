@@ -24,9 +24,10 @@ final class BoxOverrides {
 	public const HIDE = 'hide';
 
 	/**
-	 * Lasso's line break code in a description attribute (LASSO_BR_CODE).
+	 * The line break code in a description attribute: Affibloom's own, the one pros and cons read (Lasso's
+	 * `lasso-br-code` is rewritten to it by the separate migrator, deviation 146).
 	 */
-	private const BR_CODE = 'lasso-br-code';
+	private const BR_CODE = '-br-';
 
 	/**
 	 * The tags a title may be wrapped in (F5 R12, R79, D4; F31 D8 with decision C8 allowing `h1`). Lasso prints any value

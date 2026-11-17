@@ -42,7 +42,7 @@ final class AdminNavigation {
 	 */
 	public function register( NavItem $item ): void {
 		if ( ! in_array( $item->key, self::MENU, true ) ) {
-			throw new InvalidArgumentException( 'This screen has no place in Lasso\'s navigation order.' );
+			throw new InvalidArgumentException( 'This screen has no place in the navigation order.' );
 		}
 		$this->items[ $item->key ] = $item;
 	}

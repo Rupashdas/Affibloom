@@ -22,11 +22,11 @@ final class WidgetShortcodesTest extends TestCase {
 	}
 
 	/**
-	 * D11: `[affibloom …]`, `[affibloom]` and `[lasso …]` are marked; `[lasso-attr …]` and other text stay whole.
+	 * D11: `[affibloom …]` and `[affibloom]` are marked; Lasso's shortcodes (deviation 146), longer names and other text stay whole.
 	 */
 	public function test_only_the_box_shortcodes_are_marked(): void {
 		self::assertSame(
-			'[affibloom origin="widget" id="1"] [affibloom origin="widget"] [lasso origin="widget" id="2"] [lasso-attr id="3"] [affibloomx]',
+			'[affibloom origin="widget" id="1"] [affibloom origin="widget"] [lasso id="2"] [lasso-attr id="3"] [affibloomx]',
 			WidgetShortcodes::marked( '[affibloom id="1"] [affibloom] [lasso id="2"] [lasso-attr id="3"] [affibloomx]' )
 		);
 	}

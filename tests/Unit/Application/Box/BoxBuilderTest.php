@@ -329,7 +329,7 @@ final class BoxBuilderTest extends TestCase {
 		$view = $box(
 			array(
 				'badge'       => 'Top Pick',
-				'description' => 'Short.lasso-br-codeSweet.',
+				'description' => 'Short.-br-Sweet.',
 				'title'       => 'Ligra Kids',
 				'titleUrl'    => 'https://www.example.com/review',
 				'titleType'   => 'h3',
@@ -589,7 +589,7 @@ final class BoxBuilderTest extends TestCase {
 		self::assertSame( '$70.00', $fresh->discount );
 		self::assertSame( '', $build( $row( '2026-11-16 01:00:00' ) )->discount ); // Show Discount Pricing off
 		self::assertSame( '', $build( $row( '2026-11-15 11:00:00' ) )->price ); // older than 24 hours
-		self::assertSame( '', $build( $row( '2026-11-16 01:00:00', 'lasso' ) )->price ); // migrated
+		self::assertSame( '', $build( $row( '2026-11-16 01:00:00', 'imported' ) )->price ); // migrated
 		self::assertSame( '11/16/2026 01:00 am GMT', $build( $row( '2026-11-16 01:00:00' ), array(), DisplaySettings::defaults()->with_advanced( false ) )->date );
 	}
 

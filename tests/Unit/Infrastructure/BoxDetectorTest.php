@@ -36,14 +36,13 @@ final class BoxDetectorTest extends TestCase {
 		self::assertTrue( $this->single( 'Text [affibloom id="7"] more' )->page_needs_css() );
 	}
 
-	public function test_a_post_with_lasso_s_markers_needs_it(): void {
+	public function test_lasso_s_markers_are_not_read(): void {
 		foreach ( array( '[lasso id="3"]', '<!-- wp:affiliate-plugin/lasso /-->', 'class="lasso-display"', '[lasso type="table" id="1"]' ) as $content ) {
-			self::assertTrue( $this->single( $content )->page_needs_css(), $content );
+			self::assertFalse( $this->single( $content, false )->page_needs_css(), $content );
 		}
 	}
 
 	public function test_elementor_data_with_a_box_needs_it(): void {
-		self::assertTrue( $this->single( '', '[{"widgetType":"lasso_shortcode"}]' )->page_needs_css() );
 		self::assertTrue( $this->single( '', '[{"settings":{"shortcode":"[affibloom id=\\"7\\"]"}}]' )->page_needs_css() );
 	}
 

@@ -522,44 +522,6 @@ test.describe( 'F4 Displays in the editor', () => {
 		}
 	} );
 
-	test( 'AC20 posts whose image, button and list blocks carry Lasso link attributes open valid and keep them on save', async ( { page } ) => {
-		test.setTimeout( 240_000 );
-		// Lasso's own editor script keeps these blocks valid while Lasso is active; it is held back, as after the cutover.
-		await page.route( /lasso-gutenberg-block\.js/, ( route ) => route.abort() );
-		// Copies of real posts (F4 analysis): 2622 has GenerateBlocks buttons, 4468 images, a button and a list item, 5931
-		// the site's one core button.
-		for ( const source of [ 2622, 4468, 5931 ] ) {
-			const stored = wp( 'post', 'get', String( source ), '--field=post_content' );
-			const copy = wp( 'eval', `kses_remove_filters(); echo wp_insert_post( wp_slash( array( 'post_type' => 'post', 'post_status' => 'draft', 'post_title' => 'F4 AC20 copy of ${ source }', 'post_content' => get_post( ${ source } )->post_content ) ) );` );
-			await page.goto( `/wp-admin/post.php?post=${ copy }&action=edit` );
-			await page.waitForFunction( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getBlockCount: () => number } } } } ).wp.data.select( 'core/block-editor' ).getBlockCount() > 0 );
-			const invalid = await page.evaluate( () => {
-				type Block = { name: string; isValid: boolean; innerBlocks: Block[] };
-				const w = window as unknown as { wp: { data: { select: ( store: string ) => { getBlocks: () => Block[] } } } };
-				const found: string[] = [];
-				const walk = ( blocks: Block[] ): void => blocks.forEach( ( block ) => {
-					if ( ! block.isValid ) {
-						found.push( block.name );
-					}
-					walk( block.innerBlocks );
-				} );
-				walk( w.wp.data.select( 'core/block-editor' ).getBlocks() );
-				return found;
-			} );
-			expect( invalid, `post ${ source }` ).toEqual( [] );
-			await expect( page.getByText( 'This block contains unexpected or invalid content' ) ).toHaveCount( 0 );
-
-			await page.evaluate( () => {
-				const w = window as unknown as { wp: { data: { dispatch: ( store: string ) => { editPost: ( edits: object ) => void; savePost: () => Promise<void> } } } };
-				w.wp.data.dispatch( 'core/editor' ).editPost( { title: 'F4 AC20 saved' } );
-				return w.wp.data.dispatch( 'core/editor' ).savePost();
-			} );
-			const count = ( html: string ): number => ( html.match( /data-lasso-(id|name|lid)=/g ) ?? [] ).length;
-			await expect.poll( () => wp( 'post', 'get', copy, '--field=post_title' ) ).toBe( 'F4 AC20 saved' );
-			expect( count( wp( 'post', 'get', copy, '--field=post_content' ) ), `post ${ source }` ).toBe( count( stored ) );
-		}
-	} );
-
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

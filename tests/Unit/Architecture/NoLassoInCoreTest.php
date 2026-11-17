@@ -17,19 +17,6 @@ final class NoLassoInCoreTest extends TestCase {
 	 */
 	private const FOLDERS = array( 'src', 'templates', 'assets', 'blocks' );
 
-	/**
-	 * Files still allowed to name Lasso until Task LC2 takes their markup out (plugin-relative paths).
-	 */
-	private const ALLOWED = array(
-		'src/Domain/Box/BoxOverrides.php',
-		'src/Domain/Product/PlaceholderName.php',
-		'src/Infrastructure/WordPress/BoxDetector.php',
-		'src/Infrastructure/WordPress/WpDetectionChoices.php',
-		'src/Interface/Admin/AdminNavigation.php',
-		'src/Interface/Front/WidgetShortcodes.php',
-		'assets/editor/core-link-attributes.js',
-	);
-
 	public function test_no_shipped_code_names_lasso_outside_comments(): void {
 		$root  = dirname( __DIR__, 3 );
 		$found = array();
@@ -38,7 +25,7 @@ final class NoLassoInCoreTest extends TestCase {
 			foreach ( $files as $file ) {
 				$path = str_replace( '\\', '/', substr( $file->getPathname(), strlen( $root ) + 1 ) );
 				$code = self::code( $path, (string) file_get_contents( $file->getPathname() ) );
-				if ( null === $code || in_array( $path, self::ALLOWED, true ) ) {
+				if ( null === $code ) {
 					continue;
 				}
 				foreach ( explode( "\n", $code ) as $number => $line ) {

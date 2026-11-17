@@ -39,14 +39,14 @@ final class BoxOverridesTest extends TestCase {
 	}
 
 	/**
-	 * Lasso's shortcode names map onto the same fields; `lasso-br-code` becomes a line break (R67).
+	 * Lasso's shortcode names map onto the same fields; `-br-` becomes a line break (R67, deviation 146).
 	 */
 	public function test_lassos_shortcode_names_map_onto_the_same_fields(): void {
 		$box = BoxOverrides::from_shortcode(
 			array(
 				'id'          => 9,
 				'badge'       => 'hide',
-				'description' => 'One.lasso-br-codeTwo.',
+				'description' => 'One.-br-Two.',
 				'title_url'   => 'https://www.example.com/r',
 				'title_type'  => 'h2',
 				'image_url'   => 'https://www.example.com/p.jpg',

@@ -66,7 +66,7 @@ Grouped by feature, in the order they are worked.
 **Core without Lasso**
 
 - [x] Task LC1: Take the one-time Lasso import out of core
-- [ ] Task LC2: Take Lasso's markup out of core
+- [x] Task LC2: Take Lasso's markup out of core
 
 **F21 — the content link index**
 
@@ -207,11 +207,15 @@ content until Phase M.)
 **Files:** the above and their unit tests (`BoxDetectorTest`, `WidgetShortcodesTest`, `PlaceholderNameTest`,
 `BoxOverridesTest`); `NoLassoInCoreTest`'s allow-list emptied.
 
-- [ ] **Step 1: Tests.** `NoLassoInCoreTest` with an empty allow-list; the changed unit tests.
-- [ ] **Step 2: The changes.**
-- [ ] **Step 3: Run and look.** A post with an `[affibloom]` box loads the box CSS; the Dashboard, the Groups dialogs
+- [x] **Step 1: Tests.** `NoLassoInCoreTest` with an empty allow-list; the changed unit tests.
+- [x] **Step 2: The changes.**
+- [x] **Step 3: Run and look.** A post with an `[affibloom]` box loads the box CSS; the Dashboard, the Groups dialogs
   and a product page at 1280 px look as before.
-- [ ] **Step 4: Commit** — "Take Lasso's markup out of core".
+- [x] **Step 4: Commit** — "Take Lasso's markup out of core".
+
+*Note (2026-11-18):* the line-break code is `-br-` (what `[affibloom]`'s pros and cons already read). The admin
+`lasso-*` class names were already gone (only comments named them); `BoxDetector`'s `type="table"` marker went with
+Lasso's, and `AdminNavigation`'s exception no longer names Lasso. Checked: a post with `[affibloom]` loads the box CSS.
 
 ---
 

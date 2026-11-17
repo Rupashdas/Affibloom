@@ -39,9 +39,6 @@ final class WpDetectionChoices implements DetectionChoices {
 		'elementor_snippet',
 		'elementor_font',
 		'elementor_icons',
-		'lasso-urls',
-		'pretty-link',
-		'affiliate_url',
 		ProductPostType::NAME,
 	);
 

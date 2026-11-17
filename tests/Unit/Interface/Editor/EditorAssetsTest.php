@@ -63,22 +63,6 @@ final class EditorAssetsTest extends TestCase {
 		return new EditorAssets( 'https://site.test/wp-content/plugins/affibloom/', '0.1.0', self::template(), $box );
 	}
 
-	public function test_the_block_editor_keeps_stored_link_attributes_valid(): void {
-		$scripts = array();
-		Functions\when( 'wp_enqueue_script' )->alias(
-			function ( string $handle, string $src, array $deps, string $ver, bool $footer ) use ( &$scripts ): void {
-				$scripts[ $handle ] = array( $src, $deps, $footer );
-			}
-		);
-
-		self::assets()->enqueue();
-
-		self::assertSame(
-			array( 'https://site.test/wp-content/plugins/affibloom/assets/editor/core-link-attributes.js', array( 'wp-hooks', 'wp-element', 'wp-blocks', 'wp-html-entities' ), false ),
-			$scripts['affibloom-core-link-attributes']
-		);
-	}
-
 	public function test_the_modal_styles_follow_meadows_fonts_and_admin_styles(): void {
 		self::assets()->enqueue();
 

@@ -12,9 +12,9 @@ namespace Affibloom\Interface\Front;
 use Affibloom\Module;
 
 /**
- * A text widget's `[affibloom …]` and `[lasso …]` get `origin="widget"`, so a single box there draws the phone layout
+ * A text widget's `[affibloom …]` gets `origin="widget"`, so a single box there draws the phone layout
  * (F31 R16, A17), as Lasso's `widget_text` filter does; nothing while Elementor is active (Lasso's rule). Unlike Lasso,
- * only a shortcode name followed by a space or `]` is marked, so `[lasso-attr …]` stays whole (D11).
+ * only the name followed by a space or `]` is marked, so a longer name that starts with it stays whole (D11).
  */
 final class WidgetShortcodes implements Module {
 
@@ -40,11 +40,11 @@ final class WidgetShortcodes implements Module {
 	}
 
 	/**
-	 * The text with `origin="widget"` after every `[affibloom` and `[lasso` that a space or `]` follows.
+	 * The text with `origin="widget"` after every `[affibloom` that a space or `]` follows.
 	 *
 	 * @param string $text The text.
 	 */
 	public static function marked( string $text ): string {
-		return (string) preg_replace( '/\[(affibloom|lasso)(?=[\s\]])/', '[$1 origin="widget"', $text );
+		return (string) preg_replace( '/\[affibloom(?=[\s\]])/', '[affibloom origin="widget"', $text );
 	}
 }
