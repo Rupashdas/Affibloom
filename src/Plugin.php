@@ -31,7 +31,10 @@ use Affibloom\Application\Icons\IconService;
 use Affibloom\Application\Lifecycle;
 use Affibloom\Application\LinkIndex\DisplayResolver;
 use Affibloom\Application\LinkIndex\LinkIndexer;
+use Affibloom\Application\LinkIndex\LinkIndexJobStatus;
 use Affibloom\Application\LinkIndex\LinkIndexRebuild;
+use Affibloom\Application\Products\BulkAddJobStatus;
+use Affibloom\Application\Shell\JobBoard;
 use Affibloom\Application\LinkIndex\LinkIndexStatus;
 use Affibloom\Application\LinkIndex\ProductResolver;
 use Affibloom\Domain\LinkIndex\LinkClassifier;
@@ -83,6 +86,7 @@ use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
+use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
 use Affibloom\Interface\Cron\LinkIndexCron;
 use Affibloom\Infrastructure\System\CpuLoad;
@@ -476,6 +480,14 @@ final class Plugin {
 			new FieldsController( $fields, $this->template() ),
 			new GroupsController( $groups, $this->template() ),
 			new LinkIndexController( $this->link_index_status(), $this->link_index_rebuild() ),
+			new JobsController(
+				new JobBoard(
+					array(
+						new BulkAddJobStatus( new OptionBulkRunRepository(), static fn(): int => time() ),
+						new LinkIndexJobStatus( new OptionLinkIndexState() ),
+					)
+				)
+			),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),
 			$this->upgrade_hooks(),

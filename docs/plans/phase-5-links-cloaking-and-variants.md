@@ -84,7 +84,7 @@ Grouped by feature, in the order they are worked.
 
 **F38 (part) — Automations and link index notices**
 
-- [ ] Task ON3: Automations — what is running in the background
+- [x] Task ON3: Automations — what is running in the background
 - [ ] Task ON4: Link index notices
 
 **F21 — a product's save and repoint**
@@ -562,12 +562,17 @@ count updates every 15 s for five minutes.
 **Files:** the classes above; tests `JobBoardTest`, a controller test, F38 AC7; modify `header.php`,
 `AdminAssets.php`, `Plugin.php`, `admin.css`, `design-system.md` (popover).
 
-- [ ] **Step 1: Failing tests** (AC7: a bulk add of three links started through REST; the count, the line, the idle
+- [x] **Step 1: Failing tests** (AC7: a bulk add of three links started through REST; the count, the line, the idle
   text).
-- [ ] **Step 2: Board and status.**
-- [ ] **Step 3: Route, header, script.**
-- [ ] **Step 4: Run and look.** At 1280 and 375 px: start a bulk add, see the count and the line, wait for the idle text.
-- [ ] **Step 5: Commit** — "Show running background jobs in the header".
+- [x] **Step 2: Board and status.**
+- [x] **Step 3: Route, header, script.**
+- [x] **Step 4: Run and look.** At 1280 and 375 px: start a bulk add, see the count and the line, wait for the idle text.
+- [x] **Step 5: Commit** — "Show running background jobs in the header".
+
+*Note (2026-11-18):* the board holds Bulk Add Links (F18) and the link index rebuild as Lasso's "Scan all links" (its full scan); C1I's bulk
+Amazon sync keeps its own banner and can join later. The popover reuses the design system's menu (a click elsewhere
+closes it); the button is an outlined icon beside Add New Link (a first look had it as a second green button after the
+tabs). Checked in Brave at 1280 px: during a rebuild the icon carries "1" and the menu reads "Scan all links (0/1105)".
 
 ---
 

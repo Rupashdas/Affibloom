@@ -51,6 +51,19 @@ $header_can_add = current_user_can( Capabilities::PRODUCTS );
 		<?php endforeach; ?>
 	</nav>
 	<?php if ( $header_can_add ) : ?>
+		<?php // Automations (F38 R40, Task ON3): the running background jobs; shell.js fills the count and the list. ?>
+		<div class="affibloom-header__jobs">
+			<button type="button" class="affibloom-header__action affibloom-jobs-button" data-jobs aria-expanded="false" aria-controls="affibloom-jobs"
+				aria-label="<?php esc_attr_e( 'Automations', 'affibloom' ); ?>" title="<?php esc_attr_e( 'Automations', 'affibloom' ); ?>">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'refresh' ) ); ?>
+				<span class="affibloom-jobs__count" data-jobs-count hidden></span>
+			</button>
+			<div id="affibloom-jobs" class="affibloom-menu affibloom-jobs" hidden>
+				<p class="affibloom-jobs__title"><?php esc_html_e( 'Automations', 'affibloom' ); ?></p>
+				<ul class="affibloom-jobs__list" data-jobs-list></ul>
+				<p class="affibloom-jobs__idle" data-jobs-idle><?php esc_html_e( 'Silence is a source of great strength - Lao Tzu', 'affibloom' ); ?></p>
+			</div>
+		</div>
 		<?php // Lasso's split button: the main part opens the single-link dialog, the caret lists the other ways to add. ?>
 		<div class="affibloom-header__add">
 			<button type="button" class="affibloom-header__action" data-affibloom-open="affibloom-add-modal" aria-haspopup="dialog">

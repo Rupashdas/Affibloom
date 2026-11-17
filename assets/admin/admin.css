@@ -237,6 +237,27 @@
 
 /* Menu (0b.3, 0b.4): a white card under its button with a hairline and the menus' shadow; items with an icon chip, a
    title and a description, a green wash on hover */
+/* Automations (F38 R40, Task ON3): the header's jobs button, spinning with a count while jobs run, and its menu. */
+.affibloom-header__jobs { position: relative; margin-left: auto; }
+.affibloom-header__jobs + .affibloom-header__add { margin-left: 10px; }
+/* A quiet outlined icon button beside Add New Link, not a second primary action. */
+.affibloom-admin .affibloom-jobs-button,
+.affibloom-admin .affibloom-jobs-button:hover,
+.affibloom-admin .affibloom-jobs-button:active { position: relative; width: 40px; padding: 0; justify-content: center; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); color: var(--affibloom-ink-700); }
+.affibloom-admin .affibloom-jobs-button:hover,
+.affibloom-admin .affibloom-jobs-button[aria-expanded="true"] { border-color: var(--affibloom-line-strong); color: var(--affibloom-ink-900); }
+.affibloom-jobs-button.is-running .affibloom-icon { animation: affibloom-spin 1.2s linear infinite; }
+.affibloom-jobs__count { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: var(--affibloom-brand-600); color: var(--affibloom-white); font: 700 11px/18px var(--affibloom-font); text-align: center; }
+.affibloom-jobs__count[hidden] { display: none; }
+.affibloom-admin .affibloom-jobs__title { margin: 4px 8px 8px; color: var(--affibloom-ink-900); font: 700 14px/20px var(--affibloom-font); }
+.affibloom-jobs__list { margin: 0 8px; padding: 0; list-style: none; }
+.affibloom-jobs__list li { padding: 6px 0; border-top: 1px solid var(--affibloom-line); color: var(--affibloom-ink-700); font-size: 13px; line-height: 18px; }
+.affibloom-admin .affibloom-jobs__idle { margin: 0 8px 4px; color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-jobs__idle[hidden] { display: none; }
+@keyframes affibloom-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.affibloom-jobs-button.is-running .affibloom-icon { animation: none; }
+}
 .affibloom-menu {
 	position: absolute;
 	top: calc(100% + 8px);

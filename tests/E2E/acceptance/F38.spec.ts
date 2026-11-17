@@ -157,6 +157,35 @@ test.describe( 'F38 Admin shell', () => {
 		}
 	} );
 
+	test( 'AC7 Automations shows the running background jobs with their counts, or Lao Tzu when none runs', async ( { page } ) => {
+		const button = page.getByRole( 'button', { name: /Automations/ } );
+		wp( 'option', 'delete', 'affibloom_link_index_state' );
+		wp( 'option', 'delete', 'affibloom_bulk_add' );
+		await page.goto( DASHBOARD );
+		await page.evaluate( () => window.localStorage.clear() );
+		await button.click();
+		const panel = page.locator( '#affibloom-jobs' );
+		await expect( panel.getByText( 'Automations' ) ).toBeVisible();
+		await expect( panel.getByText( 'Silence is a source of great strength - Lao Tzu' ) ).toBeVisible();
+		await page.locator( '.affibloom-page__title' ).click();
+		await expect( panel ).toBeHidden();
+
+		// A link index rebuild is a job: the icon spins with a count, and the line reads "<name> (<done>/<total>)".
+		wp( 'eval', 'do_action( "affibloom_link_index_start" );' );
+		try {
+			// The last answer is reused for 15 s (R43), so this tab forgets it first.
+			await page.evaluate( () => window.localStorage.clear() );
+			await page.reload();
+			await expect( button.locator( '.affibloom-jobs__count' ) ).toHaveText( '1' );
+			await expect( button ).toHaveClass( /is-running/ );
+			await button.click();
+			await expect( panel.getByText( /^Scan all links \(0\/\d+\)$/ ) ).toBeVisible();
+		} finally {
+			wp( 'option', 'delete', 'affibloom_link_index_state' );
+			wp( 'cron', 'event', 'delete', 'affibloom_link_index_batch' );
+		}
+	} );
+
 	test( 'AC5 a script adds notices to one region under the header, newest last', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
 		const region = page.locator( '#affibloom-notices' );
