@@ -24,6 +24,15 @@ const DEFAULTS = Object.fromEntries(
 );
 
 /**
+ * Whether the block names a display: a product, or a group for a grid, list or gallery (Tasks 23C, 23D).
+ *
+ * @param {Object} attributes The block's attributes.
+ * @return {boolean} True when there is something to preview.
+ */
+const namesDisplay = ( attributes ) =>
+	attributes.productId > 0 || attributes.groupId > 0;
+
+/**
  * The display's preview from the server; the latest answer wins.
  *
  * @param {Object} attributes The block's attributes.
@@ -34,7 +43,7 @@ function usePreview( attributes ) {
 	const key = JSON.stringify( attributes );
 	useEffect( () => {
 		const asked = JSON.parse( key );
-		if ( ! ( asked.productId > 0 ) ) {
+		if ( ! namesDisplay( asked ) ) {
 			setPreview( { state: 'idle', html: '' } );
 			return undefined;
 		}
@@ -67,7 +76,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	const button = useRef();
 	const blockProps = useBlockProps( { className: 'affibloom-block' } );
 	const preview = usePreview( attributes );
-	const hasDisplay = attributes.productId > 0;
+	const hasDisplay = namesDisplay( attributes );
 
 	const ready = 'ready' === state;
 	const failed = 'error' === state;

@@ -22,7 +22,7 @@ use WP_REST_Server;
 /**
  * POST /editor/preview (F4 D2, R32, Task 23C): one display drawn from a Product box block's attributes, by the block's
  * own render callback, so the editor shows the HTML the published page will. Only Affibloom's displays, from attributes
- * that name one (DisplayRequest::from_block); never an arbitrary shortcode (unlike Lasso's R32).
+ * that name one (DisplayRequest::names_display); never an arbitrary shortcode (unlike Lasso's R32).
  */
 final class EditorController implements Module {
 
@@ -64,7 +64,7 @@ final class EditorController implements Module {
 	public function preview( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$attributes = (array) $request['attributes'];
 		$block      = WP_Block_Type_Registry::get_instance()->get_registered( ProductBoxBlock::NAME );
-		if ( null === $block || null === DisplayRequest::from_block( $attributes ) ) {
+		if ( null === $block || ! DisplayRequest::names_display( $attributes ) ) {
 			return new WP_Error( 'affibloom_invalid_display', __( 'This display cannot be drawn.', 'affibloom' ), array( 'status' => 400 ) );
 		}
 

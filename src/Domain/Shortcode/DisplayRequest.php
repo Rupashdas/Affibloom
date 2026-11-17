@@ -17,6 +17,9 @@ use Affibloom\Domain\Box\BoxOverrides;
  */
 final class DisplayRequest {
 
+	/** The block's types that show a group (F4 D3; the shortcode's `type` with a `group`). */
+	private const GROUP_TYPES = array( 'grid', 'list', 'gallery' );
+
 	/**
 	 * Builds the request.
 	 *
@@ -59,24 +62,63 @@ final class DisplayRequest {
 	}
 
 	/**
-	 * The request a Product box block asks for (F4 D3, Task 23C), as the shortcode would: its `type` and its product.
-	 * Null when the block names no product or a type the block cannot draw yet (the editor's preview answers 400).
-	 * A block with no `type` is the single box, as blocks saved before Phase 4 are.
+	 * Whether a Product box block's attributes name a display (F4 D3): a type the block draws and its target's ID (a
+	 * product, or a group for a grid, list or gallery). A block with no `type` is the single box, as blocks saved before
+	 * Phase 4 are. The editor's preview answers 400 when they do not (Task 23C).
 	 *
 	 * @param array<string, mixed> $attributes The block's attributes.
 	 */
-	public static function from_block( array $attributes ): ?self {
-		$type    = $attributes['type'] ?? '';
-		$product = is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0;
-		if ( $product <= 0 || ! is_string( $type ) || ! in_array( $type, array( '', 'single', 'button', 'image' ), true ) ) {
+	public static function names_display( array $attributes ): bool {
+		$type = $attributes['type'] ?? '';
+		if ( ! is_string( $type ) ) {
+			return false;
+		}
+		if ( in_array( $type, self::GROUP_TYPES, true ) ) {
+			return self::id( $attributes, 'groupId' ) > 0;
+		}
+
+		return in_array( $type, array( '', 'single', 'button', 'image' ), true ) && self::id( $attributes, 'productId' ) > 0;
+	}
+
+	/**
+	 * The request a Product box block asks for (F4 D3, Tasks 23C, 23D), as the shortcode would: its product as the single
+	 * box, a button or an image, or its group as a grid, list or gallery. The block keeps its group's ID; the shortcode
+	 * names a group by its slug, which the caller looks up. Null when the attributes name no display or the group is gone
+	 * (the page then prints nothing, F4 edge case 1).
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 * @param string               $group_slug The slug of the block's group ('' none), for the group types.
+	 */
+	public static function from_block( array $attributes, string $group_slug = '' ): ?self {
+		if ( ! self::names_display( $attributes ) ) {
 			return null;
 		}
 
-		$shortcode = array( 'id' => (string) $product );
+		$type = (string) ( $attributes['type'] ?? '' );
+		if ( in_array( $type, self::GROUP_TYPES, true ) ) {
+			return '' === $group_slug ? null : self::of(
+				array(
+					'type'  => $type,
+					'group' => $group_slug,
+				)
+			);
+		}
+
+		$shortcode = array( 'id' => (string) self::id( $attributes, 'productId' ) );
 		if ( 'button' === $type || 'image' === $type ) {
 			$shortcode['type'] = $type;
 		}
 
 		return self::of( $shortcode );
+	}
+
+	/**
+	 * A numeric attribute as an ID; 0 when it is missing or not a number.
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 * @param string               $name       The attribute.
+	 */
+	private static function id( array $attributes, string $name ): int {
+		return is_numeric( $attributes[ $name ] ?? null ) ? (int) $attributes[ $name ] : 0;
 	}
 }

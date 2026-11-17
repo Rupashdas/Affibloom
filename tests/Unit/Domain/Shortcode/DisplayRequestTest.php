@@ -24,6 +24,19 @@ final class DisplayRequestTest extends TestCase {
 		self::assertSame( DisplayKind::Single, DisplayRequest::from_block( array( 'type' => 'single', 'productId' => 12 ) )?->kind );
 	}
 
+	public function test_the_group_types_ask_for_their_group_by_its_slug(): void {
+		$grid = DisplayRequest::from_block( array( 'type' => 'grid', 'groupId' => 4 ), 'best-shoes' );
+		self::assertSame( DisplayKind::Grid, $grid?->kind );
+		self::assertSame( 'best-shoes', $grid?->attributes['group'] );
+		self::assertSame( DisplayKind::List, DisplayRequest::from_block( array( 'type' => 'list', 'groupId' => 4 ), 'best-shoes' )?->kind );
+		self::assertSame( DisplayKind::Gallery, DisplayRequest::from_block( array( 'type' => 'gallery', 'groupId' => 4 ), 'best-shoes' )?->kind );
+		// A group that is gone draws nothing, though the block still names a display (the preview answers, empty).
+		self::assertNull( DisplayRequest::from_block( array( 'type' => 'list', 'groupId' => 4 ) ) );
+		self::assertTrue( DisplayRequest::names_display( array( 'type' => 'list', 'groupId' => 4 ) ) );
+		self::assertNull( DisplayRequest::from_block( array( 'type' => 'grid' ), 'best-shoes' ) );
+		self::assertFalse( DisplayRequest::names_display( array( 'type' => 'grid', 'productId' => 4 ) ) );
+	}
+
 	public function test_no_product_or_an_unknown_type_asks_for_nothing(): void {
 		self::assertNull( DisplayRequest::from_block( array( 'type' => 'single' ) ) );
 		self::assertNull( DisplayRequest::from_block( array( 'type' => 'single', 'productId' => 0 ) ) );

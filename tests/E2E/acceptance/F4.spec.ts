@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith, unique } from '../utils';
+import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, unique } from '../utils';
 
 // F4 Displays in the editor (docs/features/F4/requirements.md). Labels: Lasso's, minus its name (D5).
 const MODAL_SCRIPT = /assets\/editor\/display-modal\.js/;
@@ -112,6 +112,34 @@ test.describe( 'F4 Displays in the editor', () => {
 		await page.goto( newPostWith( boxBlock( id, { type: 'button' } ) ) );
 		expect( await drawn( page.locator( '.entry-content' ) ) ).toEqual( inEditor );
 		expect( inEditor.product ).toBe( String( id ) );
+	} );
+
+	test( 'AC6 Grid, List and Gallery open "Choose a Group": counts, Enter-only search, Add inserts the group', async ( { page } ) => {
+		const stamp = unique( 'F4 AC6' );
+		const products = [ 1, 2 ].map( ( n ) => createProduct( { name: `${ stamp } product ${ n }` } ) );
+		createGroup( `${ stamp } pair`, products );
+
+		for ( const type of [ 'Grid', 'List', 'Gallery' ] ) {
+			const block = await insertProductBox( page );
+			await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+			const modal = page.locator( '.affibloom-block-modal' );
+			await modal.getByRole( 'button', { name: type } ).click();
+			const dialog = page.getByRole( 'dialog', { name: 'Choose a Group' } );
+			await expect( dialog ).toBeVisible();
+			await expect( dialog.locator( '.affibloom-group-row' ) ).toHaveCount( 5 );
+
+			const search = dialog.getByPlaceholder( 'Search groups' );
+			await search.fill( stamp );
+			await search.press( 'Enter' );
+			const row = dialog.locator( '.affibloom-group-row', { hasText: `${ stamp } pair` } );
+			await expect( row ).toContainText( '2 links' );
+			await row.getByRole( 'button', { name: 'Add' } ).click();
+			await expect( modal ).toBeHidden();
+
+			const stored = await page.evaluate( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getEditedPostContent: () => string } } } } ).wp.data.select( 'core/editor' ).getEditedPostContent() );
+			expect( stored ).toMatch( new RegExp( `"type":"${ type.toLowerCase() }","groupId":\\d+` ) );
+			await expect( block.locator( '.affibloom-block__preview' ) ).toContainText( `${ stamp } product 1` );
+		}
 	} );
 
 	test( 'AC2 the published page shows the box', async ( { page } ) => {

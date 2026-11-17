@@ -266,48 +266,39 @@
 	};
 
 	/**
-	 * "Choose a Link" (Task 23B; R12-R15): five products a page, newest changed first; "Search URLs" on Enter only;
-	 * a row's Add hands the product to the block (Task 23C).
+	 * A step that lists search results (Tasks 23B, 23D; R14): five a page, a search on Enter only, grey rows while the
+	 * answer is on its way, page buttons, and the step's empty and failure messages. Extracted on its second use.
+	 *
+	 * @param {Object}                                 options        The step.
+	 * @param {string}                                 options.name   The step (`data-step`).
+	 * @param {(query: URLSearchParams) => string}     options.path   The route to ask, with the search and page.
+	 * @param {(item: Object, row: Element) => void}   options.fill   Fills a row from an item of the answer.
+	 * @param {(button: HTMLElement) => Object | null} options.choose The display a row's Add inserts.
+	 * @return {Object|null} The step's own search reload, for steps that redraw it (23E).
 	 */
-	( function linksStep() {
-		const section = root.querySelector( '[data-step="links"]' );
+	const searchStep = function ( options ) {
+		const section = root.querySelector(
+			'[data-step="' + options.name + '"]'
+		);
 		if ( ! section ) {
-			return;
+			return null;
 		}
-		const search = section.querySelector( '[data-links-search]' );
-		const list = section.querySelector( '[data-links-list]' );
-		const message = section.querySelector( '[data-links-message]' );
-		const nav = section.querySelector( '[data-links-pages]' );
-		const template = section.querySelector( '[data-link-row]' );
+		const search = section.querySelector( '[data-step-search]' );
+		const list = section.querySelector( '[data-step-list]' );
+		const message = section.querySelector( '[data-step-message]' );
+		const nav = section.querySelector( '[data-step-pages]' );
+		const template = section.querySelector( '[data-step-row]' );
 		let latest = 0;
+		let shown = 1;
 
 		const say = function ( text ) {
 			message.textContent = text;
 			message.hidden = '' === text;
 		};
 
-		const row = function ( item ) {
-			const element =
-				template.content.firstElementChild.cloneNode( true );
-			const image = element.querySelector( '[data-row-image]' );
-			if ( item.image_url ) {
-				image.src = item.image_url;
-				image.hidden = false;
-				element.querySelector( '[data-row-none]' ).hidden = true;
-			}
-			const name = element.querySelector( '[data-row-name]' );
-			name.textContent = item.name;
-			name.title = item.name;
-			const link = element.querySelector( '[data-row-url]' );
-			link.textContent = item.url;
-			link.href = safeHref( item.url );
-			element.querySelector( '[data-row-add]' ).dataset.productId =
-				String( item.id );
-			return element;
-		};
-
 		const load = function ( page ) {
 			const ask = ++latest;
+			shown = page;
 			skeleton( list );
 			say( '' );
 			const query = new URLSearchParams( {
@@ -316,9 +307,7 @@
 				per_page: '5',
 			} );
 			window.wp
-				.apiFetch( {
-					path: '/affibloom/v1/products?' + query.toString(),
-				} )
+				.apiFetch( { path: options.path( query ) } )
 				.then( function ( answer ) {
 					if ( ask !== latest ) {
 						return;
@@ -326,7 +315,12 @@
 					const data = answer.data;
 					list.innerHTML = '';
 					data.items.forEach( function ( item ) {
-						list.appendChild( row( item ) );
+						const row =
+							template.content.firstElementChild.cloneNode(
+								true
+							);
+						options.fill( item, row );
+						list.appendChild( row );
 					} );
 					say(
 						data.items.length
@@ -351,13 +345,14 @@
 				} );
 		};
 
-		// Add (R16, Task 23C): the chosen type with this product; the modal closes and the block draws it.
+		// Add (R16, R18): the chosen type with this row's target; the modal closes and the block draws it.
 		list.addEventListener( 'click', function ( event ) {
 			const add = event.target.closest( '[data-row-add]' );
-			if ( add ) {
+			const display = add ? options.choose( add ) : null;
+			if ( display ) {
 				window.affibloomDisplayModal.insert( {
 					type: context.type,
-					productId: parseInt( add.dataset.productId, 10 ),
+					...display,
 				} );
 			}
 		} );
@@ -369,7 +364,7 @@
 			}
 		} );
 
-		window.affibloomDisplayModal.step( 'links', {
+		window.affibloomDisplayModal.step( options.name, {
 			show() {
 				search.value = '';
 				load( 1 );
@@ -382,5 +377,65 @@
 				say( '' );
 			},
 		} );
-	} )();
+
+		return {
+			section,
+			list,
+			reload() {
+				load( shown );
+			},
+		};
+	};
+
+	/** "Choose a Link" (Task 23B; R12-R16): products, newest changed first, with their picture and link. */
+	searchStep( {
+		name: 'links',
+		path: ( query ) => '/affibloom/v1/products?' + query.toString(),
+		fill( item, row ) {
+			const image = row.querySelector( '[data-row-image]' );
+			if ( item.image_url ) {
+				image.src = item.image_url;
+				image.hidden = false;
+				row.querySelector( '[data-row-none]' ).hidden = true;
+			}
+			const name = row.querySelector( '[data-row-name]' );
+			name.textContent = item.name;
+			name.title = item.name;
+			const link = row.querySelector( '[data-row-url]' );
+			link.textContent = item.url;
+			link.href = safeHref( item.url );
+			row.querySelector( '[data-row-add]' ).dataset.target = String(
+				item.id
+			);
+		},
+		choose: ( button ) => ( {
+			productId: parseInt( button.dataset.target, 10 ),
+		} ),
+	} );
+
+	/** "Choose a Group" (Task 23D; R17-R18): groups with "1 link" / "N links"; Add inserts the group as the chosen type. */
+	searchStep( {
+		name: 'groups',
+		path: ( query ) => '/affibloom/v1/groups?' + query.toString(),
+		fill( item, row ) {
+			const section = root.querySelector( '[data-step="groups"]' );
+			const name = row.querySelector( '[data-row-name]' );
+			name.textContent = item.name;
+			name.title = item.name;
+			const words =
+				1 === item.count
+					? section.getAttribute( 'data-one' )
+					: section.getAttribute( 'data-many' );
+			row.querySelector( '[data-row-count]' ).textContent = words.replace(
+				'%s',
+				item.count.toLocaleString()
+			);
+			row.querySelector( '[data-row-add]' ).dataset.target = String(
+				item.id
+			);
+		},
+		choose: ( button ) => ( {
+			groupId: parseInt( button.dataset.target, 10 ),
+		} ),
+	} );
 } )();

@@ -61,7 +61,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 23A: The block and "Choose a Display Type"
 - [x] Task 23B: "Choose a Link" — product search
 - [x] Task 23C: Insert Single, Button and Image; stored markup; the published page
-- [ ] Task 23D: Grid, List and Gallery — "Choose a Group"
+- [x] Task 23D: Grid, List and Gallery — "Choose a Group"
 - [ ] Task 23E: Create Group and "Add to Group" from the modal
 - Task 23F: Table — "Choose a Table" — **moved to Phase 7** (after F25 T12; settled 2026-11-14)
 - [ ] Task 23G: Create a Link and the quick detail
@@ -607,10 +607,15 @@ display-modal.js (step "groups") → GET /affibloom/v1/groups?search=&page=&per_
 **Files:** modify `assets/editor/display-modal.{js,css}`, `src/Domain/Display/DisplayRequest.php`;
 tests `tests/E2E/acceptance/F4.spec.ts` (AC6).
 
-- [ ] **Step 1: Failing tests** (AC6: five groups a page, counts, Enter-only search, Add per type). Red: no groups step.
-- [ ] **Step 2: Groups step.** Rows: the group's name, link count, **+ Add**; the failure and empty messages as 23B.
-- [ ] **Step 3: Run and look.** Checks; by hand: Grid, List and Gallery each from a group, at 375 px.
-- [ ] **Step 4: Commit** — "Insert a group display from the block".
+- [x] **Step 1: Failing tests** (AC6: five groups a page, counts, Enter-only search, Add per type). Red: no groups step.
+- [x] **Step 2: Groups step.** Rows: the group's name, link count, **+ Add**; the failure and empty messages as 23B.
+- [x] **Step 3: Run and look.** Checks; by hand: Grid, List and Gallery each from a group, at 375 px.
+- [x] **Step 4: Commit** — "Insert a group display from the block".
+
+*Note (2026-11-17):* `GET /groups` gained `per_page` and `items` (id, decoded name, count) beside its HTML, and reads
+with `INSERT_BOXES`. The block keeps `groupId`; the render callback looks up the slug (`GroupService::get`) for
+`DisplayRequest::from_block()`, and `names_display()` validates the preview (a gone group: 200 with nothing to draw).
+The links step's code became `searchStep()`, shared by both steps. Seen at 1280 px: Grid, List and Gallery from a group.
 
 ---
 

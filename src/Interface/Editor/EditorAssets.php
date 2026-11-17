@@ -30,7 +30,7 @@ final class EditorAssets implements Module {
 	 *
 	 * @var list<string>
 	 */
-	public const STEPS = array( 'links' );
+	public const STEPS = array( 'links', 'groups' );
 
 	/**
 	 * Builds the assets.

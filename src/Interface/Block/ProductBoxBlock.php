@@ -13,6 +13,7 @@ use Affibloom\Application\Box\BoxBuilder;
 use Affibloom\Application\Box\BoxFields;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Display\DisplaySettingsService;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Fields\FieldRepository;
@@ -28,7 +29,8 @@ use Affibloom\Module;
 /**
  * Registers `affibloom/product-box` from the built `build/product-box/block.json` (its editor script and style, Task
  * 23A; the source is `blocks/product-box`) and renders it on the server (F5 R1, AC3).
- * A Button or an Image display (Task 23C, F4 D3) draws as the shortcode draws it; the single box keeps its own path,
+ * A Button, Image, Grid, List or Gallery display (Tasks 23C, 23D; F4 D3) draws as the shortcode draws it, a group found
+ * by the ID the block keeps; the single box keeps its own path,
  * with the block's overrides. The editor's preview (EditorController) renders through this same callback.
  */
 final class ProductBoxBlock implements Module {
@@ -48,7 +50,8 @@ final class ProductBoxBlock implements Module {
 	 * @param ProductRepository       $catalog   The products, for their custom fields.
 	 * @param FieldRepository         $fields    The field library.
 	 * @param AmazonProductRepository $amazon   The stored Amazon data (C1), for the timestamp.
-	 * @param AffibloomShortcode      $shortcode The shortcode, which draws the Button and Image displays.
+	 * @param AffibloomShortcode      $shortcode The shortcode, which draws every display but the single box.
+	 * @param GroupService            $groups    The groups, for a group display's slug.
 	 */
 	public function __construct(
 		private readonly string $block_dir,
@@ -61,6 +64,7 @@ final class ProductBoxBlock implements Module {
 		private readonly FieldRepository $fields,
 		private readonly AmazonProductRepository $amazon,
 		private readonly AffibloomShortcode $shortcode,
+		private readonly GroupService $groups,
 	) {}
 
 	/**
@@ -83,7 +87,8 @@ final class ProductBoxBlock implements Module {
 	 * @param array<string, mixed> $attributes The block's attributes.
 	 */
 	public function render( array $attributes ): string {
-		$request = DisplayRequest::from_block( $attributes );
+		$group   = is_numeric( $attributes['groupId'] ?? null ) ? $this->groups->get( (int) $attributes['groupId'] ) : null;
+		$request = DisplayRequest::from_block( $attributes, null === $group ? '' : $group->slug );
 		if ( null !== $request && DisplayKind::Single !== $request->kind ) {
 			return $this->shortcode->render( $request->attributes );
 		}

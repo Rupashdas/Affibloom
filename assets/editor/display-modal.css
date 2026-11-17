@@ -85,6 +85,9 @@
 .affibloom-link-row__name { overflow: hidden; color: var(--affibloom-ink-900); font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-admin .affibloom-link-row__url { overflow: hidden; color: var(--affibloom-ink-500); font-size: 12px; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-admin .affibloom-link-row__url:hover { color: var(--affibloom-brand-600); text-decoration: underline; }
+/* "Choose a Group" (Task 23D): the rows of "Choose a Link" with a group chip and the link count under the name. */
+.affibloom-admin .affibloom-group-row__chip { border: 0; background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); }
+.affibloom-group-row__count { color: var(--affibloom-ink-500); font-size: 12px; }
 .affibloom-link-rows__message { margin: 16px 0 4px; color: var(--affibloom-ink-600); text-align: center; }
 .affibloom-modal-pages { justify-content: center; margin-top: 12px; }
 .affibloom-admin .affibloom-modal-pages button.page-numbers { cursor: pointer; }

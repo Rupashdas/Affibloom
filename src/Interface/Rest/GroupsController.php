@@ -83,19 +83,27 @@ final class GroupsController implements Module {
 			$ns,
 			'/groups',
 			array(
+				// The Groups screen's list, and the editor's "Choose a Group" (F4 R17, Task 23D), which anyone who may place
+				// displays may read (F4 D8).
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'list' ),
-					'permission_callback' => array( $this, 'can_manage' ),
+					'permission_callback' => static fn(): bool => current_user_can( Capabilities::INSERT_BOXES ),
 					'args'                => array(
-						'search' => array(
+						'search'   => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'page'   => array(
+						'page'     => array(
 							'type'    => 'integer',
 							'minimum' => 1,
 							'default' => 1,
+						),
+						'per_page' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 50,
+							'default' => GroupService::PER_PAGE,
 						),
 					),
 				),
@@ -198,14 +206,24 @@ final class GroupsController implements Module {
 	}
 
 	/**
-	 * GET /groups: one page of the list, as the screen would print it, and the screen's own address for it.
+	 * GET /groups: one page of the list, as the screen would print it, the screen's own address for it, and its groups as
+	 * items (id, name, link count) for the editor's "Choose a Group" (Task 23D).
 	 *
-	 * @param WP_REST_Request $request Request with "search" and "page".
-	 * @phpstan-param WP_REST_Request<array{search: string, page: int}> $request
+	 * @param WP_REST_Request $request Request with "search", "page" and "per_page".
+	 * @phpstan-param WP_REST_Request<array{search: string, page: int, per_page: int}> $request
 	 */
 	public function list( WP_REST_Request $request ): WP_REST_Response {
 		$term   = SearchTerm::from_input( sanitize_text_field( (string) $request['search'] ) );
-		$groups = $this->groups->list( $term, max( 1, (int) $request['page'] ) );
+		$groups = $this->groups->list( $term, max( 1, (int) $request['page'] ), (int) $request['per_page'] );
+		$items  = array_map(
+			static fn( $group ): array => array(
+				'id'    => $group->id,
+				// A term's name is stored with "&" as "&amp;"; the editor prints it as text.
+				'name'  => wp_specialchars_decode( $group->name, ENT_QUOTES ),
+				'count' => $group->count,
+			),
+			$groups->items
+		);
 
 		return new WP_REST_Response(
 			array(
@@ -220,7 +238,9 @@ final class GroupsController implements Module {
 					),
 					'term'  => $term->text(),
 					'page'  => $groups->current(),
+					'pages' => $groups->pages(),
 					'total' => $groups->total,
+					'items' => $items,
 					'url'   => GroupsUrl::to( $term->text(), $groups->current() ),
 				),
 			)

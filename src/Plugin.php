@@ -378,7 +378,8 @@ final class Plugin {
 				new PostTypeProductRepository(),
 				new OptionFieldRepository(),
 				new TableAmazonProductRepository(),
-				$shortcode
+				$shortcode,
+				$groups
 			),
 			$box_assets,
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets ),

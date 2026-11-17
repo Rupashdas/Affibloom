@@ -37,11 +37,12 @@ final class GroupService {
 	/**
 	 * One page of the list, newest first, searched by name with spaces as wildcards (R2).
 	 *
-	 * @param SearchTerm $term What was typed in "Search Groups".
-	 * @param int        $page Page number, from 1.
+	 * @param SearchTerm $term     What was typed in "Search Groups".
+	 * @param int        $page     Page number, from 1.
+	 * @param int        $per_page Groups a page: the screen's ten, the editor's "Choose a Group" five (F4 R17).
 	 */
-	public function list( SearchTerm $term, int $page ): GroupPage {
-		return $this->groups->page( $term, max( 1, $page ), self::PER_PAGE );
+	public function list( SearchTerm $term, int $page, int $per_page = self::PER_PAGE ): GroupPage {
+		return $this->groups->page( $term, max( 1, $page ), max( 1, $per_page ) );
 	}
 
 	/**

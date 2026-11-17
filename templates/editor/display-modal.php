@@ -70,13 +70,13 @@ $display_types = array(
 			</div>
 			<div class="affibloom-modal__body">
 				<label class="screen-reader-text" for="affibloom-display-links-search"><?php esc_html_e( 'Search URLs', 'affibloom' ); ?></label>
-				<input type="search" id="affibloom-display-links-search" class="affibloom-input affibloom-search affibloom-modal-search" placeholder="<?php esc_attr_e( 'Search URLs', 'affibloom' ); ?>" data-links-search>
-				<ul class="affibloom-link-rows" data-links-list aria-live="polite"></ul>
-				<p class="affibloom-link-rows__message" data-links-message role="status" hidden></p>
-				<nav class="affibloom-pagination affibloom-modal-pages" aria-label="<?php esc_attr_e( 'Link pages', 'affibloom' ); ?>" data-links-pages
+				<input type="search" id="affibloom-display-links-search" class="affibloom-input affibloom-search affibloom-modal-search" placeholder="<?php esc_attr_e( 'Search URLs', 'affibloom' ); ?>" data-step-search>
+				<ul class="affibloom-link-rows" data-step-list aria-live="polite"></ul>
+				<p class="affibloom-link-rows__message" data-step-message role="status" hidden></p>
+				<nav class="affibloom-pagination affibloom-modal-pages" aria-label="<?php esc_attr_e( 'Link pages', 'affibloom' ); ?>" data-step-pages
 					data-previous="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>"></nav>
 			</div>
-			<template data-link-row>
+			<template data-step-row>
 				<li class="affibloom-link-row">
 					<span class="affibloom-link-row__picture">
 						<img alt="" width="44" height="44" loading="lazy" data-row-image hidden>
@@ -85,6 +85,45 @@ $display_types = array(
 					<span class="affibloom-link-row__text">
 						<strong class="affibloom-link-row__name" data-row-name></strong>
 						<a class="affibloom-link-row__url" target="_blank" rel="noopener noreferrer" data-row-url></a>
+					</span>
+					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-row-add>
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+						<span><?php esc_html_e( 'Add', 'affibloom' ); ?></span>
+					</button>
+				</li>
+			</template>
+		</section>
+
+		<?php
+		// "Choose a Group" (Task 23D; display-add.php 105-131, R17-R18): Grid, List and Gallery show a group. Five a page with
+		// each group's link count; the search runs on Enter only (GET /groups).
+		/* translators: %s: how many links a group holds (one). */
+		$group_one = _n( '%s link', '%s links', 1, 'affibloom' );
+		/* translators: %s: how many links a group holds (several). */
+		$group_many = _n( '%s link', '%s links', 2, 'affibloom' );
+		?>
+		<section class="affibloom-modal-step" data-step="groups" aria-labelledby="affibloom-display-groups-title" hidden
+			data-empty="<?php esc_attr_e( 'No groups found.', 'affibloom' ); ?>"
+			data-failed="<?php esc_attr_e( 'Could not load groups. Please try again.', 'affibloom' ); ?>"
+			data-page-label="<?php /* translators: %d: a page number. */ esc_attr_e( 'Page %d', 'affibloom' ); ?>"
+			data-one="<?php echo esc_attr( $group_one ); ?>" data-many="<?php echo esc_attr( $group_many ); ?>">
+			<div class="affibloom-modal__head">
+				<h2 id="affibloom-display-groups-title" class="affibloom-modal__title"><?php esc_html_e( 'Choose a Group', 'affibloom' ); ?></h2>
+			</div>
+			<div class="affibloom-modal__body">
+				<label class="screen-reader-text" for="affibloom-display-groups-search"><?php esc_html_e( 'Search groups', 'affibloom' ); ?></label>
+				<input type="search" id="affibloom-display-groups-search" class="affibloom-input affibloom-search affibloom-modal-search" placeholder="<?php esc_attr_e( 'Search groups', 'affibloom' ); ?>" data-step-search>
+				<ul class="affibloom-link-rows" data-step-list aria-live="polite"></ul>
+				<p class="affibloom-link-rows__message" data-step-message role="status" hidden></p>
+				<nav class="affibloom-pagination affibloom-modal-pages" aria-label="<?php esc_attr_e( 'Group pages', 'affibloom' ); ?>" data-step-pages
+					data-previous="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>"></nav>
+			</div>
+			<template data-step-row>
+				<li class="affibloom-link-row affibloom-group-row">
+					<span class="affibloom-link-row__picture affibloom-group-row__chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'layers' ) ); ?></span>
+					<span class="affibloom-link-row__text">
+						<strong class="affibloom-link-row__name" data-row-name></strong>
+						<span class="affibloom-group-row__count" data-row-count></span>
 					</span>
 					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-row-add>
 						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
