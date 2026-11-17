@@ -18,6 +18,12 @@ final class ProductFields {
 	/** Lasso's ID for Primary Rating (Fields::RATING_FIELD_ID). */
 	public const RATING_ID = 1;
 
+	/** The built-in Pros field (Lasso's field 2). */
+	public const PROS_ID = 2;
+
+	/** The built-in Cons field (Lasso's field 3). */
+	public const CONS_ID = 3;
+
 	/**
 	 * The rows, Primary Rating first.
 	 *
@@ -112,6 +118,27 @@ final class ProductFields {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * The Primary Rating as the schema reads it (F5 R90): its value when the row is shown, else ''.
+	 */
+	public function shown_rating(): string {
+		$row = $this->find( self::RATING_ID );
+
+		return null !== $row && $row->visible ? trim( $row->value ) : '';
+	}
+
+	/**
+	 * A field's value as lines (the Pros, the Cons): one per line; none when the product does not have the field.
+	 *
+	 * @param int $field_id The field's ID.
+	 * @return list<string>
+	 */
+	public function lines( int $field_id ): array {
+		$row = $this->find( $field_id );
+
+		return null === $row ? array() : explode( "\n", str_replace( "\r", '', $row->value ) );
 	}
 
 	/**

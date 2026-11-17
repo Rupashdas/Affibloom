@@ -285,6 +285,32 @@ test.describe( 'F4 Displays in the editor', () => {
 		expect( await stored() ).not.toContain( '"badge"' );
 	} );
 
+	test( 'AC12 Schema & Structured Data: one block per post; Review schema gives a rating-less product 3.5', async ( { page } ) => {
+		const first = createProduct( { name: unique( 'F4 AC12 a' ) } );
+		const second = createProduct( { name: unique( 'F4 AC12 b' ) } );
+		const post = newPostWith( boxBlock( first, { type: 'single' } ) + boxBlock( second, { type: 'single' } ) );
+		await page.goto( post.replace( /\?p=(\d+).*$/, 'wp-admin/post.php?post=$1&action=edit' ) );
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const panel = page.locator( '.block-editor-block-inspector' );
+		const open = async ( index: number ) => {
+			await canvas.locator( '.affibloom-block' ).nth( index ).click();
+			const toggle = panel.getByRole( 'button', { name: 'Schema & Structured Data' } );
+			if ( 'false' === await toggle.getAttribute( 'aria-expanded' ) ) {
+				await toggle.click();
+			}
+		};
+
+		await open( 0 );
+		await expect( panel.getByLabel( 'Rating value' ) ).toHaveValue( '' );
+		await panel.getByLabel( 'Review schema' ).click();
+		await expect( panel.getByLabel( 'Review schema' ) ).toBeChecked();
+		await expect( panel.getByLabel( 'Rating value' ) ).toHaveValue( '3.5' );
+
+		await open( 1 );
+		await expect( panel.getByLabel( 'Review schema' ) ).toBeDisabled();
+		await expect( panel.getByText( 'Another display in this post already uses schema.' ) ).toBeVisible();
+	} );
+
 	test( 'edge case 7: an author places displays but sees no Create buttons', async ( { browser } ) => {
 		const login = unique( 'f4author' );
 		const password = unique( 'pw' );

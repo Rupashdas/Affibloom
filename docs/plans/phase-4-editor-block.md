@@ -66,7 +66,7 @@ them when the task is worked, and record any code that differs from the text bel
 - Task 23F: Table — "Choose a Table" — **moved to Phase 7** (after F25 T12; settled 2026-11-14)
 - [x] Task 23G: Create a Link and the quick detail
 - [x] Task 24A: Customize Display sidebar
-- [ ] Task 24B: Schema & Structured Data panel
+- [x] Task 24B: Schema & Structured Data panel
 - [ ] Task 24C: Shortcode box and Update Display
 - [ ] Task 24D: Edit Display
 - [ ] Task 24E: Preview queue on load
@@ -799,11 +799,19 @@ toggle → schema_review="enable" → POST /editor/preview ; rating 3.5 → PATC
 **Files:** modify `EditorController.php`, `edit.js`; create `PostDisplays.php`, `SchemaService.php`,
 `tests/Unit/Application/SchemaServiceTest.php`; tests `tests/E2E/acceptance/F4.spec.ts` (AC12).
 
-- [ ] **Step 1: Failing tests** (AC12 incl. one-per-post, and the 3.5 rating; unit: `SchemaService`, `PostDisplays`).
-- [ ] **Step 2: `GET /editor/schema`.** `edit_post` on the post; no writes.
-- [ ] **Step 3: Panel.** Notice text; Pro/Con toggle only if the product has both; the rule of edge case 4.
-- [ ] **Step 4: Run and look.** Checks; by hand: two blocks, turn schema on in the first, see the second disabled; view the page source.
-- [ ] **Step 5: Commit** — "Set a display's review schema from the sidebar".
+- [x] **Step 1: Failing tests** (AC12 incl. one-per-post, and the 3.5 rating; unit: `SchemaService`, `PostDisplays`).
+- [x] **Step 2: `GET /editor/schema`.** `edit_post` on the post; no writes.
+- [x] **Step 3: Panel.** Notice text; Pro/Con toggle only if the product has both; the rule of edge case 4.
+- [x] **Step 4: Run and look.** Checks; by hand: two blocks, turn schema on in the first, see the second disabled; view the page source.
+- [x] **Step 5: Commit** — "Set a display's review schema from the sidebar".
+
+*Note (2026-11-17):* the panel sets the block's existing schema attributes (`schemaReview`, `schemaProsCons`,
+`schemaPrice`, `schemaPriceCurrency`, F5), which SchemaMarkup already reads. The one-per-post rule reads the editor's
+own block list (the post as edited, not as saved), so `PostDisplays` and `SchemaService` are not built; `GET
+/editor/schema?product=&post=` answers one product's facts, and `POST /editor/schema/rating` gives Lasso's 3.5 through
+`FieldsService::attach()`. The rating, Pros and Cons reading moved into `ProductFields` (`shown_rating()`, `lines()`),
+shared with SchemaMarkup. Not built: R47's copying of the preview's schema into a new Single's attributes (empty
+attributes already mean the product's values). Seen at 1280 px: two blocks, 3.5 given, the second disabled, the JSON-LD.
 
 ---
 

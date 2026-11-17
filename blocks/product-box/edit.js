@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
 
 import metadata from './block.json';
 import CustomizeDisplay from './customize';
+import SchemaPanel from './schema';
 import { FlowerIcon } from './flower';
 import { loadModal, useModalState } from './modal-loader';
 
@@ -72,7 +73,7 @@ function usePreview( attributes ) {
 	return preview;
 }
 
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { attributes, setAttributes, clientId } ) {
 	const state = useModalState();
 	const button = useRef();
 	const blockProps = useBlockProps( { className: 'affibloom-block' } );
@@ -108,6 +109,13 @@ export default function Edit( { attributes, setAttributes } ) {
 				<CustomizeDisplay
 					attributes={ attributes }
 					setAttributes={ setAttributes }
+				/>
+			) }
+			{ hasDisplay && (
+				<SchemaPanel
+					attributes={ attributes }
+					setAttributes={ setAttributes }
+					clientId={ clientId }
 				/>
 			) }
 			<div

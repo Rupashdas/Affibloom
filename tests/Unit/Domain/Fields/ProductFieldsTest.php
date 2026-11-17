@@ -111,4 +111,12 @@ final class ProductFieldsTest extends TestCase {
 		self::assertSame( array( 2 ), $fields->detach( 1 )->ids() );
 		self::assertEquals( $fields, ProductFields::from_array( $fields->to_array() ) );
 	}
+
+	/** What the schema reads (F4 R43, Task 24B): the shown rating, the Pros and Cons as lines. */
+	public function test_the_schema_reads_the_shown_rating_and_the_lines(): void {
+		self::assertSame( '', ProductFields::from_array( array() )->shown_rating() );
+		$fields = ProductFields::from_array( array() )->attach( $this->library->find( ProductFields::RATING_ID ) );
+		self::assertSame( '3.5', $fields->shown_rating() );
+		self::assertSame( array(), $fields->lines( ProductFields::PROS_ID ) );
+	}
 }

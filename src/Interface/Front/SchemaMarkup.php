@@ -82,21 +82,7 @@ final class SchemaMarkup implements Module {
 			return;
 		}
 
-		$fields = $this->catalog->fields( (int) $product->id ) ?? ProductFields::from_array( array() );
-		$lines  = static function ( int $id ) use ( $fields ): array {
-			foreach ( $fields->all() as $row ) {
-				if ( $id === $row->field_id ) {
-					return explode( "\n", str_replace( "\r", '', $row->value ) );
-				}
-			}
-			return array();
-		};
-		$rating = '';
-		foreach ( $fields->all() as $row ) {
-			if ( ProductFields::RATING_ID === $row->field_id && $row->visible ) {
-				$rating = trim( $row->value );
-			}
-		}
+		$fields   = $this->catalog->fields( (int) $product->id ) ?? ProductFields::from_array( array() );
 		$stored   = ProductType::Amazon === $product->type && '' !== $product->asin ? $this->amazon->find( $product->asin, $product->amazon_country ) : null;
 		$currency = '' !== $box['currency'] ? $box['currency'] : ( $stored->currency ?? 'USD' );
 		$price    = '' !== $box['price'] ? $box['price'] : $product->price;
@@ -106,9 +92,9 @@ final class SchemaMarkup implements Module {
 			$this->builder->picture( $product, $this->settings->get() ),
 			$price,
 			$currency,
-			$rating,
-			$lines( 2 ),
-			$lines( 3 ),
+			$fields->shown_rating(),
+			$fields->lines( ProductFields::PROS_ID ),
+			$fields->lines( ProductFields::CONS_ID ),
 			(string) get_the_author_meta( 'display_name', (int) $post->post_author ),
 			$box['review'],
 			$box['pros_cons']
