@@ -181,6 +181,14 @@ interface ProductRepository {
 	public function find_by_slug( string $slug ): ?Product;
 
 	/**
+	 * The published or retired product that had this slug before, or null (F24 N1: old slugs keep answering; Task CL10).
+	 * The one changed last wins when two had it.
+	 *
+	 * @param string $slug A slug.
+	 */
+	public function find_by_old_slug( string $slug ): ?Product;
+
+	/**
 	 * The ID of the product with this slug, whatever its status (F31 A2: Lasso looks a slug up so; the resolver then
 	 * decides what draws), or null.
 	 *

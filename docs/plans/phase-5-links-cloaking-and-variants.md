@@ -102,7 +102,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task CL7: The Dashboard row's link
 - [x] Task CL8: Products in the block editor's link search
 - [x] Task CL9: Products in the classic editor's link dialog
-- [ ] Task CL10: Old addresses (Lasso's hand-over moved to Phase M, 26G)
+- [x] Task CL10: Old addresses (Lasso's hand-over moved to Phase M, 26G)
 - [ ] Task CL11: A pasted cloaked URL finds its product
 
 **F27 — URL variants**
@@ -968,11 +968,13 @@ current address; after `wp affibloom migrate --only=slugs` the seven links in po
 
 **Files:** the above; tests F24 AC7 (old slug), AC14 (after 26G); unit `CloakHandOverTest`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Resolver arm.**
-- [ ] **Step 3: Hand-over service.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Keep old cloaked addresses answering".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Resolver arm.**
+- [x] **Step 3: Hand-over service.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Keep old cloaked addresses answering".
+
+*Note (2026-11-18):* *Note:* old-slug arm only (`find_by_old_slug()`, a LIKE on the quoted slug in `_affibloom_old_slugs`; the current slug wins); the old-prefix arm came with CL5. Step 3 (`CloakHandOver`) is Phase M's 26G (deviation 146). Checked on Local: 20489 renamed `example-27` → `example-renamed`; both 302, an unknown slug 404. AC7's old-slug line (written in CL3) covers it.
 
 ---
 

@@ -14,8 +14,9 @@ use Affibloom\Domain\Product\ProductRepository;
 
 /**
  * The product a cloaked slug names (F24 R17, D3): a published or retired product with that slug (Lasso redirects its
- * `lasso_delete` links too; a trashed product's slug carries `__trashed`, so it is not found). Old slugs (CL10) and URL
- * variants (V3) add their arms here.
+ * `lasso_delete` links too; a trashed product's slug carries `__trashed`, so it is not found), else the product that had
+ * it before (F24 N1; Task CL10): no post is rewritten when a slug changes, so the old address keeps answering. URL
+ * variants (V3) add their arm here.
  */
 final class CloakResolver {
 
@@ -32,6 +33,6 @@ final class CloakResolver {
 	 * @param string $slug The slug from the path.
 	 */
 	public function product_for( string $slug ): ?Product {
-		return $this->products->find_by_slug( $slug );
+		return $this->products->find_by_slug( $slug ) ?? $this->products->find_by_old_slug( $slug );
 	}
 }

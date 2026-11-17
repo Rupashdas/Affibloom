@@ -280,6 +280,15 @@ final class InMemoryProductRepository implements ProductRepository {
 		return null;
 	}
 
+	public function find_by_old_slug( string $slug ): ?Product {
+		foreach ( array_reverse( $this->saved ) as $product ) {
+			if ( in_array( $slug, $product->old_slugs, true ) ) {
+				return $product;
+			}
+		}
+		return null;
+	}
+
 	public function id_by_slug( string $slug ): ?int {
 		foreach ( $this->saved as $product ) {
 			if ( $slug === $product->slug ) {

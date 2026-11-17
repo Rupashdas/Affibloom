@@ -585,6 +585,39 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The published or retired product that had this slug before, or null (Task CL10). The old slugs are one stored
+	 * list, so the slug is matched with its quotes, as it stands in the serialised list.
+	 *
+	 * @param string $slug A slug.
+	 */
+	public function find_by_old_slug( string $slug ): ?Product {
+		$slug = sanitize_title( $slug );
+		if ( '' === $slug ) {
+			return null;
+		}
+		$posts = get_posts(
+			array(
+				'post_type'        => ProductPostType::NAME,
+				'post_status'      => array( 'publish', ProductPostType::RETIRED ),
+				'posts_per_page'   => 1,
+				'orderby'          => 'modified',
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- only for an address no post or product answers.
+				'meta_query'       => array(
+					array(
+						'key'     => '_affibloom_old_slugs',
+						'value'   => '"' . $slug . '"',
+						'compare' => 'LIKE',
+					),
+				),
+			)
+		);
+
+		return isset( $posts[0] ) ? $this->hydrate( $posts[0] ) : null;
+	}
+
+	/**
 	 * The ID of the product with this slug, whatever its status, or null (F31 A2).
 	 *
 	 * @param string $slug A product's slug.
