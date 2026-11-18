@@ -87,6 +87,7 @@ final class DashboardScreen {
 				'args'       => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts ),
 				'alerts_of'  => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 				'listing'    => $alerts,
+				'counts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one ),
 				'library'    => $this->products->count(),
 				'notice'     => $this->notice->message(),
 			)

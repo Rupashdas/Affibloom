@@ -294,6 +294,41 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		await expect( page ).not.toHaveURL( /order_by/ );
 	} );
 
+	test( 'AC10 the Broken links and Out of stock tabs filter the list, follow the search, and keep in a saved view', async ( { page } ) => {
+		const name = unique( 'F11 AC10' );
+		const broken = createProduct( { name: `${ name } broken`, url: 'https://shop.example/h' } );
+		const out = createProduct( { name: `${ name } out`, url: 'https://shop.example/i' } );
+		createProduct( { name: `${ name } fine`, url: 'https://shop.example/j' } );
+		setIssue( broken, '404', true, 1 );
+		setIssue( out, '000', true, 1 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		const brokenTab = page.locator( 'a.affibloom-filter-broken' );
+		await expect( brokenTab ).toHaveAccessibleName( /Broken links \(1\)/ );
+		await expect( brokenTab ).toHaveAttribute( 'data-tip', /^See broken URLs/ );
+		await expect( page.locator( 'a.affibloom-filter-out-of-stock' ) ).toHaveAccessibleName( /Out of stock \(1\)/ );
+
+		await brokenTab.click();
+		await expect( page ).toHaveURL( /filter=broken-links/ );
+		await expect( brokenTab ).toHaveAttribute( 'aria-current', 'true' );
+		await expect( page.locator( 'tbody tr[data-product-id]' ) ).toHaveCount( 1 );
+		await expect( page.locator( `tr[data-product-id="${ broken }"]` ) ).toBeVisible();
+
+		// Saved as a view, the tab comes back with it.
+		await page.getByRole( 'button', { name: 'Save as' } ).click();
+		await page.getByLabel( 'View name' ).fill( `${ name } view` );
+		await page.getByRole( 'button', { name: 'Save View' } ).click();
+		await brokenTab.click();
+		await expect( page ).not.toHaveURL( /filter=/ );
+		await expect( page.locator( 'tbody tr[data-product-id]' ) ).toHaveCount( 3 );
+		await page.getByRole( 'link', { name: `${ name } view` } ).click();
+		await expect( page ).toHaveURL( /filter=broken-links/ );
+
+		// Reset filters clears it.
+		await page.locator( '[data-views] .affibloom-pill' ).first().click();
+		await expect( page ).not.toHaveURL( /filter=/ );
+		await expect( brokenTab ).not.toHaveAttribute( 'aria-current', 'true' );
+	} );
+
 	test( 'AC11 an out-of-stock issue younger than the grace days shows nowhere', async ( { page } ) => {
 		const name = unique( 'F11 AC11' );
 		const id = createProduct( { name, url: 'https://shop.example/g' } );

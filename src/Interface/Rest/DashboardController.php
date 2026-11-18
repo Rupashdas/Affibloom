@@ -134,7 +134,7 @@ final class DashboardController implements Module {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'save_view' ),
 					'permission_callback' => array( $this, 'can_manage' ),
-					'args'                => $list + array(
+					'args'                => $list + self::alert_args() + array(
 						'name' => array(
 							'type'     => 'string',
 							'required' => true,
@@ -237,6 +237,8 @@ final class DashboardController implements Module {
 					'post_id'   => $one,
 					'order'     => null === $alerts ? '' : $alerts->order,
 					'filter'    => null === $alerts ? '' : $alerts->tab,
+					// The tabs' counts follow the search and the filters (Task 31B; F11 R24).
+					'alerts'    => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one ),
 					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts ),
 				),
 			)
@@ -258,7 +260,8 @@ final class DashboardController implements Module {
 			SearchTerm::from_input( sanitize_text_field( (string) $request->get_param( 's' ) ) )->text(),
 			LinkKind::from_input( (string) $request->get_param( 'link_type' ) ),
 			$this->per_page->choose( absint( $request->get_param( 'per_page' ) ) ),
-			$this->groups->choose_filter( (int) $request->get_param( 'group' ) )
+			$this->groups->choose_filter( (int) $request->get_param( 'group' ) ),
+			(string) $request->get_param( 'filter' )
 		);
 
 		try {
@@ -315,6 +318,7 @@ final class DashboardController implements Module {
 							'link_kind' => null === $active ? LinkKind::All : $active->link_kind,
 							'per_page'  => null === $active ? 0 : $active->per_page,
 							'group'     => null === $active ? 0 : $active->group,
+							'filter'    => null === $active ? '' : $active->filter,
 							'group_ids' => array_map( static fn( $group ): int => $group->id, $this->groups->all() ),
 						)
 					),

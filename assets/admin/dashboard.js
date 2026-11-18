@@ -234,6 +234,63 @@
 		}
 	}
 
+	/**
+	 * The alert tabs (Task 31B; F11 R23-R25, D16): their counts from the list answer (they follow the search and the
+	 * filters), the warm-up clock and line, and the tab on screen marked.
+	 *
+	 * @param {Object|null} alerts The answer's counts, or nothing to only mark the tab.
+	 */
+	function alertTabs( alerts ) {
+		var holder = document.querySelector( '[data-alert-tiles]' );
+		if ( ! holder ) {
+			return;
+		}
+		var format = new Intl.NumberFormat( document.documentElement.lang || undefined );
+		holder.querySelectorAll( '[data-alert-tab]' ).forEach( function ( tile ) {
+			var tab = tile.getAttribute( 'data-alert-tab' );
+			if ( tab === current.filter ) {
+				tile.setAttribute( 'aria-current', 'true' );
+			} else {
+				tile.removeAttribute( 'aria-current' );
+			}
+			if ( ! alerts ) {
+				return;
+			}
+			var n = 'broken-links' === tab ? alerts.broken : alerts.out_of_stock;
+			tile.querySelectorAll( '[data-alert-count]' ).forEach( function ( count ) {
+				count.textContent = format.format( n );
+			} );
+			tile.querySelector( '[data-alert-warm]' ).hidden = ! alerts.warm_up;
+			tile.setAttribute( 'aria-busy', alerts.warm_up ? 'true' : 'false' );
+			var tip = [ tile.getAttribute( 'data-base-tip' ) ];
+			if ( alerts.warm_up ) {
+				tip.push( holder.getAttribute( 'data-warm-line' ) );
+			}
+			if ( tile.hasAttribute( 'data-amazon-tip' ) ) {
+				tip.push( tile.getAttribute( 'data-amazon-tip' ) );
+			}
+			tile.setAttribute( 'data-tip', tip.join( '\n' ) );
+		} );
+	}
+
+	// A tab lists only its products from page 1, oldest issue first; the tab on screen clicked again lists them all
+	// (Lasso's view-js.php 1185-1262). A real link, so a modified click still opens it elsewhere.
+	var alertTiles = document.querySelector( '[data-alert-tiles]' );
+	if ( alertTiles ) {
+		alertTiles.addEventListener( 'click', function ( event ) {
+			var tile = event.target.closest( '[data-alert-tab]' );
+			if ( ! tile || 0 !== event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ) {
+				return;
+			}
+			event.preventDefault();
+			var tab = tile.getAttribute( 'data-alert-tab' );
+			var on = tab !== current.filter;
+			guarded( function () {
+				load( listWith( { filter: on ? tab : '', order: on ? 'asc' : '' } ), true, false );
+			}, tile, true );
+		} );
+	}
+
 	/** Marks the pill whose list is on screen, as Lasso marks the active view; "All links" when none is. */
 	function markActivePill() {
 		var pills = Array.prototype.slice.call( document.querySelectorAll( '[data-views] .affibloom-pill' ) );
@@ -242,11 +299,12 @@
 			if ( ! match && ! current.post_id && pill.getAttribute( 'data-view-s' ) === current.s &&
 				pill.getAttribute( 'data-view-link-type' ) === current.link_type &&
 				parseInt( pill.getAttribute( 'data-view-group' ), 10 ) === current.group &&
+				( pill.getAttribute( 'data-view-filter' ) || '' ) === current.filter &&
 				parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) === current.per_page ) {
 				match = pill;
 			}
 		} );
-		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group ) {
+		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.filter ) {
 			match = pills[ 0 ];
 		}
 		pills.forEach( function ( pill ) {
@@ -321,6 +379,7 @@
 			keepDrawn();
 			shownUrl = window.location.href;
 			counts( data.library );
+			alertTabs( data.alerts );
 			reflect( ! remember );
 			announce();
 			if ( focus ) {
@@ -556,7 +615,7 @@
 		if ( search ) {
 			search.value = '';
 		}
-		load( { s: '', link_type: '', group: 0, post_id: 0, paged: 1, per_page: 10 }, true, false );
+		load( { s: '', link_type: '', group: 0, post_id: 0, paged: 1, per_page: 10, order: '', filter: '' }, true, false );
 	}
 
 	var toolbar = document.querySelector( '.affibloom-toolbar' );
@@ -590,6 +649,8 @@
 						group: parseInt( pill.getAttribute( 'data-view-group' ), 10 ) || 0,
 						paged: 1,
 						per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
+						filter: pill.getAttribute( 'data-view-filter' ) || '',
+						order: pill.getAttribute( 'data-view-filter' ) ? 'asc' : '',
 					}, true, false );
 				}, pill, true );
 				return;
@@ -668,7 +729,7 @@
 			wp.apiFetch( {
 				path: '/affibloom/v1/dashboard/views',
 				method: 'POST',
-				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, per_page: current.per_page },
+				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, per_page: current.per_page, filter: current.filter },
 			} ).then( function ( response ) {
 				replaceViews( response.data.html );
 				nameField.value = '';

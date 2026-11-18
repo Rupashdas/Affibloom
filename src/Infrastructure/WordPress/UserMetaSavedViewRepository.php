@@ -41,7 +41,8 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 				isset( $filters['s'] ) && is_string( $filters['s'] ) ? $filters['s'] : '',
 				LinkKind::from_input( isset( $filters['link_type'] ) && is_string( $filters['link_type'] ) ? $filters['link_type'] : '' ),
 				isset( $filters['per_page'] ) ? absint( $filters['per_page'] ) : 0,
-				isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0
+				isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0,
+				isset( $filters['filter'] ) && in_array( $filters['filter'], array( 'broken-links', 'out-of-stock' ), true ) ? $filters['filter'] : ''
 			);
 		}
 
@@ -67,6 +68,7 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 						'link_type' => $view->link_kind->value,
 						'per_page'  => $view->per_page,
 						'group'     => $view->group,
+						'filter'    => $view->filter,
 					),
 				),
 				$views->all()

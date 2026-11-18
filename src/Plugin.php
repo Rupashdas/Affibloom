@@ -565,7 +565,14 @@ final class Plugin {
 	 * Link health as the screens read it (F11, Task 31A).
 	 */
 	private function link_issue_query(): LinkIssueQuery {
-		return new LinkIssueQuery( new TableLinkIssueRepository(), $this->settings_repository(), static fn(): DateTimeImmutable => new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ) );
+		return new LinkIssueQuery(
+			new TableLinkIssueRepository(),
+			$this->settings_repository(),
+			static fn(): DateTimeImmutable => new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ),
+			new PostTypeProductRepository(),
+			new CatalogProductCheck( new OptionCredentialsRepository(), $this->catalog() ),
+			static fn(): int => (int) get_option( OptionPluginState::ACTIVATED_AT, 0 )
+		);
 	}
 
 	/**

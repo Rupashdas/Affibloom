@@ -61,7 +61,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 30B: The check on product save
 - [x] Task 30C: Amazon products through the product API (dormant until C1)
 - [x] Task 31A: The Alert column in every state, and its sort
-- [ ] Task 31B: The Alert filter tabs, counters and the Broken links tile
+- [x] Task 31B: The Alert filter tabs, counters and the Broken links tile
 - [ ] Task 31C: The product page's issue notice
 - [ ] Task 31D: Export CSV of issue links
 - [ ] Task 32A: `wp affibloom check-links`
@@ -343,10 +343,17 @@ hours; without C1 the out-of-stock tab carries D7's line.
 
 **Files:** the above; tests F11 **AC10**, AC1's filter step; F19 AC13-AC14 rerun.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Counts and the filter.** - [ ] **Step 3: Tabs, tile, warm-up.**
-- [ ] **Step 4: Run and look.** - [ ] **Step 5: Commit:** "Filter the Dashboard by broken and out-of-stock products".
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Counts and the filter.** - [x] **Step 3: Tabs, tile, warm-up.**
+- [x] **Step 4: Run and look.** - [x] **Step 5: Commit:** "Filter the Dashboard by broken and out-of-stock products".
+
+*Note (2026-11-19):* The tabs are the page head's Broken links and Out of stock stat cards (U9's tile and U2's tab in
+one control, as `dashboard-tiles.php` planned): links to the list on the tab, loaded in place by `dashboard.js`, their
+accessible names "Broken links (n)", Lasso's tooltips plus D16's warm-up line (24 h after `affibloom_activated_at`) and
+D7's line without the Amazon API. `LinkIssueQuery::counts()` counts through the same list query (search and filters
+applied); saved views store `filter`. Seen on Local (HTML): 5 broken / 1 out of stock, each tab listing them, marked.
 
 ---
+
 
 ### Task 31C: The product page's issue notice
 

@@ -37,6 +37,9 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 				'actions_args' => array(
 					'part'    => 'stats',
 					'library' => $view['library'],
+					'counts'  => $view['counts'] ?? null,
+					'tab'     => isset( $view['listing'] ) ? $view['listing']->tab : '',
+					'base'    => $view['args'] ?? array(),
 				),
 				'below'        => 'admin/partials/dashboard-search',
 				'below_args'   => array(
@@ -65,6 +68,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 							'link_kind' => $view['link_kind'],
 							'per_page'  => $products->per_page,
 							'group'     => $view['group'],
+							'filter'    => isset( $view['listing'] ) ? $view['listing']->tab : '',
 							'group_ids' => array_map( static fn( $choice ): int => $choice->id, $view['group_list'] ),
 						)
 					);
