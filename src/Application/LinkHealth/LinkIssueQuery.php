@@ -12,6 +12,7 @@ namespace Affibloom\Application\LinkHealth;
 use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\LinkHealth\AlertState;
 use Affibloom\Domain\LinkHealth\AlertWindow;
+use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\LinkHealth\LinkIssueRepository;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\ProductRepository;
@@ -33,6 +34,9 @@ final class LinkIssueQuery {
 	/** How long after activation the counts may still grow while the first checks run (D16). */
 	private const WARM_UP = 86400;
 
+	/** How long a closed bar stays closed (R29: Lasso's 7 days). */
+	private const DISMISS_FOR = 7 * 86400;
+
 	/**
 	 * Builds the query.
 	 *
@@ -42,6 +46,7 @@ final class LinkIssueQuery {
 	 * @param ProductRepository            $products The list the counts follow.
 	 * @param AmazonProductCheck           $amazon   Whether Amazon products are checked (D7).
 	 * @param Closure(): int               $activated When the plugin was activated (Unix time; 0 unknown).
+	 * @param AlertDismissals              $dismissals The product page's closed bars (Task 31C).
 	 */
 	public function __construct(
 		private LinkIssueRepository $issues,
@@ -50,6 +55,7 @@ final class LinkIssueQuery {
 		private ProductRepository $products,
 		private AmazonProductCheck $amazon,
 		private Closure $activated,
+		private AlertDismissals $dismissals,
 	) {}
 
 	/**
@@ -105,6 +111,42 @@ final class LinkIssueQuery {
 			'warm_up'      => $activated > 0 && ( $this->now )()->getTimestamp() - $activated < self::WARM_UP,
 			'amazon_api'   => $this->amazon->is_configured(),
 		);
+	}
+
+	/**
+	 * The product page's bars (F11 R29, D7, D14, D17; Task 31C): broken, and out of stock once its grace days have
+	 * passed, each unless closed within the last 7 days; and, for an Amazon product while the Amazon API is not
+	 * connected, that it is not checked.
+	 *
+	 * @param int  $product_id The product.
+	 * @param bool $amazon     It is an Amazon product.
+	 * @return array{broken: bool, out_of_stock: bool, amazon_unchecked: bool}
+	 */
+	public function notices( int $product_id, bool $amazon ): array {
+		$now  = ( $this->now )();
+		$row  = $this->issues->get( $product_id );
+		$open = null !== $row && $this->window()->shows( $row, $now ) ? $row->issue_type : null;
+		$shut = fn( string $bar ): bool => $this->dismissals->until( $product_id, $bar ) > $now->getTimestamp();
+
+		return array(
+			'broken'           => null !== $open && IssueType::OUT_OF_STOCK !== $open && ! $shut( AlertDismissals::BROKEN ),
+			'out_of_stock'     => IssueType::OUT_OF_STOCK === $open && ! $shut( AlertDismissals::OUT_OF_STOCK ),
+			'amazon_unchecked' => $amazon && ! $this->amazon->is_configured(),
+		);
+	}
+
+	/**
+	 * Closes a product page's bar for 7 days (R29).
+	 *
+	 * @param int    $product_id The product.
+	 * @param string $bar        AlertDismissals::BROKEN or AlertDismissals::OUT_OF_STOCK.
+	 * @return int Until when (Unix time).
+	 */
+	public function dismiss( int $product_id, string $bar ): int {
+		$until = ( $this->now )()->getTimestamp() + self::DISMISS_FOR;
+		$this->dismissals->close( $product_id, $bar, $until );
+
+		return $until;
 	}
 
 	/**

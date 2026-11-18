@@ -62,7 +62,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 30C: Amazon products through the product API (dormant until C1)
 - [x] Task 31A: The Alert column in every state, and its sort
 - [x] Task 31B: The Alert filter tabs, counters and the Broken links tile
-- [ ] Task 31C: The product page's issue notice
+- [x] Task 31C: The product page's issue notice
 - [ ] Task 31D: Export CSV of issue links
 - [ ] Task 32A: `wp affibloom check-links`
 - [ ] Task 32B: The broken-links admin notice
@@ -376,10 +376,17 @@ for 7 days; an Amazon product without C1 shows D7's muted line.
 
 **Files:** the above; tests F11 **AC12**.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Query and route.** - [ ] **Step 3: Bars and dismissal.** - [ ] **Step 4: Run and
-  look.** - [ ] **Step 5: Commit:** "Warn on a product's page when its link is broken or out of stock".
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Query and route.** - [x] **Step 3: Bars and dismissal.** - [x] **Step 4: Run and
+  look.** - [x] **Step 5: Commit:** "Warn on a product's page when its link is broken or out of stock".
+
+*Note (2026-11-19):* The bars sit at the top of the page body (`issue-notice.php`, the notice card); closing posts to
+`ProductAlertsController` (in `Plugin`'s modules) through a new `AlertDismissals` port (`PostMetaAlertDismissals`). The
+grace days apply to the orange bar too (D14). A product that is not there answers 403, not 404: WordPress's
+`edit_post` check refuses it before the callback. Seen on Local (HTML and REST): both bars, a closed one gone after
+reload, 400 for another type.
 
 ---
+
 
 ### Task 31D: Export CSV of issue links
 

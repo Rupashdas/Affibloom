@@ -330,6 +330,29 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		await expect( brokenTab ).not.toHaveAttribute( 'aria-current', 'true' );
 	} );
 
+	test( 'AC12 the product page shows the broken and out-of-stock bars; × hides one for 7 days', async ( { page } ) => {
+		const broken = createProduct( { name: unique( 'F11 AC12 broken' ), url: 'https://shop.example/k' } );
+		const out = createProduct( { name: unique( 'F11 AC12 out' ), url: 'https://shop.example/l' } );
+		setIssue( broken, '410', true, 1 );
+		setIssue( out, '000', true, 1 );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ out }` );
+		await expect( page.locator( '[data-issue-bar="out-of-stock"]' ) ).toContainText( 'This product may be out of stock.' );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ broken }` );
+		const bar = page.locator( '[data-issue-bar="broken"]' );
+		await expect( bar ).toContainText( 'Your URL is broken.' );
+		await expect( bar ).toHaveAttribute( 'role', 'status' );
+		const closed = page.waitForResponse( ( response ) => response.url().includes( `/products/${ broken }/alerts/dismiss` ) );
+		await bar.getByRole( 'button', { name: 'Hide for 7 days' } ).click();
+		expect( ( await closed ).status() ).toBe( 200 );
+		await expect( bar ).toBeHidden();
+		await page.reload();
+		await expect( page.locator( '[data-issue-bar="broken"]' ) ).toHaveCount( 0 );
+		const until = Number( wp( 'post', 'meta', 'get', String( broken ), '_affibloom_dismiss_broken' ) );
+		expect( until - Math.floor( Date.now() / 1000 ) ).toBeGreaterThan( 7 * 86400 - 120 );
+	} );
+
 	test( 'AC11 an out-of-stock issue younger than the grace days shows nowhere', async ( { page } ) => {
 		const name = unique( 'F11 AC11' );
 		const id = createProduct( { name, url: 'https://shop.example/g' } );

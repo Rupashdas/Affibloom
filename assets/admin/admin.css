@@ -2993,3 +2993,7 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-tile__warm .affibloom-icon { width: 14px; height: 14px; }
 .affibloom-tile--alert[data-tip]:hover::after,
 .affibloom-tile--alert[data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; width: max-content; max-width: 260px; padding: 6px 10px; border-radius: var(--affibloom-radius-segment); background: var(--affibloom-ink-900); color: #fff; font: 500 12px/16px var(--affibloom-font); white-space: pre-line; text-align: left; pointer-events: none; }
+
+/* Task 31C (F11 R29, D7): the product page's issue bars use the notice card; D7's line is quiet text under them. */
+.affibloom-issue-bar[hidden] { display: none; }
+.affibloom-issue-line { margin: 0 0 16px; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); }

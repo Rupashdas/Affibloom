@@ -114,6 +114,8 @@ use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
 use Affibloom\Infrastructure\WordPress\OptionCheckPass;
 use Affibloom\Infrastructure\WordPress\TableLinkIssueRepository;
+use Affibloom\Infrastructure\WordPress\PostMetaAlertDismissals;
+use Affibloom\Interface\Rest\ProductAlertsController;
 use Affibloom\Infrastructure\WordPress\WpCronProductLinkChecks;
 use Affibloom\Infrastructure\System\CpuLoad;
 use Affibloom\Infrastructure\WordPress\OptionLinkIndexState;
@@ -494,7 +496,7 @@ final class Plugin {
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query() ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query() ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -557,6 +559,7 @@ final class Plugin {
 			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
 			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new CpuLoad(), $this->settings_repository() ),
 			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ) ),
+			new ProductAlertsController( $this->link_issue_query(), new PostTypeProductRepository() ),
 			new ForeignNotices( $this->navigation() ),
 		);
 	}
@@ -571,7 +574,8 @@ final class Plugin {
 			static fn(): DateTimeImmutable => new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ),
 			new PostTypeProductRepository(),
 			new CatalogProductCheck( new OptionCredentialsRepository(), $this->catalog() ),
-			static fn(): int => (int) get_option( OptionPluginState::ACTIVATED_AT, 0 )
+			static fn(): int => (int) get_option( OptionPluginState::ACTIVATED_AT, 0 ),
+			new PostMetaAlertDismissals()
 		);
 	}
 

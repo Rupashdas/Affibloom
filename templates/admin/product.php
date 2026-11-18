@@ -56,6 +56,17 @@ $destination = $product->url->value();
 		?>
 
 		<div class="affibloom-page__body affibloom-product">
+			<?php
+			if ( null !== ( $view['issues'] ?? null ) ) {
+				$this->render(
+					'admin/partials/issue-notice',
+					array(
+						'issues'     => $view['issues'],
+						'product_id' => (int) $product->id,
+					)
+				);
+			}
+			?>
 			<?php if ( $view['duplicate'] ) : ?>
 				<?php // Lasso's warning after "Add A New Link" finds this product (url-details.php 2597-2600). ?>
 				<div class="affibloom-notice affibloom-notice--warning" role="status">

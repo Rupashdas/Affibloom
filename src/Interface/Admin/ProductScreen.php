@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Display\DisplaySettingsService;
@@ -57,6 +58,7 @@ final class ProductScreen {
 	 * @param AmazonDataService      $amazon   Whether Refresh can ask Amazon (C1D).
 	 * @param PublicLinks|null       $links    The public link and the cloaked address's start (F24, Task CL3).
 	 * @param VariantService|null    $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
+	 * @param LinkIssueQuery|null    $alerts   The page's issue bars (F11, Task 31C).
 	 */
 	public function __construct(
 		private Template $template,
@@ -70,6 +72,7 @@ final class ProductScreen {
 		private AmazonDataService $amazon,
 		private ?PublicLinks $links = null,
 		private ?VariantService $variants = null,
+		private ?LinkIssueQuery $alerts = null,
 	) {}
 
 	/**
@@ -180,6 +183,8 @@ final class ProductScreen {
 			'admin/product',
 			array(
 				'product'      => $this->product,
+				// F11 R29 (Task 31C): the broken and out-of-stock bars, and D7's line for an unchecked Amazon product.
+				'issues'       => null === $this->alerts ? null : $this->alerts->notices( (int) $this->product->id, ProductType::Amazon === $this->product->type ),
 				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
 				'public_link'  => $public_link,
 				'tabs'         => self::tabs( (int) $this->product->id, 'details', count( $variants ) ),

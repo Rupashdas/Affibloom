@@ -434,4 +434,23 @@
 			productForm( form );
 		}
 	} );
+
+	// The issue bars' × (Task 31C; F11 R29, D17): the bar goes at once and stays closed for 7 days, also after a reload.
+	// A refusal puts it back with the server's message.
+	document.addEventListener( 'click', function ( event ) {
+		var close = event.target.closest( '[data-alert-dismiss]' );
+		if ( ! close ) {
+			return;
+		}
+		var bar = close.closest( '[data-issue-bar]' );
+		bar.hidden = true;
+		wp.apiFetch( {
+			path: '/affibloom/v1/products/' + close.getAttribute( 'data-product-id' ) + '/alerts/dismiss',
+			method: 'POST',
+			data: { type: close.getAttribute( 'data-alert-dismiss' ) },
+		} ).catch( function ( error ) {
+			bar.hidden = false;
+			window.affibloomToast( error && error.message ? error.message : '', true );
+		} );
+	} );
 } )();
