@@ -118,4 +118,21 @@ final class WpLinkScannerTest extends TestCase {
 		self::assertSame( array( LinkCandidate::SITESTRIPE_IMAGE, LinkCandidate::SITESTRIPE_IFRAME ), array_map( static fn( LinkCandidate $link ): string => $link->kind, $on->scan( $html ) ) );
 		self::assertSame( array(), ( new WpLinkScanner( new InMemorySettingsRepository() ) )->scan( $html ) );
 	}
+
+	/** F21 R30 (Task 35J): a dynamic Kadence button's link and a testimonial's content are links; a saved anchor is not counted twice. */
+	public function test_kadence_buttons_and_testimonials_are_scanned_from_their_attributes(): void {
+		Functions\when( 'esc_url' )->returnArg();
+		Functions\when( 'esc_attr' )->returnArg();
+		Functions\when( 'esc_html' )->returnArg();
+		Functions\when( 'wp_strip_all_tags' )->alias( 'strip_tags' );
+		$html = '<!-- wp:kadence/singlebtn {"link":"https://www.example.com/shoe","target":"_blank","noFollow":true,"sponsored":true,"text":"Buy"} /-->'
+			. '<!-- wp:kadence/singlebtn {"link":"https://www.example.com/saved"} --><a class="kb-button" href="https://www.example.com/saved">Saved</a><!-- /wp:kadence/singlebtn -->'
+			. '<!-- wp:kadence/testimonial {"content":"Loved \u003ca href=\u0022https://www.example.com/review\u0022\u003eit\u003c/a\u003e"} /-->';
+
+		$links = ( new WpLinkScanner() )->scan( $html );
+
+		self::assertSame( array( 'https://www.example.com/saved', 'https://www.example.com/shoe', 'https://www.example.com/review' ), array_map( static fn( LinkCandidate $link ): string => $link->href, $links ) );
+		self::assertSame( 'nofollow sponsored', $links[1]->rel );
+		self::assertSame( '_blank', $links[1]->target );
+	}
 }

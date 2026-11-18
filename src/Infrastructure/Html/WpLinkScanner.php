@@ -65,6 +65,9 @@ final class WpLinkScanner implements LinkScanner {
 	 * @return list<LinkCandidate>
 	 */
 	public function scan( string $html ): array {
+		if ( str_contains( $html, 'wp:kadence/' ) ) {
+			$html .= self::kadence( parse_blocks( $html ) );
+		}
 		$sitestripe = null !== $this->settings && $this->settings->get()->bool( 'scan_sitestripe_in_post_content' ) && str_contains( $html, 'amazon-adsystem.com' );
 		if ( false === stripos( $html, '<a' ) && ! $sitestripe ) {
 			return array();
@@ -310,5 +313,38 @@ final class WpLinkScanner implements LinkScanner {
 			|| str_starts_with( $href, '[' )
 			|| 0 === stripos( $href, 'mailto:' )
 			|| 0 === stripos( $href, 'tel:' );
+	}
+
+	/**
+	 * Kadence's links that live in block attributes only (F21 R30; Task 35J): a single button rendered from its `link`
+	 * (with its NoFollow, Sponsored and target), and a testimonial's `content`, when the saved markup does not hold
+	 * them already. They are scanned as links after the content, so render time (35H) prints them as their products'.
+	 *
+	 * @param array<int, array<string, mixed>> $blocks parse_blocks()' answer, or a block's innerBlocks.
+	 */
+	private static function kadence( array $blocks ): string {
+		$html = '';
+		foreach ( $blocks as $block ) {
+			$attrs = is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array();
+			$saved = is_string( $block['innerHTML'] ?? null ) ? $block['innerHTML'] : '';
+			$name  = $block['blockName'] ?? '';
+			if ( 'kadence/singlebtn' === $name && is_string( $attrs['link'] ?? null ) && '' !== trim( $attrs['link'] ) && false === stripos( $saved, '<a' ) ) {
+				$rel   = trim( ( empty( $attrs['noFollow'] ) ? '' : 'nofollow' ) . ( empty( $attrs['sponsored'] ) ? '' : ' sponsored' ) );
+				$html .= sprintf(
+					'<a href="%s"%s%s>%s</a>',
+					esc_url( trim( $attrs['link'] ) ),
+					'_blank' === ( $attrs['target'] ?? '' ) ? ' target="_blank"' : '',
+					'' === $rel ? '' : ' rel="' . esc_attr( $rel ) . '"',
+					esc_html( is_string( $attrs['text'] ?? null ) ? wp_strip_all_tags( $attrs['text'] ) : '' )
+				);
+			} elseif ( 'kadence/testimonial' === $name && is_string( $attrs['content'] ?? null ) && ! str_contains( $saved, $attrs['content'] ) ) {
+				$html .= $attrs['content'];
+			}
+			if ( is_array( $block['innerBlocks'] ?? null ) && array() !== $block['innerBlocks'] ) {
+				$html .= self::kadence( $block['innerBlocks'] );
+			}
+		}
+
+		return $html;
 	}
 }
