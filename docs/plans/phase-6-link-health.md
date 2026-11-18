@@ -68,7 +68,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 32B: The broken-links admin notice
 - [x] Task 32C: Settings → General: Performance and Cron
 - [x] Task 32D: The WP-Cron fallback from admin pages
-- [ ] Task 32E: The background activity indicator
+- [x] Task 32E: The background activity indicator
 
 ### F10 (part): Lasso's data, migrated
 
@@ -553,10 +553,15 @@ links (completed/total)" (AC18); when nothing runs it shows Lasso's idle line.
 
 **Files:** the above; tests F11 **AC18**.
 
-- [ ] **Step 1: Failing test.** - [ ] **Step 2: Status and route.** - [ ] **Step 3: Indicator.** - [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit:** "Show running background jobs in the header".
+- [x] **Step 1: Failing test.** - [x] **Step 2: Status and route.** - [x] **Step 3: Indicator.** - [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit:** "Show running background jobs in the header".
+
+*Note (2026-11-19):* The indicator, `GET /jobs` and the idle line were built by ON3 (Phase 5); this task adds the link
+check's `JobStatus` (`LinkCheckJobStatus`, from the pass option) to its board. Seen on Local: `GET /jobs` lists
+"Checking for broken links (103/129)" beside the link index's rebuild.
 
 ---
+
 
 ### Task 26K: moved to Phase M, the Affibloom Lasso Migrator plugin (deviation 146; section in [`phase-m-lasso-migrator.md`](phase-m-lasso-migrator.md))
 

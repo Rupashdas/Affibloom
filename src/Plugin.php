@@ -117,6 +117,7 @@ use Affibloom\Interface\Cron\LinkIndexCron;
 use Affibloom\Interface\Cron\LinkCheckCron;
 use Affibloom\Application\LinkHealth\CatalogProductCheck;
 use Affibloom\Application\LinkHealth\LinkCheckService;
+use Affibloom\Application\LinkHealth\LinkCheckJobStatus;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Application\LinkHealth\IssueLinksExport;
 use Affibloom\Interface\Rest\DashboardExportController;
@@ -574,6 +575,7 @@ final class Plugin {
 					array(
 						new BulkAddJobStatus( new OptionBulkRunRepository(), static fn(): int => time() ),
 						new LinkIndexJobStatus( new OptionLinkIndexState() ),
+						new LinkCheckJobStatus( new OptionCheckPass() ),
 					)
 				),
 				new DueJobs( new WpScheduledEvents(), self::cron_registry()->hooks(), $this->settings_repository() ),

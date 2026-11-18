@@ -186,6 +186,21 @@ test.describe( 'F11 Link health', () => {
 		expect( wp( 'eval', 'echo false === wp_next_scheduled( "affibloom_link_check_batch" ) || wp_next_scheduled( "affibloom_link_check_batch" ) > time() - 5 ? "ran" : "waiting";' ) ).toBe( 'ran' );
 	} );
 
+	test( 'AC18 while the check runs, the header shows it with its progress', async ( { page } ) => {
+		wp( 'option', 'update', 'affibloom_link_check', JSON.stringify( { date: '2026-11-19', total: 129, checked: 80, queue: [ 1, 2 ] } ), '--format=json' );
+		try {
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			await page.evaluate( () => window.localStorage.removeItem( 'affibloom_jobs_time' ) );
+			await page.reload();
+			const button = page.locator( '[data-jobs]' );
+			await expect( button.locator( '[data-jobs-count]' ) ).not.toHaveText( '0' );
+			await button.click();
+			await expect( page.locator( '[data-jobs-list]' ) ).toContainText( 'Checking for broken links (80/129)' );
+		} finally {
+			newDay();
+		}
+	} );
+
 	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F11 AC6' ), url: stub( 200 ) } );
 		const due = () => wp( 'eval', `echo false === wp_next_scheduled( "affibloom_link_check_product", array( ${ id } ) ) ? "no" : "yes";` );
