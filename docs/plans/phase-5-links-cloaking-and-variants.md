@@ -74,7 +74,7 @@ Grouped by feature, in the order they are worked.
 - [x] Task 35B: Displays in the index — shortcodes and blocks
 - [x] Task 35C: Saving, trashing and deleting a post updates its rows — `save_post`
 - [x] Task 35D: Custom Link Detection — Settings → General
-- [ ] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post` (SiteStripe and Elementor done 2026-11-18; the other plugins wait for the user's answer)
+- [x] Task 35E: Links in builders and recipe plugins — `wp affibloom links rebuild --post` (SiteStripe and Elementor done 2026-11-18; the other plugins wait for the user's answer)
 - [x] Task 35F: The background rebuild and the daily pass — WP-Cron `affibloom_link_index_batch`
 - [x] Task 35G: Settings → General — Link Index and Performance
 
@@ -116,7 +116,7 @@ Grouped by feature, in the order they are worked.
 **F21 — render-time link attributes and displays (after the cloaking block)**
 
 - [x] Task 35H: Render-time link attributes — `the_content`
-- [ ] Task 35J: SiteStripe, image-block and Kadence displays at render time — `render_block`
+- [x] Task 35J: SiteStripe, image-block and Kadence displays at render time — `render_block`
 
 ## Cross-phase notes
 
@@ -415,14 +415,16 @@ Checked in Brave: ticking a test post type and saving indexed its post. Local no
 - [x] **Step 5: Run and look.** `wp affibloom links rebuild --post=<id>` on a fixture post per available plugin; none is active on this site, so the E2E skips are listed.
 - [x] **Step 6: Commit** — "Index links in builders and recipe plugins".
 
-*Note (2026-11-18):* **part built; the rest waits for the user's answer** (`open-decisions.md`, "Non-affiliate integrations"). Built:
+*Note (2026-11-18):* first part built:
 SiteStripe images and iframes (setting `scan_sitestripe_in_post_content`; `Domain\LinkIndex\SiteStripe` reads Lasso's
 `asin(s)`, `tag`/`tracking_id`, `region`/`marketplace`), link type `sitestripe`, display Image or Product Box, tied by
 the Amazon link they name (checked on Local: both tied to product 20331; off, none). Elementor needs no reader: it writes
 its plain copy (with the Affibloom widget's shortcode, ED2) into `post_content`, which is scanned, and its save runs
-`save_post`; reading `_elementor_data` too would count every link twice. Not built yet (none installed on this site):
+`save_post`; reading `_elementor_data` too would count every link twice. Built later the same day, after the user's "Keep them" (next note):
 Kadence buttons and testimonials, Beaver Builder, Thrive, TablePress, WP Recipe Maker, Mediavine Create, and the list of
 their output filters for 35H.
+
+*Note (2026-11-18):* *Note (2026-11-18, after "Keep them"):* readers in `Infrastructure\WordPress\Builders` (Thrive's copy as "content"; TablePress's cells, its type indexed while active; `wprm:<id>` and `mv:<id>` for the recipes and Create cards a post shows, link types `WpRecipeMaker`, `MvCreate`); Beaver Builder needs none (its rendered copy is in `post_content`, as Elementor's). Hooks: `save_post_wprm_recipe` (the parent post), `mv_create_card_post_publish` (its `associated_posts`). Render time (35H) matches a link across all of a post's places, untied rows counted too, and prints TablePress through `tablepress_table_output`. None is installed here: checked with `wp affibloom links rebuild --post` in one WP-CLI run that marked the plugins active (all four tied to 20489/20490, a recipe's bare Amazon address included) and through the output filters with their markup. Thrive's own save hook is not verified (the daily pass and a rebuild catch it).
 
 ---
 
@@ -1226,12 +1228,14 @@ product image; a `[lasso]` in an image block shows the image; a Kadence button o
 
 **Files:** create `src/Front/DisplayRenderFilter.php`; modify `src/Plugin.php`; integration tests; E2E F21 AC10.
 
-- [ ] **Step 1: Failing tests.** AC10: a tied SiteStripe iframe, an image block, a Kadence button; red: they print as stored.
-- [ ] **Step 2: Filter.**
-- [ ] **Step 3: Run and look.** One post of each kind on Local at 1280 and 375 px.
-- [ ] **Step 4: Commit** — "Draw SiteStripe and block displays from products at render time".
+- [x] **Step 1: Failing tests.** AC10: a tied SiteStripe iframe, an image block, a Kadence button; red: they print as stored.
+- [x] **Step 2: Filter.**
+- [x] **Step 3: Run and look.** One post of each kind on Local at 1280 and 375 px.
+- [x] **Step 4: Commit** — "Draw SiteStripe and block displays from products at render time".
 
-*Note (2026-11-18):* the SiteStripe half is built (`Front\DisplayRenderFilter`, `the_content` 21: a tied SiteStripe iframe drawn as `[affibloom id sitestripe="true"]`, a SiteStripe image given the product's image; with Keep SiteStripe UI off the box is the Single box, Lasso's rule), committed as "Draw SiteStripe displays from products at render time"; checked on Local (post 20497: iframe → box, content unchanged). The image-block case is LM5's; **Kadence waits** for the non-affiliate integrations decision (open-decisions, 2026-11-17), so the task stays open.
+*Note (2026-11-18):* the SiteStripe half is built (`Front\DisplayRenderFilter`, `the_content` 21: a tied SiteStripe iframe drawn as `[affibloom id sitestripe="true"]`, a SiteStripe image given the product's image; with Keep SiteStripe UI off the box is the Single box, Lasso's rule), committed as "Draw SiteStripe displays from products at render time"; checked on Local (post 20497: iframe → box, content unchanged). The image-block case is LM5's; **Kadence waits** for the non-affiliate integrations decision (open-decisions, 2026-11-17), so the task stayed open until the user's "Keep them" (next note).
+
+*Note (2026-11-18):* *Note (2026-11-18, after "Keep them"):* Kadence: a dynamic `kadence/singlebtn` (link only in its attributes, with NoFollow, Sponsored, target) and a `kadence/testimonial`'s content are scanned as links; render time is 35H's filter (a tied button prints its product's link, rel and click attributes). Checked: post 20498 indexed (button tied to 20489, the testimonial's link external) and Kadence's button markup printed through `the_content` as the product's. A Kadence button whose URL also appears earlier in the text is counted after it (edge, accepted).
 
 ---
 
