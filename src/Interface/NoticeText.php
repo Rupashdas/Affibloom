@@ -53,6 +53,15 @@ final class NoticeText {
 				'text'   => __( 'We\'re rounding up a list of your links. %s.', 'affibloom' ),
 				'action' => __( 'See the progress', 'affibloom' ),
 			),
+			// F11 D20 (Task 32B): while products have broken links; the count first, then the link.
+			'broken_links'     => array(
+				'text'   => sprintf(
+					/* translators: 1: number of products; %%s stays: the "See broken URLs" link. */
+					_n( '%1$s product link looks broken. %%s', '%1$s product links look broken. %%s', (int) ( $notice->args[0] ?? 0 ), 'affibloom' ),
+					number_format_i18n( (int) ( $notice->args[0] ?? 0 ) )
+				),
+				'action' => __( 'See broken URLs', 'affibloom' ),
+			),
 			default            => array(
 				'text'   => '',
 				'action' => '',

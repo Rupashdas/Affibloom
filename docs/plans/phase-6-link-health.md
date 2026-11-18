@@ -65,7 +65,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 31C: The product page's issue notice
 - [x] Task 31D: Export CSV of issue links
 - [x] Task 32A: `wp affibloom check-links`
-- [ ] Task 32B: The broken-links admin notice
+- [x] Task 32B: The broken-links admin notice
 - [ ] Task 32C: Settings → General: Performance and Cron
 - [ ] Task 32D: The WP-Cron fallback from admin pages
 - [ ] Task 32E: The background activity indicator
@@ -465,10 +465,16 @@ the second check waits. Seen on Local: one product, an Amazon product through th
 
 **Files:** the above; `Plugin.php`; tests F11 **AC15**.
 
-- [ ] **Step 1: Failing test.** - [ ] **Step 2: Notice.** - [ ] **Step 3: Run and look.** - [ ] **Step 4: Commit:** "Tell editors
+- [x] **Step 1: Failing test.** - [x] **Step 2: Notice.** - [x] **Step 3: Run and look.** - [x] **Step 4: Commit:** "Tell editors
   when product links look broken".
 
+*Note (2026-11-19):* One `BrokenLinksNotice` serves both places: a `NoticeProvider` in the NoticeBoard (Affibloom's
+region) and a `Module` on `admin_notices` for WordPress's Dashboard only. Not dismissible; it goes when nothing is
+broken. `TableLinkIssueRepository::save()` deletes the transient. Seen on Local: "6 product links look broken. See
+broken URLs" on index.php and on Settings.
+
 ---
+
 
 ### Task 32C: Settings → General: Performance and Cron
 

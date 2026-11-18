@@ -409,6 +409,20 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		await expect( page.getByRole( 'button', { name: 'Export CSV' } ) ).toHaveAttribute( 'title', 'No links to export for the current filters.' );
 	} );
 
+	test( 'AC15 broken products put a warning on the WordPress Dashboard and Affibloom pages', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F11 AC15' ), url: 'https://shop.example/n' } );
+		setIssue( id, '404', true, 1 );
+		wp( 'transient', 'delete', 'affibloom_link_issue_counts' );
+		const count = Number( JSON.parse( wp( 'eval', 'wp_set_current_user( 1 ); $r = new WP_REST_Request( "GET", "/affibloom/v1/dashboard/products" ); echo wp_json_encode( rest_do_request( $r )->get_data()["data"]["alerts"]["broken"] );' ) ) );
+
+		await page.goto( '/wp-admin/index.php' );
+		const notice = page.locator( '.notice-warning', { hasText: 'look broken' } );
+		await expect( notice ).toContainText( `${ count.toLocaleString( 'en-US' ) } product link${ 1 === count ? ' looks' : 's look' } broken.` );
+		await notice.getByRole( 'link', { name: 'See broken URLs' } ).click();
+		await expect( page ).toHaveURL( /page=affibloom&filter=broken-links/ );
+		await expect( page.locator( '#affibloom-notices' ) ).toContainText( 'look broken' );
+	} );
+
 	test( 'AC11 an out-of-stock issue younger than the grace days shows nowhere', async ( { page } ) => {
 		const name = unique( 'F11 AC11' );
 		const id = createProduct( { name, url: 'https://shop.example/g' } );

@@ -132,6 +132,8 @@ KEY last_checked_at (last_checked_at)";
 			),
 			array( '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s' )
 		);
+		// The broken-links notice's count (Task 32B) is read again after any change.
+		delete_transient( 'affibloom_link_issue_counts' );
 		if ( false === $written ) {
 			throw new RuntimeException( "The link check of product {$issue->product_id} could not be stored: {$wpdb->last_error}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- never printed as HTML.
 		}

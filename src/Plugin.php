@@ -99,6 +99,7 @@ use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
 use Affibloom\Interface\Cli\CheckLinksCommand;
+use Affibloom\Interface\Admin\BrokenLinksNotice;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
@@ -213,6 +214,13 @@ final class Plugin {
 	 * @var NoticeBoard|null
 	 */
 	private ?NoticeBoard $notice_board = null;
+
+	/**
+	 * The broken-links notice, built once.
+	 *
+	 * @var BrokenLinksNotice|null
+	 */
+	private ?BrokenLinksNotice $broken_links_notice = null;
 
 	/**
 	 * The upgrade's hooks: a module, and a notice provider when a step failed; built on first use.
@@ -574,9 +582,19 @@ final class Plugin {
 			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new CpuLoad(), $this->settings_repository() ),
 			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ) ),
 			new CheckLinksCommand( $this->link_checks(), new PostTypeProductRepository() ),
+			$this->broken_links_notice(),
 			new ProductAlertsController( $this->link_issue_query(), new PostTypeProductRepository() ),
 			new ForeignNotices( $this->navigation() ),
 		);
+	}
+
+	/**
+	 * "N product links look broken." (F11 D20, Task 32B): one instance, a notice provider and a module.
+	 */
+	private function broken_links_notice(): BrokenLinksNotice {
+		$this->broken_links_notice ??= new BrokenLinksNotice( $this->link_issue_query() );
+
+		return $this->broken_links_notice;
 	}
 
 	/**
@@ -688,6 +706,7 @@ final class Plugin {
 				new AmazonNotices( $this->bulk_sync() ),
 				new SiteStripeNotice( $this->settings_repository() ),
 				new LinkIndexBuildingNotice( new OptionLinkIndexState(), admin_url( 'admin.php?page=affibloom-settings&tab=general#affibloom-card-link-index' ) ),
+				$this->broken_links_notice(),
 			),
 			static function ( Throwable $error ): void {
 				wp_trigger_error( '', 'Affibloom skipped a notice: ' . $error->getMessage(), E_USER_WARNING );
