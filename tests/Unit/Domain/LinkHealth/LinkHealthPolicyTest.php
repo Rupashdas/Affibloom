@@ -55,6 +55,13 @@ final class LinkHealthPolicyTest extends TestCase {
 		$this->assertEquals( self::time( '04:05' ), $second->last_checked_at );
 	}
 
+	public function test_a_second_failure_within_the_hour_changes_nothing(): void {
+		$first = self::apply( null, CheckResult::failed( 404 ), '03:00' );
+
+		$this->assertNull( self::apply( $first, CheckResult::failed( 404 ), '03:59' ) );
+		$this->assertTrue( self::apply( $first, CheckResult::failed( 404 ), '04:00' )->is_open() );
+	}
+
 	public function test_a_200_between_two_failures_resets_the_count(): void {
 		$row = self::apply( null, CheckResult::failed( 404 ), '03:00' );
 		$row = self::apply( $row, CheckResult::ok(), '04:00' );

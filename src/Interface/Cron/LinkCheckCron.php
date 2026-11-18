@@ -11,25 +11,29 @@ namespace Affibloom\Interface\Cron;
 
 use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\Upgrade\UpgradeLock;
+use Affibloom\Domain\LinkHealth\LinkHealthPolicy;
 use Affibloom\Module;
 use DateTimeImmutable;
 
 /**
  * F11 D2 (ADR-4; Lasso's lasso_cron_check_issue): `affibloom_daily` at 03:00 site time starts the day's pass, and the
  * chained `affibloom_link_check_batch` single events run it, one at a time behind a 60-second lock. A daily event
- * another plugin cleared is scheduled again on the next `init` (edge case 7).
+ * another plugin cleared is scheduled again on the next `init` (edge case 7). `affibloom_link_check_product` [id] is
+ * the check a product save starts (D12, Task 30B); a first failure schedules the same event for its second check an
+ * hour later (D4).
  */
 final class LinkCheckCron implements Module {
 
-	public const DAILY = 'affibloom_daily';
-	public const BATCH = 'affibloom_link_check_batch';
+	public const DAILY   = 'affibloom_daily';
+	public const BATCH   = 'affibloom_link_check_batch';
+	public const PRODUCT = 'affibloom_link_check_product';
 
 	/**
 	 * Every hook this module schedules, for the CronRegistry deactivation clears.
 	 *
 	 * @var list<string>
 	 */
-	public const HOOKS = array( self::DAILY, self::BATCH );
+	public const HOOKS = array( self::DAILY, self::BATCH, self::PRODUCT );
 
 	/**
 	 * Builds the module.
@@ -45,6 +49,7 @@ final class LinkCheckCron implements Module {
 	public function register(): void {
 		add_action( self::DAILY, array( $this, 'start' ) );
 		add_action( self::BATCH, array( $this, 'batch' ) );
+		add_action( self::PRODUCT, array( $this, 'product' ) );
 		add_action( 'init', array( $this, 'schedule_daily' ) );
 	}
 
@@ -66,6 +71,18 @@ final class LinkCheckCron implements Module {
 			$this->checks->run_batch();
 		} finally {
 			$this->lock->release();
+		}
+	}
+
+	/**
+	 * Checks one product; a first failure gets its second check an hour later.
+	 *
+	 * @param int|string $product_id The product, as the event's argument.
+	 */
+	public function product( $product_id ): void {
+		$row = $this->checks->check_product( (int) $product_id );
+		if ( null !== $row && $row->failures > 0 ) {
+			wp_schedule_single_event( time() + LinkHealthPolicy::CONFIRM_AFTER, self::PRODUCT, array( (int) $product_id ) );
 		}
 	}
 

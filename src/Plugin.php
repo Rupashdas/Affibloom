@@ -112,6 +112,7 @@ use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
 use Affibloom\Infrastructure\WordPress\OptionCheckPass;
 use Affibloom\Infrastructure\WordPress\TableLinkIssueRepository;
+use Affibloom\Infrastructure\WordPress\WpCronProductLinkChecks;
 use Affibloom\Infrastructure\System\CpuLoad;
 use Affibloom\Infrastructure\WordPress\OptionLinkIndexState;
 use Affibloom\Interface\Hooks\LinkIndexHooks;
@@ -434,7 +435,7 @@ final class Plugin {
 		// A post's tied links, read once per request for both render-time filters (Tasks 35H, 35J).
 		$rendered   = new RenderedLinks( new TableLinkLocationRepository(), new PostTypeProductRepository() );
 		$cloaked    = new CloakedLinkRedirect( new CloakResolver( new PostTypeProductRepository(), new TableVariantRepository() ), $this->settings_repository(), new WpPostSlugGuard(), new FileNetworkSubIds( dirname( $this->file ) . '/data/network-subids.php' ) );
-		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository(), $cloaked->product_at( ... ) );
+		$products   = new ProductService( new PostTypeProductRepository(), $resolver, $this->settings_repository(), new ProductInput( $links ), $links, $data, new TableLinkLocationRepository(), $cloaked->product_at( ... ), new WpCronProductLinkChecks( LinkCheckCron::PRODUCT ) );
 		$variants   = new VariantService( new TableVariantRepository(), new WpSlugTaken( new PostTypeProductRepository() ) );
 		$bulk       = new BulkAddService( $products, new OptionBulkRunRepository(), new WpCronBackgroundJob( BulkAddCron::HOOK ) );
 		$genius     = new GeniusCleanupService( new PostTypeProductRepository(), $products, new WpCronGeniusCleanupSchedule( GeniusCleanupCron::HOOK ) );

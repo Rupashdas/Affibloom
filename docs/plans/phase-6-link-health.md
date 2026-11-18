@@ -58,7 +58,7 @@ the text below as a deviation in `progress.md`.
 ### F11: Link health
 
 - [x] Task 30A: The daily link check pass
-- [ ] Task 30B: The check on product save
+- [x] Task 30B: The check on product save
 - [ ] Task 30C: Amazon products through the product API (dormant until C1)
 - [ ] Task 31A: The Alert column in every state, and its sort
 - [ ] Task 31B: The Alert filter tabs, counters and the Broken links tile
@@ -231,9 +231,17 @@ the hour's confirmation the red icon.
 **Files:** modify `ProductService.php`, `LinkCheckCron.php`, `LinkCheckService.php`, `Plugin.php`; tests F11 **AC6**,
 `ProductServiceTest` (scheduled or not).
 
-- [ ] **Step 1: Failing tests** (save with a stub 404, run the event, confirm an hour later).
-- [ ] **Step 2: The event and `check_product`.** - [ ] **Step 3: The save's rule.** - [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit:** "Check a product's link after its destination changes".
+- [x] **Step 1: Failing tests** (save with a stub 404, run the event, confirm an hour later).
+- [x] **Step 2: The event and `check_product`.** - [x] **Step 3: The save's rule.** - [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit:** "Check a product's link after its destination changes".
+
+*Note (2026-11-18):* `ProductService` asks a new port, `Application\LinkHealth\ProductLinkChecks` (adapter
+`WpCronProductLinkChecks`: `post_modified_gmt`, a single event and `spawn_cron()`), before the save and schedules after
+it; Save Changes only (R15: a new product is not checked on save). `ProductServiceLinkCheckTest` instead of
+`ProductServiceTest`. The look found that a second failure could be confirmed minutes after the first when two events
+ran close together (the save's check and a spawned cron run): `LinkHealthPolicy` now confirms only an hour or more
+after the first failure (`CONFIRM_AFTER`), and a sooner one changes nothing. Seen on Local through the REST save:
+404 pending, confirmed an hour later, same-link resave not checked, a 200 resolved it.
 
 ---
 

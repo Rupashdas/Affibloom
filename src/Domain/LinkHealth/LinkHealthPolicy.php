@@ -14,11 +14,15 @@ use DateTimeImmutable;
 /**
  * How one check changes a product's row (F11 R13, D4, D6). Lasso's rule with Affibloom's second check in place of
  * Lasso's cloud: a 200 resolves the row and keeps its code and date; an HTTP failure counts once, and a second failure
- * in a row for the same destination opens the issue dated by the first; a certain result (blank destination, product
- * API) opens at once; an open issue that fails again stays open with its date; a check that never went out changes
- * nothing.
+ * in a row for the same destination, at least an hour after the first (D4), opens the issue dated by the first (one
+ * sooner changes nothing, so the second check stays due on time, whichever event runs first); a certain result (blank
+ * destination, product API) opens at once; an open issue that fails again stays open with its date; a check that never
+ * went out changes nothing.
  */
 final class LinkHealthPolicy {
+
+	/** Seconds between a first failure and the check that can confirm it (D4). */
+	public const CONFIRM_AFTER = 3600;
 
 	/**
 	 * The row after the check, or null when nothing changes.
@@ -43,6 +47,9 @@ final class LinkHealthPolicy {
 			return self::opened( $current, $product_id, $url, $result->type, $now, $now );
 		}
 		if ( null !== $current && $current->failures > 0 && $current->checked_url === $url && null !== $current->first_failed_at ) {
+			if ( $now->getTimestamp() - $current->first_failed_at->getTimestamp() < self::CONFIRM_AFTER ) {
+				return null;
+			}
 			return self::opened( $current, $product_id, $url, $result->type, $current->first_failed_at, $now );
 		}
 

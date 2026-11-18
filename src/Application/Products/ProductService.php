@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Products;
 
+use Affibloom\Application\LinkHealth\ProductLinkChecks;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonUrl;
@@ -25,6 +26,7 @@ use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
+use DateTimeImmutable;
 use RuntimeException;
 
 /**
@@ -44,6 +46,7 @@ final class ProductService {
 	 * @param LinkLocationRepository|null       $locations The link index, whose rows follow a new link and a repoint (35I).
 	 * @param (\Closure(string): ?Product)|null $own_link The product a link to this site's own cloaked address answers
 	 *                                                  for (F24 R36; Task CL11); null knows none.
+	 * @param ProductLinkChecks|null            $link_checks The link check a save starts (F11 D12; Task 30B); null starts none.
 	 */
 	public function __construct(
 		private ProductRepository $products,
@@ -54,6 +57,7 @@ final class ProductService {
 		private AmazonDataService $amazon,
 		private ?LinkLocationRepository $locations = null,
 		private ?\Closure $own_link = null,
+		private ?ProductLinkChecks $link_checks = null,
 	) {}
 
 	/** Products per Dashboard page on a fresh install: Lasso's default (Lasso_Helper::get_dashboard_page_size_options). */
@@ -188,8 +192,32 @@ final class ProductService {
 		if ( null !== $this->locations && $changed->url->key() !== $product->url->key() ) {
 			$this->locations->pin_product( $id );
 		}
+		$check = $this->needs_link_check( $product, $changed );
+		$saved = $this->products->save( $changed );
+		if ( $check ) {
+			$this->link_checks?->schedule( $id );
+		}
 
-		return $this->products->save( $changed );
+		return $saved;
+	}
+
+	/**
+	 * Whether Save Changes checks the product's link (F11 R15, D12; Task 30B): Lasso checks it unless it was saved
+	 * within the hour with the same destination. Asked before the save, while the last save's time is still stored.
+	 *
+	 * @param Product $before The stored product.
+	 * @param Product $after  The product as it will be saved.
+	 */
+	private function needs_link_check( Product $before, Product $after ): bool {
+		if ( null === $this->link_checks || null === $before->id ) {
+			return false;
+		}
+		if ( $after->url->value() !== $before->url->value() ) {
+			return true;
+		}
+		$last_saved = $this->link_checks->last_saved( $before->id );
+
+		return null === $last_saved || $last_saved <= new DateTimeImmutable( '-1 hour' );
 	}
 
 	/**

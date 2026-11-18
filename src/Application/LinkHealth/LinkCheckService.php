@@ -36,9 +36,6 @@ final class LinkCheckService {
 	/** Seconds of work a batch does before it hands over to the next (R7). */
 	public const BUDGET = 10.0;
 
-	/** Seconds between a first failure and its second check (D4). */
-	private const CONFIRM_AFTER = 3600;
-
 	/**
 	 * Builds the service.
 	 *
@@ -104,7 +101,7 @@ final class LinkCheckService {
 		}
 
 		$room    = $limit - $done;
-		$due     = $room > 0 ? $this->issues->confirmations( $this->now()->modify( '-' . self::CONFIRM_AFTER . ' seconds' ), $this->locations_only(), $room ) : array();
+		$due     = $room > 0 ? $this->issues->confirmations( $this->now()->modify( '-' . LinkHealthPolicy::CONFIRM_AFTER . ' seconds' ), $this->locations_only(), $room ) : array();
 		$changed = 0;
 		$tried   = 0;
 		foreach ( $due as $product_id ) {
@@ -161,7 +158,7 @@ final class LinkCheckService {
 		if ( null === $oldest ) {
 			return;
 		}
-		$wait = $oldest->getTimestamp() + self::CONFIRM_AFTER - $this->now()->getTimestamp();
+		$wait = $oldest->getTimestamp() + LinkHealthPolicy::CONFIRM_AFTER - $this->now()->getTimestamp();
 		if ( $wait > 0 ) {
 			$this->job->dispatch( $wait );
 		}

@@ -123,4 +123,37 @@ test.describe( 'F11 Link health', () => {
 		expect( again ).toMatchObject( { issue_type: '410', resolved: '0' } );
 		expect( again?.detection_date ).not.toBe( old );
 	} );
+
+	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F11 AC6' ), url: stub( 200 ) } );
+		const due = () => wp( 'eval', `echo false === wp_next_scheduled( "affibloom_link_check_product", array( ${ id } ) ) ? "no" : "yes";` );
+		/** Runs the product's waiting check, as WP-Cron would. */
+		const runCheck = () => wp( 'eval', `wp_clear_scheduled_hook( "affibloom_link_check_product", array( ${ id } ) ); do_action( "affibloom_link_check_product", ${ id } );` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await page.locator( '#affibloom-url' ).fill( `${ stub( 404 ) }?ac6=${ id }` );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved' );
+
+		expect( due() ).toBe( 'yes' );
+		runCheck();
+		expect( issue( id ) ).toMatchObject( { failures: '1', pending_type: '404', resolved: '0' } );
+		expect( due() ).toBe( 'yes' ); // The second check, an hour later (D4).
+		anHourLater( id );
+		runCheck();
+		expect( issue( id ) ).toMatchObject( { issue_type: '404', resolved: '0', failures: '0' } );
+
+		// Saved again within the hour with the same link: no check.
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved' );
+		expect( due() ).toBe( 'no' );
+
+		// A working link: checked at once, the tick's row.
+		await page.locator( '#affibloom-url' ).fill( `${ stub( 200 ) }?ac6=${ id }` );
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved' );
+		runCheck();
+		expect( issue( id ) ).toMatchObject( { resolved: '1' } );
+	} );
 } );
