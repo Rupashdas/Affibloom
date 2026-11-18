@@ -101,6 +101,7 @@ test.describe( 'F24 Link cloaking', () => {
 	} );
 
 	test( 'AC8 Add Link gives a new product its name as slug (amzn- for Amazon) and the site Link Cloaking', async ( { page } ) => {
+		setSettings( { link_cloaking: true } );
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		const added = await page.evaluate( async ( url ) => {
 			const w = window as unknown as { wp: { apiFetch: ( o: object ) => Promise< { id?: number; data?: { id: number } } > } };
@@ -186,7 +187,7 @@ test.describe( 'F24 Link cloaking', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		await page.getByRole( 'dialog', { name: 'Add A New Link' } ).getByRole( 'textbox' ).fill( `${ baseURL }/${ slug }/` );
-		await page.getByRole( 'button', { name: 'Add Link' } ).click();
+		await page.getByRole( 'button', { name: 'Add Link', exact: true } ).click();
 		await expect( page ).toHaveURL( new RegExp( `id=${ product }&is_duplicate=1` ) );
 		await expect( page.getByText( 'This product already exists.' ) ).toBeVisible();
 	} );

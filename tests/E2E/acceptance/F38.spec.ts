@@ -173,16 +173,17 @@ test.describe( 'F38 Admin shell', () => {
 		// A link index rebuild is a job: the icon spins with a count, and the line reads "<name> (<done>/<total>)".
 		wp( 'eval', 'do_action( "affibloom_link_index_start" );' );
 		try {
-			// The last answer is reused for 15 s (R43), so this tab forgets it first.
+			// The last answer is reused for 15 s (R43), so this tab forgets it first. The start spawns WP-Cron, so the count
+			// may be past 0 already.
 			await page.evaluate( () => window.localStorage.clear() );
 			await page.reload();
 			await expect( button.locator( '.affibloom-jobs__count' ) ).toHaveText( '1' );
 			await expect( button ).toHaveClass( /is-running/ );
 			await button.click();
-			await expect( panel.getByText( /^Scan all links \(0\/\d+\)$/ ) ).toBeVisible();
+			await expect( panel.getByText( /^Scan all links \(\d+\/\d+\)$/ ) ).toBeVisible();
 		} finally {
 			wp( 'option', 'delete', 'affibloom_link_index_state' );
-			wp( 'cron', 'event', 'delete', 'affibloom_link_index_batch' );
+			wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_index_batch" );' );
 		}
 	} );
 
@@ -238,7 +239,7 @@ test.describe( 'F38 Admin shell', () => {
 			await expect( page.locator( '#affibloom-card-link-index' ) ).toBeVisible();
 		} finally {
 			wp( 'option', 'delete', 'affibloom_link_index_state' );
-			wp( 'cron', 'event', 'delete', 'affibloom_link_index_batch' );
+			wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_index_batch" );' );
 		}
 	} );
 

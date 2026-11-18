@@ -244,7 +244,7 @@ test.describe( 'F9 Link settings', () => {
 
 		// Finished: the card goes back to its figures.
 		for ( let run = 0; run < 20 && wp( 'option', 'get', 'affibloom_link_index_state', '--format=json' ).includes( '"running"' ); run++ ) {
-			wp( 'cron', 'event', 'run', 'affibloom_link_index_batch' );
+			wp( 'eval', 'do_action( "affibloom_link_index_batch" );' );
 		}
 		await expect( card.getByText( 'Links Indexed' ) ).toBeVisible( { timeout: 10_000 } );
 	} );

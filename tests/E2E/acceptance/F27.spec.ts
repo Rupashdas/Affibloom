@@ -36,7 +36,10 @@ test.describe( 'F27 URL variants', () => {
 		addVariant( product, 'Newsletter', unique( 'f27-mail' ).toLowerCase() );
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }&tab=variants` );
 		let requests = 0;
-		page.on( 'request', () => requests++ );
+		// Affibloom's own requests only (WordPress's heartbeat and assets may come at any time).
+		page.on( 'request', ( request ) => {
+			requests += /affibloom|admin-ajax/.test( request.url() ) && ! /heartbeat/.test( request.postData() ?? '' ) ? 1 : 0;
+		} );
 		await page.getByRole( 'searchbox', { name: 'Search variants' } ).fill( 'NEWS' );
 		await expect( page.locator( '[data-variant-row]:visible' ) ).toHaveCount( 1 );
 		await expect( page.locator( '[data-variant-row]:visible' ) ).toContainText( 'Newsletter' );
@@ -86,7 +89,7 @@ test.describe( 'F27 URL variants', () => {
 		addVariant( product, 'Keep', `${ key }-a` );
 		addVariant( product, 'Drop', `${ key }-b` );
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }&tab=variants` );
-		await page.getByRole( 'button', { name: 'Copy' } ).first().click();
+		await page.getByRole( 'button', { name: 'Copy', exact: true } ).first().click();
 		await expect( page.getByRole( 'button', { name: 'Copied!' } ) ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Remove Drop' } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Remove this variant?' } );
