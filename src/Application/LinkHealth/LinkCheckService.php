@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\LinkHealth;
 
+use Affibloom\Application\Jobs\CpuGuard;
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Domain\LinkHealth\CheckPass;
 use Affibloom\Domain\LinkHealth\CheckPassRepository;
@@ -103,7 +104,8 @@ final class LinkCheckService {
 		}
 		$this->passes->save( $pass->advanced( $queue, $checked ) );
 		if ( array() !== $queue ) {
-			$this->job->dispatch();
+			// Settings → General's Cron interval spaces the batches (Task 32C; D21).
+			$this->job->dispatch( CpuGuard::spacing( $this->settings ) );
 			return;
 		}
 

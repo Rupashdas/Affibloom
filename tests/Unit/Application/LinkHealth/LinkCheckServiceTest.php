@@ -161,6 +161,16 @@ final class LinkCheckServiceTest extends TestCase {
 		$this->assertSame( '200', $this->issues->get( 3 )->issue_type );
 	}
 
+	public function test_the_cron_interval_spaces_the_batches(): void {
+		$this->settings->stored = $this->settings->stored->with( array( 'cron_interval' => 2 ) );
+		$this->issues->destinations = array( 1 => 'https://a.example', 2 => 'https://b.example' );
+		$this->service()->start_pass( '2026-11-18' );
+		$this->dispatched = array();
+
+		$this->service()->run_batch( 1 );
+		$this->assertSame( array( 7200 ), $this->dispatched );
+	}
+
 	public function test_the_time_budget_is_checked_between_requests(): void {
 		$this->issues->destinations = array( 1 => 'https://a.example', 2 => 'https://b.example' );
 		$this->service()->start_pass( '2026-11-18' );

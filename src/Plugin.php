@@ -99,6 +99,8 @@ use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
 use Affibloom\Interface\Cli\CheckLinksCommand;
+use Affibloom\Application\Jobs\CpuGuard;
+use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Interface\Admin\BrokenLinksNotice;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
@@ -579,8 +581,8 @@ final class Plugin {
 			new AmazonCommand( $amazon, $catalog ),
 			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository(), new OptionLinkIndexState() ),
 			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
-			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new CpuLoad(), $this->settings_repository() ),
-			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ) ),
+			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), $this->cpu_guard(), $this->settings_repository(), $this->job_slots() ),
+			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ), $this->cpu_guard(), $this->job_slots(), new WpCronBackgroundJob( LinkCheckCron::BATCH ) ),
 			new CheckLinksCommand( $this->link_checks(), new PostTypeProductRepository() ),
 			$this->broken_links_notice(),
 			new ProductAlertsController( $this->link_issue_query(), new PostTypeProductRepository() ),
@@ -595,6 +597,22 @@ final class Plugin {
 		$this->broken_links_notice ??= new BrokenLinksNotice( $this->link_issue_query() );
 
 		return $this->broken_links_notice;
+	}
+
+	/**
+	 * Whether a background batch waits for a busy server (Task 32C; F21 D12).
+	 */
+	private function cpu_guard(): CpuGuard {
+		$cpu = new CpuLoad();
+
+		return new CpuGuard( static fn(): ?float => $cpu->percent(), $this->settings_repository() );
+	}
+
+	/**
+	 * Processes Execute Limit's two slots (Task 32C).
+	 */
+	private function job_slots(): JobSlots {
+		return new JobSlots( array( new OptionLock( 'affibloom_job_slot_1', 5 * 60 ), new OptionLock( 'affibloom_job_slot_2', 5 * 60 ) ), $this->settings_repository() );
 	}
 
 	/**

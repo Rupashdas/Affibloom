@@ -66,7 +66,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 31D: Export CSV of issue links
 - [x] Task 32A: `wp affibloom check-links`
 - [x] Task 32B: The broken-links admin notice
-- [ ] Task 32C: Settings → General: Performance and Cron
+- [x] Task 32C: Settings → General: Performance and Cron
 - [ ] Task 32D: The WP-Cron fallback from admin pages
 - [ ] Task 32E: The background activity indicator
 
@@ -494,10 +494,17 @@ Limit; saving the interval reschedules.
 
 **Files:** the above; tests F11 **AC16**, `CpuGuardTest`.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Fields and presets.** - [ ] **Step 3: Effects on the batch.** - [ ] **Step 4:
-  Run and look.** - [ ] **Step 5: Commit:** "Let a busy site slow the link check".
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Fields and presets.** - [x] **Step 3: Effects on the batch.** - [x] **Step 4:
+  Run and look.** - [x] **Step 5: Commit:** "Let a busy site slow the link check".
+
+*Note (2026-11-19):* The fields, presets and clamps were already on Settings → General (9H, 9L); this task adds their
+effect. `Application\Jobs\CpuGuard` (CPU threshold, Cron interval) is LinkIndexCron's CPU check moved out on its second
+use; `JobSlots` holds two `OptionLock` slots for Processes Execute Limit, used by both crons. Saving a new interval
+moves a waiting link-check batch (`update_option_affibloom_settings`). Seen on Local: 2 h → next batch in 120 min;
+saving 1 h → 60 min; 0 → now.
 
 ---
+
 
 ### Task 32D: The WP-Cron fallback from admin pages
 

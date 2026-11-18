@@ -9,7 +9,10 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Cron;
 
+use Affibloom\Application\Jobs\CpuGuard;
+use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Application\LinkHealth\LinkCheckService;
+use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Upgrade\UpgradeLock;
 use Affibloom\Domain\LinkHealth\LinkHealthPolicy;
 use Affibloom\Module;
@@ -20,7 +23,8 @@ use DateTimeImmutable;
  * chained `affibloom_link_check_batch` single events run it, one at a time behind a 60-second lock. A daily event
  * another plugin cleared is scheduled again on the next `init` (edge case 7). `affibloom_link_check_product` [id] is
  * the check a product save starts (D12, Task 30B); a first failure schedules the same event for its second check an
- * hour later (D4).
+ * hour later (D4). Settings → General (Task 32C, D21): a busy server or two Affibloom batches already running make a
+ * batch wait a minute; a new Cron interval moves the waiting batch.
  */
 final class LinkCheckCron implements Module {
 
@@ -40,8 +44,11 @@ final class LinkCheckCron implements Module {
 	 *
 	 * @param LinkCheckService $checks The check.
 	 * @param UpgradeLock      $lock   One batch at a time.
+	 * @param CpuGuard         $cpu    Whether the server is too busy.
+	 * @param JobSlots         $slots  Processes Execute Limit.
+	 * @param BackgroundJob    $job    Schedules the batch again.
 	 */
-	public function __construct( private LinkCheckService $checks, private UpgradeLock $lock ) {}
+	public function __construct( private LinkCheckService $checks, private UpgradeLock $lock, private CpuGuard $cpu, private JobSlots $slots, private BackgroundJob $job ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -51,6 +58,7 @@ final class LinkCheckCron implements Module {
 		add_action( self::BATCH, array( $this, 'batch' ) );
 		add_action( self::PRODUCT, array( $this, 'product' ) );
 		add_action( 'init', array( $this, 'schedule_daily' ) );
+		add_action( 'update_option_affibloom_settings', array( $this, 'interval_changed' ), 10, 2 );
 	}
 
 	/**
@@ -68,7 +76,9 @@ final class LinkCheckCron implements Module {
 			return;
 		}
 		try {
-			$this->checks->run_batch();
+			if ( $this->cpu->busy() || ! $this->slots->run( array( $this->checks, 'run_batch' ) ) ) {
+				$this->job->dispatch( CpuGuard::BUSY_WAIT );
+			}
 		} finally {
 			$this->lock->release();
 		}
@@ -84,6 +94,23 @@ final class LinkCheckCron implements Module {
 		if ( null !== $row && $row->failures > 0 ) {
 			wp_schedule_single_event( time() + LinkHealthPolicy::CONFIRM_AFTER, self::PRODUCT, array( (int) $product_id ) );
 		}
+	}
+
+	/**
+	 * A new Cron interval moves a batch that waits for the old one (R33: saving reschedules).
+	 *
+	 * @param mixed $stored The settings before.
+	 * @param mixed $saved  The settings after.
+	 */
+	public function interval_changed( $stored, $saved ): void {
+		$before = is_array( $stored ) ? (int) ( $stored['cron_interval'] ?? 0 ) : 0;
+		$after  = is_array( $saved ) ? (int) ( $saved['cron_interval'] ?? 0 ) : 0;
+		$next   = wp_next_scheduled( self::BATCH );
+		if ( $before === $after || false === $next || $next <= time() ) {
+			return;
+		}
+		wp_unschedule_event( $next, self::BATCH );
+		$this->job->dispatch( max( 0, min( 3, $after ) ) * HOUR_IN_SECONDS );
 	}
 
 	/**

@@ -154,6 +154,26 @@ test.describe( 'F11 Link health', () => {
 		}
 	} );
 
+	test( 'AC16 Settings → General: Performance always, the Cron fields with &support; a 2-hour interval spaces the batches', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
+		await expect( page.getByText( 'Performance Mode:' ) ).toBeVisible();
+		await expect( page.getByText( 'Time interval (hours)' ) ).toHaveCount( 0 );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general&support' );
+		await expect( page.getByText( 'Time interval (hours)' ) ).toBeVisible();
+		await expect( page.getByText( 'Processes Execute Limit' ) ).toBeVisible();
+
+		wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); $s["cron_interval"] = 2; update_option( "affibloom_settings", $s );' );
+		try {
+			// More than one batch's 100 products are covered here (the suite turns "locations only" off).
+			newDay();
+			wp( 'eval', 'add_filter( "pre_http_request", static fn( $pre, $args, $url ) => str_contains( $url, "wp-cron.php" ) ? new WP_Error( "http_request_failed", "no spawn" ) : $pre, 10, 3 ); do_action( "affibloom_daily" ); wp_clear_scheduled_hook( "affibloom_link_check_batch" ); do_action( "affibloom_link_check_batch" );' );
+			const wait = Number( wp( 'eval', 'echo wp_next_scheduled( "affibloom_link_check_batch" ) - time();' ) );
+			expect( wait ).toBeGreaterThan( 2 * 3600 - 120 );
+		} finally {
+			wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); $s["cron_interval"] = 0; update_option( "affibloom_settings", $s );' );
+		}
+	} );
+
 	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F11 AC6' ), url: stub( 200 ) } );
 		const due = () => wp( 'eval', `echo false === wp_next_scheduled( "affibloom_link_check_product", array( ${ id } ) ) ? "no" : "yes";` );

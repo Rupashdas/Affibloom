@@ -14,7 +14,8 @@ use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Upgrade\UpgradeLock;
 use Affibloom\Domain\LinkIndex\RebuildStateRepository;
 use Affibloom\Domain\Settings\SettingsRepository;
-use Affibloom\Infrastructure\System\CpuLoad;
+use Affibloom\Application\Jobs\CpuGuard;
+use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Module;
 
 /**
@@ -36,9 +37,6 @@ final class LinkIndexCron implements Module {
 	 */
 	public const HOOKS = array( self::BATCH, self::DAILY, self::START );
 
-	/** How long a busy server makes the next batch wait. */
-	private const BUSY_WAIT = 60;
-
 	/**
 	 * Builds the module.
 	 *
@@ -46,16 +44,18 @@ final class LinkIndexCron implements Module {
 	 * @param RebuildStateRepository $state    Where it stands.
 	 * @param UpgradeLock            $lock     One batch at a time.
 	 * @param BackgroundJob          $job      Schedules a batch.
-	 * @param CpuLoad                $cpu      The server's load.
-	 * @param SettingsRepository     $settings The CPU threshold and the catch-up limit.
+	 * @param CpuGuard               $cpu      Whether the server is too busy (Task 32C).
+	 * @param SettingsRepository     $settings The catch-up limit.
+	 * @param JobSlots               $slots    Processes Execute Limit (Task 32C).
 	 */
 	public function __construct(
 		private LinkIndexRebuild $rebuild,
 		private RebuildStateRepository $state,
 		private UpgradeLock $lock,
 		private BackgroundJob $job,
-		private CpuLoad $cpu,
+		private CpuGuard $cpu,
 		private SettingsRepository $settings,
+		private JobSlots $slots,
 	) {}
 
 	/**
@@ -84,12 +84,9 @@ final class LinkIndexCron implements Module {
 			return;
 		}
 		try {
-			$load = $this->cpu->percent();
-			if ( null !== $load && $load >= $this->settings->get()->int( 'cpu_threshold' ) ) {
-				$this->job->dispatch( self::BUSY_WAIT );
-				return;
+			if ( $this->cpu->busy() || ! $this->slots->run( array( $this->rebuild, 'next_batch' ) ) ) {
+				$this->job->dispatch( CpuGuard::BUSY_WAIT );
 			}
-			$this->rebuild->next_batch();
 		} finally {
 			$this->lock->release();
 		}
