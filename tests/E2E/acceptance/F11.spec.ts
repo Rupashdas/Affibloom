@@ -368,11 +368,10 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		const file = await download;
 		expect( file.suggestedFilename() ).toMatch( /^affibloom-broken-links-\d{4}-\d{2}-\d{2}\.csv$/ );
 		const csv = require( 'node:fs' ).readFileSync( await file.path(), 'utf8' ) as string;
-		const [ header, row ] = csv.trim().split( '
-' );
+		const [ header, row ] = csv.trim().split( '\n' );
 		expect( header.split( ',' ) ).toHaveLength( 24 );
 		expect( row ).toContain( 'Broken (404)' );
-		expect( row ).toContain( '"	=HYPERLINK(""x"")"' );
+		expect( row ).toContain( '"\t=HYPERLINK(""x"")"' );
 		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Exported 1 link.' );
 
 		await page.goto( `/wp-admin/admin.php?page=affibloom&filter=out-of-stock&s=${ encodeURIComponent( name ) }` );
