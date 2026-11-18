@@ -353,6 +353,33 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		expect( until - Math.floor( Date.now() / 1000 ) ).toBeGreaterThan( 7 * 86400 - 120 );
 	} );
 
+	test( 'AC13 Export CSV downloads the tab as a WP All Import CSV; disabled when empty, hidden elsewhere', async ( { page } ) => {
+		const name = unique( 'F11 AC13' );
+		const id = createProduct( { name, url: 'https://shop.example/m', badge: '=HYPERLINK("x")' } );
+		setIssue( id, '404', true, 1 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		await expect( page.locator( '[data-export-csv]' ) ).toHaveCount( 0 );
+
+		await page.locator( 'a.affibloom-filter-broken' ).click();
+		const button = page.getByRole( 'button', { name: 'Export CSV' } );
+		await expect( button ).toHaveAttribute( 'title', 'Export all filtered links to WP All Import CSV' );
+		const download = page.waitForEvent( 'download' );
+		await button.click();
+		const file = await download;
+		expect( file.suggestedFilename() ).toMatch( /^affibloom-broken-links-\d{4}-\d{2}-\d{2}\.csv$/ );
+		const csv = require( 'node:fs' ).readFileSync( await file.path(), 'utf8' ) as string;
+		const [ header, row ] = csv.trim().split( '
+' );
+		expect( header.split( ',' ) ).toHaveLength( 24 );
+		expect( row ).toContain( 'Broken (404)' );
+		expect( row ).toContain( '"	=HYPERLINK(""x"")"' );
+		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Exported 1 link.' );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom&filter=out-of-stock&s=${ encodeURIComponent( name ) }` );
+		await expect( page.getByRole( 'button', { name: 'Export CSV' } ) ).toBeDisabled();
+		await expect( page.getByRole( 'button', { name: 'Export CSV' } ) ).toHaveAttribute( 'title', 'No links to export for the current filters.' );
+	} );
+
 	test( 'AC11 an out-of-stock issue younger than the grace days shows nowhere', async ( { page } ) => {
 		const name = unique( 'F11 AC11' );
 		const id = createProduct( { name, url: 'https://shop.example/g' } );

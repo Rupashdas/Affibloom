@@ -2997,3 +2997,6 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 /* Task 31C (F11 R29, D7): the product page's issue bars use the notice card; D7's line is quiet text under them. */
 .affibloom-issue-bar[hidden] { display: none; }
 .affibloom-issue-line { margin: 0 0 16px; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); }
+
+/* Task 31D: Export CSV sits above the list on the issue tabs, right-aligned. */
+.affibloom-export { display: flex; justify-content: flex-end; margin: 0 0 12px; }

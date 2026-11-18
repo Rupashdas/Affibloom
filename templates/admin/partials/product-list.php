@@ -35,6 +35,24 @@ $columns     = array(
 	array( 'affibloom-col-actions', __( 'Actions', 'affibloom' ), false ),
 );
 ?>
+<?php
+// Lasso's Export CSV (F11 R28, D18; Task 31D): on the broken and out-of-stock tabs only; disabled with Lasso's title
+// when the tab lists nothing. dashboard.js downloads the file and says how many links it holds.
+$export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
+?>
+<?php if ( '' !== $export_tab ) : ?>
+	<div class="affibloom-export">
+		<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-export-csv
+			data-exporting="<?php esc_attr_e( 'Exporting', 'affibloom' ); ?>" data-failed="<?php esc_attr_e( 'Export failed.', 'affibloom' ); ?>"
+			<?php /* translators: %s: number of links. */ ?>
+			data-exported-one="<?php esc_attr_e( 'Exported 1 link.', 'affibloom' ); ?>" data-exported-many="<?php esc_attr_e( 'Exported %s links.', 'affibloom' ); ?>"
+			title="<?php echo esc_attr( 0 === $products->total ? __( 'No links to export for the current filters.', 'affibloom' ) : __( 'Export all filtered links to WP All Import CSV', 'affibloom' ) ); ?>"
+			<?php disabled( 0, $products->total ); ?>>
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'download' ) ); ?>
+			<span data-export-label><?php esc_html_e( 'Export CSV', 'affibloom' ); ?></span>
+		</button>
+	</div>
+<?php endif; ?>
 <?php if ( 0 === $products->total ) : ?>
 	<div class="affibloom-card affibloom-empty">
 		<span class="affibloom-chip">

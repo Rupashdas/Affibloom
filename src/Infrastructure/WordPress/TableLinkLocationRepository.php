@@ -148,6 +148,29 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * How many places each product is used in (the export's location_count, F11 R28; Task 31D).
+	 *
+	 * @param list<int> $product_ids The products.
+	 * @return array<int, int> By product ID; a product used nowhere is left out.
+	 */
+	public function counts_for( array $product_ids ): array {
+		global $wpdb;
+
+		$ids = implode( ',', array_map( 'intval', $product_ids ) );
+		if ( '' === $ids ) {
+			return array();
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Affibloom's own table; the IDs are integers.
+		$found  = $wpdb->get_results( $wpdb->prepare( "SELECT product_id, COUNT(*) AS used FROM %i WHERE product_id IN ({$ids}) GROUP BY product_id", $wpdb->prefix . self::TABLE ), ARRAY_A );
+		$counts = array();
+		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			$counts[ (int) $row['product_id'] ] = (int) $row['used'];
+		}
+
+		return $counts;
+	}
+
+	/**
 	 * The whole index's figures, in two queries.
 	 */
 	public function stats(): LinkIndexStats {

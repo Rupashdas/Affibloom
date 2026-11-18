@@ -63,7 +63,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 31A: The Alert column in every state, and its sort
 - [x] Task 31B: The Alert filter tabs, counters and the Broken links tile
 - [x] Task 31C: The product page's issue notice
-- [ ] Task 31D: Export CSV of issue links
+- [x] Task 31D: Export CSV of issue links
 - [ ] Task 32A: `wp affibloom check-links`
 - [ ] Task 32B: The broken-links admin notice
 - [ ] Task 32C: Settings → General: Performance and Cron
@@ -409,10 +409,17 @@ empty; "Exported N links." on success.
 
 **Files:** the above; tests F11 **AC13**, `IssueLinksExportTest`.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Export service.** - [ ] **Step 3: Route and button.** - [ ] **Step 4: Run and look**
-  (open in a spreadsheet). - [ ] **Step 5: Commit:** "Export the broken and out-of-stock lists as CSV".
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Export service.** - [x] **Step 3: Route and button.** - [x] **Step 4: Run and look**
+  (open in a spreadsheet). - [x] **Step 5: Commit:** "Export the broken and out-of-stock lists as CSV".
+
+*Note (2026-11-19):* The route answers the CSV itself through `rest_pre_serve_request` (not JSON), with
+`X-Affibloom-Exported` for the message; `dashboard.js` downloads it with `wp.apiFetch` (`parse: false`). Location counts
+come from `TableLinkLocationRepository::counts_for()`. Three column names differ: deviation 149. The button sits
+above the list in `product-list.php`, so its state follows each load. Seen on Local: 5 rows in
+`affibloom-broken-links-2026-11-19.csv`, 400 without a tab, the disabled title on an empty tab.
 
 ---
+
 
 ### Task 32A: `wp affibloom check-links`
 

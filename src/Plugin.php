@@ -111,6 +111,8 @@ use Affibloom\Interface\Cron\LinkCheckCron;
 use Affibloom\Application\LinkHealth\CatalogProductCheck;
 use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\LinkHealth\IssueLinksExport;
+use Affibloom\Interface\Rest\DashboardExportController;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
 use Affibloom\Infrastructure\WordPress\OptionCheckPass;
 use Affibloom\Infrastructure\WordPress\TableLinkIssueRepository;
@@ -525,6 +527,17 @@ final class Plugin {
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query() ),
+			new DashboardExportController(
+				new IssueLinksExport(
+					new PostTypeProductRepository(),
+					new TableLinkIssueRepository(),
+					$fields,
+					static fn( array $ids ): array => array_map( static fn( array $named ): array => array_map( static fn( $group ): string => wp_specialchars_decode( $group->name, ENT_QUOTES ), $named ), $groups->for_products( $ids ) ),
+					static fn( array $ids ): array => ( new TableLinkLocationRepository() )->counts_for( $ids )
+				),
+				$this->link_issue_query(),
+				$groups
+			),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),
 			new GeniusCleanupCron( $genius ),

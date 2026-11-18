@@ -154,6 +154,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 146. Standalone Affibloom (the user, 2026-11-17): the Lasso migration and content conversion move to a separate Affibloom Lasso Migrator plugin (Phase M); no other plugins' compatibility; Phase 5 core only; A1 and A2 reversed.
 - 147. Task 30A (2026-11-18): the link check covers only products used in content while "locations only" is on (F21's index exists); a first failure on an unchecked product is a row with code `''`, not an issue.
 - 148. Task 30C (2026-11-18): Amazon products are checked through C1's API whenever its credentials work; a down API or refused credentials check nothing; C1E must leave them to its refresh (R5).
+- 149. Task 31D (2026-11-19): the export's three Lasso-named columns are `fields`, `custom_redirect`, `custom_thumbnail` (no Lasso names in Affibloom).
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2915,3 +2916,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     Amazon pricing daily" is on, the refresh files Amazon results through `LinkCheckService::record()` and
     `resolve_out_of_stock()`, and the pass must then leave Amazon products to it (R5: `due( …, false )`), so no item is
     asked twice a day. Local holds the site's real credentials: a pass there asks Amazon for real.
+
+149. **Export CSV column names (Task 31D, 2026-11-19).** D18 keeps Lasso's 24 headers; three of them name Lasso
+    (`lasso_fields`, `lasso_custom_redirect`, `lasso_custom_thumbnail`), which the standing rule (no Lasso dependency
+    or branding, 2026-11-14; deviation 146, guarded by `NoLassoInCoreTest`) forbids in Affibloom. They are `fields`,
+    `custom_redirect` and `custom_thumbnail`; the other 21 names, the order and the values are Lasso's. A WP All Import
+    template made for Lasso's file maps those three columns again. Task 38 reuses the same writer.

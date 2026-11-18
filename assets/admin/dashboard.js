@@ -417,6 +417,53 @@
 	}
 
 	// Page links. A Ctrl-, Cmd- or Shift-click still opens a new tab or window, as any link does.
+	// Export CSV on the broken and out-of-stock tabs (Task 31D; F11 R28, D18): the list as it stands, downloaded as
+	// the server names it; "Exported N links." on success, the server's message (or Lasso's) on failure.
+	region.addEventListener( 'click', function ( event ) {
+		var button = event.target.closest( '[data-export-csv]' );
+		if ( ! button || button.disabled ) {
+			return;
+		}
+		var label = button.querySelector( '[data-export-label]' );
+		var text = label.textContent;
+		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), filter: current.filter } );
+		if ( current.order ) {
+			args.set( 'order_by', 'detection_date' );
+			args.set( 'order_type', current.order );
+		}
+		button.disabled = true;
+		button.classList.add( 'is-busy' );
+		label.textContent = button.getAttribute( 'data-exporting' );
+		wp.apiFetch( { path: '/affibloom/v1/dashboard/export?' + args.toString(), parse: false } ).then( function ( response ) {
+			var count = parseInt( response.headers.get( 'X-Affibloom-Exported' ), 10 ) || 0;
+			var name = ( /filename="([^"]+)"/.exec( response.headers.get( 'Content-Disposition' ) || '' ) || [] )[ 1 ] || 'affibloom-export.csv';
+			return response.blob().then( function ( blob ) {
+				var link = document.createElement( 'a' );
+				link.href = URL.createObjectURL( blob );
+				link.download = name;
+				document.body.appendChild( link );
+				link.click();
+				link.remove();
+				URL.revokeObjectURL( link.href );
+				window.affibloomToast( 1 === count ? button.getAttribute( 'data-exported-one' ) : button.getAttribute( 'data-exported-many' ).replace( '%s', String( count ) ), false );
+			} );
+		} ).catch( function ( error ) {
+			var shown = button.getAttribute( 'data-failed' );
+			if ( error && 'function' === typeof error.json ) {
+				return error.json().then( function ( body ) {
+					window.affibloomToast( ( body && body.message ) || shown, true );
+				}, function () {
+					window.affibloomToast( shown, true );
+				} );
+			}
+			window.affibloomToast( ( error && error.message ) || shown, true );
+		} ).then( function () {
+			button.disabled = false;
+			button.classList.remove( 'is-busy' );
+			label.textContent = text;
+		} );
+	} );
+
 	// The Alert header sorts by the issue's date (Task 31A; F11 R20, AC9): ascending, descending, then off.
 	region.addEventListener( 'click', function ( event ) {
 		var sort = event.target.closest( '[data-alert-sort]' );
