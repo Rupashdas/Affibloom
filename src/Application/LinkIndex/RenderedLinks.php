@@ -14,15 +14,16 @@ use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductRepository;
 
 /**
- * A host's tied links by their key (host, source, URL, occurrence; D4), each with its row and its published product,
- * read once per host and request (F21 D13; Task 35H). A product that is not published is not printed over.
+ * A host's links by their key (host, source, URL, occurrence; D4), each with its row and its published product (null
+ * when it is tied to none, or to one that is not published), read once per host and request (F21 D13; Tasks 35H, 35E).
+ * The untied ones are kept too: render time counts every link of a place to find the tied ones.
  */
 final class RenderedLinks {
 
 	/**
 	 * The request's hosts already read.
 	 *
-	 * @var array<int, array<string, array{id: int, product: Product}>>
+	 * @var array<int, array<string, array{id: int, product: Product|null}>>
 	 */
 	private array $hosts = array();
 
@@ -42,25 +43,22 @@ final class RenderedLinks {
 	public function __construct( private LinkLocationRepository $rows, private ProductRepository $products ) {}
 
 	/**
-	 * A host's tied links.
+	 * A host's links.
 	 *
 	 * @param int $host_id The post.
-	 * @return array<string, array{id: int, product: Product}>
+	 * @return array<string, array{id: int, product: Product|null}>
 	 */
 	public function for_host( int $host_id ): array {
 		if ( ! isset( $this->hosts[ $host_id ] ) ) {
 			$links = array();
-			foreach ( $this->rows->tied_links( $host_id ) as $key => $row ) {
-				if ( ! array_key_exists( $row['product'], $this->products_read ) ) {
+			foreach ( $this->rows->host_links( $host_id ) as $key => $row ) {
+				if ( $row['product'] > 0 && ! array_key_exists( $row['product'], $this->products_read ) ) {
 					$this->products_read[ $row['product'] ] = $this->products->get( $row['product'] );
 				}
-				$product = $this->products_read[ $row['product'] ];
-				if ( null !== $product ) {
-					$links[ $key ] = array(
-						'id'      => $row['id'],
-						'product' => $product,
-					);
-				}
+				$links[ $key ] = array(
+					'id'      => $row['id'],
+					'product' => $row['product'] > 0 ? $this->products_read[ $row['product'] ] : null,
+				);
 			}
 			$this->hosts[ $host_id ] = $links;
 		}

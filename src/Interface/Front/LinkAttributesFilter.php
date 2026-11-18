@@ -12,6 +12,7 @@ namespace Affibloom\Interface\Front;
 use Affibloom\Application\LinkIndex\RenderedLinks;
 use Affibloom\Domain\LinkIndex\LocationKey;
 use Affibloom\Domain\LinkIndex\RenderedAttributes;
+use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Module;
 use WP_HTML_Tag_Processor;
@@ -23,8 +24,10 @@ use WP_HTML_Tag_Processor;
  * Window, rel and the click attributes; any other `_blank` link gets noopener. Affibloom's own displays (anchors that
  * already carry `data-affibloom-id`) are left as they are drawn.
  *
- * Where: `the_content` after blocks and shortcodes (20), Elementor's content, the chosen ACF fields
- * (`acf/format_value`, source `acf:<meta key>`); widgets, which have no index rows, get the untied rule only.
+ * Where: `the_content` after blocks and shortcodes (20), which also prints Thrive's copy and the recipes and Create
+ * cards a post shows; Elementor's content; the chosen ACF fields (`acf/format_value`, source `acf:<meta key>`);
+ * TablePress's tables (`tablepress_table_output`); widgets, which have no index rows, get the untied rule only. Beaver
+ * Builder prints through `the_content` too. (F21 N1: these are every builder's output filters, Task 35E.)
  */
 final class LinkAttributesFilter implements Module {
 
@@ -45,6 +48,7 @@ final class LinkAttributesFilter implements Module {
 		add_filter( 'widget_block_content', array( $this, 'widget' ), 20 );
 		add_filter( 'widget_text', array( $this, 'widget' ), 20 );
 		add_filter( 'acf/format_value', array( $this, 'acf' ), 20, 3 );
+		add_filter( 'tablepress_table_output', array( $this, 'table' ), 20, 2 );
 	}
 
 	/**
@@ -95,19 +99,33 @@ final class LinkAttributesFilter implements Module {
 		if ( false === stripos( $html, '<a' ) ) {
 			return $html;
 		}
-		$tied  = $host_id > 0 ? $this->links->for_host( $host_id ) : array();
-		$seen  = array();
-		$tags  = new WP_HTML_Tag_Processor( $html );
-		$moved = false;
+		$tied = $host_id > 0 ? $this->links->for_host( $host_id ) : array();
+		// The content is printed with what it shows from other places, a recipe or a Create card (Task 35E): a link is
+		// looked for in "content" first, then in each such place, each with its own count of the same URL.
+		$places = 'content' === $source ? self::places( $tied ) : array( $source );
+		$seen   = array();
+		$tags   = new WP_HTML_Tag_Processor( $html );
+		$moved  = false;
 		while ( $tags->next_tag( array( 'tag_name' => 'a' ) ) ) {
 			$href = $tags->get_attribute( 'href' );
 			if ( ! is_string( $href ) || null !== $tags->get_attribute( 'data-affibloom-id' ) ) {
 				continue;
 			}
-			$md5          = LocationKey::md5( $href );
-			$seen[ $md5 ] = ( $seen[ $md5 ] ?? 0 ) + 1;
-			$link         = $tied[ LocationKey::of( $host_id, $source, $md5, $seen[ $md5 ] ) ] ?? null;
+			$md5  = LocationKey::md5( $href );
+			$link = null;
+			foreach ( $places as $place ) {
+				$next = ( $seen[ $place ][ $md5 ] ?? 0 ) + 1;
+				$link = $tied[ LocationKey::of( $host_id, $place, $md5, $next ) ] ?? null;
+				if ( null !== $link ) {
+					$seen[ $place ][ $md5 ] = $next;
+					break;
+				}
+			}
 			if ( null === $link ) {
+				// A link the index does not know (added at render time) counts in the first place.
+				$seen[ $places[0] ][ $md5 ] = ( $seen[ $places[0] ][ $md5 ] ?? 0 ) + 1;
+			}
+			if ( null === $link || null === $link['product'] ) {
 				$target  = $tags->get_attribute( 'target' );
 				$rel     = $tags->get_attribute( 'rel' );
 				$changes = RenderedAttributes::untied( is_string( $target ) ? $target : '', is_string( $rel ) ? $rel : '' );
@@ -126,5 +144,40 @@ final class LinkAttributesFilter implements Module {
 		}
 
 		return $moved ? $tags->get_updated_html() : $html;
+	}
+
+	/**
+	 * A TablePress table as TablePress prints it (`tablepress_table_output`): the table is a post of its own, found by
+	 * TablePress's table ID (Task 35E).
+	 *
+	 * @param mixed $output The table's HTML.
+	 * @param mixed $table  The table.
+	 * @return mixed
+	 */
+	public function table( mixed $output, mixed $table ): mixed {
+		if ( ! is_string( $output ) || ! is_array( $table ) || ! isset( $table['id'] ) ) {
+			return $output;
+		}
+
+		return $this->printed( $output, TablePressSource::post_of( (string) $table['id'] ), 'content' );
+	}
+
+	/**
+	 * The places a post's printed content may show links from: "content", then the others with rows, ACF fields aside
+	 * (they are printed through their own filter).
+	 *
+	 * @param array<string, mixed> $tied The post's tied links by key (host|source|md5|occurrence).
+	 * @return non-empty-list<string>
+	 */
+	private static function places( array $tied ): array {
+		$places = array( 'content' );
+		foreach ( array_keys( $tied ) as $key ) {
+			$source = explode( '|', (string) $key )[1] ?? 'content';
+			if ( ! in_array( $source, $places, true ) && ! str_starts_with( $source, 'acf:' ) ) {
+				$places[] = $source;
+			}
+		}
+
+		return $places;
 	}
 }

@@ -68,7 +68,7 @@ final class LinkIndexerTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
-			public function tied_links( int $host_id ): array {
+			public function host_links( int $host_id ): array {
 				return array();
 			}
 			public function pin_product( int $product_id ): void {}
@@ -198,7 +198,7 @@ final class LinkIndexerTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
-			public function tied_links( int $host_id ): array {
+			public function host_links( int $host_id ): array {
 				return array();
 			}
 		};

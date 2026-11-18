@@ -70,11 +70,10 @@ final class DisplayRenderFilter implements Module {
 				}
 				$md5          = LocationKey::md5( $src );
 				$seen[ $md5 ] = ( $seen[ $md5 ] ?? 0 ) + 1;
-				$link         = $tied[ LocationKey::of( $host, 'content', $md5, $seen[ $md5 ] ) ] ?? null;
-				if ( null === $link ) {
+				$product      = ( $tied[ LocationKey::of( $host, 'content', $md5, $seen[ $md5 ] ) ] ?? array( 'product' => null ) )['product'];
+				if ( null === $product ) {
 					return $found[0];
 				}
-				$product = $link['product'];
 				if ( 'IFRAME' === $tags->get_tag() ) {
 					return do_shortcode( sprintf( '[affibloom id="%d" sitestripe="true"]', (int) $product->id ) );
 				}

@@ -40,16 +40,14 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return new LinkIndexStats();
 	}
 
-	public function tied_links( int $host_id ): array {
+	public function host_links( int $host_id ): array {
 		$links = array();
 		foreach ( $this->rows[ $host_id ] ?? array() as $index => $row ) {
 			$product = $row->assigned_product_id > 0 ? $row->assigned_product_id : $row->product_id;
-			if ( $product > 0 && ! $row->is_ignored ) {
-				$links[ $row->key() ] = array(
-					'id'      => $index + 1,
-					'product' => $product,
-				);
-			}
+			$links[ $row->key() ] = array(
+				'id'      => $index + 1,
+				'product' => $product,
+			);
 		}
 		return $links;
 	}

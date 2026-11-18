@@ -59,11 +59,11 @@ interface LinkLocationRepository {
 	public function stats(): LinkIndexStats;
 
 	/**
-	 * A host's links tied to a product and not dismissed, by their key (LocationKey::of()), with the row's ID and the
-	 * product it is tied to, an editor's assignment first (F21 D13; Task 35H).
+	 * A host's links by their key (LocationKey::of()), with the row's ID and the product it is tied to (an editor's
+	 * assignment first; 0 when none): render time counts every link of a place, tied or not (F21 D13; Tasks 35H, 35E).
 	 *
 	 * @param int $host_id The post.
 	 * @return array<string, array{id: int, product: int}>
 	 */
-	public function tied_links( int $host_id ): array;
+	public function host_links( int $host_id ): array;
 }

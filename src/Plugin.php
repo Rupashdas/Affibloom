@@ -9,6 +9,11 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
+use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
+use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
+use Affibloom\Infrastructure\WordPress\Builders\ThriveSource;
+use Affibloom\Infrastructure\WordPress\Builders\WprmSource;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
@@ -331,6 +336,16 @@ final class Plugin {
 	}
 
 	/**
+	 * The builders and recipe plugins whose places the link index reads while they are active (F21 R23, R32; Task 35E).
+	 * Elementor and Beaver Builder need none: both keep a rendered copy in `post_content`.
+	 *
+	 * @return list<BuilderSource>
+	 */
+	private static function builders(): array {
+		return array( new ThriveSource(), new TablePressSource(), new WprmSource(), new MvCreateSource() );
+	}
+
+	/**
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
@@ -549,7 +564,7 @@ final class Plugin {
 		$links = new ProductResolver( new PostTypeProductRepository() );
 
 		$this->link_indexer = new LinkIndexer(
-			new PostContentSource( $this->host_query(), $this->settings_repository() ),
+			new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ),
 			new WpLinkScanner( $this->settings_repository() ),
 			$links,
 			new DisplayResolver( new PostTypeProductRepository(), new TermGroupRepository(), $links ),
@@ -574,7 +589,7 @@ final class Plugin {
 	 * The posts the link index covers (F21 D6, D7; Task 35D's chosen types).
 	 */
 	private function host_query(): HostQuery {
-		return new HostQuery( $this->settings_repository() );
+		return new HostQuery( $this->settings_repository(), self::builders() );
 	}
 
 	/**

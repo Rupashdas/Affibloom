@@ -11,6 +11,7 @@ namespace Affibloom\Infrastructure\WordPress;
 
 use Affibloom\Application\LinkIndex\Hosts;
 use Affibloom\Domain\Settings\SettingsRepository;
+use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
 
 /**
  * F21 D6 and D7: posts, pages and reusable blocks, plus the types chosen in Custom Link Detection (Settings → General,
@@ -28,9 +29,10 @@ final class HostQuery implements Hosts {
 	/**
 	 * Builds the query.
 	 *
-	 * @param SettingsRepository $settings The chosen custom post types.
+	 * @param SettingsRepository  $settings The chosen custom post types.
+	 * @param list<BuilderSource> $builders The builders whose own post type is indexed while active (Task 35E).
 	 */
-	public function __construct( private SettingsRepository $settings ) {}
+	public function __construct( private SettingsRepository $settings, private array $builders = array() ) {}
 
 	/**
 	 * The indexed post types: the three always, then the chosen ones.
@@ -38,7 +40,10 @@ final class HostQuery implements Hosts {
 	 * @return list<string>
 	 */
 	public function types(): array {
-		return array_values( array_unique( array_merge( self::TYPES, $this->settings->get()->list( 'scan_post_types' ) ) ) );
+		// A builder's own post type joins while its plugin is active (TablePress's tables; Task 35E).
+		$own = array_values( array_filter( array_map( static fn( BuilderSource $builder ): ?string => $builder->host_type(), $this->builders ) ) );
+
+		return array_values( array_unique( array_merge( self::TYPES, $this->settings->get()->list( 'scan_post_types' ), $own ) ) );
 	}
 
 	/**

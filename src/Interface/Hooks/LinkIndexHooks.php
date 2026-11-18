@@ -46,6 +46,38 @@ final class LinkIndexHooks implements Module {
 		add_action( 'trashed_post', array( $this, 'changed' ) );
 		add_action( 'untrashed_post', array( $this, 'changed' ) );
 		add_action( 'deleted_post', array( $this, 'deleted' ) );
+		// Builders and recipe plugins (Task 35E): a recipe or a Create card is read through the posts that show it.
+		add_action( 'save_post_wprm_recipe', array( $this, 'recipe' ), 20 );
+		add_action( 'mv_create_card_post_publish', array( $this, 'card' ), 10 );
+	}
+
+	/**
+	 * A saved WP Recipe Maker recipe: the post it belongs to (`wprm_parent_post_id`) is indexed again.
+	 *
+	 * @param int $recipe_id The recipe.
+	 */
+	public function recipe( int $recipe_id ): void {
+		$parent = (int) get_post_meta( $recipe_id, 'wprm_parent_post_id', true );
+		if ( $parent > 0 ) {
+			$this->changed( $parent );
+		}
+	}
+
+	/**
+	 * A published Mediavine Create card: the posts it is shown in (its `associated_posts`, Lasso's
+	 * get_mediavine_create_post_ids_to_scan) are indexed again.
+	 *
+	 * @param mixed $creation The card, as Create passes it.
+	 */
+	public function card( mixed $creation ): void {
+		$card  = is_object( $creation ) ? get_object_vars( $creation ) : ( is_array( $creation ) ? $creation : array() );
+		$posts = $card['associated_posts'] ?? array();
+		$posts = is_string( $posts ) ? json_decode( $posts, true ) : $posts;
+		foreach ( is_array( $posts ) ? $posts : array() as $post_id ) {
+			if ( is_numeric( $post_id ) ) {
+				$this->changed( (int) $post_id );
+			}
+		}
 	}
 
 	/**

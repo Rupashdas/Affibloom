@@ -20,4 +20,24 @@ enum LinkType: string {
 
 	/** Amazon's SiteStripe markup (R31). */
 	case SiteStripe = 'sitestripe';
+
+	/** A link in a WP Recipe Maker recipe a post shows (R32; Task 35E), Lasso's own type name. */
+	case WpRecipeMaker = 'WpRecipeMaker';
+
+	/** A link in a Mediavine Create card's description (R32; Task 35E), Lasso's own type name. */
+	case MvCreate = 'MvCreate';
+
+	/**
+	 * The type a place gives its links whatever they point to: a recipe's (`wprm:<id>`), a Create card's (`mv:<id>`), or
+	 * none.
+	 *
+	 * @param string $source The place in the host.
+	 */
+	public static function of_source( string $source ): ?self {
+		return match ( true ) {
+			str_starts_with( $source, 'wprm:' ) => self::WpRecipeMaker,
+			str_starts_with( $source, 'mv:' )   => self::MvCreate,
+			default                             => null,
+		};
+	}
 }

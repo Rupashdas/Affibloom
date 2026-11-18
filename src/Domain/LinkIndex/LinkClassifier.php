@@ -43,7 +43,7 @@ final class LinkClassifier {
 	 * @param string        $detected_at Now, UTC.
 	 */
 	public function classify( LinkCandidate $link, int $product_id, int $host_id, string $host_url, string $source, int $occurrence, string $detected_at ): LinkLocation {
-		$type   = $link->is_sitestripe() ? LinkType::SiteStripe : $this->type( $link->href, $product_id );
+		$type   = $link->is_sitestripe() ? LinkType::SiteStripe : ( LinkType::of_source( $source ) ?? $this->type( $link->href, $product_id ) );
 		$amazon = self::amazon( $link->product_url() );
 		$text   = trim( (string) preg_replace( '/\s+/u', ' ', $link->text ) );
 
