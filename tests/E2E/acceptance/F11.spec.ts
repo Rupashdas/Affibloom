@@ -314,9 +314,10 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		await expect( page.locator( `tr[data-product-id="${ broken }"]` ) ).toBeVisible();
 
 		// Saved as a view, the tab comes back with it.
-		await page.getByRole( 'button', { name: 'Save as' } ).click();
-		await page.getByLabel( 'View name' ).fill( `${ name } view` );
-		await page.getByRole( 'button', { name: 'Save View' } ).click();
+		await page.locator( '[aria-controls="affibloom-filters-panel"]' ).click();
+		await page.getByLabel( 'Save as' ).fill( `${ name } view` );
+		await page.locator( '#affibloom-filters-panel' ).getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await expect( page.getByRole( 'link', { name: `${ name } view` } ) ).toBeVisible();
 		await brokenTab.click();
 		await expect( page ).not.toHaveURL( /filter=/ );
 		await expect( page.locator( 'tbody tr[data-product-id]' ) ).toHaveCount( 3 );
