@@ -206,6 +206,8 @@ lock. The stub is `tests/E2E/link-stub.php`, loaded by `affibloom.php` on local 
 mu-plugin, no `.wp-env.json` mapping); it has no clock option: the AC moves the row's times back 61 minutes. Locations
 only and the unconfirmed row: deviation 147. Seen on Local: 107 products queued, external links not requested (D6);
 stub links gave 200 / pending 404 / blank 404 at once, the 404 confirmed an hour later with the event fired.
+*Fixed 2026-11-18:* a product with a blank stored link failed the Dashboard (`AffiliateUrl::from_string` in the
+repository's hydrate); stored links are now read with `AffiliateUrl::stored()`, input still through `from_string()`.
 
 ---
 

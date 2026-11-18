@@ -94,6 +94,18 @@ final class AffiliateUrl {
 	}
 
 	/**
+	 * A link as stored, read back without the input rules. A stored destination can be blank or not a link (a record
+	 * migrated or written without Affibloom's form, or a dummy one); the product must still load, so the Dashboard and
+	 * its page show it and link health reports it as broken (F11 R9, R19), where from_string() would fail the whole
+	 * list. Only the repository reads with it; every input goes through from_string().
+	 *
+	 * @param string $value The stored value.
+	 */
+	public static function stored( string $value ): self {
+		return new self( $value );
+	}
+
+	/**
 	 * Lasso_Helper::add_https(): the broken prefixes become "https://"; a value with a dot and no scheme gets
 	 * "https://" in front, after its leading slashes; e-mail addresses, mailto: links and anything starting with "["
 	 * (a shortcode) are left alone. One improvement: Lasso looks only for a lower-case "http://" or "https://", so

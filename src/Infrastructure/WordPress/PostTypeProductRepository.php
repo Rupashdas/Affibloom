@@ -936,7 +936,7 @@ final class PostTypeProductRepository implements ProductRepository {
 		return new Product(
 			id: $post->ID,
 			name: $post->post_title,
-			url: AffiliateUrl::from_string( $meta( 'url' ) ),
+			url: AffiliateUrl::stored( $meta( 'url' ) ),
 			type: ProductType::tryFrom( $meta( 'type' ) ) ?? ProductType::Other,
 			new_tab: '1' === $meta( 'new_tab' ),
 			nofollow: '1' === $meta( 'nofollow' ),

@@ -6,6 +6,16 @@ use Affibloom\Domain\Product\AffiliateUrl;
 use PHPUnit\Framework\TestCase;
 
 final class AffiliateUrlTest extends TestCase {
+
+	public function test_a_stored_link_is_read_back_as_stored_even_blank_or_broken(): void {
+		$blank = AffiliateUrl::stored( '' );
+		self::assertSame( '', $blank->value() );
+		self::assertSame( '', $blank->host() );
+		self::assertFalse( $blank->is_amazon() );
+
+		self::assertSame( 'not a link', AffiliateUrl::stored( 'not a link' )->value() );
+		self::assertSame( 'https://www.example.com/x?tag=a', AffiliateUrl::stored( 'https://www.example.com/x?tag=a' )->value() );
+	}
 	public function test_a_tracking_link_is_kept_exactly_after_trimming(): void {
 		$url = 'https://mizuno.pxf.io/c/123/456/789?u=https%3A%2F%2Fmizunousa.com%2Fwave&subId1=vv';
 
