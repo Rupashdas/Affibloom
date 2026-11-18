@@ -107,6 +107,11 @@ use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
 use Affibloom\Interface\Cron\LinkIndexCron;
+use Affibloom\Interface\Cron\LinkCheckCron;
+use Affibloom\Application\LinkHealth\LinkCheckService;
+use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
+use Affibloom\Infrastructure\WordPress\OptionCheckPass;
+use Affibloom\Infrastructure\WordPress\TableLinkIssueRepository;
 use Affibloom\Infrastructure\System\CpuLoad;
 use Affibloom\Infrastructure\WordPress\OptionLinkIndexState;
 use Affibloom\Interface\Hooks\LinkIndexHooks;
@@ -164,6 +169,8 @@ use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Template;
 use Affibloom\Interface\UpgradeHooks;
 use Affibloom\Module;
+use DateTimeImmutable;
+use DateTimeZone;
 use Throwable;
 
 /**
@@ -332,6 +339,10 @@ final class Plugin {
 			5 => static function (): void {
 				( new Table( TableVariantRepository::TABLE, TableVariantRepository::COLUMNS ) )->create();
 			},
+			// Task 30A: the products' link-health rows (F11 D1).
+			6 => static function (): void {
+				( new Table( TableLinkIssueRepository::TABLE, TableLinkIssueRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 
@@ -349,7 +360,7 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS, LinkCheckCron::HOOKS );
 	}
 
 	/**
@@ -542,7 +553,25 @@ final class Plugin {
 			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository(), new OptionLinkIndexState() ),
 			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
 			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new CpuLoad(), $this->settings_repository() ),
+			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ) ),
 			new ForeignNotices( $this->navigation() ),
+		);
+	}
+
+	/**
+	 * The daily link check (F11, Task 30A).
+	 */
+	private function link_checks(): LinkCheckService {
+		return new LinkCheckService(
+			new TableLinkIssueRepository(),
+			new OptionCheckPass(),
+			new HttpLinkStatusChecker(),
+			new WpCronBackgroundJob( LinkCheckCron::BATCH ),
+			$this->settings_repository(),
+			static fn(): DateTimeImmutable => new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ),
+			static function ( int $product_id, string $url, string $issue_type ): void {
+				do_action( 'affibloom_link_issue_detected', $product_id, $url, $issue_type );
+			}
 		);
 	}
 

@@ -57,6 +57,11 @@ if ( 'local' === wp_get_environment_type() && is_readable( __DIR__ . '/tests/E2E
 	require __DIR__ . '/tests/E2E/amazon-stub.php';
 }
 
+// Test only (F11): the status stub the link-health acceptance tests point products at. Local sites only, as above.
+if ( 'local' === wp_get_environment_type() && is_readable( __DIR__ . '/tests/E2E/link-stub.php' ) ) {
+	require __DIR__ . '/tests/E2E/link-stub.php';
+}
+
 register_activation_hook( __FILE__, array( Affibloom\Plugin::class, 'activate' ) );
 register_deactivation_hook( __FILE__, array( Affibloom\Plugin::class, 'deactivate' ) );
 

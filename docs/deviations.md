@@ -152,6 +152,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 144. Settings → Display (the user, 2026-11-17): Single, Grid and List switch in place and one save stores every type, as in Lasso.
 - 145. Loading states (the user, 2026-11-17): content that waits for the server shows a skeleton; actions show `.is-busy`.
 - 146. Standalone Affibloom (the user, 2026-11-17): the Lasso migration and content conversion move to a separate Affibloom Lasso Migrator plugin (Phase M); no other plugins' compatibility; Phase 5 core only; A1 and A2 reversed.
+- 147. Task 30A (2026-11-18): the link check covers only products used in content while "locations only" is on (F21's index exists); a first failure on an unchecked product is a row with code `''`, not an issue.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2897,3 +2898,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       at cutover instead of IM2.
     - Batches re-cut in `plans/batches.md` (Phase 5: 17 batches; Phase M: 20 batches).
 
+147. **Link check: locations only, and the unconfirmed row (Task 30A, 2026-11-18).** D5 applies R5's "locations only"
+    rule "once F21's index exists"; the index was built in Phase 5, so with `pricing_locations_only` on (the default)
+    the pass checks only products with a row in `affibloom_link_locations`. Products never requested: type `amazon` or a
+    destination on an Amazon host (AC2). A product whose first-ever check fails gets a row with `issue_type` `''`,
+    `failures` 1 and `pending_type` set (D4: not shown); it is not an issue. **Later tasks:** 31A-31D, 32A and 32B count
+    an issue as `resolved = 0 AND issue_type <> ''` (broken: also `<> '000'`) and "checked" as `issue_type <> ''`
+    (`LinkIssue::is_open()`). The pass keeps its queue of product IDs in `affibloom_link_check` (D11's option).

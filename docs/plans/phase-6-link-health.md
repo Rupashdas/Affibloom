@@ -57,7 +57,7 @@ the text below as a deviation in `progress.md`.
 
 ### F11: Link health
 
-- [ ] Task 30A: The daily link check pass
+- [x] Task 30A: The daily link check pass
 - [ ] Task 30B: The check on product save
 - [ ] Task 30C: Amazon products through the product API (dormant until C1)
 - [ ] Task 31A: The Alert column in every state, and its sort
@@ -188,17 +188,24 @@ The acceptance tests use `http://localhost/wp-json/affibloom-stub/v1/status/404`
 no clock option, so add one (an option the checker's clock reads in test environments) when that test is written, and
 record it in `progress.md`.
 
-- [ ] **Step 1: Failing tests.** E2E: products pointing at the stub's 200, 404 and blank; `wp cron event run
+- [x] **Step 1: Failing tests.** E2E: products pointing at the stub's 200, 404 and blank; `wp cron event run
   affibloom_daily` then `affibloom_link_check_batch`; read the table through `wp eval`; a second failure an hour later
   (time moved through the stub's clock option). Unit: every policy transition. Expected red: no event.
-- [ ] **Step 2: Domain** (`IssueType`, `LinkHealthPolicy` with D4, `IssueDefinitions`).
-- [ ] **Step 3: Infrastructure** (`Migrator`, `LinkIssueTable` with R6's order and D4's due rule, the HTTP checker with
+- [x] **Step 2: Domain** (`IssueType`, `LinkHealthPolicy` with D4, `IssueDefinitions`).
+- [x] **Step 3: Infrastructure** (`Migrator`, `LinkIssueTable` with R6's order and D4's due rule, the HTTP checker with
   D6/D9).
-- [ ] **Step 4: Service and cron** (`start_pass` once a day, `run_batch` with 10 s / 100 and the 60 s lock, re-dispatch,
+- [x] **Step 4: Service and cron** (`start_pass` once a day, `run_batch` with 10 s / 100 and the 60 s lock, re-dispatch,
   `affibloom_link_issue_detected`).
-- [ ] **Step 5: Run and look.** Checks; on Local, a pass records nothing for external links (D6); stub links give 200 /
+- [x] **Step 5: Run and look.** Checks; on Local, a pass records nothing for external links (D6); stub links give 200 /
   pending / 404.
-- [ ] **Step 6: Commit:** "Check product links once a day, in batches, as Lasso does".
+- [x] **Step 6: Commit:** "Check product links once a day, in batches, as Lasso does".
+
+*Note (2026-11-18):* Built with the codebase's names: `Infrastructure\WordPress\{TableLinkIssueRepository,
+OptionCheckPass}`, `Domain\LinkHealth\{CheckPass, CheckPassRepository}` (the pass and its queue), `OptionLock` for the
+lock. The stub is `tests/E2E/link-stub.php`, loaded by `affibloom.php` on local sites like the Amazon stub (no
+mu-plugin, no `.wp-env.json` mapping); it has no clock option: the AC moves the row's times back 61 minutes. Locations
+only and the unconfirmed row: deviation 147. Seen on Local: 107 products queued, external links not requested (D6);
+stub links gave 200 / pending 404 / blank 404 at once, the 404 confirmed an hour later with the event fired.
 
 ---
 
