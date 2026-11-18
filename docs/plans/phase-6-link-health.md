@@ -64,7 +64,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 31B: The Alert filter tabs, counters and the Broken links tile
 - [x] Task 31C: The product page's issue notice
 - [x] Task 31D: Export CSV of issue links
-- [ ] Task 32A: `wp affibloom check-links`
+- [x] Task 32A: `wp affibloom check-links`
 - [ ] Task 32B: The broken-links admin notice
 - [ ] Task 32C: Settings → General: Performance and Cron
 - [ ] Task 32D: The WP-Cron fallback from admin pages
@@ -438,10 +438,16 @@ above the list in `product-list.php`, so its state follows each load. Seen on Lo
 
 **Files:** the above; `Plugin.php`; tests F11 **AC14**.
 
-- [ ] **Step 1: Failing test.** - [ ] **Step 2: Command.** - [ ] **Step 3: Run and look** (all products on Local).
-- [ ] **Step 4: Commit:** "Add wp affibloom check-links".
+- [x] **Step 1: Failing test.** - [x] **Step 2: Command.** - [x] **Step 3: Run and look** (all products on Local).
+- [x] **Step 4: Commit:** "Add wp affibloom check-links".
+
+*Note (2026-11-19):* `check()` returns a `CheckOutcome` (destination, result, row) for the table; `check_product()` keeps
+its contract. The result column says "not sent (blocked)" for a request WordPress refused (D6) and "(first failure)" while
+the second check waits. Seen on Local: one product, an Amazon product through the API, and `--all` over 129 products
+(Amazon's hosts blocked for that run by a filter, so no real requests).
 
 ---
+
 
 ### Task 32B: The broken-links admin notice
 

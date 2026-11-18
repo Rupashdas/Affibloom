@@ -124,6 +124,36 @@ test.describe( 'F11 Link health', () => {
 		expect( again?.detection_date ).not.toBe( old );
 	} );
 
+	test( 'AC14 wp affibloom check-links checks one product or the whole pass and prints a table', () => {
+		const dead = createProduct( { name: unique( 'F11 AC14' ), url: `${ stub( 404 ) }?ac14=1` } );
+		const one = wp( 'affibloom', 'check-links', `--product=${ dead }`, '--format=json' );
+		expect( JSON.parse( one ) ).toEqual( [ expect.objectContaining( { product: String( dead ), result: '404 (first failure)' } ) ] );
+
+		const amazon = createProduct( { name: unique( 'F11 AC14 amazon' ), type: 'amazon', asin: 'B0F11AC14X', url: 'https://www.amazon.com/dp/B0F11AC14X' } );
+		const saved = ( () => {
+			try {
+				return wp( 'option', 'get', 'affibloom_amazon_credentials', '--format=json' );
+			} catch {
+				return null;
+			}
+		} )();
+		try {
+			wp( 'option', 'delete', 'affibloom_amazon_credentials' );
+		} catch {
+			// None stored.
+		}
+		try {
+			expect( JSON.parse( wp( 'affibloom', 'check-links', `--product=${ amazon }`, '--format=json' ) )[ 0 ].result ).toBe( 'skipped (Amazon API not connected)' );
+			const all = wp( 'affibloom', 'check-links', '--all', '--format=csv' );
+			expect( all.split( '\n' )[ 0 ] ).toBe( 'product,url,result,issue,since' );
+			expect( all ).toContain( `${ dead },` );
+		} finally {
+			if ( saved ) {
+				wp( 'option', 'add', 'affibloom_amazon_credentials', saved, '--format=json', '--autoload=no' );
+			}
+		}
+	} );
+
 	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F11 AC6' ), url: stub( 200 ) } );
 		const due = () => wp( 'eval', `echo false === wp_next_scheduled( "affibloom_link_check_product", array( ${ id } ) ) ? "no" : "yes";` );

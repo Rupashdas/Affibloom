@@ -98,6 +98,7 @@ use Affibloom\Infrastructure\WordPress\WpCronBackgroundJob;
 use Affibloom\Infrastructure\WordPress\WpCronGeniusCleanupSchedule;
 use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
+use Affibloom\Interface\Cli\CheckLinksCommand;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
@@ -572,6 +573,7 @@ final class Plugin {
 			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
 			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), new CpuLoad(), $this->settings_repository() ),
 			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ) ),
+			new CheckLinksCommand( $this->link_checks(), new PostTypeProductRepository() ),
 			new ProductAlertsController( $this->link_issue_query(), new PostTypeProductRepository() ),
 			new ForeignNotices( $this->navigation() ),
 		);

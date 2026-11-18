@@ -19,6 +19,7 @@ use Affibloom\Domain\LinkHealth\LinkIssue;
 use Affibloom\Domain\LinkHealth\LinkIssueRepository;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Closure;
+use Generator;
 use DateTimeImmutable;
 
 /**
@@ -130,6 +131,18 @@ final class LinkCheckService {
 	 * @return LinkIssue|null Its row afterwards; null when it is not covered or nothing changed.
 	 */
 	public function check_product( int $product_id ): ?LinkIssue {
+		$outcome = $this->check( $product_id );
+
+		return null === $outcome || ! $outcome->changed ? null : $outcome->row;
+	}
+
+	/**
+	 * Checks one covered product now, stores the result and says what happened (Task 32A).
+	 *
+	 * @param int $product_id The product.
+	 * @return CheckOutcome|null Null when the product is not covered.
+	 */
+	public function check( int $product_id ): ?CheckOutcome {
 		$target = $this->issues->destination( $product_id, $this->amazon->is_configured() );
 		if ( null === $target ) {
 			return null;
@@ -140,8 +153,23 @@ final class LinkCheckService {
 		} else {
 			$result = '' === $url ? CheckResult::certain( IssueType::NOT_FOUND ) : $this->checker->status( $url );
 		}
+		$row = $this->apply( $product_id, $url, $result );
 
-		return $this->apply( $product_id, $url, $result );
+		return new CheckOutcome( $product_id, $url, $result, $row ?? $this->issues->get( $product_id ), null !== $row );
+	}
+
+	/**
+	 * Runs the whole pass now, ignoring the once-a-day rule (D19: `wp affibloom check-links --all`).
+	 *
+	 * @return Generator<int, CheckOutcome>
+	 */
+	public function run_all(): Generator {
+		foreach ( $this->issues->due( $this->locations_only(), $this->amazon->is_configured() ) as $product_id ) {
+			$outcome = $this->check( $product_id );
+			if ( null !== $outcome ) {
+				yield $outcome;
+			}
+		}
 	}
 
 	/**
