@@ -38,6 +38,9 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 	/** Amazon does not answer item requests (HttpError). */
 	public bool $failing = false;
 
+	/** Answer item calls with this CatalogError kind; '' for none. */
+	public string $item_error = '';
+
 	/** Item calls made. */
 	public int $asked = 0;
 
@@ -66,6 +69,9 @@ final class FakeAmazonCatalog implements AmazonCatalog {
 
 	public function item( Credentials $credentials, Asin $asin, string $country ): CatalogItem {
 		++$this->asked;
+		if ( '' !== $this->item_error ) {
+			throw new CatalogError( $this->item_error, 'ItemNotAccessible' );
+		}
 		if ( $this->throttled > 0 ) {
 			throw new CatalogError( CatalogError::THROTTLED, 'Request was denied due to request throttling.', '', $this->throttled );
 		}

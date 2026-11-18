@@ -157,3 +157,76 @@ test.describe( 'F11 Link health', () => {
 		expect( issue( id ) ).toMatchObject( { resolved: '1' } );
 	} );
 } );
+
+// AC7 (Task 30C): Amazon products through the product API, answered by the test-only Amazon stub (tests/E2E/amazon-stub.php,
+// scenario "ok": ASINs starting B0NOTFOUND are not found, B0OUTSTOCK out of stock, others in stock).
+test.describe( 'F11 Link health: Amazon products', () => {
+	let saved: string | null = null;
+	let locationsOnly: unknown;
+
+	/** Stores the suite's test credentials (null removes them). */
+	const credentials = ( on: boolean ) => {
+		try {
+			wp( 'option', 'delete', 'affibloom_amazon_credentials' );
+		} catch {
+			// None stored.
+		}
+		if ( on ) {
+			wp( 'option', 'add', 'affibloom_amazon_credentials', JSON.stringify( { credential_id: 'amzn1.application-oa2-client.e2e', secret: 'e2e-secret', partner_tag: 'vbvault-20', version: '3.1', verified_signature: '' } ), '--format=json', '--autoload=no' );
+		}
+	};
+
+	const amazonProduct = ( asin: string ) => createProduct( { name: unique( `F11 AC7 ${ asin }` ), type: 'amazon', asin, url: `https://www.amazon.com/dp/${ asin }` } );
+
+	test.beforeAll( () => {
+		try {
+			saved = wp( 'option', 'get', 'affibloom_amazon_credentials', '--format=json' );
+		} catch {
+			saved = null;
+		}
+		const settings = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		locationsOnly = settings.pricing_locations_only;
+		wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); $s["pricing_locations_only"] = false; update_option( "affibloom_settings", $s );' );
+		wp( 'option', 'update', 'affibloom_test_amazon_stub', 'ok' );
+		wp( 'option', 'update', 'affibloom_test_amazon_requests', '0' );
+	} );
+
+	test.afterAll( () => {
+		wp( 'option', 'update', 'affibloom_test_amazon_stub', '' );
+		credentials( false );
+		if ( saved ) {
+			wp( 'option', 'add', 'affibloom_amazon_credentials', saved, '--format=json', '--autoload=no' );
+		}
+		const value = undefined === locationsOnly ? 'unset( $s["pricing_locations_only"] );' : `$s["pricing_locations_only"] = ${ locationsOnly ? 'true' : 'false' };`;
+		wp( 'eval', `$s = (array) get_option( "affibloom_settings", array() ); ${ value } update_option( "affibloom_settings", $s );` );
+	} );
+
+	test( 'AC7 the product API decides: not found is broken, no stock is out of stock, back in stock is cleared', () => {
+		credentials( true );
+		const gone = amazonProduct( 'B0NOTFOUND7' );
+		const out = amazonProduct( 'B0OUTSTOCK7' );
+		const fine = amazonProduct( 'B0F11AC7OK' );
+		newDay();
+		runPass();
+		expect( issue( gone ) ).toMatchObject( { issue_type: '404', resolved: '0', failures: '0' } );
+		expect( issue( out ) ).toMatchObject( { issue_type: '000', resolved: '0' } );
+		expect( issue( fine ) ).toMatchObject( { issue_type: '200', resolved: '1' } );
+
+		// Back in stock: the stub answers in stock for another ASIN; the next day's pass clears it, keeping its code (R13).
+		wp( 'post', 'meta', 'update', String( out ), '_affibloom_asin', 'B0F11AC7BACK' );
+		newDay();
+		runPass();
+		expect( issue( out ) ).toMatchObject( { issue_type: '000', resolved: '1' } );
+		expect( Number( wp( 'option', 'get', 'affibloom_test_amazon_requests' ) ) ).toBeGreaterThan( 0 );
+	} );
+
+	test( 'AC7 without credentials Amazon products are not checked', () => {
+		credentials( false );
+		wp( 'option', 'update', 'affibloom_test_amazon_requests', '0' );
+		const id = amazonProduct( 'B0OUTSTOCK8' );
+		newDay();
+		runPass();
+		expect( issue( id ) ).toBeNull();
+		expect( wp( 'option', 'get', 'affibloom_test_amazon_requests' ) ).toBe( '0' );
+	} );
+} );

@@ -108,6 +108,7 @@ use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
 use Affibloom\Interface\Cron\LinkIndexCron;
 use Affibloom\Interface\Cron\LinkCheckCron;
+use Affibloom\Application\LinkHealth\CatalogProductCheck;
 use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
 use Affibloom\Infrastructure\WordPress\OptionCheckPass;
@@ -567,6 +568,7 @@ final class Plugin {
 			new TableLinkIssueRepository(),
 			new OptionCheckPass(),
 			new HttpLinkStatusChecker(),
+			new CatalogProductCheck( new OptionCredentialsRepository(), $this->catalog() ),
 			new WpCronBackgroundJob( LinkCheckCron::BATCH ),
 			$this->settings_repository(),
 			static fn(): DateTimeImmutable => new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ),

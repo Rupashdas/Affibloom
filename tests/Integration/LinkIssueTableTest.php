@@ -55,15 +55,22 @@ final class LinkIssueTableTest extends WP_UnitTestCase {
 		$never    = $this->product( 'https://shop.example/never' );
 		$open     = $this->product( 'https://shop.example/open' );
 		$resolved = $this->product( 'https://shop.example/resolved' );
-		$this->product( 'https://www.amazon.com/dp/B0TEST0001', 'amazon' );
+		$amazon = $this->product( 'https://www.amazon.com/dp/B0TEST0001', 'amazon' );
+		update_post_meta( $amazon, '_affibloom_asin', 'B0TEST0001' );
+		update_post_meta( $amazon, '_affibloom_amazon_country', 'us' );
 		$this->product( 'https://amzn.to/abc' );
 		$this->product( 'https://shop.example/draft', 'other', 'draft' );
 		$this->issues->save( new LinkIssue( $open, '404', 'x', self::at( '2026-11-01 00:00:00' ), false, null, self::at( '2026-11-17 00:00:00' ) ) );
 		$this->issues->save( new LinkIssue( $resolved, '200', 'x', null, true, null, self::at( '2026-11-16 00:00:00' ) ) );
 
-		self::assertSame( array( $open, $resolved, $never ), $this->issues->due( false ) );
-		self::assertSame( array(), $this->issues->due( true ), 'No product is used in content.' );
-		self::assertSame( 'https://shop.example/never', $this->issues->destination( $never ) );
+		self::assertSame( array( $open, $resolved, $never ), $this->issues->due( false, false ) );
+		self::assertSame( array( $open, $resolved, $never, $amazon ), $this->issues->due( false, true ), 'With the product API.' );
+		self::assertSame( array(), $this->issues->due( true, true ), 'No product is used in content.' );
+		self::assertSame( 'https://shop.example/never', $this->issues->destination( $never, true )->url );
+		self::assertFalse( $this->issues->destination( $never, true )->is_amazon() );
+		self::assertNull( $this->issues->destination( $amazon, false ) );
+		self::assertSame( array( 'B0TEST0001', 'us' ), array( $this->issues->destination( $amazon, true )->asin, $this->issues->destination( $amazon, true )->country ) );
+		self::assertSame( array( $amazon ), $this->issues->with_asin( 'B0TEST0001', 'us' ) );
 	}
 
 	public function test_second_checks_are_found_by_their_last_check(): void {
@@ -87,6 +94,6 @@ final class LinkIssueTableTest extends WP_UnitTestCase {
 		self::assertSame( 1, $this->issues->delete_orphans() );
 		self::assertNull( $this->issues->get( $gone ) );
 		self::assertNotNull( $this->issues->get( $trashed ) );
-		self::assertNull( $this->issues->destination( $trashed ) );
+		self::assertNull( $this->issues->destination( $trashed, true ) );
 	}
 }

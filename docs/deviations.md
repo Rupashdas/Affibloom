@@ -153,6 +153,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 145. Loading states (the user, 2026-11-17): content that waits for the server shows a skeleton; actions show `.is-busy`.
 - 146. Standalone Affibloom (the user, 2026-11-17): the Lasso migration and content conversion move to a separate Affibloom Lasso Migrator plugin (Phase M); no other plugins' compatibility; Phase 5 core only; A1 and A2 reversed.
 - 147. Task 30A (2026-11-18): the link check covers only products used in content while "locations only" is on (F21's index exists); a first failure on an unchecked product is a row with code `''`, not an issue.
+- 148. Task 30C (2026-11-18): Amazon products are checked through C1's API whenever its credentials work; a down API or refused credentials check nothing; C1E must leave them to its refresh (R5).
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2905,3 +2906,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     `failures` 1 and `pending_type` set (D4: not shown); it is not an issue. **Later tasks:** 31A-31D, 32A and 32B count
     an issue as `resolved = 0 AND issue_type <> ''` (broken: also `<> '000'`) and "checked" as `issue_type <> ''`
     (`LinkIssue::is_open()`). The pass keeps its queue of product IDs in `affibloom_link_check` (D11's option).
+
+148. **Amazon products in the link check (Task 30C, 2026-11-18).** C1's product client exists, so 30C's adapter
+    (`CatalogProductCheck`) is live: while the Creators API credentials are configured and not refused, the daily pass
+    and the save check ask the API about every covered Amazon product (type `amazon` with an ASIN), one request each,
+    against C1's daily quota. R16 kept, except that HttpError, Throttled and AuthFailed check nothing (Lasso: 200, which
+    would clear a real issue); ApiError stays 200 (Lasso's ignore list). **Later task, C1E (Phase 7):** when "Update
+    Amazon pricing daily" is on, the refresh files Amazon results through `LinkCheckService::record()` and
+    `resolve_out_of_stock()`, and the pass must then leave Amazon products to it (R5: `due( …, false )`), so no item is
+    asked twice a day. Local holds the site's real credentials: a pass there asks Amazon for real.

@@ -1,13 +1,14 @@
 <?php
 namespace Affibloom\Tests\Unit\Fakes;
 
+use Affibloom\Domain\LinkHealth\CheckTarget;
 use Affibloom\Domain\LinkHealth\LinkIssue;
 use Affibloom\Domain\LinkHealth\LinkIssueRepository;
 use DateTimeImmutable;
 
 /**
- * Link issues kept in memory. $destinations lists the products still to be checked (published, not Amazon) with
- * their stored link, in the order due() returns them.
+ * Link issues kept in memory. $destinations lists the products the HTTP check covers (published, not Amazon) with
+ * their stored link, and $amazon the published Amazon products with an ASIN, in the order due() returns them.
  */
 final class InMemoryLinkIssues implements LinkIssueRepository {
 
@@ -16,6 +17,9 @@ final class InMemoryLinkIssues implements LinkIssueRepository {
 
 	/** @var array<int, string> */
 	public array $destinations = array();
+
+	/** @var array<int, array{string, string, string}> Product ID => link, ASIN, store. */
+	public array $amazon = array();
 
 	public int $orphans_deleted = 0;
 
@@ -36,9 +40,9 @@ final class InMemoryLinkIssues implements LinkIssueRepository {
 		$this->rows[ $issue->product_id ] = $issue;
 	}
 
-	public function due( bool $locations_only ): array {
+	public function due( bool $locations_only, bool $amazon ): array {
 		$this->locations_only = $locations_only;
-		return array_keys( $this->destinations );
+		return array_merge( array_keys( $this->destinations ), $amazon ? array_keys( $this->amazon ) : array() );
 	}
 
 	public function confirmations( DateTimeImmutable $checked_before, bool $locations_only, int $limit ): array {
@@ -56,8 +60,18 @@ final class InMemoryLinkIssues implements LinkIssueRepository {
 		return array() === $times ? null : min( $times );
 	}
 
-	public function destination( int $product_id ): ?string {
-		return $this->destinations[ $product_id ] ?? null;
+	public function destination( int $product_id, bool $amazon ): ?CheckTarget {
+		if ( isset( $this->destinations[ $product_id ] ) ) {
+			return new CheckTarget( $this->destinations[ $product_id ] );
+		}
+		if ( $amazon && isset( $this->amazon[ $product_id ] ) ) {
+			return new CheckTarget( ...$this->amazon[ $product_id ] );
+		}
+		return null;
+	}
+
+	public function with_asin( string $asin, string $country ): array {
+		return array_keys( array_filter( $this->amazon, static fn( array $row ): bool => $row[1] === $asin && $row[2] === $country ) );
 	}
 
 	public function delete_orphans(): int {

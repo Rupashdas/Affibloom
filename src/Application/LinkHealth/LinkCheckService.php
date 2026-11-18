@@ -27,6 +27,10 @@ use DateTimeImmutable;
  * time is checked between requests) and chains the next batch while any are left. A first failure is checked again an
  * hour later: once the queue is empty, a batch checks the failures that are an hour old, and when some are younger it
  * waits for the oldest. Every confirmed issue fires the detected listener (`affibloom_link_issue_detected`).
+ *
+ * Amazon products (Task 30C; R10, R16, R17, D7, D8) are never requested: while the product API is configured they are
+ * queued too and asked of the API, whose answer is certain; without it they are not checked. C1's Amazon refresh files
+ * what it learns through record() and resolve_out_of_stock().
  */
 final class LinkCheckService {
 
@@ -42,6 +46,7 @@ final class LinkCheckService {
 	 * @param LinkIssueRepository                $issues   The rows and the covered products.
 	 * @param CheckPassRepository                $passes   The daily pass.
 	 * @param LinkStatusChecker                  $checker  Asks a link for its status.
+	 * @param AmazonProductCheck                 $amazon   Asks the product API about an Amazon product.
 	 * @param BackgroundJob                      $job      Schedules the next batch.
 	 * @param SettingsRepository                 $settings "Locations only" (R5).
 	 * @param Closure(): DateTimeImmutable       $now      The time now.
@@ -51,6 +56,7 @@ final class LinkCheckService {
 		private LinkIssueRepository $issues,
 		private CheckPassRepository $passes,
 		private LinkStatusChecker $checker,
+		private AmazonProductCheck $amazon,
 		private BackgroundJob $job,
 		private SettingsRepository $settings,
 		private Closure $now,
@@ -69,7 +75,7 @@ final class LinkCheckService {
 			return false;
 		}
 		$this->issues->delete_orphans();
-		$queue = $this->issues->due( $this->locations_only() );
+		$queue = $this->issues->due( $this->locations_only(), $this->amazon->is_configured() );
 		$this->passes->save( new CheckPass( $day, count( $queue ), 0, $queue ) );
 		$this->job->dispatch();
 
@@ -124,13 +130,71 @@ final class LinkCheckService {
 	 * @return LinkIssue|null Its row afterwards; null when it is not covered or nothing changed.
 	 */
 	public function check_product( int $product_id ): ?LinkIssue {
-		$url = $this->issues->destination( $product_id );
-		if ( null === $url ) {
+		$target = $this->issues->destination( $product_id, $this->amazon->is_configured() );
+		if ( null === $target ) {
 			return null;
 		}
-		$url    = trim( $url );
-		$result = '' === $url ? CheckResult::certain( IssueType::NOT_FOUND ) : $this->checker->status( $url );
-		$row    = LinkHealthPolicy::apply( $this->issues->get( $product_id ), $product_id, $url, $result, $this->now() );
+		$url = trim( $target->url );
+		if ( $target->is_amazon() ) {
+			$result = $this->amazon->status( $target->asin, $target->country );
+		} else {
+			$result = '' === $url ? CheckResult::certain( IssueType::NOT_FOUND ) : $this->checker->status( $url );
+		}
+
+		return $this->apply( $product_id, $url, $result );
+	}
+
+	/**
+	 * Files what C1's Amazon refresh learned about a product (R17; C1E, C1H): its code counts at once, as any answer of
+	 * the product API.
+	 *
+	 * @param int    $product_id The product.
+	 * @param string $url        Its destination.
+	 * @param string $issue_type IssueType::OK, IssueType::OUT_OF_STOCK or IssueType::NOT_FOUND.
+	 * @return LinkIssue|null The product's row afterwards (a certain code always changes it).
+	 */
+	public function record( int $product_id, string $url, string $issue_type ): ?LinkIssue {
+		return $this->apply( $product_id, $url, CheckResult::certain( $issue_type ) );
+	}
+
+	/**
+	 * An item back in stock clears out of stock on every product of its ASIN in that store (R17: Lasso's
+	 * resolve_product_out_of_stock); their other issues stay.
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 * @return int How many products were cleared.
+	 */
+	public function resolve_out_of_stock( string $asin, string $country ): int {
+		$cleared = 0;
+		foreach ( $this->issues->with_asin( $asin, $country ) as $product_id ) {
+			$row = $this->issues->get( $product_id );
+			if ( null !== $row && $row->is_open() && IssueType::OUT_OF_STOCK === $row->issue_type ) {
+				$this->apply( $product_id, $row->checked_url, CheckResult::certain( IssueType::OK ) );
+				++$cleared;
+			}
+		}
+
+		return $cleared;
+	}
+
+	/**
+	 * Whether Amazon products are checked (the product API is configured; D7).
+	 */
+	public function amazon_api(): bool {
+		return $this->amazon->is_configured();
+	}
+
+	/**
+	 * Stores what a check found, and reports a confirmed issue.
+	 *
+	 * @param int         $product_id The product.
+	 * @param string      $url        The destination checked.
+	 * @param CheckResult $result     What the check found.
+	 * @return LinkIssue|null The row afterwards; null when nothing changed.
+	 */
+	private function apply( int $product_id, string $url, CheckResult $result ): ?LinkIssue {
+		$row = LinkHealthPolicy::apply( $this->issues->get( $product_id ), $product_id, $url, $result, $this->now() );
 		if ( null === $row ) {
 			return null;
 		}

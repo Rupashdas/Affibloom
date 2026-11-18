@@ -59,7 +59,7 @@ the text below as a deviation in `progress.md`.
 
 - [x] Task 30A: The daily link check pass
 - [x] Task 30B: The check on product save
-- [ ] Task 30C: Amazon products through the product API (dormant until C1)
+- [x] Task 30C: Amazon products through the product API (dormant until C1)
 - [ ] Task 31A: The Alert column in every state, and its sort
 - [ ] Task 31B: The Alert filter tabs, counters and the Broken links tile
 - [ ] Task 31C: The product page's issue notice
@@ -268,9 +268,17 @@ them nothing is checked and the screens say so (D7, shown by 31A-31C).
 
 **Files:** the above; tests F11 **AC7** (fake client through a test-only filter in the stub), unit tests for R16.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Port and fake.** - [ ] **Step 3: The pass's Amazon branch and the recorder.**
-- [ ] **Step 4: Run and look** (without C1: Amazon products untouched). - [ ] **Step 5: Commit:** "Check Amazon products
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Port and fake.** - [x] **Step 3: The pass's Amazon branch and the recorder.**
+- [x] **Step 4: Run and look** (without C1: Amazon products untouched). - [x] **Step 5: Commit:** "Check Amazon products
   through the product API once credentials exist".
+
+*Note (2026-11-18):* C1's client exists (Phase 2), so the adapter is live, not dormant: `Application\LinkHealthCatalogProductCheck` over the guarded `AmazonCatalog` (Application, since R16's mapping is a rule; no
+`Infrastructure\Amazon`), with `Domain\LinkHealth\CheckTarget` for the ASIN and store. The pass covers Amazon
+products (type `amazon` with an ASIN) only while the credentials are configured and not refused. R16 differs where
+Lasso's "other error → 200" would clear a real issue: a service that does not answer and refused credentials check
+nothing (deviation 148). AC7 uses the Amazon stub with the suite's credentials (no new filter); back in stock is shown
+through a second pass. Seen on Local (real credentials backed up to `.local/`, then restored): none → no row and no
+request; stub → 404 / 000 / 200.
 
 ---
 

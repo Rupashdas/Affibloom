@@ -12,8 +12,9 @@ namespace Affibloom\Domain\LinkHealth;
 use DateTimeImmutable;
 
 /**
- * The products' link-health rows (F11 D1) and the products the check covers (D5): published, not Amazon (Amazon
- * products are never requested over HTTP, AC2), and, with "locations only", used in content (R5).
+ * The products' link-health rows (F11 D1) and the products the check covers (D5): published products whose link is
+ * not Amazon's (Amazon URLs are never requested, AC2), and, while the product API is configured, Amazon products with
+ * an ASIN (D8); with "locations only", only those used in content (R5).
  */
 interface LinkIssueRepository {
 
@@ -36,9 +37,10 @@ interface LinkIssueRepository {
 	 * longest unchecked first; never-checked products last.
 	 *
 	 * @param bool $locations_only Only products used in content.
+	 * @param bool $amazon         Amazon products with an ASIN too (the product API is configured).
 	 * @return list<int>
 	 */
-	public function due( bool $locations_only ): array;
+	public function due( bool $locations_only, bool $amazon ): array;
 
 	/**
 	 * Covered products whose first failure waits for its second check and was checked at or before the given time.
@@ -58,12 +60,22 @@ interface LinkIssueRepository {
 	public function next_confirmation( bool $locations_only ): ?DateTimeImmutable;
 
 	/**
-	 * A covered product's stored primary destination ('' when blank); null when the product is not covered (gone,
-	 * not published, or an Amazon product).
+	 * What the check of a covered product asks about; null when the product is not covered (gone, not published, an
+	 * Amazon link without the product API or without an ASIN).
 	 *
-	 * @param int $product_id The product.
+	 * @param int  $product_id The product.
+	 * @param bool $amazon     Amazon products with an ASIN are covered (the product API is configured).
 	 */
-	public function destination( int $product_id ): ?string;
+	public function destination( int $product_id, bool $amazon ): ?CheckTarget;
+
+	/**
+	 * The Amazon products of an ASIN in a store, whatever their status (R17).
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 * @return list<int>
+	 */
+	public function with_asin( string $asin, string $country ): array;
 
 	/**
 	 * Deletes the rows of products that no longer exist (R4); a trashed product keeps its row.
