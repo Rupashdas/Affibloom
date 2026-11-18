@@ -4,20 +4,32 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // A `?post_id=` that names no published product is a search that found nothing, not an empty library (Task 13F).
 $products  = $view['products'];
-$searching = '' !== $view['term'] || isset( $view['args']['post_id'] );
-$columns   = array(
+$searching = '' !== $view['term'] || isset( $view['args']['post_id'] ) || isset( $view['args']['filter'] );
+// The Alert column's sort (F11 R20, AC9; Task 31A): none, oldest issue first, newest first, then none again.
+$alert_order = isset( $view['listing'] ) ? $view['listing']->order : '';
+$alert_next  = array(
+	''     => 'asc',
+	'asc'  => 'desc',
+	'desc' => '',
+)[ $alert_order ];
+$alert_aria  = array(
+	''     => 'none',
+	'asc'  => 'ascending',
+	'desc' => 'descending',
+)[ $alert_order ];
+$columns     = array(
 	// [ class, label, a placeholder until its task ].
 	array( 'affibloom-col-image', __( 'Image', 'affibloom' ), false ),
 	array( 'affibloom-col-name', __( 'Link Name', 'affibloom' ), false ),
 	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), false ),
-	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), true ),
+	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), false ),
 	array( 'affibloom-col-locations', __( 'Locations', 'affibloom' ), true ),
 	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), true ),
 	array( 'affibloom-col-actions', __( 'Actions', 'affibloom' ), false ),
@@ -50,6 +62,18 @@ $columns   = array(
 						<input type="checkbox" class="affibloom-check" data-select-page aria-label="<?php esc_attr_e( 'Select all on this page', 'affibloom' ); ?>">
 					</th>
 					<?php foreach ( $columns as $column ) : ?>
+						<?php if ( 'affibloom-col-alert' === $column[0] ) : ?>
+							<th scope="col" class="affibloom-col-alert" aria-sort="<?php echo esc_attr( $alert_aria ); ?>">
+								<button type="button" class="affibloom-sort" data-alert-sort="<?php echo esc_attr( $alert_next ); ?>"
+									title="<?php esc_attr_e( 'Sort by the date the issue was found', 'affibloom' ); ?>">
+									<span><?php echo esc_html( $column[1] ); ?></span>
+									<?php if ( '' !== $alert_order ) : ?>
+										<?php $this->render( 'admin/partials/icon', array( 'name' => 'asc' === $alert_order ? 'chevron-up' : 'chevron-down' ) ); ?>
+									<?php endif; ?>
+								</button>
+							</th>
+							<?php continue; ?>
+						<?php endif; ?>
 						<th scope="col" class="<?php echo esc_attr( $column[0] ); ?>">
 							<span class="affibloom-th"><?php echo esc_html( $column[1] ); ?>
 							<?php
@@ -71,6 +95,7 @@ $columns   = array(
 							'product' => $product,
 							'groups'  => $view['groups_of'][ (int) $product->id ] ?? array(),
 							'link'    => $view['links_of'][ (int) $product->id ] ?? $product->url->value(),
+							'alert'   => $view['alerts_of'][ (int) $product->id ] ?? null,
 						)
 					);
 					?>

@@ -64,6 +64,49 @@ KEY last_checked_at (last_checked_at)";
 	}
 
 	/**
+	 * The rows of some products.
+	 *
+	 * @param list<int> $product_ids The products.
+	 * @return array<int, LinkIssue> By product ID.
+	 */
+	public function rows( array $product_ids ): array {
+		global $wpdb;
+
+		$ids = implode( ',', array_map( 'intval', $product_ids ) );
+		if ( '' === $ids ) {
+			return array();
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Affibloom's own table; the IDs are integers.
+		$found = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE product_id IN ({$ids})", self::table() ), ARRAY_A );
+		$rows  = array();
+		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			$rows[ (int) $row['product_id'] ] = self::issue( $row );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Which of the products were published after the given time.
+	 *
+	 * @param list<int>         $product_ids The products.
+	 * @param DateTimeImmutable $after       The time.
+	 * @return list<int>
+	 */
+	public function published_after( array $product_ids, DateTimeImmutable $after ): array {
+		global $wpdb;
+
+		$ids = implode( ',', array_map( 'intval', $product_ids ) );
+		if ( '' === $ids ) {
+			return array();
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the IDs are integers.
+		$found = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM %i WHERE ID IN ({$ids}) AND post_date_gmt > %s", $wpdb->posts, self::time( $after ) ) );
+
+		return self::ids( $found );
+	}
+
+	/**
 	 * Stores a row, replacing the product's.
 	 *
 	 * @param LinkIssue $issue The row.

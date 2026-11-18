@@ -4,7 +4,7 @@
  * Locations, Clicks, Actions. Lasso keeps the select box under the image; here it has its own cell, which gives
  * it a target of its own and a label.
  *
- * Placeholders until their tasks: Groups (the Groups area), Alert (Tasks 30-31), Locations (the content link
+ * The Alert cell is link health's (alert-cell.php, Task 31A). Placeholders until their tasks: Locations (the content link
  * index and Task 36), Clicks (Tasks 33-34). Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
  * (Task 14A), as Lasso's do; the link under the name opens the public link (F24 R14; Task CL7): the cloaked address
  * of a cloaked product, else the destination.
@@ -15,7 +15,7 @@
  * of this one and back.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -60,7 +60,19 @@ $public_link  = $view['link'] ?? $product->url->value();
 			<span class="affibloom-groups-cell"><?php echo esc_html( $group_names ); ?></span>
 		<?php endif; ?>
 	</td>
-	<td class="affibloom-col-alert"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
+	<td class="affibloom-col-alert">
+		<?php
+		if ( isset( $view['alert'] ) ) {
+			$this->render(
+				'admin/partials/alert-cell',
+				array(
+					'alert'        => $view['alert'],
+					'product_page' => $product_page,
+				)
+			);
+		}
+		?>
+	</td>
 	<td class="affibloom-col-locations"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
 	<td class="affibloom-col-clicks"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
 	<td class="affibloom-col-actions">

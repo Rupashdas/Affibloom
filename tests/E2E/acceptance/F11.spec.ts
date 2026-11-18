@@ -230,3 +230,80 @@ test.describe( 'F11 Link health: Amazon products', () => {
 		expect( wp( 'option', 'get', 'affibloom_test_amazon_requests' ) ).toBe( '0' );
 	} );
 } );
+
+// Tasks 31A-31D: the screens. A product's row is put in a state directly in affibloom_link_issues.
+test.describe( 'F11 Link health: the Dashboard', () => {
+	/** Gives a product a link-health row: an open issue of `type` found `daysAgo` days ago, or a checked one. */
+	function setIssue( id: number, type: string, open: boolean, daysAgo = 0 ): void {
+		wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . "affibloom_link_issues", array( "product_id" => ${ id }, "issue_type" => "${ type }", "checked_url" => "x", "detection_date" => gmdate( "Y-m-d H:i:s", time() - ${ daysAgo } * DAY_IN_SECONDS ), "resolved" => ${ open ? 0 : 1 }, "last_checked_at" => gmdate( "Y-m-d H:i:s" ), "failures" => 0 ) );` );
+	}
+
+	/** Sets "Days before out of stock alerts". */
+	function graceDays( days: number ): void {
+		wp( 'eval', `$s = (array) get_option( "affibloom_settings", array() ); $s["days_before_out_of_stock_alerts"] = ${ days }; update_option( "affibloom_settings", $s );` );
+	}
+
+	test.afterAll( () => graceDays( 0 ) );
+
+	test( 'AC8 the Alert cell shows each state with its tooltip and days line', async ( { page } ) => {
+		const name = unique( 'F11 AC8' );
+		const broken = createProduct( { name: `${ name } broken`, url: 'https://shop.example/a' } );
+		const out = createProduct( { name: `${ name } out`, url: 'https://shop.example/b' } );
+		const ok = createProduct( { name: `${ name } ok`, url: 'https://shop.example/c' } );
+		const fresh = createProduct( { name: `${ name } fresh`, url: 'https://shop.example/d' } );
+		setIssue( broken, '404', true, 2 );
+		setIssue( out, '000', true, 0 );
+		setIssue( ok, '200', false );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		const cell = ( id: number ) => page.locator( `tr[data-product-id="${ id }"] .affibloom-col-alert` );
+		await expect( cell( broken ).locator( '.affibloom-alert--broken' ) ).toHaveAttribute( 'data-tip', /^Broken since [A-Z][a-z]{2} \d{1,2}, \d{4}$/ );
+		await expect( cell( broken ).locator( '.affibloom-alert--broken' ) ).toHaveAttribute( 'href', new RegExp( `page=affibloom-product&id=${ broken }$` ) );
+		await expect( cell( broken ) ).toContainText( '3 days' );
+		await expect( cell( out ).locator( '.affibloom-alert--out-of-stock' ) ).toHaveAttribute( 'data-tip', /^Out of stock since / );
+		await expect( cell( out ) ).toContainText( '1 day' );
+		await expect( cell( ok ).locator( '.affibloom-alert--checked' ) ).toHaveAttribute( 'data-tip', 'Link status checked. No alert issues detected.' );
+		await expect( cell( fresh ).locator( '.affibloom-alert--pending' ) ).toHaveAttribute( 'data-tip', 'Processing. Please check back in 24 hours.' );
+
+		// The tooltip is reached by the keyboard too.
+		await cell( ok ).locator( '.affibloom-alert--checked' ).focus();
+		await expect( cell( ok ).locator( '.affibloom-alert--checked' ) ).toBeFocused();
+	} );
+
+	test( 'AC9 the Alert header sorts by detection date: ascending, descending, off', async ( { page } ) => {
+		const name = unique( 'F11 AC9' );
+		const older = createProduct( { name: `${ name } older`, url: 'https://shop.example/e' } );
+		const newer = createProduct( { name: `${ name } newer`, url: 'https://shop.example/f' } );
+		setIssue( older, '404', true, 5 );
+		setIssue( newer, '404', true, 1 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		const ids = async () => page.locator( 'tbody tr[data-product-id]' ).evaluateAll( ( rows ) => rows.map( ( row ) => Number( row.getAttribute( 'data-product-id' ) ) ) );
+		const header = page.locator( 'th.affibloom-col-alert' );
+
+		await header.getByRole( 'button' ).click();
+		await expect( header ).toHaveAttribute( 'aria-sort', 'ascending' );
+		await expect( page ).toHaveURL( /order_by=detection_date&order_type=asc/ );
+		expect( await ids() ).toEqual( [ older, newer ] );
+
+		await header.getByRole( 'button' ).click();
+		await expect( header ).toHaveAttribute( 'aria-sort', 'descending' );
+		expect( await ids() ).toEqual( [ newer, older ] );
+
+		await header.getByRole( 'button' ).click();
+		await expect( header ).toHaveAttribute( 'aria-sort', 'none' );
+		await expect( page ).not.toHaveURL( /order_by/ );
+	} );
+
+	test( 'AC11 an out-of-stock issue younger than the grace days shows nowhere', async ( { page } ) => {
+		const name = unique( 'F11 AC11' );
+		const id = createProduct( { name, url: 'https://shop.example/g' } );
+		setIssue( id, '000', true, 2 );
+		graceDays( 3 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		await expect( page.locator( `tr[data-product-id="${ id }"] .affibloom-alert` ) ).toHaveCount( 0 );
+
+		graceDays( 2 );
+		await page.reload();
+		await expect( page.locator( `tr[data-product-id="${ id }"] .affibloom-alert--out-of-stock` ) ).toBeVisible();
+	} );
+} );

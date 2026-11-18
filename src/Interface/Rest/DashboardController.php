@@ -14,6 +14,7 @@ use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Dashboard\ViewNotFound;
 use Affibloom\Application\Groups\GroupService;
+use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViews;
@@ -47,12 +48,13 @@ final class DashboardController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param ProductService   $products The product library.
-	 * @param PerPage          $per_page How many products this editor sees at a time.
-	 * @param SavedViewService $views    This editor's saved views (Task 13E).
-	 * @param Template         $template Renders the partials.
-	 * @param GroupService     $groups   The Groups column and the Group filter (Task G5).
-	 * @param PublicLinks|null $links    The rows' public links (F24 R14; Task CL7).
+	 * @param ProductService      $products The product library.
+	 * @param PerPage             $per_page How many products this editor sees at a time.
+	 * @param SavedViewService    $views    This editor's saved views (Task 13E).
+	 * @param Template            $template Renders the partials.
+	 * @param GroupService        $groups   The Groups column and the Group filter (Task G5).
+	 * @param PublicLinks|null    $links    The rows' public links (F24 R14; Task CL7).
+	 * @param LinkIssueQuery|null $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
 	 */
 	public function __construct(
 		private ProductService $products,
@@ -61,6 +63,7 @@ final class DashboardController implements Module {
 		private Template $template,
 		private GroupService $groups,
 		private ?PublicLinks $links = null,
+		private ?LinkIssueQuery $alerts = null,
 	) {}
 
 	/**
@@ -106,7 +109,7 @@ final class DashboardController implements Module {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'products' ),
 					'permission_callback' => array( $this, 'can_manage' ),
-					'args'                => $list + array(
+					'args'                => $list + self::alert_args() + array(
 						'paged'   => array(
 							'type'    => 'integer',
 							'minimum' => 1,
@@ -160,6 +163,31 @@ final class DashboardController implements Module {
 	}
 
 	/**
+	 * The list's Alert arguments (Tasks 31A, 31B): Lasso's sort names and the tab.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function alert_args(): array {
+		return array(
+			'order_by'   => array(
+				'type'    => 'string',
+				'enum'    => array( '', 'detection_date' ),
+				'default' => '',
+			),
+			'order_type' => array(
+				'type'    => 'string',
+				'enum'    => array( '', 'asc', 'desc' ),
+				'default' => '',
+			),
+			'filter'     => array(
+				'type'    => 'string',
+				'enum'    => array( '', 'broken-links', 'out-of-stock' ),
+				'default' => '',
+			),
+		);
+	}
+
+	/**
 	 * Only people who manage products see the list or keep views, as on the screen itself.
 	 */
 	public function can_manage(): bool {
@@ -177,7 +205,8 @@ final class DashboardController implements Module {
 		$per_page  = $this->per_page->choose( absint( $request->get_param( 'per_page' ) ) );
 		$group     = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
 		$one       = absint( $request->get_param( 'post_id' ) );
-		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one );
+		$alerts    = $this->alerts?->listing( 'detection_date' === $request->get_param( 'order_by' ) ? (string) $request->get_param( 'order_type' ) : '', (string) $request->get_param( 'filter' ) );
+		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one, $alerts );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $list->items );
 
 		return new WP_REST_Response(
@@ -188,8 +217,10 @@ final class DashboardController implements Module {
 						array(
 							'products'  => $list,
 							'term'      => $term->text(),
-							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one ),
-							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one ),
+							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts ),
+							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts ),
+							'alerts_of' => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
+							'listing'   => $alerts,
 							'groups_of' => $this->groups->for_products( $ids ),
 							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
 						)
@@ -204,7 +235,9 @@ final class DashboardController implements Module {
 					// the search placeholder follow a delete, a revive or a quick edit at once (Task 13I; F19 D18).
 					'library'   => $this->products->count(),
 					'post_id'   => $one,
-					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one ),
+					'order'     => null === $alerts ? '' : $alerts->order,
+					'filter'    => null === $alerts ? '' : $alerts->tab,
+					'url'       => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts ),
 				),
 			)
 		);

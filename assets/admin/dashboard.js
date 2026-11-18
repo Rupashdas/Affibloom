@@ -162,6 +162,9 @@
 		// Lasso's ?post_id= (Task 13F; F19 D24): one product, kept by every list change until Reset or a pill.
 		post_id: parseInt( params.get( 'post_id' ), 10 ) || 0,
 		paged: parseInt( params.get( 'paged' ), 10 ) || 1,
+		// The Alert sort (Task 31A: Lasso's order_by=detection_date&order_type=) and the alert tab (Task 31B: filter=).
+		order: 'detection_date' === params.get( 'order_by' ) ? params.get( 'order_type' ) || '' : '',
+		filter: params.get( 'filter' ) || '',
 		// The size the page was printed with (remembered per editor), so the first search keeps it.
 		per_page: sizeSelect ? parseInt( sizeSelect.value, 10 ) : 0,
 	};
@@ -180,12 +183,19 @@
 		args.set( 'post_id', String( list.post_id || 0 ) );
 		args.set( 'paged', String( list.paged ) );
 		args.set( 'per_page', String( list.per_page ) );
+		if ( list.order ) {
+			args.set( 'order_by', 'detection_date' );
+			args.set( 'order_type', list.order );
+		}
+		if ( list.filter ) {
+			args.set( 'filter', list.filter );
+		}
 		return '/affibloom/v1/dashboard/products?' + args.toString();
 	}
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, group: current.group, post_id: current.post_id, paged: 1, per_page: current.per_page };
+		var next = { s: current.s, link_type: current.link_type, group: current.group, post_id: current.post_id, paged: 1, per_page: current.per_page, order: current.order, filter: current.filter };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -300,7 +310,7 @@
 				return;
 			}
 			var data = response.data;
-			current = { s: data.term, link_type: data.link_type, group: data.group, post_id: data.post_id, paged: data.page, per_page: data.per_page };
+			current = { s: data.term, link_type: data.link_type, group: data.group, post_id: data.post_id, paged: data.page, per_page: data.per_page, order: data.order || '', filter: data.filter || '' };
 
 			region.innerHTML = data.html;
 			quick.id = null; // An open quick edit went with the old rows.
@@ -348,6 +358,22 @@
 	}
 
 	// Page links. A Ctrl-, Cmd- or Shift-click still opens a new tab or window, as any link does.
+	// The Alert header sorts by the issue's date (Task 31A; F11 R20, AC9): ascending, descending, then off.
+	region.addEventListener( 'click', function ( event ) {
+		var sort = event.target.closest( '[data-alert-sort]' );
+		if ( ! sort ) {
+			return;
+		}
+		guarded( function () {
+			load( listWith( { order: sort.getAttribute( 'data-alert-sort' ) } ), true, false, function () {
+				var again = region.querySelector( '[data-alert-sort]' );
+				if ( again ) {
+					again.focus();
+				}
+			} );
+		}, sort, true );
+	} );
+
 	region.addEventListener( 'click', function ( event ) {
 		var link = event.target.closest( '.affibloom-pagination a' );
 		if ( ! link || 0 !== event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ) {
@@ -388,6 +414,8 @@
 				post_id: parseInt( back.get( 'post_id' ), 10 ) || 0,
 				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
 				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
+				order: 'detection_date' === back.get( 'order_by' ) ? back.get( 'order_type' ) || '' : '',
+				filter: back.get( 'filter' ) || '',
 			}, false, false );
 		}, null, true, function () {
 			window.history.pushState( current, '', shownUrl );

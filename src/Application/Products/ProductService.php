@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Application\Products;
 
 use Affibloom\Application\LinkHealth\ProductLinkChecks;
+use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Domain\Amazon\AmazonUrl;
@@ -69,15 +70,16 @@ final class ProductService {
 	/**
 	 * One page of the Dashboard list, most recently changed first.
 	 *
-	 * @param SearchTerm $term      What to look for; an empty term lists everything.
-	 * @param LinkKind   $link_kind Lasso's "Link type" filter.
-	 * @param int        $page      Page number, from 1.
-	 * @param int        $per_page  Products per page.
-	 * @param int        $group     The Group filter: 0 for all, -1 for products in no group, else a group's ID.
-	 * @param int        $post_id   One product only (Lasso's `?post_id=`, Task 13F): 0 for all.
+	 * @param SearchTerm        $term      What to look for; an empty term lists everything.
+	 * @param LinkKind          $link_kind Lasso's "Link type" filter.
+	 * @param int               $page      Page number, from 1.
+	 * @param int               $per_page  Products per page.
+	 * @param int               $group     The Group filter: 0 for all, -1 for products in no group, else a group's ID.
+	 * @param int               $post_id   One product only (Lasso's `?post_id=`, Task 13F): 0 for all.
+	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
 	 */
-	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): ProductPage {
-		return $this->products->page( $term, $link_kind, $page, $per_page, $group, $post_id );
+	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): ProductPage {
+		return $this->products->page( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts );
 	}
 
 	/**

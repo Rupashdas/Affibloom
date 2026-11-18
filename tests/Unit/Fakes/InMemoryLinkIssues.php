@@ -36,6 +36,17 @@ final class InMemoryLinkIssues implements LinkIssueRepository {
 		return $this->rows[ $product_id ] ?? null;
 	}
 
+	/** @var list<int> Products published in the last 24 hours. */
+	public array $recent = array();
+
+	public function rows( array $product_ids ): array {
+		return array_intersect_key( $this->rows, array_flip( $product_ids ) );
+	}
+
+	public function published_after( array $product_ids, DateTimeImmutable $after ): array {
+		return array_values( array_intersect( $product_ids, $this->recent ) );
+	}
+
 	public function save( LinkIssue $issue ): void {
 		$this->rows[ $issue->product_id ] = $issue;
 	}

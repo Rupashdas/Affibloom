@@ -60,7 +60,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 30A: The daily link check pass
 - [x] Task 30B: The check on product save
 - [x] Task 30C: Amazon products through the product API (dormant until C1)
-- [ ] Task 31A: The Alert column in every state, and its sort
+- [x] Task 31A: The Alert column in every state, and its sort
 - [ ] Task 31B: The Alert filter tabs, counters and the Broken links tile
 - [ ] Task 31C: The product page's issue notice
 - [ ] Task 31D: Export CSV of issue links
@@ -308,11 +308,19 @@ Lasso's tooltips and the days line; clicking "Alert" sorts asc, desc, off.
 `product-row.php`, `dashboard.js`, `admin.css`, `docs/ui/design-system.md`; tests F11 **AC8, AC9, AC11**, AC1's column
 step, `AlertStateTest`, `AlertWindowTest`.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Domain.** - [ ] **Step 3: Query and route.** - [ ] **Step 4: Cell and sort.**
-- [ ] **Step 5: Run and look** (every state, keyboard tooltips, 375 px). - [ ] **Step 6: Commit:** "Show Lasso's Alert column
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Domain.** - [x] **Step 3: Query and route.** - [x] **Step 4: Cell and sort.**
+- [x] **Step 5: Run and look** (every state, keyboard tooltips, 375 px). - [x] **Step 6: Commit:** "Show Lasso's Alert column
   in every state".
 
+*Note (2026-11-19):* The list's link-health arguments are one value, `Domain\LinkHealth\AlertListing` (sort now, the
+tab for 31B), passed through `ProductService::list()` to the repository's `page()`, which joins the issues table in a
+`posts_clauses` filter; the address carries Lasso's `order_by=detection_date&order_type=`. `LinkIssueQuery::listing()`
+applies the grace days (`AlertWindow`), also to the sort. The tooltips are a `data-tip` bubble on hover and focus (the
+tick and the clock take the focus). D14: an out-of-stock issue inside the grace days shows nothing, not the tick. Seen
+on Local at 1280 px (HTML): broken, out of stock, tick, clock and "1 day"; asc and desc order, `aria-sort`.
+
 ---
+
 
 ### Task 31B: The Alert filter tabs, counters and the Broken links tile
 

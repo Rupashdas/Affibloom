@@ -156,6 +156,7 @@ SIL OFL); loaded only on Affibloom's pages; no request to any other host. Tokens
 | **Busy button** | `.is-busy`: disabled, a 14px spinner before the words. The only spinner (deviation 145). |
 | **Switch** | 44×24 track, ink-400 off, brand-600 on, flat; the real checkbox lies over the track (`role="switch"`). |
 | **Icon chip** | 40×40, 8px radius, brand-50 with a brand-600 icon; tints `--warning`, `--danger`; 36px in notices, 42px in stat cards, 44px in dialogs. |
+| **Alert cell** | (Dashboard, Task 31A) a 32px square, 8px radius: broken danger-700 on danger-50 (unlink), out of stock warning-700 on warning-50 (box), linking to the product; the tick success-700 and the clock ink-400 without a tint; the days line 12px/500 ink-500 under it; the tooltip an ink-900 bubble with white 12px text above the icon, on hover and on focus. The Alert header is a button that sorts (chevron up or down). |
 | **Stat card** | (`.affibloom-tile`) white, `line` border, 12px radius, card depth, 12px 20px 12px 12px padding, at least 168px; a 42px chip, the 26px number (or a dash) over its 13px/500 label and an 11px note. Waiting for its data: the chip on `sunk`, the dash ink-400. |
 | **Summary line** | (`.affibloom-summary`) 14px ink-600 label and 600 ink-900 number, items split by a 4px `line-strong` dot. |
 | **Segmented tabs** | 3px padding on `segment-bg`, 8px radius, segments 5px; the current one white with ink-900 text and a soft shadow, `aria-current="page"`; scrolls sideways on a phone. |

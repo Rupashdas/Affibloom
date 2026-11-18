@@ -26,6 +26,23 @@ interface LinkIssueRepository {
 	public function get( int $product_id ): ?LinkIssue;
 
 	/**
+	 * The rows of some products.
+	 *
+	 * @param list<int> $product_ids The products.
+	 * @return array<int, LinkIssue> By product ID; a product without a row is left out.
+	 */
+	public function rows( array $product_ids ): array;
+
+	/**
+	 * Which of the products were published after the given time (R21's "processing" window).
+	 *
+	 * @param list<int>         $product_ids The products.
+	 * @param DateTimeImmutable $after       The time.
+	 * @return list<int>
+	 */
+	public function published_after( array $product_ids, DateTimeImmutable $after ): array;
+
+	/**
 	 * Stores a row, replacing the product's.
 	 *
 	 * @param LinkIssue $issue The row.

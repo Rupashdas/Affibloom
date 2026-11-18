@@ -11,6 +11,8 @@ namespace Affibloom\Infrastructure\WordPress;
 
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\ProductFields;
+use Affibloom\Domain\LinkHealth\AlertListing;
+use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
@@ -35,6 +37,9 @@ final class PostTypeProductRepository implements ProductRepository {
 
 	/** The query variable that carries the search to the WHERE filter, and nothing else. */
 	private const SEARCH_VAR = 'affibloom_search';
+
+	/** The query variable that marks the Dashboard's queries the Alert sort and tab change (alert_clauses()). */
+	private const ALERTS_VAR = 'affibloom_alerts';
 
 	/**
 	 * Stores the post with every field in one call, as Lasso's meta_input does: a new product is inserted, one with an
@@ -703,14 +708,15 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * WP_Query primes the meta cache for the page, so building each product reads no further rows; the term
 	 * cache is left alone because no column on this screen shows a taxonomy.
 	 *
-	 * @param SearchTerm $term      What to look for; an empty term lists everything.
-	 * @param LinkKind   $link_kind Lasso's "Link type" filter: Amazon's products, the others', or all (Task 13E).
-	 * @param int        $page      Page number, from 1.
-	 * @param int        $per_page  Products per page.
-	 * @param int        $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
-	 * @param int        $post_id   One product only (Lasso's `?post_id=`, F19 R30): 0 for all; still published only.
+	 * @param SearchTerm        $term      What to look for; an empty term lists everything.
+	 * @param LinkKind          $link_kind Lasso's "Link type" filter: Amazon's products, the others', or all (Task 13E).
+	 * @param int               $page      Page number, from 1.
+	 * @param int               $per_page  Products per page.
+	 * @param int               $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
+	 * @param int               $post_id   One product only (Lasso's `?post_id=`, F19 R30): 0 for all; still published only.
+	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -776,8 +782,13 @@ final class PostTypeProductRepository implements ProductRepository {
 			);
 		}
 
-		$filter = $this->search_filter();
+		$filter  = $this->search_filter();
+		$clauses = null !== $alerts && $alerts->is_active() ? self::alert_clauses( $alerts ) : null;
 		add_filter( 'posts_where', $filter, 10, 2 );
+		if ( null !== $clauses ) {
+			$list[ self::ALERTS_VAR ] = true;
+			add_filter( 'posts_clauses', $clauses, 10, 2 );
+		}
 
 		try {
 			$counter = new WP_Query(
@@ -807,9 +818,48 @@ final class PostTypeProductRepository implements ProductRepository {
 			}
 		} finally {
 			remove_filter( 'posts_where', $filter, 10 );
+			if ( null !== $clauses ) {
+				remove_filter( 'posts_clauses', $clauses, 10 );
+			}
 		}
 
 		return new ProductPage( $items, $total, $wanted, $per_page );
+	}
+
+	/**
+	 * The Alert sort and the alert tab as SQL for the two queries above (F11 R20, R24-R26; Tasks 31A, 31B): the
+	 * product's link-health row joined by its ID (one row per product, so totals do not change), the shown issue's
+	 * date (an open broken issue's, or an open out-of-stock one's once its grace days have passed) as the sort key,
+	 * products without one last, then the list's own order. Only queries that carry ALERTS_VAR are changed.
+	 *
+	 * @param AlertListing $alerts The sort and the tab.
+	 * @return callable(array<string, string>, WP_Query): array<string, string>
+	 */
+	private static function alert_clauses( AlertListing $alerts ): callable {
+		return static function ( array $clauses, WP_Query $query ) use ( $alerts ): array {
+			global $wpdb;
+
+			if ( true !== $query->get( self::ALERTS_VAR ) ) {
+				return $clauses;
+			}
+			$issues           = $wpdb->prefix . TableLinkIssueRepository::TABLE;
+			$cutoff           = $alerts->cutoff->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+			$broken           = $wpdb->prepare( 'afi.resolved = 0 AND afi.issue_type NOT IN (%s, %s)', IssueType::NONE, IssueType::OUT_OF_STOCK );
+			$out              = $wpdb->prepare( 'afi.resolved = 0 AND afi.issue_type = %s AND afi.detection_date <= %s', IssueType::OUT_OF_STOCK, $cutoff );
+			$shown            = "CASE WHEN {$broken} THEN afi.detection_date WHEN {$out} THEN afi.detection_date END";
+			$clauses['join'] .= $wpdb->prepare( " LEFT JOIN %i afi ON afi.product_id = {$wpdb->posts}.ID", $issues );
+			if ( AlertListing::BROKEN === $alerts->tab ) {
+				$clauses['where'] .= " AND {$broken}";
+			} elseif ( AlertListing::OUT_OF_STOCK === $alerts->tab ) {
+				$clauses['where'] .= " AND {$out}";
+			}
+			if ( '' !== $alerts->order ) {
+				$direction          = AlertListing::DESC === $alerts->order ? 'DESC' : 'ASC';
+				$clauses['orderby'] = "({$shown}) IS NULL ASC, ({$shown}) {$direction}, {$wpdb->posts}.post_modified DESC, {$wpdb->posts}.ID DESC";
+			}
+
+			return $clauses;
+		};
 	}
 
 	/**

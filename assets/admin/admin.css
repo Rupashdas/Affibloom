@@ -2960,3 +2960,21 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table--variants tr[data-variant-editing] td { vertical-align: top; background: var(--affibloom-brand-25); }
 .affibloom-table--variants tr[data-variant-editing] .affibloom-input { width: 100%; max-width: none; }
 .affibloom-variants .affibloom-empty__action { display: inline-flex; gap: 8px; align-items: center; }
+
+/* Task 31A (F11 R20, R22; ADR-8): the Alert column. Its header sorts (button, Lasso's asc / desc / off); the cell's
+   icons in the design system's tones: danger for broken, warning for out of stock, success for the tick, ink-400 for
+   the clock. Each icon's tooltip (data-tip) shows on hover and on keyboard focus. */
+.affibloom-sort { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px; margin: -2px -4px; border: 0; border-radius: var(--affibloom-radius-segment); background: none; color: inherit; font: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
+.affibloom-sort:hover { color: var(--affibloom-ink-900); }
+.affibloom-sort:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-sort .affibloom-icon { width: 14px; height: 14px; }
+.affibloom-alert { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--affibloom-radius-chip); text-decoration: none; }
+.affibloom-alert .affibloom-icon { width: 18px; height: 18px; }
+.affibloom-alert--broken { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+.affibloom-alert--out-of-stock { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
+.affibloom-alert--checked { color: var(--affibloom-success-700); }
+.affibloom-alert--pending { color: var(--affibloom-ink-400); }
+.affibloom-alert:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-alert[data-tip]:hover::after,
+.affibloom-alert[data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; z-index: 5; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 220px; padding: 6px 10px; border-radius: var(--affibloom-radius-segment); background: var(--affibloom-ink-900); color: #fff; font: 500 12px/16px var(--affibloom-font); text-align: center; white-space: normal; pointer-events: none; }
+.affibloom-alert__days { display: block; margin-top: 2px; color: var(--affibloom-ink-500); font: 500 12px/16px var(--affibloom-font); }

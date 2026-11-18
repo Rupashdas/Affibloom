@@ -110,6 +110,7 @@ use Affibloom\Interface\Cron\LinkIndexCron;
 use Affibloom\Interface\Cron\LinkCheckCron;
 use Affibloom\Application\LinkHealth\CatalogProductCheck;
 use Affibloom\Application\LinkHealth\LinkCheckService;
+use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
 use Affibloom\Infrastructure\WordPress\OptionCheckPass;
 use Affibloom\Infrastructure\WordPress\TableLinkIssueRepository;
@@ -492,7 +493,7 @@ final class Plugin {
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ) ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query() ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants ),
 				new SettingsScreen(
 					$this->template(),
@@ -521,7 +522,7 @@ final class Plugin {
 			new VariantsController( $products, $variants, $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
-			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ) ),
+			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query() ),
 			new BulkAddCron( $bulk ),
 			new AmazonBulkSyncCron( $this->bulk_sync() ),
 			new GeniusCleanupCron( $genius ),
@@ -558,6 +559,13 @@ final class Plugin {
 			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ) ),
 			new ForeignNotices( $this->navigation() ),
 		);
+	}
+
+	/**
+	 * Link health as the screens read it (F11, Task 31A).
+	 */
+	private function link_issue_query(): LinkIssueQuery {
+		return new LinkIssueQuery( new TableLinkIssueRepository(), $this->settings_repository(), static fn(): DateTimeImmutable => new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ) );
 	}
 
 	/**

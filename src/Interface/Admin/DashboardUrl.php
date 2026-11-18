@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
 
 /**
@@ -23,15 +24,16 @@ final class DashboardUrl {
 	 * The address of this list. Arguments at their defaults are left out, so the plain Dashboard stays
 	 * `admin.php?page=affibloom`.
 	 *
-	 * @param string   $term      The cleaned search text; '' for none.
-	 * @param LinkKind $link_kind The link-type filter.
-	 * @param int      $page      Page number, from 1.
-	 * @param int      $per_page  Products per page.
-	 * @param int      $group     The Group filter (Task G5): 0 for all groups, -1 for products in no group, else a group's ID.
-	 * @param int      $post_id   One product only (Lasso's `?post_id=`, Task 13F; F19 D24); 0 for all.
+	 * @param string            $term      The cleaned search text; '' for none.
+	 * @param LinkKind          $link_kind The link-type filter.
+	 * @param int               $page      Page number, from 1.
+	 * @param int               $per_page  Products per page.
+	 * @param int               $group     The Group filter (Task G5): 0 for all groups, -1 for products in no group, else a group's ID.
+	 * @param int               $post_id   One product only (Lasso's `?post_id=`, Task 13F; F19 D24); 0 for all.
+	 * @param AlertListing|null $alerts The Alert sort (`order_by=detection_date&order_type=`, Task 31A) and tab (`filter=`, Task 31B).
 	 */
-	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): string {
-		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id );
+	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): string {
+		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts );
 
 		return add_query_arg( array_map( 'rawurlencode', $args ), admin_url( 'admin.php' ) );
 	}
@@ -41,15 +43,16 @@ final class DashboardUrl {
 	 * them, and so do the hidden inputs that let the screen's GET forms keep every other argument without JavaScript
 	 * (Task 13F; F19 D17).
 	 *
-	 * @param string   $term      As to().
-	 * @param LinkKind $link_kind As to().
-	 * @param int      $page      As to().
-	 * @param int      $per_page  As to().
-	 * @param int      $group     As to().
-	 * @param int      $post_id   As to().
+	 * @param string            $term      As to().
+	 * @param LinkKind          $link_kind As to().
+	 * @param int               $page      As to().
+	 * @param int               $per_page  As to().
+	 * @param int               $group     As to().
+	 * @param int               $post_id   As to().
+	 * @param AlertListing|null $alerts As to().
 	 * @return array<string, string>
 	 */
-	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0 ): array {
+	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): array {
 		$args = array();
 		if ( '' !== $term ) {
 			$args['s'] = $term;
@@ -62,6 +65,13 @@ final class DashboardUrl {
 		}
 		if ( $post_id > 0 ) {
 			$args['post_id'] = (string) $post_id;
+		}
+		if ( null !== $alerts && '' !== $alerts->tab ) {
+			$args['filter'] = $alerts->tab;
+		}
+		if ( null !== $alerts && '' !== $alerts->order ) {
+			$args['order_by']   = 'detection_date';
+			$args['order_type'] = $alerts->order;
 		}
 		if ( ProductService::PER_PAGE_DEFAULT !== $per_page ) {
 			$args['per_page'] = (string) $per_page;
