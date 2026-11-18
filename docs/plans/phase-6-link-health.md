@@ -67,7 +67,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 32A: `wp affibloom check-links`
 - [x] Task 32B: The broken-links admin notice
 - [x] Task 32C: Settings → General: Performance and Cron
-- [ ] Task 32D: The WP-Cron fallback from admin pages
+- [x] Task 32D: The WP-Cron fallback from admin pages
 - [ ] Task 32E: The background activity indicator
 
 ### F10 (part): Lasso's data, migrated
@@ -523,10 +523,17 @@ editor sees nothing different.
 
 **Files:** the above; tests F11 **AC17** (spawn test forced to fail by a test filter), `DueJobsTest`.
 
-- [ ] **Step 1: Failing tests.** - [ ] **Step 2: Health and due jobs.** - [ ] **Step 3: The poll.** - [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit:** "Run due jobs from admin pages when WP-Cron cannot".
+- [x] **Step 1: Failing tests.** - [x] **Step 2: Health and due jobs.** - [x] **Step 3: The poll.** - [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit:** "Run due jobs from admin pages when WP-Cron cannot".
+
+*Note (2026-11-19):* `POST /jobs/run-due` joins the existing `JobsController` (ON3); the poll joins ON3's `shell.js`,
+one tab at a time through storage. `DueJobs` reads WP-Cron through a `ScheduledEvents` port (`WpScheduledEvents`), only
+CronRegistry's hooks. `LinkIndexCron::catch_up()` (35F) stays. The spawn test fails by itself on Local (`DISABLE_WP_CRON`),
+so AC17 needs no test filter. Seen on Local: "WP cron is disabled", the due batch ran (queue 48 → 26). Note: on Local
+the open admin pages now run due Affibloom jobs, the Amazon ones included, as a working WP-Cron would.
 
 ---
+
 
 ### Task 32E: The background activity indicator
 

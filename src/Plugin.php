@@ -100,6 +100,9 @@ use Affibloom\Interface\Cli\AmazonCommand;
 use Affibloom\Interface\Cli\LinksCommand;
 use Affibloom\Interface\Cli\CheckLinksCommand;
 use Affibloom\Application\Jobs\CpuGuard;
+use Affibloom\Application\Jobs\DueJobs;
+use Affibloom\Infrastructure\WordPress\WpScheduledEvents;
+use Affibloom\Infrastructure\WordPress\WpCronHealth;
 use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Interface\Admin\BrokenLinksNotice;
 use Affibloom\Interface\PublicLinks;
@@ -572,7 +575,9 @@ final class Plugin {
 						new BulkAddJobStatus( new OptionBulkRunRepository(), static fn(): int => time() ),
 						new LinkIndexJobStatus( new OptionLinkIndexState() ),
 					)
-				)
+				),
+				new DueJobs( new WpScheduledEvents(), self::cron_registry()->hooks(), $this->settings_repository() ),
+				new WpCronHealth()
 			),
 			new ProductFieldsController( $fields, $this->template() ),
 			new IconStyles( $icons ),

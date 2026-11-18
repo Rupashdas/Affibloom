@@ -75,5 +75,42 @@
 		}
 	}
 
+	/*
+	 * Where WP-Cron cannot spawn, the open Affibloom page runs the due Affibloom jobs itself (Task 32D; F11 R34, D22;
+	 * Lasso's lasso_check_crons): POST /jobs/run-due at load and every 15 seconds for 5 minutes, by one tab at a time
+	 * (the last call's time is shared in storage); the poll stops once the server says "Cron is working well.".
+	 */
+	var CRON_AT = 'affibloom_cron_time';
+
+	function cronCheck() {
+		var mine = true;
+		try {
+			var at = Number( window.localStorage.getItem( CRON_AT ) );
+			mine = ! at || Date.now() - at >= EVERY;
+			if ( mine ) {
+				window.localStorage.setItem( CRON_AT, String( Date.now() ) );
+			}
+		} catch ( error ) {
+			mine = true;
+		}
+		var next = function ( working ) {
+			if ( ! working && Date.now() - started < FOR ) {
+				window.setTimeout( cronCheck, EVERY );
+			}
+		};
+		if ( ! mine ) {
+			next( false );
+			return;
+		}
+		wp.apiFetch( { path: '/affibloom/v1/jobs/run-due', method: 'POST' } )
+			.then( function ( data ) {
+				next( !! ( data && data.status ) );
+			} )
+			.catch( function () {
+				next( false );
+			} );
+	}
+
 	poll();
+	cronCheck();
 } )();

@@ -174,6 +174,18 @@ test.describe( 'F11 Link health', () => {
 		}
 	} );
 
+	test( 'AC17 where WP-Cron cannot run, an Affibloom screen runs the due jobs itself', async ( { page } ) => {
+		// The Local copy sets DISABLE_WP_CRON, so the spawn test fails there (WpCronHealth); its answer is cached for an hour.
+		wp( 'transient', 'delete', 'affibloom_cron_health' );
+		wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_check_batch" ); wp_schedule_single_event( time() - 5, "affibloom_link_check_batch" );' );
+		const answer = page.waitForResponse( ( response ) => response.url().includes( '/affibloom/v1/jobs/run-due' ) );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const body = await ( await answer ).json() as { status: boolean; message: string; ran: string[] };
+		expect( body ).toMatchObject( { status: false, message: 'WP cron is disabled' } );
+		expect( body.ran ).toContain( 'affibloom_link_check_batch' );
+		expect( wp( 'eval', 'echo false === wp_next_scheduled( "affibloom_link_check_batch" ) || wp_next_scheduled( "affibloom_link_check_batch" ) > time() - 5 ? "ran" : "waiting";' ) ).toBe( 'ran' );
+	} );
+
 	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F11 AC6' ), url: stub( 200 ) } );
 		const due = () => wp( 'eval', `echo false === wp_next_scheduled( "affibloom_link_check_product", array( ${ id } ) ) ? "no" : "yes";` );

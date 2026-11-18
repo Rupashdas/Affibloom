@@ -9,7 +9,9 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Jobs\DueJobs;
 use Affibloom\Application\Shell\JobBoard;
+use Affibloom\Infrastructure\WordPress\WpCronHealth;
 use Affibloom\Domain\Shell\JobProgress;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
@@ -25,9 +27,11 @@ final class JobsController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param JobBoard $board The running jobs.
+	 * @param JobBoard          $board  The running jobs.
+	 * @param DueJobs|null      $due    Runs due jobs where WP-Cron cannot (Task 32D).
+	 * @param WpCronHealth|null $health Whether WP-Cron can run.
 	 */
-	public function __construct( private JobBoard $board ) {}
+	public function __construct( private JobBoard $board, private ?DueJobs $due = null, private ?WpCronHealth $health = null ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -48,6 +52,41 @@ final class JobsController implements Module {
 				'callback'            => array( $this, 'list' ),
 				'permission_callback' => static fn(): bool => current_user_can( Capabilities::PRODUCTS ),
 			)
+		);
+		// F11 R34, D22 (Task 32D): the admin pages' poll where WP-Cron cannot spawn.
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/jobs/run-due',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'run_due' ),
+				'permission_callback' => static fn(): bool => current_user_can( Capabilities::PRODUCTS ),
+			)
+		);
+	}
+
+	/**
+	 * POST /jobs/run-due: Lasso's answers. While WP-Cron works, "Cron is working well." (the poll stops); else the
+	 * due Affibloom jobs run here, up to the manual limit, and "WP cron is disabled".
+	 */
+	public function run_due(): WP_REST_Response {
+		if ( null === $this->due || null === $this->health || $this->health->works() ) {
+			return new WP_REST_Response(
+				array(
+					'status'  => true,
+					'message' => 'Cron is working well.',
+				),
+				200
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'status'  => false,
+				'message' => 'WP cron is disabled',
+				'ran'     => $this->due->run_due( time() ),
+			),
+			200
 		);
 	}
 
