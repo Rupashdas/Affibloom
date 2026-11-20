@@ -579,6 +579,16 @@ Phase 6 is done when:
   screen checked at 1280 and 375 px.
 - The user has signed Phase 6 off (decisions F11 N1-N5 are decided: E15, E14).
 
+**Exit check passed 2026-11-20** (F11 AC1-AC18 in Playwright: 19 tests, 13 in one full run and the other 6 after the
+Local site stopped mid-run; lint, analyse, 990 unit tests; the Dashboard, a broken product's page and the WordPress
+Dashboard looked at at 1280 and 375 px). It found two product bugs, fixed: the day's pass waited behind a second check
+an hour away (`WpCronBackgroundJob::dispatch()`, df40c17) and the broken-links notice's count stayed stale after a
+product was trashed (1f1f80f); and the alert cards' accessible names (820544f). The other fixes were in the tests:
+background WP-Cron runs and the pages' run-due poll raced them, the dummy library's unreachable links cost DNS waits,
+and a helper let the real Amazon API through (491c2c3, 55e7657). On Local, WordPress's `cron` option can lose an event
+when several requests write it at once (no locking); AC6 saves through the product route in one process for that
+reason. Sign-off open.
+
 ## Coverage
 
 **F37 (part)**
