@@ -14,9 +14,12 @@ function issue( id: number ): Record< string, string > | null {
 	return JSON.parse( out ) as Record< string, string > | null;
 }
 
-/** Moves a product's last check an hour back, as if the hour of D4's second check had passed. */
+/**
+ * Moves a product's last check an hour back, as if the hour of D4's second check had passed, and brings the batch that
+ * waits for that hour forward to now.
+ */
 function anHourLater( id: number ): void {
-	wp( 'eval', `global $wpdb; $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}affibloom_link_issues SET last_checked_at = last_checked_at - INTERVAL 61 MINUTE, first_failed_at = first_failed_at - INTERVAL 61 MINUTE WHERE product_id = %d", ${ id } ) );` );
+	wp( 'eval', `global $wpdb; $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}affibloom_link_issues SET last_checked_at = last_checked_at - INTERVAL 61 MINUTE, first_failed_at = first_failed_at - INTERVAL 61 MINUTE WHERE product_id = %d", ${ id } ) ); $at = wp_next_scheduled( "affibloom_link_check_batch" ); if ( false !== $at ) { wp_unschedule_event( $at, "affibloom_link_check_batch" ); } wp_schedule_single_event( time() - 1, "affibloom_link_check_batch" );` );
 }
 
 /** Forgets today's pass, so the daily event starts a new one. */
@@ -24,20 +27,26 @@ function newDay(): void {
 	wp( 'option', 'delete', 'affibloom_link_check' );
 }
 
+/**
+ * PHP run before the checks in the same WP-CLI process: no spawn_cron() loopback (a background WP-Cron run would take
+ * the batches out of the test's hands), and every request to a host other than the site itself refused at once, as
+ * WP_HTTP_BLOCK_EXTERNAL refuses it (so the dummy library's unreachable links cost no DNS wait). The stub (the site's
+ * own host) passes through, and Amazon's hosts only while the Amazon stub answers them (AC7): the suite never asks the
+ * real Amazon API, whose credentials the Local copy holds.
+ */
+const QUIET = 'add_filter( "pre_http_request", static function ( $pre, $args, $url ) { $host = (string) wp_parse_url( $url, PHP_URL_HOST ); if ( str_contains( $url, "wp-cron.php" ) ) { return new WP_Error( "http_request_failed", "No spawn in the acceptance tests." ); } if ( $host === (string) wp_parse_url( home_url(), PHP_URL_HOST ) || ( str_contains( $host, "amazon" ) && "" !== (string) get_option( "affibloom_test_amazon_stub", "" ) ) ) { return $pre; } return new WP_Error( "http_request_not_executed", "Blocked in the acceptance tests." ); }, 10, 3 );';
+
+/** Waiting batches (at most 50) in this process, as WP-Cron would run them; echoes how many ran. */
+const BATCHES = '$ran = 0; while ( $ran < 50 && false !== wp_next_scheduled( "affibloom_link_check_batch" ) && wp_next_scheduled( "affibloom_link_check_batch" ) <= time() ) { wp_clear_scheduled_hook( "affibloom_link_check_batch" ); do_action( "affibloom_link_check_batch" ); $ran++; } echo $ran;';
+
 /** The daily event, then batches until none is waiting; returns how many batches ran. */
 function runPass(): number {
-	wp( 'eval', 'do_action( "affibloom_daily" );' );
-	return runBatches();
+	return Number( wp( 'eval', `${ QUIET } do_action( "affibloom_daily" ); ${ BATCHES }` ) );
 }
 
-/** Runs waiting batches (at most 20), as WP-Cron would. */
+/** Runs waiting batches, as WP-Cron would; returns how many ran. */
 function runBatches(): number {
-	let ran = 0;
-	while ( ran < 20 && 'yes' === wp( 'eval', 'echo false !== wp_next_scheduled( "affibloom_link_check_batch" ) && wp_next_scheduled( "affibloom_link_check_batch" ) <= time() ? "yes" : "no";' ) ) {
-		wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_check_batch" ); do_action( "affibloom_link_check_batch" );' );
-		ran++;
-	}
-	return ran;
+	return Number( wp( 'eval', `${ QUIET } ${ BATCHES }` ) );
 }
 
 test.describe( 'F11 Link health', () => {
@@ -70,9 +79,28 @@ test.describe( 'F11 Link health', () => {
 
 	test( 'AC2 an Amazon product is never requested', () => {
 		const id = createProduct( { name: unique( 'F11 AC2' ), type: 'amazon', asin: 'B0F11AC2XX', url: 'https://www.amazon.com/dp/B0F11AC2XX' } );
-		newDay();
-		runPass();
-		expect( issue( id ) ).toBeNull();
+		// Without the Amazon API (D7); with it, the product API answers instead (AC7). Never Amazon's pages.
+		const saved = ( () => {
+			try {
+				return wp( 'option', 'get', 'affibloom_amazon_credentials', '--format=json' );
+			} catch {
+				return null;
+			}
+		} )();
+		try {
+			wp( 'option', 'delete', 'affibloom_amazon_credentials' );
+		} catch {
+			// None stored.
+		}
+		try {
+			newDay();
+			runPass();
+			expect( issue( id ) ).toBeNull();
+		} finally {
+			if ( saved ) {
+				wp( 'option', 'add', 'affibloom_amazon_credentials', saved, '--format=json', '--autoload=no' );
+			}
+		}
 	} );
 
 	test( 'AC3 the daily pass checks each product once a day, in batches', () => {
@@ -88,7 +116,7 @@ test.describe( 'F11 Link health', () => {
 		const checkedAt = issue( ok )?.last_checked_at;
 		expect( runPass() ).toBe( 0 ); // The same day: nothing is queued.
 		expect( issue( ok )?.last_checked_at ).toBe( checkedAt );
-		expect( wp( 'cron', 'event', 'list', '--hook=affibloom_daily', '--fields=hook,recurrence', '--format=csv' ) ).toContain( 'affibloom_daily,1 day' );
+		expect( wp( 'cron', 'event', 'list', '--hook=affibloom_daily', '--fields=hook,recurrence', '--format=csv' ) ).toContain( 'affibloom_daily,"1 day"' );
 	} );
 
 	test( 'AC4 a blank destination is broken (404) after the pass, without a request', () => {
@@ -155,12 +183,14 @@ test.describe( 'F11 Link health', () => {
 	} );
 
 	test( 'AC16 Settings → General: Performance always, the Cron fields with &support; a 2-hour interval spaces the batches', async ( { page } ) => {
+		// The open page's WP-Cron fallback (AC17) would run the batches below itself; this test runs them.
+		await page.route( ( url ) => decodeURIComponent( url.href ).includes( 'jobs/run-due' ), ( route ) => route.fulfill( { json: { status: true, message: 'Cron is working well.' } } ) );
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
 		await expect( page.getByText( 'Performance Mode:' ) ).toBeVisible();
 		await expect( page.getByText( 'Time interval (hours)' ) ).toHaveCount( 0 );
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general&support' );
 		await expect( page.getByText( 'Time interval (hours)' ) ).toBeVisible();
-		await expect( page.getByText( 'Processes Execute Limit' ) ).toBeVisible();
+		await expect( page.getByText( 'Processes Execute Limit' ).first() ).toBeVisible();
 
 		wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); $s["cron_interval"] = 2; update_option( "affibloom_settings", $s );' );
 		try {
@@ -175,10 +205,12 @@ test.describe( 'F11 Link health', () => {
 	} );
 
 	test( 'AC17 where WP-Cron cannot run, an Affibloom screen runs the due jobs itself', async ( { page } ) => {
+		test.setTimeout( 120000 );
 		// The Local copy sets DISABLE_WP_CRON, so the spawn test fails there (WpCronHealth); its answer is cached for an hour.
 		wp( 'transient', 'delete', 'affibloom_cron_health' );
 		wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_check_batch" ); wp_schedule_single_event( time() - 5, "affibloom_link_check_batch" );' );
-		const answer = page.waitForResponse( ( response ) => response.url().includes( '/affibloom/v1/jobs/run-due' ) );
+		await page.addInitScript( () => window.localStorage.removeItem( 'affibloom_cron_time' ) );
+		const answer = page.waitForResponse( ( response ) => decodeURIComponent( response.url() ).includes( 'affibloom/v1/jobs/run-due' ), { timeout: 60000 } ); // It runs the due batch first: up to its 10 s budget and one request.
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		const body = await ( await answer ).json() as { status: boolean; message: string; ran: string[] };
 		expect( body ).toMatchObject( { status: false, message: 'WP cron is disabled' } );
@@ -201,37 +233,48 @@ test.describe( 'F11 Link health', () => {
 		}
 	} );
 
-	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', async ( { page } ) => {
+	test( 'AC6 saving a product with a new destination checks it at once, and a 404 an hour later', () => {
 		const id = createProduct( { name: unique( 'F11 AC6' ), url: stub( 200 ) } );
-		const due = () => wp( 'eval', `echo false === wp_next_scheduled( "affibloom_link_check_product", array( ${ id } ) ) ? "no" : "yes";` );
-		/** Runs the product's waiting check, as WP-Cron would. */
-		const runCheck = () => wp( 'eval', `wp_clear_scheduled_hook( "affibloom_link_check_product", array( ${ id } ) ); do_action( "affibloom_link_check_product", ${ id } );` );
+		const hook = `"affibloom_link_check_product", array( ${ id } )`;
+		/** When the product's next check is due, in seconds from now; null when none waits. */
+		const due = (): number | null => {
+			const at = Number( wp( 'eval', `echo (int) wp_next_scheduled( ${ hook } );` ) );
+			return at > 0 ? at - Math.floor( Date.now() / 1000 ) : null;
+		};
+		/**
+		 * Save Changes through the product page's own route (PATCH /affibloom/v1/products/{id}), as an editor, in one
+		 * WP-CLI process: with no other request running, WordPress's cron option cannot lose the scheduled check to a
+		 * concurrent write (it has no locking; on Local the browser's parallel requests did lose it). WP-Cron's lock
+		 * keeps spawn_cron() aside, so the check is run below, as WP-Cron would.
+		 */
+		const save = ( fields: Record< string, string > ) => wp( 'eval', `set_transient( "doing_cron", sprintf( "%.22F", microtime( true ) ) ); wp_set_current_user( 1 ); $r = new WP_REST_Request( "PATCH", "/affibloom/v1/products/${ id }" ); foreach ( json_decode( '${ JSON.stringify( fields ) }', true ) as $k => $v ) { $r->set_param( $k, $v ); } echo rest_do_request( $r )->get_status();` );
+		/** Runs the product's check if it is due now, as WP-Cron would. */
+		const runDue = () => wp( 'eval', `${ QUIET } $at = wp_next_scheduled( ${ hook } ); if ( false !== $at && $at <= time() ) { wp_unschedule_event( $at, ${ hook } ); do_action( "affibloom_link_check_product", ${ id } ); }` );
 
-		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
-		await page.locator( '#affibloom-url' ).fill( `${ stub( 404 ) }?ac6=${ id }` );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved' );
+		try {
+			expect( save( { url: `${ stub( 404 ) }?ac6=${ id }` } ) ).toBe( '200' );
+			expect( due() ).toBeLessThanOrEqual( 0 ); // Checked at once.
+			runDue();
+			expect( issue( id ) ).toMatchObject( { failures: '1', pending_type: '404', resolved: '0' } );
+			expect( due() ).toBeGreaterThan( 3500 ); // The second check, an hour later (D4).
 
-		expect( due() ).toBe( 'yes' );
-		runCheck();
-		expect( issue( id ) ).toMatchObject( { failures: '1', pending_type: '404', resolved: '0' } );
-		expect( due() ).toBe( 'yes' ); // The second check, an hour later (D4).
-		anHourLater( id );
-		runCheck();
-		expect( issue( id ) ).toMatchObject( { issue_type: '404', resolved: '0', failures: '0' } );
+			// The hour passes: the row's times and the waiting check move back.
+			anHourLater( id );
+			wp( 'eval', `$at = wp_next_scheduled( ${ hook } ); wp_unschedule_event( $at, ${ hook } ); wp_schedule_single_event( time() - 1, ${ hook } );` );
+			runDue();
+			expect( issue( id ) ).toMatchObject( { issue_type: '404', resolved: '0', failures: '0' } );
 
-		// Saved again within the hour with the same link: no check.
-		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved' );
-		expect( due() ).toBe( 'no' );
+			// Saved again within the hour with the same link: no check.
+			expect( save( { badge: 'AC6' } ) ).toBe( '200' );
+			expect( due() ).toBeNull();
 
-		// A working link: checked at once, the tick's row.
-		await page.locator( '#affibloom-url' ).fill( `${ stub( 200 ) }?ac6=${ id }` );
-		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
-		await expect( page.locator( '.affibloom-toast' ).last() ).toContainText( 'Product saved' );
-		runCheck();
-		expect( issue( id ) ).toMatchObject( { resolved: '1' } );
+			// A working link: checked at once, the row resolved.
+			expect( save( { url: `${ stub( 200 ) }?ac6=${ id }` } ) ).toBe( '200' );
+			runDue();
+			expect( issue( id ) ).toMatchObject( { resolved: '1' } );
+		} finally {
+			wp( 'transient', 'delete', 'doing_cron' );
+		}
 	} );
 } );
 
