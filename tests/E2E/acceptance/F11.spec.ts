@@ -353,6 +353,12 @@ test.describe( 'F11 Link health: Amazon products', () => {
 
 // Tasks 31A-31D: the screens. A product's row is put in a state directly in affibloom_link_issues.
 test.describe( 'F11 Link health: the Dashboard', () => {
+	// These tests are about the screens: the pages' WP-Cron fallback (AC17) would run waiting batches inline and hold the
+	// PHP worker the screen's own requests need on Local, so its poll is answered here.
+	test.beforeEach( async ( { page } ) => {
+		await page.route( ( url ) => decodeURIComponent( url.href ).includes( 'jobs/run-due' ), ( route ) => route.fulfill( { json: { status: true, message: 'Cron is working well.' } } ) );
+	} );
+
 	/** Gives a product a link-health row: an open issue of `type` found `daysAgo` days ago, or a checked one. */
 	function setIssue( id: number, type: string, open: boolean, daysAgo = 0 ): void {
 		wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . "affibloom_link_issues", array( "product_id" => ${ id }, "issue_type" => "${ type }", "checked_url" => "x", "detection_date" => gmdate( "Y-m-d H:i:s", time() - ${ daysAgo } * DAY_IN_SECONDS ), "resolved" => ${ open ? 0 : 1 }, "last_checked_at" => gmdate( "Y-m-d H:i:s" ), "failures" => 0 ) );` );
