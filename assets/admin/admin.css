@@ -2137,8 +2137,11 @@
 .affibloom-image-field .affibloom-input { flex: 1 1 12rem; min-width: 0; }
 .affibloom-image-field__actions { display: flex; flex: none; gap: 8px; }
 .affibloom-price .affibloom-field__head { flex-wrap: wrap; }
-.affibloom-price__show { margin-left: auto; }
-.affibloom-price__show .affibloom-toggle-row { min-height: 0; gap: 8px; font-size: 13px; }
+/* A field's Show switch at the right of its head: Show Price, Show Features. */
+.affibloom-price__show,
+.affibloom-field__show { margin-left: auto; }
+.affibloom-price__show .affibloom-toggle-row,
+.affibloom-field__show .affibloom-toggle-row { min-height: 0; gap: 8px; font-size: 13px; }
 .affibloom-editor { overflow: hidden; border: 1px solid var(--affibloom-control-line); border-radius: var(--affibloom-radius-control); }
 .affibloom-admin .affibloom-editor .wp-editor-container { border: 0; }
 .affibloom-admin .affibloom-editor .mce-panel { border: 0; background: var(--affibloom-white); }

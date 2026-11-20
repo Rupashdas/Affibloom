@@ -61,6 +61,7 @@ final class ProductResource {
 			'badge'            => $product->badge,
 			'price'            => $product->price,
 			'show_price'       => $product->show_price,
+			'show_features'    => $product->show_features,
 			'description'      => $product->description,
 			'disclosure'       => $product->disclosure,
 			'sponsored'        => $product->sponsored,

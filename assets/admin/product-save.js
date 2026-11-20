@@ -26,7 +26,7 @@
 	'use strict';
 
 	var TEXTS = [ 'name', 'url', 'button_text', 'badge', 'disclosure', 'theme', 'image_url', 'permalink' ];
-	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'link_cloaking' ];
+	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'show_features', 'link_cloaking' ];
 	var toast = window.affibloomToast;
 	var dialog = window.affibloomSaveDialog;
 	var errors = window.affibloomFieldErrors;

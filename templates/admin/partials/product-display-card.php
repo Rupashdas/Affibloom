@@ -219,11 +219,25 @@ endif;
 				'admin/partials/help',
 				array(
 					'id'    => 'affibloom-features-help',
-					'text'  => __( "The product's key points, one per line. Amazon products get Amazon's bullet points when they are added or refreshed. Not shown in displays yet.", 'affibloom' ),
+					'text'  => __( "The product's key points, one per line. Amazon products get Amazon's bullet points when they are added or refreshed.", 'affibloom' ),
 					'label' => __( 'Features', 'affibloom' ),
 				)
 			);
 			?>
+			<span class="affibloom-field__show">
+				<?php
+				$this->render(
+					'admin/partials/switch-row',
+					array(
+						'id'      => 'affibloom-show-features',
+						'name'    => 'show_features',
+						'label'   => __( 'Show Features', 'affibloom' ),
+						'checked' => $product->show_features,
+						'help'    => __( 'Turn this on to show the features under the description in displays for this link.', 'affibloom' ),
+					)
+				);
+				?>
+			</span>
 		</div>
 		<?php
 		// The labels' patterns, for product.js to number the bullets after a change.

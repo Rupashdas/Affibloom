@@ -16,6 +16,7 @@ use Affibloom\Application\Display\PreviewProduct;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Module;
@@ -40,6 +41,7 @@ final class DisplayPreviewController implements Module {
 	 * @param BoxHtml                $html     The box's printer.
 	 * @param BoxAssets              $assets   The box's stylesheets.
 	 * @param string                 $image    The sample's picture.
+	 * @param IconStyles             $icons    The site's icon CSS.
 	 */
 	public function __construct(
 		private readonly DisplaySettingsService $display,
@@ -48,6 +50,7 @@ final class DisplayPreviewController implements Module {
 		private readonly BoxHtml $html,
 		private readonly BoxAssets $assets,
 		private readonly string $image,
+		private readonly IconStyles $icons,
 	) {}
 
 	/**
@@ -105,7 +108,7 @@ final class DisplayPreviewController implements Module {
 				'html'   => $this->html->render( $view ),
 				'styles' => $this->assets->stylesheets( true ),
 				'script' => $this->assets->phone_script(),
-				'root'   => BoxAssets::head_style( DisplayPresentation::root( $config, $preview->columns(), true ), $this->settings->get()->string( 'custom_css' ) ),
+				'root'   => BoxAssets::head_style( DisplayPresentation::root( $config, $preview->columns(), true ), $this->settings->get()->string( 'custom_css' ) ) . "\n" . $this->icons->preview_css(),
 			)
 		);
 	}

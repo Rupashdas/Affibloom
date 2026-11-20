@@ -23,6 +23,7 @@ use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\BoxHtml;
 use Affibloom\Module;
@@ -50,6 +51,7 @@ final class ProductPreviewController implements Module {
 	 * @param BoxBuilder              $builder  The box engine.
 	 * @param BoxHtml                 $html     The box's printer.
 	 * @param BoxAssets               $assets   The box's stylesheets.
+	 * @param IconStyles              $icons    The site's icon CSS.
 	 */
 	public function __construct(
 		private readonly ProductService $products,
@@ -61,6 +63,7 @@ final class ProductPreviewController implements Module {
 		private readonly BoxBuilder $builder,
 		private readonly BoxHtml $html,
 		private readonly BoxAssets $assets,
+		private readonly IconStyles $icons,
 	) {}
 
 	/**
@@ -115,7 +118,7 @@ final class ProductPreviewController implements Module {
 				'html'   => $this->html->render( $view ),
 				'styles' => $this->assets->stylesheets( $display->advanced() ),
 				'script' => $this->assets->phone_script(),
-				'root'   => BoxAssets::head_style( DisplayPresentation::root( $display->config( DisplayType::single() ), $display->columns(), true ), $this->settings->get()->string( 'custom_css' ) ),
+				'root'   => BoxAssets::head_style( DisplayPresentation::root( $display->config( DisplayType::single() ), $display->columns(), true ), $this->settings->get()->string( 'custom_css' ) ) . "\n" . $this->icons->preview_css(),
 			)
 		);
 	}

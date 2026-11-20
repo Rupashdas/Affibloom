@@ -155,6 +155,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 147. Task 30A (2026-11-18): the link check covers only products used in content while "locations only" is on (F21's index exists); a first failure on an unchecked product is a row with code `''`, not an issue.
 - 148. Task 30C (2026-11-18): Amazon products are checked through C1's API whenever its credentials work; a down API or refused credentials check nothing; C1E must leave them to its refresh (R5).
 - 149. Task 31D (2026-11-19): the export's three Lasso-named columns are `fields`, `custom_redirect`, `custom_thumbnail` (no Lasso names in Affibloom).
+- 150. The user (2026-11-20): Show Features on the product page draws its bullets in the box's description block; the preview frames load the site's icon CSS.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2922,3 +2923,13 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     or branding, 2026-11-14; deviation 146, guarded by `NoLassoInCoreTest`) forbids in Affibloom. They are `fields`,
     `custom_redirect` and `custom_thumbnail`; the other 21 names, the order and the values are Lasso's. A WP All Import
     template made for Lasso's file maps those three columns again. Task 38 reuses the same writer.
+
+150. **Show Features, and icons in the preview frames (the user, 2026-11-20).** The user asked for the features in the
+    product page's preview and a Show switch like the other fields'. The product has `show_features` (meta
+    `_affibloom_show_features`, "1"/"0", off when missing, so boxes drawn before keep their look); on, `BoxBuilder`
+    puts its bullets in `BoxView::$features` while the Description element shows, and `partials/features.php` prints
+    them as a `ul` inside the description block (Single boxes and list cards; a compact grid card drops them), where
+    box.css's description list rules draw them. Lasso has no such element, so no Lasso baseline covers it. The two
+    preview routes add `IconStyles::preview_css()` to their CSS: the site's Additional CSS (the imported icons' rules)
+    and the added icons', since an admin page has neither and the button and badge icons did not show. Checked by unit
+    tests (BoxBuilder, ProductInput, IconStyles) and on product 20767 in the browser.

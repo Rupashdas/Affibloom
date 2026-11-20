@@ -464,6 +464,7 @@ final class Plugin {
 		$views      = new SavedViewService( new UserMetaSavedViewRepository() );
 		$icons      = new IconService( new OptionIconRepository(), new SiteCssIcons() );
 		$choices    = new IconChoices( $icons );
+		$icon_css   = new IconStyles( $icons );
 		$fields     = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
 		$groups     = new GroupService( new TermGroupRepository(), new PostTypeProductRepository() );
 		$amazon     = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
@@ -502,8 +503,8 @@ final class Plugin {
 				$groups
 			),
 			$box_assets,
-			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets ),
-			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg' ),
+			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, $icon_css ),
+			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg', $icon_css ),
 			$shortcode,
 			new WidgetShortcodes(),
 			$cloaked,
@@ -582,7 +583,7 @@ final class Plugin {
 				new WpCronHealth()
 			),
 			new ProductFieldsController( $fields, $this->template() ),
-			new IconStyles( $icons ),
+			$icon_css,
 			$this->upgrade_hooks(),
 			new UpgradeCommand( $upgrader ),
 			new AmazonCommand( $amazon, $catalog ),

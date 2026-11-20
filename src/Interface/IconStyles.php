@@ -12,12 +12,13 @@ namespace Affibloom\Interface;
 use Affibloom\Application\Icons\IconService;
 use Affibloom\Domain\Icons\Icon;
 use Affibloom\Domain\Icons\IconSet;
+use Affibloom\Domain\Settings\CustomCss;
 use Affibloom\Module;
 
 /**
  * Prints the CSS for the icons added in Affibloom, on the site's pages (F28 requirements B2). Imported icons are drawn
  * by the site's own Additional CSS, so they get nothing here and keep their exact look (ADR-6). Nothing is printed when
- * no icon has been added. The admin gets the same CSS with the first admin screen that shows a box (the preview).
+ * no icon has been added. A preview frame in the admin gets both, the site's CSS and the added icons' (preview_css()).
  */
 final class IconStyles implements Module {
 
@@ -49,6 +50,15 @@ final class IconStyles implements Module {
 		wp_register_style( self::HANDLE, false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- inline only, no file.
 		wp_enqueue_style( self::HANDLE );
 		wp_add_inline_style( self::HANDLE, $css );
+	}
+
+	/**
+	 * The icon CSS for a preview frame (the product page's and Display's), which shows the box alone in an admin page:
+	 * the site's Additional CSS, which draws the imported icons (and the rest of the site's box rules) as the site's
+	 * pages print it, then the added icons' rules. Cleaned as the Custom CSS is, so it cannot close the style element.
+	 */
+	public function preview_css(): string {
+		return CustomCss::clean( wp_get_custom_css() . "\n" . self::css( $this->icons->all() ) );
 	}
 
 	/**

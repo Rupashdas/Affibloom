@@ -57,7 +57,10 @@ foreach ( array_slice( $view->buttons, 1 ) as $card_button ) {
 		<?php require __DIR__ . '/partials/stars.php'; ?>
 		<?php require __DIR__ . '/partials/price.php'; ?>
 		<div class="affibloom-description">
-			<?php echo null === $view->description ? '' : wp_kses_post( $view->description ); ?>
+			<?php
+			echo null === $view->description ? '' : wp_kses_post( $view->description );
+			require __DIR__ . '/partials/features.php';
+			?>
 		</div>
 		<?php require __DIR__ . '/partials/fields.php'; ?>
 		<?php

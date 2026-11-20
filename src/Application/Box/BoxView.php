@@ -49,6 +49,7 @@ final class BoxView {
 	 * @param string                $name        The name as the links show it (the box's title, decoded), whatever the
 	 *                                           Title element says: a list card prints it (F30 R22).
 	 * @param string                $slug        The product's slug, for a list card's class.
+	 * @param list<string>          $features    The feature bullets, printed in the description block; empty prints none.
 	 */
 	public function __construct(
 		public readonly LayoutFamily $family,
@@ -78,6 +79,7 @@ final class BoxView {
 		public readonly array $inline = array(),
 		public readonly string $name = '',
 		public readonly string $slug = '',
+		public readonly array $features = array(),
 	) {}
 
 	/**
@@ -124,7 +126,7 @@ final class BoxView {
 	}
 
 	/**
-	 * A compact grid card (F30 R13, N1): no description and no fields (its disclosure is already gone, as_card()).
+	 * A compact grid card (F30 R13, N1): no description, features or fields (its disclosure is already gone, as_card()).
 	 */
 	public function compact(): self {
 		return new self(
@@ -132,6 +134,7 @@ final class BoxView {
 				get_object_vars( $this ),
 				array(
 					'description' => null,
+					'features'    => array(),
 					'fields'      => array(),
 				)
 			)

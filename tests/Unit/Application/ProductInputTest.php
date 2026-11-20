@@ -77,6 +77,7 @@ final class ProductInputTest extends TestCase {
 				'show_disclosure' => '',
 				'prime'           => true,
 				'show_price'      => false,
+				'show_features'   => '1',
 			)
 		);
 
@@ -88,6 +89,7 @@ final class ProductInputTest extends TestCase {
 				'show_disclosure' => false,
 				'prime'           => true,
 				'show_price'      => false,
+				'show_features'   => true,
 			),
 			$changes
 		);

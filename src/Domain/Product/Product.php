@@ -49,7 +49,8 @@ final class Product {
 	 * @param bool         $prime           The Prime logo's opt-out switch (C1G, decision C4): on unless an editor turns it off.
 	 * @param int          $image_id        The image's media library item, when it was picked there; 0 otherwise.
 	 * @param list<string> $features        The product's feature bullets, in order (C1Q4: Amazon's on add and Refresh,
-	 *                                      editable; separate from the description; not shown in displays yet).
+	 *                                      editable; separate from the description; shown in the box under the
+	 *                                      description when $show_features is on).
 	 * @param string       $old_genius_url  The last geni.us link given as the Primary URL (Lasso's old_genius_url, C1K).
 	 * @param string       $old_genius_url2 The last geni.us link given to the second button, the first added one (Lasso's
 	 *                                      old_second_btn_genius_url).
@@ -58,6 +59,8 @@ final class Product {
 	 * @param string       $slug            The product's slug (its post name); the box's `affibloom-url-<slug>` class.
 	 * @param bool         $cloak           Link Cloaking: its links show the cloaked address (F24 D1; meta `_affibloom_cloak`).
 	 * @param list<string> $old_slugs       Slugs it had before, which keep answering (F24 N1; meta `_affibloom_old_slugs`).
+	 * @param bool         $show_features   Show the features in the box (meta `_affibloom_show_features`); off unless an
+	 *                                      editor turns it on, so boxes drawn before it keep their look.
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -89,6 +92,7 @@ final class Product {
 		public readonly string $slug = '',
 		public readonly bool $cloak = false,
 		public readonly array $old_slugs = array(),
+		public readonly bool $show_features = false,
 	) {}
 
 	/**

@@ -427,6 +427,19 @@ final class BoxBuilderTest extends TestCase {
 	}
 
 	/**
+	 * The product's Show Features (deviation 150): on, its bullets go to the description block; off, or under a hidden
+	 * Description element, none.
+	 */
+	public function test_features_show_by_the_products_switch_and_the_description_element(): void {
+		$features = array( 'Light', 'Grippy' );
+		$hidden   = DisplaySettings::from_array( array( 'single' => array( 'theme' => 'Lab', 'elements' => array( 'desc' => false ) ) ) );
+
+		self::assertSame( $features, self::build( self::product( array( 'features' => $features, 'show_features' => true ) ) )->features );
+		self::assertSame( array(), self::build( self::product( array( 'features' => $features ) ) )->features );
+		self::assertSame( array(), self::build( self::product( array( 'features' => $features, 'show_features' => true ) ), $hidden )->features );
+	}
+
+	/**
 	 * F5 R27, R64 (Task 18K): the classic box has no v2 class or wrapper attributes, shows every element by its own
 	 * data, and shows the timestamp only with a printed price; a box-hidden picture is hidden by the box itself.
 	 */

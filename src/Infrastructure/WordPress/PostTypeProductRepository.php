@@ -79,6 +79,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_prime'            => self::flag( $product->prime ),
 				// A JSON list of bullets (C1Q4; the user asked for JSON).
 				'_affibloom_features'         => (string) wp_json_encode( $product->features ),
+				'_affibloom_show_features'    => self::flag( $product->show_features ),
 				'_affibloom_old_genius_url'   => $product->old_genius_url,
 				'_affibloom_old_genius_url2'  => $product->old_genius_url2,
 			),
@@ -1018,6 +1019,7 @@ final class PostTypeProductRepository implements ProductRepository {
 			// Missing is off, as Lasso reads link_cloaking with intval (F24 D1).
 			cloak: '1' === $meta( 'cloak' ),
 			old_slugs: self::old_slugs( get_post_meta( $post->ID, '_affibloom_old_slugs', true ) ),
+			show_features: '1' === $meta( 'show_features' ),
 		);
 	}
 

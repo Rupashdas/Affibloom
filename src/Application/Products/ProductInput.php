@@ -24,8 +24,8 @@ use Affibloom\Domain\Product\PriceHtml;
  */
 final class ProductInput {
 
-	/** Lasso's switches that are stored as 0/1 (`enable_nofollow`, `open_new_tab`, …), plus Show Price and Prime. */
-	private const SWITCHES = array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price' );
+	/** Lasso's switches that are stored as 0/1 (`enable_nofollow`, `open_new_tab`, …), plus Show Price, Prime and Show Features. */
+	private const SWITCHES = array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'show_features' );
 
 	/** Badge and button texts: the site's icon spans and nothing else (Lasso's get_icon_markup_wp_kses_allowed_html). */
 	public const ICON_MARKUP = array( 'span' => array( 'class' => true ) );

@@ -190,6 +190,8 @@ final class BoxBuilder {
 			date: ( $advanced ? TimestampRule::shows( ProductType::Amazon === $product->type, $elements->shows( 'timestamp' ) ) : TimestampRule::shows_classic( ProductType::Amazon === $product->type, '' !== $price ) ) ? TimestampRule::text( $amazon->last_updated ?? '' ) : null,
 			name: $name,
 			slug: $product->slug,
+			// The product's Show Features: its bullets in the description block, which the Description element gates.
+			features: $product->show_features && $elements->shows( 'desc' ) ? $product->features : array(),
 		);
 	}
 
