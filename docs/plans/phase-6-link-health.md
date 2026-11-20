@@ -8,7 +8,7 @@
 
 ## Status
 
-Planned; gate 4 given by the user 2026-11-14 for every open task. Phase 5's exit check must be met and signed off first.
+Done, signed off by the user 2026-11-20 (Batches 6.1-6.6; exit check passed 2026-11-20).
 
 ## Scope and features
 
@@ -587,7 +587,7 @@ product was trashed (1f1f80f); and the alert cards' accessible names (820544f). 
 background WP-Cron runs and the pages' run-due poll raced them, the dummy library's unreachable links cost DNS waits,
 and a helper let the real Amazon API through (491c2c3, 55e7657). On Local, WordPress's `cron` option can lose an event
 when several requests write it at once (no locking); AC6 saves through the product route in one process for that
-reason. Sign-off open.
+reason. **Signed off by the user 2026-11-20.**
 
 ## Coverage
 
