@@ -260,6 +260,7 @@
 			tile.querySelectorAll( '[data-alert-count]' ).forEach( function ( count ) {
 				count.textContent = format.format( n );
 			} );
+			tile.setAttribute( 'aria-label', tile.getAttribute( 'data-alert-name' ) + ' (' + format.format( n ) + ')' );
 			tile.querySelector( '[data-alert-warm]' ).hidden = ! alerts.warm_up;
 			tile.setAttribute( 'aria-busy', alerts.warm_up ? 'true' : 'false' );
 			var tip = [ tile.getAttribute( 'data-base-tip' ) ];

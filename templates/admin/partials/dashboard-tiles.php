@@ -71,14 +71,15 @@ $amazon_line = __( 'Amazon products are checked through the Amazon API, which is
 		<a class="affibloom-tile affibloom-tile--alert affibloom-tile--<?php echo esc_attr( $tile[0] ); ?> affibloom-filter-<?php echo esc_attr( 'broken-links' === $tile[0] ? 'broken' : 'out-of-stock' ); ?>"
 			href="<?php echo esc_url( $href ); ?>" data-alert-tab="<?php echo esc_attr( $tile[0] ); ?>" data-tip="<?php echo esc_attr( $tip ); ?>"
 			data-base-tip="<?php echo esc_attr( $tile[3] ); ?>"<?php echo 'out-of-stock' === $tile[0] && ! $counts['amazon_api'] ? ' data-amazon-tip="' . esc_attr( $amazon_line ) . '"' : ''; ?>
-			<?php echo $active ? 'aria-current="true"' : ''; ?> aria-busy="<?php echo $warm ? 'true' : 'false'; ?>">
+			<?php echo $active ? 'aria-current="true"' : ''; ?> aria-busy="<?php echo $warm ? 'true' : 'false'; ?>"
+			<?php // The link's name is U2's "Broken links (3)"; dashboard.js rewrites it with the count. ?>
+			aria-label="<?php echo esc_attr( sprintf( '%s (%s)', $tile[2], number_format_i18n( $tile[4] ) ) ); ?>" data-alert-name="<?php echo esc_attr( $tile[2] ); ?>">
 			<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => $tile[1] ) ); ?></span>
 			<span class="affibloom-tile__number">
 				<span data-alert-count="<?php echo esc_attr( $tile[0] ); ?>"><?php echo esc_html( number_format_i18n( $tile[4] ) ); ?></span>
 				<span class="affibloom-tile__warm" data-alert-warm<?php echo $warm ? '' : ' hidden'; ?>><?php $this->render( 'admin/partials/icon', array( 'name' => 'clock' ) ); ?></span>
 			</span>
-			<?php // The visible label and the count make the link's name: "Broken links (3)" (U2). ?>
-			<span class="affibloom-tile__label"><?php echo esc_html( $tile[2] ); ?><span class="screen-reader-text"> (<span data-alert-count="<?php echo esc_attr( $tile[0] ); ?>"><?php echo esc_html( number_format_i18n( $tile[4] ) ); ?></span>)</span></span>
+			<span class="affibloom-tile__label"><?php echo esc_html( $tile[2] ); ?></span>
 		</a>
 	<?php endforeach; ?>
 	<div class="affibloom-tile affibloom-tile--soon">
