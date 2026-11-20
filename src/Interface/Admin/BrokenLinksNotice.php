@@ -14,6 +14,7 @@ use Affibloom\Application\Shell\NoticeProvider;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Shell\ShellNotice;
+use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Interface\NoticeText;
 use Affibloom\Module;
 
@@ -42,6 +43,35 @@ final class BrokenLinksNotice implements NoticeProvider, Module {
 	 */
 	public function register(): void {
 		add_action( 'admin_notices', array( $this, 'dashboard_notice' ) );
+		// A product trashed, restored or deleted changes the count without a check (the exit check found it an hour stale).
+		add_action( 'transition_post_status', array( $this, 'status_changed' ), 10, 3 );
+		add_action( 'after_delete_post', array( $this, 'deleted' ), 10, 2 );
+	}
+
+	/**
+	 * Clears the cached count when a product's status changes.
+	 *
+	 * @param string   $new_status The new status.
+	 * @param string   $old_status The old status.
+	 * @param \WP_Post $post       The post.
+	 */
+	public function status_changed( $new_status, $old_status, $post ): void {
+		if ( $new_status !== $old_status && ProductPostType::NAME === $post->post_type ) {
+			delete_transient( self::TRANSIENT );
+		}
+	}
+
+	/**
+	 * Clears the cached count when a product is deleted for good.
+	 *
+	 * @param int      $post_id The post's ID.
+	 * @param \WP_Post $post    The post as it was.
+	 */
+	public function deleted( $post_id, $post ): void {
+		unset( $post_id );
+		if ( ProductPostType::NAME === $post->post_type ) {
+			delete_transient( self::TRANSIENT );
+		}
 	}
 
 	/**
