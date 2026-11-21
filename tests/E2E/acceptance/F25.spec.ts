@@ -347,4 +347,36 @@ test.describe( 'F25 Comparison tables', () => {
 		await expect( cell( 99989 ) ).toContainText( 'Soft and light.' );
 		expect( stored( id ).values[ String( plain ) ][ '99989' ] ).toContain( 'Soft and light.' );
 	} );
+
+	// AC11 (T8; R29, R35).
+	test( 'AC11 button cells: Edit "<field>", the Primary\'s link read only, the Secondary\'s typed, Lasso\'s sentences', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const product = createProduct( { name: `Button ${ word }` } );
+		const id = await tableWith( page, 'column', [ product ] );
+		const cell = ( field: number ) => page.locator( `[data-table-product="${ product }"] [data-table-field="${ field }"]` );
+		const dialog = ( name: string ) => page.getByRole( 'dialog', { name: `Edit "${ name }"` } );
+
+		await cell( 99992 ).getByRole( 'button', { name: 'Edit Primary Button' } ).click();
+		await expect( dialog( 'Primary Button' ).getByLabel( 'Button URL' ) ).not.toBeEditable();
+		await dialog( 'Primary Button' ).getByLabel( 'Button Text' ).fill( '' );
+		await dialog( 'Primary Button' ).getByRole( 'button', { name: 'Save' } ).click();
+		await expect( dialog( 'Primary Button' ).getByText( 'Missing the "Button Text" information' ) ).toBeVisible();
+		await dialog( 'Primary Button' ).getByLabel( 'Button Text' ).fill( 'Check Price' );
+		await dialog( 'Primary Button' ).getByRole( 'button', { name: 'Save' } ).click();
+		await expect( cell( 99992 ) ).toContainText( 'Check Price' );
+
+		await cell( 99992 ).locator( 'xpath=ancestor::*[@data-table-group][1]' ).getByRole( 'button', { name: 'Add field' } ).click();
+		const fields = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await fields.getByPlaceholder( 'Find a field by searching here' ).fill( 'Secondary' );
+		await fields.getByRole( 'button', { name: 'Add Secondary Button' } ).click();
+		await expect( cell( 99993 ).getByText( 'No Secondary Button URL set.' ) ).toBeVisible();
+		await cell( 99993 ).getByRole( 'button', { name: 'Edit Secondary Button' } ).click();
+		await dialog( 'Secondary Button' ).getByLabel( 'Button Text' ).fill( 'Compare' );
+		await dialog( 'Secondary Button' ).getByRole( 'button', { name: 'Save' } ).click();
+		await expect( dialog( 'Secondary Button' ).getByText( 'Missing the "Button URL" information' ) ).toBeVisible();
+		await dialog( 'Secondary Button' ).getByLabel( 'Button URL' ).fill( 'https://shop.example/compare' );
+		await dialog( 'Secondary Button' ).getByRole( 'button', { name: 'Save' } ).click();
+		await expect( cell( 99993 ).getByText( 'No Secondary Button URL set.' ) ).toHaveCount( 0 );
+		expect( JSON.parse( stored( id ).values[ String( product ) ][ '99993' ] ) ).toEqual( { button_text: 'Compare', url: 'https://shop.example/compare' } );
+	} );
 } );

@@ -58,12 +58,12 @@ final class TableValues {
 	}
 
 	/**
-	 * A button cell's value, as Lasso stores it.
+	 * A button cell's value, as Lasso stores it (also a table's 'Edit "<button>"', Task T8).
 	 *
 	 * @param string $text The button's text.
 	 * @param string $url  Its address.
 	 */
-	private static function button( string $text, string $url ): string {
+	public static function button( string $text, string $url ): string {
 		return (string) wp_json_encode(
 			array(
 				'button_text' => $text,

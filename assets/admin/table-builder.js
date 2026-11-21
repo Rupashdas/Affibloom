@@ -21,6 +21,8 @@
  * - Images, prices, descriptions (T7): an image opens the media library and saves the picked address at once; a price
  *   opens one rich editor in place (wp.editor, Lasso's price toolbar), saved 500 ms after a change and on leaving it;
  *   a description's edit icon opens "Description Editor" and Save stores it.
+ * - Buttons (T8): the edit icon opens 'Edit "<field>"' (the Primary's address read only); Save stores the text and
+ *   the Secondary's address and draws the builder again; a missing one gets Lasso's sentence under its box.
  */
 ( function () {
 	'use strict';
@@ -56,7 +58,7 @@
 		return ( fields && fields.title ) || ( failure && failure.message ) || page.getAttribute( 'data-failed' );
 	};
 
-	// A job: { send( revision ) → apiFetch promise, done( data ), failed( text ) }.
+	// A job: { send( revision ) → apiFetch promise, done( data ), failed( text ), fields( { field: text } ) }.
 	var next = function () {
 		if ( busy || 0 === jobs.length ) {
 			return;
@@ -83,6 +85,11 @@
 				jobs = [];
 				settings = null;
 				status.textContent = '';
+				var fields = failure && failure.data && failure.data.fields;
+				if ( fields && job.fields ) {
+					job.fields( fields );
+					return;
+				}
 				( job.failed || say )( words( failure ) );
 			} )
 			.then( function () {
@@ -548,6 +555,11 @@
 			editPrice( price );
 			return;
 		}
+		var editButton = event.target.closest( '[data-table-button]' );
+		if ( editButton ) {
+			openButton( editButton );
+			return;
+		}
 		var describe = event.target.closest( '[data-table-description]' );
 		if ( describe ) {
 			describing = { cell: cellOf( describe ), rich: describe.parentNode.querySelector( '[data-table-rich]' ) };
@@ -576,6 +588,74 @@
 			remover.querySelector( '.affibloom-modal__title' ).textContent = remover.dataset.titleTemplate.replace( '%s', cell.getAttribute( 'data-product-name' ) );
 			window.affibloomModal.show( remover, remove );
 		}
+	} );
+
+	// 'Edit "<button>"' (T8; R35).
+	var buttoner = document.getElementById( 'affibloom-table-button' );
+	var buttonForm = buttoner.querySelector( '[data-table-button-form]' );
+	var buttonSave = buttoner.querySelector( '[data-table-button-save]' );
+	var buttonText = buttonForm.querySelector( '[name="button_text"]' );
+	var buttonUrl = buttonForm.querySelector( '[name="button_url"]' );
+	var buttonCell = null;
+	var buttonProblem = function ( fields, text ) {
+		buttonForm.querySelectorAll( '[data-error-for]' ).forEach( function ( line ) {
+			var message = ( fields && fields[ line.dataset.errorFor ] ) || '';
+			line.textContent = message;
+			line.hidden = '' === message;
+		} );
+		var general = buttonForm.querySelector( '[data-table-button-error]' );
+		general.textContent = text || '';
+		general.hidden = ! text;
+	};
+	var openButton = function ( trigger ) {
+		var holder = trigger.closest( '.affibloom-table-field__buttons' );
+		var field = trigger.closest( '[data-table-field]' );
+		buttonCell = cellOf( trigger );
+		buttoner.querySelector( '.affibloom-modal__title' ).textContent = buttoner.dataset.titleTemplate.replace( '%s', field.dataset.fieldName );
+		buttonText.value = holder.dataset.buttonText;
+		buttonUrl.value = holder.dataset.buttonUrl;
+		buttonUrl.readOnly = '1' === holder.dataset.buttonPrimary;
+		buttonProblem( null, '' );
+		window.affibloomModal.show( buttoner, trigger );
+	};
+	buttonSave.addEventListener( 'click', function () {
+		var chosen = buttonCell;
+		var label = buttonSave.textContent;
+		var value = JSON.stringify( { button_text: buttonText.value, url: buttonUrl.value } );
+		buttonSave.disabled = true;
+		buttonSave.textContent = buttonSave.getAttribute( 'data-busy-label' );
+		buttonProblem( null, '' );
+		var restore = function () {
+			buttonSave.disabled = false;
+			buttonSave.textContent = label;
+		};
+		enqueue( {
+			send: function ( current ) {
+				return wp.apiFetch( { path: path + '/values/' + chosen.product + '/' + chosen.field, method: 'PUT', data: { revision: current, value: value } } );
+			},
+			done: function () {
+				restore();
+				window.affibloomModal.hide();
+			},
+			failed: function ( text ) {
+				restore();
+				buttonProblem( null, text );
+			},
+			fields: function ( fields ) {
+				restore();
+				buttonProblem( fields, '' );
+			},
+		} );
+	} );
+	buttonForm.addEventListener( 'input', function ( event ) {
+		var line = buttonForm.querySelector( '[data-error-for="' + event.target.name + '"]' );
+		if ( line ) {
+			line.hidden = true;
+		}
+	} );
+	buttonForm.addEventListener( 'submit', function ( event ) {
+		event.preventDefault();
+		buttonSave.click();
 	} );
 
 	// A price box opens on Enter or Space too.

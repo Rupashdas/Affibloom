@@ -187,6 +187,34 @@ final class TableServiceTest extends TestCase {
 		$this->service->add_group( (int) $table->id, $table->revision, 999 );
 	}
 
+	/** Task T8 (F25 R35): the Primary Button keeps the product's link; the Secondary takes the one typed; text is needed. */
+	public function test_a_buttons_text_saves_and_only_the_secondary_takes_an_address(): void {
+		$table   = $this->service->create( 'Shoes', TableStyle::Column );
+		$product = $this->product( 'Molten' );
+		$table   = $this->service->add_product( (int) $table->id, $table->revision, $product );
+		self::assertNotNull( $table );
+		$group = $table->groups[2]['id'];
+		$table = $this->service->add_field( (int) $table->id, $table->revision, $group, 99993 );
+		self::assertNotNull( $table );
+
+		$table = $this->service->set_button( (int) $table->id, $table->revision, $product, 99992, ' Check Price ', 'https://elsewhere.test/' );
+		self::assertNotNull( $table );
+		self::assertSame( '{"button_text":"Check Price","url":"https://site.test/go/' . $product . '/"}', $table->values[ $product ][99992] );
+
+		$table = $this->service->set_button( (int) $table->id, $table->revision, $product, 99993, 'Compare', 'https://shop.test/v5' );
+		self::assertNotNull( $table );
+		self::assertSame( '{"button_text":"Compare","url":"https://shop.test/v5"}', $table->values[ $product ][99993] );
+
+		foreach ( array( array( 99992, ' ', '', 'table_button_text' ), array( 99993, 'Compare', ' ', 'table_button_url' ) ) as [ $field, $text, $url, $reason ] ) {
+			try {
+				$this->service->set_button( (int) $table->id, $table->revision, $product, $field, $text, $url );
+				self::fail( 'A button without its ' . $reason . ' was saved.' );
+			} catch ( \Affibloom\Domain\InvalidField $refused ) {
+				self::assertSame( $reason, $refused->reason );
+			}
+		}
+	}
+
 	/** Task T4 (F25 R18): a product that does not exist is refused. */
 	public function test_a_missing_product_is_refused(): void {
 		$table = $this->service->create( 'Shoes', TableStyle::Column );

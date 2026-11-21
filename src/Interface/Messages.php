@@ -58,6 +58,9 @@ final class Messages {
 			'table_name_required' => __( 'Please fill out "Table Name" field', 'affibloom' ),
 			// The builder's Name left blank (F25 R15; Task T3).
 			'table_title_blank'   => __( 'Please input table name', 'affibloom' ),
+			// A table's 'Edit "<button>"' (F25 R35; Task T8): Lasso's words.
+			'table_button_text'   => __( 'Missing the "Button Text" information', 'affibloom' ),
+			'table_button_url'    => __( 'Missing the "Button URL" information', 'affibloom' ),
 			'group_name_taken'    => __( 'A group with this name already exists.', 'affibloom' ),
 			// The Product Data API card's Validate (C1 R21): Lasso's words.
 			'amazon_validated'    => __( 'Amazon Creators API credentials verified successfully.', 'affibloom' ),

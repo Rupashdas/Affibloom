@@ -11,6 +11,7 @@ namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Products\ProductInput;
 use Affibloom\Application\Tables\TableService;
+use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Table\Table;
@@ -400,6 +401,26 @@ final class TablesController implements Module {
 		$field = $this->tables->field( (int) $request['field'] );
 		if ( null === $field ) {
 			return self::broken( 'cell_missing' );
+		}
+		// A button (R35; Task T8): `value` is Lasso's {"button_text", "url"}; the builder is drawn again.
+		if ( FieldType::Button === $field->type ) {
+			$button = json_decode( (string) $request['value'], true );
+			$button = is_array( $button ) ? $button : array();
+			try {
+				return $this->write(
+					fn(): ?Table => $this->tables->set_button(
+						(int) $request['id'],
+						(int) $request['revision'],
+						(int) $request['product'],
+						$field->id,
+						wp_kses_post( is_string( $button['button_text'] ?? null ) ? $button['button_text'] : '' ),
+						esc_url_raw( is_string( $button['url'] ?? null ) ? $button['url'] : '' )
+					),
+					self::redrawn( ... )
+				);
+			} catch ( InvalidField $error ) {
+				return FieldError::from( $error );
+			}
 		}
 		$value = TableCellValue::clean( $field, $request['value'] );
 

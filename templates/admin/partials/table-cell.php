@@ -5,7 +5,7 @@
  * the placeholder); long text and lists: a three-line box; number: a number box; rating: 1 to 5 in steps of 0.1 with
  * its stars. Task T7: the image opens the media library ("Update Image"); the price opens a one-line rich editor in
  * place ("N/A"), except an Amazon product's, which shows the live price read only; the description shows its HTML
- * and an edit icon for "Description Editor". The buttons are shown as they are; their editor comes with Task T8.
+ * and an edit icon for "Description Editor". Task T8: a button's edit icon opens 'Edit "<field>"'.
  * table-builder.js saves a value 500 ms after it changes.
  *
  * @package Affibloom
@@ -15,6 +15,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Domain\Fields\FieldType;
+use Affibloom\Domain\Table\StartingLayout;
 
 foreach ( $view['order'] as $field_id ) :
 	$field = $view['fields'][ $field_id ] ?? null;
@@ -72,8 +73,21 @@ foreach ( $view['order'] as $field_id ) :
 				</button>
 			</div>
 		<?php elseif ( FieldType::Button === $field->type ) : ?>
-			<?php // An empty text draws the site's default button text on the page (R22); the builder names the field. ?>
-			<span id="<?php echo esc_attr( $input ); ?>" class="affibloom-table-field__button"><?php echo esc_html( '' !== $text ? wp_strip_all_tags( $text ) : $field->name ); ?></span>
+			<?php
+			// R29, R35 (Task T8): the button with its text and an edit icon; an empty text draws the site's default button
+			// text on the page (R22), so the builder names the field. A Secondary without an address says so.
+			$url = is_array( $button ) ? (string) ( $button['url'] ?? '' ) : '';
+			?>
+			<div class="affibloom-table-field__buttons" data-button-text="<?php echo esc_attr( $text ); ?>" data-button-url="<?php echo esc_attr( $url ); ?>" data-button-primary="<?php echo esc_attr( StartingLayout::PRIMARY_BUTTON === $field->id ? '1' : '0' ); ?>">
+				<span id="<?php echo esc_attr( $input ); ?>" class="affibloom-table-field__button"><?php echo esc_html( '' !== $text ? wp_strip_all_tags( $text ) : $field->name ); ?></span>
+				<?php /* translators: %s: the field's name. */ ?>
+				<button type="button" class="affibloom-icon-button" data-table-button aria-haspopup="dialog" aria-label="<?php echo esc_attr( sprintf( __( 'Edit %s', 'affibloom' ), $field->name ) ); ?>" title="<?php esc_attr_e( 'Edit', 'affibloom' ); ?>">
+					<?php $this->render( 'admin/partials/icon', array( 'name' => 'pencil' ) ); ?>
+				</button>
+			</div>
+			<?php if ( StartingLayout::PRIMARY_BUTTON !== $field->id && '' === $url ) : ?>
+				<span class="affibloom-table-field__note"><?php esc_html_e( 'No Secondary Button URL set.', 'affibloom' ); ?></span>
+			<?php endif; ?>
 		<?php elseif ( '' === $value ) : ?>
 			<span id="<?php echo esc_attr( $input ); ?>" class="affibloom-table-field__empty">—</span>
 		<?php else : ?>

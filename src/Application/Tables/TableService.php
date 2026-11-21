@@ -289,6 +289,41 @@ final class TableService {
 	}
 
 	/**
+	 * A button cell's text and address (R35, D11; Task T8). The Primary Button goes to the product's link, so its address
+	 * stays the one the cell has; the Secondary's is the one typed. Text is needed, and a Secondary's address too.
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param int    $product  The product.
+	 * @param int    $field    The button field.
+	 * @param string $text     The button's text, cleaned by the caller.
+	 * @param string $url      The address typed, cleaned by the caller (ignored for the Primary Button).
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws InvalidField `table_button_text` or `table_button_url` (Lasso's words); TableChanged when the table moved
+	 *                      on since the editor's copy; TableRuleBroken `cell_missing`.
+	 */
+	public function set_button( int $id, int $revision, int $product, int $field, string $text, string $url ): ?Table {
+		if ( '' === trim( $text ) ) {
+			throw new InvalidField( 'button_text', 'table_button_text' );
+		}
+		$primary = StartingLayout::PRIMARY_BUTTON === $field;
+		if ( ! $primary && '' === trim( $url ) ) {
+			throw new InvalidField( 'button_url', 'table_button_url' );
+		}
+
+		return $this->change(
+			$id,
+			$revision,
+			static function ( Table $table ) use ( $product, $field, $text, $url, $primary ): Table {
+				$stored = json_decode( (string) ( $table->values[ $product ][ $field ] ?? '' ), true );
+				$link   = $primary ? (string) ( is_array( $stored ) ? ( $stored['url'] ?? '' ) : '' ) : trim( $url );
+
+				return $table->set_value( $product, $field, TableValues::button( trim( $text ), $link ) );
+			}
+		);
+	}
+
+	/**
 	 * A field of the library, or null (the cell's kind, for cleaning its value).
 	 *
 	 * @param int $id The field.

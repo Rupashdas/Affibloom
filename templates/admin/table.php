@@ -121,6 +121,7 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	<?php $this->render( 'admin/partials/table-product-picker' ); ?>
 	<?php $this->render( 'admin/partials/table-group-picker' ); ?>
 	<?php $this->render( 'admin/partials/table-description-modal' ); ?>
+	<?php $this->render( 'admin/partials/table-button-modal' ); ?>
 	<?php
 	$this->render(
 		'admin/partials/field-modal',

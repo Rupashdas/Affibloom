@@ -135,7 +135,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T5: Add a group to a table
 - [x] Task T6: Rows and columns, the Add Field dialog, plain cells
 - [x] Task T7: Image, price and description cells
-- [ ] Task T8: Button information
+- [x] Task T8: Button information
 - [ ] Task T9: Reordering
 - [ ] Task T10: Table Locations
 - [ ] Task T11: Clone and delete
@@ -1939,11 +1939,13 @@ without URL shows "No Secondary Button URL set.".
 
 **Files:** the above; F25 spec AC11; unit test for the Primary rule.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Value rule.**
-- [ ] **Step 3: Modal.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Edit a table button's text and URL".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Value rule.**
+- [x] **Step 3: Modal.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Edit a table button's text and URL".
+
+*Note:* The rule is `TableService::set_button()` (Lasso's sentences as InvalidField reasons `table_button_text` and `table_button_url`, 422 under their boxes); a button save answers with the builder drawn again. Checked: unit test for the Primary rule; in a headless browser both refusals, a Primary text saved, a Secondary added and given an address.
 
 ---
 
