@@ -27,16 +27,18 @@ final class WpSlugTaken implements SlugTaken {
 	public function __construct( private ProductRepository $products ) {}
 
 	/**
-	 * Whether another product has a permalink variant with this key.
+	 * Whether another product has a permalink variant with this key. A variant whose product no longer exists (deleted
+	 * outside WordPress, so its rows stayed) blocks nothing: it answers no address either (V2 edge case 3). A trashed
+	 * product keeps its keys, since it can come back.
 	 *
-	 * @param string $key    The key.
+	 * @param string $key        The key.
 	 * @param int    $product_id The product whose variants are saved.
 	 */
 	public function by_other_variant( string $key, int $product_id ): bool {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, once per saved row.
-		return null !== $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE variant_key = %s AND variant_kind = %s AND parent_id <> %d LIMIT 1', $wpdb->prefix . TableVariantRepository::TABLE, $key, VariantKind::Permalink->value, $product_id ) );
+		return null !== $wpdb->get_var( $wpdb->prepare( 'SELECT v.id FROM %i AS v INNER JOIN %i AS p ON p.ID = v.parent_id AND p.post_type = %s WHERE v.variant_key = %s AND v.variant_kind = %s AND v.parent_id <> %d LIMIT 1', $wpdb->prefix . TableVariantRepository::TABLE, $wpdb->posts, ProductPostType::NAME, $key, VariantKind::Permalink->value, $product_id ) );
 	}
 
 	/**
