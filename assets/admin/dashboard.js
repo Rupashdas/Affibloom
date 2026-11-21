@@ -203,8 +203,13 @@
 	}
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
+	// The list last asked for while its answer is out: a change made meanwhile (a second filter, say) builds on it, not on
+	// the list last drawn, so the change before it is not lost.
+	var wanted = null;
+
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, comparison_table: current.comparison_table, post_id: current.post_id, paged: 1, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter };
+		var base = wanted || current;
+		var next = { s: base.s, link_type: base.link_type, group: base.group, placements: base.placements, comparison_table: base.comparison_table, post_id: base.post_id, paged: 1, per_page: base.per_page, orderby: base.orderby, order: base.order, filter: base.filter };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -382,12 +387,14 @@
 			return;
 		}
 		var mine = ++requests;
+		wanted = list;
 		busy( true );
 
 		wp.apiFetch( { path: listPath( list ) } ).then( function ( response ) {
 			if ( mine !== requests ) {
 				return;
 			}
+			wanted = null;
 			var data = response.data;
 			current = { s: data.term, link_type: data.link_type, group: data.group, placements: data.placements || '', comparison_table: data.comparison_table || '', post_id: data.post_id, paged: data.page, per_page: data.per_page, orderby: data.orderby || '', order: data.order || '', filter: data.filter || '' };
 
@@ -421,6 +428,7 @@
 			if ( mine !== requests ) {
 				return;
 			}
+			wanted = null;
 			busy( false );
 			region.innerHTML = '';
 			region.appendChild( errorTemplate.content.cloneNode( true ) );
