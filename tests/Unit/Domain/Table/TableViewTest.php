@@ -33,4 +33,24 @@ final class TableViewTest extends TestCase {
 		self::assertSame( '<span class="medal-icon"></span> Best', $view->rows[0]['badge'] );
 		self::assertSame( array( array( 99991 ), array( 99990, 500, 1 ), array( 99992 ) ), $view->rows[1]['cells'] );
 	}
+
+	/** Task T13 (F25 R45): a Vertical table has no header; each product's cells are its fields one by one. */
+	public function test_a_vertical_table_has_a_cell_per_field_in_group_order(): void {
+		$table = new Table(
+			1,
+			'Shoes',
+			TableStyle::Column,
+			products: array( new TableProduct( 7, 'Best' ), new TableProduct( 8 ) ),
+			groups: array(
+				array( 'id' => 'g_a', 'fields' => array( 99991 ) ),
+				array( 'id' => 'g_b', 'fields' => array( 99990, 1 ) ),
+			)
+		);
+
+		$view = TableView::vertical( $table );
+
+		self::assertSame( array(), $view->headers );
+		self::assertSame( array( array( 99991 ), array( 99990 ), array( 1 ) ), $view->rows[0]['cells'] );
+		self::assertSame( array( 'Best', '' ), array_column( $view->rows, 'badge' ) );
+	}
 }

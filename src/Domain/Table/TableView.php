@@ -10,9 +10,11 @@ declare( strict_types=1 );
 namespace Affibloom\Domain\Table;
 
 /**
- * The reader's table (F25 R46; Task T12; Lasso's table-horizontal.php). Horizontal: a header cell per field group, its
- * fields' names joined " / " with each word capitalised (a field without a name left out); a row per product, a cell
- * per group holding its fields, the badge in the first cell. Every group shows, the heading group first.
+ * The reader's table (F25 R45, R46; Tasks T12-T13; Lasso's table-horizontal.php and table-vertical.php). Horizontal: a
+ * header cell per field group, its fields' names joined " / " with each word capitalised (a field without a name left
+ * out); a row per product, a cell per group holding its fields, the badge in the first cell. Every group shows, the
+ * heading group first. Vertical: no header; each product's cells are its fields one by one (group order, then field
+ * order), which the template draws as a row per field and a column per product.
  */
 final class TableView {
 
@@ -46,5 +48,23 @@ final class TableView {
 		}
 
 		return new self( $headers, $rows );
+	}
+
+	/**
+	 * A Vertical table's view (R45; Task T13): each product's fields one cell each.
+	 *
+	 * @param Table $table The table.
+	 */
+	public static function vertical( Table $table ): self {
+		$rows = array();
+		foreach ( $table->products as $product ) {
+			$rows[] = array(
+				'product' => $product->id,
+				'badge'   => trim( $product->badge ),
+				'cells'   => array_map( static fn( int $field ): array => array( $field ), $table->field_ids() ),
+			);
+		}
+
+		return new self( array(), $rows );
 	}
 }

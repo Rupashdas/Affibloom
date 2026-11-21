@@ -14,10 +14,7 @@ defined( 'ABSPATH' ) || exit;
 <?php if ( array() !== $table->rows ) : ?>
 	<?php $attributes = $table->wrapper; ?>
 	<div id="<?php echo esc_attr( $table->anchor ); ?>" class="<?php echo esc_attr( $table->classes ); ?>"<?php echo $table->nosnippet ? ' data-nosnippet' : ''; ?><?php require __DIR__ . '/partials/attributes.php'; ?>>
-		<?php
-		// T13 adds the Vertical layout.
-		require __DIR__ . '/table-horizontal.php';
-		?>
+		<?php require __DIR__ . ( $table->horizontal ? '/table-horizontal.php' : '/table-vertical.php' ); ?>
 	</div>
 	<?php if ( null !== $table->timestamp ) : ?>
 		<span class="oldest-updated"><?php echo esc_html( $table->timestamp ); ?></span>

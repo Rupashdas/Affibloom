@@ -108,7 +108,7 @@ final class ShortcodeRenderer {
 		}
 		$has_price  = in_array( TableCell::PRICE, $table->field_ids(), true );
 		$horizontal = TableStyle::Row === $table->style;
-		$layout     = TableView::horizontal( $table, $names );
+		$layout     = $horizontal ? TableView::horizontal( $table, $names ) : TableView::vertical( $table );
 		$rows       = array();
 		$timestamp  = null;
 		foreach ( $layout->rows as $row ) {

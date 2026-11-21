@@ -505,4 +505,24 @@ test.describe( 'F25 Comparison tables', () => {
 		await page.goto( `/?p=${ missing }&preview=true` );
 		await expect( page.locator( '.affibloom-display-table' ) ).toHaveCount( 0 );
 	} );
+
+	// AC17 (T13; R45).
+	test( 'AC17 a Vertical table: the badge row first, a row per field, set widths up to four products, a scrolling row past four', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const products = [ 1, 2, 3, 4, 5 ].map( ( n ) => createProduct( { name: `Vertical ${ word } ${ n }`, badge: 1 === n ? 'Best' : '' } ) );
+		const four = await tableWith( page, 'column', products.slice( 0, 4 ) );
+		const five = await tableWith( page, 'column', products );
+		const post = wp( 'post', 'create', '--post_title=F25 AC17', '--post_status=draft', `--post_content=[affibloom type="table" id="${ four }"][affibloom type="table" id="${ five }"]`, '--porcelain' );
+		await page.goto( `/?p=${ post }&preview=true` );
+
+		const [ first, second ] = [ page.locator( '.affibloom-display-table' ).nth( 0 ), page.locator( '.affibloom-display-table' ).nth( 1 ) ];
+		const desktop = first.locator( '.table-vertical.table-vertical-desktop.template-1.include-badge' );
+		await expect( desktop.locator( 'table.affibloom-table.table-borderless.table-title tr' ) ).toHaveCount( 5 );
+		await expect( desktop.locator( 'tr' ).first().locator( 'td.text-center.field.field-group-detail' ) ).toHaveCount( 4 );
+		await expect( desktop.locator( 'td' ).first() ).toHaveAttribute( 'style', 'width: 25%' );
+		await expect( desktop.locator( 'tr' ).first().locator( '.badge-text' ).first() ).toHaveText( 'Best' );
+		await expect( desktop.locator( 'tr' ).first().locator( 'td' ).nth( 1 ).locator( '.cell' ) ).toHaveClass( /no-border-left/ );
+		await expect( second.locator( '.table-vertical-desktop' ) ).toHaveClass( /table-vertical-scroll/ );
+		await expect( second.locator( '.table-vertical-desktop td' ).first() ).not.toHaveAttribute( 'style', /width/ );
+	} );
 } );

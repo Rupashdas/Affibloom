@@ -141,7 +141,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T11: Clone and delete
 - [x] Task T12: The reader's Horizontal table, by shortcode
 - [x] Task 18S13: A table's Copy Shortcode
-- [ ] Task T13: The reader's Vertical table
+- [x] Task T13: The reader's Vertical table
 - [ ] Task T14: Phone cards and breakpoints
 - [ ] Task T15: Preview Table
 - [ ] Task T16: The Dashboard's Comparison table filter
@@ -2131,12 +2131,14 @@ row past four.
 
 **Files:** the above; F25 spec AC17; `table-vertical.spec.ts` (N2).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: View.**
-- [ ] **Step 3: Template.**
-- [ ] **Step 4: Run and look** (2,
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: View.**
+- [x] **Step 3: Template.**
+- [x] **Step 4: Run and look** (2,
   4 and 5 products).
-- [ ] **Step 5: Commit** — "Draw a Vertical comparison table".
+- [x] **Step 5: Commit** — "Draw a Vertical comparison table".
+
+*Note:* `TableView::vertical()` keeps the Horizontal row shape (a cell per field), and `table-vertical.php` transposes it. Fixed on the way: the field partial's `$table_lines` / `$table_line` overwrote the template's loop counter (an endless loop); the template's own names are `$vertical_*` now. Checked on Local: 2, 4 and 5 products (50 % and 25 % widths; the scroll class and no width at five), the badge row, no left border after a badged cell. Lasso's Vertical has no baseline (N2: a staging clone, at the user's word).
 
 ---
 
