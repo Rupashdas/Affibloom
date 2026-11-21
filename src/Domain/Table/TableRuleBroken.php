@@ -13,7 +13,8 @@ use DomainException;
 
 /**
  * F25's refusals (R18, R25, R28 and the rest; Tasks T4-T9), each named by a rule the interface turns into Lasso's
- * words: `product_exists` (R18), `product_missing` (a product no longer in the table).
+ * words: `product_exists` (R18), `product_missing` (a product no longer in the table), `no_products` and
+ * `empty_group` (R25), `field_exists` (R28), `group_missing`, `field_missing`, `cell_missing` (R30).
  */
 final class TableRuleBroken extends DomainException {
 

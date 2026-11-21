@@ -3154,7 +3154,7 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 
 /* Task T4 (F25 R21, R34): the builder's grid; widths split evenly up to five products (or groups), past five the
    grid keeps 220px tracks and scrolls. A product's header cell: grip, Add field, Remove, then Badge and its image. */
-.affibloom-table-grid-scroll { overflow-x: auto; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-card); }
+.affibloom-table-grid-scroll { position: relative; overflow-x: auto; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-card); }
 .affibloom-table-grid { display: grid; grid-template-columns: repeat(var(--affibloom-table-columns), minmax(150px, 1fr)); min-width: 100%; }
 .affibloom-table-grid--wide { grid-template-columns: repeat(var(--affibloom-table-columns), 220px); width: max-content; }
 .affibloom-table-cell { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 16px; border-right: 1px solid var(--affibloom-line); border-bottom: 1px solid var(--affibloom-line); }
@@ -3171,6 +3171,24 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-field__rating { display: inline-flex; align-items: center; gap: 4px; color: var(--affibloom-ink-900); font-weight: 600; }
 .affibloom-table-field__rating svg { width: 16px; height: 16px; color: #f5b400; }
 .affibloom-table-field__button { align-self: flex-start; padding: 6px 14px; border-radius: var(--affibloom-radius-control); background: var(--affibloom-brand-600); color: #fff; font: 600 13px/18px var(--affibloom-font); }
+
+/* Task T6 (F25 R25-R33): a field's name and its remove (×), the plain editors, an empty row's "Click to add a Field",
+   each cell's Add field (+) and Vertical's "Remove same field →". */
+.affibloom-table-field__head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.affibloom-table-field__remove { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: var(--affibloom-radius-full); background: none; color: var(--affibloom-ink-400); cursor: pointer; }
+.affibloom-table-field__remove svg { width: 14px; height: 14px; }
+.affibloom-table-field__remove:hover, .affibloom-table-field__remove:focus-visible { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+.affibloom-table-field__input { width: 100%; min-width: 0; }
+.affibloom-table-field__rating { display: flex; align-items: center; gap: 8px; }
+.affibloom-table-field__rating .affibloom-table-field__input { width: 76px; flex: 0 0 auto; }
+.affibloom-table-field__rating .affibloom-stars { flex: 0 0 auto; font-size: 14px; white-space: nowrap; }
+.affibloom-table-cell__empty { width: 100%; min-height: 64px; padding: 12px; border: 1px dashed var(--affibloom-control-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-subtle); color: var(--affibloom-ink-500); font: 500 13px/18px var(--affibloom-font); cursor: pointer; }
+.affibloom-table-cell__empty:hover, .affibloom-table-cell__empty:focus-visible { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
+.affibloom-table-cell__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
+.affibloom-table-cell__foot .affibloom-icon-button { width: 28px; height: 28px; }
+.affibloom-table-cell__remove-row { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; white-space: nowrap; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-500); font: 500 12px/16px var(--affibloom-font); cursor: pointer; }
+.affibloom-table-cell__remove-row svg { width: 14px; height: 14px; }
+.affibloom-table-cell__remove-row:hover, .affibloom-table-cell__remove-row:focus-visible { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
 
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }

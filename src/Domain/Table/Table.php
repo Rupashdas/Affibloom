@@ -166,6 +166,145 @@ final class Table {
 	}
 
 	/**
+	 * An empty row (Vertical) or column (Horizontal) for every product, last (R25; Task T6).
+	 *
+	 * @param string $id The new group's ID.
+	 * @throws TableRuleBroken `no_products` before the first product; `empty_group` while an empty one is waiting.
+	 */
+	public function add_group( string $id ): self {
+		if ( array() === $this->products ) {
+			throw new TableRuleBroken( 'no_products' );
+		}
+		foreach ( $this->groups as $group ) {
+			if ( array() === $group['fields'] ) {
+				throw new TableRuleBroken( 'empty_group' );
+			}
+		}
+
+		return $this->with(
+			array(
+				'groups' => array_merge(
+					$this->groups,
+					array(
+						array(
+							'id'     => $id,
+							'fields' => array(),
+						),
+					)
+				),
+			)
+		);
+	}
+
+	/**
+	 * A whole row taken out (R33, Vertical's "Remove same field →"; Task T6): its fields leave every product; their
+	 * values stay (D7). The heading group stays.
+	 *
+	 * @param string $group The group.
+	 * @throws TableRuleBroken `group_missing` for the heading group or one not in the table.
+	 */
+	public function remove_group( string $group ): self {
+		$at = $this->group_index( $group );
+		if ( $at < 1 ) {
+			throw new TableRuleBroken( 'group_missing' );
+		}
+		$groups = $this->groups;
+		array_splice( $groups, $at, 1 );
+
+		return $this->with( array( 'groups' => $groups ) );
+	}
+
+	/**
+	 * A field added to a group for every product, last in the cell (R28, D7; Task T6). Each product's value is the one
+	 * the table kept from before (D7), else its starting value.
+	 *
+	 * @param string  $group The group.
+	 * @param int     $field The field.
+	 * @param Closure $value A product's starting value: fn( int $product, int $field ): string.
+	 * @throws TableRuleBroken `no_products`, `field_exists` (a field once per table, R2), `group_missing`.
+	 */
+	public function add_field( string $group, int $field, Closure $value ): self {
+		if ( array() === $this->products ) {
+			throw new TableRuleBroken( 'no_products' );
+		}
+		if ( in_array( $field, $this->field_ids(), true ) ) {
+			throw new TableRuleBroken( 'field_exists' );
+		}
+		$at = $this->group_index( $group );
+		if ( $at < 0 ) {
+			throw new TableRuleBroken( 'group_missing' );
+		}
+		$groups                    = $this->groups;
+		$groups[ $at ]['fields'][] = $field;
+		$values                    = $this->values;
+		foreach ( $this->product_ids() as $product ) {
+			$values[ $product ][ $field ] = $values[ $product ][ $field ] ?? (string) $value( $product, $field );
+		}
+
+		return $this->with(
+			array(
+				'groups' => $groups,
+				'values' => $values,
+			)
+		);
+	}
+
+	/**
+	 * A field taken out of its group for every product (R31, D7; Task T6). Its values stay, so adding it back brings
+	 * them back ("No data is deleted and the Field can always be added back."); a body group left empty goes.
+	 *
+	 * @param string $group The group.
+	 * @param int    $field The field.
+	 * @throws TableRuleBroken `field_missing` when the group does not hold it.
+	 */
+	public function remove_field( string $group, int $field ): self {
+		$at = $this->group_index( $group );
+		if ( $at < 0 || ! in_array( $field, $this->groups[ $at ]['fields'], true ) ) {
+			throw new TableRuleBroken( 'field_missing' );
+		}
+		$groups                  = $this->groups;
+		$groups[ $at ]['fields'] = array_values( array_diff( $groups[ $at ]['fields'], array( $field ) ) );
+		if ( $at > 0 && array() === $groups[ $at ]['fields'] ) {
+			array_splice( $groups, $at, 1 );
+		}
+
+		return $this->with( array( 'groups' => $groups ) );
+	}
+
+	/**
+	 * One cell's value (R30; Tasks T6-T8), cleaned by the caller.
+	 *
+	 * @param int    $product The product.
+	 * @param int    $field   The field.
+	 * @param string $value   The value.
+	 * @throws TableRuleBroken `cell_missing` when the product or the field is not in the table.
+	 */
+	public function set_value( int $product, int $field, string $value ): self {
+		if ( ! $this->has_product( $product ) || ! in_array( $field, $this->field_ids(), true ) ) {
+			throw new TableRuleBroken( 'cell_missing' );
+		}
+		$values                       = $this->values;
+		$values[ $product ][ $field ] = $value;
+
+		return $this->with( array( 'values' => $values ) );
+	}
+
+	/**
+	 * A group's place, from 0 (the heading group); -1 when it is not in the table.
+	 *
+	 * @param string $group The group.
+	 */
+	private function group_index( string $group ): int {
+		foreach ( $this->groups as $at => $entry ) {
+			if ( $entry['id'] === $group ) {
+				return (int) $at;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
 	 * Its products' IDs, in order.
 	 *
 	 * @return list<int>

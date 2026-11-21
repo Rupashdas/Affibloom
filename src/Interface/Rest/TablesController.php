@@ -31,7 +31,8 @@ use WP_REST_Server;
 
 /**
  * F25's routes (Tasks T1-T17). `POST /tables` (T2, R12) creates a table; `PATCH /tables/{id}` (T3) saves the builder's
- * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
+ * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them; `/groups`, their
+ * `/fields` and `/values` (T6) shape the rows and columns and save the cells. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
  * (`html`, `url`) and as data (`items`: id, title) for the editor's "Choose a Table", ten a page or the picker's five;
  * anyone who may place displays may read it.
  */
@@ -61,6 +62,69 @@ final class TablesController implements Module {
 			'type'     => 'integer',
 			'minimum'  => 0,
 			'required' => true,
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/groups',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_line' ),
+				'permission_callback' => $can,
+				'args'                => array( 'revision' => $revision ),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/groups/(?P<group>[A-Za-z0-9_-]+)',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'remove_group' ),
+				'permission_callback' => $can,
+				'args'                => array( 'revision' => $revision ),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/groups/(?P<group>[A-Za-z0-9_-]+)/fields',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_field' ),
+				'permission_callback' => $can,
+				'args'                => array(
+					'revision' => $revision,
+					'field'    => array(
+						'type'     => 'integer',
+						'minimum'  => 1,
+						'required' => true,
+					),
+				),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/groups/(?P<group>[A-Za-z0-9_-]+)/fields/(?P<field>\d+)',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'remove_field' ),
+				'permission_callback' => $can,
+				'args'                => array( 'revision' => $revision ),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/values/(?P<product>\d+)/(?P<field>\d+)',
+			array(
+				'methods'             => 'PUT',
+				'callback'            => array( $this, 'set_value' ),
+				'permission_callback' => $can,
+				'args'                => array(
+					'revision' => $revision,
+					'value'    => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
 		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
@@ -272,6 +336,97 @@ final class TablesController implements Module {
 	}
 
 	/**
+	 * POST /tables/{id}/groups (R25; Task T6): Add Row / Add Column, an empty one last. 409 `affibloom_table_no_products`,
+	 * 409 `affibloom_table_empty_group`.
+	 *
+	 * @param WP_REST_Request $request The table and its revision.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function add_line( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		return $this->write(
+			fn(): ?Table => $this->tables->add_line( (int) $request['id'], (int) $request['revision'] ),
+			self::redrawn( ... )
+		);
+	}
+
+	/**
+	 * DELETE /tables/{id}/groups/{group}?revision= (R33; Task T6): a whole row out.
+	 *
+	 * @param WP_REST_Request $request The table, its revision and the group.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function remove_group( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		return $this->write(
+			fn(): ?Table => $this->tables->remove_group( (int) $request['id'], (int) $request['revision'], (string) $request['group'] ),
+			self::redrawn( ... )
+		);
+	}
+
+	/**
+	 * POST /tables/{id}/groups/{group}/fields (R28; Task T6): a field for every product of that row or column. 409
+	 * `affibloom_table_field_exists`, 409 `affibloom_table_no_products`, 422 `affibloom_table_field_invalid`.
+	 *
+	 * @param WP_REST_Request $request The table, its revision, the group and the field.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function add_field( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		return $this->write(
+			fn(): ?Table => $this->tables->add_field( (int) $request['id'], (int) $request['revision'], (string) $request['group'], (int) $request['field'] ),
+			self::redrawn( ... )
+		);
+	}
+
+	/**
+	 * DELETE /tables/{id}/groups/{group}/fields/{field}?revision= (R31, D7; Task T6): the field out, its values kept.
+	 *
+	 * @param WP_REST_Request $request The table, its revision, the group and the field.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function remove_field( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		return $this->write(
+			fn(): ?Table => $this->tables->remove_field( (int) $request['id'], (int) $request['revision'], (string) $request['group'], (int) $request['field'] ),
+			self::redrawn( ... )
+		);
+	}
+
+	/**
+	 * PUT /tables/{id}/values/{product}/{field} (R30, D11; Tasks T6-T8): one cell, cleaned for its field's kind; the
+	 * builder is not redrawn (the cell keeps its focus). 404 when the cell is not in the table.
+	 *
+	 * @param WP_REST_Request $request The table, its revision, the product, the field and the value.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function set_value( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$field = $this->tables->field( (int) $request['field'] );
+		if ( null === $field ) {
+			return self::broken( 'cell_missing' );
+		}
+		$value = TableCellValue::clean( $field, $request['value'] );
+
+		return $this->write(
+			fn(): ?Table => $this->tables->set_value( (int) $request['id'], (int) $request['revision'], (int) $request['product'], $field->id, $value ),
+			static fn( Table $table ): array => array(
+				'revision' => $table->revision,
+				'value'    => $value,
+			)
+		);
+	}
+
+	/**
+	 * A write's answer that redraws the builder.
+	 *
+	 * @param Table  $table The table as saved.
+	 * @param string $html  The builder drawn from it.
+	 * @return array{revision: int, html: string}
+	 */
+	private static function redrawn( Table $table, string $html ): array {
+		return array(
+			'revision' => $table->revision,
+			'html'     => $html,
+		);
+	}
+
+	/**
 	 * One builder write's answer (D4, D5): the change made, or the refusal in Lasso's words.
 	 *
 	 * @param Closure $write  The write: fn(): ?Table (null: the table is gone).
@@ -302,6 +457,12 @@ final class TablesController implements Module {
 			'product_exists'  => new WP_Error( 'affibloom_table_product_exists', __( 'This product already exists, please select another product', 'affibloom' ), array( 'status' => 409 ) ),
 			'product_invalid' => new WP_Error( 'affibloom_table_product_invalid', __( 'That product does not exist.', 'affibloom' ), array( 'status' => 422 ) ),
 			'group_invalid'   => new WP_Error( 'affibloom_table_group_invalid', __( 'That group does not exist.', 'affibloom' ), array( 'status' => 422 ) ),
+			'no_products'     => new WP_Error( 'affibloom_table_no_products', __( 'Please add a Product before adding a field', 'affibloom' ), array( 'status' => 409 ) ),
+			'empty_group'     => new WP_Error( 'affibloom_table_empty_group', __( 'Please add a Field to the empty column before adding another', 'affibloom' ), array( 'status' => 409 ) ),
+			'field_exists'    => new WP_Error( 'affibloom_table_field_exists', __( 'This field already exists, please select another field', 'affibloom' ), array( 'status' => 409 ) ),
+			'field_invalid'   => new WP_Error( 'affibloom_table_field_invalid', __( 'That field does not exist.', 'affibloom' ), array( 'status' => 422 ) ),
+			'group_missing', 'field_missing' => new WP_Error( 'affibloom_table_field_missing', __( 'That field is no longer in this table. Reload to see the latest version.', 'affibloom' ), array( 'status' => 404 ) ),
+			'cell_missing'    => new WP_Error( 'affibloom_table_cell_missing', __( 'Unexpected error. Please contact your developer', 'affibloom' ), array( 'status' => 404 ) ),
 			default           => new WP_Error( 'affibloom_table_product_missing', __( 'That product is no longer in this table. Reload to see the latest version.', 'affibloom' ), array( 'status' => 404 ) ),
 		};
 	}

@@ -28,7 +28,7 @@ use Closure;
 
 /**
  * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4) and a
- * group's (T5). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
+ * group's (T5), rows, columns, fields and cell values (T6). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
  */
 final class TableService {
 
@@ -200,6 +200,101 @@ final class TableService {
 	 */
 	public function remove_product( int $id, int $revision, int $product ): ?Table {
 		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->remove_product( $product ) );
+	}
+
+	/**
+	 * An empty row or column (R25; Task T6).
+	 *
+	 * @param int $id       The table.
+	 * @param int $revision The revision the editor's copy has.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `no_products`,
+	 *                      `empty_group`.
+	 */
+	public function add_line( int $id, int $revision ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->add_group( self::new_group_id() ) );
+	}
+
+	/**
+	 * A whole row taken out (R33; Task T6).
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param string $group    The group.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `group_missing`.
+	 */
+	public function remove_group( int $id, int $revision, string $group ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->remove_group( $group ) );
+	}
+
+	/**
+	 * A field added to a row or column for every product, each filled from its product (R28, R22, D7; Task T6).
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param string $group    The group.
+	 * @param int    $field    The field.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableRuleBroken `field_invalid` (no such field); TableChanged when the table moved on since the editor's
+	 *                         copy; the table's own refusals (R28).
+	 */
+	public function add_field( int $id, int $revision, string $group, int $field ): ?Table {
+		if ( null === $this->field( $field ) ) {
+			throw new TableRuleBroken( 'field_invalid' );
+		}
+
+		return $this->change(
+			$id,
+			$revision,
+			fn( Table $table ): Table => $table->add_field(
+				$group,
+				$field,
+				function ( int $product, int $field ): string {
+					$found = $this->products->get( $product );
+
+					return null === $found ? '' : $this->values->for( $found, $this->products->fields( $product ), $field );
+				}
+			)
+		);
+	}
+
+	/**
+	 * A field taken out of a row or column (R31, D7; Task T6); its values are kept.
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param string $group    The group.
+	 * @param int    $field    The field.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `field_missing`.
+	 */
+	public function remove_field( int $id, int $revision, string $group, int $field ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->remove_field( $group, $field ) );
+	}
+
+	/**
+	 * One cell's value (R30, D11; Tasks T6-T8), cleaned by the caller for the field's kind.
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param int    $product  The product.
+	 * @param int    $field    The field.
+	 * @param string $value    The value.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `cell_missing`.
+	 */
+	public function set_value( int $id, int $revision, int $product, int $field, string $value ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->set_value( $product, $field, $value ) );
+	}
+
+	/**
+	 * A field of the library, or null (the cell's kind, for cleaning its value).
+	 *
+	 * @param int $id The field.
+	 */
+	public function field( int $id ): ?Field {
+		return ( $this->library )()->find( $id );
 	}
 
 	/**

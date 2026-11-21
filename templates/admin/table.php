@@ -11,6 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Table\Table;
 use Affibloom\Domain\Table\TableStyle;
 use Affibloom\Domain\Table\TableTheme;
@@ -116,6 +117,32 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	<?php $this->render( 'admin/partials/table-create-modal' ); ?>
 	<?php $this->render( 'admin/partials/table-product-picker' ); ?>
 	<?php $this->render( 'admin/partials/table-group-picker' ); ?>
+	<?php
+	$this->render(
+		'admin/partials/field-modal',
+		array(
+			'types'  => FieldType::choosable(),
+			'remove' => false,
+		)
+	);
+	?>
+	<?php
+	// Lasso's 'Remove "<field>"?' (R31); the script puts the field's name in the title.
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'            => 'affibloom-table-remove-field',
+			'title'         => '',
+			'text'          => __( 'No data is deleted and the Field can always be added back.', 'affibloom' ),
+			'confirm_label' => __( 'Remove', 'affibloom' ),
+			'confirm_attr'  => 'data-table-remove-field-confirm',
+			'busy_label'    => __( 'Removing…', 'affibloom' ),
+			'failed_text'   => __( 'Could not remove the field. Please try again.', 'affibloom' ),
+			/* translators: %s: the field's name. */
+			'data'          => array( 'title-template' => __( 'Remove "%s"?', 'affibloom' ) ),
+		)
+	);
+	?>
 	<?php
 	// Lasso's 'Remove "<name>"?' (R23); the script puts the product's name in the title.
 	$this->render(

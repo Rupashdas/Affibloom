@@ -2,8 +2,8 @@
 /**
  * Custom fields on the product page (F1, Task 14C). Every change is stored as it is made, as Lasso's page does: a value
  * when it changes (on leaving its box), a switch when it is turned, the order when a row is dragged, by pointer or Arrow keys (Task FL5);
- * adding and removing a field redraw the rows. A value the server refuses is named under its row (Task FL5). The "Add Field" dialog: "Create new" stores a field and opens the library, as Lasso's does;
- * "Add from library" searches by name, ten a page, and adds one. Opening and closing the dialogs is admin.js's.
+ * adding and removing a field redraw the rows. A value the server refuses is named under its row (Task FL5). The "Add Field" dialog is
+ * field-dialog.js's; this file adds the field chosen. Opening and closing the dialogs is admin.js's.
  */
 ( function () {
 	'use strict';
@@ -179,177 +179,25 @@
 			} );
 		} );
 
-		// The dialog's tabs.
-		var tabs = Array.prototype.slice.call( modal.querySelectorAll( '[data-field-tab]' ) );
-		var show = function ( name ) {
-			tabs.forEach( function ( tab ) {
-				var on = tab.dataset.fieldTab === name;
-				tab.setAttribute( 'aria-selected', on ? 'true' : 'false' );
-				tab.tabIndex = on ? 0 : -1;
-				modal.querySelector( '[data-field-panel="' + tab.dataset.fieldTab + '"]' ).hidden = ! on;
-			} );
-			if ( 'library' === name ) {
-				library( 1 );
-			}
-		};
-		tabs.forEach( function ( tab ) {
-			tab.addEventListener( 'click', function () {
-				show( tab.dataset.fieldTab );
-			} );
-			tab.addEventListener( 'keydown', function ( event ) {
-				if ( 'ArrowRight' === event.key || 'ArrowLeft' === event.key ) {
-					var next = tabs[ ( tabs.indexOf( tab ) + 1 ) % tabs.length ];
-					next.focus();
-					show( next.dataset.fieldTab );
-				}
-			} );
-		} );
-
-		// "Create new".
-		var title = modal.querySelector( '[data-field-title]' );
-		var error = modal.querySelector( '[data-field-error]' );
-		var describe = modal.querySelector( '[data-field-description]' );
-		var fail = function ( message ) {
-			error.textContent = message;
-			error.hidden = '' === message;
-			title.classList.toggle( 'is-invalid', '' !== message );
-		};
-		title.addEventListener( 'input', function () {
-			fail( '' );
-		} );
-		modal.querySelector( '[data-field-create]' ).addEventListener( 'click', function () {
-			var create = this;
-			if ( create.disabled ) {
-				return;
-			}
-			create.disabled = true;
-			create.classList.add( 'is-busy' );
-			var idle = function () {
-				create.disabled = false;
-				create.classList.remove( 'is-busy' );
-			};
-			wp.apiFetch( {
-				path: '/affibloom/v1/fields',
-				method: 'POST',
-				data: { name: title.value, type: modal.querySelector( '[data-field-type]' ).value, description: describe.value },
-			} ).then( function () {
-				idle();
-				title.value = '';
-				describe.value = '';
-				fail( '' );
-				show( 'library' );
-				modal.querySelector( '[data-field-tab="library"]' ).focus();
-			} ).catch( function ( problem ) {
-				idle();
-				fail( problem && problem.message ? problem.message : '' );
-				title.focus();
-			} );
-		} );
-
-		// "Add from library": ten a page, searched by name.
-		var shelf = modal.querySelector( '[data-field-library]' );
-		var search = modal.querySelector( '[data-field-search]' );
-		var pager = modal.querySelector( '[data-field-pager]' );
-		var page = 1;
-		var pages = 1;
-		var requests = 0;
-		var timer = null;
-
-		var library = function ( wanted ) {
-			var mine = ++requests;
-			// Until the answer comes, the list shows the rows' shapes (design system, "Skeleton").
-			shelf.replaceChildren();
-			window.affibloomSkeleton( shelf, 4, false );
-			wp.apiFetch( { path: '/affibloom/v1/fields?' + new URLSearchParams( { search: search.value, page: String( wanted ) } ).toString() } ).then( function ( response ) {
-				if ( mine !== requests ) {
-					return; // A newer search has been asked for.
-				}
-				window.affibloomSkeleton.done( shelf );
-				var data = response.data;
-				var attached = rows().map( function ( row ) {
-					return row.dataset.fieldId;
+		// The "Add Field" dialog (field-dialog.js): each opening starts on "Create new", as Lasso's dialog does; the
+		// library marks the fields the product has.
+		window.affibloomFieldDialog( {
+			modal: modal,
+			start: 'create',
+			has: function ( field ) {
+				return rows().some( function ( row ) {
+					return row.dataset.fieldId === String( field.id );
 				} );
-				page = data.page;
-				pages = data.pages;
-				shelf.replaceChildren();
-				data.items.forEach( function ( field ) {
-					var item = document.createElement( 'li' );
-					var text = document.createElement( 'span' );
-					var name = document.createElement( 'strong' );
-					var meta = document.createElement( 'span' );
-					var add = document.createElement( 'button' );
-					var has = -1 !== attached.indexOf( String( field.id ) );
-					item.className = 'affibloom-field-library__item';
-					text.className = 'affibloom-field-library__text';
-					name.textContent = field.name;
-					meta.className = 'affibloom-field-library__meta';
-					meta.textContent = field.type_label + ( field.description ? ' · ' + field.description : '' );
-					add.type = 'button';
-					add.className = 'affibloom-button affibloom-button--small ' + ( has ? 'affibloom-button--secondary' : 'affibloom-button--primary' );
-					add.textContent = has ? shelf.dataset.addedLabel : shelf.dataset.addText;
-					add.disabled = has;
-					add.setAttribute( 'aria-label', format( shelf.dataset.addLabel, [ field.name ] ) );
-					add.dataset.fieldAdd = String( field.id );
-					text.append( name, meta );
-					item.append( text, add );
-					shelf.appendChild( item );
+			},
+			add: function ( field, button ) {
+				wp.apiFetch( { path: path, method: 'POST', data: { field: field } } ).then( function ( response ) {
+					draw( response.data.html );
+					close( modal );
+				} ).catch( function ( problem ) {
+					button.disabled = false;
+					failed( problem, box.dataset.addFailed );
 				} );
-				if ( 0 === data.items.length ) {
-					var none = document.createElement( 'li' );
-					none.className = 'affibloom-field-library__empty';
-					none.textContent = shelf.dataset.empty;
-					shelf.appendChild( none );
-				}
-				pager.hidden = pages <= 1;
-				pager.querySelector( '[data-field-page="previous"]' ).disabled = page <= 1;
-				pager.querySelector( '[data-field-page="next"]' ).disabled = page >= pages;
-				var label = pager.querySelector( '[data-field-page-text]' );
-				label.textContent = format( label.dataset.format, [ String( page ), String( pages ) ] );
-			} ).catch( function () {
-				if ( mine !== requests ) {
-					return;
-				}
-				// A failed load says so instead of leaving the shapes; searching or paging asks again.
-				window.affibloomSkeleton.done( shelf );
-				var failed = document.createElement( 'li' );
-				failed.className = 'affibloom-field-library__empty';
-				failed.setAttribute( 'role', 'alert' );
-				failed.textContent = shelf.dataset.failed;
-				shelf.replaceChildren( failed );
-			} );
-		};
-
-		search.addEventListener( 'input', function () {
-			window.clearTimeout( timer );
-			timer = window.setTimeout( function () {
-				library( 1 );
-			}, 250 );
-		} );
-		pager.addEventListener( 'click', function ( event ) {
-			var button = event.target.closest( '[data-field-page]' );
-			if ( button ) {
-				library( 'next' === button.dataset.fieldPage ? page + 1 : page - 1 );
-			}
-		} );
-		shelf.addEventListener( 'click', function ( event ) {
-			var add = event.target.closest( '[data-field-add]' );
-			if ( ! add ) {
-				return;
-			}
-			add.disabled = true;
-			wp.apiFetch( { path: path, method: 'POST', data: { field: parseInt( add.dataset.fieldAdd, 10 ) } } ).then( function ( response ) {
-				draw( response.data.html );
-				close( modal );
-			} ).catch( function ( problem ) {
-				add.disabled = false;
-				failed( problem, box.dataset.addFailed );
-			} );
-		} );
-
-		// Each opening starts on "Create new", as Lasso's dialog does.
-		modal.addEventListener( 'affibloom:open', function () {
-			search.value = '';
-			show( 'create' );
+			},
 		} );
 	} );
 } )();

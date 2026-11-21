@@ -46,4 +46,71 @@ final class TableTest extends TestCase {
 		$this->expectException( \Affibloom\Domain\InvalidField::class );
 		Table::draft( '   ', TableStyle::Column );
 	}
+
+	/** A table with two products and Lasso's starting layout, for Task T6's rules. */
+	private static function laid_out(): Table {
+		$ids   = array( 'g_head', 'g_one', 'g_two' );
+		$table = new Table( 1, 'Shoes' );
+		foreach ( array( 7, 8 ) as $product ) {
+			$table = $table->add_product( $product, '', static fn( int $field ): string => $product . ':' . $field, static function () use ( &$ids ): string {
+				return (string) array_shift( $ids );
+			} );
+		}
+
+		return $table;
+	}
+
+	/** Task T6 (F25 R25): Add Row needs a product and refuses a second empty one. */
+	public function test_an_empty_line_needs_a_product_and_only_one_waits(): void {
+		try {
+			( new Table( 1, 'Shoes' ) )->add_group( 'g_x' );
+			self::fail( 'An empty table took a row.' );
+		} catch ( \Affibloom\Domain\Table\TableRuleBroken $broken ) {
+			self::assertSame( 'no_products', $broken->rule );
+		}
+		$table = self::laid_out()->add_group( 'g_new' );
+		self::assertSame( array( 'id' => 'g_new', 'fields' => array() ), $table->groups[3] );
+
+		$this->expectExceptionObject( new \Affibloom\Domain\Table\TableRuleBroken( 'empty_group' ) );
+		$table->add_group( 'g_other' );
+	}
+
+	/** Task T6 (F25 R2, R28, R31, D7): a field once per table, for every product; removed, its values stay. */
+	public function test_a_field_is_added_for_every_product_once_and_its_values_survive_removal(): void {
+		$table = self::laid_out()->add_group( 'g_new' )->add_field( 'g_new', 2, static fn( int $product, int $field ): string => "pros of $product" );
+		self::assertSame( array( 2 ), $table->groups[3]['fields'] );
+		self::assertSame( array( 'pros of 7', 'pros of 8' ), array( $table->values[7][2], $table->values[8][2] ) );
+
+		try {
+			$table->add_field( 'g_one', 2, static fn(): string => '' );
+			self::fail( 'A field came twice.' );
+		} catch ( \Affibloom\Domain\Table\TableRuleBroken $broken ) {
+			self::assertSame( 'field_exists', $broken->rule );
+		}
+
+		$table = $table->set_value( 7, 2, 'Light' )->remove_field( 'g_new', 2 );
+		self::assertCount( 3, $table->groups, 'The emptied row went.' );
+		self::assertSame( 'Light', $table->values[7][2], 'D7: the value is kept.' );
+
+		$back = $table->add_group( 'g_back' )->add_field( 'g_back', 2, static fn(): string => 'fresh' );
+		self::assertSame( array( 'Light', 'pros of 8' ), array( $back->values[7][2], $back->values[8][2] ) );
+
+		// The heading group stays even when emptied.
+		self::assertSame( array(), $table->remove_field( 'g_head', 99991 )->groups[0]['fields'] );
+	}
+
+	/** Task T6 (F25 R30, R33): a cell must be in the table; a whole row goes, the heading row never. */
+	public function test_cells_must_exist_and_a_whole_row_can_go(): void {
+		$table = self::laid_out();
+		self::assertSame( array( 'g_head', 'g_two' ), array_column( $table->remove_group( 'g_one' )->groups, 'id' ) );
+
+		foreach ( array( static fn() => $table->remove_group( 'g_head' ), static fn() => $table->set_value( 7, 2, 'x' ), static fn() => $table->set_value( 99, 99990, 'x' ), static fn() => $table->remove_field( 'g_one', 99992 ) ) as $refused ) {
+			try {
+				$refused();
+				self::fail( 'A missing row, field or cell was accepted.' );
+			} catch ( \Affibloom\Domain\Table\TableRuleBroken $broken ) {
+				self::assertContains( $broken->rule, array( 'group_missing', 'cell_missing', 'field_missing' ) );
+			}
+		}
+	}
 }

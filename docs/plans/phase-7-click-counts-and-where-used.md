@@ -133,7 +133,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T3: The builder page and the table's settings
 - [x] Task T4: Products in a table — add, starting layout, badge, remove
 - [x] Task T5: Add a group to a table
-- [ ] Task T6: Rows and columns, the Add Field dialog, plain cells
+- [x] Task T6: Rows and columns, the Add Field dialog, plain cells
 - [ ] Task T7: Image, price and description cells
 - [ ] Task T8: Button information
 - [ ] Task T9: Reordering
@@ -1873,13 +1873,15 @@ Vertical row's **Remove same field →** removes the whole row.
 
 **Files:** the above; F25 spec AC7-AC9; unit tests for every refusal and D7.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain.**
-- [ ] **Step 3: Routes.**
-- [ ] **Step 4: Dialog and
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain.**
+- [x] **Step 3: Routes.**
+- [x] **Step 4: Dialog and
   cells.**
-- [ ] **Step 5: Run and look.**
-- [ ] **Step 6: Commit** — "Add rows, columns and fields to a table".
+- [x] **Step 5: Run and look.**
+- [x] **Step 6: Commit** — "Add rows, columns and fields to a table".
+
+*Note:* The Add Field dialog's script moved from product-fields.js to field-dialog.js on its second use (the product page now calls it); GET /fields gained `for=table`, `per_page` and `exclude[]`, and the dialog renders without the product's remove question (`remove` false). The heading group stays when its last field goes; an emptied body group goes (R31). Values are cleaned per kind in Interface\Rest\TableCellValue (D11). Fixed on the way: the cells' hidden Badge labels widened the page at 375 px (the grid card is now their containing block). Checked: unit tests for every refusal and D7; on Local every route and refusal; in a headless browser Add Row, the refusal, the dialog on the library (6 rows, the table's fields left out), a pick filling every product, a value saved, Remove and Remove same field, 375 px, and the product page's dialog.
 
 ---
 

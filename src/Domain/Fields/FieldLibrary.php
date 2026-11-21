@@ -237,18 +237,19 @@ final class FieldLibrary {
 	 * One page of fields whose name holds the words typed, in any case, in that order: Lasso's `field_name LIKE %…%` with
 	 * each space a wildcard (F26 R8, D11), so "pri rat" finds Primary Rating. `%` and `_` are ordinary characters here.
 	 *
-	 * @param string $search        What was typed; '' for every field.
-	 * @param int    $page          From 1.
-	 * @param int    $per_page      Fields a page.
-	 * @param bool   $products_only Leave out the table-only built-ins: the product page's library (R24).
+	 * @param string    $search        What was typed; '' for every field.
+	 * @param int       $page          From 1.
+	 * @param int       $per_page      Fields a page.
+	 * @param bool      $products_only Leave out the table-only built-ins: the product page's library (R24).
+	 * @param list<int> $exclude       Fields left out: those a comparison table has already (F25 R27).
 	 */
-	public function search( string $search, int $page, int $per_page, bool $products_only = false ): FieldPage {
+	public function search( string $search, int $page, int $per_page, bool $products_only = false, array $exclude = array() ): FieldPage {
 		$words   = preg_split( '/\s+/', trim( $search ), -1, PREG_SPLIT_NO_EMPTY );
 		$words   = false === $words ? array() : $words;
 		$matches = array_values(
 			array_filter(
 				$this->all(),
-				static fn( Field $field ): bool => ( ! $products_only || ! $field->table_only ) && self::holds( $field->name, $words )
+				static fn( Field $field ): bool => ( ! $products_only || ! $field->table_only ) && ! in_array( $field->id, $exclude, true ) && self::holds( $field->name, $words )
 			)
 		);
 		$pages   = max( 1, (int) ceil( count( $matches ) / max( 1, $per_page ) ) );

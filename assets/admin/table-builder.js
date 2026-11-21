@@ -14,6 +14,10 @@
  *   'Remove "<name>"?' and takes the product out.
  * - Groups (T5): Add Group opens "Add group to Table" (the same search over GET /groups); a choice adds the group's
  *   products not yet in the table.
+ * - Rows, columns and fields (T6): Add Row / Add Column adds an empty one; Add field (+) and "Click to add a Field"
+ *   open "Add Field" (field-dialog.js) on the library of fields not in the table, six a page, and add the pick to that
+ *   row or column for every product. A field's × asks 'Remove "<field>"?'; Vertical's "Remove same field →" takes the
+ *   whole row out. A value saves 500 ms after it changes (a rating is kept between 1 and 5 while typing).
  */
 ( function () {
 	'use strict';
@@ -245,6 +249,104 @@
 		}
 	} );
 
+	// Add Row / Add Column, Add Field, removing fields and rows (T6; R25-R28, R31, R33).
+	var fieldModal = document.getElementById( 'affibloom-field-modal' );
+	var fieldGroup = '';
+	var fieldsInTable = function () {
+		var ids = [];
+		region.querySelectorAll( '[data-table-field]' ).forEach( function ( field ) {
+			if ( -1 === ids.indexOf( field.dataset.tableField ) ) {
+				ids.push( field.dataset.tableField );
+			}
+		} );
+		return ids;
+	};
+	window.affibloomFieldDialog( {
+		modal: fieldModal,
+		start: 'library',
+		findCreated: true,
+		query: function () {
+			return { for: 'table', per_page: 6, exclude: fieldsInTable() };
+		},
+		add: function ( field, button ) {
+			enqueue( {
+				send: function ( current ) {
+					return wp.apiFetch( { path: path + '/groups/' + encodeURIComponent( fieldGroup ) + '/fields', method: 'POST', data: { revision: current, field: field } } );
+				},
+				done: function () {
+					window.affibloomModal.hide();
+				},
+				failed: function ( text ) {
+					button.disabled = false;
+					window.affibloomToast( text, true );
+				},
+			} );
+		},
+	} );
+
+	var fieldRemover = document.getElementById( 'affibloom-table-remove-field' );
+	var fieldConfirm = fieldRemover.querySelector( '[data-table-remove-field-confirm]' );
+	var removingField = null;
+	fieldConfirm.addEventListener( 'click', function () {
+		var chosen = removingField;
+		var label = fieldConfirm.textContent;
+		fieldConfirm.disabled = true;
+		fieldConfirm.textContent = fieldConfirm.getAttribute( 'data-busy-label' );
+		var restore = function () {
+			fieldConfirm.disabled = false;
+			fieldConfirm.textContent = label;
+			window.affibloomModal.hide();
+		};
+		enqueue( {
+			send: function ( current ) {
+				return wp.apiFetch( { path: path + '/groups/' + encodeURIComponent( chosen.group ) + '/fields/' + chosen.field + '?revision=' + current, method: 'DELETE' } );
+			},
+			done: restore,
+			failed: function ( text ) {
+				restore();
+				say( text );
+			},
+		} );
+	} );
+
+	// A cell's value, 500 ms after its last change (R30).
+	var timers = {};
+	var saveValue = function ( input ) {
+		var cell = input.closest( '[data-table-product]' );
+		var product = cell.getAttribute( 'data-table-product' );
+		var field = input.closest( '[data-table-field]' ).dataset.tableField;
+		var key = product + '-' + field;
+		window.clearTimeout( timers[ key ] );
+		timers[ key ] = window.setTimeout( function () {
+			var value = input.value;
+			enqueue( {
+				send: function ( current ) {
+					return wp.apiFetch( { path: path + '/values/' + product + '/' + field, method: 'PUT', data: { revision: current, value: value } } );
+				},
+				done: function ( data ) {
+					// The stored value (a rating rounded, empty lines dropped) shows once the box is left.
+					if ( document.activeElement !== input && input.value === value ) {
+						input.value = data.value;
+					}
+				},
+			} );
+		}, 500 );
+	};
+	region.addEventListener( 'input', function ( event ) {
+		var input = event.target.closest( '[data-table-value]' );
+		if ( ! input ) {
+			return;
+		}
+		if ( input.hasAttribute( 'data-table-rating' ) ) {
+			if ( parseFloat( input.value ) > 5 ) {
+				input.value = '5';
+			}
+			var stars = input.parentNode.querySelector( '[data-table-stars]' );
+			stars.style.setProperty( '--rating', String( parseFloat( input.value ) || 0 ) );
+		}
+		saveValue( input );
+	} );
+
 	// Remove this product (T4; R23).
 	var remover = document.getElementById( 'affibloom-table-remove-product' );
 	var confirm = remover.querySelector( '[data-table-remove-confirm]' );
@@ -283,6 +385,38 @@
 		var addGroup = event.target.closest( '[data-table-action="add-group"]' );
 		if ( addGroup ) {
 			window.affibloomModal.show( groupPicker, addGroup );
+			return;
+		}
+		if ( event.target.closest( '[data-table-action="add-line"]' ) ) {
+			enqueue( {
+				send: function ( current ) {
+					return wp.apiFetch( { path: path + '/groups', method: 'POST', data: { revision: current } } );
+				},
+			} );
+			return;
+		}
+		var addField = event.target.closest( '[data-table-add-field]' );
+		if ( addField ) {
+			fieldGroup = addField.closest( '[data-table-group]' ).getAttribute( 'data-table-group' );
+			window.affibloomModal.show( fieldModal, addField );
+			return;
+		}
+		var removeField = event.target.closest( '[data-table-remove-field]' );
+		if ( removeField ) {
+			var holder = removeField.closest( '[data-table-field]' );
+			removingField = { group: removeField.closest( '[data-table-group]' ).getAttribute( 'data-table-group' ), field: holder.dataset.tableField };
+			fieldRemover.querySelector( '.affibloom-modal__title' ).textContent = fieldRemover.dataset.titleTemplate.replace( '%s', holder.dataset.fieldName );
+			window.affibloomModal.show( fieldRemover, removeField );
+			return;
+		}
+		var removeRow = event.target.closest( '[data-table-remove-row]' );
+		if ( removeRow ) {
+			var row = removeRow.closest( '[data-table-group]' ).getAttribute( 'data-table-group' );
+			enqueue( {
+				send: function ( current ) {
+					return wp.apiFetch( { path: path + '/groups/' + encodeURIComponent( row ) + '?revision=' + current, method: 'DELETE' } );
+				},
+			} );
 			return;
 		}
 		var remove = event.target.closest( '[data-table-remove]' );

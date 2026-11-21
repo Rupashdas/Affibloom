@@ -135,7 +135,8 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
 			wp_enqueue_script( 'affibloom-product', $this->plugin_url . 'assets/admin/product.js', array( 'affibloom-admin', 'affibloom-drag-rows' ), $this->version, true );
 			// Custom fields: the rows and the "Add Field" dialog (Task 14C).
-			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-field-dialog', $this->plugin_url . 'assets/admin/field-dialog.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-product-fields', $this->plugin_url . 'assets/admin/product-fields.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows', 'affibloom-field-dialog' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-buttons', $this->plugin_url . 'assets/admin/product-buttons.js', array( 'affibloom-admin', 'affibloom-icon-picker', 'affibloom-drag-rows' ), $this->version, true );
 			// Save Changes: the form through PATCH /products/{id}, its dialog and toasts (Task 15A).
 			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );
@@ -164,7 +165,8 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-tables', $this->plugin_url . 'assets/admin/tables.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
-			wp_enqueue_script( 'affibloom-table-builder', $this->plugin_url . 'assets/admin/table-builder.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-product-search' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-field-dialog', $this->plugin_url . 'assets/admin/field-dialog.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-table-builder', $this->plugin_url . 'assets/admin/table-builder.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-product-search', 'affibloom-field-dialog' ), $this->version, true );
 		}
 		if ( str_contains( $hook_suffix, TablesScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );

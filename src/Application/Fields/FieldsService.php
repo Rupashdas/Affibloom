@@ -53,13 +53,16 @@ final class FieldsService {
 
 	/**
 	 * One page of the "Add from library" tab: the fields a product can take, which leaves out the six that comparison
-	 * tables fill (F26 R24, D2).
+	 * tables fill (F26 R24, D2); or a table's (F25 R27, Task T6): every field, those already in the table left out.
 	 *
-	 * @param string $search What was typed.
-	 * @param int    $page   From 1.
+	 * @param string    $search   What was typed.
+	 * @param int       $page     From 1.
+	 * @param int       $per_page Fields a page (ten; a table's dialog shows six).
+	 * @param bool      $table    A table's library.
+	 * @param list<int> $exclude  The fields the table has.
 	 */
-	public function library( string $search, int $page ): FieldPage {
-		return $this->library->load()->search( $search, $page, self::PER_PAGE, true );
+	public function library( string $search, int $page, int $per_page = self::PER_PAGE, bool $table = false, array $exclude = array() ): FieldPage {
+		return $this->library->load()->search( $search, $page, $per_page, ! $table, $exclude );
 	}
 
 	/**

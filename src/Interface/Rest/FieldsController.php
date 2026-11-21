@@ -84,15 +84,32 @@ final class FieldsController implements Module {
 					'callback'            => array( $this, 'library' ),
 					'permission_callback' => array( $this, 'can_manage' ),
 					'args'                => array(
-						'search' => array(
+						'search'   => array(
 							'type'              => 'string',
 							'default'           => '',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
-						'page'   => array(
+						'page'     => array(
 							'type'    => 'integer',
 							'minimum' => 1,
 							'default' => 1,
+						),
+						// A comparison table's "Add Field" (F25 R27, Task T6): every field, six a page, its own left out.
+						'for'      => array(
+							'type'    => 'string',
+							'enum'    => array( 'product', 'table' ),
+							'default' => 'product',
+						),
+						'per_page' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 50,
+							'default' => FieldsService::PER_PAGE,
+						),
+						'exclude'  => array(
+							'type'    => 'array',
+							'items'   => array( 'type' => 'integer' ),
+							'default' => array(),
 						),
 					),
 				),
@@ -199,11 +216,17 @@ final class FieldsController implements Module {
 	/**
 	 * GET /fields: one page of the library.
 	 *
-	 * @param WP_REST_Request $request Request with "search" and "page".
-	 * @phpstan-param WP_REST_Request<array{search: string, page: int}> $request
+	 * @param WP_REST_Request $request Request with "search", "page" and a table's "for", "per_page" and "exclude".
+	 * @phpstan-param WP_REST_Request<array{search: string, page: int, for: string, per_page: int, exclude: list<int>}> $request
 	 */
 	public function library( WP_REST_Request $request ): WP_REST_Response {
-		$page = $this->fields->library( (string) $request['search'], (int) $request['page'] );
+		$page = $this->fields->library(
+			(string) $request['search'],
+			(int) $request['page'],
+			(int) $request['per_page'],
+			'table' === $request['for'],
+			array_map( 'intval', (array) $request['exclude'] )
+		);
 
 		return new WP_REST_Response(
 			array(

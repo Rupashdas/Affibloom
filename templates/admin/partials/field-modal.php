@@ -3,10 +3,11 @@
  * "Add Field" (F1, Task 14C; Lasso's modals/field-create.php): the tabs "Create new" (Field Title, Field Type,
  * Description, "Create Field") and "Add from library" (a search and ten fields a page, each with Add). Creating a field
  * stores it and opens the library, as Lasso's does; adding one stores it on the product and closes the dialog.
- * "Manage Fields" (Lasso's Fields screen) opens the Fields list in a new tab (Task FL1).
+ * "Manage Fields" (Lasso's Fields screen) opens the Fields list in a new tab (Task FL1). A comparison table's builder
+ * (F25 R26, Task T6) shows the same dialog without the product's remove question (`remove` false).
  *
  * @package Affibloom
- * @var array{types: list<\Affibloom\Domain\Fields\FieldType>} $view
+ * @var array{types: list<\Affibloom\Domain\Fields\FieldType>, remove?: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -115,6 +116,11 @@ $title_help = __( 'Ideal title for use in things like a comparison table header.
 	</div>
 </div>
 
+<?php
+if ( false === ( $view['remove'] ?? true ) ) {
+	return;
+}
+?>
 <?php // Lasso's url-field-delete: the field's name in the question, its value gone with it. ?>
 <div id="affibloom-field-remove" class="affibloom-modal" hidden data-field-remove-modal>
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>

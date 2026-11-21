@@ -214,4 +214,102 @@ test.describe( 'F25 Comparison tables', () => {
 		expect( stored.products.map( ( entry: { id: number } ) => entry.id ) ).toEqual( [ one, two ] );
 		await expect( page.locator( '.affibloom-table-cell--head' ) ).toHaveCount( 2 );
 	} );
+
+	/** A table of the given products, built through the builder's own route (T4) so it has Lasso's starting layout. */
+	const tableWith = async ( page: import( '@playwright/test' ).Page, style: 'row' | 'column', products: number[] ): Promise<number> => {
+		const id = createTable( unique( 'F25 fields' ), style, 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+		for ( const product of products ) {
+			await page.evaluate( async ( [ table, item ] ) => {
+				const builder = document.querySelector( '[data-table-builder]' ) as HTMLElement;
+				const answer = await ( window as unknown as { wp: { apiFetch: ( o: object ) => Promise<{ data: { revision: number } }> } } ).wp.apiFetch( {
+					path: `/affibloom/v1/tables/${ table }/products`,
+					method: 'POST',
+					data: { revision: Number( builder.dataset.revision ), product: item },
+				} );
+				builder.dataset.revision = String( answer.data.revision );
+			}, [ id, product ] );
+		}
+		await page.reload();
+		return id;
+	};
+	const stored = ( id: number ) => JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) );
+
+	// AC7 (T6; R25).
+	test( 'AC7 Add Row / Add Column: an empty one with "Click to add a Field"; refused without products or with one waiting', async ( { page } ) => {
+		const empty = createTable( unique( 'F25 AC7 empty' ), 'column', 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ empty }` );
+		await page.getByRole( 'button', { name: 'Add Row' } ).click();
+		await expect( page.getByRole( 'alert' ).filter( { hasText: 'Please add a Product before adding a field' } ) ).toBeVisible();
+
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		await tableWith( page, 'row', [ createProduct( { name: `Row ${ word } a` } ), createProduct( { name: `Row ${ word } b` } ) ] );
+		await page.getByRole( 'button', { name: 'Add Column' } ).click();
+		await expect( page.getByRole( 'button', { name: 'Click to add a Field' } ) ).toHaveCount( 2 );
+		await page.getByRole( 'button', { name: 'Add Column' } ).click();
+		await expect( page.getByRole( 'alert' ).filter( { hasText: 'Please add a Field to the empty column before adding another' } ) ).toBeVisible();
+	} );
+
+	// AC8 (T6; R26-R28).
+	test( 'AC8 Add Field: the library of fields not in the table, six a page; a pick fills the row for every product; a field once', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const id = await tableWith( page, 'column', [ createProduct( { name: `Field ${ word } a` } ), createProduct( { name: `Field ${ word } b` } ) ] );
+		await page.getByRole( 'button', { name: 'Add Row' } ).click();
+		await page.getByRole( 'button', { name: 'Click to add a Field' } ).first().click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await expect( dialog.getByRole( 'tab', { name: 'Add from library' } ) ).toHaveAttribute( 'aria-selected', 'true' );
+		await expect( dialog.getByRole( 'link', { name: /Manage Fields/ } ) ).toBeVisible();
+		await expect( dialog.getByRole( 'button', { name: /^Add / } ) ).toHaveCount( 6 );
+		await expect( dialog.getByRole( 'button', { name: 'Add Product name' } ) ).toHaveCount( 0 );
+		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'Pros' );
+		await dialog.getByRole( 'button', { name: 'Add Pros' } ).click();
+		await expect( dialog ).toBeHidden();
+		await expect( page.getByLabel( 'Pros' ) ).toHaveCount( 2 );
+		const groups = stored( id ).groups;
+		expect( groups[ groups.length - 1 ].fields ).toEqual( [ 2 ] );
+
+		// The same field through the route a second time is refused.
+		const refused = await page.evaluate( async ( [ table, group ] ) => {
+			const builder = document.querySelector( '[data-table-builder]' ) as HTMLElement;
+			try {
+				await ( window as unknown as { wp: { apiFetch: ( o: object ) => Promise<unknown> } } ).wp.apiFetch( {
+					path: `/affibloom/v1/tables/${ table }/groups/${ group }/fields`,
+					method: 'POST',
+					data: { revision: Number( builder.dataset.revision ), field: 2 },
+				} );
+				return '';
+			} catch ( problem ) {
+				return ( problem as { message: string } ).message;
+			}
+		}, [ id, groups[ 1 ].id ] );
+		expect( refused ).toBe( 'This field already exists, please select another field' );
+	} );
+
+	// AC9 (T6; R29-R31, R33, D7, D11).
+	test( 'AC9 plain cells save as you type; a removed field keeps its values; Remove same field takes the row', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const product = createProduct( { name: `Cell ${ word }` } );
+		const id = await tableWith( page, 'column', [ product ] );
+		const rating = page.getByLabel( 'Primary Rating' );
+		await rating.fill( '7' );
+		await expect( rating ).toHaveValue( '5' );
+		await page.getByRole( 'button', { name: 'Add Row' } ).click();
+		await page.getByRole( 'button', { name: 'Click to add a Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'Pros' );
+		await dialog.getByRole( 'button', { name: 'Add Pros' } ).click();
+		await page.getByLabel( 'Pros' ).fill( 'Light\n\nGrippy' );
+		await expect.poll( () => stored( id ).values[ String( product ) ] ).toMatchObject( { 1: '5', 2: 'Light\nGrippy' } );
+
+		await page.getByRole( 'button', { name: 'Remove Pros' } ).click();
+		const confirm = page.getByRole( 'dialog', { name: 'Remove "Pros"?' } );
+		await expect( confirm.getByText( 'No data is deleted and the Field can always be added back.' ) ).toBeVisible();
+		await confirm.getByRole( 'button', { name: 'Remove' } ).click();
+		await expect( page.getByLabel( 'Pros' ) ).toHaveCount( 0 );
+		expect( stored( id ).values[ String( product ) ][ '2' ] ).toBe( 'Light\nGrippy' );
+
+		const rows = stored( id ).groups.length;
+		await page.getByRole( 'button', { name: 'Remove same field →' } ).last().click();
+		await expect.poll( () => stored( id ).groups.length ).toBe( rows - 1 );
+	} );
 } );

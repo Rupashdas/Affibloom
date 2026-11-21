@@ -5,7 +5,8 @@
  * Horizontal one, Preview Table, each live with its task), then the table in its style's layout with the theme's class,
  * or Lasso's empty state. Vertical: a column per product, its header cell on top and a row per field group; Horizontal:
  * a row per product, its header cell first and a column per group. Widths split evenly up to five; past five the grid
- * scrolls. Every write answers with this partial, so the builder never drifts from the store.
+ * scrolls. Every write answers with this partial, so the builder never drifts from the store. Task T6: Add Row / Add
+ * Column, "Click to add a Field" in an empty one, Add field (+) in every cell, Vertical's "Remove same field →".
  *
  * @package Affibloom
  * @var array{table: \Affibloom\Domain\Table\Table, fields: array<int, \Affibloom\Domain\Fields\Field>, names: array<int, string>} $view
@@ -22,7 +23,7 @@ $body       = array_slice( $table->groups, 1 );
 $buttons    = array(
 	array( 'add-product', __( 'Add Product', 'affibloom' ), 'plus', true ),
 	array( 'add-group', __( 'Add Group', 'affibloom' ), 'layers', true ),
-	array( 'add-line', $horizontal ? __( 'Add Column', 'affibloom' ) : __( 'Add Row', 'affibloom' ), 'plus', false ),
+	array( 'add-line', $horizontal ? __( 'Add Column', 'affibloom' ) : __( 'Add Row', 'affibloom' ), 'plus', true ),
 );
 $columns    = $horizontal ? 1 + count( $body ) : count( $table->products );
 // Lasso's order (R34): a Vertical table reads across (each group a row of every product's cells); a Horizontal table
@@ -77,11 +78,10 @@ if ( $horizontal ) {
 					$name = $view['names'][ $product->id ] ?? '';
 					if ( 'head' === $kind ) :
 						?>
-						<div class="affibloom-table-cell affibloom-table-cell--head" data-table-product="<?php echo esc_attr( (string) $product->id ); ?>" data-product-name="<?php echo esc_attr( $name ); ?>">
+						<div class="affibloom-table-cell affibloom-table-cell--head" data-table-product="<?php echo esc_attr( (string) $product->id ); ?>" data-table-group="<?php echo esc_attr( (string) ( $table->groups[0]['id'] ?? '' ) ); ?>" data-product-name="<?php echo esc_attr( $name ); ?>">
 							<div class="affibloom-table-cell__tools">
 								<span class="affibloom-grip" aria-hidden="true"><?php $this->render( 'admin/partials/icon', array( 'name' => 'grip' ) ); ?></span>
-								<?php // Add field comes with Task T6. ?>
-								<button type="button" class="affibloom-icon-button" disabled title="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>" aria-label="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>">
+								<button type="button" class="affibloom-icon-button" data-table-add-field aria-haspopup="dialog" title="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>" aria-label="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>">
 									<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
 								</button>
 								<?php /* translators: %s: the product's name. */ ?>
@@ -96,25 +96,44 @@ if ( $horizontal ) {
 							$this->render(
 								'admin/partials/table-cell',
 								array(
-									'fields' => $view['fields'],
-									'order'  => $heading,
-									'values' => $table->values[ $product->id ] ?? array(),
+									'fields'  => $view['fields'],
+									'order'   => $heading,
+									'values'  => $table->values[ $product->id ] ?? array(),
+									'product' => $product->id,
 								)
 							);
 							?>
 						</div>
 					<?php else : ?>
 						<div class="affibloom-table-cell" data-table-product="<?php echo esc_attr( (string) $product->id ); ?>" data-table-group="<?php echo esc_attr( (string) $group['id'] ); ?>">
-							<?php
-							$this->render(
-								'admin/partials/table-cell',
-								array(
-									'fields' => $view['fields'],
-									'order'  => $group['fields'],
-									'values' => $table->values[ $product->id ] ?? array(),
-								)
-							);
-							?>
+							<?php if ( array() === $group['fields'] ) : ?>
+								<?php // R25: an empty row or column, every cell offering its first field. ?>
+								<button type="button" class="affibloom-table-cell__empty" data-table-add-field aria-haspopup="dialog"><?php esc_html_e( 'Click to add a Field', 'affibloom' ); ?></button>
+							<?php else : ?>
+								<?php
+								$this->render(
+									'admin/partials/table-cell',
+									array(
+										'fields'  => $view['fields'],
+										'order'   => $group['fields'],
+										'values'  => $table->values[ $product->id ] ?? array(),
+										'product' => $product->id,
+									)
+								);
+								?>
+								<div class="affibloom-table-cell__foot">
+									<button type="button" class="affibloom-icon-button" data-table-add-field aria-haspopup="dialog" title="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>" aria-label="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>">
+										<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+									</button>
+									<?php if ( ! $horizontal && $product === $table->products[0] ) : ?>
+										<?php // R33: Vertical's "Remove same field →" on the row's first cell takes the whole row out. ?>
+										<button type="button" class="affibloom-table-cell__remove-row" data-table-remove-row>
+											<?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?>
+											<span><?php esc_html_e( 'Remove same field →', 'affibloom' ); ?></span>
+										</button>
+									<?php endif; ?>
+								</div>
+							<?php endif; ?>
 						</div>
 						<?php
 					endif;
