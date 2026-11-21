@@ -3114,3 +3114,11 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table--domains .affibloom-col-bulb { width: 72px; text-align: center; }
 .affibloom-table--domains .affibloom-col-links { width: 120px; text-align: right; font-variant-numeric: tabular-nums; }
 .affibloom-table--domains th.affibloom-col-links .affibloom-sort { margin-left: auto; }
+
+/* Task O3 (F22 R25, R26): Content Opportunities' filter bar (Lasso's four fields in a row) and its table. */
+.affibloom-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 0 0 16px; }
+.affibloom-filter-bar__field { display: grid; gap: 4px; min-width: 160px; }
+.affibloom-filter-bar__number { width: 120px; }
+.affibloom-table.affibloom-table--content { min-width: 640px; }
+.affibloom-table--content .affibloom-col-updated { width: 150px; }
+.affibloom-table--content .affibloom-col-links { width: 100px; text-align: right; font-variant-numeric: tabular-nums; }

@@ -25,10 +25,10 @@ final class OpportunityPage {
 	/**
 	 * Builds the page.
 	 *
-	 * @param list<Opportunity|DomainCount|DetectedLink> $items The rows on this page.
-	 * @param int                                        $total    Rows in the whole list.
-	 * @param int                                        $page     This page's number, from 1.
-	 * @param int                                        $per_page Rows per page.
+	 * @param list<Opportunity|DomainCount|DetectedLink|ContentRow> $items The rows on this page.
+	 * @param int                                                   $total    Rows in the whole list.
+	 * @param int                                                   $page     This page's number, from 1.
+	 * @param int                                                   $per_page Rows per page.
 	 */
 	public function __construct(
 		public readonly array $items,

@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Opportunities;
 
+use Affibloom\Application\Clicks\ClickReport;
+use Affibloom\Domain\Opportunity\ContentFilter;
 use Affibloom\Domain\Opportunity\OpportunityPage;
 use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Domain\Opportunity\OpportunityRepository;
@@ -52,5 +54,16 @@ final class OpportunityService {
 	 */
 	public function domain_links( string $domain, OpportunityQuery $query ): OpportunityPage {
 		return $this->opportunities->domain_links( strtolower( trim( $domain ) ), $query );
+	}
+
+	/**
+	 * One page of Content Opportunities (R24-R26; Task O3); Min link clicks reads F12's last 30 days (D17).
+	 *
+	 * @param OpportunityQuery $query  The search, sort and page.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param int              $now    Now, as a Unix time.
+	 */
+	public function content( OpportunityQuery $query, ContentFilter $filter, int $now ): OpportunityPage {
+		return $this->opportunities->content( $query, $filter, ClickReport::since( $now ) );
 	}
 }

@@ -1,8 +1,9 @@
 /* global wp */
 /**
- * The Opportunities screens (F22 D3, D8; Task O1): the list redrawn in place by in-place-list.js (search, the sortable
- * headers, pages, and the product filter it keeps), the Type icon's preview (location-preview.js), and the intro box's
- * ×, which closes it for good (POST /opportunities/intros/{box}); a failed save puts the box back.
+ * The Opportunities screens (F22 D3, D8; Tasks O1-O3): the list redrawn in place by in-place-list.js (search, the
+ * sortable headers, pages, the product filter it keeps, and Content's filter bar, whose every change reloads page 1,
+ * R25), the Type icon's preview (location-preview.js), and the intro box's ×, which closes it for good
+ * (POST /opportunities/intros/{box}); a failed save puts the box back.
  */
 ( function () {
 	'use strict';
@@ -15,14 +16,34 @@
 		} catch ( ignored ) {
 			args = {};
 		}
-		window.affibloomInPlaceList( {
+		var filters = document.getElementById( 'affibloom-content-filters' );
+		var list = window.affibloomInPlaceList( {
 			region: region,
 			search: document.getElementById( 'affibloom-opportunities-search' ),
 			status: document.getElementById( 'affibloom-list-status' ),
 			errorTemplate: document.getElementById( 'affibloom-list-error' ),
 			path: region.getAttribute( 'data-list-path' ),
-			args: args,
+			args: filters
+				? function () {
+					var values = {};
+					new FormData( filters ).forEach( function ( value, key ) {
+						if ( 'page' !== key && 'tab' !== key ) {
+							values[ key ] = value;
+						}
+					} );
+					return values;
+				}
+				: args,
 		} );
+		if ( filters ) {
+			filters.addEventListener( 'change', function () {
+				list.reload();
+			} );
+			filters.addEventListener( 'submit', function ( event ) {
+				event.preventDefault();
+				list.reload();
+			} );
+		}
 		if ( window.affibloomLocationPreview ) {
 			window.affibloomLocationPreview( region );
 		}

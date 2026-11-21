@@ -101,7 +101,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task O1: The Opportunities nav and Link Opportunities
 - [x] Task O2: Domains and Detected Links
-- [ ] Task O3: Content Opportunities
+- [x] Task O3: Content Opportunities
 - [ ] Task O4: A post's links (Content › post)
 - [ ] Task O5: The product page's Opportunities tab and Detect Opportunities
 - [ ] Task O6: Detect Opportunities in Settings, and Override All Links
@@ -970,12 +970,18 @@ newest first; a filter change reloads page 1; a row opens the post's links (O4; 
 **Files:** the above; tests F22 **AC4**, `tests/Unit/Domain/Opportunity/ContentFilterTest.php`,
 `tests/Integration/Opportunities/ContentOpportunitiesTest.php`.
 
-- [ ] **Step 1: Failing tests** (AC4: the fixture's host listed with Links = its row count; "Has unmonetized links";
+- [x] **Step 1: Failing tests** (AC4: the fixture's host listed with Links = its row count; "Has unmonetized links";
   Post type Pages hides it; a category filter; Min link clicks hidden without the click store).
-- [ ] **Step 2: Filter normalising, query, service.**
-- [ ] **Step 3: Route, partials, script.**
-- [ ] **Step 4: Run and look** (checks; filters by hand, 375 px).
-- [ ] **Step 5: Commit** — "Add Lasso's Content Opportunities with its filters".
+- [x] **Step 2: Filter normalising, query, service.**
+- [x] **Step 3: Route, partials, script.**
+- [x] **Step 4: Run and look** (checks; filters by hand, 375 px).
+- [x] **Step 5: Commit** — "Add Lasso's Content Opportunities with its filters".
+
+*Note (2026-11-21):* the post type filter travels as `content_type` (a `post_type` argument on admin.php changes
+WordPress's screen context). Min link clicks is shown and reads the 30-day clicks of the products tied in the post
+(F12's store exists, D17). `in-place-list.js` takes `args` as a function and returns `reload()` for the filter bar.
+The row's "view its links" is "Coming soon" until O4. Checked: unit, phpcs, analyse; on Local 1046 posts, 22 pages with
+unmonetized links, 3 with clicks, the sort; the list at 1280 px.
 
 ---
 

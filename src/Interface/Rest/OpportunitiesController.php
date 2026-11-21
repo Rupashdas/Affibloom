@@ -53,6 +53,7 @@ final class OpportunitiesController implements Module {
 			'/opportunities/domains' => OpportunityQuery::DOMAINS,
 			// A domain as the index stores it: lower case letters, digits, dots and hyphens.
 			'/opportunities/domains/(?P<domain>[a-z0-9.-]+)/links' => OpportunityQuery::DOMAIN_LINKS,
+			'/opportunities/content' => OpportunityQuery::CONTENT,
 		);
 		foreach ( $lists as $route => $kind ) {
 			register_rest_route(
@@ -119,6 +120,29 @@ final class OpportunitiesController implements Module {
 				'default' => 0,
 			);
 		}
+		// Content's filter bar (R25); values outside Lasso's lists are its defaults (ContentFilter).
+		if ( OpportunityQuery::CONTENT === $kind ) {
+			$args += array(
+				'show'         => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'content_type' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'category'     => array(
+					'type'    => 'integer',
+					'minimum' => 0,
+					'default' => 0,
+				),
+				'min_clicks'   => array(
+					'type'    => 'integer',
+					'minimum' => 0,
+					'default' => 0,
+				),
+			);
+		}
 
 		return $args;
 	}
@@ -133,15 +157,18 @@ final class OpportunitiesController implements Module {
 	public function list( string $kind, WP_REST_Request $request ): WP_REST_Response {
 		$query  = OpportunitiesScreen::query( $kind, sanitize_text_field( (string) $request['search'] ), (string) $request['orderby'], (string) $request['order'], (int) $request['page'], (int) $request['product'] );
 		$domain = strtolower( (string) $request['domain'] );
+		$filter = OpportunitiesScreen::filter( (string) $request['show'], (string) $request['content_type'], (int) $request['category'], (int) $request['min_clicks'] );
 		$page   = match ( $kind ) {
 			OpportunityQuery::DOMAINS      => $this->opportunities->domains( $query ),
 			OpportunityQuery::DOMAIN_LINKS => $this->opportunities->domain_links( $domain, $query ),
+			OpportunityQuery::CONTENT      => $this->opportunities->content( $query, $filter, time() ),
 			default                        => $this->opportunities->links( $query ),
 		};
 		$partials = array(
 			OpportunityQuery::LINKS        => 'admin/partials/opportunity-links-list',
 			OpportunityQuery::DOMAINS      => 'admin/partials/opportunity-domains-list',
 			OpportunityQuery::DOMAIN_LINKS => 'admin/partials/opportunity-domain-links-list',
+			OpportunityQuery::CONTENT      => 'admin/partials/opportunity-content-list',
 		);
 
 		return new WP_REST_Response(
@@ -153,7 +180,7 @@ final class OpportunitiesController implements Module {
 							'list'   => $page,
 							'query'  => $query,
 							'domain' => $domain,
-							'url'    => OpportunitiesScreen::url( $query, 1, $domain ),
+							'url'    => OpportunitiesScreen::url( $query, 1, $domain, $filter ),
 						)
 					),
 					'term'    => $query->search,
@@ -161,7 +188,7 @@ final class OpportunitiesController implements Module {
 					'orderby' => $query->orderby,
 					'order'   => $query->order,
 					'total'   => $page->total,
-					'url'     => OpportunitiesScreen::url( $query, $page->current(), $domain ),
+					'url'     => OpportunitiesScreen::url( $query, $page->current(), $domain, $filter ),
 				),
 			)
 		);

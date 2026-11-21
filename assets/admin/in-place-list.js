@@ -15,7 +15,10 @@
  *  - status:        a polite live region for what the list now shows;
  *  - errorTemplate: a <template> holding the "could not load" card, with a [data-retry] button;
  *  - path:          the list's REST route, e.g. /affibloom/v1/fields/list;
- *  - args:          arguments every request carries, e.g. { product: 7 } (optional).
+ *  - args:          arguments every request carries, e.g. { product: 7 }, or a function that returns them at each
+ *                   request (a filter bar outside the list; optional).
+ *
+ * It returns { reload() }, which loads page 1 again with the current search and sort (a filter changed).
  */
 ( function () {
 	'use strict';
@@ -27,7 +30,9 @@
 		var errorTemplate = options.errorTemplate;
 		var params = new URLSearchParams( window.location.search );
 		var current = { s: params.get( 's' ) || '', paged: parseInt( params.get( 'paged' ), 10 ) || 1, order: params.get( 'order' ) || '', orderby: params.get( 'orderby' ) || '' };
-		var fixed = options.args || {};
+		var extra = function () {
+			return 'function' === typeof options.args ? options.args() : options.args || {};
+		};
 		var requests = 0;
 
 		var busy = function ( on ) {
@@ -61,8 +66,9 @@
 			if ( list.orderby ) {
 				args.set( 'orderby', list.orderby );
 			}
-			Object.keys( fixed ).forEach( function ( key ) {
-				args.set( key, String( fixed[ key ] ) );
+			var more = extra();
+			Object.keys( more ).forEach( function ( key ) {
+				args.set( key, String( more[ key ] ) );
 			} );
 
 			wp.apiFetch( { path: options.path + '?' + args.toString() } ).then( function ( response ) {
@@ -130,5 +136,11 @@
 			var back = new URLSearchParams( window.location.search );
 			load( { s: back.get( 's' ) || '', paged: parseInt( back.get( 'paged' ), 10 ) || 1, order: back.get( 'order' ) || '', orderby: back.get( 'orderby' ) || '' }, false, false );
 		} );
+
+		return {
+			reload: function () {
+				load( { s: current.s, paged: 1, order: current.order, orderby: current.orderby }, true, false );
+			},
+		};
 	};
 }() );

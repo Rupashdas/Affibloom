@@ -12,6 +12,8 @@ namespace Affibloom\Infrastructure\WordPress;
 use Affibloom\Domain\LinkIndex\ProductLocation;
 use Affibloom\Domain\Opportunity\AmazonDomains;
 use Affibloom\Domain\Opportunity\BaseDomain;
+use Affibloom\Domain\Opportunity\ContentFilter;
+use Affibloom\Domain\Opportunity\ContentRow;
 use Affibloom\Domain\Opportunity\DetectedLink;
 use Affibloom\Domain\Opportunity\DomainCount;
 use Affibloom\Domain\Opportunity\Opportunity;
@@ -193,6 +195,83 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		};
 
 		return $this->detected( $where, $args, $order, $query->page );
+	}
+
+	/**
+	 * One page of Content Opportunities (R24-R26, D17, D18): each published post with index rows, its link count and
+	 * how many are tied; a search matches the title; the filter narrows by unmonetized links, type (posts, pages; all
+	 * types includes reusable blocks), category and the 30-day clicks of the products tied in it. Default order: the
+	 * most recently changed first.
+	 *
+	 * @param OpportunityQuery $query  The search, sort and page.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first UTC day of the clicks counted, "Y-m-d".
+	 */
+	public function content( OpportunityQuery $query, ContentFilter $filter, string $since ): OpportunityPage {
+		global $wpdb;
+
+		$table  = $wpdb->prefix . TableLinkLocationRepository::TABLE;
+		$join   = '';
+		$where  = "h.post_status = 'publish'";
+		$args   = array();
+		$having = array();
+		if ( '' !== $filter->post_type ) {
+			$where .= ' AND h.post_type = %s';
+			$args[] = $filter->post_type;
+		}
+		if ( $filter->category > 0 ) {
+			$join = $wpdb->prepare( " JOIN %i AS ctr ON ctr.object_id = h.ID JOIN %i AS ctt ON ctt.term_taxonomy_id = ctr.term_taxonomy_id AND ctt.taxonomy = 'category' AND ctt.term_id = %d", $wpdb->term_relationships, $wpdb->term_taxonomy, $filter->category );
+		}
+		$words = $query->words();
+		if ( array() !== $words ) {
+			$where .= ' AND h.post_title LIKE %s';
+			$args[] = self::like( $words );
+		}
+		if ( ContentFilter::UNMONETIZED === $filter->show ) {
+			$having[] = 'links > monetized';
+		}
+		$clicks = '0';
+		if ( $filter->min_clicks > 0 ) {
+			// The tied products' clicks in the 30 days, each product once (Lasso sums url_details.clicks; D17).
+			$clicks   = $wpdb->prepare(
+				'( SELECT COALESCE(SUM(c.clicks), 0) FROM %i AS c WHERE c.day >= %s AND c.product_id IN ( SELECT IF(t.assigned_product_id > 0, t.assigned_product_id, t.product_id) FROM %i AS t WHERE t.host_id = l.host_id AND ( t.product_id > 0 OR t.assigned_product_id > 0 ) ) )',
+				$wpdb->prefix . TableClickStore::TABLE,
+				$since,
+				$table
+			);
+			$having[] = $wpdb->prepare( 'clicks >= %d', $filter->min_clicks );
+		}
+		$having = array() === $having ? '' : ' HAVING ' . implode( ' AND ', $having );
+		$order  = match ( $query->orderby ) {
+			'post_modified'   => 'h.post_modified ' . strtoupper( $query->order ),
+			'detection_title' => 'h.post_title ' . strtoupper( $query->order ),
+			'detection_slug'  => 'host_url ' . strtoupper( $query->order ),
+			'count'           => 'links ' . strtoupper( $query->order ),
+			default           => 'h.post_modified DESC',
+		};
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $clicks and $join are prepared above (table names, a date, an ID: no %).
+		$select = $wpdb->prepare(
+			"SELECT l.host_id, h.post_title, h.post_modified, MAX(l.host_url) AS host_url, COUNT(*) AS links,
+				SUM(l.product_id > 0 OR l.assigned_product_id > 0) AS monetized, {$clicks} AS clicks
+			FROM %i AS l JOIN %i AS h ON h.ID = l.host_id{$join}",
+			$table,
+			$wpdb->posts
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$group = "{$select} WHERE {$where} GROUP BY l.host_id, h.post_title, h.post_modified{$having}";
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table, one screen; the parts are prepared, $where holds only placeholders, $order is from the allow-list.
+		$total = (int) $wpdb->get_var( array() === $args ? "SELECT COUNT(*) FROM ( {$group} ) AS hosts" : $wpdb->prepare( "SELECT COUNT(*) FROM ( {$group} ) AS hosts", ...$args ) );
+		$shell = new OpportunityPage( array(), $total, $query->page );
+		$rows  = 0 === $total ? array() : $wpdb->get_results( $wpdb->prepare( "{$group} ORDER BY {$order}, l.host_id DESC LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ), ARRAY_A );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		$items = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$items[] = new ContentRow( (int) $row['host_id'], (string) $row['post_title'], (string) $row['host_url'], (string) $row['post_modified'], (int) $row['links'], (int) $row['monetized'] );
+		}
+
+		return new OpportunityPage( $items, $total, $shell->current() );
 	}
 
 	/**

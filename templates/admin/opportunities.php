@@ -5,7 +5,7 @@
  * back), the sub-tabs, Search, and the list region. The list partial is the one GET /opportunities/* renders (D3).
  *
  * @package Affibloom
- * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain: string, list: \Affibloom\Domain\Opportunity\OpportunityPage, product: \Affibloom\Domain\Product\Product|null, intro: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool}>}} $view
+ * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain: string, filter: \Affibloom\Domain\Opportunity\ContentFilter, list: \Affibloom\Domain\Opportunity\OpportunityPage, product: \Affibloom\Domain\Product\Product|null, intro: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool}>}} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,6 +20,10 @@ $intros      = array(
 	'links'   => array(
 		__( 'Turn Any Existing Link Into a Product Link', 'affibloom' ),
 		__( 'These are all of your external links that point to the same domain as an existing product you created. Choose to monetize the link with a product or dismiss the Suggestion.', 'affibloom' ),
+	),
+	'content' => array(
+		__( 'Identify And Fix Your Under-Monetized Content', 'affibloom' ),
+		__( 'Publishing a post that gets traffic just isn’t enough. They need to drive income. Find out which posts are under-monetized and increase your monthly revenue.', 'affibloom' ),
 	),
 	'domains' => array(
 		__( 'Find Site-Wide Monetization Opportunities', 'affibloom' ),
@@ -45,6 +49,7 @@ $lists = array(
 		array(),
 		'admin/partials/opportunity-domain-links-list',
 	),
+	OpportunityQuery::CONTENT      => array( __( 'Content Opportunities', 'affibloom' ), null, '/affibloom/v1/opportunities/content', array(), 'admin/partials/opportunity-content-list' ),
 );
 [ $page_title, $list_back, $list_path, $list_args, $partial ] = $lists[ $query->kind ];
 
@@ -84,6 +89,11 @@ if ( null !== $list_back ) {
 		?>
 
 		<div class="affibloom-page__body">
+			<?php
+			if ( OpportunityQuery::CONTENT === $query->kind ) {
+				$this->render( 'admin/partials/opportunity-content-filters', array( 'filter' => $view['filter'] ) );
+			}
+			?>
 			<div id="affibloom-opportunities-list" class="affibloom-list" data-list-path="<?php echo esc_attr( $list_path ); ?>"
 				data-list-args="<?php echo esc_attr( (string) wp_json_encode( array() === $list_args ? (object) array() : $list_args ) ); ?>">
 				<?php
@@ -93,7 +103,7 @@ if ( null !== $list_back ) {
 						'list'   => $view['list'],
 						'query'  => $query,
 						'domain' => $list_domain,
-						'url'    => OpportunitiesScreen::url( $query, 1, $list_domain ),
+						'url'    => OpportunitiesScreen::url( $query, 1, $list_domain, $view['filter'] ),
 					)
 				);
 				?>

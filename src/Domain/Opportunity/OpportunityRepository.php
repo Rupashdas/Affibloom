@@ -37,4 +37,13 @@ interface OpportunityRepository {
 	 * @param OpportunityQuery $query  The search, sort and page.
 	 */
 	public function domain_links( string $domain, OpportunityQuery $query ): OpportunityPage;
+
+	/**
+	 * One page of Content Opportunities (R24, R25): published posts with indexed links, narrowed by the filter.
+	 *
+	 * @param OpportunityQuery $query  The search, sort and page.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first UTC day of Min link clicks' 30 days, "Y-m-d".
+	 */
+	public function content( OpportunityQuery $query, ContentFilter $filter, string $since ): OpportunityPage;
 }

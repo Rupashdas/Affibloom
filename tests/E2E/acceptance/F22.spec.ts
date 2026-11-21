@@ -87,6 +87,24 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( page.locator( 'tbody tr' ).first() ).toContainText( title );
 	} );
 
+	// AC4 (O3; R24-R28, R32, R33).
+	test( 'AC4 Content: posts with indexed links, their counts, and the filter bar', async ( { page } ) => {
+		const { title } = fixture( 2 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=content&s=${ encodeURIComponent( title ) }` );
+		const row = page.locator( '.affibloom-table--content tbody tr', { hasText: title } );
+		await expect( row.locator( 'td.affibloom-col-links' ) ).toHaveText( '2' );
+
+		await page.getByLabel( 'Show' ).selectOption( 'unmonetized' );
+		await expect( row ).toHaveCount( 1 ); // both links are untied
+		await expect( page ).toHaveURL( /show=unmonetized/ );
+		await page.getByLabel( 'Post type' ).selectOption( 'page' );
+		await expect( page.getByText( "Looks like we're coming up empty." ) ).toBeVisible();
+		await page.getByLabel( 'Post type' ).selectOption( 'post' );
+		await page.getByLabel( 'Min link clicks' ).fill( '1' );
+		await page.getByLabel( 'Min link clicks' ).press( 'Enter' );
+		await expect( page.getByText( "Looks like we're coming up empty." ) ).toBeVisible(); // no product, no clicks
+	} );
+
 	// AC13 (O1; R74-R80, D14, D15).
 	test( 'AC13 nothing of keywords, Programs or Marketplace, and no request to Lasso', async ( { page, context } ) => {
 		const hosts = new Set< string >();
