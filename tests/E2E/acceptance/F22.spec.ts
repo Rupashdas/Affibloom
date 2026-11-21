@@ -64,6 +64,29 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( page.getByRole( 'dialog', { name: 'Link with Context' } ) ).toContainText( 'See item 0 luminous.' );
 	} );
 
+	// AC3 (O2; R17-R23).
+	test( 'AC3 Domains: counts, biggest first, the lightbulb, and Detected Links with its search', async ( { page } ) => {
+		const { domain, title } = fixture( 3 );
+		const stray = `${ unique( 'stray' ) }.example`;
+		newPostWith( `<p><a href="https://${ stray }/a">a stray link</a></p>` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=domains&s=${ encodeURIComponent( domain ) }` );
+		const row = page.locator( '.affibloom-table--domains tbody tr', { hasText: domain } );
+		await expect( row.locator( 'td.affibloom-col-links' ) ).toHaveText( '3' );
+		await expect( row.locator( '.affibloom-alert--opportunity' ) ).toHaveCount( 1 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=domains&s=${ encodeURIComponent( stray ) }` );
+		await expect( page.locator( '.affibloom-table--domains tbody tr', { hasText: stray } ).locator( '.affibloom-alert--opportunity' ) ).toHaveCount( 0 );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=domains&s=${ encodeURIComponent( domain ) }` );
+		await row.getByRole( 'link', { name: domain } ).click();
+		await expect( page.getByRole( 'heading', { name: `Detected Links › ${ domain }` } ) ).toBeVisible();
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '3 Found' );
+		await page.getByLabel( 'Search Opportunities' ).fill( 'item 2' );
+		await page.getByLabel( 'Search Opportunities' ).press( 'Enter' );
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
+		await expect( page.locator( 'tbody tr' ).first() ).toContainText( title );
+	} );
+
 	// AC13 (O1; R74-R80, D14, D15).
 	test( 'AC13 nothing of keywords, Programs or Marketplace, and no request to Lasso', async ( { page, context } ) => {
 		const hosts = new Set< string >();

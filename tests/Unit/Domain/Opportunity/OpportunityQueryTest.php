@@ -19,6 +19,16 @@ final class OpportunityQueryTest extends TestCase {
 		self::assertSame( array( 'suggestion', 'asc' ), ( new OpportunityQuery( '', 'suggestion', 'desc' ) )->next( 'suggestion' ) );
 	}
 
+	/** Task O2 (R17, R19): Domains sorts by domain or count; a count header starts descending. */
+	public function test_each_list_has_its_own_columns_and_first_directions(): void {
+		$domains = new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::DOMAINS );
+
+		self::assertSame( array( 'count', 'desc' ), $domains->next( 'count' ) );
+		self::assertSame( array( 'domain', 'asc' ), $domains->next( 'domain' ) );
+		self::assertSame( '', ( new OpportunityQuery( '', 'suggestion', 'asc', 1, 0, OpportunityQuery::DOMAINS ) )->orderby );
+		self::assertSame( 'url', ( new OpportunityQuery( '', 'url', 'desc', 1, 0, OpportunityQuery::DOMAIN_LINKS ) )->orderby );
+	}
+
 	public function test_spaces_split_the_search_into_wildcard_words(): void {
 		self::assertSame( array( 'luminous', 'ball' ), ( new OpportunityQuery( '  luminous   ball ' ) )->words() );
 		self::assertSame( array(), ( new OpportunityQuery( '   ' ) )->words() );

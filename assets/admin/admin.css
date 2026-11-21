@@ -3107,3 +3107,10 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-opportunity__action.is-disabled { color: var(--affibloom-ink-400); cursor: default; }
 @media (hover: none) { .affibloom-opportunity__actions { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .affibloom-opportunity__actions { transition: none; } }
+
+/* Task O2 (F22 R19): Domain Opportunities: the domain, the green lightbulb, the count. */
+.affibloom-alert--opportunity { color: var(--affibloom-success-700); }
+.affibloom-table.affibloom-table--domains { min-width: 480px; }
+.affibloom-table--domains .affibloom-col-bulb { width: 72px; text-align: center; }
+.affibloom-table--domains .affibloom-col-links { width: 120px; text-align: right; font-variant-numeric: tabular-nums; }
+.affibloom-table--domains th.affibloom-col-links .affibloom-sort { margin-left: auto; }

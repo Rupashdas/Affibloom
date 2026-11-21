@@ -21,4 +21,20 @@ interface OpportunityRepository {
 	 * @param OpportunityQuery $query The search, sort, page and product.
 	 */
 	public function links( OpportunityQuery $query ): OpportunityPage;
+
+	/**
+	 * One page of Domain Opportunities (R17, R18): untied text links grouped by domain, with each domain's count and
+	 * what could monetize it (R19).
+	 *
+	 * @param OpportunityQuery $query The search, sort and page.
+	 */
+	public function domains( OpportunityQuery $query ): OpportunityPage;
+
+	/**
+	 * One page of Detected Links (R20): a domain's untied links.
+	 *
+	 * @param string           $domain The base domain.
+	 * @param OpportunityQuery $query  The search, sort and page.
+	 */
+	public function domain_links( string $domain, OpportunityQuery $query ): OpportunityPage;
 }

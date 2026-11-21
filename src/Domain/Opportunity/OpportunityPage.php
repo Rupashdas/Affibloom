@@ -12,8 +12,8 @@ namespace Affibloom\Domain\Opportunity;
 use Affibloom\Domain\PageNumbers;
 
 /**
- * One page of Link Opportunities (F22 R4, R7; Task O1): ten rows, the total behind them ("N Found"), and a page past
- * the end shown as the last one.
+ * One page of an Opportunities list (F22 R4, R7; Tasks O1-O3): ten rows, the total behind them ("N Found"), and a page
+ * past the end shown as the last one.
  */
 final class OpportunityPage {
 
@@ -25,10 +25,10 @@ final class OpportunityPage {
 	/**
 	 * Builds the page.
 	 *
-	 * @param list<Opportunity> $items    The rows on this page.
-	 * @param int               $total    Rows in the whole list.
-	 * @param int               $page     This page's number, from 1.
-	 * @param int               $per_page Rows per page.
+	 * @param list<Opportunity|DomainCount|DetectedLink> $items The rows on this page.
+	 * @param int                                        $total    Rows in the whole list.
+	 * @param int                                        $page     This page's number, from 1.
+	 * @param int                                        $per_page Rows per page.
 	 */
 	public function __construct(
 		public readonly array $items,

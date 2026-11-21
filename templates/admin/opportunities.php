@@ -1,32 +1,67 @@
 <?php
 /**
- * Opportunities, Link Opportunities (F22 R1-R16, D1-D8; Task O1; Lasso's opportunities/links.php): the intro box, the
- * title ("Link Opportunities", or "Link › <product>" with a way back when filtered by a product), the sub-tabs, Search,
- * and the list region. The list partial is the one GET /opportunities/links renders (D3).
+ * Opportunities (F22 R1-R23, D1-D8; Tasks O1, O2; Lasso's opportunities/*.php): the tab's intro box, the title (Link
+ * Opportunities, "Link › <product>", Domain Opportunities, "Detected Links › <domain>", the filtered ones with a way
+ * back), the sub-tabs, Search, and the list region. The list partial is the one GET /opportunities/* renders (D3).
  *
  * @package Affibloom
- * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, list: \Affibloom\Domain\Opportunity\OpportunityPage, product: \Affibloom\Domain\Product\Product|null, intro: bool, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool}>}, all_links: string} $view
+ * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain: string, list: \Affibloom\Domain\Opportunity\OpportunityPage, product: \Affibloom\Domain\Product\Product|null, intro: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool}>}} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
 
-$query   = $view['query'];
-$product = $view['product'];
-/* translators: %s: product name. */
-$page_title = null === $product ? __( 'Link Opportunities', 'affibloom' ) : sprintf( __( 'Link › %s', 'affibloom' ), $product->name );
-$head       = array(
+$query       = $view['query'];
+$product     = $view['product'];
+$list_domain = $view['domain'];
+$intros      = array(
+	'links'   => array(
+		__( 'Turn Any Existing Link Into a Product Link', 'affibloom' ),
+		__( 'These are all of your external links that point to the same domain as an existing product you created. Choose to monetize the link with a product or dismiss the Suggestion.', 'affibloom' ),
+	),
+	'domains' => array(
+		__( 'Find Site-Wide Monetization Opportunities', 'affibloom' ),
+		__( 'You’ll be shocked how many times you linked to a domain you didn’t know had an affiliate program. Sign up for that program, add your new affiliate URL to Affibloom, and instantly monetize all those links.', 'affibloom' ),
+	),
+);
+// Each list: its title, its way back, its REST route, the arguments every request carries, and its partial.
+$lists = array(
+	OpportunityQuery::LINKS        => array(
+		/* translators: %s: product name. */
+		null === $product ? __( 'Link Opportunities', 'affibloom' ) : sprintf( __( 'Link › %s', 'affibloom' ), $product->name ),
+		null === $product ? null : array( OpportunitiesScreen::url( new OpportunityQuery() ), __( 'Link Opportunities', 'affibloom' ) ),
+		'/affibloom/v1/opportunities/links',
+		$query->product > 0 ? array( 'product' => $query->product ) : array(),
+		'admin/partials/opportunity-links-list',
+	),
+	OpportunityQuery::DOMAINS      => array( __( 'Domain Opportunities', 'affibloom' ), null, '/affibloom/v1/opportunities/domains', array(), 'admin/partials/opportunity-domains-list' ),
+	OpportunityQuery::DOMAIN_LINKS => array(
+		/* translators: %s: a domain. */
+		sprintf( __( 'Detected Links › %s', 'affibloom' ), $list_domain ),
+		array( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::DOMAINS ) ), __( 'Domain Opportunities', 'affibloom' ) ),
+		'/affibloom/v1/opportunities/domains/' . rawurlencode( $list_domain ) . '/links',
+		array(),
+		'admin/partials/opportunity-domain-links-list',
+	),
+);
+[ $page_title, $list_back, $list_path, $list_args, $partial ] = $lists[ $query->kind ];
+
+$head = array(
 	'title'        => $page_title,
 	'actions'      => 'admin/partials/opportunities-actions',
-	'actions_args' => array( 'query' => $query ),
+	'actions_args' => array(
+		'query'  => $query,
+		'domain' => $list_domain,
+	),
 	'below'        => 'admin/partials/section-tabs',
 	'below_args'   => $view['tabs'],
 );
-if ( null !== $product ) {
+if ( null !== $list_back ) {
 	$head['back'] = array(
-		'url'   => $view['all_links'],
-		'label' => __( 'Link Opportunities', 'affibloom' ),
+		'url'   => $list_back[0],
+		'label' => $list_back[1],
 	);
 }
 ?>
@@ -35,13 +70,13 @@ if ( null !== $product ) {
 
 	<div class="affibloom-page affibloom-opportunities">
 		<?php
-		if ( $view['intro'] ) {
+		if ( '' !== $view['intro'] ) {
 			$this->render(
 				'admin/partials/opportunity-intro',
 				array(
-					'box'   => 'links',
-					'title' => __( 'Turn Any Existing Link Into a Product Link', 'affibloom' ),
-					'text'  => __( 'These are all of your external links that point to the same domain as an existing product you created. Choose to monetize the link with a product or dismiss the Suggestion.', 'affibloom' ),
+					'box'   => $view['intro'],
+					'title' => $intros[ $view['intro'] ][0],
+					'text'  => $intros[ $view['intro'] ][1],
 				)
 			);
 		}
@@ -49,15 +84,16 @@ if ( null !== $product ) {
 		?>
 
 		<div class="affibloom-page__body">
-			<div id="affibloom-opportunities-list" class="affibloom-list" data-list-path="/affibloom/v1/opportunities/links"
-				data-list-args="<?php echo esc_attr( (string) wp_json_encode( $query->product > 0 ? array( 'product' => $query->product ) : (object) array() ) ); ?>">
+			<div id="affibloom-opportunities-list" class="affibloom-list" data-list-path="<?php echo esc_attr( $list_path ); ?>"
+				data-list-args="<?php echo esc_attr( (string) wp_json_encode( array() === $list_args ? (object) array() : $list_args ) ); ?>">
 				<?php
 				$this->render(
-					'admin/partials/opportunity-links-list',
+					$partial,
 					array(
-						'list'  => $view['list'],
-						'query' => $query,
-						'url'   => OpportunitiesScreen::links_url( $query, 1 ),
+						'list'   => $view['list'],
+						'query'  => $query,
+						'domain' => $list_domain,
+						'url'    => OpportunitiesScreen::url( $query, 1, $list_domain ),
 					)
 				);
 				?>

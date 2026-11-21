@@ -100,7 +100,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### F22 — Opportunities
 
 - [x] Task O1: The Opportunities nav and Link Opportunities
-- [ ] Task O2: Domains and Detected Links
+- [x] Task O2: Domains and Detected Links
 - [ ] Task O3: Content Opportunities
 - [ ] Task O4: A post's links (Content › post)
 - [ ] Task O5: The product page's Opportunities tab and Detect Opportunities
@@ -930,12 +930,19 @@ text. O1's Filter by URL now works.
 **Files:** the above; tests F22 **AC3**, `tests/Integration/Opportunities/DomainOpportunitiesTest.php` (grouping, NULL
 and own domain out, the "Opportunities" quirk, the lightbulb rule).
 
-- [ ] **Step 1: Failing tests** (AC3 on the fixture: usa.mizuno.com 3 with a lightbulb, amazon.com 3 with one, an
+- [x] **Step 1: Failing tests** (AC3 on the fixture: usa.mizuno.com 3 with a lightbulb, amazon.com 3 with one, an
   unknown domain without; Detected Links' rows and search).
-- [ ] **Step 2: Queries and service.**
-- [ ] **Step 3: Routes, partials, sub-tab live.**
-- [ ] **Step 4: Run and look** (checks; both lists by hand, 375 px).
-- [ ] **Step 5: Commit** — "Add Lasso's Domain Opportunities and Detected Links".
+- [x] **Step 2: Queries and service.**
+- [x] **Step 3: Routes, partials, sub-tab live.**
+- [x] **Step 4: Run and look** (checks; both lists by hand, 375 px).
+- [x] **Step 5: Commit** — "Add Lasso's Domain Opportunities and Detected Links".
+
+*Note (2026-11-21):* `OpportunityQuery` now names its list (`kind`) and holds each list's sort allow-list with its
+first direction; the screen and the route dispatch by it (`tab=domains`, `tab=domain&domain=`). Shared on their second
+use: `opportunity-table-head.php`, `list-pager.php`. "Amazon Associates" is Lasso's monetize-with for an Amazon
+domain. The Domains table needed its own minimum width (the base table's is the Dashboard's 1076 px). Checked: unit,
+phpcs, analyse; on Local 105 domains (the bulb on four), Detected Links for example.com with a search, a 400 for a
+foreign column; both lists at 1280 px.
 
 ---
 

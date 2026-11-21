@@ -12,13 +12,14 @@ namespace Affibloom\Interface\Admin;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Application\Products\ProductService;
+use Affibloom\Domain\Opportunity\OpportunityPage;
 use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Interface\Template;
 
 /**
- * Opportunities (F22 R1-R16, D1-D8; Task O1): `admin.php?page=affibloom-opportunities`, Link Opportunities first
- * (`tab=links`, the default; Domains and Content come with O2 and O3), with Lasso's "Filter by Link" as `&product=<id>`.
- * The page prints the first list; opportunities.js redraws it in place (D3).
+ * Opportunities (F22 R1-R23, D1-D8; Tasks O1, O2): `admin.php?page=affibloom-opportunities` with `tab=links` (Link
+ * Opportunities, the default; `&product=<id>` is Lasso's "Filter by Link"), `tab=domains` (Domain Opportunities) and
+ * `tab=domain&domain=<d>` (Detected Links). The page prints the first list; opportunities.js redraws it in place (D3).
  */
 final class OpportunitiesScreen {
 
@@ -36,13 +37,20 @@ final class OpportunitiesScreen {
 	public function __construct( private Template $template, private OpportunityService $opportunities, private IntroBoxes $intros, private ProductService $products ) {}
 
 	/**
-	 * A list's address with its search, sort, page and product; the defaults are left out.
+	 * A list's address with its search, sort, page and filter; the defaults are left out.
 	 *
-	 * @param OpportunityQuery $query The list.
-	 * @param int|null         $page  Another page than the query's; null for its own.
+	 * @param OpportunityQuery $query  The list.
+	 * @param int|null         $page   Another page than the query's; null for its own.
+	 * @param string           $domain Detected Links' domain.
 	 */
-	public static function links_url( OpportunityQuery $query, ?int $page = null ): string {
+	public static function url( OpportunityQuery $query, ?int $page = null, string $domain = '' ): string {
 		$args = array( 'page' => self::SLUG );
+		if ( OpportunityQuery::LINKS !== $query->kind ) {
+			$args['tab'] = $query->kind;
+		}
+		if ( '' !== $domain ) {
+			$args['domain'] = rawurlencode( $domain );
+		}
 		if ( '' !== $query->search ) {
 			$args['s'] = rawurlencode( $query->search );
 		}
@@ -64,14 +72,31 @@ final class OpportunitiesScreen {
 	/**
 	 * The list a request asks for.
 	 *
+	 * @param string $kind    Which list (OpportunityQuery's constants).
 	 * @param string $search  The search.
 	 * @param string $orderby The sort column.
 	 * @param string $order   The direction.
 	 * @param int    $page    The page.
 	 * @param int    $product The "Filter by Link" product, 0 for none.
 	 */
-	public static function query( string $search, string $orderby, string $order, int $page, int $product ): OpportunityQuery {
-		return new OpportunityQuery( trim( $search ), $orderby, $order, max( 1, $page ), max( 0, $product ) );
+	public static function query( string $kind, string $search, string $orderby, string $order, int $page, int $product = 0 ): OpportunityQuery {
+		$kind = isset( OpportunityQuery::COLUMNS[ $kind ] ) ? $kind : OpportunityQuery::LINKS;
+
+		return new OpportunityQuery( trim( $search ), $orderby, $order, max( 1, $page ), OpportunityQuery::LINKS === $kind ? max( 0, $product ) : 0, $kind );
+	}
+
+	/**
+	 * A list's page, as the screen and the route draw it.
+	 *
+	 * @param OpportunityQuery $query  The list.
+	 * @param string           $domain Detected Links' domain.
+	 */
+	public function page( OpportunityQuery $query, string $domain = '' ): OpportunityPage {
+		return match ( $query->kind ) {
+			OpportunityQuery::DOMAINS      => $this->opportunities->domains( $query ),
+			OpportunityQuery::DOMAIN_LINKS => $this->opportunities->domain_links( $domain, $query ),
+			default                        => $this->opportunities->links( $query ),
+		};
 	}
 
 	/**
@@ -79,7 +104,10 @@ final class OpportunitiesScreen {
 	 */
 	public function render(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- a read-only list, with no action behind it.
-		$query = self::query(
+		$tab    = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : OpportunityQuery::LINKS;
+		$domain = isset( $_GET['domain'] ) ? strtolower( sanitize_text_field( wp_unslash( $_GET['domain'] ) ) ) : '';
+		$query  = self::query(
+			$tab,
 			isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '',
 			isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '',
 			isset( $_GET['order'] ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '',
@@ -87,17 +115,23 @@ final class OpportunitiesScreen {
 			isset( $_GET['product'] ) ? absint( wp_unslash( $_GET['product'] ) ) : 0
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		// Lasso's Detected Links without a domain searches example.com (R22).
+		if ( OpportunityQuery::DOMAIN_LINKS === $query->kind && '' === $domain ) {
+			$domain = 'example.com';
+		}
 		$product = $query->product > 0 ? $this->products->get( $query->product ) : null;
+		// The Domain box shows on Domains and on Detected Links (R23).
+		$box = OpportunityQuery::LINKS === $query->kind ? 'links' : 'domains';
 
 		$this->template->render(
 			'admin/opportunities',
 			array(
-				'query'     => $query,
-				'list'      => $this->opportunities->links( $query ),
-				'product'   => $product,
-				'intro'     => $this->intros->shows( 'links' ),
-				'tabs'      => self::tabs( 'links' ),
-				'all_links' => self::links_url( new OpportunityQuery() ),
+				'query'   => $query,
+				'domain'  => $domain,
+				'list'    => $this->page( $query, $domain ),
+				'product' => $product,
+				'intro'   => $this->intros->shows( $box ) ? $box : '',
+				'tabs'    => self::tabs( OpportunityQuery::DOMAIN_LINKS === $query->kind ? OpportunityQuery::DOMAINS : $query->kind ),
 			)
 		);
 	}
@@ -114,10 +148,14 @@ final class OpportunitiesScreen {
 			'items' => array(
 				array(
 					'label'   => __( 'Links', 'affibloom' ),
-					'url'     => self::links_url( new OpportunityQuery() ),
-					'current' => 'links' === $current,
+					'url'     => self::url( new OpportunityQuery() ),
+					'current' => OpportunityQuery::LINKS === $current,
 				),
-				array( 'label' => __( 'Domains', 'affibloom' ) ),
+				array(
+					'label'   => __( 'Domains', 'affibloom' ),
+					'url'     => self::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::DOMAINS ) ),
+					'current' => OpportunityQuery::DOMAINS === $current,
+				),
 				array( 'label' => __( 'Content', 'affibloom' ) ),
 			),
 		);

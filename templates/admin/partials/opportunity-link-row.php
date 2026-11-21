@@ -3,8 +3,8 @@
  * One Link Opportunity (F22 R11, R12, D7; Task O1; Lasso's rows/link-opportunity-row.php): the URL (a new tab) with
  * Filter by URL and Open in New Window under it on hover or focus; the post to its editor with Filter by Content and
  * Open in New Window; the Suggestion to the product's page with Filter by Link (not when the list is already one
- * product's); the Type icon, which opens the preview; the Monetize switch. Filter by URL, Filter by Content and
- * Monetize come with their tasks (O2, O4, O10) and are shown disabled until then.
+ * product's); the Type icon, which opens the preview; the Monetize switch. Filter by Content and Monetize come with
+ * their tasks (O4, O10) and are shown disabled until then.
  *
  * @package Affibloom
  * @var array{opportunity: \Affibloom\Domain\Opportunity\Opportunity, filtered: bool} $view
@@ -26,7 +26,7 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place
 	<td class="affibloom-col-url">
 		<a class="affibloom-opportunity__main" href="<?php echo esc_url( $opportunity->place->url ); ?>" target="_blank" rel="noopener noreferrer" title="<?php echo esc_attr( $opportunity->place->url ); ?>"><?php echo esc_html( $opportunity->place->url ); ?></a>
 		<span class="affibloom-opportunity__actions">
-			<span class="affibloom-opportunity__action is-disabled" aria-disabled="true" aria-describedby="affibloom-soon-note"><?php esc_html_e( 'Filter by URL', 'affibloom' ); ?></span>
+			<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::DOMAIN_LINKS ), 1, $opportunity->domain ) ); ?>"><?php esc_html_e( 'Filter by URL', 'affibloom' ); ?></a>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( $opportunity->place->url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open in New Window', 'affibloom' ); ?></a>
 		</span>
 	</td>
@@ -45,7 +45,7 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place
 		<a class="affibloom-opportunity__main" href="<?php echo esc_url( ProductScreen::url( $opportunity->product_id ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $opportunity->product_name ); ?></a>
 		<?php if ( ! $view['filtered'] ) : ?>
 			<span class="affibloom-opportunity__actions">
-				<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::links_url( new OpportunityQuery( '', '', '', 1, $opportunity->product_id ) ) ); ?>"><?php esc_html_e( 'Filter by Link', 'affibloom' ); ?></a>
+				<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, $opportunity->product_id ) ) ); ?>"><?php esc_html_e( 'Filter by Link', 'affibloom' ); ?></a>
 			</span>
 		<?php endif; ?>
 	</td>

@@ -21,8 +21,9 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * F22's routes (D3, D8, D20; Task O1): `GET /opportunities/links` answers the list drawn by the partial the page printed,
- * `{ html, term, page, orderby, order, total, url }`; `POST /opportunities/intros/{box}` closes an intro box for good.
+ * F22's routes (D3, D8, D20; Tasks O1, O2): `GET /opportunities/links`, `/domains` and `/domains/{domain}/links` answer
+ * the list drawn by the partial the page printed, `{ html, term, page, orderby, order, total, url }`;
+ * `POST /opportunities/intros/{box}` closes an intro box for good.
  */
 final class OpportunitiesController implements Module {
 
@@ -46,42 +47,25 @@ final class OpportunitiesController implements Module {
 	 * Registers the routes.
 	 */
 	public function routes(): void {
-		$can = static fn(): bool => current_user_can( Capabilities::PRODUCTS );
-		register_rest_route(
-			ProductsController::NAMESPACE,
-			'/opportunities/links',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'links' ),
-				'permission_callback' => $can,
-				'args'                => array(
-					'search'  => array(
-						'type'    => 'string',
-						'default' => '',
-					),
-					'page'    => array(
-						'type'    => 'integer',
-						'minimum' => 1,
-						'default' => 1,
-					),
-					'orderby' => array(
-						'type'    => 'string',
-						'enum'    => array_merge( array( '' ), OpportunityQuery::COLUMNS ),
-						'default' => '',
-					),
-					'order'   => array(
-						'type'    => 'string',
-						'enum'    => array( '', 'asc', 'desc' ),
-						'default' => '',
-					),
-					'product' => array(
-						'type'    => 'integer',
-						'minimum' => 0,
-						'default' => 0,
-					),
-				),
-			)
+		$can   = static fn(): bool => current_user_can( Capabilities::PRODUCTS );
+		$lists = array(
+			'/opportunities/links'   => OpportunityQuery::LINKS,
+			'/opportunities/domains' => OpportunityQuery::DOMAINS,
+			// A domain as the index stores it: lower case letters, digits, dots and hyphens.
+			'/opportunities/domains/(?P<domain>[a-z0-9.-]+)/links' => OpportunityQuery::DOMAIN_LINKS,
 		);
+		foreach ( $lists as $route => $kind ) {
+			register_rest_route(
+				ProductsController::NAMESPACE,
+				$route,
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn( WP_REST_Request $request ): WP_REST_Response => $this->list( $kind, $request ),
+					'permission_callback' => $can,
+					'args'                => self::list_args( $kind ),
+				)
+			);
+		}
 		register_rest_route(
 			ProductsController::NAMESPACE,
 			'/opportunities/intros/(?P<box>[a-z]+)',
@@ -100,32 +84,84 @@ final class OpportunitiesController implements Module {
 	}
 
 	/**
-	 * GET: one page of Link Opportunities.
+	 * A list's arguments: the search, the page, its own sort allow-list (any other value is a 400), and the product
+	 * filter of Link Opportunities.
 	 *
-	 * @param WP_REST_Request $request Request with "search", "page", "orderby", "order" and "product".
-	 * @phpstan-param WP_REST_Request<array{search: string, page: int, orderby: string, order: string, product: int}> $request
+	 * @param string $kind Which list.
+	 * @return array<string, array<string, mixed>>
 	 */
-	public function links( WP_REST_Request $request ): WP_REST_Response {
-		$query = OpportunitiesScreen::query( sanitize_text_field( (string) $request['search'] ), (string) $request['orderby'], (string) $request['order'], (int) $request['page'], (int) $request['product'] );
-		$list  = $this->opportunities->links( $query );
+	private static function list_args( string $kind ): array {
+		$args = array(
+			'search'  => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+			'page'    => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+				'default' => 1,
+			),
+			'orderby' => array(
+				'type'    => 'string',
+				'enum'    => array_merge( array( '' ), array_keys( OpportunityQuery::COLUMNS[ $kind ] ) ),
+				'default' => '',
+			),
+			'order'   => array(
+				'type'    => 'string',
+				'enum'    => array( '', 'asc', 'desc' ),
+				'default' => '',
+			),
+		);
+		if ( OpportunityQuery::LINKS === $kind ) {
+			$args['product'] = array(
+				'type'    => 'integer',
+				'minimum' => 0,
+				'default' => 0,
+			);
+		}
+
+		return $args;
+	}
+
+	/**
+	 * GET: one page of a list, drawn by the partial the page printed.
+	 *
+	 * @param string          $kind    Which list.
+	 * @param WP_REST_Request $request Request with "search", "page", "orderby", "order", and "product" or "domain".
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function list( string $kind, WP_REST_Request $request ): WP_REST_Response {
+		$query  = OpportunitiesScreen::query( $kind, sanitize_text_field( (string) $request['search'] ), (string) $request['orderby'], (string) $request['order'], (int) $request['page'], (int) $request['product'] );
+		$domain = strtolower( (string) $request['domain'] );
+		$page   = match ( $kind ) {
+			OpportunityQuery::DOMAINS      => $this->opportunities->domains( $query ),
+			OpportunityQuery::DOMAIN_LINKS => $this->opportunities->domain_links( $domain, $query ),
+			default                        => $this->opportunities->links( $query ),
+		};
+		$partials = array(
+			OpportunityQuery::LINKS        => 'admin/partials/opportunity-links-list',
+			OpportunityQuery::DOMAINS      => 'admin/partials/opportunity-domains-list',
+			OpportunityQuery::DOMAIN_LINKS => 'admin/partials/opportunity-domain-links-list',
+		);
 
 		return new WP_REST_Response(
 			array(
 				'data' => array(
 					'html'    => $this->template->fetch(
-						'admin/partials/opportunity-links-list',
+						$partials[ $kind ],
 						array(
-							'list'  => $list,
-							'query' => $query,
-							'url'   => OpportunitiesScreen::links_url( $query, 1 ),
+							'list'   => $page,
+							'query'  => $query,
+							'domain' => $domain,
+							'url'    => OpportunitiesScreen::url( $query, 1, $domain ),
 						)
 					),
 					'term'    => $query->search,
-					'page'    => $list->current(),
+					'page'    => $page->current(),
 					'orderby' => $query->orderby,
 					'order'   => $query->order,
-					'total'   => $list->total,
-					'url'     => OpportunitiesScreen::links_url( $query, $list->current() ),
+					'total'   => $page->total,
+					'url'     => OpportunitiesScreen::url( $query, $page->current(), $domain ),
 				),
 			)
 		);

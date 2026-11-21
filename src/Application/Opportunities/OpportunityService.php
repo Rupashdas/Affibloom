@@ -34,4 +34,23 @@ final class OpportunityService {
 	public function links( OpportunityQuery $query ): OpportunityPage {
 		return $this->opportunities->links( $query );
 	}
+
+	/**
+	 * One page of Domain Opportunities (R17-R19; Task O2).
+	 *
+	 * @param OpportunityQuery $query The search, sort and page.
+	 */
+	public function domains( OpportunityQuery $query ): OpportunityPage {
+		return $this->opportunities->domains( $query );
+	}
+
+	/**
+	 * One page of Detected Links for a domain (R20; Task O2).
+	 *
+	 * @param string           $domain The base domain.
+	 * @param OpportunityQuery $query  The search, sort and page.
+	 */
+	public function domain_links( string $domain, OpportunityQuery $query ): OpportunityPage {
+		return $this->opportunities->domain_links( strtolower( trim( $domain ) ), $query );
+	}
 }
