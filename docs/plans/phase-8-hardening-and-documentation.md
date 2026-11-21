@@ -82,7 +82,7 @@ the text below as a deviation in `progress.md`.
 
 ### Uninstall and export (roadmap 8.5; F37 TL5, F9)
 
-- [ ] Task 38: Uninstall opt-in, the Uninstall card and the product export
+- [x] Task 38: Uninstall opt-in, the Uninstall card and the product export
 
 ### F37 Tools and diagnostics
 
@@ -606,7 +606,7 @@ fixed table names.`).
 `ProductRepository.php`, `PostTypeProductRepository.php`, `dashboard.php` (the export button, posting to
 `admin-post.php` with a nonce), `Plugin.php`, `docs/ui/design-system.md` only if the card needs a new element.
 
-- [ ] **Step 1: Failing tests, outside in.**
+- [x] **Step 1: Failing tests, outside in.**
   - E2E `F37-uninstall.spec.ts` (F37 AC6, F9 AC16): the General tab has an Uninstall card with the toggle and the
     help text and the list of posts using Affibloom with edit links; the Dashboard's "Export CSV" downloads a file
     with a header row and one row per product, names in UTF-8. Expected: red, no card and no button.
@@ -618,12 +618,12 @@ fixed table names.`).
     `_affibloom_…`, `{prefix}affibloom_…`) and fails for any that is neither in `DataInventory` nor in the test's
     short allow-list of names that are not stored data (REST namespace, nonce actions, script handles, hook names
     that are filters). This is the test that keeps the inventory true as features land. Runs on PHP 8.5 CLI.
-- [ ] **Step 2: The setting and the card.** `delete_data_on_uninstall` in `Settings`, `SettingsService` and the General
+- [x] **Step 2: The setting and the card.** `delete_data_on_uninstall` in `Settings`, `SettingsService` and the General
   route (administrators only); the card partial in `settings.php`; the list of posts that use Affibloom from F21's
   index, with edit links.
-- [ ] **Step 3: `DataInventory` and `DataEraser`,** then `uninstall.php`. Check `DataInventory` against the
+- [x] **Step 3: `DataInventory` and `DataEraser`,** then `uninstall.php`. Check `DataInventory` against the
   analyses' "Data" sections and the drift test; fix the list, not the test.
-- [ ] **Step 4: `ExportController`:**
+- [x] **Step 4: `ExportController`:**
   - checks the capability and the nonce;
   - sends the `Content-Type: text/csv` and `Content-Disposition: attachment; filename=affibloom-products-<date>.csv`
     headers;
@@ -632,7 +632,7 @@ fixed table names.`).
     column;
   - exits.
   Add the Dashboard button.
-- [ ] **Step 5: Run and look.**
+- [x] **Step 5: Run and look.**
   1. Export on the local copy and open the file. Expected: 263 rows, with UTF-8 names intact.
   2. Back up first: `bash tools/local-wp.sh db export "C:/Users/Rupash/Local Sites/volleyballvault/app/affibloom-backup-<date>.sql"`.
   3. With the toggle off, run the uninstall file by hand:
@@ -642,9 +642,16 @@ fixed table names.`).
      `wp option list --search=affibloom*`, `wp post list --post_type=affibloom_product`, `wp term list affibloom_group`).
   5. Restore: `bash tools/local-wp.sh db import <the backup>`, and open the Dashboard to see the library back.
   6. The card at 1280 and 375 px.
-- [ ] **Step 6: Commit** — "Add an opt-in data removal on uninstall, the Uninstall card and a product CSV export
+- [x] **Step 6: Commit** — "Add an opt-in data removal on uninstall, the Uninstall card and a product CSV export
 
   Lasso removes nothing on delete; this removal is Affibloom's own and runs only when the administrator opts in."
+
+*Note (2026-11-22):* the export is REST, `GET /products/export` through 31D's `CsvResponse` (Affibloom has no
+`admin-post` action, 37A), on the Dashboard's views without Lasso's alert export (F11 R28 keeps that one on the broken
+and out-of-stock tabs); it pages with `ProductService::list()`, so no `ProductRepository::all()`. The card lists the
+newest 20 posts from the link index (`IndexPostsUsingAffibloom`) and counts the rest. The drift test classifies by
+line (error codes, hooks, query and URL arguments) plus a short list. Step 5 ran on Local with a backup, restored after:
+off, nothing changed; on, every store gone (`affibloom_lasso_import` is the migrator's, LM10).
 
 ---
 

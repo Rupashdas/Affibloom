@@ -3523,3 +3523,16 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table.affibloom-table--content { min-width: 640px; }
 .affibloom-table--content .affibloom-col-updated { width: 150px; }
 .affibloom-table--content .affibloom-col-links { width: 100px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/*
+ * Settings → General, Uninstall (Task 38): the posts that still use Affibloom, a compact list of links, each on a 24px
+ * line (WCAG 2.2 target size, as Task 37C set for the other lists).
+ */
+.affibloom-uninstall-posts { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--affibloom-line); }
+.affibloom-uninstall-posts__title { margin: 0 0 4px; color: var(--affibloom-ink-900); font: 600 14px/20px var(--affibloom-font); }
+.affibloom-uninstall-posts__list { margin: 8px 0 0; padding: 0; list-style: none; }
+.affibloom-uninstall-posts__list li { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-admin .affibloom-uninstall-posts__list a { display: inline-block; min-height: 24px; line-height: 24px; color: var(--affibloom-brand-700); text-decoration: none; }
+.affibloom-admin .affibloom-uninstall-posts__list a:hover { text-decoration: underline; }
+.affibloom-uninstall-posts__more,
+.affibloom-uninstall-posts__none { margin: 8px 0 0; color: var(--affibloom-ink-600); font-size: 13px; }

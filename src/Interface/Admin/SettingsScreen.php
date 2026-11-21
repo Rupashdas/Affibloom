@@ -14,6 +14,7 @@ use Affibloom\Application\Amazon\CredentialsService;
 use Affibloom\Application\Monetize\AmazonImportStatusService;
 use Affibloom\Application\Settings\DetectionChoices;
 use Affibloom\Application\Settings\SettingsService;
+use Affibloom\Application\Uninstall\PostsUsingAffibloom;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Interface\Template;
 
@@ -21,6 +22,9 @@ use Affibloom\Interface\Template;
  * Settings: General, Display and Amazon tabs, as in Lasso.
  */
 final class SettingsScreen {
+
+	/** How many posts the Uninstall card lists by name; the rest are counted. */
+	private const UNINSTALL_POSTS = 20;
 
 	public const SLUG = 'affibloom-settings';
 
@@ -35,6 +39,7 @@ final class SettingsScreen {
 	 * @param CredentialsService             $credentials The Amazon tab's Product Data API card (C1A).
 	 * @param LinkIndexStatus                $link_index  General's Link Index card (Task 9J).
 	 * @param AmazonImportStatusService|null $import The Amazon import's card and General figures (F35; Task AM5).
+	 * @param PostsUsingAffibloom|null       $in_use The posts that still use Affibloom, for the Uninstall card (Task 38).
 	 */
 	public function __construct(
 		private Template $template,
@@ -44,7 +49,8 @@ final class SettingsScreen {
 		private DetectionChoices $choices,
 		private CredentialsService $credentials,
 		private LinkIndexStatus $link_index,
-		private ?AmazonImportStatusService $import = null
+		private ?AmazonImportStatusService $import = null,
+		private ?PostsUsingAffibloom $in_use = null
 	) {}
 
 	/**
@@ -78,6 +84,11 @@ final class SettingsScreen {
 				'fields'     => 'general' === $tab ? $this->choices->custom_fields() : array(),
 				'has_acf'    => 'general' === $tab && $this->choices->has_acf(),
 				'link_index' => 'general' === $tab ? LinkIndexText::of( $this->link_index->figures( time() ) ) : array(),
+				// The Uninstall card's posts that still use Affibloom (Task 38), the newest 20.
+				'uninstall'  => 'general' === $tab && null !== $this->in_use ? $this->in_use->first( self::UNINSTALL_POSTS ) : array(
+					'ids'   => array(),
+					'total' => 0,
+				),
 				// F35 R33, R34 (Task AM5): the import's card on Amazon, its figures in General's Link Index card.
 				'import'     => match ( $tab ) {
 					'amazon'  => $this->import?->card(),

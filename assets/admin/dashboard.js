@@ -457,6 +457,11 @@
 		if ( ! button || button.disabled ) {
 			return;
 		}
+		// The whole library's export (Task 38) has a path of its own and no filters.
+		if ( button.hasAttribute( 'data-export-path' ) ) {
+			window.affibloomCsvDownload( button, button.getAttribute( 'data-export-path' ) );
+			return;
+		}
 		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), placements: current.placements, comparison_table: current.comparison_table, filter: current.filter } );
 		if ( current.orderby && current.order ) {
 			args.set( 'orderby', current.orderby );

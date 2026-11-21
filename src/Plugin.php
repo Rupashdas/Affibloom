@@ -29,6 +29,7 @@ use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
 use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
 use Affibloom\Infrastructure\WordPress\Builders\ThriveSource;
 use Affibloom\Infrastructure\WordPress\Builders\WprmSource;
+use Affibloom\Infrastructure\WordPress\IndexPostsUsingAffibloom;
 use Affibloom\Infrastructure\WordPress\IndexTableLocations;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
@@ -222,6 +223,7 @@ use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
+use Affibloom\Interface\Rest\ProductsExportController;
 use Affibloom\Interface\Rest\LocationPreviewController;
 use Affibloom\Interface\Rest\LocationsController;
 use Affibloom\Interface\Rest\TablePreview;
@@ -611,7 +613,8 @@ final class Plugin {
 					$detection,
 					$amazon,
 					$this->link_index_status(),
-					$this->amazon_import_status()
+					$this->amazon_import_status(),
+					new IndexPostsUsingAffibloom()
 				),
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
@@ -654,6 +657,7 @@ final class Plugin {
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ), $this->opportunity_service() ),
+			new ProductsExportController( $products, $groups, new ProductResource( new PublicLinks( $this->settings_repository() ) ) ),
 			new DashboardExportController(
 				new IssueLinksExport(
 					new PostTypeProductRepository(),

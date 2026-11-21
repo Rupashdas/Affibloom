@@ -3,6 +3,7 @@
 	<description>WordPress Coding Standards for Affibloom.</description>
 
 	<file>affibloom.php</file>
+	<file>uninstall.php</file>
 	<file>src</file>
 	<file>templates</file>
 	<file>tools</file>

@@ -59,6 +59,18 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 			<span data-export-label><?php esc_html_e( 'Export CSV', 'affibloom' ); ?></span>
 		</button>
 	</div>
+<?php else : ?>
+	<?php // Elsewhere, Export CSV is the whole library with every field (Task 38: "Export them first" before an uninstall). ?>
+	<div class="affibloom-export">
+		<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-export-csv data-export-path="/affibloom/v1/products/export"
+			data-exporting="<?php esc_attr_e( 'Exporting', 'affibloom' ); ?>" data-failed="<?php esc_attr_e( 'Export failed.', 'affibloom' ); ?>"
+			<?php /* translators: %s: number of products. */ ?>
+			data-exported-one="<?php esc_attr_e( 'Exported 1 product.', 'affibloom' ); ?>" data-exported-many="<?php esc_attr_e( 'Exported %s products.', 'affibloom' ); ?>"
+			title="<?php esc_attr_e( 'Export every product with every field to CSV', 'affibloom' ); ?>">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'download' ) ); ?>
+			<span data-export-label><?php esc_html_e( 'Export CSV', 'affibloom' ); ?></span>
+		</button>
+	</div>
 <?php endif; ?>
 <?php if ( 0 === $products->total ) : ?>
 	<div class="affibloom-card affibloom-empty">
