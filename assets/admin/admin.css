@@ -234,6 +234,20 @@
 .affibloom-admin .affibloom-header__caret[aria-expanded="true"] { background: var(--affibloom-brand-700); }
 .affibloom-admin .affibloom-header__action:active,
 .affibloom-admin .affibloom-header__caret:active { background: var(--affibloom-brand-800); }
+/*
+ * Between 992px, where the tabs fold behind Menu, and 1280px, WordPress's menu leaves too little room for the six tabs
+ * at full spacing (deviation 152): the bar tightens, and below 1200px Add New Link shows its icon only, as on a phone.
+ */
+@media (min-width: 992px) and (max-width: 1279px) {
+	.affibloom-header { gap: 20px; }
+	.affibloom-header__tab { padding: 0 10px; }
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+	.affibloom-header { padding-right: 20px; padding-left: 20px; }
+	.affibloom-header__action-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.affibloom-admin .affibloom-header__action { padding: 0 10px; }
+	.affibloom-admin .affibloom-header__caret { padding: 0 7px; }
+}
 
 /* Menu (0b.3, 0b.4): a white card under its button with a hairline and the menus' shadow; items with an icon chip, a
    title and a description, a green wash on hover */

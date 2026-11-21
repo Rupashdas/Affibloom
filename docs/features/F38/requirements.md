@@ -13,10 +13,11 @@ The shell belongs to no single screen. Screens fill it: each screen's task adds 
   background, I am told what changed or failed, and I find any product from any screen with one shortcut.
 - As the person who installs Affibloom on a new site, I am walked through the defaults once.
 
-- **AC1** The Affibloom header shows, left to right, **Dashboard, Opportunities, Tables, Groups** (each once its screen
-  exists), then **Settings**; the tab of the screen's group is marked current (`aria-current="page"`): Dashboard for the
-  Dashboard and every product page; Opportunities for every opportunities page; Groups for the list and a group;
-  Tables for the list and a table; Settings for every Settings tab. Below 992 px the tabs fold behind a **Menu**
+- **AC1** The Affibloom header shows, left to right, **Dashboard, Opportunities, Tables, Groups, Fields** (each once its
+  screen exists), then **Settings**; the tab of the screen's group is marked current (`aria-current="page"`): Dashboard
+  for the Dashboard and every product page; Opportunities for every opportunities page; Groups for the list and a group;
+  Tables for the list and a table; Fields for the list and a field (deviation 152; Lasso's header has no Fields tab);
+  Settings for every Settings tab. Below 992 px the tabs fold behind a **Menu**
   button. No Analytics or Marketplace tab. (ON1; R1-R4, R6, D1-D3)
 - **AC2** The WordPress menu has **Affibloom** at Lasso's place (position 20) with **Dashboard, Opportunities, Tables,
   Groups, Fields, Import, Settings, History** in that order, each once its screen exists; detail pages (a product, a

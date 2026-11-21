@@ -29,8 +29,8 @@ final class AdminNavigationTest extends TestCase {
 		return array_map( static fn ( NavItem $item ): string => $item->key, $items );
 	}
 
-	public function test_the_header_lists_lassos_tabs_in_order_then_settings(): void {
-		self::assertSame( array( 'dashboard', 'opportunities', 'tables', 'groups', 'settings' ), self::keys( self::full()->tabs() ) );
+	public function test_the_header_lists_lassos_tabs_in_order_then_fields_and_settings(): void {
+		self::assertSame( array( 'dashboard', 'opportunities', 'tables', 'groups', 'fields', 'settings' ), self::keys( self::full()->tabs() ) );
 	}
 
 	public function test_the_menu_lists_lassos_submenu_in_order(): void {
@@ -47,7 +47,7 @@ final class AdminNavigationTest extends TestCase {
 		$navigation->register( self::item( 'fields', 'affibloom-fields' ) );
 		$navigation->register( self::item( 'dashboard', 'affibloom' ) );
 
-		self::assertSame( array( 'dashboard', 'settings' ), self::keys( $navigation->tabs() ) );
+		self::assertSame( array( 'dashboard', 'fields', 'settings' ), self::keys( $navigation->tabs() ) );
 		self::assertSame( array( 'dashboard', 'fields', 'settings' ), self::keys( $navigation->menu() ) );
 	}
 

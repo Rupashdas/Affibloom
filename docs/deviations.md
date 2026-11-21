@@ -157,6 +157,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 149. Task 31D (2026-11-19): the export's three Lasso-named columns are `fields`, `custom_redirect`, `custom_thumbnail` (no Lasso names in Affibloom).
 - 150. The user (2026-11-20): Show Features on the product page draws its bullets in the box's description block; the preview frames load the site's icon CSS.
 - 151. Table builder rework (the user, 2026-11-21): live drag-and-drop by grips and whole cards, keyboard drag, a selection inspector, an icon picker for badges and buttons; Move buttons and the button dialog go.
+- 152. A Fields tab in the header (the user, 2026-11-22): Dashboard, Opportunities, Tables, Groups, Fields, Settings; Lasso's header has none.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2972,3 +2973,8 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     - **Structure**: table-builder.js becomes a small core (the write queue, the redraw, the selection) and modules
       for the settings, the cells, the drag, the inspector and the icon picker, sharing one `affibloomTableBuilder`.
 
+152. **A Fields tab in the header (the user, 2026-11-22).** A visual review found that the Fields list and a field's
+    page marked no header tab, so nothing showed where you were (F38 AC1 had kept Lasso's header, which has no Fields
+    tab). The user chose a Fields tab between Groups and Settings, current on the list and on a field
+    (`AdminNavigation::TABS`). F38 AC1 and its acceptance test say so; the WordPress menu is unchanged. The reader's
+    comparison table was reviewed at the same time and stays as Lasso's (25px names, labels on empty values).

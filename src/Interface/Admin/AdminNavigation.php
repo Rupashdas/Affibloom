@@ -18,9 +18,10 @@ use InvalidArgumentException;
 final class AdminNavigation {
 
 	/**
-	 * The header's order: Lasso's tabs (header-new.php 154-173, without Analytics and Marketplace), then Settings.
+	 * The header's order: Lasso's tabs (header-new.php 154-173, without Analytics and Marketplace), then Fields and
+	 * Settings. Lasso's header has no Fields tab; Affibloom's does, so the Fields pages mark where you are (deviation 152).
 	 */
-	private const TABS = array( 'dashboard', 'opportunities', 'tables', 'groups', 'settings' );
+	private const TABS = array( 'dashboard', 'opportunities', 'tables', 'groups', 'fields', 'settings' );
 
 	/**
 	 * The WordPress submenu's order (Lasso's class-post-type.php 309-399, without its external links).

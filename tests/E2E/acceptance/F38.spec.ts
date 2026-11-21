@@ -26,8 +26,8 @@ test.describe( 'F38 Admin shell', () => {
 		const group = Number( wp( 'term', 'create', 'affibloom_group', unique( 'F38 group' ), '--porcelain' ).trim() );
 		try {
 			await page.goto( DASHBOARD );
-			// Opportunities and Tables join between Dashboard and Groups when their screens exist; no Analytics or Marketplace.
-			await expect( tabs( page ) ).toHaveText( [ 'Dashboard', 'Groups', 'Settings' ] );
+			// Lasso's tabs, then Fields (deviation 152) and Settings; no Analytics or Marketplace.
+			await expect( tabs( page ) ).toHaveText( [ 'Dashboard', 'Opportunities', 'Tables', 'Groups', 'Fields', 'Settings' ] );
 			await expect( current( page ) ).toHaveText( 'Dashboard' );
 
 			const pages: Array< [ string, string ] > = [
@@ -43,9 +43,12 @@ test.describe( 'F38 Admin shell', () => {
 				await expect( current( page ), url ).toHaveText( tab );
 			}
 
-			// Fields is a menu item, not a tab (Lasso's header has none): no tab is current there.
+			// Fields has its own tab (deviation 152), current on the list and on a field.
 			await page.goto( '/wp-admin/admin.php?page=affibloom-fields' );
-			await expect( current( page ) ).toHaveCount( 0 );
+			await expect( current( page ) ).toHaveText( 'Fields' );
+			const field = new URL( await page.locator( 'a[href*="page=affibloom-field&"]' ).first().getAttribute( 'href' ) ?? '', page.url() );
+			await page.goto( field.pathname + field.search );
+			await expect( current( page ) ).toHaveText( 'Fields' );
 		} finally {
 			wp( 'post', 'delete', String( product ), '--force' );
 			wp( 'term', 'delete', 'affibloom_group', String( group ) );
@@ -63,7 +66,7 @@ test.describe( 'F38 Admin shell', () => {
 
 		await button.click();
 		await expect( button ).toHaveAttribute( 'aria-expanded', 'true' );
-		for ( const name of [ 'Dashboard', 'Groups', 'Settings' ] ) {
+		for ( const name of [ 'Dashboard', 'Groups', 'Fields', 'Settings' ] ) {
 			await expect( page.locator( '.affibloom-header__nav' ).getByRole( 'link', { name } ) ).toBeVisible();
 		}
 		// The page does not scroll sideways with the tabs open.
