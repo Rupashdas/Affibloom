@@ -32,6 +32,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 				'meta_args'    => array(
 					'part'    => 'summary',
 					'library' => $view['library'],
+					'clicks'  => $view['clicks_30'] ?? null,
 				),
 				'actions'      => 'admin/partials/dashboard-tiles',
 				'actions_args' => array(

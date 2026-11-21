@@ -4,12 +4,13 @@
  *
  * - "stats": Lasso's three attention counters (Broken links, Out of stock, Opportunities) as stat cards right of the
  *   title. Broken links and Out of stock are the list's alert tabs (Task 31B); Opportunities waits for F22 (O8).
- * - "summary": Products (live) and Clicks (30 days) as one quiet line under the subtitle.
+ * - "summary": Products (live) and Clicks (30 days: the sum over published products, F12 AC12; Task 34B) as one quiet
+ *   line under the subtitle.
  *
  * The `.affibloom-tile*` class names stay on both, so the tasks that fill them need no change.
  *
  * @package Affibloom
- * @var array{part: string, library: int, counts?: array{broken: int, out_of_stock: int, warm_up: bool, amazon_api: bool}|null, tab?: string, base?: array<string, string>} $view
+ * @var array{part: string, library: int, clicks?: int|null, counts?: array{broken: int, out_of_stock: int, warm_up: bool, amazon_api: bool}|null, tab?: string, base?: array<string, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,10 +24,17 @@ if ( 'summary' === $view['part'] ) :
 			<span class="affibloom-tile__number" data-library-count><?php echo esc_html( number_format_i18n( $view['library'] ) ); ?></span>
 		</span>
 		<span class="affibloom-summary__sep" aria-hidden="true"></span>
-		<span class="affibloom-tile affibloom-tile--line affibloom-tile--soon">
-			<span class="affibloom-tile__label"><?php esc_html_e( 'Clicks (30 days)', 'affibloom' ); ?></span>
-			<span class="affibloom-tile__number"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></span>
-		</span>
+		<?php if ( isset( $view['clicks'] ) ) : ?>
+			<span class="affibloom-tile affibloom-tile--line affibloom-tile--success">
+				<span class="affibloom-tile__label"><?php esc_html_e( 'Clicks (30 days)', 'affibloom' ); ?></span>
+				<span class="affibloom-tile__number" data-clicks-total><?php echo esc_html( number_format_i18n( $view['clicks'] ) ); ?></span>
+			</span>
+		<?php else : ?>
+			<span class="affibloom-tile affibloom-tile--line affibloom-tile--soon">
+				<span class="affibloom-tile__label"><?php esc_html_e( 'Clicks (30 days)', 'affibloom' ); ?></span>
+				<span class="affibloom-tile__number"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></span>
+			</span>
+		<?php endif; ?>
 	</p>
 	<?php
 	return;

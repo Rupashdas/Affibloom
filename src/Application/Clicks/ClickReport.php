@@ -13,7 +13,7 @@ use Affibloom\Domain\Clicks\ClickStore;
 
 /**
  * Lasso's fixed 30 days (F12 R4, D8; Tasks 34A-34C): today (UTC) and the 29 days before. The Dashboard's Clicks column
- * reads each product's figure.
+ * reads each product's figure; its head the sum over published products (Task 34B).
  */
 final class ClickReport {
 
@@ -42,6 +42,15 @@ final class ClickReport {
 		}
 
 		return $totals;
+	}
+
+	/**
+	 * All published products' clicks in the last 30 days (the Dashboard's Clicks (30 days), U9; Task 34B).
+	 *
+	 * @param int $now Now, as a Unix time.
+	 */
+	public function total( int $now ): int {
+		return $this->clicks->total_since( self::since( $now ) );
 	}
 
 	/**

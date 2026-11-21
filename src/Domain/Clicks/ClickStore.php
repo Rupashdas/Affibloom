@@ -40,4 +40,11 @@ interface ClickStore {
 	 * @return array<int, int> By product ID; a product without clicks is left out.
 	 */
 	public function totals_since( string $day, array $product_ids ): array;
+
+	/**
+	 * All published products' clicks from a day on (the Dashboard's Clicks (30 days), Task 34B).
+	 *
+	 * @param string $day The first UTC day counted, "Y-m-d".
+	 */
+	public function total_since( string $day ): int;
 }

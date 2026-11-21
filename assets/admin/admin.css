@@ -1125,6 +1125,8 @@
 .affibloom-tile--line .affibloom-tile__label { margin: 0; font-size: 14px; font-weight: 400; }
 .affibloom-tile--line .affibloom-tile__number { color: var(--affibloom-ink-900); font: 600 14px/20px var(--affibloom-font); letter-spacing: 0; }
 .affibloom-summary__sep { width: 4px; height: 4px; border-radius: 50%; background: var(--affibloom-line-strong); }
+/* Task 34B (U9): Clicks (30 days) in the success tint. */
+.affibloom-tile--line.affibloom-tile--success .affibloom-tile__number { color: var(--affibloom-success-700); }
 
 /*
  * The toolbar: the saved views (or, with rows ticked, Lasso's selection bar in their place) on the left and the

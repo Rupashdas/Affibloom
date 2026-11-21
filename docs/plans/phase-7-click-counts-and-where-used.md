@@ -74,7 +74,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 33C: Old click rows are removed — `affibloom_daily`
 - [x] Task 33D: Settings → General — Page and Link-Level Tracking
 - [x] Task 34A: The Dashboard's Clicks column, sortable
-- [ ] Task 34B: The Clicks (30 days) tile
+- [x] Task 34B: The Clicks (30 days) tile
 - [ ] Task 34C: Clicks per location on the Locations tab
 - Task 34D: dropped with 26J (decision E1: start from zero)
 
@@ -558,10 +558,14 @@ suite does not run). Checked: unit, phpcs, analyse, the Dashboard at 1280 px (th
 
 **Files:** the above; `F12.spec.ts` AC12.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Total and tile.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Add the 30-day clicks tile".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Total and tile.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Add the 30-day clicks tile".
+
+*Note (2026-11-21):* since MD4 the "tile" is the page head's summary line ("Products · Clicks (30 days)"); the figure
+fills it (`data-clicks-total`, success tint). The sum joins published products only. Checked: unit, phpcs, analyse,
+the line at 1280 px (1 click on Local).
 
 ---
 

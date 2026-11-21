@@ -74,6 +74,18 @@ KEY location_day (location_id,day)';
 	}
 
 	/**
+	 * All published products' clicks from a day on: a trashed or retired product's rows are not counted (U9).
+	 *
+	 * @param string $day The first UTC day counted, "Y-m-d".
+	 */
+	public function total_since( string $day ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one sum for the Dashboard's head.
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COALESCE(SUM(c.clicks), 0) FROM %i AS c JOIN %i AS p ON p.ID = c.product_id AND p.post_type = %s AND p.post_status = %s WHERE c.day >= %s', $wpdb->prefix . self::TABLE, $wpdb->posts, ProductPostType::NAME, 'publish', $day ) );
+	}
+
+	/**
 	 * Removes the rows of days before this one.
 	 *
 	 * @param string $day The first UTC day kept, "Y-m-d".

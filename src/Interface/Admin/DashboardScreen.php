@@ -101,6 +101,7 @@ final class DashboardScreen {
 				'locations'  => $this->locations?->of( $ids ),
 				'known'      => $this->locations?->known() ?? true,
 				'clicks'     => $this->clicks?->totals_for( $ids, time() ),
+				'clicks_30'  => $this->clicks?->total( time() ),
 				'counts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement ),
 				'library'    => $this->products->count(),
 				'notice'     => $this->notice->message(),
