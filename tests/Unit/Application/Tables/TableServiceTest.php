@@ -42,6 +42,9 @@ final class TableServiceTest extends TestCase {
 
 	private InMemoryGroupRepository $groups;
 
+	/** @var TableLocations&\PHPUnit\Framework\MockObject\Stub */
+	private TableLocations $locations;
+
 	protected function setUp(): void {
 		Monkey\setUp();
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
@@ -65,6 +68,9 @@ final class TableServiceTest extends TestCase {
 				$this->stored[ $saved->id ] = $saved;
 				return $saved;
 			}
+			public function delete( int $id ): void {
+				unset( $this->stored[ $id ] );
+			}
 			public function name_taken( string $name ): bool {
 				foreach ( $this->stored as $table ) {
 					if ( $table->name === $name ) {
@@ -76,7 +82,7 @@ final class TableServiceTest extends TestCase {
 		};
 		$this->service = new TableService(
 			$repository,
-			$this->createStub( TableLocations::class ),
+			$this->locations = $this->createStub( TableLocations::class ),
 			$this->products,
 			new TableValues( static fn( Product $product ): string => 'https://site.test/go/' . $product->id . '/' ),
 			static fn(): FieldLibrary => FieldLibrary::from_array( array() ),
@@ -213,6 +219,42 @@ final class TableServiceTest extends TestCase {
 				self::assertSame( $reason, $refused->reason );
 			}
 		}
+	}
+
+	/** Task T11 (F25 R10, D8): a clone has everything, Show Field Name included, under "<name> - Copy". */
+	public function test_a_clone_copies_everything(): void {
+		$table   = $this->service->create( 'Shoes', TableStyle::Row );
+		$product = $this->product( 'Molten', array( 'badge' => 'Top' ) );
+		$table   = $this->service->add_product( (int) $table->id, $table->revision, $product );
+		self::assertNotNull( $table );
+		$table = $this->service->update( (int) $table->id, $table->revision, array( 'theme' => 'Llama', 'show_field_name' => false ) );
+		self::assertNotNull( $table );
+
+		$copy = $this->service->clone( (int) $table->id );
+
+		self::assertNotNull( $copy );
+		$clone = $copy['table'];
+		self::assertNotSame( $table->id, $clone->id );
+		self::assertSame( 'Shoes - Copy', $clone->name );
+		self::assertSame( array( TableStyle::Row, 'Llama', false ), array( $clone->style, $clone->theme, $clone->show_field_name ) );
+		self::assertEquals( $table->products, $clone->products );
+		self::assertSame( array( $table->groups, $table->values ), array( $clone->groups, $clone->values ) );
+		self::assertSame( 1, $copy['page'] );
+		self::assertNull( $this->service->clone( 999 ) );
+	}
+
+	/** Task T11 (F25 R41, D12): a table content shows is not deleted; an unused one is; a gone one answers false. */
+	public function test_a_table_in_use_is_not_deleted(): void {
+		$used   = $this->service->create( 'Used', TableStyle::Column );
+		$unused = $this->service->create( 'Unused', TableStyle::Column );
+		$this->locations->method( 'counts' )->willReturnCallback( static fn( array $ids ): array => in_array( $used->id, $ids, true ) ? array( (int) $used->id => 2 ) : array() );
+
+		self::assertTrue( $this->service->delete( (int) $unused->id ) );
+		self::assertNull( $this->service->get( (int) $unused->id ) );
+		self::assertFalse( $this->service->delete( (int) $unused->id ) );
+
+		$this->expectException( \Affibloom\Application\Tables\TableInUse::class );
+		$this->service->delete( (int) $used->id );
 	}
 
 	/** Task T4 (F25 R18): a product that does not exist is refused. */

@@ -69,5 +69,6 @@ $search_label = sprintf( __( 'Search All %s Tables', 'affibloom' ), number_forma
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 	<?php $this->render( 'admin/partials/table-create-modal' ); ?>
 	<?php $this->render( 'admin/partials/table-locations-modal' ); ?>
+	<?php $this->render( 'admin/partials/table-clone-modal' ); ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

@@ -26,6 +26,8 @@
  * - Order (T9; D9): a product, a row or column and a field are dragged by their grips (pointer events: the item under
  *   the pointer is marked, the drop sends the new order) or moved one place by their Move buttons; a field also moves
  *   to the previous or next row (column), or is dropped on another one. Each move redraws the builder.
+ * - Delete This Table (T11; R41, D12): the table's locations are counted first; none → 'Delete "<name>"' → OK deletes
+ *   it and goes to the Tables list; some → "Hold Up". The server counts again and answers 409 when it is in use.
  */
 ( function () {
 	'use strict';
@@ -856,6 +858,36 @@
 		dragging = null;
 		mark( null );
 		region.classList.remove( 'is-dragging' );
+	} );
+
+	// Delete This Table (T11).
+	var deleter = document.getElementById( 'affibloom-table-delete' );
+	var deleteConfirm = deleter.querySelector( '[data-table-delete-confirm]' );
+	var holdUp = document.getElementById( 'affibloom-table-holdup' );
+	var deleteButton = page.querySelector( '[data-table-delete]' );
+	deleteButton.addEventListener( 'click', function () {
+		wp.apiFetch( { path: path + '/locations' } ).then( function ( answer ) {
+			window.affibloomModal.show( answer.data.total > 0 ? holdUp : deleter, deleteButton );
+		} ).catch( function ( failure ) {
+			say( words( failure ) );
+		} );
+	} );
+	deleteConfirm.addEventListener( 'click', function () {
+		var label = deleteConfirm.textContent;
+		deleteConfirm.disabled = true;
+		deleteConfirm.textContent = deleteConfirm.getAttribute( 'data-busy-label' );
+		wp.apiFetch( { path: path, method: 'DELETE' } ).then( function ( answer ) {
+			window.location.assign( answer.data.redirect_to );
+		} ).catch( function ( failure ) {
+			deleteConfirm.disabled = false;
+			deleteConfirm.textContent = label;
+			window.affibloomModal.hide();
+			if ( failure && 'affibloom_table_in_use' === failure.code ) {
+				window.affibloomModal.show( holdUp, deleteButton );
+				return;
+			}
+			say( words( failure ) );
+		} );
 	} );
 
 	// A price box opens on Enter or Space too.

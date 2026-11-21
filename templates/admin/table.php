@@ -111,8 +111,8 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 			</div>
 
 			<p class="affibloom-table-page__delete">
-				<?php // Delete This Table comes with Task T11. ?>
-				<button type="button" class="affibloom-button affibloom-button--danger" disabled title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>"><?php esc_html_e( 'Delete This Table', 'affibloom' ); ?></button>
+				<?php // R41, D12 (Task T11): unused, Lasso's question; used, "Hold Up". The server checks again. ?>
+				<button type="button" class="affibloom-button affibloom-button--danger" data-table-delete aria-haspopup="dialog"<?php echo null === $table->id ? ' hidden' : ''; ?>><?php esc_html_e( 'Delete This Table', 'affibloom' ); ?></button>
 			</p>
 		</div>
 	</div>
@@ -122,6 +122,28 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	<?php $this->render( 'admin/partials/table-group-picker' ); ?>
 	<?php $this->render( 'admin/partials/table-description-modal' ); ?>
 	<?php $this->render( 'admin/partials/table-button-modal' ); ?>
+	<?php
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'            => 'affibloom-table-delete',
+			/* translators: %s: the table's name. */
+			'title'         => sprintf( __( 'Delete "%s"', 'affibloom' ), $table->name ),
+			'text'          => __( "If deleted, you won't be able to get its back.", 'affibloom' ),
+			'confirm_label' => __( 'OK', 'affibloom' ),
+			'confirm_attr'  => 'data-table-delete-confirm',
+			'failed_text'   => __( 'Could not delete the table. Please try again.', 'affibloom' ),
+		)
+	);
+	$this->render(
+		'admin/partials/holdup-modal',
+		array(
+			'id'     => 'affibloom-table-holdup',
+			'text'   => __( "You can't delete a Table if it is in use on your site. Remove this Table from your content first.", 'affibloom' ),
+			'button' => __( 'Got It', 'affibloom' ),
+		)
+	);
+	?>
 	<?php
 	$this->render(
 		'admin/partials/field-modal',

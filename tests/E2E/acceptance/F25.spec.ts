@@ -435,4 +435,49 @@ test.describe( 'F25 Comparison tables', () => {
 		await expect( dialog.getByRole( 'link', { name: title } ) ).toHaveAttribute( 'href', new RegExp( `post=${ post }&action=edit` ) );
 		await expect( dialog.getByRole( 'link', { name: `View ${ title }` } ) ).toHaveAttribute( 'target', '_blank' );
 	} );
+
+	// AC14 (T11; R10, D8).
+	test( 'AC14 Clone: Lasso\'s question, "<name> - Copy" with everything, the list\'s last page', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const id = await tableWith( page, 'row', [ createProduct( { name: `Clone ${ word }`, badge: 'Top' } ) ] );
+		const name = wp( 'post', 'get', String( id ), '--field=post_title' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-tables&search=${ encodeURIComponent( name ) }` );
+		await page.getByRole( 'button', { name: `Clone ${ name }` } ).click();
+		const dialog = page.getByRole( 'dialog', { name: `Do you want to clone ${ name }` } );
+		await dialog.getByRole( 'button', { name: 'OK' } ).click();
+		await expect( page.getByRole( 'link', { name: `${ name } - Copy` } ) ).toBeVisible();
+		const copy = wp( 'post', 'list', '--post_type=affibloom_table', `--title=${ name } - Copy`, '--field=ID' );
+		const original = stored( id );
+		expect( stored( Number( copy ) ) ).toMatchObject( { style: original.style, theme: original.theme, products: original.products, groups: original.groups, values: original.values, show_field_name: original.show_field_name } );
+	} );
+
+	// AC15 (T11; R41, D12).
+	test( 'AC15 Delete This Table: unused → Lasso\'s question → the list; used → "Hold Up", also for a direct request', async ( { page } ) => {
+		const unused = createTable( unique( 'F25 AC15 unused' ), 'column', 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ unused }` );
+		await page.getByRole( 'button', { name: 'Delete This Table' } ).click();
+		const question = page.getByRole( 'dialog', { name: /^Delete "/ } );
+		await expect( question.getByText( "If deleted, you won't be able to get its back." ) ).toBeVisible();
+		await question.getByRole( 'button', { name: 'OK' } ).click();
+		await expect( page ).toHaveURL( /page=affibloom-tables/ );
+		expect( wp( 'post', 'list', '--post_type=affibloom_table', `--post__in=${ unused }`, '--format=count' ) ).toBe( '0' );
+
+		const used = createTable( unique( 'F25 AC15 used' ), 'column', 'Cactus', [] );
+		const post = Number( wp( 'post', 'create', '--post_title=F25 AC15 host', '--post_status=draft', '--porcelain' ) );
+		wp( 'eval', `global $wpdb; $wpdb->insert( $wpdb->prefix . 'affibloom_link_locations', array( 'host_id' => ${ post }, 'link_type' => 'display', 'display_type' => 'table', 'display_ref' => 'table:${ used }', 'url' => 'x', 'original_url' => 'x', 'url_md5' => md5( 'table-${ used }' ), 'detected_at' => current_time( 'mysql' ) ) );` );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ used }` );
+		await page.getByRole( 'button', { name: 'Delete This Table' } ).click();
+		const holdUp = page.getByRole( 'dialog', { name: 'Hold Up' } );
+		await expect( holdUp.getByText( "You can't delete a Table if it is in use on your site. Remove this Table from your content first." ) ).toBeVisible();
+		await holdUp.getByRole( 'button', { name: 'Got It' } ).click();
+		const status = await page.evaluate( async ( table ) => {
+			try {
+				await ( window as unknown as { wp: { apiFetch: ( o: object ) => Promise<unknown> } } ).wp.apiFetch( { path: `/affibloom/v1/tables/${ table }`, method: 'DELETE' } );
+				return 'deleted';
+			} catch ( problem ) {
+				return ( problem as { code: string } ).code;
+			}
+		}, used );
+		expect( status ).toBe( 'affibloom_table_in_use' );
+	} );
 } );

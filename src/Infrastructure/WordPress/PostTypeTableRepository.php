@@ -169,6 +169,17 @@ final class PostTypeTableRepository implements TableRepository {
 	}
 
 	/**
+	 * Deletes a table for good (R41; Task T11): its post and, with it, its meta.
+	 *
+	 * @param int $id The table.
+	 */
+	public function delete( int $id ): void {
+		if ( null !== $this->get( $id ) ) {
+			wp_delete_post( $id, true );
+		}
+	}
+
+	/**
 	 * Whether a table has this exact name.
 	 *
 	 * @param string $name The name.

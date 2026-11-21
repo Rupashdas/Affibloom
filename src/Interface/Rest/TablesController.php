@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Products\ProductInput;
+use Affibloom\Application\Tables\TableInUse;
 use Affibloom\Application\Tables\TableService;
 use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\InvalidField;
@@ -34,7 +35,8 @@ use WP_REST_Server;
  * F25's routes (Tasks T1-T17). `POST /tables` (T2, R12) creates a table; `PATCH /tables/{id}` (T3) saves the builder's
  * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them; `/groups`, their
  * `/fields` and `/values` (T6) shape the rows and columns and save the cells; `/order` and a field's `/move` (T9)
- * reorder them; `/locations` (T10) lists the posts a table is in. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
+ * reorder them; `/locations` (T10) lists the posts a table is in;
+ * `/clone` and DELETE (T11) copy and delete one. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
  * (`html`, `url`) and as data (`items`: id, title) for the editor's "Choose a Table", ten a page or the picker's five;
  * anyone who may place displays may read it.
  */
@@ -64,6 +66,15 @@ final class TablesController implements Module {
 			'type'     => 'integer',
 			'minimum'  => 0,
 			'required' => true,
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/clone',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'clone' ),
+				'permission_callback' => $can,
+			)
 		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
@@ -236,26 +247,29 @@ final class TablesController implements Module {
 			ProductsController::NAMESPACE,
 			'/tables/(?P<id>\d+)',
 			array(
-				'methods'             => 'PATCH',
-				'callback'            => array( $this, 'update' ),
-				'permission_callback' => static fn(): bool => current_user_can( Capabilities::PRODUCTS ),
-				'args'                => array(
-					'revision'        => array(
-						'type'     => 'integer',
-						'minimum'  => 0,
-						'required' => true,
+				array(
+					'methods'             => 'PATCH',
+					'callback'            => array( $this, 'update' ),
+					'permission_callback' => $can,
+					'args'                => array(
+						'revision'        => $revision,
+						'title'           => array( 'type' => 'string' ),
+						'style'           => array(
+							'type' => 'string',
+							'enum' => array( TableStyle::Column->value, TableStyle::Row->value ),
+						),
+						'theme'           => array(
+							'type' => 'string',
+							'enum' => TableTheme::ALL,
+						),
+						'show_headers'    => array( 'type' => 'boolean' ),
+						'show_field_name' => array( 'type' => 'boolean' ),
 					),
-					'title'           => array( 'type' => 'string' ),
-					'style'           => array(
-						'type' => 'string',
-						'enum' => array( TableStyle::Column->value, TableStyle::Row->value ),
-					),
-					'theme'           => array(
-						'type' => 'string',
-						'enum' => TableTheme::ALL,
-					),
-					'show_headers'    => array( 'type' => 'boolean' ),
-					'show_field_name' => array( 'type' => 'boolean' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete' ),
+					'permission_callback' => $can,
 				),
 			)
 		);
@@ -544,6 +558,57 @@ final class TablesController implements Module {
 		);
 
 		return new WP_REST_Response( array( 'data' => $found ) );
+	}
+
+	/**
+	 * POST /tables/{id}/clone (R10, D8; Task T11): "<name> - Copy" with everything; answers its id and the list page it
+	 * is on (the last). 404 for a table that is gone.
+	 *
+	 * @param WP_REST_Request $request The table.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function clone( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$copy = $this->tables->clone( (int) $request['id'] );
+		if ( null === $copy ) {
+			return self::not_found();
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'id'   => (int) $copy['table']->id,
+					'page' => $copy['page'],
+				),
+			),
+			201
+		);
+	}
+
+	/**
+	 * DELETE /tables/{id} (R41, D12; Task T11): a table no content shows; answers the Tables list's address. 409
+	 * `affibloom_table_in_use` (Lasso's "Hold Up" sentence), 404 "Table is not found".
+	 *
+	 * @param WP_REST_Request $request The table.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		try {
+			$deleted = $this->tables->delete( (int) $request['id'] );
+		} catch ( TableInUse ) {
+			return new WP_Error( 'affibloom_table_in_use', __( "You can't delete a Table if it is in use on your site. Remove this Table from your content first.", 'affibloom' ), array( 'status' => 409 ) );
+		}
+		if ( ! $deleted ) {
+			return self::not_found();
+		}
+
+		return new WP_REST_Response( array( 'data' => array( 'redirect_to' => TablesScreen::url() ) ) );
+	}
+
+	/**
+	 * Lasso's answer for a table that is gone.
+	 */
+	private static function not_found(): WP_Error {
+		return new WP_Error( 'affibloom_table_not_found', __( 'Table is not found', 'affibloom' ), array( 'status' => 404 ) );
 	}
 
 	/**

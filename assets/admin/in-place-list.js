@@ -19,7 +19,8 @@
  *                   request (a filter bar outside the list; optional).
  *
  * It returns { reload() }, which loads page 1 again with the current search and sort (a filter changed), and
- * { refresh() }, which draws the current page again and moves the focus to it (a row was dismissed, Task O7). Each drawn
+ * { refresh() }, which draws the current page again and moves the focus to it (a row was dismissed, Task O7), and
+ * { show( page ) }, which clears the search and draws that page (a table cloned, F25 Task T11). Each drawn
  * list fires `affibloom:list-loaded` on the region with the answer's data ({ total, … }), for counts kept elsewhere.
  */
 ( function () {
@@ -146,6 +147,12 @@
 			},
 			refresh: function () {
 				load( current, false, true );
+			},
+			show: function ( page ) {
+				if ( search ) {
+					search.value = '';
+				}
+				load( { s: '', paged: page, order: current.order, orderby: current.orderby }, true, true );
 			},
 		};
 	};

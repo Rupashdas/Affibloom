@@ -52,4 +52,11 @@ interface TableRepository {
 	 * @param string $name The name.
 	 */
 	public function name_taken( string $name ): bool;
+
+	/**
+	 * Deletes a table for good (R41; Task T11).
+	 *
+	 * @param int $id The table.
+	 */
+	public function delete( int $id ): void;
 }

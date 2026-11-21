@@ -138,7 +138,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T8: Button information
 - [x] Task T9: Reordering
 - [x] Task T10: Table Locations
-- [ ] Task T11: Clone and delete
+- [x] Task T11: Clone and delete
 - [ ] Task T12: The reader's Horizontal table, by shortcode
 - [ ] Task 18S13: A table's Copy Shortcode
 - [ ] Task T13: The reader's Vertical table
@@ -2037,12 +2037,14 @@ Tables list; used → "Hold Up" (Got It), nothing deleted; a direct request is r
 
 **Files:** the above; F25 spec AC14-AC15; unit tests (clone copies settings; in-use refusal).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Service and routes.**
-- [ ] **Step 3: Dialogs.**
-- [ ] **Step 4: Run
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Service and routes.**
+- [x] **Step 3: Dialogs.**
+- [x] **Step 4: Run
   and look.**
-- [ ] **Step 5: Commit** — "Clone a table and delete one only when unused".
+- [x] **Step 5: Commit** — "Clone a table and delete one only when unused".
+
+*Note:* The in-place list gained `show( page )` (clears the search and draws that page) for Clone's last page. Delete counts the locations through GET /tables/{id}/locations before asking; the server counts again (409 `affibloom_table_in_use`). Checked: unit tests (clone copies all; in-use refusal); in a headless browser a clone from the list, Hold Up for the used table, the copy deleted and back on the list; a direct DELETE answered 409.
 
 ---
 

@@ -397,6 +397,22 @@ final class Table {
 	}
 
 	/**
+	 * A copy with everything (R10, D8; Task T11): the products, badges, fields, values and settings, named "<name> -
+	 * Copy", not stored yet.
+	 *
+	 * @param string $suffix The words after the name (" - Copy").
+	 */
+	public function copy( string $suffix ): self {
+		return $this->with(
+			array(
+				'id'       => null,
+				'name'     => $this->name . $suffix,
+				'revision' => 1,
+			)
+		);
+	}
+
+	/**
 	 * Its products' IDs, in order.
 	 *
 	 * @return list<int>

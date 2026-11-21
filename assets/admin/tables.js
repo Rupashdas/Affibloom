@@ -9,6 +9,9 @@
  *
  * Table Locations (R40, D13; Task T10): a count above 0 opens the dialog with GET /tables/{id}/locations, six posts a
  * page (title to its editor, address, view); each table's page is kept in this browser (localStorage, per viewer).
+ *
+ * Clone (R10, D8; Task T11): "Do you want to clone <name>" → POST /tables/{id}/clone → the list's last page, where
+ * "<name> - Copy" is.
  */
 ( function () {
 	'use strict';
@@ -151,12 +154,43 @@
 	if ( ! region || ! window.affibloomInPlaceList ) {
 		return;
 	}
-	window.affibloomInPlaceList( {
+	var list = window.affibloomInPlaceList( {
 		region: region,
 		search: document.getElementById( 'affibloom-tables-search' ),
 		status: document.getElementById( 'affibloom-list-status' ),
 		errorTemplate: document.getElementById( 'affibloom-list-error' ),
 		path: region.getAttribute( 'data-list-path' ),
 		args: {},
+	} );
+
+	// Clone (T11).
+	var cloner = document.getElementById( 'affibloom-table-clone' );
+	var cloneConfirm = cloner.querySelector( '[data-table-clone-confirm]' );
+	var cloning = 0;
+	region.addEventListener( 'click', function ( event ) {
+		var button = event.target.closest( '[data-table-clone]' );
+		if ( button ) {
+			cloning = parseInt( button.getAttribute( 'data-table-clone' ), 10 );
+			cloner.querySelector( '.affibloom-modal__title' ).textContent = cloner.dataset.question.replace( '%s', button.getAttribute( 'data-table-name' ) );
+			window.affibloomModal.show( cloner, button );
+		}
+	} );
+	cloneConfirm.addEventListener( 'click', function () {
+		var label = cloneConfirm.textContent;
+		cloneConfirm.disabled = true;
+		cloneConfirm.textContent = cloneConfirm.getAttribute( 'data-busy-label' );
+		var restore = function () {
+			cloneConfirm.disabled = false;
+			cloneConfirm.textContent = label;
+		};
+		wp.apiFetch( { path: '/affibloom/v1/tables/' + cloning + '/clone', method: 'POST' } ).then( function ( answer ) {
+			restore();
+			window.affibloomModal.hide();
+			list.show( answer.data.page );
+		} ).catch( function ( failure ) {
+			restore();
+			window.affibloomModal.hide();
+			window.affibloomToast( ( failure && failure.message ) || cloner.dataset.failed, true );
+		} );
 	} );
 }() );

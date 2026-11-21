@@ -28,7 +28,8 @@ use Closure;
 
 /**
  * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4) and a
- * group's (T5), rows, columns, fields and cell values (T6-T8), their order (T9). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
+ * group's (T5), rows, columns, fields and cell values (T6-T8), their order (T9), where it is used (T10), clone and
+ * delete (T11). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
  */
 final class TableService {
 
@@ -508,6 +509,44 @@ final class TableService {
 			'page'  => $page,
 			'pages' => $pages( $found['total'] ),
 		);
+	}
+
+	/**
+	 * A copy of a table (R10, D8; Task T11), and the list page it appears on (the last: the list runs oldest first).
+	 *
+	 * @param int $id The table.
+	 * @return array{table: Table, page: int}|null Null when the table is gone.
+	 */
+	public function clone( int $id ): ?array {
+		$table = $this->tables->get( $id );
+		if ( null === $table ) {
+			return null;
+		}
+		$copy = $this->tables->save( $table->copy( ' - Copy' ) );
+
+		return array(
+			'table' => $copy,
+			'page'  => max( 1, (int) ceil( $this->tables->count() / TablePage::PER_PAGE ) ),
+		);
+	}
+
+	/**
+	 * Deletes a table that no content shows (R41, D12; Task T11); the locations are counted at this moment.
+	 *
+	 * @param int $id The table.
+	 * @return bool False when the table is gone already.
+	 * @throws TableInUse When content shows it.
+	 */
+	public function delete( int $id ): bool {
+		if ( null === $this->tables->get( $id ) ) {
+			return false;
+		}
+		if ( ( $this->locations->counts( array( $id ) )[ $id ] ?? 0 ) > 0 ) {
+			throw new TableInUse( 'The table is used in content.' );
+		}
+		$this->tables->delete( $id );
+
+		return true;
 	}
 
 	/**

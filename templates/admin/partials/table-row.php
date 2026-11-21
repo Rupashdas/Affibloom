@@ -2,7 +2,7 @@
 /**
  * One row of the Tables list (F25 R7; Task T1; Lasso's table-row.php): the name (bold) to the builder; each product's
  * name to its page, in table order (a product no longer published is left out, D15), or "No products in this table
- * yet."; the theme; Horizontal (Row) or Vertical (Column); the Locations count; Clone, which comes with Task T11.
+ * yet."; the theme; Horizontal (Row) or Vertical (Column); the Locations count (T10); Clone (T11).
  *
  * @package Affibloom
  * @var array{table: \Affibloom\Domain\Table\Table, locations: int} $view
@@ -46,8 +46,8 @@ $clone_label = sprintf( __( 'Clone %s', 'affibloom' ), $table->name );
 		<?php endif; ?>
 	</td>
 	<td class="affibloom-col-clone">
-		<?php // Clone comes with Task T11; until then the icon is shown, disabled. ?>
-		<button type="button" class="affibloom-icon-button" disabled aria-label="<?php echo esc_attr( $clone_label ); ?>" aria-describedby="affibloom-soon-note" title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>">
+		<?php // R10 (Task T11): Lasso's question, then the copy. ?>
+		<button type="button" class="affibloom-icon-button" data-table-clone="<?php echo esc_attr( (string) $table->id ); ?>" data-table-name="<?php echo esc_attr( $table->name ); ?>" aria-haspopup="dialog" aria-label="<?php echo esc_attr( $clone_label ); ?>" title="<?php esc_attr_e( 'Clone', 'affibloom' ); ?>">
 			<?php $this->render( 'admin/partials/icon', array( 'name' => 'copy' ) ); ?>
 		</button>
 	</td>
