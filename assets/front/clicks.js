@@ -108,9 +108,8 @@
 		} else if ( window.dataLayer && 'function' === typeof window.dataLayer.push ) {
 			window.dataLayer.push( Object.assign( { event: name }, params ) );
 		} else if ( 'function' === typeof window.ga ) {
-			// Lasso's own tracker when the page has it (R10), else the default one.
-			var tracker = window.ga.getByName && window.ga.getByName( 'LassoTracker' ) ? 'LassoTracker.send' : 'send';
-			window.ga( tracker, 'event', params.event_category, name, params.affibloom_href );
+			// The default tracker (R10's named tracker was the old plugin's own and is not used; deviation 146).
+			window.ga( 'send', 'event', params.event_category, name, params.affibloom_href );
 		}
 	}
 

@@ -675,7 +675,8 @@ AC2, AC8, AC9.
 would have no caller). `ClickScript` prints the script when either setting is on and passes `count` and `ga`. An
 in-content link has no product name attribute (35H stamps the ID and location), so its `event_category` is the link's
 text. Checked: phpcs, analyse; on Local with a stub gtag: button 1 and the image send `affibloom_primary_click`
-("Buy Now"), a tied text link `affibloom_link_click`.
+("Buy Now"), a tied text link `affibloom_link_click`. analytics.js always gets `ga( 'send', … )`: the named tracker of R10 and
+AC9 is the old plugin's and is not used (deviation 146; `NoLassoInCoreTest`).
 
 ---
 
