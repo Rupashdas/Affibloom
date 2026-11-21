@@ -3241,6 +3241,15 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 #affibloom-table-builder.is-dragging, #affibloom-table-builder.is-dragging * { cursor: grabbing; user-select: none; }
 .affibloom-table-builder .is-drop-target { outline: 2px dashed var(--affibloom-brand-600); outline-offset: -3px; }
 
+/* Task T10 (F25 R40): "Table Locations", a large dialog of posts: the title over its address, a view icon. */
+.affibloom-table-locations .affibloom-modal__panel { max-width: 760px; }
+.affibloom-table-locations__list { width: 100%; min-width: 0; table-layout: fixed; }
+.affibloom-table-locations__list td { vertical-align: middle; }
+.affibloom-table-locations__title { display: block; color: var(--affibloom-ink-900); font-weight: 600; }
+.affibloom-table-locations__url { display: block; color: var(--affibloom-ink-500); font-size: 13px; overflow-wrap: anywhere; }
+.affibloom-table-locations__action { width: 72px; text-align: center; }
+.affibloom-table-locations__list tbody[aria-busy="true"] { opacity: .5; }
+
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
 .affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }

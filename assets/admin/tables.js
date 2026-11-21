@@ -6,6 +6,9 @@
  * Create Table (R12; Task T2): an empty name is refused without a request; otherwise POST /tables, a busy button, and
  * the address the answer names; a refusal shows the server's words and gives the button back. `&create=1` (the
  * editor's link) opens the dialog and leaves the address.
+ *
+ * Table Locations (R40, D13; Task T10): a count above 0 opens the dialog with GET /tables/{id}/locations, six posts a
+ * page (title to its editor, address, view); each table's page is kept in this browser (localStorage, per viewer).
  */
 ( function () {
 	'use strict';
@@ -52,6 +55,96 @@
 			window.history.replaceState( null, '', window.location.pathname + '?' + params.toString() );
 			window.affibloomModal.show( dialog, document.querySelector( '[data-affibloom-open="affibloom-table-create"]' ) || document.body );
 		}
+	}
+
+	var places = document.getElementById( 'affibloom-table-locations' );
+	if ( places ) {
+		var rows = places.querySelector( '[data-locations-rows]' );
+		var pager = places.querySelector( '[data-locations-pages]' );
+		var problem = places.querySelector( '[data-locations-error]' );
+		var STORE = 'affibloom_table_locations';
+		var remembered = function () {
+			try {
+				return JSON.parse( window.localStorage.getItem( STORE ) || '{}' ) || {};
+			} catch ( e ) {
+				return {};
+			}
+		};
+		var remember = function ( table, page ) {
+			try {
+				var pages = remembered();
+				pages[ table ] = page;
+				window.localStorage.setItem( STORE, JSON.stringify( pages ) );
+			} catch ( e ) {
+				// Without storage the dialog starts on its first page.
+			}
+		};
+		var link = function ( href, text, label ) {
+			var anchor = document.createElement( 'a' );
+			anchor.href = href;
+			anchor.target = '_blank';
+			anchor.rel = 'noopener';
+			anchor.textContent = text;
+			if ( label ) {
+				anchor.setAttribute( 'aria-label', label );
+			}
+			return anchor;
+		};
+		var load = function ( table, page ) {
+			problem.hidden = true;
+			rows.innerHTML = '';
+			rows.setAttribute( 'aria-busy', 'true' );
+			wp.apiFetch( { path: '/affibloom/v1/tables/' + table + '/locations?page=' + page } ).then( function ( answer ) {
+				var data = answer.data;
+				rows.removeAttribute( 'aria-busy' );
+				remember( table, data.page );
+				data.items.forEach( function ( post ) {
+					var tr = document.createElement( 'tr' );
+					var content = document.createElement( 'td' );
+					var title = link( post.edit_url, post.title );
+					title.className = 'affibloom-table-locations__title';
+					var address = link( post.url, post.url );
+					address.className = 'affibloom-table-locations__url';
+					content.append( title, address );
+					var action = document.createElement( 'td' );
+					action.className = 'affibloom-table-locations__action';
+					var view = link( post.url, '', places.dataset.viewLabel.replace( '%s', post.title ) );
+					view.className = 'affibloom-icon-button';
+					view.innerHTML = '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 10s2.75-5 7.5-5 7.5 5 7.5 5-2.75 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.25"/></svg>';
+					action.appendChild( view );
+					tr.append( content, action );
+					rows.appendChild( tr );
+				} );
+				pager.innerHTML = '';
+				pager.hidden = data.pages < 2;
+				[ [ -1, places.dataset.prevLabel, data.page > 1 ], [ 1, places.dataset.nextLabel, data.page < data.pages ] ].forEach( function ( step ) {
+					var button = document.createElement( 'button' );
+					button.type = 'button';
+					button.className = 'affibloom-button affibloom-button--small affibloom-button--secondary';
+					button.textContent = step[ 1 ];
+					button.disabled = ! step[ 2 ];
+					button.addEventListener( 'click', function () {
+						load( table, data.page + step[ 0 ] );
+					} );
+					pager.appendChild( button );
+				} );
+				var where = document.createElement( 'span' );
+				where.textContent = data.page + ' / ' + data.pages;
+				pager.insertBefore( where, pager.lastChild );
+			} ).catch( function () {
+				rows.removeAttribute( 'aria-busy' );
+				problem.textContent = places.dataset.failed;
+				problem.hidden = false;
+			} );
+		};
+		document.addEventListener( 'click', function ( event ) {
+			var opener = event.target.closest( '[data-table-locations]' );
+			if ( opener ) {
+				var table = opener.getAttribute( 'data-table-locations' );
+				load( table, remembered()[ table ] || 1 );
+				window.affibloomModal.show( places, opener );
+			}
+		} );
 	}
 
 	var region = document.getElementById( 'affibloom-tables-list' );

@@ -36,7 +36,15 @@ $clone_label = sprintf( __( 'Clone %s', 'affibloom' ), $table->name );
 	</td>
 	<td class="affibloom-col-theme"><?php echo esc_html( $table->theme ); ?></td>
 	<td class="affibloom-col-style"><?php echo esc_html( TableStyle::Row === $table->style ? __( 'Horizontal', 'affibloom' ) : __( 'Vertical', 'affibloom' ) ); ?></td>
-	<td class="affibloom-col-locations"><?php echo esc_html( number_format_i18n( $view['locations'] ) ); ?></td>
+	<td class="affibloom-col-locations">
+		<?php if ( $view['locations'] > 0 ) : ?>
+			<?php // R40 (Task T10): a count above 0 opens "Table Locations". ?>
+			<?php /* translators: %s: the table's name. */ ?>
+			<button type="button" class="affibloom-link-button" data-table-locations="<?php echo esc_attr( (string) $table->id ); ?>" aria-haspopup="dialog" aria-label="<?php echo esc_attr( sprintf( __( 'Locations of %s', 'affibloom' ), $table->name ) ); ?>"><?php echo esc_html( number_format_i18n( $view['locations'] ) ); ?></button>
+		<?php else : ?>
+			<?php echo esc_html( number_format_i18n( $view['locations'] ) ); ?>
+		<?php endif; ?>
+	</td>
 	<td class="affibloom-col-clone">
 		<?php // Clone comes with Task T11; until then the icon is shown, disabled. ?>
 		<button type="button" class="affibloom-icon-button" disabled aria-label="<?php echo esc_attr( $clone_label ); ?>" aria-describedby="affibloom-soon-note" title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>">

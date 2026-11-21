@@ -419,4 +419,20 @@ test.describe( 'F25 Comparison tables', () => {
 		await page.reload();
 		await expect( page.locator( '.affibloom-table-cell--head' ).first() ).toHaveAttribute( 'data-table-product', String( a ) );
 	} );
+
+	// AC13 (T10; R9, R40, D13): an index row seeded for a draft, as the index records a table placed in a post.
+	test( 'AC13 Table Locations: the count opens the dialog, title to its editor, address and view', async ( { page } ) => {
+		const title = unique( 'F25 AC13 post' );
+		const table = createTable( unique( 'F25 AC13' ), 'column', 'Cactus', [] );
+		const post = Number( wp( 'post', 'create', `--post_title=${ title }`, '--post_status=draft', '--porcelain' ) );
+		wp( 'eval', `global $wpdb; $wpdb->insert( $wpdb->prefix . 'affibloom_link_locations', array( 'host_id' => ${ post }, 'link_type' => 'display', 'display_type' => 'table', 'display_ref' => 'table:${ table }', 'url' => 'x', 'original_url' => 'x', 'url_md5' => md5( 'table-${ table }' ), 'detected_at' => current_time( 'mysql' ) ) );` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-tables&search=${ encodeURIComponent( 'F25 AC13' ) }` );
+		await page.getByRole( 'button', { name: /^Locations of F25 AC13/ } ).first().click();
+		const dialog = page.getByRole( 'dialog', { name: 'Table Locations' } );
+		await expect( dialog.getByRole( 'columnheader', { name: /Content/ } ) ).toBeVisible();
+		await expect( dialog.getByRole( 'columnheader', { name: 'Action' } ) ).toBeVisible();
+		await expect( dialog.getByRole( 'link', { name: title } ) ).toHaveAttribute( 'href', new RegExp( `post=${ post }&action=edit` ) );
+		await expect( dialog.getByRole( 'link', { name: `View ${ title }` } ) ).toHaveAttribute( 'target', '_blank' );
+	} );
 } );

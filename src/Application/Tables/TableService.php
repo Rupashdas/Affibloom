@@ -32,6 +32,9 @@ use Closure;
  */
 final class TableService {
 
+	/** "Table Locations" shows six posts a page (Lasso's `link_location_limit`, R40). */
+	public const PLACES_PER_PAGE = 6;
+
 	/**
 	 * Builds the service.
 	 *
@@ -478,6 +481,33 @@ final class TableService {
 	 */
 	public function count(): int {
 		return $this->tables->count();
+	}
+
+	/**
+	 * One page of the posts a table is used in (R40, D13; Task T10), six a page as Lasso's dialog shows them.
+	 *
+	 * @param int $id   The table.
+	 * @param int $page The page, from 1.
+	 * @return array{items: list<array{id: int, title: string}>, total: int, page: int, pages: int}|null Null when the
+	 *                                                                                                   table is gone.
+	 */
+	public function places( int $id, int $page ): ?array {
+		if ( null === $this->tables->get( $id ) ) {
+			return null;
+		}
+		$pages = static fn( int $total ): int => max( 1, (int) ceil( $total / self::PLACES_PER_PAGE ) );
+		$found = $this->locations->page( $id, max( 1, $page ), self::PLACES_PER_PAGE );
+		$page  = min( max( 1, $page ), $pages( $found['total'] ) );
+		if ( array() === $found['items'] && $found['total'] > 0 ) {
+			$found = $this->locations->page( $id, $page, self::PLACES_PER_PAGE );
+		}
+
+		return array(
+			'items' => $found['items'],
+			'total' => $found['total'],
+			'page'  => $page,
+			'pages' => $pages( $found['total'] ),
+		);
 	}
 
 	/**

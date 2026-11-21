@@ -34,7 +34,7 @@ use WP_REST_Server;
  * F25's routes (Tasks T1-T17). `POST /tables` (T2, R12) creates a table; `PATCH /tables/{id}` (T3) saves the builder's
  * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them; `/groups`, their
  * `/fields` and `/values` (T6) shape the rows and columns and save the cells; `/order` and a field's `/move` (T9)
- * reorder them. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
+ * reorder them; `/locations` (T10) lists the posts a table is in. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
  * (`html`, `url`) and as data (`items`: id, title) for the editor's "Choose a Table", ten a page or the picker's five;
  * anyone who may place displays may read it.
  */
@@ -64,6 +64,22 @@ final class TablesController implements Module {
 			'type'     => 'integer',
 			'minimum'  => 0,
 			'required' => true,
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/locations',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'places' ),
+				'permission_callback' => $can,
+				'args'                => array(
+					'page' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'default' => 1,
+					),
+				),
+			)
 		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
@@ -504,6 +520,30 @@ final class TablesController implements Module {
 			fn(): ?Table => $this->tables->move_field( (int) $request['id'], (int) $request['revision'], (string) $request['group'], (int) $request['field'], (string) $request['to_group'], (int) $request['position'] ),
 			self::redrawn( ... )
 		);
+	}
+
+	/**
+	 * GET /tables/{id}/locations?page= (R40, D13; Task T10): one page of the posts the table is in, six a page, each with
+	 * its editor, its address and its view link.
+	 *
+	 * @param WP_REST_Request $request The table and the page.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function places( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$found = $this->tables->places( (int) $request['id'], (int) $request['page'] );
+		if ( null === $found ) {
+			return new WP_Error( 'affibloom_table_not_found', __( 'That table does not exist.', 'affibloom' ), array( 'status' => 404 ) );
+		}
+		$found['items'] = array_map(
+			static fn( array $post ): array => array(
+				'title'    => '' !== $post['title'] ? wp_specialchars_decode( $post['title'], ENT_QUOTES ) : __( '(no title)', 'affibloom' ),
+				'edit_url' => (string) get_edit_post_link( $post['id'], 'raw' ),
+				'url'      => (string) get_permalink( $post['id'] ),
+			),
+			$found['items']
+		);
+
+		return new WP_REST_Response( array( 'data' => $found ) );
 	}
 
 	/**

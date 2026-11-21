@@ -137,7 +137,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T7: Image, price and description cells
 - [x] Task T8: Button information
 - [x] Task T9: Reordering
-- [ ] Task T10: Table Locations
+- [x] Task T10: Table Locations
 - [ ] Task T11: Clone and delete
 - [ ] Task T12: The reader's Horizontal table, by shortcode
 - [ ] Task 18S13: A table's Copy Shortcode
@@ -2004,12 +2004,14 @@ found in.") and Action; title (its editor, new tab), address, view icon; six a p
 
 **Files:** the above; F25 spec AC13 (an index row seeded for the draft).
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Route and adapter.**
-- [ ] **Step 3: Dialog.**
-- [ ] **Step 4: Run and
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Route and adapter.**
+- [x] **Step 3: Dialog.**
+- [x] **Step 4: Run and
   look.**
-- [ ] **Step 5: Commit** — "Show where a table is used".
+- [x] **Step 5: Commit** — "Show where a table is used".
+
+*Note:* The dialog lists each post once (the count, from T1, counts index rows). Its rows are drawn without the list skeleton (that helper makes list items, which a table body cannot hold). Checked on Local with 8 seeded index rows (dummy data): six a page, page 2, the page remembered after a reload, 375 px.
 
 ---
 
