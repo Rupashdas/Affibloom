@@ -28,14 +28,15 @@ use WP_Post;
 final class PostTypeTableRepository implements TableRepository {
 
 	/**
-	 * One page of tables, oldest first.
+	 * One page of tables, oldest first (the Tables list), or newest first (the editor's "Choose a Table", R55).
 	 *
 	 * @param SearchTerm $term     The search.
 	 * @param int        $page     The page, from 1.
 	 * @param int        $per_page Tables per page.
+	 * @param bool       $newest   Newest first.
 	 */
-	public function page( SearchTerm $term, int $page, int $per_page ): TablePage {
-		$tables = $this->all();
+	public function page( SearchTerm $term, int $page, int $per_page, bool $newest = false ): TablePage {
+		$tables = $newest ? array_reverse( $this->all() ) : $this->all();
 		if ( ! $term->is_empty() ) {
 			$tables = array_values(
 				array_filter(
@@ -186,7 +187,7 @@ final class PostTypeTableRepository implements TableRepository {
 	 */
 	public function product_ids(): array {
 		$ids = array();
-		foreach ( $this->every() as $table ) {
+		foreach ( $this->all() as $table ) {
 			$ids = array_merge( $ids, $table->product_ids() );
 		}
 
@@ -200,26 +201,7 @@ final class PostTypeTableRepository implements TableRepository {
 	 * @return list<Table>
 	 */
 	public function containing( int $product ): array {
-		return array_values( array_filter( $this->every(), static fn( Table $table ): bool => $table->has_product( $product ) ) );
-	}
-
-	/**
-	 * Every table, read whole (the site has a handful).
-	 *
-	 * @return list<Table>
-	 */
-	private function every(): array {
-		$posts = get_posts(
-			array(
-				'post_type'        => TablePostType::NAME,
-				'post_status'      => 'any',
-				'posts_per_page'   => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- a handful of tables.
-				'no_found_rows'    => true,
-				'suppress_filters' => true,
-			)
-		);
-
-		return array_values( array_map( array( self::class, 'hydrate' ), $posts ) );
+		return array_values( array_filter( $this->all(), static fn( Table $table ): bool => $table->has_product( $product ) ) );
 	}
 
 	/**

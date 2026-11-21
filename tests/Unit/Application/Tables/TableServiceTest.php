@@ -54,7 +54,7 @@ final class TableServiceTest extends TestCase {
 		$repository = new class( $stored ) implements TableRepository {
 			/** @param array<int, Table> $stored */
 			public function __construct( private array &$stored ) {}
-			public function page( SearchTerm $term, int $page, int $per_page ): TablePage {
+			public function page( SearchTerm $term, int $page, int $per_page, bool $newest = false ): TablePage {
 				return new TablePage( array(), 0, $page, $per_page );
 			}
 			public function count(): int {

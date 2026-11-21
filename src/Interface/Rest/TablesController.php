@@ -323,6 +323,12 @@ final class TablesController implements Module {
 							'enum'    => array( 5, TablePage::PER_PAGE ),
 							'default' => TablePage::PER_PAGE,
 						),
+						// The editor's "Choose a Table" lists the newest first (R55; Task 23F).
+						'order'    => array(
+							'type'    => 'string',
+							'enum'    => array( 'asc', 'desc' ),
+							'default' => 'asc',
+						),
 					),
 				),
 			)
@@ -732,11 +738,11 @@ final class TablesController implements Module {
 	 * GET /tables.
 	 *
 	 * @param WP_REST_Request $request The search, the page and its size.
-	 * @phpstan-param WP_REST_Request<array{search: string, page: int, per_page: int}> $request
+	 * @phpstan-param WP_REST_Request<array{search: string, page: int, per_page: int, order: string}> $request
 	 */
 	public function list( WP_REST_Request $request ): WP_REST_Response {
 		$term   = SearchTerm::from_input( sanitize_text_field( (string) $request['search'] ) );
-		$tables = $this->tables->list( $term, (int) $request['page'], (int) $request['per_page'] );
+		$tables = $this->tables->list( $term, (int) $request['page'], (int) $request['per_page'], 'desc' === $request['order'] );
 
 		return new WP_REST_Response(
 			array(

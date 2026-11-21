@@ -23,6 +23,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\ProductScreen;
+use Affibloom\Interface\Admin\TablesScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Module;
 use WP_Block_Type_Registry;
@@ -224,7 +225,7 @@ final class EditorController implements Module {
 	 *
 	 * @param WP_REST_Request $request Request with "text".
 	 * @phpstan-param WP_REST_Request<array{text: string}> $request
-	 * @return WP_REST_Response|WP_Error 200 { type, productId, groupId, overrides }; 400 affibloom_invalid_display.
+	 * @return WP_REST_Response|WP_Error 200 { type, productId, groupId, tableId, overrides }; 400 affibloom_invalid_display.
 	 */
 	public function shortcode( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$text    = trim( (string) $request['text'] );
@@ -242,6 +243,7 @@ final class EditorController implements Module {
 					'type'      => $display['type'],
 					'productId' => $display['product'],
 					'groupId'   => $group ?? 0,
+					'tableId'   => $display['table'],
 					'overrides' => (object) $display['overrides'],
 				),
 			)
@@ -249,12 +251,17 @@ final class EditorController implements Module {
 	}
 
 	/**
-	 * The page Edit Display opens: the product's, for a product display and someone who manages products.
+	 * The page Edit Display opens: the product's, for a product display, or the table's builder (Task 24D's table half,
+	 * built with 23F), for someone who manages products.
 	 *
 	 * @param array<string, mixed> $attributes The block's attributes.
 	 */
 	private function edit_url( array $attributes ): string {
-		$type    = is_string( $attributes['type'] ?? null ) ? $attributes['type'] : '';
+		$type  = is_string( $attributes['type'] ?? null ) ? $attributes['type'] : '';
+		$table = is_numeric( $attributes['tableId'] ?? null ) ? (int) $attributes['tableId'] : 0;
+		if ( 'table' === $type ) {
+			return $table > 0 && current_user_can( Capabilities::PRODUCTS ) ? TablesScreen::table_url( $table ) : '';
+		}
 		$product = is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0;
 		if ( $product <= 0 || ! in_array( $type, array( '', 'single', 'button', 'image' ), true ) || ! current_user_can( Capabilities::PRODUCTS ) ) {
 			return '';
@@ -276,7 +283,8 @@ final class EditorController implements Module {
 			$type,
 			is_numeric( $attributes['productId'] ?? null ) ? (int) $attributes['productId'] : 0,
 			null === $group ? '' : $group->slug,
-			is_array( $attributes['overrides'] ?? null ) ? $attributes['overrides'] : array()
+			is_array( $attributes['overrides'] ?? null ) ? $attributes['overrides'] : array(),
+			is_numeric( $attributes['tableId'] ?? null ) ? (int) $attributes['tableId'] : 0
 		);
 	}
 }

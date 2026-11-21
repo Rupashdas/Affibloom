@@ -4,8 +4,7 @@
  * their screens by EditorAssets and driven by assets/editor/display-modal.js. Task 23A builds its frame and the first
  * step, Lasso's "Choose a Display Type" (display-add.php 13-74; R9): two rows of four, AI Text left out (B5). Each type
  * opens its step (Single, Button and Image the links, Grid, List and Gallery the groups, Table the tables), which the
- * tasks 23B-23F add as `<section data-step>` parts. Table waits for the Tables area (F25, Phase 7): shown, disabled,
- * "Soon". The look is the design system's Modal (Meadow); the root carries `.affibloom-admin` for its tokens.
+ * tasks 23B-23F add as `<section data-step>` parts (Table's with F25, Task 23F). The look is the design system's Modal (Meadow); the root carries `.affibloom-admin` for its tokens.
  *
  * @package Affibloom
  * The steps' Create buttons and the dialogs they open (Task 23E) are printed only for those who may manage products (F4 D8).
@@ -20,7 +19,7 @@ $display_types = array(
 	array( 'single', __( 'Single', 'affibloom' ), 'box', 'links' ),
 	array( 'grid', __( 'Grid', 'affibloom' ), 'grid', 'groups' ),
 	array( 'list', __( 'List', 'affibloom' ), 'list', 'groups' ),
-	array( 'table', __( 'Table', 'affibloom' ), 'table', '' ),
+	array( 'table', __( 'Table', 'affibloom' ), 'table', 'tables' ),
 	array( 'button', __( 'Button', 'affibloom' ), 'button', 'links' ),
 	array( 'image', __( 'Image', 'affibloom' ), 'image', 'links' ),
 	array( 'gallery', __( 'Gallery', 'affibloom' ), 'gallery', 'groups' ),
@@ -143,6 +142,44 @@ $display_types = array(
 							<strong class="affibloom-link-row__name" data-row-name></strong>
 						<?php endif; ?>
 						<span class="affibloom-group-row__count" data-row-count></span>
+					</span>
+					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-row-add>
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+						<span><?php esc_html_e( 'Add', 'affibloom' ); ?></span>
+					</button>
+				</li>
+			</template>
+		</section>
+		<?php
+		// "Choose a Table" (Task 23F; display-add.php 133-154, F4 R24, F25 R55): five tables a page, newest first, "Search
+		// tables" on Enter; Create Table opens the Tables screen's dialog in a new tab; Add inserts the table.
+		?>
+		<section class="affibloom-modal-step" data-step="tables" aria-labelledby="affibloom-display-tables-title" hidden
+			data-empty="<?php esc_attr_e( 'No tables found.', 'affibloom' ); ?>"
+			data-failed="<?php esc_attr_e( 'Could not load tables. Please try again.', 'affibloom' ); ?>"
+			data-page-label="<?php /* translators: %d: a page number. */ esc_attr_e( 'Page %d', 'affibloom' ); ?>">
+			<div class="affibloom-modal__head">
+				<h2 id="affibloom-display-tables-title" class="affibloom-modal__title"><?php esc_html_e( 'Choose a Table', 'affibloom' ); ?></h2>
+				<?php if ( $view['can_manage'] ) : ?>
+					<a class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-modal__head-action" href="<?php echo esc_url( add_query_arg( 'create', '1', \Affibloom\Interface\Admin\TablesScreen::url() ) ); ?>" target="_blank" rel="noopener">
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+						<span><?php esc_html_e( 'Create Table', 'affibloom' ); ?></span>
+					</a>
+				<?php endif; ?>
+			</div>
+			<div class="affibloom-modal__body">
+				<label class="screen-reader-text" for="affibloom-display-tables-search"><?php esc_html_e( 'Search tables', 'affibloom' ); ?></label>
+				<input type="search" id="affibloom-display-tables-search" class="affibloom-input affibloom-search affibloom-modal-search" placeholder="<?php esc_attr_e( 'Search tables', 'affibloom' ); ?>" data-step-search>
+				<ul class="affibloom-link-rows" data-step-list aria-live="polite"></ul>
+				<p class="affibloom-link-rows__message" data-step-message role="status" hidden></p>
+				<nav class="affibloom-pagination affibloom-modal-pages" aria-label="<?php esc_attr_e( 'Table pages', 'affibloom' ); ?>" data-step-pages
+					data-previous="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>"></nav>
+			</div>
+			<template data-step-row>
+				<li class="affibloom-link-row affibloom-group-row">
+					<span class="affibloom-link-row__picture affibloom-group-row__chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'table' ) ); ?></span>
+					<span class="affibloom-link-row__text">
+						<strong class="affibloom-link-row__name" data-row-name></strong>
 					</span>
 					<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-row-add>
 						<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>

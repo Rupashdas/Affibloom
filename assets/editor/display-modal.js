@@ -449,6 +449,26 @@
 		} ),
 	} );
 
+	/** "Choose a Table" (Task 23F; F4 R24, F25 R55): the tables, newest first; Add inserts `type=table` for one. */
+	searchStep( {
+		name: 'tables',
+		path: ( query ) => {
+			query.set( 'order', 'desc' );
+			return '/affibloom/v1/tables?' + query.toString();
+		},
+		fill( item, row ) {
+			const name = row.querySelector( '[data-row-name]' );
+			name.textContent = item.title;
+			name.title = item.title;
+			row.querySelector( '[data-row-add]' ).dataset.target = String(
+				item.id
+			);
+		},
+		choose: ( button ) => ( {
+			tableId: parseInt( button.dataset.target, 10 ),
+		} ),
+	} );
+
 	/**
 	 * "Choose a Group" (Task 23D; R17-R18): groups with "1 link" / "N links"; Add inserts the group as the chosen type.
 	 * A group's name opens "Add to Group" for it (Task 23E), for those who may manage products.

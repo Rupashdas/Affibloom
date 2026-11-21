@@ -77,6 +77,10 @@ final class DisplayRequest {
 		if ( in_array( $type, self::GROUP_TYPES, true ) ) {
 			return self::id( $attributes, 'groupId' ) > 0;
 		}
+		// A comparison table (F4 R24, Task 23F).
+		if ( 'table' === $type ) {
+			return self::id( $attributes, 'tableId' ) > 0;
+		}
 
 		return in_array( $type, array( '', 'single', 'button', 'image' ), true ) && self::id( $attributes, 'productId' ) > 0;
 	}
@@ -96,6 +100,14 @@ final class DisplayRequest {
 		}
 
 		$type = (string) ( $attributes['type'] ?? '' );
+		if ( 'table' === $type ) {
+			return self::of(
+				array(
+					'type' => 'table',
+					'id'   => (string) self::id( $attributes, 'tableId' ),
+				)
+			);
+		}
 		// The block's own overrides (Task 24A, R35-R40), under Lasso's names, as the shortcode would carry them.
 		$overrides = OverrideCatalog::overrides( $type, is_array( $attributes['overrides'] ?? null ) ? $attributes['overrides'] : array() );
 		if ( in_array( $type, self::GROUP_TYPES, true ) ) {

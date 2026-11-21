@@ -35,6 +35,7 @@ final class ShortcodeFormatTest extends TestCase {
 				'type'      => 'button',
 				'product'   => 12,
 				'group'     => '',
+				'table'     => 0,
 				'overrides' => array( 'primary_text' => 'Buy' ),
 			),
 			ShortcodeFormat::read(
@@ -60,5 +61,14 @@ final class ShortcodeFormatTest extends TestCase {
 		self::assertNull( ShortcodeFormat::read( array( 'badge' => 'Hi' ) ) );
 		self::assertNull( ShortcodeFormat::read( array( 'type' => 'grid' ) ) );
 		self::assertNull( ShortcodeFormat::read( array( 'id' => 'abc' ) ) );
+	}
+
+	/** Task 23F (F4 R24): a comparison table as text and back. */
+	public function test_a_table_is_written_and_read_by_its_id(): void {
+		self::assertSame( '[affibloom type="table" id="7"]', ShortcodeFormat::format( 'table', 0, '', array( 'badge' => 'x' ), 7 ) );
+		self::assertSame( '', ShortcodeFormat::format( 'table', 0, '', array() ) );
+		$table = ShortcodeFormat::read( array( 'type' => 'table', 'id' => '7' ) );
+		self::assertSame( array( 'table', 7, 0 ), array( $table['type'] ?? null, $table['table'] ?? null, $table['product'] ?? null ) );
+		self::assertNull( ShortcodeFormat::read( array( 'type' => 'table' ) ) );
 	}
 }

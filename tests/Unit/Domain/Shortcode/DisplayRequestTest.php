@@ -61,4 +61,13 @@ final class DisplayRequestTest extends TestCase {
 		self::assertNull( DisplayRequest::from_block( array( 'type' => 'carousel', 'productId' => 12 ) ) );
 		self::assertNull( DisplayRequest::from_block( array( 'type' => array( 'single' ), 'productId' => 12 ) ) );
 	}
+
+	/** Task 23F (F4 R24): a block's table asks for the table by its ID. */
+	public function test_a_table_block_asks_for_its_table(): void {
+		self::assertTrue( DisplayRequest::names_display( array( 'type' => 'table', 'tableId' => 7 ) ) );
+		self::assertFalse( DisplayRequest::names_display( array( 'type' => 'table', 'productId' => 7 ) ) );
+		$request = DisplayRequest::from_block( array( 'type' => 'table', 'tableId' => 7 ) );
+		self::assertSame( DisplayKind::Table, $request?->kind );
+		self::assertSame( '7', $request?->attributes['id'] );
+	}
 }

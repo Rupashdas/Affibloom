@@ -146,7 +146,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T15: Preview Table
 - [x] Task T16: The Dashboard's Comparison table filter
 - [x] Task T17: A deleted product leaves its tables
-- [ ] Task 23F: Table — "Choose a Table" in the block (moved here from Phase 4; with 24D's table half)
+- [x] Task 23F: Table — "Choose a Table" in the block (moved here from Phase 4; with 24D's table half)
 
 ### F10 — migration family: tables
 
@@ -2289,10 +2289,12 @@ display-modal.js (step "tables") → GET /affibloom/v1/tables?search=&page=&per_
 **Files:** modify `assets/editor/display-modal.{js,css}`, `src/Domain/Display/DisplayRequest.php`;
 tests `tests/E2E/acceptance/F4.spec.ts` (AC8, skipped until F25 T1/T12).
 
-- [ ] **Step 1: Failing test** (AC8).
-- [ ] **Step 2: Tables step.** Enable the tile when `GET /tables` exists.
-- [ ] **Step 3: Run and look.** Checks; by hand at 1280 and 375 px.
-- [ ] **Step 4: Commit** — "Insert a comparison table from the block".
+- [x] **Step 1: Failing test** (AC8).
+- [x] **Step 2: Tables step.** Enable the tile when `GET /tables` exists.
+- [x] **Step 3: Run and look.** Checks; by hand at 1280 and 375 px.
+- [x] **Step 4: Commit** — "Insert a comparison table from the block".
+
+*Note:* GET /tables gained `order=desc` (the picker lists the newest first, F25 R55); ShortcodeFormat reads and writes `type="table" id`, DisplayRequest knows `tableId`, and Edit Display opens the table's builder (24D's table half). F4's AC8 was never written in Phase 4; it is written here. Checked in a headless editor: the tile is live, five tables newest first, Create Table's link, Add inserts `{type: table, tableId}`, and the editor preview draws the table with its shortcode and Edit Display address.
 
 ---
 

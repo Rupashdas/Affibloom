@@ -59,7 +59,9 @@ const openEditTab = ( url ) => {
  * @return {boolean} True when there is something to preview.
  */
 const namesDisplay = ( attributes ) =>
-	attributes.productId > 0 || attributes.groupId > 0;
+	attributes.productId > 0 ||
+	attributes.groupId > 0 ||
+	attributes.tableId > 0;
 
 /**
  * The display's preview from the server, with its shortcode text (Task 24C); the latest answer wins. A new token asks

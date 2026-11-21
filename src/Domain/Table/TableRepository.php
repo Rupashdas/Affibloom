@@ -23,8 +23,9 @@ interface TableRepository {
 	 * @param SearchTerm $term     The search.
 	 * @param int        $page     The page, from 1.
 	 * @param int        $per_page Tables per page.
+	 * @param bool       $newest   Newest first (the editor's "Choose a Table", R55).
 	 */
-	public function page( SearchTerm $term, int $page, int $per_page ): TablePage;
+	public function page( SearchTerm $term, int $page, int $per_page, bool $newest = false ): TablePage;
 
 	/**
 	 * How many tables there are ("Search All <n> Tables", R5).

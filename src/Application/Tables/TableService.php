@@ -61,9 +61,10 @@ final class TableService {
 	 * @param SearchTerm $term     The search.
 	 * @param int        $page     The page, from 1.
 	 * @param int        $per_page Tables per page (10; the editor's picker asks for 5).
+	 * @param bool       $newest   Newest first (the editor's "Choose a Table", R55; Task 23F).
 	 */
-	public function list( SearchTerm $term, int $page, int $per_page = TablePage::PER_PAGE ): TablePage {
-		return $this->tables->page( $term, max( 1, $page ), max( 1, $per_page ) );
+	public function list( SearchTerm $term, int $page, int $per_page = TablePage::PER_PAGE, bool $newest = false ): TablePage {
+		return $this->tables->page( $term, max( 1, $page ), max( 1, $per_page ), $newest );
 	}
 
 	/**

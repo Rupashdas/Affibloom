@@ -28,10 +28,15 @@ final class ShortcodeFormat {
 	 * @param int                  $product    Its product's ID, for the product types.
 	 * @param string               $group_slug Its group's slug, for the group types.
 	 * @param array<string, mixed> $overrides  Its overrides, under Lasso's names.
+	 * @param int                  $table      Its table's ID, for the table type (F25, Task 23F).
 	 */
-	public static function format( string $type, int $product, string $group_slug, array $overrides ): string {
+	public static function format( string $type, int $product, string $group_slug, array $overrides, int $table = 0 ): string {
 		$type  = '' === $type ? 'single' : $type;
 		$parts = array();
+		// A comparison table (F4 R24, Task 23F): `[affibloom type="table" id="<table>"]`, no overrides.
+		if ( 'table' === $type ) {
+			return $table > 0 ? '[affibloom type="table" id="' . $table . '"]' : '';
+		}
 		if ( in_array( $type, self::GROUP_TYPES, true ) ) {
 			if ( '' === $group_slug ) {
 				return '';
@@ -62,10 +67,21 @@ final class ShortcodeFormat {
 	 * slug, and its overrides. Null for one that names no product or group, or a kind the block does not draw.
 	 *
 	 * @param array<string, string> $attributes The repaired attributes.
-	 * @return array{type: string, product: int, group: string, overrides: array<string, string>}|null
+	 * @return array{type: string, product: int, group: string, table: int, overrides: array<string, string>}|null
 	 */
 	public static function read( array $attributes ): ?array {
 		$kind = DisplayKind::of( $attributes );
+		// A comparison table (Task 23F): its ID.
+		if ( DisplayKind::Table === $kind ) {
+			$table = ctype_digit( trim( $attributes['id'] ?? '' ) ) ? (int) trim( $attributes['id'] ) : 0;
+			return 0 === $table ? null : array(
+				'type'      => 'table',
+				'product'   => 0,
+				'group'     => '',
+				'table'     => $table,
+				'overrides' => array(),
+			);
+		}
 		$type = match ( $kind ) {
 			DisplayKind::Single  => 'single',
 			DisplayKind::Button  => 'button',
@@ -89,6 +105,7 @@ final class ShortcodeFormat {
 			'type'      => $type,
 			'product'   => $product,
 			'group'     => $group,
+			'table'     => 0,
 			'overrides' => OverrideCatalog::overrides( $type, $attributes ),
 		);
 	}

@@ -154,6 +154,35 @@ test.describe( 'F4 Displays in the editor', () => {
 		}
 	} );
 
+	test( 'AC8 Table opens "Choose a Table": five a page, newest first, Create Table in a new tab, Add inserts the table', async ( { page } ) => {
+		const stamp = unique( 'F4 AC8' );
+		const product = createProduct( { name: `${ stamp } product` } );
+		const table = Number( wp( 'eval-file', 'tests/E2E/fixtures/create-table.php', JSON.stringify( { title: `${ stamp } table`, style: 'row', theme: 'Cactus', products: [ product ] } ) ) );
+		wp( 'eval', `$r = new Affibloom\\Infrastructure\\WordPress\\PostTypeTableRepository(); $t = $r->get( ${ table } ); $r->save( $t->with( array( 'groups' => array( array( 'id' => 'g_a', 'fields' => array( 99990 ) ) ), 'values' => array( ${ product } => array( 99990 => '${ stamp } product' ) ) ) ) );` );
+
+		const block = await insertProductBox( page );
+		await block.getByRole( 'button', { name: 'Add a Display' } ).click();
+		const modal = page.locator( '#affibloom-display-modal' );
+		await modal.getByRole( 'button', { name: 'Table' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Choose a Table' } );
+		await expect( dialog.locator( '.affibloom-group-row' ) ).toHaveCount( 5 );
+		// Newest first: the table just made heads the list.
+		await expect( dialog.locator( '.affibloom-group-row' ).first() ).toContainText( `${ stamp } table` );
+		await expect( dialog.getByRole( 'link', { name: 'Create Table' } ) ).toHaveAttribute( 'href', /page=affibloom-tables&create=1/ );
+		await expect( dialog.getByRole( 'link', { name: 'Create Table' } ) ).toHaveAttribute( 'target', '_blank' );
+
+		const search = dialog.getByPlaceholder( 'Search tables' );
+		await search.fill( stamp );
+		await search.press( 'Enter' );
+		await dialog.locator( '.affibloom-group-row', { hasText: `${ stamp } table` } ).getByRole( 'button', { name: 'Add' } ).click();
+		await expect( modal ).toBeHidden();
+
+		const stored = await page.evaluate( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getEditedPostContent: () => string } } } } ).wp.data.select( 'core/editor' ).getEditedPostContent() );
+		expect( stored ).toContain( `"type":"table"` );
+		expect( stored ).toContain( `"tableId":${ table }` );
+		await expect( block.locator( '.affibloom-block__preview .affibloom-display-table' ) ).toContainText( `${ stamp } product` );
+	} );
+
 	test( 'AC7 Create Group, then "Add to Group": Select, Added, Done redraws the count, Add Group inserts it', async ( { page } ) => {
 		const stamp = unique( 'F4 AC7' );
 		const products = [ 1, 2 ].map( ( n ) => createProduct( { name: `${ stamp } item ${ n }` } ) );
