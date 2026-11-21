@@ -61,7 +61,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F21 / F12 — Locations (where used)
 
-- [ ] Task 36A: The Dashboard's Locations column — count, sort, clock
+- [x] Task 36A: The Dashboard's Locations column — count, sort, clock
 - [ ] Task 36B: The product page's Locations tab
 - [ ] Task 36C: Link with Context preview and the Clicks column
 - [ ] Task 36D: The Placements filter
@@ -229,12 +229,17 @@ All settled on 2026-11-14: see "Overlaps settled" at the top of these notes. 33C
 | `order=count` in the list route (its arm is added by 13K) | `dashboard.js` |
 
 **Files:** `product-row.php`, `DashboardController`, repository; tests unit, E2E F12 AC20 (its sort part runs in 13K), F19 rerun.
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Counts.**
-- [ ] **Step 3: Column and clock** (the sort: 13K).
-- [ ] **Step 4: Run
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Counts.**
+- [x] **Step 3: Column and clock** (the sort: 13K).
+- [x] **Step 4: Run
   and look.**
-- [ ] **Step 5: Commit** — "Show where each product is used on the Dashboard".
+- [x] **Step 5: Commit** — "Show where each product is used on the Dashboard".
+
+*Note (2026-11-21):* the count is `LinkLocationRepository::counts_for()` (the 31D export's query, now with group
+displays and assignments) behind `Application\Locations\LocationCounts`; the clock shows for a 0 while
+`affibloom_link_index_state.finished_at` is empty. Table displays join the count with T10. Checked: unit, phpcs, the
+query on Local (16980: 53 rows + 1 group display = 54), the Dashboard at 1280 px.
 
 ---
 

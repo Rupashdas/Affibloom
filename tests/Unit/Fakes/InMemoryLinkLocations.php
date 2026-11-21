@@ -15,6 +15,9 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 	/** @var array<int, list<\Affibloom\Domain\LinkIndex\LinkLocation>> The rows stored, by host. */
 	public array $rows = array();
 
+	/** @var array<string, list<int>> The members of each group display's `display_ref` ("group:5" => products). */
+	public array $groups = array();
+
 	public function replace_host( int $host_id, array $rows ): void {
 		$this->calls[] = 'replace ' . $host_id;
 		$this->rows[ $host_id ] = $rows;
@@ -50,5 +53,21 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 			);
 		}
 		return $links;
+	}
+
+	public function counts_for( array $product_ids ): array {
+		$counts = array();
+		foreach ( $this->rows as $rows ) {
+			foreach ( $rows as $row ) {
+				$shown = $row->assigned_product_id > 0 ? array( $row->assigned_product_id ) : ( $row->product_id > 0 ? array( $row->product_id ) : array() );
+				if ( null !== $row->display_ref ) {
+					$shown = array_merge( $shown, $this->groups[ $row->display_ref ] ?? array() );
+				}
+				foreach ( array_intersect( array_unique( $shown ), $product_ids ) as $id ) {
+					$counts[ $id ] = ( $counts[ $id ] ?? 0 ) + 1;
+				}
+			}
+		}
+		return $counts;
 	}
 }

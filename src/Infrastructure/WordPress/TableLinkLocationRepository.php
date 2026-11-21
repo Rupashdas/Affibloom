@@ -148,7 +148,10 @@ KEY display_type (display_type)";
 	}
 
 	/**
-	 * How many places each product is used in (the export's location_count, F11 R28; Task 31D).
+	 * How many places each product is used in (F12 L1, D20; the Dashboard's column, Task 36A; the export's
+	 * location_count, Task 31D): its rows, an editor's assignment first, plus the group displays (`display_ref`
+	 * "group:<term id>") whose group holds it, read from the group's members now (F21 D2). A display tied to the product
+	 * itself is not counted twice. Trashed hosts have no rows (F21 D6).
 	 *
 	 * @param list<int> $product_ids The products.
 	 * @return array<int, int> By product ID; a product used nowhere is left out.
@@ -160,11 +163,31 @@ KEY display_type (display_type)";
 		if ( '' === $ids ) {
 			return array();
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Affibloom's own table; the IDs are integers.
-		$found  = $wpdb->get_results( $wpdb->prepare( "SELECT product_id, COUNT(*) AS used FROM %i WHERE product_id IN ({$ids}) GROUP BY product_id", $wpdb->prefix . self::TABLE ), ARRAY_A );
+		$table = $wpdb->prefix . self::TABLE;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Affibloom's own table, one query per list page; the IDs are integers.
+		$found = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT used.product, COUNT(*) AS used FROM (
+					SELECT IF(assigned_product_id > 0, assigned_product_id, product_id) AS product FROM %i
+					WHERE assigned_product_id IN ({$ids}) OR ( assigned_product_id = 0 AND product_id IN ({$ids}) )
+					UNION ALL
+					SELECT tr.object_id AS product FROM %i AS l
+					JOIN %i AS tt ON tt.taxonomy = %s AND l.display_ref = CONCAT('group:', tt.term_id)
+					JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					WHERE tr.object_id IN ({$ids}) AND tr.object_id <> IF(l.assigned_product_id > 0, l.assigned_product_id, l.product_id)
+				) AS used GROUP BY used.product",
+				$table,
+				$table,
+				$wpdb->term_taxonomy,
+				GroupTaxonomy::NAME,
+				$wpdb->term_relationships
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$counts = array();
 		foreach ( is_array( $found ) ? $found : array() as $row ) {
-			$counts[ (int) $row['product_id'] ] = (int) $row['used'];
+			$counts[ (int) $row['product'] ] = (int) $row['used'];
 		}
 
 		return $counts;

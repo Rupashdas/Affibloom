@@ -13,6 +13,7 @@ use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\SearchTerm;
@@ -35,6 +36,7 @@ final class DashboardScreen {
 	 * @param GroupService        $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
 	 * @param PublicLinks|null    $links    The rows' public links (F24 R14; Task CL7).
 	 * @param LinkIssueQuery|null $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
+	 * @param LocationCounts|null $locations The Locations column (F12 L1-L3; Task 36A).
 	 */
 	public function __construct(
 		private Template $template,
@@ -45,6 +47,7 @@ final class DashboardScreen {
 		private GroupService $groups,
 		private ?PublicLinks $links = null,
 		private ?LinkIssueQuery $alerts = null,
+		private ?LocationCounts $locations = null,
 	) {}
 
 	/**
@@ -87,6 +90,7 @@ final class DashboardScreen {
 				'args'       => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts ),
 				'alerts_of'  => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 				'listing'    => $alerts,
+				'locations'  => $this->locations,
 				'counts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one ),
 				'library'    => $this->products->count(),
 				'notice'     => $this->notice->message(),

@@ -1249,6 +1249,10 @@
 /* Locations and Clicks counts in the display face (0b.2), once their tasks fill them. */
 .affibloom-card--list .affibloom-table td.affibloom-col-locations,
 .affibloom-card--list .affibloom-table td.affibloom-col-clicks { color: var(--affibloom-ink-900); font: 700 20px/1 var(--affibloom-font-display); font-variant-numeric: tabular-nums; }
+/* Task 36A (F12 L2): the count links to the product's Locations tab, in the count's colour; the brand on hover and focus. */
+.affibloom-admin .affibloom-count-link { display: inline-block; min-width: 32px; padding: 6px 4px; border-radius: var(--affibloom-radius-chip); color: inherit; text-decoration: none; }
+.affibloom-admin .affibloom-count-link:hover { color: var(--affibloom-brand-700); }
+.affibloom-admin .affibloom-count-link:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
 /* A placeholder dash keeps the body face, so it lines up with the other columns' dashes. */
 .affibloom-card--list .affibloom-table td .affibloom-soon-cell { font: 400 14px/20px var(--affibloom-font); }
 .affibloom-card--list .affibloom-thumb { width: 52px; height: 52px; }

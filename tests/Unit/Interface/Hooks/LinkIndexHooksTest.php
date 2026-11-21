@@ -60,6 +60,10 @@ final class LinkIndexHooksTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
+			public function counts_for( array $product_ids ): array {
+				return array();
+			}
+
 			public function host_links( int $host_id ): array {
 				return array();
 			}

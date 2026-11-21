@@ -66,4 +66,13 @@ interface LinkLocationRepository {
 	 * @return array<string, array{id: int, product: int}>
 	 */
 	public function host_links( int $host_id ): array;
+
+	/**
+	 * How many places each product is used in (F12 L1, D20; Tasks 31D, 36A): its rows (an editor's assignment first)
+	 * plus the group displays whose group holds it.
+	 *
+	 * @param list<int> $product_ids The products.
+	 * @return array<int, int> By product ID; a product used nowhere is left out.
+	 */
+	public function counts_for( array $product_ids ): array;
 }

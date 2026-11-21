@@ -119,6 +119,7 @@ use Affibloom\Application\LinkHealth\CatalogProductCheck;
 use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\LinkHealth\LinkCheckJobStatus;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\LinkHealth\IssueLinksExport;
 use Affibloom\Interface\Rest\DashboardExportController;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
@@ -513,7 +514,7 @@ final class Plugin {
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query() ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts() ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query() ),
 				new SettingsScreen(
 					$this->template(),
@@ -542,7 +543,7 @@ final class Plugin {
 			new VariantsController( $products, $variants, $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
-			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query() ),
+			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts() ),
 			new DashboardExportController(
 				new IssueLinksExport(
 					new PostTypeProductRepository(),
@@ -621,6 +622,13 @@ final class Plugin {
 	 */
 	private function job_slots(): JobSlots {
 		return new JobSlots( array( new OptionLock( 'affibloom_job_slot_1', 5 * 60 ), new OptionLock( 'affibloom_job_slot_2', 5 * 60 ) ), $this->settings_repository() );
+	}
+
+	/**
+	 * The Locations column's counts and clock (F12 L1-L3; Task 36A).
+	 */
+	private function location_counts(): LocationCounts {
+		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
 	}
 
 	/**

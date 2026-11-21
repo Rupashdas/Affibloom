@@ -4,8 +4,9 @@
  * Locations, Clicks, Actions. Lasso keeps the select box under the image; here it has its own cell, which gives
  * it a target of its own and a label.
  *
- * The Alert cell is link health's (alert-cell.php, Task 31A). Placeholders until their tasks: Locations (the content link
- * index and Task 36), Clicks (Tasks 33-34). Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
+ * The Alert cell is link health's (alert-cell.php, Task 31A). Locations is the product's count in the link index, a link to
+ * its Locations tab, or Lasso's clock while the first full index has not finished (F12 L1-L3, D20, D21; Task 36A).
+ * Placeholder until its tasks: Clicks (Tasks 33-34). Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
  * (Task 14A), as Lasso's do; the link under the name opens the public link (F24 R14; Task CL7): the cloaked address
  * of a cloaked product, else the destination.
  *
@@ -15,7 +16,7 @@
  * of this one and back.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations?: int|null, known?: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -73,7 +74,20 @@ $public_link  = $view['link'] ?? $product->url->value();
 		}
 		?>
 	</td>
-	<td class="affibloom-col-locations"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
+	<td class="affibloom-col-locations">
+		<?php if ( ! isset( $view['locations'] ) ) : ?>
+			<?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?>
+		<?php elseif ( 0 === $view['locations'] && ! ( $view['known'] ?? true ) ) : ?>
+			<?php $location_tip = __( 'Processing. Please check back in 24 hours.', 'affibloom' ); ?>
+			<span class="affibloom-alert affibloom-alert--pending" tabindex="0" data-tip="<?php echo esc_attr( $location_tip ); ?>">
+				<?php $this->render( 'admin/partials/icon', array( 'name' => 'clock' ) ); ?>
+				<span class="screen-reader-text"><?php echo esc_html( $location_tip ); ?></span>
+			</span>
+		<?php else : ?>
+			<?php /* translators: %d: how many places the product is used in. */ ?>
+			<a class="affibloom-count-link" href="<?php echo esc_url( add_query_arg( 'tab', 'locations', $product_page ) ); ?>" title="<?php echo esc_attr( sprintf( _n( 'Used in %d place', 'Used in %d places', $view['locations'], 'affibloom' ), $view['locations'] ) ); ?>"><?php echo esc_html( (string) $view['locations'] ); ?></a>
+		<?php endif; ?>
+	</td>
 	<td class="affibloom-col-clicks"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
 	<td class="affibloom-col-actions">
 		<span class="affibloom-row__actions">

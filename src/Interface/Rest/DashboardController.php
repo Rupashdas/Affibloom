@@ -15,6 +15,7 @@ use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Dashboard\ViewNotFound;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViews;
@@ -55,6 +56,7 @@ final class DashboardController implements Module {
 	 * @param GroupService        $groups   The Groups column and the Group filter (Task G5).
 	 * @param PublicLinks|null    $links    The rows' public links (F24 R14; Task CL7).
 	 * @param LinkIssueQuery|null $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
+	 * @param LocationCounts|null $locations The Locations column (F12 L1-L3; Task 36A).
 	 */
 	public function __construct(
 		private ProductService $products,
@@ -64,6 +66,7 @@ final class DashboardController implements Module {
 		private GroupService $groups,
 		private ?PublicLinks $links = null,
 		private ?LinkIssueQuery $alerts = null,
+		private ?LocationCounts $locations = null,
 	) {}
 
 	/**
@@ -223,6 +226,7 @@ final class DashboardController implements Module {
 							'listing'   => $alerts,
 							'groups_of' => $this->groups->for_products( $ids ),
 							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
+							'locations' => $this->locations,
 						)
 					),
 					'term'      => $term->text(),
