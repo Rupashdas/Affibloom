@@ -72,6 +72,10 @@ final class LinkIndexerTest extends TestCase {
 				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
 			}
 
+			public function find( int $id ): ?\Affibloom\Domain\LinkIndex\LinkLocation {
+				return null;
+			}
+
 			public function counts_for( array $product_ids ): array {
 				return array();
 			}
@@ -208,6 +212,10 @@ final class LinkIndexerTest extends TestCase {
 			}
 			public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): \Affibloom\Domain\LinkIndex\LocationPage {
 				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
+			}
+
+			public function find( int $id ): ?\Affibloom\Domain\LinkIndex\LinkLocation {
+				return null;
 			}
 
 			public function counts_for( array $product_ids ): array {

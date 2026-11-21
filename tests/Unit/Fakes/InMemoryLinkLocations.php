@@ -63,6 +63,12 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, $page, $per_page );
 	}
 
+	/** Rows are numbered from 1 across the hosts, in the order they were stored. */
+	public function find( int $id ): ?\Affibloom\Domain\LinkIndex\LinkLocation {
+		$all = array_merge( array(), ...array_values( $this->rows ) );
+		return $all[ $id - 1 ] ?? null;
+	}
+
 	public function counts_for( array $product_ids ): array {
 		$counts = array();
 		foreach ( $this->rows as $rows ) {

@@ -68,5 +68,6 @@ $product = $view['product'];
 			</template>
 		</div>
 	</div>
+	<?php $this->render( 'admin/partials/location-preview-modal' ); ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

@@ -3038,3 +3038,20 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-location__context--code { font: 400 13px/20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .affibloom-location__type { color: var(--affibloom-ink-500); }
 @media (prefers-reduced-motion: reduce) { .affibloom-location__toggle .affibloom-icon { transition: none; } }
+
+/*
+ * Task 36C (F12 L10): the row's link text and Type icon open "Link with Context". The paragraph reads as text with the
+ * location's link highlighted; a display is drawn in the preview frame.
+ */
+.affibloom-admin button.affibloom-location__context { width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
+.affibloom-admin button.affibloom-location__context:hover { color: var(--affibloom-brand-700); text-decoration: underline; }
+.affibloom-admin button.affibloom-location__context:focus-visible { outline: none; border-radius: var(--affibloom-radius-segment); box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-admin button.affibloom-location__type { border: 0; background: none; cursor: pointer; }
+.affibloom-admin button.affibloom-location__type:hover { background: var(--affibloom-brand-25); color: var(--affibloom-brand-700); }
+#affibloom-location-preview .affibloom-modal__panel { max-width: 760px; }
+.affibloom-location-preview__host { margin: 4px 0 0; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); }
+.affibloom-location-preview__text { margin: 0; padding: 16px; border-radius: var(--affibloom-radius-control); background: var(--affibloom-sunk); color: var(--affibloom-ink-900); font: 400 15px/24px var(--affibloom-font); }
+.affibloom-admin .affibloom-location-preview__text a { color: var(--affibloom-brand-700); }
+.affibloom-admin .affibloom-location-preview__text .affibloom-preview__hit { padding: 1px 3px; border-radius: 3px; background: var(--affibloom-warning-50); color: var(--affibloom-ink-900); font-weight: 600; }
+.affibloom-location-preview__loading { display: block; height: 72px; border-radius: var(--affibloom-radius-control); }
+.affibloom-location-preview .affibloom-preview-frame { display: block; width: 100%; border: 0; }

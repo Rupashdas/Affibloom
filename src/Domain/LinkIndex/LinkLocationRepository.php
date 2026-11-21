@@ -88,4 +88,11 @@ interface LinkLocationRepository {
 	 * @param int    $per_page   Hosts per page.
 	 */
 	public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): LocationPage;
+
+	/**
+	 * One row by its ID (the Locations tab's preview, Task 36C); null when it is gone.
+	 *
+	 * @param int $id The row's ID.
+	 */
+	public function find( int $id ): ?LinkLocation;
 }

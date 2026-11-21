@@ -120,6 +120,7 @@ use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\LinkHealth\LinkCheckJobStatus;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Application\Locations\LocationCounts;
+use Affibloom\Application\Locations\LocationPreview;
 use Affibloom\Application\Locations\LocationService;
 use Affibloom\Application\LinkHealth\IssueLinksExport;
 use Affibloom\Interface\Rest\DashboardExportController;
@@ -176,6 +177,7 @@ use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
+use Affibloom\Interface\Rest\LocationPreviewController;
 use Affibloom\Interface\Rest\LocationsController;
 use Affibloom\Interface\Rest\VariantsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
@@ -507,6 +509,7 @@ final class Plugin {
 			),
 			$box_assets,
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, $icon_css ),
+			new LocationPreviewController( new LocationPreview( new TableLinkLocationRepository(), new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ) ), $display, $this->settings_repository(), $box_assets, $icon_css ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg', $icon_css ),
 			$shortcode,
 			new WidgetShortcodes(),

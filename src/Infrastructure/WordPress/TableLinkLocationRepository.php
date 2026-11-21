@@ -263,6 +263,47 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * One row by its ID.
+	 *
+	 * @param int $id The row's ID.
+	 */
+	public function find( int $id ): ?LinkLocation {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one row for a preview.
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $wpdb->prefix . self::TABLE, $id ), ARRAY_A );
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+		$text = static fn( string $key ): ?string => null === $row[ $key ] ? null : (string) $row[ $key ];
+
+		return new LinkLocation(
+			host_id: (int) $row['host_id'],
+			host_url: (string) $row['host_url'],
+			source: (string) $row['source'],
+			occurrence: (int) $row['occurrence'],
+			product_id: (int) $row['product_id'],
+			link_type: (string) $row['link_type'],
+			display_type: (string) $row['display_type'],
+			url: (string) $row['url'],
+			url_md5: (string) $row['url_md5'],
+			anchor_text: $text( 'anchor_text' ),
+			domain: $text( 'domain' ),
+			asin: $text( 'asin' ),
+			tracking_id: $text( 'tracking_id' ),
+			country: (string) $row['country'],
+			no_follow: '1' === (string) $row['no_follow'],
+			new_window: '1' === (string) $row['new_window'],
+			affiliate_platform: $text( 'affiliate_platform' ),
+			detected_at: (string) $row['detected_at'],
+			display_ref: $text( 'display_ref' ),
+			original_url: (string) $row['original_url'],
+			is_ignored: '1' === (string) $row['is_ignored'],
+			assigned_product_id: (int) $row['assigned_product_id'],
+		);
+	}
+
+	/**
 	 * The whole index's figures, in two queries.
 	 */
 	public function stats(): LinkIndexStats {

@@ -1,7 +1,7 @@
 <?php
 /**
  * One place on the Locations tab (F12 L7; Lasso's link-display-row.php; Task 36B): Content (the host, left empty in a
- * group's nested rows), Link with Context, Type with Lasso's tooltip, and Clicks (a placeholder until 36C and 34C).
+ * group's nested rows), Link with Context and Type, both opening the preview (Task 36C), and Clicks.
  *
  * @package Affibloom
  * @var array{host: \Affibloom\Domain\LinkIndex\LocationHost, place: \Affibloom\Domain\LinkIndex\ProductLocation, nested: bool} $view
@@ -33,13 +33,15 @@ $place_type  = $place_types[ $place->kind() ];
 		?>
 	</td>
 	<td class="affibloom-col-link">
-		<span class="affibloom-location__context<?php echo $place->is_display() ? ' affibloom-location__context--code' : ''; ?>" title="<?php echo esc_attr( $place->context() ); ?>"><?php echo esc_html( $place->context() ); ?></span>
+		<button type="button" class="affibloom-location__context<?php echo $place->is_display() ? ' affibloom-location__context--code' : ''; ?>" data-location-preview="<?php echo esc_attr( (string) $place->id ); ?>"
+			title="<?php echo esc_attr( $place->context() ); ?>"><?php echo esc_html( $place->context() ); ?></button>
 	</td>
 	<td class="affibloom-col-type">
-		<span class="affibloom-alert affibloom-location__type" tabindex="0" data-tip="<?php echo esc_attr( $place_type[1] ); ?>">
+		<button type="button" class="affibloom-alert affibloom-location__type" data-location-preview="<?php echo esc_attr( (string) $place->id ); ?>" data-tip="<?php echo esc_attr( $place_type[1] ); ?>">
 			<?php $this->render( 'admin/partials/icon', array( 'name' => $place_type[0] ) ); ?>
 			<span class="screen-reader-text"><?php echo esc_html( $place_type[1] ); ?></span>
-		</span>
+		</button>
 	</td>
-	<td class="affibloom-col-clicks"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
+	<?php // Clicks in the last 30 days (L11, D25): 0 until Task 34C counts clicks per location. ?>
+	<td class="affibloom-col-clicks">0</td>
 </tr>

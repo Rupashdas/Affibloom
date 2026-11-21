@@ -63,7 +63,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task 36A: The Dashboard's Locations column — count, sort, clock
 - [x] Task 36B: The product page's Locations tab
-- [ ] Task 36C: Link with Context preview and the Clicks column
+- [x] Task 36C: Link with Context preview and the Clicks column
 - [ ] Task 36D: The Placements filter
 - [ ] Task 36E: Deleting a product in use is blocked
 
@@ -291,11 +291,16 @@ route through WP-CLI (paging, search, 404), the tab at 1280 px.
 
 **Files:** the routes, partials and script named above; `tests/E2E/acceptance/F12.spec.ts` (AC22; AC23 turns green in 34C).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Preview.**
-- [ ] **Step 3: Clicks cell as the 0 stub** (finished by 34C).
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Preview a location and show its clicks".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Preview.**
+- [x] **Step 3: Clicks cell as the 0 stub** (finished by 34C).
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Preview a location and show its clicks".
+
+*Note (2026-11-21):* the paragraph is found by the pure `Domain\LinkIndex\LocationSnippet` (DOMDocument, the n-th link
+to the row's URL in its own source) through `Application\Locations\LocationPreview`; the route escapes it down to
+links and inline marks. The Clicks cell prints 0 in `location-row.php` until 34C. Checked: unit, phpcs, analyse, the
+route on Local (box, grid, text link, 404), both previews at 1280 px.
 
 ---
 

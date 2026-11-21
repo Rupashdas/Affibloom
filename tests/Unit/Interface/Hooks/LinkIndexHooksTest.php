@@ -64,6 +64,10 @@ final class LinkIndexHooksTest extends TestCase {
 				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
 			}
 
+			public function find( int $id ): ?\Affibloom\Domain\LinkIndex\LinkLocation {
+				return null;
+			}
+
 			public function counts_for( array $product_ids ): array {
 				return array();
 			}

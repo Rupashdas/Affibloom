@@ -103,6 +103,33 @@ test.describe( 'F12 Clicks and where used', () => {
 		await expect( page.getByText( 'Add This Link Anywhere On Your Website' ) ).toBeVisible();
 	} );
 
+	// AC22, AC23 (36C; L10, L11, D24, D25).
+	test( 'AC22 the link text opens the preview with the link in its paragraph; a display is drawn', async ( { page } ) => {
+		const url = `https://www.example.com/${ unique( 'f12-ac22' ) }`;
+		const id = createProduct( { name: unique( 'F12 AC22' ), url } );
+		newPostWith( `<p>Before. Our pick is <a href="${ url }">the AC22 ball</a>, then more words.</p><p>Another paragraph.</p>` + boxBlock( id ), unique( 'F12 AC22 post' ) );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }&tab=locations` );
+		await page.locator( '[data-location-toggle]' ).click();
+		await page.getByRole( 'button', { name: 'the AC22 ball' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Link with Context' } );
+		await expect( dialog ).toContainText( 'Our pick is the AC22 ball, then more words.' );
+		await expect( dialog ).not.toContainText( 'Another paragraph.' );
+		await expect( dialog.getByRole( 'link', { name: 'the AC22 ball' } ) ).toHaveAttribute( 'target', '_blank' );
+		await dialog.getByRole( 'button', { name: 'Close' } ).click();
+
+		await page.getByRole( 'button', { name: 'This is a single link display.' } ).click();
+		await expect( dialog.frameLocator( 'iframe' ).locator( '.affibloom-box' ) ).toBeVisible();
+	} );
+
+	test( 'AC23 the Clicks column shows 0 for a location without clicks', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F12 AC23' ) } );
+		newPostWith( boxBlock( id ) );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }&tab=locations` );
+		await expect( page.locator( '.affibloom-table--locations tbody td.affibloom-col-clicks' ).first() ).toHaveText( '0' );
+	} );
+
 	// AC26 (36B; decision 6): unpublished hosts are listed with their status and count as use.
 	test( 'AC26 a draft that uses the product is listed with its status', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F12 AC26' ) } );
