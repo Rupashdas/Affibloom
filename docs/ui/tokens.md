@@ -104,3 +104,24 @@ decision C1; deviation 132). Task 41 translates the site's `.lasso-*` Additional
 
 Icon spans in button and badge texts (`amazon-icon`, `pricetag-icon`, …) are the site's own and keep their names.
 Measured values (sizes, spacing) are added here by Tasks 18B-22E.
+
+## Comparison table
+
+The reader's comparison table (F25, Tasks T12-T14) keeps Lasso's markup under Affibloom's names, as the box does.
+`assets/front/table.css` is Lasso's `lasso-table-frontend.min.css` with every `lasso-` renamed `affibloom-`; the
+generic classes keep Lasso's names.
+
+| Lasso | Affibloom | Where |
+|---|---|---|
+| `lasso-display-table` | `affibloom-display-table` | the wrapper (with `ls-dp`, unchanged) |
+| `lasso-table-<theme>-theme` | `affibloom-table-<theme>-theme` | the wrapper |
+| `lasso-ds-v2-frontend` and its `data-v2-*` | `affibloom-advanced` and the box's `data-layout-*` / `data-density-*` | the wrapper, advanced rendering (the Single type's settings, nothing hidden) |
+| `lasso-anchor-id-<table>-<uniqid>` | `affibloom-anchor-id-<table>-<n>` | the wrapper's `id` |
+| `lasso-table` | `affibloom-table` | the `table` |
+| `#lasso-table` | `#affibloom-table` | (Lasso's builder preview) |
+| `lasso-fields`, `lasso-fields-single`, `lasso-fields-<slug>`, `lasso-fields-<id>` | `affibloom-fields`, … | a field |
+| `lasso-title`, `lasso-image-no-lazy`, `lasso-button-1`, `lasso-button-2` | `affibloom-title`, … | the name, the image, the buttons |
+| `lasso-price`, `lasso-price-value`, `discount-price`, `latest-price` | `affibloom-price`, `affibloom-price-value`, `affibloom-discount-price`, `affibloom-latest-price` | the price |
+| `lasso-stars`, `lasso-stars-value`, `lasso-check`, `lasso-x` | `affibloom-stars`, `affibloom-stars-value`, `affibloom-check`, `affibloom-x` | ratings, Pros and Cons |
+| `lasso-amazon-prime`, `lasso-disclosure` | `affibloom-amazon-prime`, `affibloom-disclosure` | |
+| `row-style`, `template-1`, `horizontal-table`, `td-template-1`, `cell`, `badge-text-wrapper`, `badge-text`, `field-group`, `img-container`, `btn-container`, `btn`, `product-name`, `description-content`, `field-value`, `field-name`, `green`, `red`, `hide-column-headers`, `oldest-updated`, `table-vertical*`, `mobile-*`, `tb-vt*`, `mb-i-*` | unchanged | |

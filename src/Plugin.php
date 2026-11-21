@@ -552,7 +552,7 @@ final class Plugin {
 		$display_html = new DisplayHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets );
 		// The block draws its Button and Image displays through the shortcode (Task 23C).
 		$shortcode = new AffibloomShortcode(
-			new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups ),
+			new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups, $this->table_service() ),
 			$box_html,
 			$display_html,
 			new AiTextService( new OptionAiTextRepository() )

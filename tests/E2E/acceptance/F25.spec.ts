@@ -480,4 +480,29 @@ test.describe( 'F25 Comparison tables', () => {
 		}, used );
 		expect( status ).toBe( 'affibloom_table_in_use' );
 	} );
+
+	// AC16 (T12; R43, R44, R46, R48-R52). The pixel half is tests/E2E/visual/table-horizontal.spec.ts (N2's baselines).
+	test( 'AC16 [affibloom type="table"]: Lasso\'s Horizontal markup, the header row, the badge, the theme and data_nosnippet', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const product = createProduct( { name: `Reader ${ word }`, image_url: 'https://placehold.co/120x120.png', badge: 'Top Pick' } );
+		const id = await tableWith( page, 'row', [ product ] );
+		const post = wp( 'post', 'create', '--post_title=F25 AC16', '--post_status=draft', `--post_content=[affibloom type="table" id="${ id }" theme="Splash" data_nosnippet="enable"]`, '--porcelain' );
+		await page.goto( `/?p=${ post }&preview=true` );
+
+		const wrapper = page.locator( '.affibloom-display-table' );
+		await expect( wrapper ).toHaveClass( /ls-dp/ );
+		await expect( wrapper ).toHaveClass( /affibloom-table-splash-theme/ );
+		await expect( wrapper ).toHaveAttribute( 'data-nosnippet', '' );
+		await expect( wrapper.locator( '.row-style.template-1.horizontal-table table.affibloom-table thead th' ) ).toHaveText( [ 'Product Image', 'Product Name / Primary Rating / Price', 'Primary Button' ] );
+		const first = wrapper.locator( 'tbody tr' ).first().locator( 'td.td-template-1' ).first();
+		await expect( first.locator( '.badge-text-wrapper .badge-text' ) ).toHaveText( 'Top Pick' );
+		await expect( first.locator( '.img-container a img.affibloom-image-no-lazy' ) ).toHaveAttribute( 'alt', `Reader ${ word }` );
+		await expect( wrapper.locator( 'a.btn.affibloom-button-1' ) ).toHaveAttribute( 'data-affibloom-box-trackable', 'true' );
+		await expect( wrapper.locator( '.affibloom-price .affibloom-latest-price' ) ).toHaveText( 'N/A' );
+
+		// A missing table draws nothing.
+		const missing = wp( 'post', 'create', '--post_title=F25 AC16 missing', '--post_status=draft', '--post_content=[affibloom type="table" id="999999"]', '--porcelain' );
+		await page.goto( `/?p=${ missing }&preview=true` );
+		await expect( page.locator( '.affibloom-display-table' ) ).toHaveCount( 0 );
+	} );
 } );

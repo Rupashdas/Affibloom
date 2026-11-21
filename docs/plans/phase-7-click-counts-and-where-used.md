@@ -139,7 +139,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T9: Reordering
 - [x] Task T10: Table Locations
 - [x] Task T11: Clone and delete
-- [ ] Task T12: The reader's Horizontal table, by shortcode
+- [x] Task T12: The reader's Horizontal table, by shortcode
 - [ ] Task 18S13: A table's Copy Shortcode
 - [ ] Task T13: The reader's Vertical table
 - [ ] Task T14: Phone cards and breakpoints
@@ -2074,11 +2074,11 @@ when customised settings and `show_disclosure_table` are on; the brag icon when 
 **Files:** the above; F25 spec AC16; `tests/E2E/visual/table-horizontal.spec.ts` (tables 2 and 3 at 1280); unit tests
 for `TableView`.
 
-- [ ] **Step 1: Failing tests** (markup of table 2 against Lasso's captured HTML; the visual check).
-- [ ] **Step 2: View and display.**
-- [ ] **Step 3: Templates and CSS.**
-- [ ] **Step 4: Run and look** (every theme).
-- [ ] **Step 5: Commit** — "Draw a Horizontal comparison table as Lasso does".
+- [x] **Step 1: Failing tests** (markup of table 2 against Lasso's captured HTML; the visual check).
+- [x] **Step 2: View and display.**
+- [x] **Step 3: Templates and CSS.**
+- [x] **Step 4: Run and look** (every theme).
+- [x] **Step 5: Commit** — "Draw a Horizontal comparison table as Lasso does".
 
 ---
 
@@ -2101,10 +2101,12 @@ for `TableView`.
 
 **Files:** the table screen's template and script; F31 **AC13**.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Control.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Copy a table's shortcode".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Control.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Copy a table's shortcode".
+
+*Note:* The reader's table is built in `ShortcodeRenderer::table()` (each product from its Single box view, so its links carry the box's attributes, R50) and printed by `DisplayHtml::table()` (not a separate TableDisplay class). Affibloom has no Table display type: with advanced rendering the wrapper takes `affibloom-advanced` and the Single type's layout and colours, nothing hidden. `assets/front/table.css` is Lasso's stylesheet renamed lasso- → affibloom- (class map in docs/ui/tokens.md, "Comparison table"). Checked on Local: the markup skeleton against Lasso's render of table 2 (identical apart from the wrapper's advanced attributes); every theme; `theme` and `data_nosnippet`. **The pixel check (AC16, `tests/E2E/visual/table-horizontal.spec.ts`) waits for N2's staging baselines and Phase M's migrated tables; it skips until then.** Lasso's own render on Local leaves its cells empty (the Local copy lacks Lasso's table detail rows), so no pixel comparison was possible here.
 
 ---
 

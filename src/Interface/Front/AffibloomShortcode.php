@@ -79,6 +79,15 @@ final class AffibloomShortcode implements Module {
 			++$this->drawn;
 			return $this->displays->grid( $this->renderer->gallery( $request, $this->drawn, (int) get_the_ID() ) );
 		}
+		// F25 R43 (Task T12): a comparison table; a missing one draws nothing.
+		if ( DisplayKind::Table === $request->kind ) {
+			$table = $this->renderer->table( $request, $this->drawn + 1, (int) get_the_ID() );
+			if ( null === $table ) {
+				return '';
+			}
+			++$this->drawn;
+			return $this->displays->table( $table );
+		}
 		if ( DisplayKind::List === $request->kind ) {
 			++$this->drawn;
 			return $this->displays->list( $this->renderer->list( $request, $this->drawn, (int) get_the_ID() ) );

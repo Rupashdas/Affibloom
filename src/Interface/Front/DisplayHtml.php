@@ -12,10 +12,12 @@ namespace Affibloom\Interface\Front;
 use Affibloom\Application\Box\BoxView;
 use Affibloom\Application\Box\GridView;
 use Affibloom\Application\Box\ListView;
+use Affibloom\Application\Shortcode\TableReaderView;
 
 /**
  * Prints the group displays and the AI text (F30 D1): a grid or gallery (`templates/front/grid.php`, each card through
- * the box printer), a list (`list.php` with its cards, `list-card.php`) and a stored AI text (`ai-text.php`).
+ * the box printer), a list (`list.php` with its cards, `list-card.php`), a stored AI text (`ai-text.php`) and a
+ * comparison table (`table.php`, F25 Task T12).
  */
 final class DisplayHtml {
 
@@ -61,6 +63,24 @@ final class DisplayHtml {
 		ob_start();
 		try {
 			include $this->templates . '/list.php';
+		} finally {
+			$html = (string) ob_get_clean();
+		}
+
+		return $html;
+	}
+
+	/**
+	 * A comparison table's HTML (F25 R44-R52; Task T12). The box stylesheets and the table's come with it.
+	 *
+	 * @param TableReaderView $table The table.
+	 */
+	public function table( TableReaderView $table ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- the included template reads $table.
+		$this->assets->late_enqueue();
+
+		ob_start();
+		try {
+			include $this->templates . '/table.php';
 		} finally {
 			$html = (string) ob_get_clean();
 		}

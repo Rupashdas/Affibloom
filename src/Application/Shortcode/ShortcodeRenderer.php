@@ -18,6 +18,7 @@ use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Groups\GroupService;
+use Affibloom\Application\Tables\TableService;
 use Affibloom\Domain\Amazon\AmazonProduct;
 use Affibloom\Domain\Amazon\AmazonProductRepository;
 use Affibloom\Domain\Amazon\AmazonUrl;
@@ -42,6 +43,8 @@ use Affibloom\Domain\Shortcode\DisplayKind;
 use Affibloom\Domain\Shortcode\DisplayRequest;
 use Affibloom\Domain\Shortcode\FieldPart;
 use Affibloom\Domain\Shortcode\GroupAttributes;
+use Affibloom\Domain\Table\TableStyle;
+use Affibloom\Domain\Table\TableView;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -62,6 +65,7 @@ final class ShortcodeRenderer {
 	 * @param SettingsRepository      $settings The site's settings.
 	 * @param BoxBuilder              $builder  The box engine.
 	 * @param GroupService            $groups   The groups, for a group display's products.
+	 * @param TableService            $tables   The comparison tables (F25, Task T12).
 	 */
 	public function __construct(
 		private readonly ProductRepository $catalog,
@@ -72,7 +76,94 @@ final class ShortcodeRenderer {
 		private readonly SettingsRepository $settings,
 		private readonly BoxBuilder $builder,
 		private readonly GroupService $groups,
+		private readonly TableService $tables,
 	) {}
+
+	/**
+	 * A comparison table (F25 R43-R51; Task T12): `id` (or the preview's `table_id`); `theme` overrides the table's
+	 * (empty: the table's); `data_nosnippet="enable"`; `anchor_id`. Each product is drawn from its Single box view, so
+	 * its links carry the box's attributes (R50). A missing table draws nothing (null); one without products draws only
+	 * what goes under it (R51). The disclosure shows with customised settings and Show Disclosure in Tables on.
+	 *
+	 * @param DisplayRequest $request The shortcode's request.
+	 * @param int            $number  The display's number among the page's `[affibloom]` displays, from 1.
+	 * @param int            $post_id The post it is in (0 outside one).
+	 */
+	public function table( DisplayRequest $request, int $number, int $post_id ): ?TableReaderView {
+		$attributes = $request->attributes;
+		$id         = (int) ( '' !== trim( $attributes['table_id'] ?? '' ) ? $attributes['table_id'] : ( $attributes['id'] ?? 0 ) );
+		$table      = $id > 0 ? $this->tables->get( $id ) : null;
+		if ( null === $table ) {
+			return null;
+		}
+		$library = $this->fields->load();
+		$names   = array();
+		$fields  = array();
+		foreach ( $table->field_ids() as $field_id ) {
+			$field = $library->find( $field_id );
+			if ( null !== $field ) {
+				$fields[ $field_id ] = $field;
+				$names[ $field_id ]  = $field->name;
+			}
+		}
+		$has_price  = in_array( TableCell::PRICE, $table->field_ids(), true );
+		$horizontal = TableStyle::Row === $table->style;
+		$layout     = TableView::horizontal( $table, $names );
+		$rows       = array();
+		$timestamp  = null;
+		foreach ( $layout->rows as $row ) {
+			$product = $this->catalog->get( $row['product'] );
+			if ( null === $product ) {
+				continue;
+			}
+			$box   = $this->built( $product, BoxOverrides::from_shortcode( array() ), $post_id, DisplayType::single() );
+			$cells = array();
+			foreach ( $row['cells'] as $field_ids ) {
+				$cell = array();
+				foreach ( $field_ids as $field_id ) {
+					if ( isset( $fields[ $field_id ] ) ) {
+						$cell[] = new TableCell(
+							$fields[ $field_id ],
+							(string) ( $table->values[ $row['product'] ][ $field_id ] ?? '' ),
+							$product,
+							$box,
+							TableCell::labelled( $fields[ $field_id ], $horizontal, $table->show_headers, $table->show_field_name ),
+							! $has_price && $box->prime
+						);
+					}
+				}
+				$cells[] = $cell;
+			}
+			$rows[] = array(
+				'badge' => $row['badge'],
+				'cells' => $cells,
+			);
+			if ( $has_price && null === $timestamp && ProductType::Amazon === $product->type && null !== $box->date && '' !== $box->date ) {
+				$timestamp = $box->date;
+			}
+		}
+		$theme    = '' !== trim( $attributes['theme'] ?? '' ) ? trim( $attributes['theme'] ) : $table->theme;
+		$display  = $this->display->current();
+		$settings = $this->settings->get();
+		$text     = $settings->string( 'disclosure_text' );
+		$shows    = $display->advanced() && $settings->bool( 'show_disclosure_table' ) && '' !== trim( $text );
+		$advanced = $display->advanced();
+
+		return new TableReaderView(
+			anchor: AnchorId::of( $request->overrides->anchor_id, $id, $number ),
+			classes: 'affibloom-display-table ls-dp affibloom-table-' . sanitize_html_class( strtolower( $theme ) ) . '-theme' . ( $advanced ? ' affibloom-advanced' : '' ),
+			// R44: Lasso's table wrapper carries the advanced rendering's attributes. Affibloom has no Table display type,
+			// so the table takes the Single type's layout and colours, with no element hidden.
+			wrapper: $advanced ? DisplayPresentation::wrapper( $display->config( DisplayType::single() ), $display->columns(), $shows, array() ) : array(),
+			nosnippet: 'enable' === strtolower( trim( $attributes['data_nosnippet'] ?? '' ) ),
+			horizontal: $horizontal,
+			show_headers: $table->show_headers,
+			headers: $layout->headers,
+			rows: $rows,
+			timestamp: $timestamp,
+			disclosure: $shows ? $text : null,
+		);
+	}
 
 	/**
 	 * A group shown as a grid (F30 R13-R19, R55, R61; D5, D16, D17; N1): the group's shown products as Single boxes in

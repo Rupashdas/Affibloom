@@ -25,6 +25,7 @@ enum DisplayKind: string {
 	case List    = 'list';
 	case Gallery = 'gallery';
 	case AiText  = 'ai-text';
+	case Table   = 'table';
 
 	/**
 	 * The kind in a shortcode's attributes: `type="button"`, `type="image"` or `"image-link"` (AmaLinks Pro's), or
@@ -34,6 +35,10 @@ enum DisplayKind: string {
 	 */
 	public static function of( array $attributes ): self {
 		$type = strtolower( $attributes['type'] ?? '' );
+		// F25 R43 (Task T12): a comparison table, drawn without a product.
+		if ( 'table' === $type ) {
+			return self::Table;
+		}
 		// F30 R2 (1): a prompt without a product (no id or slug) is the AI text, before anything else.
 		if ( '' !== trim( $attributes['prompt'] ?? '' ) && '' === trim( $attributes['id'] ?? '' ) && '' === trim( $attributes['slug'] ?? '' ) ) {
 			return self::AiText;
