@@ -66,4 +66,12 @@ interface TableRepository {
 	 * @return list<int>
 	 */
 	public function product_ids(): array;
+
+	/**
+	 * The tables a product is in (F25 R60, Task T17).
+	 *
+	 * @param int $product The product.
+	 * @return list<Table>
+	 */
+	public function containing( int $product ): array;
 }

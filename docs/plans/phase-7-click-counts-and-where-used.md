@@ -145,7 +145,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T14: Phone cards and breakpoints
 - [x] Task T15: Preview Table
 - [x] Task T16: The Dashboard's Comparison table filter
-- [ ] Task T17: A deleted product leaves its tables
+- [x] Task T17: A deleted product leaves its tables
 - [ ] Task 23F: Table — "Choose a Table" in the block (moved here from Phase 4; with 24D's table half)
 
 ### F10 — migration family: tables
@@ -2250,11 +2250,13 @@ as a filter and is kept in saved views.
 
 **Files:** the above; F25 spec AC21; F1's delete specs rerun.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Service and call.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4:
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Service and call.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4:
   Commit** — "Remove a deleted product from its tables".
+
+*Note:* Called from a `deleted_post` hook (`Interface\Hooks\TableProductHooks`) rather than only from ProductService::delete(), so emptying the trash or a WP-CLI delete also leaves the tables clean; trashing keeps the product in its tables (it can come back). Checked on Local: a throwaway product added to a table and deleted for good left it and its values; the table still draws.
 
 ---
 

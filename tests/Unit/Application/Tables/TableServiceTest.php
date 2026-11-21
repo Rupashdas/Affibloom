@@ -71,6 +71,9 @@ final class TableServiceTest extends TestCase {
 			public function product_ids(): array {
 				return array();
 			}
+			public function containing( int $product ): array {
+				return array_values( array_filter( $this->stored, static fn( Table $table ): bool => $table->has_product( $product ) ) );
+			}
 			public function delete( int $id ): void {
 				unset( $this->stored[ $id ] );
 			}
@@ -258,6 +261,29 @@ final class TableServiceTest extends TestCase {
 
 		$this->expectException( \Affibloom\Application\Tables\TableInUse::class );
 		$this->service->delete( (int) $used->id );
+	}
+
+	/** Task T17 (F25 R60, D15): a deleted product leaves every table, with its values; the tables move on. */
+	public function test_a_deleted_product_leaves_every_table(): void {
+		$keep  = $this->product( 'Keep' );
+		$gone  = $this->product( 'Gone' );
+		$first = $this->service->create( 'One', TableStyle::Column );
+		$other = $this->service->create( 'Two', TableStyle::Row );
+		foreach ( array( $first, $other ) as $table ) {
+			$table = $this->service->add_product( (int) $table->id, $table->revision, $keep );
+			self::assertNotNull( $table );
+			$this->service->add_product( (int) $table->id, $table->revision, $gone );
+		}
+
+		self::assertSame( 2, $this->service->remove_product_everywhere( $gone ) );
+
+		foreach ( array( $first, $other ) as $table ) {
+			$saved = $this->service->get( (int) $table->id );
+			self::assertNotNull( $saved );
+			self::assertSame( array( $keep ), $saved->product_ids() );
+			self::assertArrayNotHasKey( $gone, $saved->values );
+		}
+		self::assertSame( 0, $this->service->remove_product_everywhere( $gone ) );
 	}
 
 	/** Task T4 (F25 R18): a product that does not exist is refused. */

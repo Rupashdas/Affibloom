@@ -139,6 +139,7 @@ use Affibloom\Interface\Cron\AutoDetectCron;
 use Affibloom\Interface\Front\ClickScript;
 use Affibloom\Interface\Front\GaTag;
 use Affibloom\Interface\Cron\ClickRetentionCron;
+use Affibloom\Interface\Hooks\TableProductHooks;
 use Affibloom\Interface\Hooks\AutoDetectHooks;
 use Affibloom\Interface\Hooks\TrackingIdHooks;
 use Affibloom\Interface\PublicLinks;
@@ -638,6 +639,8 @@ final class Plugin {
 			new AmazonImportController( $this->amazon_import_status(), $this->template() ),
 			// F25 (Task T1): comparison tables, stored as posts; the list's route.
 			new TablePostType(),
+			// F25 R60, D15 (Task T17): a product deleted for good leaves its tables.
+			new TableProductHooks( $this->table_service() ),
 			new TablesController( $this->table_service(), $this->template(), new TablePreview( $renderer, $display_html, $box_assets, $icon_css, $display ) ),
 			new ContentExportController( $this->content_export() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),

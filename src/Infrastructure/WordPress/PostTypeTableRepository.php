@@ -185,6 +185,30 @@ final class PostTypeTableRepository implements TableRepository {
 	 * @return list<int>
 	 */
 	public function product_ids(): array {
+		$ids = array();
+		foreach ( $this->every() as $table ) {
+			$ids = array_merge( $ids, $table->product_ids() );
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * The tables a product is in (F25 R60; Task T17).
+	 *
+	 * @param int $product The product.
+	 * @return list<Table>
+	 */
+	public function containing( int $product ): array {
+		return array_values( array_filter( $this->every(), static fn( Table $table ): bool => $table->has_product( $product ) ) );
+	}
+
+	/**
+	 * Every table, read whole (the site has a handful).
+	 *
+	 * @return list<Table>
+	 */
+	private function every(): array {
 		$posts = get_posts(
 			array(
 				'post_type'        => TablePostType::NAME,
@@ -194,12 +218,8 @@ final class PostTypeTableRepository implements TableRepository {
 				'suppress_filters' => true,
 			)
 		);
-		$ids   = array();
-		foreach ( $posts as $post ) {
-			$ids = array_merge( $ids, self::hydrate( $post )->product_ids() );
-		}
 
-		return array_values( array_unique( $ids ) );
+		return array_values( array_map( array( self::class, 'hydrate' ), $posts ) );
 	}
 
 	/**

@@ -29,7 +29,7 @@ use Closure;
 /**
  * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4) and a
  * group's (T5), rows, columns, fields and cell values (T6-T8), their order (T9), where it is used (T10), clone and
- * delete (T11). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
+ * delete (T11), a deleted product leaving them (T17). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
  */
 final class TableService {
 
@@ -547,6 +547,22 @@ final class TableService {
 		$this->tables->delete( $id );
 
 		return true;
+	}
+
+	/**
+	 * A product deleted for good leaves every table it was in, with its values (R60, D15; Task T17). Each table moves
+	 * on a revision, so an open builder is told it changed.
+	 *
+	 * @param int $product The product.
+	 * @return int How many tables it left.
+	 */
+	public function remove_product_everywhere( int $product ): int {
+		$tables = $this->tables->containing( $product );
+		foreach ( $tables as $table ) {
+			$this->tables->save( $table->remove_product( $product )->with( array( 'revision' => $table->revision + 1 ) ) );
+		}
+
+		return count( $tables );
 	}
 
 	/**

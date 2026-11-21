@@ -592,4 +592,20 @@ test.describe( 'F25 Comparison tables', () => {
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
 		await expect( page.getByRole( 'link', { name } ) ).toHaveAttribute( 'data-view-comparison-table', 'not_in_table' );
 	} );
+
+	// AC21 (T17; R60, D15).
+	test( 'AC21 a product deleted for good leaves every table, its cells with it; the table still draws', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const keep = createProduct( { name: `Stays ${ word }` } );
+		const gone = createProduct( { name: `Goes ${ word }` } );
+		const id = await tableWith( page, 'row', [ keep, gone ] );
+		wp( 'post', 'delete', String( gone ), '--force' );
+
+		const table = stored( id );
+		expect( table.products.map( ( entry: { id: number } ) => entry.id ) ).toEqual( [ keep ] );
+		expect( table.values[ String( gone ) ] ).toBeUndefined();
+		const post = wp( 'post', 'create', '--post_title=F25 AC21', '--post_status=draft', `--post_content=[affibloom type="table" id="${ id }"]`, '--porcelain' );
+		await page.goto( `/?p=${ post }&preview=true` );
+		await expect( page.locator( '.affibloom-display-table tbody tr' ) ).toHaveCount( 1 );
+	} );
 } );
