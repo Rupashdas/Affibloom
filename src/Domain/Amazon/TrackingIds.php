@@ -68,7 +68,7 @@ final class TrackingIds {
 		}
 		$whitelist[] = $tag;
 
-		return array_values( $whitelist );
+		return $whitelist;
 	}
 
 	/**
