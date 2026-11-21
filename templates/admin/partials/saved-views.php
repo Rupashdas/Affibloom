@@ -56,7 +56,8 @@ $view_group = static fn( int $group ): int => ( $group <= 0 || in_array( $group,
 					data-view-placements="<?php echo esc_attr( $saved->placement->value ); ?>"
 					data-view-comparison-table="<?php echo esc_attr( $saved->tables->value ); ?>"
 					data-view-orderby="<?php echo esc_attr( $saved->order->column ); ?>" data-view-order="<?php echo esc_attr( $saved->order->direction ); ?>"
-					<?php echo $saved_active === $saved->id ? 'aria-current="true"' : ''; ?>><?php echo esc_html( $saved->name ); ?></a>
+					title="<?php echo esc_attr( $saved->name ); ?>"
+					<?php echo $saved_active === $saved->id ? 'aria-current="true"' : ''; ?>><span class="affibloom-pill__text"><?php echo esc_html( $saved->name ); ?></span></a>
 				<button type="button" class="affibloom-pill__remove" data-affibloom-open="affibloom-view-delete"
 					data-view-id="<?php echo esc_attr( $saved->id ); ?>" data-view-name="<?php echo esc_attr( $saved->name ); ?>"
 					aria-haspopup="dialog" aria-label="<?php echo esc_attr( $remove_label ); ?>">

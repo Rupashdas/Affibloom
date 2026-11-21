@@ -1578,6 +1578,8 @@
 	white-space: nowrap;
 	transition: border-color var(--affibloom-ease), color var(--affibloom-ease);
 }
+/* A flex box does not cut its own text: the name's span does, so a long name ends in "…" before the ×. */
+.affibloom-admin .affibloom-pill__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .affibloom-admin .affibloom-pill:hover { border-color: var(--affibloom-line-strong); color: var(--affibloom-ink-900); }
 .affibloom-admin .affibloom-pill[aria-current="true"] { border-color: var(--affibloom-brand-line); background: var(--affibloom-brand-50); color: var(--affibloom-brand-600); font-weight: 600; }
 /* The tick says "current" without colour (WCAG 1.4.1). */
