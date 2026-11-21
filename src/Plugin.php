@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Amazon\TrackingIdLearning;
 use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
@@ -132,6 +133,7 @@ use Affibloom\Interface\Front\ClickScript;
 use Affibloom\Interface\Front\GaTag;
 use Affibloom\Interface\Cron\ClickRetentionCron;
 use Affibloom\Interface\Hooks\AutoDetectHooks;
+use Affibloom\Interface\Hooks\TrackingIdHooks;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
@@ -606,10 +608,12 @@ final class Plugin {
 			new LocationSelector( new TableLinkLocationRepository(), plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			// F35 R12, D3 (Task C2B): network links recorded when a post is indexed.
 			new AutoDetectHooks( $this->affiliate_detector( $products ), $this->settings_repository() ),
+			// F35 R27, D16 (Task AM6): partner tags found in posts join the whitelist.
+			new TrackingIdHooks( new TrackingIdLearning( $this->settings_repository() ) ),
 			// F35 R13, D5 (Task C2C): products for detected links, in the background.
 			new AutoDetectCron( $this->affiliate_detector( $products ), new OptionLock( 'affibloom_auto_detect_lock', 5 * 60 ), $this->settings_repository() ),
 			// F35 R24, R25, D11 (Task AM1): products for the Amazon links in posts, every five minutes while on.
-			new AmazonImportCron( new AmazonImport( new TableLinkLocationRepository(), $products, new PostTypeProductRepository(), new AmazonShortLinks( new TableAmazonShortLinkRepository(), new LinkResolver( new WpPageFetcher() ) ) ), new AmazonImportSchedule(), new OptionLock( 'affibloom_amazon_import_lock', 5 * 60 ), $this->settings_repository() ),
+			new AmazonImportCron( new AmazonImport( new TableLinkLocationRepository(), $products, new PostTypeProductRepository(), new AmazonShortLinks( new TableAmazonShortLinkRepository(), new LinkResolver( new WpPageFetcher() ) ), new TrackingIdLearning( $this->settings_repository() ) ), new AmazonImportSchedule(), new OptionLock( 'affibloom_amazon_import_lock', 5 * 60 ), $this->settings_repository() ),
 			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),

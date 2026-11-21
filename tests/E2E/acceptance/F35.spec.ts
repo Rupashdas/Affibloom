@@ -143,6 +143,34 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		await expect( card ).not.toContainText( 'Link Index vs Dashboard' );
 	} );
 
+	// AC4 (AM6; R27, D16): learned when the post is indexed on save.
+	test( "AC4 a partner's tag joins the whitelist only under Lasso's conditions", () => {
+		const whitelist = () => wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); echo implode( ",", (array) ( $s["tracking_id_whitelist"] ?? array() ) );' ).split( ',' );
+		const tag = () => `p${ unique( 't' ).replace( /[^a-z0-9]/gi, '' ).slice( -8 ).toLowerCase() }-21`;
+		const post = ( code: string ) => newPostWith( `<p><a href="https://www.amazon.com/dp/${ asin() }?tag=${ code }">x</a></p>` );
+		setSettings( { multiple_tracking_ids: true, force_change_from_link_details: false, tracking_id_blacklist: [], tracking_id: 'vbvault-20' } );
+
+		const joins = tag();
+		post( joins );
+		expect( whitelist() ).toContain( joins );
+
+		const off = tag();
+		setSettings( { multiple_tracking_ids: false } );
+		post( off );
+		expect( whitelist() ).not.toContain( off );
+
+		const forced = tag();
+		setSettings( { multiple_tracking_ids: true, force_change_from_link_details: true } );
+		post( forced );
+		expect( whitelist() ).not.toContain( forced );
+
+		const removed = tag();
+		setSettings( { force_change_from_link_details: false, tracking_id_blacklist: [ removed ] } );
+		post( removed );
+		expect( whitelist() ).not.toContain( removed );
+		setSettings( { tracking_id_blacklist: [] } );
+	} );
+
 	test( 'AC8 with Auto-Monetization off the event is not scheduled and a run does nothing', () => {
 		setSettings( { auto_monetize_amazon: false } );
 		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );

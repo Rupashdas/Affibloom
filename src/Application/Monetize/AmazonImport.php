@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Monetize;
 
+use Affibloom\Application\Amazon\TrackingIdLearning;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
@@ -30,12 +31,13 @@ final class AmazonImport {
 	/**
 	 * Builds the import.
 	 *
-	 * @param LinkLocationRepository $rows     The link index.
-	 * @param ProductService         $products The add path.
-	 * @param ProductRepository      $library  The products, for the retired-ASIN check.
-	 * @param AmazonShortLinks|null  $short    The short links' map (Task AM2).
+	 * @param LinkLocationRepository  $rows     The link index.
+	 * @param ProductService          $products The add path.
+	 * @param ProductRepository       $library  The products, for the retired-ASIN check.
+	 * @param AmazonShortLinks|null   $short    The short links' map (Task AM2).
+	 * @param TrackingIdLearning|null $learning The auto-whitelist, told each queued link's tag (R25, D16; Task AM6).
 	 */
-	public function __construct( private LinkLocationRepository $rows, private ProductService $products, private ProductRepository $library, private ?AmazonShortLinks $short = null ) {}
+	public function __construct( private LinkLocationRepository $rows, private ProductService $products, private ProductRepository $library, private ?AmazonShortLinks $short = null, private ?TrackingIdLearning $learning = null ) {}
 
 	/**
 	 * One run.
@@ -49,6 +51,8 @@ final class AmazonImport {
 		[ $short_queued, $done, $made ] = $this->short_links( $limit, $still_on );
 		$queue                          = $done < $limit ? $this->rows->untied_amazon( $limit - $done ) : array();
 		$total                          = $short_queued + count( $queue );
+		// A partner's tag on a queued link joins the whitelist before its product is made with the tag rule (D16).
+		$this->learning?->learn( array_values( array_filter( array_column( $queue, 'tag' ) ) ) );
 		if ( null !== $progress ) {
 			$progress( $done, $total );
 		}

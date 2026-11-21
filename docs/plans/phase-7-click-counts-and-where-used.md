@@ -120,7 +120,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
 - [x] Task AM4: The Amazon import notice — every Affibloom page
 - [x] Task AM5: The import status card, the Dashboard notice and the General stats
-- [ ] Task AM6: Tracking IDs found in posts join the whitelist — `save_post` through F21
+- [x] Task AM6: Tracking IDs found in posts join the whitelist — `save_post` through F21
 
 **Migration of the opportunity and auto-detect data (after F22 and F35 exist):**
 
@@ -1637,12 +1637,18 @@ that tag; otherwise nothing changes.
 **Files:** modify `src/Domain/Amazon/TrackingIds.php`, `AmazonImport`, `src/Plugin.php`; create the hook; tests
 `tests/Unit/Domain/Amazon/TrackingIdsLearnTest.php`, E2E F35 AC4.
 
-- [ ] **Step 1: Failing tests.** AC4's five conditions.
-- [ ] **Step 2: The rule.**
-- [ ] **Step 3: The hook and the
+- [x] **Step 1: Failing tests.** AC4's five conditions.
+- [x] **Step 2: The rule.**
+- [x] **Step 3: The hook and the
   import's call.**
-- [ ] **Step 4: Run and look** (this copy: no new ID; every tag is `vbvault-20`).
-- [ ] **Step 5: Commit** — "Whitelist partner tracking IDs found in posts".
+- [x] **Step 4: Run and look** (this copy: no new ID; every tag is `vbvault-20`).
+- [x] **Step 5: Commit** — "Whitelist partner tracking IDs found in posts".
+
+*Note:* the rule is `TrackingIds::learn()` (static, pure); `Application\Amazon\TrackingIdLearning` saves the whitelist
+once per batch of tags, called by `Interface\Hooks\TrackingIdHooks` (on every index write) and by the import before each
+batch. The site's own tag and Amazon's `maas` are never added. Checked: unit (the five conditions); on Local a post with
+`?tag=partner-21` added it to the whitelist on save (then removed again); the index's other tags are `vbvault-20` and a
+fixture's `site-20`, which a rebuild would add (dummy data).
 
 ---
 

@@ -50,6 +50,28 @@ final class TrackingIds {
 	}
 
 	/**
+	 * Lasso's auto-whitelist (F35 R27, D16; F35 AC4; Task AM6): a tag found on an Amazon product link joins the Tracking ID
+	 * Whitelist when Allow Multiple Tracking IDs is on, "Force changes from link details" is off, and the tag is not the
+	 * site's own, not already allowed, not Amazon's `maas`, and was never removed by hand (the blacklist, F17 B1).
+	 * Lasso's copy of whitelisted IDs into the blacklist is not repeated.
+	 *
+	 * @param string   $tag      The link's tag.
+	 * @param Settings $settings The site's settings.
+	 * @return list<string>|null The whitelist with the tag added; null when nothing changes.
+	 */
+	public static function learn( string $tag, Settings $settings ): ?array {
+		$tag       = trim( $tag );
+		$whitelist = $settings->list( 'tracking_id_whitelist' );
+		if ( '' === $tag || self::ALWAYS_ALLOWED === $tag || ! $settings->bool( 'multiple_tracking_ids' ) || $settings->bool( 'force_change_from_link_details' )
+			|| trim( $settings->string( 'tracking_id' ) ) === $tag || in_array( $tag, $whitelist, true ) || in_array( $tag, $settings->list( 'tracking_id_blacklist' ), true ) ) {
+			return null;
+		}
+		$whitelist[] = $tag;
+
+		return array_values( $whitelist );
+	}
+
+	/**
 	 * The tag to store: the pasted one when it is allowed, an Amazon variant's, or when the site has no tracking ID, else
 	 * the site's.
 	 *
