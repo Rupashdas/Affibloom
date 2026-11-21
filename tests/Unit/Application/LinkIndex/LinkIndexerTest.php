@@ -76,6 +76,14 @@ final class LinkIndexerTest extends TestCase {
 				return false;
 			}
 
+			public function untied_amazon( int $limit ): array {
+				return array();
+			}
+
+			public function tie_amazon( string $asin, string $country, int $product_id ): int {
+				return 0;
+			}
+
 			public function set_ignored( int $id, bool $ignored ): bool {
 				return false;
 			}
@@ -224,6 +232,14 @@ final class LinkIndexerTest extends TestCase {
 
 			public function set_assigned( int $id, int $product_id ): bool {
 				return false;
+			}
+
+			public function untied_amazon( int $limit ): array {
+				return array();
+			}
+
+			public function tie_amazon( string $asin, string $country, int $product_id ): int {
+				return 0;
 			}
 
 			public function set_ignored( int $id, bool $ignored ): bool {

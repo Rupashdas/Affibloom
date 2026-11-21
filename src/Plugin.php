@@ -13,10 +13,12 @@ use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Application\Monetize\AffiliateDetector;
+use Affibloom\Application\Monetize\AmazonImport;
 use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Domain\Monetize\NetworkRegistry;
+use Affibloom\Infrastructure\WordPress\AmazonImportSchedule;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
 use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
 use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
@@ -31,6 +33,7 @@ use Affibloom\Infrastructure\WordPress\TableOpportunityRepository;
 use Affibloom\Infrastructure\WordPress\TransientRepeatGuard;
 use Affibloom\Infrastructure\WordPress\WpPostDirectory;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
+use Affibloom\Interface\Cron\AmazonImportCron;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
 use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
 use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
@@ -431,7 +434,7 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS, LinkCheckCron::HOOKS, AutoDetectCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS, LinkCheckCron::HOOKS, AutoDetectCron::HOOKS, AmazonImportCron::HOOKS );
 	}
 
 	/**
@@ -595,6 +598,8 @@ final class Plugin {
 			new AutoDetectHooks( $this->affiliate_detector( $products ), $this->settings_repository() ),
 			// F35 R13, D5 (Task C2C): products for detected links, in the background.
 			new AutoDetectCron( $this->affiliate_detector( $products ), new OptionLock( 'affibloom_auto_detect_lock', 5 * 60 ), $this->settings_repository() ),
+			// F35 R24, R25, D11 (Task AM1): products for the Amazon links in posts, every five minutes while on.
+			new AmazonImportCron( new AmazonImport( new TableLinkLocationRepository(), $products, new PostTypeProductRepository() ), new AmazonImportSchedule(), new OptionLock( 'affibloom_amazon_import_lock', 5 * 60 ), $this->settings_repository() ),
 			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),

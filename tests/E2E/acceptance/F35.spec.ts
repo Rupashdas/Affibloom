@@ -1,0 +1,66 @@
+import { test, expect } from '@playwright/test';
+import { blockTrackers, newPostWith, setSettings, unique, wp } from '../utils';
+
+// F35 Amazon auto-monetization (docs/features/F35/requirements.md, AC1-AC8). The affiliate-network ACs are C2's.
+//
+// Note for the run: the import makes a product for every untied Amazon link on the copy (up to 100 a run). On a copy
+// whose Amazon API is connected (C1), each new product asks Amazon for its data once.
+
+const run = () => wp( 'cron', 'event', 'run', 'affibloom_amazon_import' );
+const amazonProducts = ( asin: string ) =>
+	Number( wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_asin', `--meta_value=${ asin }`, '--format=count' ) );
+// A made-up ASIN, unique per run: 10 characters, B0 then 8 letters or digits.
+const asin = () => ( 'B0' + unique( 'f35' ).replace( /[^a-z0-9]/gi, '' ).toUpperCase() ).slice( 0, 10 ).padEnd( 10, 'X' );
+
+test.describe( 'F35 Amazon auto-monetization', () => {
+	test.beforeEach( async ( { context } ) => {
+		await blockTrackers( context );
+		setSettings( { auto_monetize_amazon: true } );
+	} );
+
+	test.afterAll( () => {
+		setSettings( { auto_monetize_amazon: false } ); // Local's value: no import between runs
+	} );
+
+	test( 'AC1 an Amazon link in a post becomes one product at the next run; again: none; the post is unchanged', () => {
+		const code = asin();
+		const content = `<p>Buy <a href="https://www.amazon.com/dp/${ code }?tag=other-20">this</a>.</p>`;
+		const id = newPostWith( content ).replace( '/?p=', '' );
+		run();
+		expect( amazonProducts( code ) ).toBe( 1 );
+		run();
+		expect( amazonProducts( code ) ).toBe( 1 );
+		expect( wp( 'post', 'get', id, '--field=post_content' ) ).toBe( content );
+	} );
+
+	test( 'AC1 a retired ASIN is not imported', () => {
+		const code = asin();
+		newPostWith( `<p><a href="https://www.amazon.com/dp/${ code }">old</a></p>` );
+		run();
+		const product = wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_asin', `--meta_value=${ code }`, '--field=ID' );
+		wp( 'post', 'update', product, '--post_status=affibloom_retired' );
+		newPostWith( `<p><a href="https://www.amazon.com/dp/${ code }">again</a></p>` );
+		run();
+		expect( amazonProducts( code ) ).toBe( 0 ); // the published count: the retired one stays retired
+	} );
+
+	test( "AC2 the front end prints the product's link with the site's tag, rel and target", async ( { page } ) => {
+		const code = asin();
+		const id = newPostWith( `<p><a href="https://www.amazon.com/dp/${ code }?tag=other-20">this</a></p>` ).replace( '/?p=', '' );
+		run();
+		const product = wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_asin', `--meta_value=${ code }`, '--field=ID' );
+		await page.goto( `/?p=${ id }` );
+		const link = page.locator( `a[data-affibloom-id="${ product }"]` );
+		await expect( link ).toHaveAttribute( 'href', /tag=vbvault-20/ );
+		await expect( link ).toHaveAttribute( 'rel', /nofollow/ );
+	} );
+
+	test( 'AC8 with Auto-Monetization off the event is not scheduled and a run does nothing', () => {
+		setSettings( { auto_monetize_amazon: false } );
+		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );
+		const code = asin();
+		newPostWith( `<p><a href="https://www.amazon.com/dp/${ code }">this</a></p>` );
+		wp( 'eval', "do_action( 'affibloom_amazon_import' );" );
+		expect( amazonProducts( code ) ).toBe( 0 );
+	} );
+} );

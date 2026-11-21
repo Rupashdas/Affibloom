@@ -238,4 +238,13 @@ interface ProductRepository {
 	 * @throws \RuntimeException When the storage refuses it.
 	 */
 	public function revive( Product $product ): Product;
+
+	/**
+	 * Whether a retired product (F1's repoint) has this ASIN on this store: the Amazon import leaves it alone (F35 R25;
+	 * Task AM1).
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 */
+	public function is_retired_asin( string $asin, string $country ): bool;
 }

@@ -115,7 +115,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task C2A: The affiliate-network registry — `wp affibloom links detect <url>`
 - [x] Task C2B: Detecting affiliate links when a post is indexed — `save_post`
 - [x] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
-- [ ] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
+- [x] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
 - [ ] Task AM2: Amazon short links — the import's short-link branch and the map
 - [ ] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
 - [ ] Task AM4: The Amazon import notice — every Affibloom page
@@ -1431,15 +1431,22 @@ retired ASIN is not imported. With the setting off, nothing runs.
 `tests/Unit/Application/AmazonImportTest.php`, `tests/Integration/AmazonImportCronTest.php`,
 `tests/E2E/acceptance/F35.spec.ts` (AC1, AC2, AC8).
 
-- [ ] **Step 1: Failing tests.** E2E AC1 (a post with `amazon.com/dp/B0F35AC1XX?tag=other-20`; run the event; one
+- [x] **Step 1: Failing tests.** E2E AC1 (a post with `amazon.com/dp/B0F35AC1XX?tag=other-20`; run the event; one
   Amazon product; run again: one; a retired ASIN: none; md5 unchanged), AC2 (front end prints the product's link with
   `vbvault-20` unless the tag is whitelisted; `rel`, `target`), AC8 (setting off: the event is not scheduled and a manual
   run does nothing). Red: no event.
-- [ ] **Step 2: The queue query, the service, the lock.**
-- [ ] **Step 3: The cron module and schedule.**
-- [ ] **Step 4: Run and look.** On staging (F35 N3): the first runs create about 91 products; list them; Dashboard
+- [x] **Step 2: The queue query, the service, the lock.**
+- [x] **Step 3: The cron module and schedule.**
+- [x] **Step 4: Run and look.** On staging (F35 N3): the first runs create about 91 products; list them; Dashboard
   count; three posts' front ends.
-- [ ] **Step 5: Commit** — "Make products of the Amazon links in posts".
+- [x] **Step 5: Commit** — "Make products of the Amazon links in posts".
+
+*Note:* `OptionLock` already existed (Phase 5), so nothing to extract. The queue is one entry per ASIN and store, the
+link rebuilt as Lasso does (`https://www.<store>/dp/<ASIN>?tag=<its tag>`); it leaves out retired ASINs in SQL (else
+they would head the queue for ever), and each ASIN's rows are tied at once. The batch figures go to
+`affibloom_amazon_import_batch` for AM5. Step 4 on staging needs the user's word (not done); on Local (Auto-Monetization
+off, 257 ASINs queued, live Amazon credentials) one link only, through the cron module's import: the product made,
+11 posts' rows tied, contents unchanged, the front end printing the tagged link with target and rel.
 
 ---
 

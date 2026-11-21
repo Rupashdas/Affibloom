@@ -115,4 +115,23 @@ interface LinkLocationRepository {
 	 * @return bool False when the row is gone.
 	 */
 	public function set_assigned( int $id, int $product_id ): bool;
+
+	/**
+	 * The Amazon import's queue (F35 R24, D11; Task AM1): untied text and image links with an ASIN, one per ASIN and store,
+	 * oldest first, leaving out an ASIN a retired product has (F1's repoint).
+	 *
+	 * @param int $limit At most this many.
+	 * @return list<array{asin: string, country: string, domain: string, tag: string}>
+	 */
+	public function untied_amazon( int $limit ): array;
+
+	/**
+	 * Ties every untied row of an ASIN on a store to its product (F35 R25; Task AM1).
+	 *
+	 * @param string $asin       The ASIN.
+	 * @param string $country    The store's country code.
+	 * @param int    $product_id The product.
+	 * @return int How many rows were tied.
+	 */
+	public function tie_amazon( string $asin, string $country, int $product_id ): int;
 }

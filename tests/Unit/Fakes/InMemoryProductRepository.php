@@ -298,4 +298,14 @@ final class InMemoryProductRepository implements ProductRepository {
 
 		return null;
 	}
+
+	public function is_retired_asin( string $asin, string $country ): bool {
+		foreach ( $this->retired as $id => $to ) {
+			$product = $this->gone[ $id ] ?? null;
+			if ( null !== $product && $product->asin === $asin && $product->amazon_country === $country ) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

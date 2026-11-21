@@ -1110,4 +1110,34 @@ final class PostTypeProductRepository implements ProductRepository {
 	private static function flag( bool $on ): string {
 		return $on ? '1' : '0';
 	}
+
+	/**
+	 * Whether a retired product has this ASIN on this store (Task AM1).
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store's country code.
+	 */
+	public function is_retired_asin( string $asin, string $country ): bool {
+		$found = get_posts(
+			array(
+				'post_type'      => ProductPostType::NAME,
+				'post_status'    => ProductPostType::RETIRED,
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+				'no_found_rows'  => true,
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- two keys, one import link.
+					array(
+						'key'   => '_affibloom_asin',
+						'value' => $asin,
+					),
+					array(
+						'key'   => '_affibloom_amazon_country',
+						'value' => $country,
+					),
+				),
+			)
+		);
+
+		return array() !== $found;
+	}
 }

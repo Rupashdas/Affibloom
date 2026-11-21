@@ -69,6 +69,21 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return $all[ $id - 1 ] ?? null;
 	}
 
+	/** @var list<array{asin: string, country: string, domain: string, tag: string}> untied_amazon()'s answer. */
+	public array $amazon = array();
+
+	/** @var list<array{string, string, int}> tie_amazon()'s calls. */
+	public array $tied = array();
+
+	public function untied_amazon( int $limit ): array {
+		return array_slice( $this->amazon, 0, $limit );
+	}
+
+	public function tie_amazon( string $asin, string $country, int $product_id ): int {
+		$this->tied[] = array( $asin, $country, $product_id );
+		return 1;
+	}
+
 	/** @var array<int, bool> set_ignored()'s writes, by row. */
 	public array $ignored = array();
 

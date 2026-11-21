@@ -339,6 +339,64 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * The Amazon import's queue: untied text and image links with an ASIN, one per ASIN and store, oldest first, without
+	 * the ASINs of retired products (F35 R24, D11; Task AM1).
+	 *
+	 * @param int $limit At most this many.
+	 * @return list<array{asin: string, country: string, domain: string, tag: string}>
+	 */
+	public function untied_amazon( int $limit ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one background run.
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT l.asin, l.country, MIN(l.domain) AS domain, MIN(COALESCE(l.tracking_id, '')) AS tag FROM %i AS l
+				WHERE l.product_id = 0 AND l.assigned_product_id = 0 AND l.asin IS NOT NULL AND l.asin <> '' AND l.domain IS NOT NULL AND l.domain <> ''
+					AND l.display_type IN ('Text', 'Image-only anchor text')
+					AND NOT EXISTS ( SELECT 1 FROM %i AS r JOIN %i AS ra ON ra.post_id = r.ID AND ra.meta_key = '_affibloom_asin' AND ra.meta_value = l.asin
+						JOIN %i AS rc ON rc.post_id = r.ID AND rc.meta_key = '_affibloom_amazon_country' AND rc.meta_value = l.country
+						WHERE r.post_type = %s AND r.post_status = %s )
+				GROUP BY l.asin, l.country ORDER BY MIN(l.id) LIMIT %d",
+				$wpdb->prefix . self::TABLE,
+				$wpdb->posts,
+				$wpdb->postmeta,
+				$wpdb->postmeta,
+				ProductPostType::NAME,
+				ProductPostType::RETIRED,
+				max( 1, $limit )
+			),
+			ARRAY_A
+		);
+		$queue = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$queue[] = array(
+				'asin'    => (string) $row['asin'],
+				'country' => (string) $row['country'],
+				'domain'  => (string) $row['domain'],
+				'tag'     => (string) $row['tag'],
+			);
+		}
+
+		return $queue;
+	}
+
+	/**
+	 * Ties every untied row of an ASIN on a store to its product (Task AM1).
+	 *
+	 * @param string $asin       The ASIN.
+	 * @param string $country    The store's country code.
+	 * @param int    $product_id The product.
+	 * @return int How many rows were tied.
+	 */
+	public function tie_amazon( string $asin, string $country, int $product_id ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one ASIN's rows.
+		return (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET product_id = %d, link_type = 'product' WHERE product_id = 0 AND assigned_product_id = 0 AND asin = %s AND country = %s", $wpdb->prefix . self::TABLE, $product_id, $asin, $country ) );
+	}
+
+	/**
 	 * Ties a row to a product at render time, or clears that (F22 N1-A; Task O10). A rescan copies an assignment into
 	 * `product_id` (LinkLocation::keeping()), so a tie that came from the assignment moves with it, and goes with it.
 	 *
