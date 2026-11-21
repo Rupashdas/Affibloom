@@ -24,4 +24,12 @@ final class ShortcodeTextTest extends TestCase {
 		self::assertSame( '[affibloom type="grid" group="best-shoes"]', ShortcodeText::group( 'best-shoes' ) );
 		self::assertSame( '', ShortcodeText::group( '' ) );
 	}
+
+	/**
+	 * A saved table by its ID (F31 R33, D9; Task 18S13); nothing for an unsaved one.
+	 */
+	public function test_a_tables_shortcode(): void {
+		self::assertSame( '[affibloom type="table" id="7"]', ShortcodeText::table( 7 ) );
+		self::assertSame( '', ShortcodeText::table( 0 ) );
+	}
 }

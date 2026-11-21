@@ -140,7 +140,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T10: Table Locations
 - [x] Task T11: Clone and delete
 - [x] Task T12: The reader's Horizontal table, by shortcode
-- [ ] Task 18S13: A table's Copy Shortcode
+- [x] Task 18S13: A table's Copy Shortcode
 - [ ] Task T13: The reader's Vertical table
 - [ ] Task T14: Phone cards and breakpoints
 - [ ] Task T15: Preview Table
@@ -2107,6 +2107,8 @@ for `TableView`.
 - [x] **Step 4: Commit** — "Copy a table's shortcode".
 
 *Note:* The reader's table is built in `ShortcodeRenderer::table()` (each product from its Single box view, so its links carry the box's attributes, R50) and printed by `DisplayHtml::table()` (not a separate TableDisplay class). Affibloom has no Table display type: with advanced rendering the wrapper takes `affibloom-advanced` and the Single type's layout and colours, nothing hidden. `assets/front/table.css` is Lasso's stylesheet renamed lasso- → affibloom- (class map in docs/ui/tokens.md, "Comparison table"). Checked on Local: the markup skeleton against Lasso's render of table 2 (identical apart from the wrapper's advanced attributes); every theme; `theme` and `data_nosnippet`. **The pixel check (AC16, `tests/E2E/visual/table-horizontal.spec.ts`) waits for N2's staging baselines and Phase M's migrated tables; it skips until then.** Lasso's own render on Local leaves its cells empty (the Local copy lacks Lasso's table detail rows), so no pixel comparison was possible here.
+
+*Note:* The button follows the group page's (18S12): "Copied!" for 1.5 seconds, a toast when the copy is refused. Checked in a headless browser: hidden before the table is saved; the label and the shortcode after a click (the page is http, so the copy uses the textarea fallback).
 
 ---
 

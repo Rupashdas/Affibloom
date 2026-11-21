@@ -17,6 +17,7 @@ use Affibloom\Domain\Table\TableStyle;
 use Affibloom\Domain\Table\TableTheme;
 use Affibloom\Interface\Admin\RichEditorSettings;
 use Affibloom\Interface\Admin\TablesScreen;
+use Affibloom\Interface\ShortcodeText;
 
 $table      = $view['table'] ?? new Table( null, '' );
 $horizontal = TableStyle::Row === $table->style;
@@ -45,8 +46,9 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 				),
 				'actions'      => 'admin/partials/table-head-actions',
 				'actions_args' => array(
-					'saved'  => null !== $table->id,
-					'has_id' => null !== $table->id,
+					'saved'     => null !== $table->id,
+					'has_id'    => null !== $table->id,
+					'shortcode' => ShortcodeText::table( (int) $table->id ),
 				),
 			)
 		);

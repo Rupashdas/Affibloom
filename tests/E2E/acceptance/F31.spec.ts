@@ -258,4 +258,20 @@ test.describe( 'F31 Shortcode', () => {
 		await expect( button ).toHaveAttribute( 'title', 'Copied!' );
 		await expect( button ).toHaveAttribute( 'title', 'Copy this Display to your clipboard.', { timeout: 2500 } );
 	} );
+
+	test( "AC13 a table's Copy Shortcode copies [affibloom type=\"table\" id]; it shows once the table is saved", async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-table' );
+		await expect( page.getByRole( 'button', { name: 'Copy Shortcode' } ) ).toBeHidden();
+
+		const id = wp( 'eval-file', 'tests/E2E/fixtures/create-table.php', JSON.stringify( { title: `F31 AC13 ${ Date.now() }`, style: 'row', theme: 'Cactus', products: [] } ) );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+		await page.evaluate( () => document.addEventListener( 'copy', ( event ) => {
+			( window as unknown as { copied: string } ).copied = ( event.target as HTMLTextAreaElement ).value;
+		} ) );
+		const button = page.getByRole( 'button', { name: 'Copy Shortcode' } );
+		await button.click();
+		expect( await page.evaluate( () => ( window as unknown as { copied?: string } ).copied ) ).toBe( `[affibloom type="table" id="${ id }"]` );
+		await expect( button ).toHaveText( 'Copied!' );
+		await expect( button ).toHaveText( 'Copy Shortcode', { timeout: 2500 } );
+	} );
 } );

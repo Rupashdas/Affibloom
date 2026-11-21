@@ -33,4 +33,14 @@ final class ShortcodeText {
 	public static function group( string $slug ): string {
 		return '' === $slug ? '' : '[affibloom type="grid" group="' . $slug . '"]';
 	}
+
+	/**
+	 * A comparison table, `[affibloom type="table" id="<id>"]` (Lasso's `[lasso type="table" id]`, F31 R33; Task
+	 * 18S13); '' for a table not saved yet.
+	 *
+	 * @param int $id The table's ID.
+	 */
+	public static function table( int $id ): string {
+		return $id > 0 ? '[affibloom type="table" id="' . $id . '"]' : '';
+	}
 }

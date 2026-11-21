@@ -26,6 +26,8 @@
  * - Order (T9; D9): a product, a row or column and a field are dragged by their grips (pointer events: the item under
  *   the pointer is marked, the drop sends the new order) or moved one place by their Move buttons; a field also moves
  *   to the previous or next row (column), or is dropped on another one. Each move redraws the builder.
+ * - Copy Shortcode (F31 R33; Task 18S13): copies `[affibloom type="table" id="<id>"]`; the label reads "Copied!" for
+ *   1.5 seconds, as the group page's does; a refused copy says so.
  * - Delete This Table (T11; R41, D12): the table's locations are counted first; none → 'Delete "<name>"' → OK deletes
  *   it and goes to the Tables list; some → "Hold Up". The server counts again and answers 409 when it is in use.
  */
@@ -859,6 +861,25 @@
 		mark( null );
 		region.classList.remove( 'is-dragging' );
 	} );
+
+	// Copy Shortcode (18S13).
+	var copyButton = document.querySelector( '[data-table-copy]' );
+	if ( copyButton && '' !== copyButton.dataset.tableCopy ) {
+		var copyLabel = copyButton.querySelector( '[data-copy-label]' );
+		var copyName = copyLabel.textContent;
+		var copyTimer = 0;
+		copyButton.addEventListener( 'click', function () {
+			window.affibloomCopy( copyButton.dataset.tableCopy, function () {
+				window.clearTimeout( copyTimer );
+				copyLabel.textContent = copyButton.dataset.copied;
+				copyTimer = window.setTimeout( function () {
+					copyLabel.textContent = copyName;
+				}, 1500 );
+			}, function () {
+				window.affibloomToast( copyButton.dataset.copyFailed, true );
+			} );
+		} );
+	}
 
 	// Delete This Table (T11).
 	var deleter = document.getElementById( 'affibloom-table-delete' );
