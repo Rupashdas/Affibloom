@@ -36,7 +36,7 @@ final class OpportunityService {
 	 * @param int $row The row's ID.
 	 */
 	public function host_of( int $row ): int {
-		return $this->locations->find( $row )?->host_id ?? 0;
+		return $this->locations->find( $row )->host_id ?? 0;
 	}
 
 	/**
