@@ -1953,6 +1953,16 @@
 .affibloom-bulk-sync__summary { margin: 2px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 20px; }
 .affibloom-bulk-sync__summary { margin-top: 8px; color: var(--affibloom-ink-900); overflow-wrap: anywhere; }
 .affibloom-bulk-sync__actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; margin-left: auto; }
+/* The Amazon import banner (F35 R30, R31; Task AM4), drawn as the bulk sync banner: its lines, the batch's bar. */
+.affibloom-import { transition: opacity 0.3s ease; }
+.affibloom-import.is-leaving { opacity: 0; }
+.affibloom-import__body { flex: 1 1 0; min-width: 0; }
+.affibloom-admin .affibloom-import__body .affibloom-import__title { margin: 0; }
+.affibloom-admin .affibloom-import__line { margin: 2px 0 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 20px; }
+.affibloom-import__line--muted .affibloom-help { margin-left: 4px; vertical-align: middle; }
+.affibloom-import__bar { display: block; max-width: 280px; height: 4px; margin: 6px 0 2px; border-radius: 2px; background: var(--affibloom-line); overflow: hidden; }
+.affibloom-import__bar span { display: block; height: 100%; background: var(--affibloom-brand-600); }
+@media (prefers-reduced-motion: reduce) { .affibloom-import { transition: none; } }
 .affibloom-admin .affibloom-bulk-sync__actions .affibloom-notice__close { margin-left: 0; }
 @media (max-width: 599px) {
 	.affibloom-bulk-sync__actions { flex-basis: 100%; justify-content: space-between; }

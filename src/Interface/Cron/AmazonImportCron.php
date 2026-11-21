@@ -66,7 +66,22 @@ final class AmazonImportCron implements Module {
 		}
 		update_option( self::STATE, array( 'running' => true ) + (array) get_option( self::STATE, array() ), false );
 		try {
-			$batch = $this->import->run( self::BATCH, fn(): bool => $this->on() );
+			$batch = $this->import->run(
+				self::BATCH,
+				fn(): bool => $this->on(),
+				static function ( int $done, int $total ): void {
+					// "Current batch: x / y" while the run goes (R29, R31; Task AM4).
+					update_option(
+						self::STATE,
+						array(
+							'running'   => true,
+							'total'     => $total,
+							'completed' => $done,
+						),
+						false
+					);
+				}
+			);
 		} finally {
 			$this->lock->release();
 		}

@@ -40,18 +40,26 @@ final class AmazonImport {
 	/**
 	 * One run.
 	 *
-	 * @param int     $limit    At most this many links (Lasso's 100).
-	 * @param Closure $still_on Whether Auto-Monetization is still on: fn(): bool, asked before each link (D23).
+	 * @param int          $limit    At most this many links (Lasso's 100).
+	 * @param Closure      $still_on Whether Auto-Monetization is still on: fn(): bool, asked before each link (D23).
+	 * @param Closure|null $progress Told after the ASIN queue is read and after each of its links: fn( int $done, int $total ).
 	 * @return array{queued: int, done: int, made: int} The batch's size, the links handled, the products recorded.
 	 */
-	public function run( int $limit, Closure $still_on ): array {
+	public function run( int $limit, Closure $still_on, ?Closure $progress = null ): array {
 		[ $short_queued, $done, $made ] = $this->short_links( $limit, $still_on );
 		$queue                          = $done < $limit ? $this->rows->untied_amazon( $limit - $done ) : array();
+		$total                          = $short_queued + count( $queue );
+		if ( null !== $progress ) {
+			$progress( $done, $total );
+		}
 		foreach ( $queue as $link ) {
 			if ( ! $still_on() ) {
 				break;
 			}
 			++$done;
+			if ( null !== $progress ) {
+				$progress( $done, $total );
+			}
 			// The queue leaves retired ASINs out; this guards a product retired since it was read.
 			if ( $this->library->is_retired_asin( $link['asin'], $link['country'] ) ) {
 				continue;

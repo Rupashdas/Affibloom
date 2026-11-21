@@ -84,6 +84,10 @@ final class LinkIndexHooksTest extends TestCase {
 				return 0;
 			}
 
+			public function amazon_queue_size(): int {
+				return 0;
+			}
+
 			public function set_ignored( int $id, bool $ignored ): bool {
 				return false;
 			}

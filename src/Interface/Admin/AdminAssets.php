@@ -68,6 +68,8 @@ final class AdminAssets implements Module {
 		wp_enqueue_script( 'affibloom-admin', $this->plugin_url . 'assets/admin/admin.js', array( 'wp-api-fetch' ), $this->version, true );
 		// The bulk Amazon sync banner in the notice region of every screen (Task C1I); it stops at once without the banner.
 		wp_enqueue_script( 'affibloom-amazon-bulk-sync', $this->plugin_url . 'assets/admin/amazon-bulk-sync.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+		// The Amazon import's notice and status blocks, kept current (F35 R35; Task AM4).
+		wp_enqueue_script( 'affibloom-amazon-import-status', $this->plugin_url . 'assets/admin/amazon-import-status.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 		// The header's Automations on every screen (Task ON3).
 		wp_enqueue_script( 'affibloom-shell', $this->plugin_url . 'assets/admin/shell.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 

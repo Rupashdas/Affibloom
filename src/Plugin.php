@@ -14,6 +14,7 @@ use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Application\Monetize\AffiliateDetector;
 use Affibloom\Application\Monetize\AmazonImport;
+use Affibloom\Application\Monetize\AmazonImportStatusService;
 use Affibloom\Application\Monetize\AmazonShortLinks;
 use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
@@ -34,6 +35,7 @@ use Affibloom\Infrastructure\WordPress\TableDetectedLinkRepository;
 use Affibloom\Infrastructure\WordPress\TableOpportunityRepository;
 use Affibloom\Infrastructure\WordPress\TransientRepeatGuard;
 use Affibloom\Infrastructure\WordPress\WpPostDirectory;
+use Affibloom\Interface\Admin\AmazonImportNotice;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
 use Affibloom\Interface\Cron\AmazonImportCron;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
@@ -136,6 +138,7 @@ use Affibloom\Interface\Front\CloakedLinkRedirect;
 use Affibloom\Interface\Front\DisplayRenderFilter;
 use Affibloom\Interface\Front\LinkAttributesFilter;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
+use Affibloom\Interface\Rest\AmazonImportController;
 use Affibloom\Interface\Rest\ClicksController;
 use Affibloom\Interface\Rest\ContentExportController;
 use Affibloom\Interface\Rest\JobsController;
@@ -615,6 +618,7 @@ final class Plugin {
 			new BulkAddController( $bulk ),
 			new VariantsController( $products, $variants, $this->template() ),
 			new OpportunitiesController( $this->opportunity_service(), $this->intro_boxes(), $this->template(), $this->content_export() ),
+			new AmazonImportController( $this->amazon_import_status(), $this->template() ),
 			new ContentExportController( $this->content_export() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
@@ -705,6 +709,19 @@ final class Plugin {
 	 */
 	private function location_counts(): LocationCounts {
 		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
+	}
+
+	/**
+	 * The Amazon import's status and its notice (F35 R29-R35, D19; Task AM4).
+	 */
+	private function amazon_import_status(): AmazonImportStatusService {
+		return new AmazonImportStatusService(
+			new TableLinkLocationRepository(),
+			new PostTypeProductRepository(),
+			$this->settings_repository(),
+			new UserMetaBannerDismissals( 'affibloom_amazon_import_dismissed' ),
+			static fn(): array => (array) get_option( AmazonImportCron::STATE, array() )
+		);
 	}
 
 	/**
@@ -866,6 +883,8 @@ final class Plugin {
 				new UpdateAvailableNotice( new PluginUpdates( plugin_basename( $this->file ) ) ),
 				$this->upgrade_hooks(),
 				new AmazonNotices( $this->bulk_sync() ),
+				// F35 R30 (Task AM4): the Amazon import's progress.
+				new AmazonImportNotice( $this->amazon_import_status() ),
 				new SiteStripeNotice( $this->settings_repository() ),
 				new LinkIndexBuildingNotice( new OptionLinkIndexState(), admin_url( 'admin.php?page=affibloom-settings&tab=general#affibloom-card-link-index' ) ),
 				$this->broken_links_notice(),

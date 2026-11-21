@@ -410,6 +410,45 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * How many unique Amazon products the import still has to make: untied ASINs on a store (retired ones aside) and
+	 * short links not given up (F35 R29; Task AM4).
+	 */
+	public function amazon_queue_size(): int {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, the status block's count.
+		$asins = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT l.asin, l.country) FROM %i AS l
+				WHERE l.product_id = 0 AND l.assigned_product_id = 0 AND l.asin IS NOT NULL AND l.asin <> '' AND l.domain IS NOT NULL AND l.domain <> ''
+					AND l.display_type IN ('Text', 'Image-only anchor text')
+					AND NOT EXISTS ( SELECT 1 FROM %i AS r JOIN %i AS ra ON ra.post_id = r.ID AND ra.meta_key = '_affibloom_asin' AND ra.meta_value = l.asin
+						JOIN %i AS rc ON rc.post_id = r.ID AND rc.meta_key = '_affibloom_amazon_country' AND rc.meta_value = l.country
+						WHERE r.post_type = %s AND r.post_status = %s )",
+				$wpdb->prefix . self::TABLE,
+				$wpdb->posts,
+				$wpdb->postmeta,
+				$wpdb->postmeta,
+				ProductPostType::NAME,
+				ProductPostType::RETIRED
+			)
+		);
+		$short = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT l.url) FROM %i AS l WHERE l.product_id = 0 AND l.assigned_product_id = 0 AND l.domain IN ('amzn.to', 'amzn.com', 'amzlink.to')
+					AND l.display_type IN ('Text', 'Image-only anchor text')
+					AND NOT EXISTS ( SELECT 1 FROM %i AS s WHERE s.short_url = l.url AND s.tries >= %d )",
+				$wpdb->prefix . self::TABLE,
+				$wpdb->prefix . TableAmazonShortLinkRepository::TABLE,
+				ShortLinkRepository::TRIES
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		return $asins + $short;
+	}
+
+	/**
 	 * Ties every untied row of a link to a product (Task AM2).
 	 *
 	 * @param string $url        The link as written.

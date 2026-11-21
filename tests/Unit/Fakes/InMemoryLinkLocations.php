@@ -78,6 +78,10 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 	/** @var list<array{string, int}> tie_url()'s calls. */
 	public array $tied_urls = array();
 
+	public function amazon_queue_size(): int {
+		return count( $this->amazon ) + count( $this->short );
+	}
+
 	public function untied_short_links( int $limit ): array {
 		return array_slice( $this->short, 0, $limit );
 	}

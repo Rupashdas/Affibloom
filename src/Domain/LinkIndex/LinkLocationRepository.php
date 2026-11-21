@@ -152,4 +152,10 @@ interface LinkLocationRepository {
 	 * @return int How many rows were tied.
 	 */
 	public function tie_url( string $url, int $product_id ): int;
+
+	/**
+	 * How many unique Amazon products the import still has to make (F35 R29; Task AM4): the ASINs on a store and the
+	 * short links its queues would take.
+	 */
+	public function amazon_queue_size(): int;
 }

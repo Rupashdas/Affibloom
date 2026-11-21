@@ -1,0 +1,84 @@
+<?php
+/**
+ * The Amazon import's status and its notice.
+ *
+ * @package Affibloom
+ */
+
+declare( strict_types=1 );
+
+namespace Affibloom\Application\Monetize;
+
+use Affibloom\Application\Amazon\BannerDismissals;
+use Affibloom\Domain\LinkIndex\LinkLocationRepository;
+use Affibloom\Domain\Monetize\AmazonImportStatus;
+use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ProductRepository;
+use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Settings\SettingsRepository;
+use Closure;
+
+/**
+ * Where the Amazon import stands (F35 R29, R30, R35; D19; Task AM4): its queue from the link index, the Dashboard's
+ * Amazon products, the index's placements and the batch the cron last recorded; the notice shows while
+ * Auto-Monetization is on and the import has work, unless this person dismissed these counts.
+ */
+final class AmazonImportStatusService {
+
+	/**
+	 * Builds the service.
+	 *
+	 * @param LinkLocationRepository $rows       The link index.
+	 * @param ProductRepository      $products   The products.
+	 * @param SettingsRepository     $settings   The site's settings.
+	 * @param BannerDismissals       $dismissals Who hid the notice for which counts.
+	 * @param Closure                $batch      The batch the cron recorded: fn(): array{running?: bool, total?: int, completed?: int}.
+	 */
+	public function __construct(
+		private LinkLocationRepository $rows,
+		private ProductRepository $products,
+		private SettingsRepository $settings,
+		private BannerDismissals $dismissals,
+		private Closure $batch,
+	) {}
+
+	/**
+	 * The status now.
+	 */
+	public function status(): AmazonImportStatus {
+		$batch = ( $this->batch )();
+
+		return new AmazonImportStatus(
+			$this->rows->amazon_queue_size(),
+			$this->products->page( SearchTerm::from_input( '' ), LinkKind::Amazon, 1, 1 )->total,
+			$this->rows->stats()->links,
+			(bool) ( $batch['running'] ?? false ),
+			(int) ( $batch['total'] ?? 0 ),
+			(int) ( $batch['completed'] ?? 0 )
+		);
+	}
+
+	/**
+	 * The notice for a person, or null (R30): only with Auto-Monetization on, while the import has work, and not after
+	 * they dismissed these counts.
+	 *
+	 * @param int $user The person.
+	 */
+	public function notice( int $user ): ?AmazonImportStatus {
+		if ( ! $this->settings->get()->bool( 'auto_monetize_amazon' ) ) {
+			return null;
+		}
+		$status = $this->status();
+
+		return $status->busy() && $this->dismissals->get( $user ) !== $status->fingerprint() ? $status : null;
+	}
+
+	/**
+	 * Hides the notice for a person until the counts change (R35).
+	 *
+	 * @param int $user The person.
+	 */
+	public function dismiss( int $user ): void {
+		$this->dismissals->set( $user, $this->status()->fingerprint() );
+	}
+}

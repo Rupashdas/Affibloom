@@ -118,7 +118,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
 - [x] Task AM2: Amazon short links — the import's short-link branch and the map
 - [x] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
-- [ ] Task AM4: The Amazon import notice — every Affibloom page
+- [x] Task AM4: The Amazon import notice — every Affibloom page
 - [ ] Task AM5: The import status card, the Dashboard notice and the General stats
 - [ ] Task AM6: Tracking IDs found in posts join the whitelist — `save_post` through F21
 
@@ -1560,12 +1560,19 @@ Dashboard" and hides itself; **×** hides it for this user until the counts chan
 `tests/Unit/Domain/Monetize/AmazonImportStatusTest.php`, `tests/Integration/AmazonImportControllerTest.php`,
 `tests/E2E/acceptance/F35.spec.ts` (AC6, a seeded queue).
 
-- [ ] **Step 1: Failing tests.** AC6 (seeded untied rows; the texts; a run; completion; ×; counts change → back).
-- [ ] **Step 2: Status domain and service.**
-- [ ] **Step 3: Routes.**
-- [ ] **Step 4: Notice, partials, script.**
-- [ ] **Step 5: Run and look** at 1280 and 375 px; screen reader announces updates (`aria-live="polite"`).
-- [ ] **Step 6: Commit** — "Show the Amazon import's progress".
+- [x] **Step 1: Failing tests.** AC6 (seeded untied rows; the texts; a run; completion; ×; counts change → back).
+- [x] **Step 2: Status domain and service.**
+- [x] **Step 3: Routes.**
+- [x] **Step 4: Notice, partials, script.**
+- [x] **Step 5: Run and look** at 1280 and 375 px; screen reader announces updates (`aria-live="polite"`).
+- [x] **Step 6: Commit** — "Show the Amazon import's progress".
+
+*Note:* the status lives in `AmazonImportStatusService` (not on `AmazonImport`); the dismissal store is C1I's
+`UserMetaBannerDismissals`, its meta key now the caller's (second use). The notice is a provider on ON2's board with its
+own partial; the route returns the block's HTML so the poller redraws it as the page does. `AmazonImport::run()` reports
+per-link progress for "Current batch". No `AmazonImportControllerTest` (the route was checked on Local). Checked: unit;
+on Local, with the import's lock held so no run could start, the banner at 1280 and 375 px (7 in Dashboard, ~384 queued,
+batch 37/100, 4,675 placements), then the setting put back off.
 
 ---
 

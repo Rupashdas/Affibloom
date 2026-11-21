@@ -92,6 +92,10 @@ final class LinkIndexerTest extends TestCase {
 				return 0;
 			}
 
+			public function amazon_queue_size(): int {
+				return 0;
+			}
+
 			public function set_ignored( int $id, bool $ignored ): bool {
 				return false;
 			}
@@ -255,6 +259,10 @@ final class LinkIndexerTest extends TestCase {
 			}
 
 			public function tie_url( string $url, int $product_id ): int {
+				return 0;
+			}
+
+			public function amazon_queue_size(): int {
 				return 0;
 			}
 

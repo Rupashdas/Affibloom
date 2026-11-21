@@ -106,6 +106,26 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );
 	} );
 
+	// AC6 (AM4; R29-R31, R35, D19): a seeded queue.
+	test( 'AC6 the import notice shows its counts on every Affibloom page, and × hides it until they change', async ( { page } ) => {
+		newPostWith( `<p><a href="https://www.amazon.com/dp/${ asin() }">queued</a></p>` );
+		wp( 'eval', 'delete_user_meta( 1, "affibloom_amazon_import_dismissed" );' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+		const notice = page.locator( '[data-amazon-import-notice]' );
+		await expect( notice ).toContainText( 'Amazon import in progress' );
+		await expect( notice ).toContainText( /in Dashboard · ~[\d,]+ unique Amazon products still queued/ );
+		await expect( notice ).toContainText( /placements indexed/ );
+
+		await notice.getByRole( 'button', { name: 'Dismiss' } ).click();
+		await expect( notice ).toHaveCount( 0 );
+		await page.reload();
+		await expect( page.locator( '[data-amazon-import-notice]' ) ).toHaveCount( 0 );
+
+		newPostWith( `<p><a href="https://www.amazon.com/dp/${ asin() }">one more</a></p>` );
+		await page.reload();
+		await expect( page.locator( '[data-amazon-import-notice]' ) ).toBeVisible();
+	} );
+
 	test( 'AC8 with Auto-Monetization off the event is not scheduled and a run does nothing', () => {
 		setSettings( { auto_monetize_amazon: false } );
 		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );

@@ -12,12 +12,20 @@ namespace Affibloom\Infrastructure\WordPress;
 use Affibloom\Application\Amazon\BannerDismissals;
 
 /**
- * The bulk sync banner's dismissals in user meta `affibloom_bulk_sync_dismissed` (Lasso's
- * lasso_dismiss_amazon_bulk_sync_banner_v2).
+ * A banner's dismissals in user meta: the bulk sync banner's `affibloom_bulk_sync_dismissed` (Lasso's
+ * lasso_dismiss_amazon_bulk_sync_banner_v2), and since its second use the Amazon import notice's (Task AM4).
  */
 final class UserMetaBannerDismissals implements BannerDismissals {
 
 	public const META = 'affibloom_bulk_sync_dismissed';
+
+	/**
+	 * Builds the store.
+	 *
+	 * @param string $meta The user meta key: the bulk sync banner's, or the Amazon import notice's (Task AM4,
+	 *                     `affibloom_amazon_import_dismissed`).
+	 */
+	public function __construct( private string $meta = self::META ) {}
 
 	/**
 	 * The fingerprint a person dismissed, or ''.
@@ -25,7 +33,7 @@ final class UserMetaBannerDismissals implements BannerDismissals {
 	 * @param int $user The person's user ID.
 	 */
 	public function get( int $user ): string {
-		$value = get_user_meta( $user, self::META, true );
+		$value = get_user_meta( $user, $this->meta, true );
 
 		return is_string( $value ) ? $value : '';
 	}
@@ -37,6 +45,6 @@ final class UserMetaBannerDismissals implements BannerDismissals {
 	 * @param string $fingerprint The pending set's fingerprint.
 	 */
 	public function set( int $user, string $fingerprint ): void {
-		update_user_meta( $user, self::META, $fingerprint );
+		update_user_meta( $user, $this->meta, $fingerprint );
 	}
 }
