@@ -32,8 +32,12 @@ $public_link  = $view['link'] ?? $product->url->value();
 ?>
 <tr data-product-id="<?php echo esc_attr( (string) $product->id ); ?>">
 	<td class="affibloom-col-select">
+		<?php // Lasso's url-row.php 74-87 (F12 L14; Task 36E): a product in use cannot be ticked, so it cannot be deleted. ?>
 		<input type="checkbox" class="affibloom-check" value="<?php echo esc_attr( (string) $product->id ); ?>"
-			aria-label="<?php echo esc_attr( $select_label ); ?>">
+			aria-label="<?php echo esc_attr( $select_label ); ?>"
+			<?php if ( ( $view['locations'] ?? 0 ) > 0 ) : ?>
+				disabled title="<?php esc_attr_e( "You can't delete a URL if it has active links or displays", 'affibloom' ); ?>"
+			<?php endif; ?>>
 	</td>
 	<td class="affibloom-col-image">
 		<?php // A second way to the same page, so it is skipped by the keyboard and by screen readers. ?>

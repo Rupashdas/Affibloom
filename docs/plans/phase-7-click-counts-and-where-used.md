@@ -65,7 +65,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 36B: The product page's Locations tab
 - [x] Task 36C: Link with Context preview and the Clicks column
 - [x] Task 36D: The Placements filter
-- [ ] Task 36E: Deleting a product in use is blocked
+- [x] Task 36E: Deleting a product in use is blocked
 
 ### F12 — Clicks
 
@@ -350,11 +350,18 @@ on the page opens "Hold Up" listing the posts with only Keep This Link; the rout
 | `GET /products/{id}/locations/hosts`, partial `hold-up-modal.php` | the product page |
 
 **Files:** the above; `tests/Integration/DeleteInUseTest.php`; F12.spec.ts AC3 updated (count first), AC25.
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Service and routes.**
-- [ ] **Step 3: Dialog and boxes.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Refuse to delete a product that is in use".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Service and routes.**
+- [x] **Step 3: Dialog and boxes.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Refuse to delete a product that is in use".
+
+*Note (2026-11-21):* `ProductService::delete()` and `trash()` refuse through `ProductInUse` (the Locations count);
+the routes answer 409 `affibloom_in_use`. No `GET /products/{id}/locations/hosts`: `ProductScreen` knows the count when
+it draws, so Delete This Link opens "Hold Up" (the shared `holdup-modal.php`, now with the posts and "Keep This Link")
+for a product in use; a use added after the page loaded still gets the 409's sentence as the existing error toast.
+`DeleteInUseTest` is unit (`ProductServiceDeleteTest`), as the integration suite does not run. Checked: unit, phpcs,
+analyse, both 409s on Local, the disabled boxes, Hold Up at 1280 px.
 
 ---
 

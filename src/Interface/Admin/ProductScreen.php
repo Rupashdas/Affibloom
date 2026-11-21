@@ -241,6 +241,9 @@ final class ProductScreen {
 				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
 				'public_link'  => $public_link,
 				'tabs'         => self::tabs( $id, 'details', count( $variants ), $used ),
+				// Task 36E (F12 L15, D26): a product in use opens "Hold Up" with its posts instead of the delete question.
+				'in_use'       => null !== $this->locations && ( $used ?? 0 ) > 0 ? $this->locations->page( $id, '', 'asc', 1 ) : null,
+				'in_use_url'   => self::locations_url( $id ),
 				'cloak_base'   => null === $this->links ? '' : $this->links->base(),
 				// Lasso's placeholders are the site's button texts (get_lasso_url: *_button_text_default).
 				'button_text'  => $palette->value( 'primary_button_text' ),

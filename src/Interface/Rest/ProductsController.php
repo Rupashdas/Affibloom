@@ -13,6 +13,7 @@ use Affibloom\Application\Amazon\AmazonSearchService;
 use Affibloom\Application\Amazon\SearchRefused;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\DuplicateLink;
+use Affibloom\Application\Products\ProductInUse;
 use Affibloom\Application\Products\ProductNotFound;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Products\RepointRefused;
@@ -341,12 +342,15 @@ final class ProductsController implements Module {
 	 * published product is not found (Lasso answers "Invalid post." with 400; 404 is this API's word for it).
 	 *
 	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error 200 { id, deleted: true }; 404 for no such product; 500 when WordPress refuses.
+	 * @return WP_REST_Response|WP_Error 200 { id, deleted: true }; 404 for no such product; 409 while posts use it
+	 *                                   (Task 36E); 500 when WordPress refuses.
 	 */
 	public function delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id = (int) $request['id'];
 		try {
 			$this->products->delete( $id );
+		} catch ( ProductInUse $used ) {
+			return self::in_use( $used );
 		} catch ( ProductNotFound $missing ) {
 			return new WP_Error( 'affibloom_not_found', __( 'This product does not exist.', 'affibloom' ), array( 'status' => 404 ) );
 		} catch ( RuntimeException $refused ) {
@@ -369,12 +373,33 @@ final class ProductsController implements Module {
 	 * WordPress has already refused anything but 1-50 positive integers (400 rest_invalid_param).
 	 *
 	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response 200 { deleted: [ids] }.
+	 * @return WP_REST_Response|WP_Error 200 { deleted: [ids] }; 409 when posts use any of them, nothing trashed (Task 36E).
 	 */
-	public function delete_many( WP_REST_Request $request ): WP_REST_Response {
+	public function delete_many( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$ids = array_map( 'intval', (array) $request['ids'] );
+		try {
+			$trashed = $this->products->trash( $ids );
+		} catch ( ProductInUse $used ) {
+			return self::in_use( $used );
+		}
 
-		return new WP_REST_Response( array( 'data' => array( 'deleted' => $this->products->trash( $ids ) ) ) );
+		return new WP_REST_Response( array( 'data' => array( 'deleted' => $trashed ) ) );
+	}
+
+	/**
+	 * 409 `affibloom_in_use` with Lasso's sentence (F12 D26; Task 36E), naming the products.
+	 *
+	 * @param ProductInUse $used The refusal.
+	 */
+	private static function in_use( ProductInUse $used ): WP_Error {
+		return new WP_Error(
+			'affibloom_in_use',
+			__( "You can't delete a URL if it has active links or displays.", 'affibloom' ),
+			array(
+				'status' => 409,
+				'ids'    => $used->ids,
+			)
+		);
 	}
 
 	/**

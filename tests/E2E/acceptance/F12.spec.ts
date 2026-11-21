@@ -174,14 +174,38 @@ test.describe( 'F12 Clicks and where used', () => {
 		await expect( row.locator( '.affibloom-location__status' ) ).toHaveText( 'Draft' );
 	} );
 
-	test( 'AC3 a product in use cannot be deleted', async ( { page } ) => {
+	// AC3 (path corrected 2026-11-14) and AC25 (36E; L14-L16, D26): Lasso asks the count before any dialog.
+	test( 'AC3 a product in use cannot be deleted: Hold Up lists its posts and offers only Keep This Link', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F12 AC3' ) } );
-		newPostWith( boxBlock( id ) );
+		const title = unique( 'F12 AC3 post' );
+		newPostWith( boxBlock( id ), title );
 
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 		await page.getByRole( 'button', { name: 'Delete This Link' } ).click();
-		await page.getByRole( 'dialog', { name: 'Delete This Link?' } ).getByRole( 'button', { name: 'Delete', exact: true } ).click();
-		await expect( page.locator( '.affibloom-toast' ) ).toBeVisible();
+		const holdUp = page.getByRole( 'dialog', { name: 'Hold Up' } );
+		await expect( holdUp ).toContainText( title );
+		await expect( holdUp.locator( '.affibloom-modal__foot' ).getByRole( 'button' ) ).toHaveText( [ 'Keep This Link' ] );
+		await holdUp.getByRole( 'button', { name: 'Keep This Link' } ).click();
+		await expect( holdUp ).toBeHidden();
+		await expect( page.getByRole( 'dialog', { name: 'Delete This Link?' } ) ).toBeHidden();
+		expect( wp( 'post', 'get', String( id ), '--field=post_status' ) ).toBe( 'publish' );
+	} );
+
+	test( 'AC25 in use: the row cannot be ticked and the routes answer 409', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F12 AC25' ) } );
+		newPostWith( boxBlock( id ) );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom&post_id=${ id }` );
+		const box = page.locator( `tr[data-product-id="${ id }"] .affibloom-check` );
+		await expect( box ).toBeDisabled();
+		await expect( box ).toHaveAttribute( 'title', "You can't delete a URL if it has active links or displays" );
+
+		const nonce = await page.evaluate( () => ( window as unknown as { wpApiSettings: { nonce: string } } ).wpApiSettings.nonce );
+		for ( const path of [ `products/${ id }`, `products?ids[]=${ id }` ] ) {
+			const answer = await page.request.delete( `/wp-json/affibloom/v1/${ path }`, { headers: { 'X-WP-Nonce': nonce } } );
+			expect( answer.status() ).toBe( 409 );
+			expect( ( await answer.json() ).code ).toBe( 'affibloom_in_use' );
+		}
 		expect( wp( 'post', 'get', String( id ), '--field=post_status' ) ).toBe( 'publish' );
 	} );
 } );

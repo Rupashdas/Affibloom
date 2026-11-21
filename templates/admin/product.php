@@ -308,8 +308,8 @@ $destination = $product->url->value();
 			// what is stored (product-save.js sets data-dirty on the form).
 			?>
 			<div class="affibloom-product__footer">
-				<?php // Task 17A: Lasso's url-delete dialog first; its Delete removes the product for good (F1 D33). ?>
-				<button type="button" class="affibloom-link-button affibloom-link-button--danger" id="affibloom-delete" data-affibloom-open="affibloom-delete-modal">
+				<?php // Task 17A: Lasso's url-delete dialog first; its Delete removes the product for good (F1 D33). In use, "Hold Up" instead (Task 36E). ?>
+				<button type="button" class="affibloom-link-button affibloom-link-button--danger" id="affibloom-delete" data-affibloom-open="<?php echo esc_attr( empty( $view['in_use'] ) ? 'affibloom-delete-modal' : 'affibloom-holdup-product' ); ?>">
 					<?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?>
 					<span><?php esc_html_e( 'Delete This Link', 'affibloom' ); ?></span>
 				</button>
@@ -337,6 +337,20 @@ $destination = $product->url->value();
 			'text'  => __( "If deleted, you won't be able to get it back.", 'affibloom' ),
 		)
 	);
+	?>
+	<?php
+	if ( ! empty( $view['in_use'] ) ) {
+		$this->render(
+			'admin/partials/holdup-modal',
+			array(
+				'id'     => 'affibloom-holdup-product',
+				'text'   => __( "You can't delete a URL if it has active links or displays.", 'affibloom' ),
+				'hosts'  => $view['in_use'],
+				'more'   => $view['in_use_url'],
+				'button' => __( 'Keep This Link', 'affibloom' ),
+			)
+		);
+	}
 	?>
 	<?php // Task 2X1: an added button asks through the page's own dialog, as the delete does, never the browser's. ?>
 	<?php

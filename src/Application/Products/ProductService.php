@@ -110,8 +110,8 @@ final class ProductService {
 
 	/**
 	 * Delete This Link on the product page (Task 17A; F1 requirements 11, X3, D33): the product is deleted for good, as
-	 * Lasso's lasso_delete_post( id, true ). Only a published product can be deleted; whether it is in use is checked
-	 * from Task 36 on (D34, D35).
+	 * Lasso's lasso_delete_post( id, true ). Only a published product can be deleted, and only while no post uses it
+	 * (F12 L14-L16, D26; F1 D34: block only; Task 36E): ProductInUse otherwise.
 	 *
 	 * @param int $id Product ID.
 	 * @throws ProductNotFound  When there is no published product with that ID.
@@ -121,6 +121,7 @@ final class ProductService {
 		if ( null === $this->get( $id ) ) {
 			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
 		}
+		$this->refuse_in_use( array( $id ) );
 		if ( ! $this->products->delete( $id ) ) {
 			throw new RuntimeException( 'Could not delete the product.' );
 		}
@@ -129,13 +130,14 @@ final class ProductService {
 	/**
 	 * Delete on the Dashboard's selection bar (Task 17B; F1 requirements 11, X7, D33, D39): each published product among
 	 * the IDs goes to the trash, once; an ID that is not one (gone, already trashed, another post type) is skipped, as
-	 * Lasso skips records it cannot edit, and so is one the storage refuses. Whether any is in use is checked from Task
-	 * 36 on, and then nothing is trashed (Lasso's all-or-nothing, D35).
+	 * Lasso skips records it cannot edit, and so is one the storage refuses. When any is in use, nothing is trashed
+	 * (Lasso's all-or-nothing, D35; F12 L14; Task 36E): ProductInUse.
 	 *
 	 * @param list<int> $ids The ticked products' IDs.
 	 * @return list<int> The IDs trashed, in the order given.
 	 */
 	public function trash( array $ids ): array {
+		$this->refuse_in_use( $ids );
 		$trashed = array();
 		foreach ( array_values( array_unique( $ids ) ) as $id ) {
 			if ( null !== $this->get( $id ) && $this->products->trash( $id ) ) {
@@ -143,6 +145,19 @@ final class ProductService {
 			}
 		}
 		return $trashed;
+	}
+
+	/**
+	 * Refuses when posts still use any of these products (the Locations count, F12 L1; Task 36E).
+	 *
+	 * @param list<int> $ids The products.
+	 * @throws ProductInUse When any is in use.
+	 */
+	private function refuse_in_use( array $ids ): void {
+		$used = array_keys( array_filter( null === $this->locations ? array() : $this->locations->counts_for( $ids ) ) );
+		if ( array() !== $used ) {
+			throw new ProductInUse( array_map( 'intval', $used ) );
+		}
 	}
 
 	/**
