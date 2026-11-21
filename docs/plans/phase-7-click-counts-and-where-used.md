@@ -142,7 +142,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T12: The reader's Horizontal table, by shortcode
 - [x] Task 18S13: A table's Copy Shortcode
 - [x] Task T13: The reader's Vertical table
-- [ ] Task T14: Phone cards and breakpoints
+- [x] Task T14: Phone cards and breakpoints
 - [ ] Task T15: Preview Table
 - [ ] Task T16: The Dashboard's Comparison table filter
 - [ ] Task T17: A deleted product leaves its tables
@@ -2161,11 +2161,13 @@ row past four.
 
 **Files:** the above; F25 spec AC18; visual checks at 768 and 390 px.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Cards.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** —
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Cards.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** —
   "Show a comparison table as cards on phones".
+
+*Note:* The cards are one shared partial, `templates/front/table-mobile.php`, after either layout; the breakpoints are Lasso's, in table.css. Checked on Local: 390 px cards and no desktop table, 768 px the table, 900 px a Vertical table's fourth product hidden.
 
 ---
 

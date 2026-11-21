@@ -3,7 +3,7 @@
  * A Horizontal comparison table (F25 R46; Task T12; Lasso's displays/table-horizontal.php): `div.row-style.template-1
  * .horizontal-table` > `table.affibloom-table[.hide-column-headers]`; with Show Headers a header row of field names; a
  * row per product, a `td.td-template-1 > div.cell` per field group, the badge in the first, then `ul.field-group` with
- * a `li` per field. The phone cards come with Task T14.
+ * a `li` per field; then the phone cards (T14).
  *
  * @package Affibloom
  * @var \Affibloom\Application\Shortcode\TableReaderView $table
@@ -46,3 +46,4 @@ defined( 'ABSPATH' ) || exit;
 		</tbody>
 	</table>
 </div>
+<?php require __DIR__ . '/table-mobile.php'; ?>

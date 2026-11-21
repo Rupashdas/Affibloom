@@ -4,7 +4,7 @@
  * .table-vertical-desktop.template-1[.include-badge][.table-vertical-scroll]` > `table.affibloom-table.table-borderless
  * .table-title`; a row per field, a `td.text-center.field.field-group-detail` per product, `100/n %` wide up to four
  * products (past four no width, and the row scrolls); the first row's cells start with the badge (or a space); a cell
- * after a badged one has no left border.
+ * after a badged one has no left border; then the phone cards (T14).
  *
  * @package Affibloom
  * @var \Affibloom\Application\Shortcode\TableReaderView $table
@@ -48,3 +48,4 @@ $vertical_lines  = count( $table->rows[0]['cells'] ?? array() );
 		</tbody>
 	</table>
 </div>
+<?php require __DIR__ . '/table-mobile.php'; ?>

@@ -525,4 +525,29 @@ test.describe( 'F25 Comparison tables', () => {
 		await expect( second.locator( '.table-vertical-desktop' ) ).toHaveClass( /table-vertical-scroll/ );
 		await expect( second.locator( '.table-vertical-desktop td' ).first() ).not.toHaveAttribute( 'style', /width/ );
 	} );
+
+	// AC18 (T14; R47, R53).
+	test( 'AC18 phones: a card per product (badge, then every field) instead of the table; at 1000 px a Vertical table hides its fourth product', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const products = [ 1, 2, 3, 4 ].map( ( n ) => createProduct( { name: `Card ${ word } ${ n }`, badge: 1 === n ? 'Best' : '' } ) );
+		const row = await tableWith( page, 'row', products.slice( 0, 2 ) );
+		const column = await tableWith( page, 'column', products );
+		const post = wp( 'post', 'create', '--post_title=F25 AC18', '--post_status=draft', `--post_content=[affibloom type="table" id="${ row }"][affibloom type="table" id="${ column }"]`, '--porcelain' );
+
+		await page.setViewportSize( { width: 390, height: 844 } );
+		await page.goto( `/?p=${ post }&preview=true` );
+		const horizontal = page.locator( '.affibloom-display-table' ).first();
+		await expect( horizontal.locator( '.horizontal-table' ) ).toBeHidden();
+		const cards = horizontal.locator( '.table-vertical-mobile.tb-vt.tb-vt-mb .mobile-box' );
+		await expect( cards ).toHaveCount( 2 );
+		await expect( cards.first() ).toHaveClass( /has-badge-mobile/ );
+		await expect( cards.first().locator( '.badge' ) ).toHaveText( 'Best' );
+		// Lasso's starting layout: image, name, rating, price, button.
+		await expect( cards.first().locator( '.mobile-item-child.mb-i-chl.field' ) ).toHaveCount( 5 );
+
+		await page.setViewportSize( { width: 1000, height: 900 } );
+		const fourth = page.locator( '.affibloom-display-table' ).nth( 1 ).locator( '.table-vertical-desktop tr' ).first().locator( 'td' ).nth( 3 );
+		await expect( fourth ).toBeHidden();
+		await expect( page.locator( '.affibloom-display-table' ).first().locator( '.table-vertical-mobile' ) ).toBeHidden();
+	} );
 } );
