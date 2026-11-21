@@ -12,6 +12,8 @@
  * - Products (T4): Add Product opens "Add Product to Table" (product-search.js; searched on first opening only); a
  *   choice adds the product and closes the dialog, a refusal stays in it. A badge saves on leaving it. Remove asks
  *   'Remove "<name>"?' and takes the product out.
+ * - Groups (T5): Add Group opens "Add group to Table" (the same search over GET /groups); a choice adds the group's
+ *   products not yet in the table.
  */
 ( function () {
 	'use strict';
@@ -172,6 +174,7 @@
 					return wp.apiFetch( { path: path + '/products', method: 'POST', data: { revision: current, product: item.id } } );
 				},
 				done: function () {
+					button.disabled = false;
 					window.affibloomModal.hide();
 				},
 				failed: function ( text ) {
@@ -191,6 +194,54 @@
 		if ( ! searched ) {
 			searched = true;
 			finder.search( true );
+		}
+	} );
+
+	// Add Group (T5; R24).
+	var groupPicker = document.getElementById( 'affibloom-table-add-group' );
+	var groupSearch = groupPicker.querySelector( 'input[type="search"]' );
+	var groupsSearched = false;
+	var groupFinder = window.affibloomProductSearch( {
+		modal: groupPicker,
+		input: groupSearch,
+		results: groupPicker.querySelector( '[data-picker-results]' ),
+		pages: groupPicker.querySelector( '[data-picker-pages]' ),
+		error: groupPicker.querySelector( '[data-picker-error]' ),
+		path: '/affibloom/v1/groups',
+		perPage: 6,
+		picture: false,
+		detail: function ( item ) {
+			return groupPicker.dataset.links.replace( '%s', Number( item.count ).toLocaleString() );
+		},
+		button: function () {
+			return { label: groupPicker.dataset.chooseLabel, disabled: false };
+		},
+		choose: function ( item, button ) {
+			button.disabled = true;
+			enqueue( {
+				send: function ( current ) {
+					return wp.apiFetch( { path: path + '/products', method: 'POST', data: { revision: current, group: item.id } } );
+				},
+				done: function () {
+					button.disabled = false;
+					window.affibloomModal.hide();
+				},
+				failed: function ( text ) {
+					button.disabled = false;
+					groupFinder.problem( text );
+				},
+			} );
+		},
+		loaded: function ( data, term ) {
+			if ( '' === term ) {
+				groupSearch.setAttribute( 'placeholder', groupPicker.dataset.searchMany.replace( '%s', Number( data.total ).toLocaleString() ) );
+			}
+		},
+	} );
+	groupPicker.addEventListener( 'affibloom:open', function () {
+		if ( ! groupsSearched ) {
+			groupsSearched = true;
+			groupFinder.search( true );
 		}
 	} );
 
@@ -227,6 +278,11 @@
 		var add = event.target.closest( '[data-table-action="add-product"]' );
 		if ( add ) {
 			window.affibloomModal.show( picker, add );
+			return;
+		}
+		var addGroup = event.target.closest( '[data-table-action="add-group"]' );
+		if ( addGroup ) {
+			window.affibloomModal.show( groupPicker, addGroup );
 			return;
 		}
 		var remove = event.target.closest( '[data-table-remove]' );

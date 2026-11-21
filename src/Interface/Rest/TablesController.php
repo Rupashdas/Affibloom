@@ -31,7 +31,7 @@ use WP_REST_Server;
 
 /**
  * F25's routes (Tasks T1-T17). `POST /tables` (T2, R12) creates a table; `PATCH /tables/{id}` (T3) saves the builder's
- * settings; `/tables/{id}/products` (T4) adds, badges and removes its products. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
+ * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
  * (`html`, `url`) and as data (`items`: id, title) for the editor's "Choose a Table", ten a page or the picker's five;
  * anyone who may place displays may read it.
  */
@@ -72,9 +72,14 @@ final class TablesController implements Module {
 				'args'                => array(
 					'revision' => $revision,
 					'product'  => array(
-						'type'     => 'integer',
-						'minimum'  => 1,
-						'required' => true,
+						'type'    => 'integer',
+						'minimum' => 0,
+						'default' => 0,
+					),
+					'group'    => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+						'default' => 0,
 					),
 				),
 			)
@@ -213,16 +218,19 @@ final class TablesController implements Module {
 	}
 
 	/**
-	 * POST /tables/{id}/products (R17-R22; Task T4): a product added last; answers the revision, the builder drawn
-	 * again and how many products the table has. 404 for a table that is gone, 409 `affibloom_table_product_exists`,
-	 * 422 `affibloom_table_product_invalid`, 409 `affibloom_table_changed`.
+	 * POST /tables/{id}/products (R17-R22, R24; Tasks T4-T5): a product added last, or a group's products (`group`);
+	 * answers the revision, the builder drawn again and how many products the table has. 404 for a table that is gone,
+	 * 409 `affibloom_table_product_exists`, 422 `affibloom_table_product_invalid` / `affibloom_table_group_invalid`,
+	 * 409 `affibloom_table_changed`.
 	 *
-	 * @param WP_REST_Request $request The table, its revision and the product.
+	 * @param WP_REST_Request $request The table, its revision and the product or the group.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	public function add_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		return $this->write(
-			fn(): ?Table => $this->tables->add_product( (int) $request['id'], (int) $request['revision'], (int) $request['product'] ),
+			fn(): ?Table => (int) $request['group'] > 0
+				? $this->tables->add_group( (int) $request['id'], (int) $request['revision'], (int) $request['group'] )
+				: $this->tables->add_product( (int) $request['id'], (int) $request['revision'], (int) $request['product'] ),
 			static fn( Table $table, string $html ): array => array(
 				'revision'      => $table->revision,
 				'html'          => $html,
@@ -293,6 +301,7 @@ final class TablesController implements Module {
 		return match ( $rule ) {
 			'product_exists'  => new WP_Error( 'affibloom_table_product_exists', __( 'This product already exists, please select another product', 'affibloom' ), array( 'status' => 409 ) ),
 			'product_invalid' => new WP_Error( 'affibloom_table_product_invalid', __( 'That product does not exist.', 'affibloom' ), array( 'status' => 422 ) ),
+			'group_invalid'   => new WP_Error( 'affibloom_table_group_invalid', __( 'That group does not exist.', 'affibloom' ), array( 'status' => 422 ) ),
 			default           => new WP_Error( 'affibloom_table_product_missing', __( 'That product is no longer in this table. Reload to see the latest version.', 'affibloom' ), array( 'status' => 404 ) ),
 		};
 	}

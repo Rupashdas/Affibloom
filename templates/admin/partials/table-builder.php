@@ -21,7 +21,7 @@ $heading    = $table->groups[0]['fields'] ?? array();
 $body       = array_slice( $table->groups, 1 );
 $buttons    = array(
 	array( 'add-product', __( 'Add Product', 'affibloom' ), 'plus', true ),
-	array( 'add-group', __( 'Add Group', 'affibloom' ), 'layers', false ),
+	array( 'add-group', __( 'Add Group', 'affibloom' ), 'layers', true ),
 	array( 'add-line', $horizontal ? __( 'Add Column', 'affibloom' ) : __( 'Add Row', 'affibloom' ), 'plus', false ),
 );
 $columns    = $horizontal ? 1 + count( $body ) : count( $table->products );

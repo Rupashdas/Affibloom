@@ -10,6 +10,7 @@ use Affibloom\Domain\Table\TableLocations;
 use Affibloom\Domain\Table\TablePage;
 use Affibloom\Domain\Table\TableRepository;
 use Affibloom\Domain\Table\TableStyle;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Tables\TableValues;
 use Affibloom\Domain\Fields\FieldLibrary;
 use Affibloom\Domain\Fields\ProductFields;
@@ -21,6 +22,7 @@ use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Table\StartingLayout;
 use Affibloom\Domain\Table\TableRuleBroken;
 use Affibloom\Domain\Table\UntitledName;
+use Affibloom\Tests\Unit\Fakes\InMemoryGroupRepository;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
 use Brain\Monkey;
 use Brain\Monkey\Functions;
@@ -38,10 +40,13 @@ final class TableServiceTest extends TestCase {
 
 	private InMemoryProductRepository $products;
 
+	private InMemoryGroupRepository $groups;
+
 	protected function setUp(): void {
 		Monkey\setUp();
 		Functions\when( 'wp_json_encode' )->alias( 'json_encode' );
 		$this->products = new InMemoryProductRepository();
+		$this->groups   = new InMemoryGroupRepository();
 		$stored     = &$this->stored;
 		$repository = new class( $stored ) implements TableRepository {
 			/** @param array<int, Table> $stored */
@@ -74,7 +79,8 @@ final class TableServiceTest extends TestCase {
 			$this->createStub( TableLocations::class ),
 			$this->products,
 			new TableValues( static fn( Product $product ): string => 'https://site.test/go/' . $product->id . '/' ),
-			static fn(): FieldLibrary => FieldLibrary::from_array( array() )
+			static fn(): FieldLibrary => FieldLibrary::from_array( array() ),
+			new GroupService( $this->groups, $this->products )
 		);
 	}
 
@@ -157,6 +163,28 @@ final class TableServiceTest extends TestCase {
 		$table = $this->service->remove_product( (int) $table->id, $table->revision, $second );
 		self::assertNotNull( $table );
 		self::assertSame( array( array(), array() ), array( $table->groups, $table->values ) );
+	}
+
+	/** Task T5 (F25 R24, D6): a group's products join last, in its order, skipping those already in the table. */
+	public function test_a_group_adds_its_products_once_each_in_its_order(): void {
+		$table = $this->service->create( 'Shoes', TableStyle::Column );
+		$a     = $this->product( 'A' );
+		$b     = $this->product( 'B' );
+		$c     = $this->product( 'C' );
+		$group = (int) $this->groups->create( 'Shoes', '' )?->id;
+		$this->groups->members[ $group ] = array( $a, $b, $c );
+		$this->groups->orders[ $group ]  = array( $c, $a, $b );
+		$table = $this->service->add_product( (int) $table->id, $table->revision, $a );
+		self::assertNotNull( $table );
+
+		$table = $this->service->add_group( (int) $table->id, $table->revision, $group );
+
+		self::assertNotNull( $table );
+		self::assertSame( array( $a, $c, $b ), $table->product_ids() );
+		self::assertSame( 'C', $table->values[ $c ][99990] );
+
+		$this->expectException( TableRuleBroken::class );
+		$this->service->add_group( (int) $table->id, $table->revision, 999 );
 	}
 
 	/** Task T4 (F25 R18): a product that does not exist is refused. */

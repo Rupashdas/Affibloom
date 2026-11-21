@@ -132,7 +132,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T2: Create a table
 - [x] Task T3: The builder page and the table's settings
 - [x] Task T4: Products in a table — add, starting layout, badge, remove
-- [ ] Task T5: Add a group to a table
+- [x] Task T5: Add a group to a table
 - [ ] Task T6: Rows and columns, the Add Field dialog, plain cells
 - [ ] Task T7: Image, price and description cells
 - [ ] Task T8: Button information
@@ -1837,12 +1837,14 @@ remove).
 
 **Files:** the above; F25 spec AC6; unit test for the skip.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Service and route.**
-- [ ] **Step 3: Picker.**
-- [ ] **Step 4: Run and
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Service and route.**
+- [x] **Step 3: Picker.**
+- [x] **Step 4: Run and
   look.**
-- [ ] **Step 5: Commit** — "Add a group's products to a table".
+- [x] **Step 5: Commit** — "Add a group's products to a table".
+
+*Note:* The group picker reuses product-search.js (it gained `path`, `detail` and `picture` options) over GET /groups. Fixed on the way: a picker's button stayed disabled after a successful add, so reopening the dialog could not choose it again. Checked: unit test for the skip; in a headless browser "Search 60 Groups", a group of two added, a second add skipping both.
 
 ---
 

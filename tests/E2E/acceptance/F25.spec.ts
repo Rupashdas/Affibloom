@@ -182,4 +182,36 @@ test.describe( 'F25 Comparison tables', () => {
 		expect( stored.products.map( ( entry: { id: number } ) => entry.id ) ).toEqual( [ first ] );
 		expect( stored.values[ String( second ) ] ).toBeUndefined();
 	} );
+
+	// AC6 (T5; R24, D6).
+	test( 'AC6 Add Group: the picker, the group\'s products join last in its order, each once', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const one = createProduct( { name: `One ${ word }` } );
+		const two = createProduct( { name: `Two ${ word }` } );
+		const group = Number( wp( 'term', 'create', 'affibloom_group', `F25 AC6 ${ word }`, '--porcelain' ) );
+		for ( const product of [ one, two ] ) {
+			wp( 'post', 'term', 'add', String( product ), 'affibloom_group', String( group ), '--by=id' );
+		}
+		const id = createTable( unique( 'F25 AC6' ), 'column', 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+
+		const dialog = page.getByRole( 'dialog', { name: 'Add group to Table' } );
+		const addGroup = async () => {
+			await page.getByRole( 'button', { name: 'Add Group', exact: true } ).click();
+			await dialog.getByRole( 'searchbox' ).fill( `F25 AC6 ${ word }` );
+			await dialog.getByRole( 'searchbox' ).press( 'Enter' );
+			await expect( dialog.getByText( '2 link(s)' ) ).toBeVisible();
+			await dialog.getByRole( 'button', { name: `Add Group: F25 AC6 ${ word }` } ).click();
+			await expect( dialog ).toBeHidden();
+		};
+		await page.getByRole( 'button', { name: 'Add Group', exact: true } ).click();
+		await expect( dialog.getByRole( 'searchbox' ) ).toHaveAttribute( 'placeholder', /^Search [\d,]+ Groups$/ );
+		await dialog.getByRole( 'button', { name: 'Close' } ).click();
+
+		await addGroup();
+		await addGroup();
+		const stored = JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) );
+		expect( stored.products.map( ( entry: { id: number } ) => entry.id ) ).toEqual( [ one, two ] );
+		await expect( page.locator( '.affibloom-table-cell--head' ) ).toHaveCount( 2 );
+	} );
 } );

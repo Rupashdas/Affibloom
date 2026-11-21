@@ -11,6 +11,8 @@
  * - options.args(): more query arguments (the group); options.perPage: rows a page (the route's default when absent).
  * - options.button( item ): { label, disabled } for a row's action; options.choose( item, button ): its click.
  * - options.loaded( data ): called with each answer (total, page, pages).
+ * - options.path: another list route with the same answer (Add group to Table reads /groups; Task T5);
+ *   options.detail( item ): a row's second line (the address by default); options.picture: false for rows without one.
  */
 ( function () {
 	'use strict';
@@ -33,6 +35,7 @@
 			li.dataset.productId = String( item.id );
 			var picture = document.createElement( 'span' );
 			picture.className = 'affibloom-add-results__image';
+			picture.hidden = false === options.picture;
 			if ( item.image_url ) {
 				var img = document.createElement( 'img' );
 				img.className = 'affibloom-thumb';
@@ -47,7 +50,7 @@
 			var name = document.createElement( 'strong' );
 			name.textContent = item.name;
 			var url = document.createElement( 'span' );
-			url.textContent = item.url;
+			url.textContent = options.detail ? options.detail( item ) : item.url;
 			text.appendChild( name );
 			text.appendChild( url );
 			var state = options.button( item );
@@ -103,7 +106,7 @@
 			// Until the answer comes, the results show the rows' shapes (design system, "Skeleton").
 			results.innerHTML = '';
 			window.affibloomSkeleton( results, 3, true );
-			wp.apiFetch( { path: '/affibloom/v1/products?' + args.toString() } ).then( function ( response ) {
+			wp.apiFetch( { path: ( options.path || '/affibloom/v1/products' ) + '?' + args.toString() } ).then( function ( response ) {
 				if ( mine !== requests ) {
 					return;
 				}

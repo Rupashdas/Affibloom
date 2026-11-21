@@ -115,6 +115,7 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 	<?php $this->render( 'admin/partials/table-create-modal' ); ?>
 	<?php $this->render( 'admin/partials/table-product-picker' ); ?>
+	<?php $this->render( 'admin/partials/table-group-picker' ); ?>
 	<?php
 	// Lasso's 'Remove "<name>"?' (R23); the script puts the product's name in the title.
 	$this->render(

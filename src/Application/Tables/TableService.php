@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Tables;
 
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Domain\Fields\Field;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\ProductRepository;
@@ -26,8 +27,8 @@ use Affibloom\Domain\Table\UntitledName;
 use Closure;
 
 /**
- * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4). Later
- * tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
+ * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4) and a
+ * group's (T5). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
  */
 final class TableService {
 
@@ -39,6 +40,7 @@ final class TableService {
 	 * @param ProductRepository $products  The products a table holds (T4).
 	 * @param TableValues       $values    A product's starting values (R22; T4).
 	 * @param Closure           $library   The field library: fn(): FieldLibrary (the cells' names and kinds; T4).
+	 * @param GroupService      $groups    The groups whose products Add Group brings (T5).
 	 */
 	public function __construct(
 		private TableRepository $tables,
@@ -46,6 +48,7 @@ final class TableService {
 		private ProductRepository $products,
 		private TableValues $values,
 		private Closure $library,
+		private GroupService $groups,
 	) {}
 
 	/**
@@ -119,8 +122,54 @@ final class TableService {
 				$product,
 				$found->badge,
 				fn( int $field ): string => $this->values->for( $found, $own, $field ),
-				static fn(): string => 'g_' . bin2hex( random_bytes( 6 ) )
+				self::new_group_id( ... )
 			)
+		);
+	}
+
+	/**
+	 * A new field group's ID, as the stored tables have them ("g_" and hex).
+	 */
+	private static function new_group_id(): string {
+		return 'g_' . bin2hex( random_bytes( 6 ) );
+	}
+
+	/**
+	 * A group's products added last, in the group's order (R24, D6; Task T5): its published products, each as Add
+	 * Product adds one; those already in the table are skipped rather than added twice.
+	 *
+	 * @param int $id       The table.
+	 * @param int $revision The revision the editor's copy has.
+	 * @param int $group    The group.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableRuleBroken `group_invalid` (no such group); TableChanged when the table moved on since the editor's
+	 *                         copy.
+	 */
+	public function add_group( int $id, int $revision, int $group ): ?Table {
+		if ( null === $this->groups->get( $group ) ) {
+			throw new TableRuleBroken( 'group_invalid' );
+		}
+		$members = $this->groups->members( $group );
+
+		return $this->change(
+			$id,
+			$revision,
+			function ( Table $table ) use ( $members ): Table {
+				foreach ( $members as $member ) {
+					if ( null === $member->id || $table->has_product( $member->id ) ) {
+						continue;
+					}
+					$own   = $this->products->fields( $member->id );
+					$table = $table->add_product(
+						$member->id,
+						$member->badge,
+						fn( int $field ): string => $this->values->for( $member, $own, $field ),
+						self::new_group_id( ... )
+					);
+				}
+
+				return $table;
+			}
 		);
 	}
 

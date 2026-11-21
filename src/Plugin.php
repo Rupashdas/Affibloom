@@ -740,7 +740,8 @@ final class Plugin {
 			new IndexTableLocations(),
 			new PostTypeProductRepository(),
 			new TableValues( ( new PublicLinks( $this->settings_repository() ) )->for( ... ) ),
-			$fields->all( ... )
+			$fields->all( ... ),
+			new GroupService( new TermGroupRepository(), new PostTypeProductRepository() )
 		);
 	}
 
