@@ -17,6 +17,7 @@ use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Opportunity\BaseDomain;
 use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\PlainUrlKey;
@@ -67,6 +68,8 @@ final class PostTypeProductRepository implements ProductRepository {
 			'meta_input'  => array(
 				'_affibloom_url'              => $product->url->value(),
 				'_affibloom_url_key'          => $product->url->key(),
+				// The base domain Link Opportunities matches links by (F22 D5; Task O1).
+				'_affibloom_domain'           => BaseDomain::of( $product->url->value() ),
 				'_affibloom_type'             => $product->type->value,
 				'_affibloom_new_tab'          => self::flag( $product->new_tab ),
 				'_affibloom_nofollow'         => self::flag( $product->nofollow ),

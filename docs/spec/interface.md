@@ -23,13 +23,14 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 
 | Element | Lasso shows | Label (accessible name) | id / selector | Note |
 |---|---|---|---|---|
-| Header tabs | Dashboard, Opportunities, Tables, Groups, Analytics, Marketplace | `Dashboard`, `Settings` | `.affibloom-header nav a` | Other tabs belong to excluded features. Lasso reaches Settings from the WordPress menu. |
+| Header tabs | Dashboard, Opportunities, Tables, Groups, Analytics, Marketplace | `Dashboard`, `Opportunities`, `Groups`, `Settings` (Tables with T1) | `.affibloom-header nav a` | **Changed:** Opportunities is built (F22, Task O1, corrected from "excluded"); Analytics and Marketplace are Lasso's cloud and left out. Lasso reaches Settings from the WordPress menu. |
 | Page subtitle (U10) | — | Dashboard: `Your affiliate products, their links and where they are used.` Settings: `Defaults for new links, the product box and Amazon.` | `.affibloom-page__subtitle` | **Changed** (U10, approved 2026-11-13). |
 | Overview tiles (U9) | icon counters: broken, out of stock, opportunities | `Products`, `Broken links`, `Clicks (30 days)` | `.affibloom-tile` | **Changed** (U9, approved 2026-11-13). Out of stock and opportunities belong to excluded features. Built by Tasks 13, 31, 34. |
 | Add button | `Add New Link` (split; the caret opens Bulk Add Links) | `Add New Link` | `#affibloom-add-new` | The Add modal takes one link per line, which covers bulk adding. |
 | Search | placeholder `Search all 263 links…`, hint `Ctrl+Shift+L` | `Search` (visually hidden), placeholder `Search all <n> links…` | `#affibloom-search` (`name="s"`) | Keyboard shortcut not built. |
 | Broken filter | red icon + count, tooltip `See broken URLs` | `Broken links (<n>)` (visible text; the tooltip stays) | `a.affibloom-filter-broken` | **Changed** (U2, approved). |
 | Other counters | `See out-of-stock products`, `See opportunities` | — | — | Left out: no Amazon data refresh; Opportunities excluded. |
+| Opportunities (F22, Task O1) | Link Opportunities: sub-tabs, `N Found`, Search, intro box, URL, Content, Suggestion, Type, Monetize | the same; sub-tabs Links, Domains, Content (Programs, Keywords and Marketplace left out, D2, D14, D15) | `admin.php?page=affibloom-opportunities`, `.affibloom-table--opportunities` | **Changed** from "excluded" (the user, full scope, 2026-11-13). |
 | Columns | Image, Link Name, Groups, Alert, Locations, Clicks, Actions | Image, Link Name, Alert, Locations, Clicks, Actions | `thead th` | Groups left out: `lasso-cat` has 1 term and 0 assignments on the site. |
 | Row | — | — | `tr[data-product-id]` | |
 | Alert cell | green tick, or a red icon for a broken link | `Broken link` on the red icon | `td.affibloom-alert`, `.affibloom-alert-broken` | |

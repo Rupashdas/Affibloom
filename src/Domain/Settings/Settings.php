@@ -50,6 +50,8 @@ final class Settings {
 		'disable_amazon_notice'           => false,
 		'disable_help_tips'               => false,
 		'disable_import_notice'           => false,
+		// The intro boxes closed for good (F22 D8; F38 ON5 reuses the key): their names. Kept by the save, not a field.
+		'education_hidden'                => array(),
 		// General, support view only (`&support=1`, Task 9L).
 		'keep_original_domains'           => array(),
 		'cron_interval'                   => 0,

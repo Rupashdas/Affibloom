@@ -34,14 +34,15 @@ final class AdminMenu implements Module {
 	/**
 	 * Builds the menu.
 	 *
-	 * @param AdminNavigation $navigation The screens in Lasso's order (Task ON1).
-	 * @param DashboardScreen $dashboard  The Dashboard screen.
-	 * @param ProductScreen   $product    The product page (Task 14A).
-	 * @param SettingsScreen  $settings   The Settings screen.
-	 * @param GroupsScreen    $groups     The Groups list (Task G1).
-	 * @param GroupScreen     $group      One group, or a new one (Task G1).
-	 * @param FieldsScreen    $fields     The Fields list (Task FL1).
-	 * @param FieldScreen     $field      One field, or a new one (Task FL2).
+	 * @param AdminNavigation          $navigation The screens in Lasso's order (Task ON1).
+	 * @param DashboardScreen          $dashboard  The Dashboard screen.
+	 * @param ProductScreen            $product    The product page (Task 14A).
+	 * @param SettingsScreen           $settings   The Settings screen.
+	 * @param GroupsScreen             $groups     The Groups list (Task G1).
+	 * @param GroupScreen              $group      One group, or a new one (Task G1).
+	 * @param FieldsScreen             $fields     The Fields list (Task FL1).
+	 * @param FieldScreen              $field      One field, or a new one (Task FL2).
+	 * @param OpportunitiesScreen|null $opportunities Opportunities (F22, Task O1).
 	 */
 	public function __construct(
 		private AdminNavigation $navigation,
@@ -52,6 +53,7 @@ final class AdminMenu implements Module {
 		private GroupScreen $group,
 		FieldsScreen $fields,
 		private FieldScreen $field,
+		?OpportunitiesScreen $opportunities = null,
 	) {
 		$this->screens = array(
 			self::SLUG           => array( $dashboard, 'render' ),
@@ -59,6 +61,9 @@ final class AdminMenu implements Module {
 			FieldsScreen::SLUG   => array( $fields, 'render' ),
 			SettingsScreen::SLUG => array( $settings, 'render' ),
 		);
+		if ( null !== $opportunities ) {
+			$this->screens[ OpportunitiesScreen::SLUG ] = array( $opportunities, 'render' );
+		}
 	}
 
 	/**

@@ -136,8 +136,16 @@ final class AdminAssets implements Module {
 			// The Locations tab: its list in place and the group rows (F12, Task 36B).
 			if ( 'locations' === $tab ) {
 				wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
-				wp_enqueue_script( 'affibloom-product-locations', $this->plugin_url . 'assets/admin/product-locations.js', array( 'affibloom-in-place-list' ), $this->version, true );
+				wp_enqueue_script( 'affibloom-location-preview', $this->plugin_url . 'assets/admin/location-preview.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+				wp_enqueue_script( 'affibloom-product-locations', $this->plugin_url . 'assets/admin/product-locations.js', array( 'affibloom-in-place-list', 'affibloom-location-preview' ), $this->version, true );
 			}
+		}
+
+		// Opportunities (F22, Task O1): the lists in place, the preview and the intro boxes.
+		if ( str_contains( $hook_suffix, OpportunitiesScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-location-preview', $this->plugin_url . 'assets/admin/location-preview.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-opportunities', $this->plugin_url . 'assets/admin/opportunities.js', array( 'affibloom-in-place-list', 'affibloom-location-preview' ), $this->version, true );
 		}
 
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).

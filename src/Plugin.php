@@ -12,6 +12,8 @@ namespace Affibloom;
 use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
+use Affibloom\Application\Opportunities\IntroBoxes;
+use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
 use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
 use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
@@ -20,8 +22,11 @@ use Affibloom\Infrastructure\WordPress\Builders\WprmSource;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
 use Affibloom\Infrastructure\WordPress\TableClickStore;
+use Affibloom\Infrastructure\WordPress\ProductDomainBackfill;
+use Affibloom\Infrastructure\WordPress\TableOpportunityRepository;
 use Affibloom\Infrastructure\WordPress\TransientRepeatGuard;
 use Affibloom\Infrastructure\WordPress\WpPostDirectory;
+use Affibloom\Interface\Admin\OpportunitiesScreen;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
 use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
 use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
@@ -139,6 +144,7 @@ use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
 use Affibloom\Infrastructure\WordPress\OptionCheckPass;
 use Affibloom\Infrastructure\WordPress\TableLinkIssueRepository;
 use Affibloom\Infrastructure\WordPress\PostMetaAlertDismissals;
+use Affibloom\Interface\Rest\OpportunitiesController;
 use Affibloom\Interface\Rest\ProductAlertsController;
 use Affibloom\Infrastructure\WordPress\WpCronProductLinkChecks;
 use Affibloom\Infrastructure\System\CpuLoad;
@@ -385,6 +391,10 @@ final class Plugin {
 			7 => static function (): void {
 				( new Table( TableClickStore::TABLE, TableClickStore::COLUMNS ) )->create();
 			},
+			// Task O1: every stored product's base domain, which later saves write (F22 D5).
+			8 => static function (): void {
+				ProductDomainBackfill::run();
+			},
 		);
 	}
 
@@ -554,7 +564,8 @@ final class Plugin {
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
 				new FieldsScreen( $this->template(), $fields, $notice ),
-				new FieldScreen( $this->template(), $fields, $notice )
+				new FieldScreen( $this->template(), $fields, $notice ),
+				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
@@ -567,6 +578,7 @@ final class Plugin {
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
 			new VariantsController( $products, $variants, $this->template() ),
+			new OpportunitiesController( $this->opportunity_service(), $this->intro_boxes(), $this->template() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
@@ -656,6 +668,20 @@ final class Plugin {
 	 */
 	private function location_counts(): LocationCounts {
 		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
+	}
+
+	/**
+	 * The Opportunities lists (F22; Task O1).
+	 */
+	private function opportunity_service(): OpportunityService {
+		return new OpportunityService( new TableOpportunityRepository() );
+	}
+
+	/**
+	 * The Opportunities screens' intro boxes (F22 D8; Task O1).
+	 */
+	private function intro_boxes(): IntroBoxes {
+		return new IntroBoxes( $this->settings_repository() );
 	}
 
 	/**
@@ -803,6 +829,7 @@ final class Plugin {
 		if ( null === $this->navigation ) {
 			$this->navigation = new AdminNavigation();
 			$this->navigation->register( new NavItem( 'dashboard', AdminMenu::SLUG, static fn (): string => __( 'Dashboard', 'affibloom' ), 'home', Capabilities::PRODUCTS, array( ProductScreen::SLUG ) ) );
+			$this->navigation->register( new NavItem( 'opportunities', OpportunitiesScreen::SLUG, static fn (): string => __( 'Opportunities', 'affibloom' ), 'bulb', Capabilities::PRODUCTS ) );
 			$this->navigation->register( new NavItem( 'groups', GroupsScreen::SLUG, static fn (): string => __( 'Groups', 'affibloom' ), 'layers', Capabilities::PRODUCTS, array( GroupScreen::SLUG ) ) );
 			// A menu item only: Lasso's header has no Fields tab (F26 D13).
 			$this->navigation->register( new NavItem( 'fields', FieldsScreen::SLUG, static fn (): string => __( 'Fields', 'affibloom' ), 'list', Capabilities::PRODUCTS, array( FieldScreen::SLUG ) ) );

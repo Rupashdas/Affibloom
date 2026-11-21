@@ -99,7 +99,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F22 — Opportunities
 
-- [ ] Task O1: The Opportunities nav and Link Opportunities
+- [x] Task O1: The Opportunities nav and Link Opportunities
 - [ ] Task O2: Domains and Detected Links
 - [ ] Task O3: Content Opportunities
 - [ ] Task O4: A post's links (Content › post)
@@ -878,19 +878,29 @@ Marketplace tab exists.
 `assets/admin/admin.css`, `docs/ui/design-system.md` (opportunity row, intro box), `docs/spec/interface.md` (the
 Opportunities rows, corrected from "excluded").
 
-- [ ] **Step 1: Failing tests.** E2E AC1 (27 rows for the fixture; search "luminous" → 18; sort by Suggestion; the
+- [x] **Step 1: Failing tests.** E2E AC1 (27 rows for the fixture; search "luminous" → 18; sort by Suggestion; the
   empty state after dismissing through WP-CLI is O7's — here an empty fixture), AC2 (each hover link's address; the
   editor link; the preview text), AC13 (no Keywords/Programs/Marketplace text anywhere on the screens; no request to
   `getlasso.co`, `lasso.link`). Integration: D4's exclusions one by one. Unit: the four domain classes. Expected red:
   no Opportunities tab.
-- [ ] **Step 2: Domain classes and `_affibloom_domain`** (save and backfill; unit and an integration check that 263
+- [x] **Step 2: Domain classes and `_affibloom_domain`** (save and backfill; unit and an integration check that 263
   products get their domain).
-- [ ] **Step 3: Query, service, routes.** The allow-list `url`, `post_title`, `suggestion`; default location id, product
+- [x] **Step 3: Query, service, routes.** The allow-list `url`, `post_title`, `suggestion`; default location id, product
   id (D6); `esc_like` + spaces as `%`.
-- [ ] **Step 4: Screen, templates, script, intro box** with D7's words; the closed box stored (D8).
-- [ ] **Step 5: Run and look.** Checks; F19 and F23 specs (the header changed); by hand: list, sort, search, Filter by
+- [x] **Step 4: Screen, templates, script, intro box** with D7's words; the closed box stored (D8).
+- [x] **Step 5: Run and look.** Checks; F19 and F23 specs (the header changed); by hand: list, sort, search, Filter by
   Link and back, intro close and reload, preview, keyboard only, 375 px.
-- [ ] **Step 6: Commit** — "Add the Opportunities screen with Lasso's Link Opportunities".
+- [x] **Step 6: Commit** — "Add the Opportunities screen with Lasso's Link Opportunities".
+
+*Note (2026-11-21):* built as planned with these differences: no `LinkTypeIcon` (the Type cell is the shared
+`location-type.php` over `ProductLocation::kind()`), and `_affibloom_domain` is written by the repository's save
+(every save goes through it) with schema step 8 as the backfill. The Amazon list is Lasso's exact 21 (its 23 less
+`amzn.com`, `amzn.to`). This site's host is read by `TableOpportunityRepository` at query time. Shared on their second
+use: `Domain\PageNumbers` (LocationPage), `location-preview.js` (36C's preview), `location-type.php`; `in-place-list.js`
+learned `orderby` and fixed `args`. Filter by URL, Filter by Content and Monetize are shown disabled until O2, O4, O10.
+`LinkOpportunitiesTest` is unit and the F22 ACs (the integration suite does not run). Checked: unit, phpcs, analyse;
+on Local 729 products got their domain, the list shows 10 (Example's), Filter by Link, search, sort and 400s for an
+unknown column or box; the screen at 1280 px.
 
 ---
 

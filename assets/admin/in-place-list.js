@@ -3,8 +3,9 @@
  * A list that redraws without a page reload (F26 D15, Groups' D13), taken out of groups.js on its second user, the
  * Fields list (Task FL1).
  *
- * The server renders the list with the partial the page printed and answers `{ html, term, page, url }` (and `order`
- * for a list with a sortable header: a [data-list-sort] button names the order it asks for); this script
+ * The server renders the list with the partial the page printed and answers `{ html, term, page, url }` (and `order`,
+ * with `orderby` when several columns sort, for a list with sortable headers: a [data-list-sort] button names the order
+ * it asks for, and its [data-list-orderby] the column); this script
  * swaps the markup in and keeps the address bar in step, so reload, Back and bookmarks work. It never builds markup of
  * its own. Without JavaScript the search is a form and the pages are links.
  *
@@ -13,7 +14,8 @@
  *  - search:        the search box, whose form submits the search on Enter;
  *  - status:        a polite live region for what the list now shows;
  *  - errorTemplate: a <template> holding the "could not load" card, with a [data-retry] button;
- *  - path:          the list's REST route, e.g. /affibloom/v1/fields/list.
+ *  - path:          the list's REST route, e.g. /affibloom/v1/fields/list;
+ *  - args:          arguments every request carries, e.g. { product: 7 } (optional).
  */
 ( function () {
 	'use strict';
@@ -24,7 +26,8 @@
 		var status = options.status;
 		var errorTemplate = options.errorTemplate;
 		var params = new URLSearchParams( window.location.search );
-		var current = { s: params.get( 's' ) || '', paged: parseInt( params.get( 'paged' ), 10 ) || 1, order: params.get( 'order' ) || '' };
+		var current = { s: params.get( 's' ) || '', paged: parseInt( params.get( 'paged' ), 10 ) || 1, order: params.get( 'order' ) || '', orderby: params.get( 'orderby' ) || '' };
+		var fixed = options.args || {};
 		var requests = 0;
 
 		var busy = function ( on ) {
@@ -55,13 +58,19 @@
 			if ( list.order ) {
 				args.set( 'order', list.order );
 			}
+			if ( list.orderby ) {
+				args.set( 'orderby', list.orderby );
+			}
+			Object.keys( fixed ).forEach( function ( key ) {
+				args.set( key, String( fixed[ key ] ) );
+			} );
 
 			wp.apiFetch( { path: options.path + '?' + args.toString() } ).then( function ( response ) {
 				if ( mine !== requests ) {
 					return;
 				}
 				var data = response.data;
-				current = { s: data.term, paged: data.page, order: data.order || '' };
+				current = { s: data.term, paged: data.page, order: data.order || '', orderby: data.orderby || '' };
 				region.innerHTML = data.html;
 				busy( false );
 				if ( remember ) {
@@ -96,7 +105,7 @@
 		if ( search && search.form ) {
 			search.form.addEventListener( 'submit', function ( event ) {
 				event.preventDefault();
-				load( { s: search.value, paged: 1, order: current.order }, true, false );
+				load( { s: search.value, paged: 1, order: current.order, orderby: current.orderby }, true, false );
 			} );
 		}
 
@@ -105,7 +114,7 @@
 			// A sortable header: the first page in the order it names.
 			var sort = event.target.closest( '[data-list-sort]' );
 			if ( sort ) {
-				load( { s: current.s, paged: 1, order: sort.getAttribute( 'data-list-sort' ) }, true, false );
+				load( { s: current.s, paged: 1, order: sort.getAttribute( 'data-list-sort' ), orderby: sort.getAttribute( 'data-list-orderby' ) || '' }, true, false );
 				return;
 			}
 			var link = event.target.closest( '.affibloom-pagination a' );
@@ -113,13 +122,13 @@
 				return;
 			}
 			event.preventDefault();
-			load( { s: current.s, paged: parseInt( new URL( link.href ).searchParams.get( 'paged' ), 10 ) || 1, order: current.order }, true, true );
+			load( { s: current.s, paged: parseInt( new URL( link.href ).searchParams.get( 'paged' ), 10 ) || 1, order: current.order, orderby: current.orderby }, true, true );
 		} );
 
 		// Back and Forward: draw the list the address names, without pushing it again.
 		window.addEventListener( 'popstate', function () {
 			var back = new URLSearchParams( window.location.search );
-			load( { s: back.get( 's' ) || '', paged: parseInt( back.get( 'paged' ), 10 ) || 1, order: back.get( 'order' ) || '' }, false, false );
+			load( { s: back.get( 's' ) || '', paged: parseInt( back.get( 'paged' ), 10 ) || 1, order: back.get( 'order' ) || '', orderby: back.get( 'orderby' ) || '' }, false, false );
 		} );
 	};
 }() );
