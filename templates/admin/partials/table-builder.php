@@ -9,7 +9,7 @@
  * Column, "Click to add a Field" in an empty one, Add field (+) in every cell, Vertical's "Remove same field →".
  *
  * @package Affibloom
- * @var array{table: \Affibloom\Domain\Table\Table, fields: array<int, \Affibloom\Domain\Fields\Field>, names: array<int, string>} $view
+ * @var array{table: \Affibloom\Domain\Table\Table, fields: array<int, \Affibloom\Domain\Fields\Field>, names: array<int, string>, amazon: array<int, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -100,6 +100,7 @@ if ( $horizontal ) {
 									'order'   => $heading,
 									'values'  => $table->values[ $product->id ] ?? array(),
 									'product' => $product->id,
+									'amazon'  => $view['amazon'][ $product->id ] ?? null,
 								)
 							);
 							?>
@@ -118,6 +119,7 @@ if ( $horizontal ) {
 										'order'   => $group['fields'],
 										'values'  => $table->values[ $product->id ] ?? array(),
 										'product' => $product->id,
+										'amazon'  => $view['amazon'][ $product->id ] ?? null,
 									)
 								);
 								?>

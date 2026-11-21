@@ -162,6 +162,9 @@ final class AdminAssets implements Module {
 
 		// Tables (F25, Task T1): the list in place; Create Table on the list and the builder (T2); the builder (T3).
 		if ( str_contains( $hook_suffix, TablesScreen::TABLE_SLUG ) && ! str_contains( $hook_suffix, TablesScreen::SLUG ) ) {
+			// Image cells pick from the media library; price cells open a rich editor in place (T7).
+			wp_enqueue_media();
+			wp_enqueue_editor();
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-tables', $this->plugin_url . 'assets/admin/tables.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );

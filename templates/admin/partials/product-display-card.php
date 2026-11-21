@@ -33,7 +33,7 @@ if ( $is_amazon && '' !== $product->asin ) {
 		? __( 'Click Refresh to grab an updated image from Amazon, or paste an image link and click Apply, or click the preview image to choose from your Media Library.', 'affibloom' )
 		: __( 'Paste the image link from Amazon and click Apply, or click the preview image to choose from your Media Library. Refresh needs the Amazon API.', 'affibloom' );
 }
-// The toolbars are Lasso's, set by ProductEditors (other plugins may rewrite every editor's settings).
+// The toolbars are Lasso's, set by RichEditorSettings (other plugins may rewrite every editor's settings).
 $editor = static fn( int $height ): array => array(
 	'media_buttons' => false,
 	'quicktags'     => false,

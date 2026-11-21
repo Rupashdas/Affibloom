@@ -1,4 +1,4 @@
-/* global wp */
+/* global wp, tinymce */
 /**
  * A table's builder (F25 R13-R23, D4, D5; Tasks T3-T4; Lasso's table-details.js and lasso-tables.js): every action
  * saves as it happens, as Lasso's builder does.
@@ -18,6 +18,9 @@
  *   open "Add Field" (field-dialog.js) on the library of fields not in the table, six a page, and add the pick to that
  *   row or column for every product. A field's × asks 'Remove "<field>"?'; Vertical's "Remove same field →" takes the
  *   whole row out. A value saves 500 ms after it changes (a rating is kept between 1 and 5 while typing).
+ * - Images, prices, descriptions (T7): an image opens the media library and saves the picked address at once; a price
+ *   opens one rich editor in place (wp.editor, Lasso's price toolbar), saved 500 ms after a change and on leaving it;
+ *   a description's edit icon opens "Description Editor" and Save stores it.
  */
 ( function () {
 	'use strict';
@@ -309,29 +312,155 @@
 		} );
 	} );
 
-	// A cell's value, 500 ms after its last change (R30).
+	// A cell's value (R30): which product and field an element of the cell stands for, and its save.
+	var cellOf = function ( element ) {
+		return {
+			product: element.closest( '[data-table-product]' ).getAttribute( 'data-table-product' ),
+			field: element.closest( '[data-table-field]' ).dataset.tableField,
+		};
+	};
+	var putValue = function ( cell, value, done ) {
+		enqueue( {
+			send: function ( current ) {
+				return wp.apiFetch( { path: path + '/values/' + cell.product + '/' + cell.field, method: 'PUT', data: { revision: current, value: value } } );
+			},
+			done: done,
+		} );
+	};
+	// A typed value, 500 ms after its last change.
 	var timers = {};
 	var saveValue = function ( input ) {
-		var cell = input.closest( '[data-table-product]' );
-		var product = cell.getAttribute( 'data-table-product' );
-		var field = input.closest( '[data-table-field]' ).dataset.tableField;
-		var key = product + '-' + field;
+		var cell = cellOf( input );
+		var key = cell.product + '-' + cell.field;
 		window.clearTimeout( timers[ key ] );
 		timers[ key ] = window.setTimeout( function () {
 			var value = input.value;
-			enqueue( {
-				send: function ( current ) {
-					return wp.apiFetch( { path: path + '/values/' + product + '/' + field, method: 'PUT', data: { revision: current, value: value } } );
-				},
-				done: function ( data ) {
-					// The stored value (a rating rounded, empty lines dropped) shows once the box is left.
-					if ( document.activeElement !== input && input.value === value ) {
-						input.value = data.value;
-					}
-				},
+			putValue( cell, value, function ( data ) {
+				// The stored value (a rating rounded, empty lines dropped) shows once the box is left.
+				if ( document.activeElement !== input && input.value === value ) {
+					input.value = data.value;
+				}
 			} );
 		}, 500 );
 	};
+
+	// An image (T7; R29): the media library, saved at once.
+	var pickImage = function ( button ) {
+		var cell = cellOf( button );
+		window.affibloomMedia.pick( { title: page.dataset.mediaTitle, button: page.dataset.mediaButton }, function ( picked ) {
+			putValue( cell, picked.url, function ( data ) {
+				var target = region.querySelector( '[data-table-product="' + cell.product + '"] [data-table-field="' + cell.field + '"] [data-table-image]' );
+				var image = target && target.querySelector( 'img' );
+				if ( target && ! image ) {
+					image = document.createElement( 'img' );
+					image.className = 'affibloom-table-field__image';
+					image.alt = '';
+					var none = target.querySelector( '.affibloom-table-field__no-image' );
+					target.replaceChild( image, none );
+				}
+				if ( image ) {
+					image.src = data.value;
+				}
+			} );
+		} );
+	};
+
+	// A price (T7; R29, D10): one rich editor at a time, in the cell being edited.
+	var priceSettings = JSON.parse( page.dataset.priceEditor || '{}' );
+	var priceEditor = null;
+	var closePrice = function () {
+		if ( ! priceEditor ) {
+			return;
+		}
+		var open = priceEditor;
+		priceEditor = null;
+		window.clearTimeout( open.timer );
+		var editor = tinymce.get( open.id );
+		var value = editor ? editor.getContent() : open.saved;
+		wp.editor.remove( open.id );
+		open.box.innerHTML = value;
+		open.holder.replaceWith( open.box );
+		if ( value !== open.saved ) {
+			putValue( open.cell, value, function ( data ) {
+				open.box.innerHTML = data.value;
+			} );
+		}
+	};
+	var editPrice = function ( box ) {
+		closePrice();
+		var id = 'affibloom-table-price-editor';
+		var holder = document.createElement( 'div' );
+		holder.className = 'affibloom-editor affibloom-table-field__price-editor';
+		var area = document.createElement( 'textarea' );
+		area.id = id;
+		area.value = box.innerHTML;
+		holder.appendChild( area );
+		box.replaceWith( holder );
+		var open = { id: id, box: box, holder: holder, cell: cellOf( holder ), saved: box.innerHTML, timer: 0 };
+		priceEditor = open;
+		wp.editor.initialize( id, {
+			quicktags: false,
+			mediaButtons: false,
+			tinymce: Object.assign( {}, priceSettings, {
+				setup: function ( editor ) {
+					window.affibloomEditorPlaceholder( editor );
+					editor.on( 'init', function () {
+						editor.focus();
+					} );
+					editor.on( 'input change keyup', function () {
+						window.clearTimeout( open.timer );
+						open.timer = window.setTimeout( function () {
+							var value = editor.getContent();
+							if ( priceEditor === open && value !== open.saved ) {
+								open.saved = value;
+								putValue( open.cell, value );
+							}
+						}, 500 );
+					} );
+					editor.on( 'blur', function () {
+						window.setTimeout( function () {
+							if ( priceEditor === open && ! holder.contains( document.activeElement ) ) {
+								closePrice();
+							}
+						}, 150 );
+					} );
+				},
+			} ),
+		} );
+	};
+
+	// "Description Editor" (T7; R32).
+	var describer = document.getElementById( 'affibloom-table-description' );
+	var describeSave = describer.querySelector( '[data-table-description-save]' );
+	var describeError = describer.querySelector( '[data-table-description-error]' );
+	var describing = null;
+	describeSave.addEventListener( 'click', function () {
+		var editor = tinymce.get( 'affibloom_table_description' );
+		var chosen = describing;
+		var label = describeSave.textContent;
+		describeSave.disabled = true;
+		describeSave.textContent = describeSave.getAttribute( 'data-busy-label' );
+		describeError.hidden = true;
+		var restore = function () {
+			describeSave.disabled = false;
+			describeSave.textContent = label;
+		};
+		enqueue( {
+			send: function ( current ) {
+				return wp.apiFetch( { path: path + '/values/' + chosen.cell.product + '/' + chosen.cell.field, method: 'PUT', data: { revision: current, value: editor ? editor.getContent() : '' } } );
+			},
+			done: function ( data ) {
+				restore();
+				chosen.rich.innerHTML = data.value;
+				window.affibloomModal.hide();
+			},
+			failed: function ( text ) {
+				restore();
+				describeError.textContent = text;
+				describeError.hidden = false;
+			},
+		} );
+	} );
 	region.addEventListener( 'input', function ( event ) {
 		var input = event.target.closest( '[data-table-value]' );
 		if ( ! input ) {
@@ -409,6 +538,27 @@
 			window.affibloomModal.show( fieldRemover, removeField );
 			return;
 		}
+		var image = event.target.closest( '[data-table-image]' );
+		if ( image ) {
+			pickImage( image );
+			return;
+		}
+		var price = event.target.closest( '[data-table-price]' );
+		if ( price ) {
+			editPrice( price );
+			return;
+		}
+		var describe = event.target.closest( '[data-table-description]' );
+		if ( describe ) {
+			describing = { cell: cellOf( describe ), rich: describe.parentNode.querySelector( '[data-table-rich]' ) };
+			var editor = tinymce.get( 'affibloom_table_description' );
+			if ( editor ) {
+				editor.setContent( describing.rich.innerHTML );
+			}
+			describeError.hidden = true;
+			window.affibloomModal.show( describer, describe );
+			return;
+		}
 		var removeRow = event.target.closest( '[data-table-remove-row]' );
 		if ( removeRow ) {
 			var row = removeRow.closest( '[data-table-group]' ).getAttribute( 'data-table-group' );
@@ -425,6 +575,15 @@
 			removing = parseInt( cell.getAttribute( 'data-table-product' ), 10 );
 			remover.querySelector( '.affibloom-modal__title' ).textContent = remover.dataset.titleTemplate.replace( '%s', cell.getAttribute( 'data-product-name' ) );
 			window.affibloomModal.show( remover, remove );
+		}
+	} );
+
+	// A price box opens on Enter or Space too.
+	region.addEventListener( 'keydown', function ( event ) {
+		var price = event.target.closest( '[data-table-price]' );
+		if ( price && ( 'Enter' === event.key || ' ' === event.key ) ) {
+			event.preventDefault();
+			editPrice( price );
 		}
 	} );
 

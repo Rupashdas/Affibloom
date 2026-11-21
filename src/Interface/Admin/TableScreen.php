@@ -54,6 +54,8 @@ final class TableScreen {
 	 * Prints the page. WordPress has already checked the capability (Capabilities::PRODUCTS, D3).
 	 */
 	public function render(): void {
+		// The Description Editor keeps Lasso's toolbar, whatever other plugins do to editors (F25 D10, Task T7).
+		RichEditorSettings::apply();
 		$this->template->render(
 			'admin/table',
 			array(

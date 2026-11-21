@@ -298,10 +298,11 @@ final class TableService {
 	}
 
 	/**
-	 * What the builder draws besides the table (D5): each field the table shows (name, kind) and each product's name.
+	 * What the builder draws besides the table (D5): each field the table shows (name, kind), each product's name and,
+	 * for an Amazon product, its live price (R29: shown read only; Task T7).
 	 *
 	 * @param Table $table The table.
-	 * @return array{table: Table, fields: array<int, Field>, names: array<int, string>}
+	 * @return array{table: Table, fields: array<int, Field>, names: array<int, string>, amazon: array<int, string>}
 	 */
 	public function builder( Table $table ): array {
 		$library = ( $this->library )();
@@ -312,15 +313,21 @@ final class TableService {
 				$fields[ $field ] = $found;
 			}
 		}
-		$names = array();
+		$names  = array();
+		$amazon = array();
 		foreach ( $table->product_ids() as $product ) {
-			$names[ $product ] = $this->products->get( $product )->name ?? (string) ( $table->values[ $product ][ StartingLayout::PRODUCT_NAME ] ?? '' );
+			$found             = $this->products->get( $product );
+			$names[ $product ] = $found->name ?? (string) ( $table->values[ $product ][ StartingLayout::PRODUCT_NAME ] ?? '' );
+			if ( null !== $found && '' !== $found->asin ) {
+				$amazon[ $product ] = $found->price;
+			}
 		}
 
 		return array(
 			'table'  => $table,
 			'fields' => $fields,
 			'names'  => $names,
+			'amazon' => $amazon,
 		);
 	}
 

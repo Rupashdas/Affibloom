@@ -134,7 +134,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T4: Products in a table — add, starting layout, badge, remove
 - [x] Task T5: Add a group to a table
 - [x] Task T6: Rows and columns, the Add Field dialog, plain cells
-- [ ] Task T7: Image, price and description cells
+- [x] Task T7: Image, price and description cells
 - [ ] Task T8: Button information
 - [ ] Task T9: Reordering
 - [ ] Task T10: Table Locations
@@ -1908,11 +1908,13 @@ edit icon opens "Description Editor" (Manage Fields, rich text, Cancel / Save).
 **Files:** the above; `ProductScreen` / `templates/admin/product.php` use the extracted settings; F25 spec AC10; F1
 AC for the product page's editors rerun.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Extract the settings.**
-- [ ] **Step 3: Cells and modal.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Edit a table's images, prices and descriptions".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Extract the settings.**
+- [x] **Step 3: Cells and modal.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Edit a table's images, prices and descriptions".
+
+*Note:* ProductEditors became `Interface\Admin\RichEditorSettings` (product page unchanged: same toolbars and placeholders, checked in the browser) and the editors' placeholder script moved to admin.js (`affibloomEditorPlaceholder`). The price cell's editor is made in the page with `wp.editor.initialize` and `RichEditorSettings::for( 'price', '', 'N/A' )`; the Description Editor is one `wp_editor` in its dialog. An Amazon product's price shows the product's synced price read only. Checked in a headless browser: the media frame's words, a price typed and saved, a description saved, both kept after a reload.
 
 ---
 

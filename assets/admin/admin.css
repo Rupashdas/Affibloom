@@ -3190,6 +3190,26 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-cell__remove-row svg { width: 14px; height: 14px; }
 .affibloom-table-cell__remove-row:hover, .affibloom-table-cell__remove-row:focus-visible { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
 
+/* Task T7 (F25 R29, R32): the picture opens the media library ("Update Image" over it on hover or focus); the price is a
+   box like an input that becomes one rich editor in place ("N/A" while empty); the description with its edit icon. */
+.affibloom-table-field__picture { position: relative; display: grid; place-items: center; width: 100%; min-height: 72px; padding: 4px; border: 1px dashed transparent; border-radius: var(--affibloom-radius-control); background: none; cursor: pointer; }
+.affibloom-table-field__picture:hover, .affibloom-table-field__picture:focus-visible { border-color: var(--affibloom-control-line); background: var(--affibloom-subtle); }
+.affibloom-table-field__no-image { display: grid; place-items: center; width: 48px; height: 48px; border-radius: var(--affibloom-radius-control); background: var(--affibloom-subtle); color: var(--affibloom-ink-400); }
+.affibloom-table-field__update { position: absolute; inset: auto 8px 8px; padding: 4px 8px; border-radius: var(--affibloom-radius-control); background: rgba(20, 33, 61, .78); color: #fff; font: 600 12px/16px var(--affibloom-font); opacity: 0; transition: opacity .12s; pointer-events: none; }
+.affibloom-table-field__picture:hover .affibloom-table-field__update, .affibloom-table-field__picture:focus-visible .affibloom-table-field__update { opacity: 1; }
+.affibloom-table-field__price { min-height: 38px; padding: 8px 12px; border: 1px solid var(--affibloom-control-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); color: var(--affibloom-ink-900); font-size: 14px; line-height: 20px; cursor: text; overflow-wrap: anywhere; }
+.affibloom-table-field__price:empty::before { content: attr(data-placeholder); color: var(--affibloom-ink-400); }
+.affibloom-table-field__price:hover { border-color: var(--affibloom-line-strong); }
+.affibloom-table-field__price p { margin: 0; }
+.affibloom-table-field__price-editor { min-width: 0; }
+.affibloom-table-field__note { color: var(--affibloom-ink-500); font-size: 12px; line-height: 16px; }
+.affibloom-table-field__description { display: flex; align-items: flex-start; gap: 6px; }
+.affibloom-table-field__description .affibloom-table-field__rich { flex: 1 1 auto; min-width: 0; max-height: 160px; overflow: auto; }
+.affibloom-table-field__rich:empty::before { content: "—"; color: var(--affibloom-ink-400); }
+.affibloom-table-field__rich p { margin: 0 0 6px; }
+.affibloom-table-description .affibloom-modal__panel { max-width: 720px; }
+.affibloom-table-description__title { display: flex; align-items: center; gap: 8px; }
+
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
 .affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }

@@ -281,7 +281,7 @@ final class ProductScreen {
 		}
 
 		// The description and price editors keep Lasso's toolbars, whatever other plugins do to editors (Task 14B).
-		ProductEditors::apply();
+		RichEditorSettings::apply();
 
 		$single     = $this->display->config( DisplayType::single() );
 		$palette    = $single->palette();

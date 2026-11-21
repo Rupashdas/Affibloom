@@ -312,4 +312,39 @@ test.describe( 'F25 Comparison tables', () => {
 		await page.getByRole( 'button', { name: 'Remove same field →' } ).last().click();
 		await expect.poll( () => stored( id ).groups.length ).toBe( rows - 1 );
 	} );
+
+	// AC10 (T7; R29, R32, D10).
+	test( 'AC10 image, price and description cells: the media library, a rich price in place, Amazon read only, Description Editor', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const plain = createProduct( { name: `Plain ${ word }` } );
+		const id = await tableWith( page, 'column', [ plain ] );
+		const cell = ( field: number ) => page.locator( `[data-table-product="${ plain }"] [data-table-field="${ field }"]` );
+
+		await cell( 99991 ).getByRole( 'button', { name: /Update Image/ } ).click();
+		await expect( page.locator( '.media-modal:visible .media-frame-title' ) ).toHaveText( 'Select an Image' );
+		await expect( page.locator( '.media-modal:visible .media-button-select' ) ).toHaveText( 'Select Image' );
+		await page.keyboard.press( 'Escape' );
+
+		await cell( 99994 ).locator( '[data-table-price]' ).click();
+		const price = page.frameLocator( '#affibloom-table-price-editor_ifr' ).locator( 'body' );
+		await price.click();
+		await page.keyboard.type( '$19.99' );
+		await page.getByRole( 'heading', { level: 1 } ).click();
+		await expect.poll( () => stored( id ).values[ String( plain ) ][ '99994' ] ).toContain( '$19.99' );
+
+		await page.getByRole( 'button', { name: 'Add Row' } ).click();
+		await page.getByRole( 'button', { name: 'Click to add a Field' } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
+		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'Description' );
+		await dialog.getByRole( 'button', { name: 'Add Description' } ).click();
+		await cell( 99989 ).getByRole( 'button', { name: 'Edit Description' } ).click();
+		const describer = page.getByRole( 'dialog', { name: 'Description Editor' } );
+		await expect( describer.getByRole( 'link', { name: /Manage Fields/ } ) ).toBeVisible();
+		await page.frameLocator( '#affibloom_table_description_ifr' ).locator( 'body' ).click();
+		await page.keyboard.type( 'Soft and light.' );
+		await describer.getByRole( 'button', { name: 'Save' } ).click();
+		await expect( describer ).toBeHidden();
+		await expect( cell( 99989 ) ).toContainText( 'Soft and light.' );
+		expect( stored( id ).values[ String( plain ) ][ '99989' ] ).toContain( 'Soft and light.' );
+	} );
 } );

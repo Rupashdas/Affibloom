@@ -1174,6 +1174,30 @@
 	 * the product page and in quick edit. A frame is kept per title and file types, as each caller kept its own; the
 	 * newest caller's `then` gets the chosen item.
 	 */
+	/**
+	 * Lasso's description and price boxes say "Enter a description" and "$99.99" while empty (Task 2X1; the table's cells,
+	 * Task T7, use it too). TinyMCE 4.9 has
+	 * no placeholder, so each editor's setting `placeholder` (RichEditorSettings) is copied to the editor body as
+	 * `data-placeholder`, and the class `affibloom-empty` is on the body while the editor holds nothing; the style that
+	 * draws the words is the editor's own (also RichEditorSettings), so they never become content.
+	 *
+	 * @param {Object} editor The TinyMCE editor.
+	 */
+	function editorPlaceholder( editor ) {
+		var update = function () {
+			var body = editor.getBody();
+			if ( ! body ) {
+				return;
+			}
+			body.setAttribute( 'data-placeholder', editor.getParam( 'placeholder', '' ) );
+			body.classList.toggle( 'affibloom-empty', editor.dom.isEmpty( body ) );
+		};
+		editor.on( 'init SetContent keyup input change NodeChange undo redo', update );
+		if ( editor.initialized ) {
+			update();
+		}
+	}
+
 	var frames = {};
 	var media = {
 		available: function () {
@@ -1376,6 +1400,7 @@
 	window.affibloomSaveDialog = saveDialog;
 	window.affibloomFieldErrors = fieldErrors;
 	window.affibloomMedia = media;
+	window.affibloomEditorPlaceholder = editorPlaceholder;
 	window.affibloomRepoint = repoint;
 
 	document.addEventListener( 'DOMContentLoaded', function () {

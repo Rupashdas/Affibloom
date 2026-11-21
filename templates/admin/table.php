@@ -15,6 +15,7 @@ use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Table\Table;
 use Affibloom\Domain\Table\TableStyle;
 use Affibloom\Domain\Table\TableTheme;
+use Affibloom\Interface\Admin\RichEditorSettings;
 use Affibloom\Interface\Admin\TablesScreen;
 
 $table      = $view['table'] ?? new Table( null, '' );
@@ -29,7 +30,9 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	<div class="affibloom-page affibloom-table-page" data-table-builder data-table-id="<?php echo esc_attr( (string) ( $table->id ?? 0 ) ); ?>"
 		data-revision="<?php echo esc_attr( (string) $table->revision ); ?>" data-untitled="<?php echo esc_attr( $view['untitled'] ); ?>"
 		data-saving="<?php esc_attr_e( 'Saving', 'affibloom' ); ?>" data-saved="<?php esc_attr_e( 'Saved', 'affibloom' ); ?>"
-		data-failed="<?php esc_attr_e( 'Could not save. Please try again.', 'affibloom' ); ?>">
+		data-failed="<?php esc_attr_e( 'Could not save. Please try again.', 'affibloom' ); ?>"
+		data-media-title="<?php esc_attr_e( 'Select an Image', 'affibloom' ); ?>" data-media-button="<?php esc_attr_e( 'Select Image', 'affibloom' ); ?>"
+		data-price-editor="<?php echo esc_attr( (string) wp_json_encode( RichEditorSettings::for( 'price', '', __( 'N/A', 'affibloom' ) ) ) ); ?>">
 		<?php
 		$this->render(
 			'admin/partials/page-head',
@@ -117,6 +120,7 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	<?php $this->render( 'admin/partials/table-create-modal' ); ?>
 	<?php $this->render( 'admin/partials/table-product-picker' ); ?>
 	<?php $this->render( 'admin/partials/table-group-picker' ); ?>
+	<?php $this->render( 'admin/partials/table-description-modal' ); ?>
 	<?php
 	$this->render(
 		'admin/partials/field-modal',
