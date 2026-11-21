@@ -55,4 +55,13 @@ interface OpportunityRepository {
 	 * @param OpportunityQuery $query The search and page.
 	 */
 	public function post_links( int $post, OpportunityQuery $query ): OpportunityPage;
+
+	/**
+	 * How many Link Opportunities each product has (R52, R53, D13; Task O8): rows, or the distinct posts they are in.
+	 *
+	 * @param list<int> $product_ids The products.
+	 * @param bool      $hosts       Count distinct posts instead of rows.
+	 * @return array<int, int> By product ID; a product without any is left out.
+	 */
+	public function counts_for( array $product_ids, bool $hosts ): array;
 }

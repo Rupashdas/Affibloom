@@ -38,4 +38,17 @@ final class ListOrderTest extends TestCase {
 		self::assertTrue( ListOrder::from_input( '', '' )->is_default() );
 		self::assertFalse( ListOrder::from_input( 'locations', 'asc' )->is_default() );
 	}
+
+	/** F19 R5, R9, R10; F22 R51 (Task O8). */
+	public function test_the_opportunity_count_starts_descending_and_sorts_its_tab_only(): void {
+		$order = ( new ListOrder() )->next( ListOrder::OPPORTUNITY_COUNT );
+		self::assertSame( array( 'opportunity_count', 'desc' ), array( $order->column, $order->direction ) );
+		self::assertSame( 'asc', $order->next( ListOrder::OPPORTUNITY_COUNT )->direction );
+
+		self::assertSame( $order, $order->for_tab( 'opportunities' ) );
+		self::assertTrue( $order->for_tab( '' )->is_default() );
+		self::assertTrue( $order->for_tab( 'broken-links' )->is_default() );
+		$clicks = ListOrder::from_input( 'clicks', 'asc' );
+		self::assertSame( $clicks, $clicks->for_tab( '' ) );
+	}
 }

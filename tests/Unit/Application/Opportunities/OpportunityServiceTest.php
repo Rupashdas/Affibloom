@@ -40,4 +40,15 @@ final class OpportunityServiceTest extends TestCase {
 		self::assertSame( 42, $this->service->host_of( 1 ) );
 		self::assertSame( 0, $this->service->host_of( 9 ) );
 	}
+
+	/** The Dashboard's lightbulb (F22 R52-R54, D13; Task O8): posts on the Opportunities tab, rows elsewhere. */
+	public function test_per_product_asks_for_posts_on_the_tab_and_rows_elsewhere(): void {
+		$repo = $this->createMock( OpportunityRepository::class );
+		$repo->expects( self::exactly( 2 ) )->method( 'counts_for' )
+			->willReturnCallback( static fn( array $ids, bool $hosts ): array => $hosts ? array( 7 => 2 ) : array( 7 => 5 ) );
+		$service = new OpportunityService( $repo, $this->locations );
+
+		self::assertSame( array( 7 => 2 ), $service->per_product( array( 7, 8 ), true ) );
+		self::assertSame( array( 7 => 5 ), $service->per_product( array( 7, 8 ), false ) );
+	}
 }

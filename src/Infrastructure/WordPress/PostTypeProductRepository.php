@@ -802,8 +802,9 @@ final class PostTypeProductRepository implements ProductRepository {
 		if ( Placement::Any !== $placement ) {
 			$list[ self::PLACEMENT_VAR ] = $placement;
 		}
-		// The Locations and Clicks headers' sort (F19 R6, D9; Task 13K); Alert's is the alert listing's, below.
-		if ( in_array( $order->column, array( ListOrder::LOCATIONS, ListOrder::CLICKS ), true ) ) {
+		// The Locations and Clicks headers' sort (F19 R6, D9; Task 13K), and the Opportunities tab's count (F22 R52, Task
+		// O8); Alert's is the alert listing's, below.
+		if ( in_array( $order->column, array( ListOrder::LOCATIONS, ListOrder::CLICKS, ListOrder::OPPORTUNITY_COUNT ), true ) ) {
 			$list[ self::ORDER_VAR ] = $order;
 		}
 
@@ -857,8 +858,9 @@ final class PostTypeProductRepository implements ProductRepository {
 
 	/**
 	 * The Locations or Clicks sort as the two queries' ORDER BY, and for them only (F19 R6, D9; Task 13K): the product's
-	 * Locations count (the column's rule, TableLinkLocationRepository::count_sql()) or its clicks in the last 30 days
-	 * (TableClickStore::total_sql()), then the highest ID on a tie.
+	 * Locations count (the column's rule, TableLinkLocationRepository::count_sql()), its clicks in the last 30 days
+	 * (TableClickStore::total_sql()) or the posts with an opportunity for it (TableOpportunityRepository::count_sql(),
+	 * F22 R52, Task O8), then the highest ID on a tie.
 	 *
 	 * @param string   $orderby The query's ORDER BY.
 	 * @param WP_Query $query   The query.
@@ -871,9 +873,11 @@ final class PostTypeProductRepository implements ProductRepository {
 			return $orderby;
 		}
 		$direction = ListOrder::ASC === $order->direction ? 'ASC' : 'DESC';
-		$value     = ListOrder::LOCATIONS === $order->column
-			? TableLinkLocationRepository::count_sql( "{$wpdb->posts}.ID" )
-			: TableClickStore::total_sql( "{$wpdb->posts}.ID", ClickReport::since( time() ) );
+		$value     = match ( $order->column ) {
+			ListOrder::LOCATIONS         => TableLinkLocationRepository::count_sql( "{$wpdb->posts}.ID" ),
+			ListOrder::OPPORTUNITY_COUNT => TableOpportunityRepository::count_sql( "{$wpdb->posts}.ID" ),
+			default                      => TableClickStore::total_sql( "{$wpdb->posts}.ID", ClickReport::since( time() ) ),
+		};
 
 		return "{$value} {$direction}, {$wpdb->posts}.ID DESC";
 	}
@@ -923,6 +927,9 @@ final class PostTypeProductRepository implements ProductRepository {
 				$clauses['where'] .= " AND {$broken}";
 			} elseif ( AlertListing::OUT_OF_STOCK === $alerts->tab ) {
 				$clauses['where'] .= " AND {$out}";
+			} elseif ( AlertListing::OPPORTUNITIES === $alerts->tab ) {
+				// F22 R50, R52, D13 (Task O8): the products with a Link Opportunity, by D4's rule.
+				$clauses['where'] .= ' AND ' . TableOpportunityRepository::count_sql( "{$wpdb->posts}.ID" ) . ' > 0';
 			}
 			if ( '' !== $alerts->order ) {
 				$direction          = AlertListing::DESC === $alerts->order ? 'DESC' : 'ASC';

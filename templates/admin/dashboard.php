@@ -96,18 +96,19 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 					$this->render(
 						'admin/partials/product-list',
 						array(
-							'products'  => $products,
-							'term'      => $view['term'],
-							'url'       => $view['url'],
-							'args'      => $view['args'],
-							'groups_of' => $view['groups_of'],
-							'links_of'  => $view['links_of'] ?? array(),
-							'alerts_of' => $view['alerts_of'] ?? array(),
-							'listing'   => $view['listing'] ?? null,
-							'order'     => $view['order'] ?? new \Affibloom\Domain\Product\ListOrder(),
-							'locations' => $view['locations'] ?? null,
-							'known'     => $view['known'] ?? true,
-							'clicks'    => $view['clicks'] ?? null,
+							'products'      => $products,
+							'term'          => $view['term'],
+							'url'           => $view['url'],
+							'args'          => $view['args'],
+							'groups_of'     => $view['groups_of'],
+							'links_of'      => $view['links_of'] ?? array(),
+							'alerts_of'     => $view['alerts_of'] ?? array(),
+							'listing'       => $view['listing'] ?? null,
+							'order'         => $view['order'] ?? new \Affibloom\Domain\Product\ListOrder(),
+							'locations'     => $view['locations'] ?? null,
+							'known'         => $view['known'] ?? true,
+							'clicks'        => $view['clicks'] ?? null,
+							'opportunities' => $view['opportunities'] ?? null,
 						)
 					);
 					?>

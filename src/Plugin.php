@@ -550,7 +550,7 @@ final class Plugin {
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ) ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ), $this->opportunity_service() ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query(), $this->location_service(), $this->location_counts(), $this->opportunity_service() ),
 				new SettingsScreen(
 					$this->template(),
@@ -582,7 +582,7 @@ final class Plugin {
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
-			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ) ),
+			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ), $this->opportunity_service() ),
 			new DashboardExportController(
 				new IssueLinksExport(
 					new PostTypeProductRepository(),

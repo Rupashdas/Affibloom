@@ -16,7 +16,7 @@
  * of this one and back.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations?: int|null, known?: bool, clicks?: int|null} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations?: int|null, known?: bool, clicks?: int|null, opportunities?: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -67,12 +67,13 @@ $public_link  = $view['link'] ?? $product->url->value();
 	</td>
 	<td class="affibloom-col-alert">
 		<?php
-		if ( isset( $view['alert'] ) ) {
+		if ( isset( $view['alert'] ) || ( $view['opportunities'] ?? 0 ) > 0 ) {
 			$this->render(
 				'admin/partials/alert-cell',
 				array(
-					'alert'        => $view['alert'],
-					'product_page' => $product_page,
+					'alert'         => $view['alert'] ?? null,
+					'product_page'  => $product_page,
+					'opportunities' => $view['opportunities'] ?? 0,
 				)
 			);
 		}

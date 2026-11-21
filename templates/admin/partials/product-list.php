@@ -4,11 +4,12 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, order?: \Affibloom\Domain\Product\ListOrder, locations?: array<int, int>|null, known?: bool, clicks?: array<int, int>|null} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, order?: \Affibloom\Domain\Product\ListOrder, locations?: array<int, int>|null, known?: bool, clicks?: array<int, int>|null, opportunities?: array<int, int>|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\ListOrder;
 
 // A `?post_id=` that names no published product is a search that found nothing, not an empty library (Task 13F).
@@ -34,7 +35,8 @@ $columns    = array(
 	array( 'affibloom-col-image', __( 'Image', 'affibloom' ), '' ),
 	array( 'affibloom-col-name', __( 'Link Name', 'affibloom' ), '' ),
 	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), '' ),
-	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), ListOrder::ALERT ),
+	// On the Opportunities tab Alert sorts by the opportunity count, descending first (F19 R9, F22 R51; Task O8).
+	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), AlertListing::OPPORTUNITIES === ( isset( $view['listing'] ) ? $view['listing']->tab : '' ) ? ListOrder::OPPORTUNITY_COUNT : ListOrder::ALERT ),
 	array( 'affibloom-col-locations', __( 'Locations', 'affibloom' ), ListOrder::LOCATIONS ),
 	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), ListOrder::CLICKS ),
 	array( 'affibloom-col-actions', __( 'Actions', 'affibloom' ), '' ),
@@ -45,7 +47,7 @@ $columns    = array(
 // when the tab lists nothing. dashboard.js downloads the file and says how many links it holds.
 $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 ?>
-<?php if ( '' !== $export_tab ) : ?>
+<?php if ( in_array( $export_tab, array( AlertListing::BROKEN, AlertListing::OUT_OF_STOCK ), true ) ) : ?>
 	<div class="affibloom-export">
 		<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-export-csv
 			data-exporting="<?php esc_attr_e( 'Exporting', 'affibloom' ); ?>" data-failed="<?php esc_attr_e( 'Export failed.', 'affibloom' ); ?>"
@@ -114,13 +116,14 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 					$this->render(
 						'admin/partials/product-row',
 						array(
-							'product'   => $product,
-							'groups'    => $view['groups_of'][ (int) $product->id ] ?? array(),
-							'link'      => $view['links_of'][ (int) $product->id ] ?? $product->url->value(),
-							'alert'     => $view['alerts_of'][ (int) $product->id ] ?? null,
-							'locations' => isset( $view['locations'] ) ? ( $view['locations'][ (int) $product->id ] ?? 0 ) : null,
-							'known'     => $view['known'] ?? true,
-							'clicks'    => isset( $view['clicks'] ) ? ( $view['clicks'][ (int) $product->id ] ?? 0 ) : null,
+							'product'       => $product,
+							'groups'        => $view['groups_of'][ (int) $product->id ] ?? array(),
+							'link'          => $view['links_of'][ (int) $product->id ] ?? $product->url->value(),
+							'alert'         => $view['alerts_of'][ (int) $product->id ] ?? null,
+							'locations'     => isset( $view['locations'] ) ? ( $view['locations'][ (int) $product->id ] ?? 0 ) : null,
+							'known'         => $view['known'] ?? true,
+							'clicks'        => isset( $view['clicks'] ) ? ( $view['clicks'][ (int) $product->id ] ?? 0 ) : null,
+							'opportunities' => $view['opportunities'][ (int) $product->id ] ?? 0,
 						)
 					);
 					?>

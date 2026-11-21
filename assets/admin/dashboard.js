@@ -261,7 +261,7 @@
 			if ( ! alerts ) {
 				return;
 			}
-			var n = 'broken-links' === tab ? alerts.broken : alerts.out_of_stock;
+			var n = { 'broken-links': alerts.broken, 'out-of-stock': alerts.out_of_stock, opportunities: alerts.opportunities }[ tab ] || 0;
 			tile.querySelectorAll( '[data-alert-count]' ).forEach( function ( count ) {
 				count.textContent = format.format( n );
 			} );
@@ -279,8 +279,9 @@
 		} );
 	}
 
-	// A tab lists only its products from page 1, oldest issue first; the tab on screen clicked again lists them all
-	// (Lasso's view-js.php 1185-1262). A real link, so a modified click still opens it elsewhere.
+	// A tab lists only its products from page 1, oldest issue first (Opportunities: most opportunities first, F22 R51); the
+	// tab on screen clicked again lists them all (Lasso's view-js.php 1185-1262). A real link, so a modified click still
+	// opens it elsewhere.
 	var alertTiles = document.querySelector( '[data-alert-tiles]' );
 	if ( alertTiles ) {
 		alertTiles.addEventListener( 'click', function ( event ) {
@@ -292,7 +293,7 @@
 			var tab = tile.getAttribute( 'data-alert-tab' );
 			var on = tab !== current.filter;
 			guarded( function () {
-				load( listWith( { filter: on ? tab : '', orderby: on ? 'alert' : '', order: on ? 'asc' : '' } ), true, false );
+				load( listWith( { filter: on ? tab : '', orderby: on ? tile.getAttribute( 'data-tab-orderby' ) : '', order: on ? tile.getAttribute( 'data-tab-order' ) : '' } ), true, false );
 			}, tile, true );
 		} );
 	}
@@ -392,6 +393,10 @@
 			shownUrl = window.location.href;
 			counts( data.library );
 			alertTabs( data.alerts );
+			// F19 R5 (Task O8): the opportunity count asked for outside its tab; the list fell back to Last Updated.
+			if ( data.notice && window.affibloomToast ) {
+				window.affibloomToast( data.notice, false );
+			}
 			reflect( ! remember );
 			announce();
 			if ( focus ) {

@@ -1229,6 +1229,8 @@
 .affibloom-table .affibloom-col-image { width: 88px; text-align: center; }
 .affibloom-table .affibloom-col-groups { width: 140px; }
 .affibloom-table .affibloom-col-alert { width: 92px; padding-right: 12px; padding-left: 12px; text-align: center; }
+/* Two icons sit side by side, as in Lasso's row (a lightbulb with an issue or the tick, Task O8); the days line goes under. */
+.affibloom-table td.affibloom-col-alert { white-space: nowrap; }
 .affibloom-table .affibloom-col-locations { width: 112px; padding-right: 12px; padding-left: 12px; text-align: center; }
 .affibloom-table .affibloom-col-clicks { width: 92px; padding-right: 12px; padding-left: 12px; text-align: center; }
 .affibloom-table .affibloom-col-actions { width: 236px; padding-right: 24px; text-align: center; }
@@ -3015,6 +3017,9 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-tile--out-of-stock[aria-current="true"] { border-color: var(--affibloom-warning-icon); background: var(--affibloom-warning-50); }
 .affibloom-tile--broken-links .affibloom-chip { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
 .affibloom-tile--out-of-stock .affibloom-chip { background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); }
+/* Task O8 (F22 R50): Opportunities, Lasso's green tile, in the success tone. */
+.affibloom-tile--opportunities[aria-current="true"] { border-color: var(--affibloom-success-700); background: var(--affibloom-success-50); }
+.affibloom-tile--opportunities .affibloom-chip { background: var(--affibloom-success-50); color: var(--affibloom-success-700); }
 .affibloom-tile__warm { display: inline-flex; margin-left: 4px; color: var(--affibloom-ink-400); vertical-align: middle; }
 .affibloom-tile__warm .affibloom-icon { width: 14px; height: 14px; }
 .affibloom-tile--alert[data-tip]:hover::after,

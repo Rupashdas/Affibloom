@@ -106,7 +106,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O5: The product page's Opportunities tab and Detect Opportunities
 - [x] Task O6: Detect Opportunities in Settings, and Override All Links
 - [x] Task O7: Dismiss, and Undo
-- [ ] Task O8: The Dashboard's tile, filter tab and lightbulb
+- [x] Task O8: The Dashboard's tile, filter tab and lightbulb
 - [ ] Task O9: Export CSV of content opportunities
 - [ ] Task O10: Monetize and unmonetize at render time (N1-A)
 
@@ -1154,11 +1154,18 @@ lightbulb "This URL has N possible opportunities." (hosts on this tab, rows else
 
 **Files:** the above; tests F22 **AC9**, unit `OpportunityCounterTest.php`; F19's spec (tile and Alert column).
 
-- [ ] **Step 1: Failing tests** (AC9: tile 9; the tab's rows; the tooltip's plural and singular; the link).
-- [ ] **Step 2: Counter, route parameters.**
-- [ ] **Step 3: Tile, tab, icon.**
-- [ ] **Step 4: Run and look** (F19 specs green; 375 px).
-- [ ] **Step 5: Commit** — "Show opportunities on the Dashboard".
+- [x] **Step 1: Failing tests** (AC9: tile 9; the tab's rows; the tooltip's plural and singular; the link).
+- [x] **Step 2: Counter, route parameters.**
+- [x] **Step 3: Tile, tab, icon.**
+- [x] **Step 4: Run and look** (F19 specs green; 375 px).
+- [x] **Step 5: Commit** — "Show opportunities on the Dashboard".
+
+*Note:* no `OpportunityCounter` class: the tile's count is a third alert tab (`AlertListing::OPPORTUNITIES`) counted by
+`LinkIssueQuery::counts()` like Broken links, so it follows search and filters; the per-row figure is
+`OpportunityService::per_product()` over `TableOpportunityRepository::counts_for()`, and the tab's filter and sort use
+its correlated `count_sql()` (D4's rule shared with Link Opportunities). F19 R5's substitution and notice live here
+(`ListOrder::for_tab()`; views keep the sort only with the tab, R10). The bulb is partial `opportunity-bulb.php`.
+Checked: unit; on Local the route (tile, tab, bulb counts, notice, no export on the tab); both lists at 1280 px.
 
 ---
 

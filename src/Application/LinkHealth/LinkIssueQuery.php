@@ -92,7 +92,7 @@ final class LinkIssueQuery {
 	}
 
 	/**
-	 * The tabs' counts (F11 R24, D15, D16, D7): broken and out-of-stock products in the list as searched and filtered
+	 * The tabs' counts (F11 R24, D15, D16, D7): broken and out-of-stock products, and those with Link Opportunities, in the list as searched and filtered
 	 * (the tab itself aside), whether the first day's checks may still change them, and whether Amazon products are
 	 * checked at all.
 	 *
@@ -100,7 +100,7 @@ final class LinkIssueQuery {
 	 * @param LinkKind   $link_kind The link-type filter.
 	 * @param int        $group     The Group filter.
 	 * @param int        $post_id   One product only; 0 for all.
-	 * @return array{broken: int, out_of_stock: int, warm_up: bool, amazon_api: bool}
+	 * @return array{broken: int, out_of_stock: int, opportunities: int, warm_up: bool, amazon_api: bool}
 	 * @param Placement  $placement The Placements filter (Task 36D).
 	 */
 	public function counts( SearchTerm $term, LinkKind $link_kind, int $group = 0, int $post_id = 0, Placement $placement = Placement::Any ): array {
@@ -108,10 +108,12 @@ final class LinkIssueQuery {
 		$activated = ( $this->activated )();
 
 		return array(
-			'broken'       => $count( AlertListing::BROKEN ),
-			'out_of_stock' => $count( AlertListing::OUT_OF_STOCK ),
-			'warm_up'      => $activated > 0 && ( $this->now )()->getTimestamp() - $activated < self::WARM_UP,
-			'amazon_api'   => $this->amazon->is_configured(),
+			'broken'        => $count( AlertListing::BROKEN ),
+			'out_of_stock'  => $count( AlertListing::OUT_OF_STOCK ),
+			// F22 R50, D13 (Task O8): the See opportunities tile, by the same rule as its tab.
+			'opportunities' => $count( AlertListing::OPPORTUNITIES ),
+			'warm_up'       => $activated > 0 && ( $this->now )()->getTimestamp() - $activated < self::WARM_UP,
+			'amazon_api'    => $this->amazon->is_configured(),
 		);
 	}
 

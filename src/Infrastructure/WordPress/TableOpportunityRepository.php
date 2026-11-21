@@ -43,12 +43,9 @@ final class TableOpportunityRepository implements OpportunityRepository {
 	public function links( OpportunityQuery $query ): OpportunityPage {
 		global $wpdb;
 
-		// This site's own links are never an opportunity (D4).
-		$excluded = array_merge( array( BaseDomain::of( home_url() ) ), AmazonDomains::EXCLUDED );
-		$where    = "l.product_id = 0 AND l.assigned_product_id = 0 AND l.is_ignored = 0 AND l.domain IS NOT NULL AND l.domain <> ''
-			AND l.domain NOT IN (" . implode( ',', array_fill( 0, count( $excluded ), '%s' ) ) . ") AND COALESCE(dop.meta_value, '1') <> '0'";
-		$args     = $excluded;
-		$words    = $query->words();
+		$where = self::rule();
+		$args  = self::excluded();
+		$words = $query->words();
 		if ( array() !== $words ) {
 			// Lasso's search: the words in order, anything between them (R7, R9).
 			$like   = self::like( $words );
@@ -102,6 +99,94 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		}
 
 		return new OpportunityPage( $items, $total, $shell->current() );
+	}
+
+	/**
+	 * How many Link Opportunities each product has (F22 R52, R53, D13; Task O8): D4's rows, or the distinct posts they
+	 * are in (the Dashboard's Opportunities tab counts posts, its other tabs rows, as Lasso).
+	 *
+	 * @param list<int> $product_ids The products.
+	 * @param bool      $hosts       Count distinct posts instead of rows.
+	 * @return array<int, int> By product ID; a product without any is left out.
+	 */
+	public function counts_for( array $product_ids, bool $hosts ): array {
+		global $wpdb;
+
+		$ids = array_values( array_filter( array_map( 'intval', $product_ids ) ) );
+		if ( array() === $ids ) {
+			return array();
+		}
+		$count = $hosts ? 'COUNT(DISTINCT l.host_id)' : 'COUNT(*)';
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table, one page of products; the rule and the ID list hold only placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT dm.post_id AS product, {$count} AS found FROM %i AS l
+				JOIN %i AS h ON h.ID = l.host_id
+				JOIN %i AS dm ON dm.meta_key = '_affibloom_domain' AND dm.meta_value = l.domain
+					AND dm.post_id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ")
+				LEFT JOIN %i AS dop ON dop.post_id = dm.post_id AND dop.meta_key = '_affibloom_detect_opportunities'
+				WHERE " . self::rule() . ' GROUP BY dm.post_id',
+				$wpdb->prefix . TableLinkLocationRepository::TABLE,
+				$wpdb->posts,
+				$wpdb->postmeta,
+				...array_merge( $ids, array( $wpdb->postmeta ), self::excluded() )
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		$counts = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$counts[ (int) $row['product'] ] = (int) $row['found'];
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * A product's Link Opportunities as a correlated SQL count, for the Dashboard's Opportunities tab and its sort
+	 * (F22 R50-R52, D13; Task O8): the posts with an opportunity for the product in the column given. The product's own
+	 * status is the outer query's (the Dashboard lists published products).
+	 *
+	 * @param string $id_column The product ID column of the outer query, e.g. "wp_posts.ID".
+	 */
+	public static function count_sql( string $id_column ): string {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $id_column is the caller's column name; the rule holds only placeholders.
+		$sql = (string) $wpdb->prepare(
+			"(SELECT COUNT(DISTINCT l.host_id) FROM %i AS l
+			JOIN %i AS h ON h.ID = l.host_id
+			JOIN %i AS dm ON dm.post_id = {$id_column} AND dm.meta_key = '_affibloom_domain' AND dm.meta_value = l.domain
+			LEFT JOIN %i AS dop ON dop.post_id = {$id_column} AND dop.meta_key = '_affibloom_detect_opportunities'
+			WHERE " . self::rule() . ')',
+			$wpdb->prefix . TableLinkLocationRepository::TABLE,
+			$wpdb->posts,
+			$wpdb->postmeta,
+			$wpdb->postmeta,
+			...self::excluded()
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		return $sql;
+	}
+
+	/**
+	 * D4's rule for an index row (l) and its product's Detect Opportunities (dop): untied, not dismissed, with a
+	 * domain that is neither this site's nor one of Amazon's; placeholders for self::excluded().
+	 */
+	private static function rule(): string {
+		return "l.product_id = 0 AND l.assigned_product_id = 0 AND l.is_ignored = 0 AND l.domain IS NOT NULL AND l.domain <> ''
+			AND l.domain NOT IN (" . implode( ',', array_fill( 0, count( self::excluded() ), '%s' ) ) . ") AND COALESCE(dop.meta_value, '1') <> '0'";
+	}
+
+	/**
+	 * The domains that are never an opportunity (D4): this site's own, and Amazon's.
+	 *
+	 * @return list<string>
+	 */
+	private static function excluded(): array {
+		return array_merge( array( BaseDomain::of( home_url() ) ), AmazonDomains::EXCLUDED );
 	}
 
 	/**

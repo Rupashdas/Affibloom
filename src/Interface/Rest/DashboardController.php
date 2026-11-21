@@ -22,10 +22,13 @@ use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViews;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Application\Opportunities\OpportunityService;
+use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\Admin\DashboardScreen;
 use Affibloom\Interface\Admin\DashboardUrl;
 use Affibloom\Interface\Admin\PerPage;
 use Affibloom\Interface\Messages;
@@ -52,15 +55,16 @@ final class DashboardController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param ProductService      $products The product library.
-	 * @param PerPage             $per_page How many products this editor sees at a time.
-	 * @param SavedViewService    $views    This editor's saved views (Task 13E).
-	 * @param Template            $template Renders the partials.
-	 * @param GroupService        $groups   The Groups column and the Group filter (Task G5).
-	 * @param PublicLinks|null    $links    The rows' public links (F24 R14; Task CL7).
-	 * @param LinkIssueQuery|null $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
-	 * @param LocationCounts|null $locations The Locations column (F12 L1-L3; Task 36A).
-	 * @param ClickReport|null    $clicks    The Clicks column (F12 R10, D8; Task 34A).
+	 * @param ProductService          $products The product library.
+	 * @param PerPage                 $per_page How many products this editor sees at a time.
+	 * @param SavedViewService        $views    This editor's saved views (Task 13E).
+	 * @param Template                $template Renders the partials.
+	 * @param GroupService            $groups   The Groups column and the Group filter (Task G5).
+	 * @param PublicLinks|null        $links    The rows' public links (F24 R14; Task CL7).
+	 * @param LinkIssueQuery|null     $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
+	 * @param LocationCounts|null     $locations The Locations column (F12 L1-L3; Task 36A).
+	 * @param ClickReport|null        $clicks    The Clicks column (F12 R10, D8; Task 34A).
+	 * @param OpportunityService|null $opportunities The Alert column's lightbulb (F22 R52-R54; Task O8).
 	 */
 	public function __construct(
 		private ProductService $products,
@@ -72,6 +76,7 @@ final class DashboardController implements Module {
 		private ?LinkIssueQuery $alerts = null,
 		private ?LocationCounts $locations = null,
 		private ?ClickReport $clicks = null,
+		private ?OpportunityService $opportunities = null,
 	) {}
 
 	/**
@@ -185,7 +190,7 @@ final class DashboardController implements Module {
 		return array(
 			'orderby' => array(
 				'type'    => 'string',
-				'enum'    => array( '', ListOrder::ALERT, ListOrder::LOCATIONS, ListOrder::CLICKS ),
+				'enum'    => array( '', ListOrder::ALERT, ListOrder::LOCATIONS, ListOrder::CLICKS, ListOrder::OPPORTUNITY_COUNT ),
 				'default' => '',
 			),
 			'order'   => array(
@@ -195,7 +200,7 @@ final class DashboardController implements Module {
 			),
 			'filter'  => array(
 				'type'    => 'string',
-				'enum'    => array( '', 'broken-links', 'out-of-stock' ),
+				'enum'    => array_merge( array( '' ), AlertListing::TABS ),
 				'default' => '',
 			),
 		);
@@ -219,8 +224,11 @@ final class DashboardController implements Module {
 		$per_page  = $this->per_page->choose( absint( $request->get_param( 'per_page' ) ) );
 		$group     = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
 		$one       = absint( $request->get_param( 'post_id' ) );
-		$order     = ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) );
-		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), (string) $request->get_param( 'filter' ) );
+		$tab       = (string) $request->get_param( 'filter' );
+		$asked     = ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) );
+		// F19 R5 (Task O8): the opportunity count sorts the Opportunities tab only; elsewhere the default, said so.
+		$order     = $asked->for_tab( $tab );
+		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), $tab );
 		$placement = Placement::from_input( (string) $request->get_param( 'placements' ) );
 		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one, $alerts, $placement, $order );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $list->items );
@@ -231,18 +239,19 @@ final class DashboardController implements Module {
 					'html'       => $this->template->fetch(
 						'admin/partials/product-list',
 						array(
-							'products'  => $list,
-							'term'      => $term->text(),
-							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
-							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
-							'alerts_of' => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
-							'listing'   => $alerts,
-							'order'     => $order,
-							'groups_of' => $this->groups->for_products( $ids ),
-							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
-							'locations' => $this->locations?->of( $ids ),
-							'known'     => $this->locations?->known() ?? true,
-							'clicks'    => $this->clicks?->totals_for( $ids, time() ),
+							'products'      => $list,
+							'term'          => $term->text(),
+							'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
+							'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
+							'alerts_of'     => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
+							'listing'       => $alerts,
+							'order'         => $order,
+							'groups_of'     => $this->groups->for_products( $ids ),
+							'links_of'      => null === $this->links ? array() : $this->links->of( $list->items ),
+							'locations'     => $this->locations?->of( $ids ),
+							'known'         => $this->locations?->known() ?? true,
+							'clicks'        => $this->clicks?->totals_for( $ids, time() ),
+							'opportunities' => $this->opportunities?->per_product( $ids, AlertListing::OPPORTUNITIES === $alerts?->tab ),
 						)
 					),
 					'term'       => $term->text(),
@@ -259,6 +268,7 @@ final class DashboardController implements Module {
 					'orderby'    => $order->column,
 					'order'      => $order->direction,
 					'filter'     => null === $alerts ? '' : $alerts->tab,
+					'notice'     => $asked === $order ? '' : DashboardScreen::opportunity_sort_notice(),
 					// The tabs' counts follow the search and the filters (Task 31B; F11 R24).
 					'alerts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement ),
 					'url'        => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts, $placement, $order ),
@@ -285,7 +295,8 @@ final class DashboardController implements Module {
 			$this->groups->choose_filter( (int) $request->get_param( 'group' ) ),
 			(string) $request->get_param( 'filter' ),
 			Placement::from_input( (string) $request->get_param( 'placements' ) ),
-			ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) )
+			// F19 R10 (Task O8): a view keeps the opportunity count only with the Opportunities tab.
+			ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) )->for_tab( (string) $request->get_param( 'filter' ) )
 		);
 
 		try {

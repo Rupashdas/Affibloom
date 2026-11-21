@@ -23,15 +23,18 @@ final class ListOrder {
 	public const ALERT     = 'alert';
 	public const LOCATIONS = 'locations';
 	public const CLICKS    = 'clicks';
+	/** The Opportunities tab's Alert sort (F22 R51, R52; F19 R5, R9; Task O8): its products by their opportunity count. */
+	public const OPPORTUNITY_COUNT = 'opportunity_count';
 
 	public const ASC  = 'asc';
 	public const DESC = 'desc';
 
 	/** Each sortable column's first direction (R1's `data-order-init`). */
 	private const FIRST = array(
-		self::ALERT     => self::ASC,
-		self::LOCATIONS => self::DESC,
-		self::CLICKS    => self::DESC,
+		self::ALERT             => self::ASC,
+		self::LOCATIONS         => self::DESC,
+		self::CLICKS            => self::DESC,
+		self::OPPORTUNITY_COUNT => self::DESC,
 	);
 
 	/**
@@ -68,6 +71,16 @@ final class ListOrder {
 	 */
 	public static function from_input( string $orderby, string $order ): self {
 		return new self( $orderby, $order );
+	}
+
+	/**
+	 * The sort a tab allows (F19 R5, R10): the opportunity count outside the Opportunities tab is the default order, as
+	 * Lasso substitutes Last Updated; every other sort stands.
+	 *
+	 * @param string $tab The list's alert tab (AlertListing::OPPORTUNITIES or another).
+	 */
+	public function for_tab( string $tab ): self {
+		return self::OPPORTUNITY_COUNT === $this->column && 'opportunities' !== $tab ? new self() : $this;
 	}
 
 	/**

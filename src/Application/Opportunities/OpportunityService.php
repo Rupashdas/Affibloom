@@ -70,6 +70,18 @@ final class OpportunityService {
 	}
 
 	/**
+	 * Each Dashboard row's opportunity count, the lightbulb's number (R52-R54, D13; Task O8): distinct posts on the
+	 * Opportunities tab, rows on the others, as Lasso.
+	 *
+	 * @param list<int> $product_ids The rows' products.
+	 * @param bool      $by_hosts    The Opportunities tab is on screen.
+	 * @return array<int, int> By product ID; a product without any is left out.
+	 */
+	public function per_product( array $product_ids, bool $by_hosts ): array {
+		return $this->opportunities->counts_for( $product_ids, $by_hosts );
+	}
+
+	/**
 	 * One page of Domain Opportunities (R17-R19; Task O2).
 	 *
 	 * @param OpportunityQuery $query The search, sort and page.

@@ -14,7 +14,7 @@ use DateTimeImmutable;
 /**
  * The Dashboard list's link-health arguments (F11 R20, R25, R26; Tasks 31A, 31B): the Alert column's sort by the
  * shown issue's detection date (ascending, descending, or none, products without a shown issue last), and the tab
- * that lists only broken or only out-of-stock products. Out-of-stock issues count only once the grace days have
+ * that lists only broken, only out-of-stock products, or only those with Link Opportunities (F22, Task O8). Out-of-stock issues count only once the grace days have
  * passed ($cutoff, from AlertWindow).
  */
 final class AlertListing {
@@ -24,6 +24,11 @@ final class AlertListing {
 
 	public const BROKEN       = 'broken-links';
 	public const OUT_OF_STOCK = 'out-of-stock';
+	/** The products with Link Opportunities (F22 R50-R52, D13; Task O8). */
+	public const OPPORTUNITIES = 'opportunities';
+
+	/** Every tab. */
+	public const TABS = array( self::BROKEN, self::OUT_OF_STOCK, self::OPPORTUNITIES );
 
 	/**
 	 * The sort: self::ASC, self::DESC or empty (the list's own order).
@@ -33,7 +38,7 @@ final class AlertListing {
 	public readonly string $order;
 
 	/**
-	 * The tab: self::BROKEN, self::OUT_OF_STOCK or empty (every product).
+	 * The tab: self::BROKEN, self::OUT_OF_STOCK, self::OPPORTUNITIES or empty (every product).
 	 *
 	 * @var string
 	 */
@@ -48,7 +53,7 @@ final class AlertListing {
 	 */
 	public function __construct( string $order, string $tab, public readonly DateTimeImmutable $cutoff ) {
 		$this->order = in_array( $order, array( self::ASC, self::DESC ), true ) ? $order : '';
-		$this->tab   = in_array( $tab, array( self::BROKEN, self::OUT_OF_STOCK ), true ) ? $tab : '';
+		$this->tab   = in_array( $tab, self::TABS, true ) ? $tab : '';
 	}
 
 	/**

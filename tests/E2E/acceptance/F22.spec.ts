@@ -199,6 +199,34 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
 	} );
 
+	// AC9 (O8; R50-R56, D13).
+	test( "AC9 See opportunities: the tile's count, its tab sorted by the count, the lightbulb to the product's tab", async ( { page } ) => {
+		const { product } = fixture( 2 );
+		const name = wp( 'post', 'get', String( product ), '--field=post_title' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
+		const tile = page.locator( '[data-alert-tab="opportunities"]' );
+		await expect( tile.locator( '[data-alert-count]' ) ).toHaveText( '1' );
+
+		// All links: the bulb counts rows (2 links), singular and plural follow the number.
+		const row = page.locator( '.affibloom-table tbody tr', { hasText: name } );
+		await expect( row.locator( '.affibloom-alert--opportunity' ) ).toHaveAttribute( 'data-tip', 'This URL has 2 possible opportunities.' );
+
+		await tile.click();
+		await expect( page ).toHaveURL( /filter=opportunities&?.*orderby=opportunity_count/ );
+		await expect( tile ).toHaveAttribute( 'aria-current', 'true' );
+		await expect( page.locator( '.affibloom-table tbody tr' ) ).toHaveCount( 1 );
+		// The tab counts posts: both links are in one post.
+		await expect( row.locator( '.affibloom-alert--opportunity' ) ).toHaveAttribute( 'data-tip', 'This URL has 1 possible opportunity.' );
+		await expect( page.locator( 'th.affibloom-col-alert' ) ).toHaveAttribute( 'aria-sort', 'descending' );
+
+		await row.locator( '.affibloom-alert--opportunity' ).click();
+		await expect( page ).toHaveURL( new RegExp( `page=affibloom-product&id=${ product }&tab=opportunities` ) );
+
+		// The count's sort outside its tab falls back to Last Updated and says so (F19 R5).
+		await page.goto( '/wp-admin/admin.php?page=affibloom&orderby=opportunity_count&order=desc' );
+		await expect( page.getByText( 'Sorting by Opportunities is only available on the Opportunities tab.' ) ).toBeVisible();
+	} );
+
 	// AC12 (O4; R29-R31).
 	test( "AC12 Content › post: the post's text links, product links first with Monetize on", async ( { page } ) => {
 		const url = `https://www.example.com/${ unique( 'f22-ac12' ) }`;
