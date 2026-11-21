@@ -134,4 +134,22 @@ interface LinkLocationRepository {
 	 * @return int How many rows were tied.
 	 */
 	public function tie_amazon( string $asin, string $country, int $product_id ): int;
+
+	/**
+	 * The Amazon import's short links (F35 R24, R28, D14; Task AM2): untied text and image links on `amzn.to`,
+	 * `amzn.com` or `amzlink.to`, one per link, oldest first.
+	 *
+	 * @param int $limit At most this many.
+	 * @return list<string>
+	 */
+	public function untied_short_links( int $limit ): array;
+
+	/**
+	 * Ties every untied row of a link to a product (Task AM2).
+	 *
+	 * @param string $url        The link as written.
+	 * @param int    $product_id The product.
+	 * @return int How many rows were tied.
+	 */
+	public function tie_url( string $url, int $product_id ): int;
 }

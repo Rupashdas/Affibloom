@@ -16,6 +16,7 @@ use Affibloom\Domain\LinkIndex\LocationHost;
 use Affibloom\Domain\LinkIndex\LocationKey;
 use Affibloom\Domain\LinkIndex\LocationPage;
 use Affibloom\Domain\LinkIndex\ProductLocation;
+use Affibloom\Domain\Monetize\ShortLinkRepository;
 use RuntimeException;
 
 /**
@@ -379,6 +380,47 @@ KEY display_type (display_type)";
 		}
 
 		return $queue;
+	}
+
+	/**
+	 * The Amazon import's short links: untied text and image links on Amazon's short hosts, one per link, oldest first,
+	 * without those given up after three tries (F35 R24, R28, D14; Task AM2).
+	 *
+	 * @param int $limit At most this many.
+	 * @return list<string>
+	 */
+	public function untied_short_links( int $limit ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one background run.
+		$urls = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT l.url FROM %i AS l WHERE l.product_id = 0 AND l.assigned_product_id = 0 AND l.domain IN ('amzn.to', 'amzn.com', 'amzlink.to')
+					AND l.display_type IN ('Text', 'Image-only anchor text')
+					AND NOT EXISTS ( SELECT 1 FROM %i AS s WHERE s.short_url = l.url AND s.tries >= %d )
+				GROUP BY l.url ORDER BY MIN(l.id) LIMIT %d",
+				$wpdb->prefix . self::TABLE,
+				$wpdb->prefix . TableAmazonShortLinkRepository::TABLE,
+				ShortLinkRepository::TRIES,
+				max( 1, $limit )
+			)
+		);
+
+		return array_values( array_map( 'strval', is_array( $urls ) ? $urls : array() ) );
+	}
+
+	/**
+	 * Ties every untied row of a link to a product (Task AM2).
+	 *
+	 * @param string $url        The link as written.
+	 * @param int    $product_id The product.
+	 * @return int How many rows were tied.
+	 */
+	public function tie_url( string $url, int $product_id ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one link's rows (by its hash, the location key's).
+		return (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET product_id = %d, link_type = 'product' WHERE product_id = 0 AND assigned_product_id = 0 AND url_md5 = %s AND url = %s", $wpdb->prefix . self::TABLE, $product_id, md5( $url ), $url ) );
 	}
 
 	/**

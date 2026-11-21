@@ -55,6 +55,22 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		await expect( link ).toHaveAttribute( 'rel', /nofollow/ );
 	} );
 
+	// AC3 (AM2; R28, D14): amzn.to answers 301 to the product page (stubbed: the suite never reaches Amazon's hosts).
+	test( 'AC3 an Amazon short link is resolved once and tied to its product; the post keeps amzn.to', () => {
+		const code = asin();
+		const short = `https://amzn.to/${ unique( 's' ).replace( /[^a-z0-9]/gi, '' ).slice( 0, 7 ) }`;
+		const content = `<p><a href="${ short }">short</a></p>`;
+		const id = newPostWith( content ).replace( '/?p=', '' );
+		const stub = `add_filter( "pre_http_request", static function ( $pre, $args, $url ) { if ( "${ short }" === $url ) { update_option( "afb_test_short_asked", (int) get_option( "afb_test_short_asked", 0 ) + 1 ); return array( "response" => array( "code" => 301, "message" => "Moved" ), "headers" => array( "location" => "https://www.amazon.com/dp/${ code }" ), "body" => "", "cookies" => array() ); } return str_contains( $url, "amazon" ) ? new WP_Error( "http_request_not_executed", "Blocked in the acceptance tests." ) : $pre; }, 10, 3 );`;
+		wp( 'eval', 'delete_option( "afb_test_short_asked" );' );
+		wp( 'eval', `${ stub } do_action( "affibloom_amazon_import" );` );
+		wp( 'eval', `${ stub } do_action( "affibloom_amazon_import" );` );
+		expect( wp( 'eval', 'echo (int) get_option( "afb_test_short_asked", 0 );' ) ).toBe( '1' );
+		expect( amazonProducts( code ) ).toBe( 1 );
+		expect( wp( 'eval', `global $wpdb; echo (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}affibloom_link_locations WHERE url = %s AND product_id > 0", "${ short }" ) );` ) ).toBe( '1' );
+		expect( wp( 'post', 'get', id, '--field=post_content' ) ).toBe( content );
+	} );
+
 	test( 'AC8 with Auto-Monetization off the event is not scheduled and a run does nothing', () => {
 		setSettings( { auto_monetize_amazon: false } );
 		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );

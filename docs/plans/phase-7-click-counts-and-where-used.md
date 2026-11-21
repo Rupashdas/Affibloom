@@ -116,7 +116,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task C2B: Detecting affiliate links when a post is indexed — `save_post`
 - [x] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
 - [x] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
-- [ ] Task AM2: Amazon short links — the import's short-link branch and the map
+- [x] Task AM2: Amazon short links — the import's short-link branch and the map
 - [ ] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
 - [ ] Task AM4: The Amazon import notice — every Affibloom page
 - [ ] Task AM5: The import status card, the Dashboard notice and the General stats
@@ -1475,12 +1475,18 @@ link that cannot be resolved is tried three times, then left as it is.
 `tests/Unit/Application/AmazonShortLinksTest.php`, `tests/Integration/AmazonShortLinksTableTest.php`,
 `tests/E2E/acceptance/F35.spec.ts` (AC3, HTTP stubbed: `amzn.to` answers 301 to `amazon.com/dp/…`).
 
-- [ ] **Step 1: Failing tests.** AC3 (map row, product, front end full link, md5 unchanged), three failed tries → no
+- [x] **Step 1: Failing tests.** AC3 (map row, product, front end full link, md5 unchanged), three failed tries → no
   fourth request. Red: no table.
-- [ ] **Step 2: Table, repository, resolver service.**
-- [ ] **Step 3: The import branch and the resolver lookup.**
-- [ ] **Step 4: Run and look.** Staging: the 218 rows tie within a few runs; count requests (one per distinct short link).
-- [ ] **Step 5: Commit** — "Resolve Amazon short links once and tie them to their product".
+- [x] **Step 2: Table, repository, resolver service.**
+- [x] **Step 3: The import branch and the resolver lookup.**
+- [x] **Step 4: Run and look.** Staging: the 218 rows tie within a few runs; count requests (one per distinct short link).
+- [x] **Step 5: Commit** — "Resolve Amazon short links once and tie them to their product".
+
+*Note:* names follow the plugin: `TableAmazonShortLinkRepository` (schema step 10, with a `tries` column for the
+three-attempt rule; `ShortLinkRepository::TRIES`). Short links come first in a run; their queue leaves out links given
+up, so they cannot block the ASIN queue. Step 4 on staging needs the user's word (not done). On Local outbound HTTP to
+`amzn.to` is blocked (Task 2's safety), so a real link counted one failed try, as designed; with a destination put in
+the map, one run tied the link's rows to that ASIN's product and recorded it in the map; the post was unchanged.
 
 ---
 

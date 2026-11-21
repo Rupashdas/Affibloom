@@ -72,6 +72,21 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 	/** @var list<array{asin: string, country: string, domain: string, tag: string}> untied_amazon()'s answer. */
 	public array $amazon = array();
 
+	/** @var list<string> untied_short_links()'s answer. */
+	public array $short = array();
+
+	/** @var list<array{string, int}> tie_url()'s calls. */
+	public array $tied_urls = array();
+
+	public function untied_short_links( int $limit ): array {
+		return array_slice( $this->short, 0, $limit );
+	}
+
+	public function tie_url( string $url, int $product_id ): int {
+		$this->tied_urls[] = array( $url, $product_id );
+		return 1;
+	}
+
 	/** @var list<array{string, string, int}> tie_amazon()'s calls. */
 	public array $tied = array();
 

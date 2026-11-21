@@ -12,6 +12,7 @@ namespace Affibloom\Application\LinkIndex;
 use Affibloom\Domain\Amazon\AmazonUrl;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Monetize\DetectedLinkRepository;
+use Affibloom\Domain\Monetize\ShortLinkRepository;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\PlainUrlKey;
 use Affibloom\Domain\Product\ProductRepository;
@@ -37,8 +38,9 @@ final class ProductResolver {
 	 *
 	 * @param ProductRepository           $products The library.
 	 * @param DetectedLinkRepository|null $detected The detected affiliate links, looked up last (F35 R15; Task C2C).
+	 * @param ShortLinkRepository|null    $short    The Amazon short links' map (F35 D14; Task AM2).
 	 */
-	public function __construct( private ProductRepository $products, private ?DetectedLinkRepository $detected = null ) {}
+	public function __construct( private ProductRepository $products, private ?DetectedLinkRepository $detected = null, private ?ShortLinkRepository $short = null ) {}
 
 	/**
 	 * The product's ID, or 0 when the link is no product's.
@@ -79,6 +81,11 @@ final class ProductResolver {
 		$detected = null === $product && null !== $this->detected ? $this->detected->product_for( $url ) : 0;
 		if ( $detected > 0 ) {
 			$product = $this->products->get( $detected );
+		}
+		// An Amazon short link resolved by the import ties to its destination's product (F35 D14; Task AM2).
+		$mapped = null === $product && null !== $this->short && AmazonUrl::is_short( $link ) ? (int) ( $this->short->find( $url )['product'] ?? 0 ) : 0;
+		if ( $mapped > 0 ) {
+			$product = $this->products->get( $mapped );
 		}
 
 		return (int) $product?->id;

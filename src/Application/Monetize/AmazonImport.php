@@ -22,7 +22,8 @@ use RuntimeException;
  * product by ASIN and store, a revived one), at most 100 a run, one at a time. Lasso rebuilds each link from its ASIN
  * and store (`https://www.<store>/dp/<ASIN>`, with the link's own tag). A retired ASIN (F1's repoint) is skipped, as
  * the add path would publish it again. The rows of each ASIN are tied to its product at once, so the next run moves on,
- * and F21's render filter prints the product's link (D13); no post is written.
+ * and F21's render filter prints the product's link (D13); no post is written. Short links come first (Task AM2):
+ * resolved once through the map, their destination made a product and their rows tied, the post still saying `amzn.to`.
  */
 final class AmazonImport {
 
@@ -32,8 +33,9 @@ final class AmazonImport {
 	 * @param LinkLocationRepository $rows     The link index.
 	 * @param ProductService         $products The add path.
 	 * @param ProductRepository      $library  The products, for the retired-ASIN check.
+	 * @param AmazonShortLinks|null  $short    The short links' map (Task AM2).
 	 */
-	public function __construct( private LinkLocationRepository $rows, private ProductService $products, private ProductRepository $library ) {}
+	public function __construct( private LinkLocationRepository $rows, private ProductService $products, private ProductRepository $library, private ?AmazonShortLinks $short = null ) {}
 
 	/**
 	 * One run.
@@ -43,9 +45,8 @@ final class AmazonImport {
 	 * @return array{queued: int, done: int, made: int} The batch's size, the links handled, the products recorded.
 	 */
 	public function run( int $limit, Closure $still_on ): array {
-		$queue = $this->rows->untied_amazon( $limit );
-		$done  = 0;
-		$made  = 0;
+		[ $short_queued, $done, $made ] = $this->short_links( $limit, $still_on );
+		$queue                          = $done < $limit ? $this->rows->untied_amazon( $limit - $done ) : array();
 		foreach ( $queue as $link ) {
 			if ( ! $still_on() ) {
 				break;
@@ -65,10 +66,47 @@ final class AmazonImport {
 		}
 
 		return array(
-			'queued' => count( $queue ),
+			'queued' => $short_queued + count( $queue ),
 			'done'   => $done,
 			'made'   => $made,
 		);
+	}
+
+	/**
+	 * The short links first (R24; AM2): each resolved once (the map, else one request), its destination made a product
+	 * through the add path, and its rows tied to it. A link not resolved yet waits for the next run (three tries).
+	 *
+	 * @param int     $limit    At most this many.
+	 * @param Closure $still_on Whether Auto-Monetization is still on.
+	 * @return array{0: int, 1: int, 2: int} Queued, handled, products made.
+	 */
+	private function short_links( int $limit, Closure $still_on ): array {
+		if ( null === $this->short ) {
+			return array( 0, 0, 0 );
+		}
+		$queue = $this->rows->untied_short_links( $limit );
+		$done  = 0;
+		$made  = 0;
+		foreach ( $queue as $url ) {
+			if ( ! $still_on() ) {
+				break;
+			}
+			++$done;
+			$final = $this->short->resolve( $url );
+			if ( null === $final ) {
+				continue;
+			}
+			try {
+				$added = $this->products->create_from_url( $final );
+			} catch ( InvalidField | RuntimeException ) {
+				continue;
+			}
+			$this->short->made( $url, (int) $added->product->id );
+			$this->rows->tie_url( $url, (int) $added->product->id );
+			$made += $added->already_existed ? 0 : 1;
+		}
+
+		return array( count( $queue ), $done, $made );
 	}
 
 	/**

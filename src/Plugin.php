@@ -14,6 +14,7 @@ use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Application\Monetize\AffiliateDetector;
 use Affibloom\Application\Monetize\AmazonImport;
+use Affibloom\Application\Monetize\AmazonShortLinks;
 use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
@@ -26,6 +27,7 @@ use Affibloom\Infrastructure\WordPress\Builders\ThriveSource;
 use Affibloom\Infrastructure\WordPress\Builders\WprmSource;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
+use Affibloom\Infrastructure\WordPress\TableAmazonShortLinkRepository;
 use Affibloom\Infrastructure\WordPress\TableClickStore;
 use Affibloom\Infrastructure\WordPress\ProductDomainBackfill;
 use Affibloom\Infrastructure\WordPress\TableDetectedLinkRepository;
@@ -381,41 +383,45 @@ final class Plugin {
 		return array(
 			// Task 13G: the Dashboard's search reads added buttons' links from their own rows; products stored before
 			// then get them once.
-			1 => static function (): void {
+			1  => static function (): void {
 				( new PostTypeProductRepository() )->index_all_button_urls();
 			},
 			// Task C1C: Amazon's data per ASIN and store (C1 D5).
-			2 => static function (): void {
+			2  => static function (): void {
 				( new Table( TableAmazonProductRepository::TABLE, TableAmazonProductRepository::COLUMNS ) )->create();
 			},
 			// Task C1Q3: the price and the list price as numbers. dbDelta adds the columns to step 2's table (a new
 			// install already has them from step 2, and this changes nothing there).
-			3 => static function (): void {
+			3  => static function (): void {
 				( new Table( TableAmazonProductRepository::TABLE, TableAmazonProductRepository::COLUMNS ) )->create();
 			},
 			// Task 35A: the content link index (F21 D1).
-			4 => static function (): void {
+			4  => static function (): void {
 				( new Table( TableLinkLocationRepository::TABLE, TableLinkLocationRepository::COLUMNS ) )->create();
 			},
 			// Task V1: the products' URL variants (F27 D1).
-			5 => static function (): void {
+			5  => static function (): void {
 				( new Table( TableVariantRepository::TABLE, TableVariantRepository::COLUMNS ) )->create();
 			},
 			// Task 30A: the products' link-health rows (F11 D1).
-			6 => static function (): void {
+			6  => static function (): void {
 				( new Table( TableLinkIssueRepository::TABLE, TableLinkIssueRepository::COLUMNS ) )->create();
 			},
 			// Task 33A: the click counts (F12 D2, ADR-005 with location_id).
-			7 => static function (): void {
+			7  => static function (): void {
 				( new Table( TableClickStore::TABLE, TableClickStore::COLUMNS ) )->create();
 			},
 			// Task O1: every stored product's base domain, which later saves write (F22 D5).
-			8 => static function (): void {
+			8  => static function (): void {
 				ProductDomainBackfill::run();
 			},
 			// Task C2B: the detected affiliate links (F35 D4).
-			9 => static function (): void {
+			9  => static function (): void {
 				( new Table( TableDetectedLinkRepository::TABLE, TableDetectedLinkRepository::COLUMNS ) )->create();
+			},
+			// Task AM2: the Amazon short links' map (F35 D14).
+			10 => static function (): void {
+				( new Table( TableAmazonShortLinkRepository::TABLE, TableAmazonShortLinkRepository::COLUMNS ) )->create();
 			},
 		);
 	}
@@ -599,7 +605,7 @@ final class Plugin {
 			// F35 R13, D5 (Task C2C): products for detected links, in the background.
 			new AutoDetectCron( $this->affiliate_detector( $products ), new OptionLock( 'affibloom_auto_detect_lock', 5 * 60 ), $this->settings_repository() ),
 			// F35 R24, R25, D11 (Task AM1): products for the Amazon links in posts, every five minutes while on.
-			new AmazonImportCron( new AmazonImport( new TableLinkLocationRepository(), $products, new PostTypeProductRepository() ), new AmazonImportSchedule(), new OptionLock( 'affibloom_amazon_import_lock', 5 * 60 ), $this->settings_repository() ),
+			new AmazonImportCron( new AmazonImport( new TableLinkLocationRepository(), $products, new PostTypeProductRepository(), new AmazonShortLinks( new TableAmazonShortLinkRepository(), new LinkResolver( new WpPageFetcher() ) ) ), new AmazonImportSchedule(), new OptionLock( 'affibloom_amazon_import_lock', 5 * 60 ), $this->settings_repository() ),
 			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
@@ -801,7 +807,7 @@ final class Plugin {
 		if ( null !== $this->link_indexer ) {
 			return $this->link_indexer;
 		}
-		$links = new ProductResolver( new PostTypeProductRepository(), new TableDetectedLinkRepository() );
+		$links = new ProductResolver( new PostTypeProductRepository(), new TableDetectedLinkRepository(), new TableAmazonShortLinkRepository() );
 
 		$this->link_indexer = new LinkIndexer(
 			new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ),

@@ -82,4 +82,30 @@ final class AmazonImportTest extends TestCase {
 
 		self::assertSame( array( 'queued' => 2, 'done' => 1, 'made' => 1 ), $batch );
 	}
+
+	/** Task AM2 (F35 AC3): a short link is resolved, its destination made a product, its rows tied. */
+	public function test_short_links_come_first_and_tie_to_their_destinations_product(): void {
+		$map = new class() implements \Affibloom\Domain\Monetize\ShortLinkRepository {
+			public array $rows = array();
+			public function find( string $short_url ): ?array {
+				return $this->rows[ $short_url ] ?? null;
+			}
+			public function save( string $short_url, string $final_url, int $product, int $tries ): void {
+				$this->rows[ $short_url ] = array( 'final' => $final_url, 'product' => $product, 'tries' => $tries );
+			}
+		};
+		$pages = new FakePageFetcher( array( 'https://amzn.to/xyz' => new \Affibloom\Application\Products\FetchedPage( 301, 'https://www.amazon.com/dp/B0F35AC6XX', '' ) ) );
+		$resolver = new LinkResolver( $pages );
+		$settings = new InMemorySettingsRepository();
+		$links    = new LinkNormaliser( $resolver, $settings );
+		$service  = new ProductService( $this->products, $resolver, $settings, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon() );
+		$import   = new AmazonImport( $this->rows, $service, $this->products, new \Affibloom\Application\Monetize\AmazonShortLinks( $map, $resolver ) );
+		$this->rows->short = array( 'https://amzn.to/xyz' );
+
+		self::assertSame( array( 'queued' => 1, 'done' => 1, 'made' => 1 ), $import->run( 100, static fn(): bool => true ) );
+
+		$product = (int) $this->products->saved[ array_key_first( $this->products->saved ) ]->id;
+		self::assertSame( array( array( 'https://amzn.to/xyz', $product ) ), $this->rows->tied_urls );
+		self::assertSame( $product, $map->rows['https://amzn.to/xyz']['product'] );
+	}
 }
