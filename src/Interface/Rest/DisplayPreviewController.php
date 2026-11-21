@@ -10,15 +10,20 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Rest;
 
 use Affibloom\Application\Box\BoxBuilder;
+use Affibloom\Application\Box\GridView;
 use Affibloom\Application\Display\DisplayPresentation;
 use Affibloom\Application\Display\DisplaySettingsService;
 use Affibloom\Application\Display\PreviewProduct;
+use Affibloom\Domain\Box\ElementVisibility;
+use Affibloom\Domain\Display\DisplaySettings;
 use Affibloom\Domain\Display\DisplayType;
+use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\IconStyles;
 use Affibloom\Interface\Front\BoxAssets;
 use Affibloom\Interface\Front\BoxHtml;
+use Affibloom\Interface\Front\DisplayHtml;
 use Affibloom\Module;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -27,7 +32,7 @@ use WP_REST_Server;
 /**
  * `POST /affibloom/v1/display-preview` (F5 R94-R97, D11; F16 AC2): the sample box drawn with the screen's unsaved Display
  * values, advanced rendering forced on (R96), as HTML with the stylesheets and the `:root` block its frame needs. Nothing
- * is saved and no global state changes. Until the group displays exist (DT2, DT4) Grid and List show their settings on
+ * is saved and no global state changes. Grid draws Lasso's samples as a grid (R95); List still shows its settings on
  * the Single box.
  */
 final class DisplayPreviewController implements Module {
@@ -40,8 +45,9 @@ final class DisplayPreviewController implements Module {
 	 * @param BoxBuilder             $builder  The box engine.
 	 * @param BoxHtml                $html     The box's printer.
 	 * @param BoxAssets              $assets   The box's stylesheets.
-	 * @param string                 $image    The sample's picture.
+	 * @param string                 $images   The folder of the samples' pictures, ending in `/`.
 	 * @param IconStyles             $icons    The site's icon CSS.
+	 * @param DisplayHtml            $displays The group displays' printer, for the Grid preview.
 	 */
 	public function __construct(
 		private readonly DisplaySettingsService $display,
@@ -49,8 +55,9 @@ final class DisplayPreviewController implements Module {
 		private readonly BoxBuilder $builder,
 		private readonly BoxHtml $html,
 		private readonly BoxAssets $assets,
-		private readonly string $image,
+		private readonly string $images,
 		private readonly IconStyles $icons,
+		private readonly DisplayHtml $displays,
 	) {}
 
 	/**
@@ -93,22 +100,91 @@ final class DisplayPreviewController implements Module {
 		$input = is_array( $input ) && isset( $input[ $type->key() ] ) && is_array( $input[ $type->key() ] ) ? $input[ $type->key() ] : array();
 		$saved = $this->display->preview( $type, $input );
 
-		// The edited type's settings drawn on the Single box, advanced rendering forced on (R96).
+		// The edited type's settings, advanced rendering forced on (R96): Grid as a grid, the others on the Single box.
 		$config  = $saved->config( $type );
 		$preview = $saved->with_config( DisplayType::single(), $config )->with_advanced( true );
-		$view    = $this->builder->build(
-			PreviewProduct::product( $this->image ),
-			$preview,
-			$this->settings->get(),
-			PreviewProduct::overrides( $config->theme()->name(), $type->is( DisplayType::grid() ) )
-		);
+		if ( $type->is( DisplayType::grid() ) ) {
+			$html = $this->grid( $saved->with_advanced( true ), $this->unsaved( $request ) );
+		} else {
+			$html = $this->html->render(
+				$this->builder->build(
+					PreviewProduct::product( $this->images ),
+					$preview,
+					$this->settings->get(),
+					PreviewProduct::overrides( $config->theme()->name(), false )
+				)
+			);
+		}
 
 		return new WP_REST_Response(
 			array(
-				'html'   => $this->html->render( $view ),
+				'html'   => $html,
 				'styles' => $this->assets->stylesheets( true ),
 				'script' => $this->assets->phone_script(),
 				'root'   => BoxAssets::head_style( DisplayPresentation::root( $config, $preview->columns(), true ), $this->settings->get()->string( 'custom_css' ) ) . "\n" . $this->icons->preview_css(),
+			)
+		);
+	}
+
+	/**
+	 * The Grid preview (R95; Lasso's Html_Helper::render_view_by_display_type): one sample per column (at most 3) as the
+	 * grid's cards in the Grid settings, in the site's grid wrapper, then the grid's one disclosure, as a group's grid
+	 * prints them (ShortcodeRenderer::grid).
+	 *
+	 * @param DisplaySettings $display  The unsaved Display settings, advanced rendering on.
+	 * @param Settings        $settings The site's settings with the screen's unsaved Disclosure values.
+	 */
+	private function grid( DisplaySettings $display, Settings $settings ): string {
+		$config = $display->config( DisplayType::grid() );
+		$theme  = $config->theme()->name();
+
+		$cards = array();
+		$count = PreviewProduct::in_grid( $display->columns() );
+		for ( $sample = 0; $sample < $count; $sample++ ) {
+			$cards[] = $this->builder->build(
+				PreviewProduct::product( $this->images, $sample ),
+				$display,
+				$settings,
+				PreviewProduct::overrides( $theme, true, $sample ),
+				0,
+				null,
+				null,
+				DisplayType::grid()
+			)->as_card();
+		}
+
+		$shows  = $settings->bool( 'show_disclosure_grid' );
+		$text   = $settings->string( 'disclosure_text' );
+		$hidden = array_values( array_diff( ElementVisibility::of( $config->elements(), PreviewProduct::overrides( $theme, true ) )->hidden(), array( 'price' ) ) );
+
+		return $this->displays->grid(
+			new GridView(
+				anchor: 'affibloom-preview-grid',
+				classes: 'affibloom-grid-wrap affibloom-advanced',
+				wrapper: DisplayPresentation::wrapper( $config, $display->columns(), $shows, $hidden ),
+				cards: $cards,
+				disclosure: $shows && '' !== trim( $text ) ? $text : null,
+			)
+		);
+	}
+
+	/**
+	 * The site's settings with the screen's unsaved Disclosure text and Disclosure in Grids, which the whole form posts
+	 * as `settings[…]` (an unticked switch posts nothing), so the grid's disclosure follows them as Lasso's does.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 */
+	private function unsaved( WP_REST_Request $request ): Settings {
+		$settings = $this->settings->get();
+		$posted   = $request->get_param( 'settings' );
+		if ( ! is_array( $posted ) || ! isset( $posted['disclosure_text'] ) || ! is_string( $posted['disclosure_text'] ) ) {
+			return $settings;
+		}
+
+		return $settings->with(
+			array(
+				'disclosure_text'      => sanitize_textarea_field( $posted['disclosure_text'] ),
+				'show_disclosure_grid' => ! empty( $posted['show_disclosure_grid'] ),
 			)
 		);
 	}

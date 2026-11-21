@@ -1117,6 +1117,11 @@ Grid and List preview their settings on the Single box until DT2/DT4 draw groups
 the request (REST reads `_wpnonce`). The sample's product link is `https://example.com/essentialism` (inert). Elements
 are drawn as the unsaved settings render them (no "all drawn, hidden by script"). Checked signed in at 1280 and 390 px.
 
+*Note (2026-11-21, the user's report):* the Single-box stand-in for Grid was never removed after DT2. Grid now draws
+Lasso's samples (Essentialism, Atomic Habits, Effortless; one per column, at most 3) through `DisplayHtml::grid`, with
+the unsaved Disclosure in Grids and text; the frame follows its content's height (it scrolled inside). List still uses
+the Single box. Checked at 1280 px: 3 and 2 columns.
+
 ---
 
 ### Task 14E: The product page — the live preview

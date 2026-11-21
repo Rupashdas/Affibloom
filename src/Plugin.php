@@ -498,11 +498,12 @@ final class Plugin {
 		$public_links = new PublicLinks( $this->settings_repository() );
 		$box_builder  = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ), null, $public_links->for( ... ), new TableVariantRepository() );
 		$box_html     = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
+		$display_html = new DisplayHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets );
 		// The block draws its Button and Image displays through the shortcode (Task 23C).
 		$shortcode = new AffibloomShortcode(
 			new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups ),
 			$box_html,
-			new DisplayHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets ),
+			$display_html,
 			new AiTextService( new OptionAiTextRepository() )
 		);
 
@@ -530,7 +531,7 @@ final class Plugin {
 			new ClickRetentionCron( new ClickRetention( new TableClickStore() ) ),
 			new ClicksController( new ClickTracker( new PostTypeProductRepository(), new WpPostDirectory(), new TableClickStore(), new TransientRepeatGuard(), $this->settings_repository() ) ),
 			new LocationPreviewController( new LocationPreview( new TableLinkLocationRepository(), new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ) ), $display, $this->settings_repository(), $box_assets, $icon_css ),
-			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg', $icon_css ),
+			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/', $icon_css, $display_html ),
 			$shortcode,
 			new WidgetShortcodes(),
 			$cloaked,

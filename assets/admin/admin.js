@@ -1208,7 +1208,14 @@
 					onImage();
 				}
 			} );
-			frame.style.height = doc.documentElement.scrollHeight + 'px';
+			var fit = function () {
+				frame.style.height = Math.ceil( doc.body.getBoundingClientRect().height ) + 'px';
+			};
+			fit();
+			// The box can still grow after load (a grid's cards settle late), so the frame follows its body's size.
+			if ( frame.contentWindow.ResizeObserver ) {
+				new frame.contentWindow.ResizeObserver( fit ).observe( doc.body );
+			}
 			done();
 		};
 		frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' +
