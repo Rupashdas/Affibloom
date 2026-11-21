@@ -26,6 +26,7 @@ use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Product\TableFilter;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Post;
@@ -731,8 +732,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
 	 * @param Placement         $placement The Placements filter (F12 L13, Task 36D).
 	 * @param ListOrder         $order     The header sort (F19 R1-R6, D8, D9; Task 13K).
+	 * @param TableFilter       $tables    The Comparison table filter (F25 R59, Task T16).
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder(), TableFilter $tables = TableFilter::Any ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -801,6 +803,15 @@ final class PostTypeProductRepository implements ProductRepository {
 		// Lasso's Placements filter (dashboard.php 174-181; F12 L13, Task 36D): used somewhere by the Locations count's rule, or not.
 		if ( Placement::Any !== $placement ) {
 			$list[ self::PLACEMENT_VAR ] = $placement;
+		}
+		// Lasso's Comparison table filter (dashboard.php 182-189; F25 R59, Task T16): in a table, or in none.
+		if ( TableFilter::Any !== $tables ) {
+			$in_tables = ( new PostTypeTableRepository() )->product_ids();
+			if ( TableFilter::InTable === $tables ) {
+				$list['post__in'] = array() === $in_tables ? array( 0 ) : $in_tables;
+			} elseif ( array() !== $in_tables ) {
+				$list['post__not_in'] = $in_tables; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- the products of a handful of tables.
+			}
 		}
 		// The Locations and Clicks headers' sort (F19 R6, D9; Task 13K), and the Opportunities tab's count (F22 R52, Task
 		// O8); Alert's is the alert listing's, below.

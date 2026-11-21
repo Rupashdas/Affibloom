@@ -27,6 +27,7 @@ use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Product\TableFilter;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
 use DateTimeImmutable;
@@ -81,9 +82,10 @@ final class ProductService {
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
 	 * @param Placement         $placement The Placements filter (F12 L13, Task 36D).
 	 * @param ListOrder         $order     The header sort (F19 R1-R6, D8, D9; Task 13K).
+	 * @param TableFilter       $tables    The Comparison table filter (F25 R59, Task T16).
 	 */
-	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): ProductPage {
-		return $this->products->page( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement, $order );
+	public function list( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder(), TableFilter $tables = TableFilter::Any ): ProductPage {
+		return $this->products->page( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement, $order, $tables );
 	}
 
 	/**

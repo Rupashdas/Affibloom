@@ -118,8 +118,9 @@ interface ProductRepository {
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
 	 * @param Placement         $placement The Placements filter (F12 L13, Task 36D).
 	 * @param ListOrder         $order     The header sort (F19 R1-R6, D8, D9; Task 13K).
+	 * @param TableFilter       $tables    The Comparison table filter (F25 R59, Task T16).
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): ProductPage;
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder(), TableFilter $tables = TableFilter::Any ): ProductPage;
 
 	/**
 	 * How many published products the library holds, whatever is being searched for. Lasso counts the same way

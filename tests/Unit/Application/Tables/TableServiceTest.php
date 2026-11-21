@@ -68,6 +68,9 @@ final class TableServiceTest extends TestCase {
 				$this->stored[ $saved->id ] = $saved;
 				return $saved;
 			}
+			public function product_ids(): array {
+				return array();
+			}
 			public function delete( int $id ): void {
 				unset( $this->stored[ $id ] );
 			}

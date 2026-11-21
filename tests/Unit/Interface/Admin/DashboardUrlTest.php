@@ -36,6 +36,13 @@ final class DashboardUrlTest extends TestCase {
 		self::assertArrayNotHasKey( 'placements', DashboardUrl::args( '', LinkKind::All, 1, 10, 0, 0, null, Placement::Any ) );
 	}
 
+	/** F25 R59 (Task T16): the Comparison table filter is carried unless it is Any. */
+	public function test_the_comparison_table_filter_is_carried_unless_it_is_any(): void {
+		$order = new \Affibloom\Domain\Product\ListOrder();
+		self::assertSame( array( 'comparison_table' => 'in_table' ), DashboardUrl::args( '', LinkKind::All, 1, 10, 0, 0, null, Placement::Any, $order, \Affibloom\Domain\Product\TableFilter::InTable ) );
+		self::assertArrayNotHasKey( 'comparison_table', DashboardUrl::args( '', LinkKind::All, 1, 10, 0, 0, null, Placement::Any, $order, \Affibloom\Domain\Product\TableFilter::Any ) );
+	}
+
 	public function test_a_post_id_of_zero_is_no_filter(): void {
 		self::assertArrayNotHasKey( 'post_id', DashboardUrl::args( '', LinkKind::All, 1, 10, 0, 0 ) );
 	}

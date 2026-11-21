@@ -144,7 +144,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T13: The reader's Vertical table
 - [x] Task T14: Phone cards and breakpoints
 - [x] Task T15: Preview Table
-- [ ] Task T16: The Dashboard's Comparison table filter
+- [x] Task T16: The Dashboard's Comparison table filter
 - [ ] Task T17: A deleted product leaves its tables
 - [ ] Task 23F: Table — "Choose a Table" in the block (moved here from Phase 4; with 24D's table half)
 
@@ -2221,12 +2221,14 @@ as a filter and is kept in saved views.
 
 **Files:** the above; `filters-panel.php`, `saved-views.php`; F25 spec AC20; F19 filter specs rerun.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Condition and route.**
-- [ ] **Step 3: Panel.**
-- [ ] **Step 4: Run
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Condition and route.**
+- [x] **Step 3: Panel.**
+- [x] **Step 4: Run
   and look.**
-- [ ] **Step 5: Commit** — "Filter the Dashboard by comparison tables".
+- [x] **Step 5: Commit** — "Filter the Dashboard by comparison tables".
+
+*Note:* `Domain\Product\TableFilter` (Lasso's values '', in_table, not_in_table) is threaded where Placements is (list route, address, alert counts, CSV export, saved views), appended after the sort. The condition is `post__in` / `post__not_in` over `TableRepository::product_ids()` (the products of every table, read whole). Checked on Local: in a table 8 products, not in any table the rest with no overlap, the badge counts it, the address keeps it after a reload.
 
 ---
 

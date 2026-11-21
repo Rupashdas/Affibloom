@@ -17,6 +17,7 @@ use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Product\TableFilter;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
 use WP_Error;
@@ -65,31 +66,35 @@ final class DashboardExportController implements Module {
 					'callback'            => array( $this, 'export' ),
 					'permission_callback' => static fn(): bool => current_user_can( Capabilities::PRODUCTS ),
 					'args'                => array(
-						's'          => array(
+						's'                => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'link_type'  => array(
+						'link_type'        => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'group'      => array(
+						'group'            => array(
 							'type'    => 'integer',
 							'default' => 0,
 						),
-						'filter'     => array(
+						'filter'           => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'placements' => array(
+						'placements'       => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'orderby'    => array(
+						'comparison_table' => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'order'      => array(
+						'orderby'          => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'order'            => array(
 							'type'    => 'string',
 							'default' => '',
 						),
@@ -115,7 +120,7 @@ final class DashboardExportController implements Module {
 		$term    = SearchTerm::from_input( sanitize_text_field( (string) $request->get_param( 's' ) ) );
 		$group   = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
 
-		$rows = $this->export->rows( $term, LinkKind::from_input( (string) $request->get_param( 'link_type' ) ), $group, $listing, Placement::from_input( (string) $request->get_param( 'placements' ) ) );
+		$rows = $this->export->rows( $term, LinkKind::from_input( (string) $request->get_param( 'link_type' ) ), $group, $listing, Placement::from_input( (string) $request->get_param( 'placements' ) ), TableFilter::from_input( (string) $request->get_param( 'comparison_table' ) ) );
 
 		return CsvResponse::of( $rows, 'affibloom-' . $filter . '-' . wp_date( 'Y-m-d' ) . '.csv' );
 	}

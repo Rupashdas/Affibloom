@@ -180,6 +180,29 @@ final class PostTypeTableRepository implements TableRepository {
 	}
 
 	/**
+	 * Every product in any table, each once (F25 R59; Task T16). The site has a handful of tables, read whole.
+	 *
+	 * @return list<int>
+	 */
+	public function product_ids(): array {
+		$posts = get_posts(
+			array(
+				'post_type'        => TablePostType::NAME,
+				'post_status'      => 'any',
+				'posts_per_page'   => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- a handful of tables.
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+			)
+		);
+		$ids   = array();
+		foreach ( $posts as $post ) {
+			$ids = array_merge( $ids, self::hydrate( $post )->product_ids() );
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
 	 * Whether a table has this exact name.
 	 *
 	 * @param string $name The name.

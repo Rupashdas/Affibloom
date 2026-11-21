@@ -59,4 +59,11 @@ interface TableRepository {
 	 * @param int $id The table.
 	 */
 	public function delete( int $id ): void;
+
+	/**
+	 * Every product in any table, each once (F25 R59, Task T16: the Dashboard's Comparison table filter).
+	 *
+	 * @return list<int>
+	 */
+	public function product_ids(): array;
 }

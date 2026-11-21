@@ -8,6 +8,7 @@ use Affibloom\Domain\Product\ProductPage;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\ProductType;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Product\TableFilter;
 
 /**
  * Products kept in memory, numbered from 100, found by their link's key, their ASIN and store, or
@@ -41,7 +42,7 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	/** Newest saved first, which is this fake's stand-in for "most recently changed". */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?\Affibloom\Domain\LinkHealth\AlertListing $alerts = null, \Affibloom\Domain\Product\Placement $placement = \Affibloom\Domain\Product\Placement::Any, \Affibloom\Domain\Product\ListOrder $order = new \Affibloom\Domain\Product\ListOrder() ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?\Affibloom\Domain\LinkHealth\AlertListing $alerts = null, \Affibloom\Domain\Product\Placement $placement = \Affibloom\Domain\Product\Placement::Any, \Affibloom\Domain\Product\ListOrder $order = new \Affibloom\Domain\Product\ListOrder(), TableFilter $tables = TableFilter::Any ): ProductPage {
 		$all = array_values(
 			array_filter(
 				array_reverse( $this->saved ),

@@ -14,6 +14,7 @@ use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
+use Affibloom\Domain\Product\TableFilter;
 
 /**
  * The Dashboard's own address for a list. The page and the REST route that refreshes it (Task 13D) both build it
@@ -35,9 +36,10 @@ final class DashboardUrl {
 	 * @param AlertListing|null $alerts The alert tab (`filter=`, Task 31B).
 	 * @param Placement         $placement The Placements filter (`placements=`, Task 36D).
 	 * @param ListOrder         $order     The header sort (`orderby=` and `order=`, F19 D8; Task 13K).
+	 * @param TableFilter       $tables    The Comparison table filter (`comparison_table=`, F25 Task T16).
 	 */
-	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): string {
-		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement, $order );
+	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder(), TableFilter $tables = TableFilter::Any ): string {
+		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement, $order, $tables );
 
 		return add_query_arg( array_map( 'rawurlencode', $args ), admin_url( 'admin.php' ) );
 	}
@@ -56,9 +58,10 @@ final class DashboardUrl {
 	 * @param AlertListing|null $alerts As to().
 	 * @param Placement         $placement As to().
 	 * @param ListOrder         $order     As to().
+	 * @param TableFilter       $tables    The Comparison table filter (`comparison_table=`, F25 Task T16).
 	 * @return array<string, string>
 	 */
-	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): array {
+	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder(), TableFilter $tables = TableFilter::Any ): array {
 		$args = array();
 		if ( '' !== $term ) {
 			$args['s'] = $term;
@@ -71,6 +74,9 @@ final class DashboardUrl {
 		}
 		if ( Placement::Any !== $placement ) {
 			$args['placements'] = $placement->value;
+		}
+		if ( TableFilter::Any !== $tables ) {
+			$args['comparison_table'] = $tables->value;
 		}
 		if ( $post_id > 0 ) {
 			$args['post_id'] = (string) $post_id;

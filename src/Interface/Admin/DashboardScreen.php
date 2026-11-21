@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Domain\Product\TableFilter;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Groups\GroupService;
@@ -80,6 +81,7 @@ final class DashboardScreen {
 		$dir   = isset( $_GET['order'] ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '';
 		$tab   = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : '';
 		$place = isset( $_GET['placements'] ) ? sanitize_key( wp_unslash( $_GET['placements'] ) ) : '';
+		$in    = isset( $_GET['comparison_table'] ) ? sanitize_key( wp_unslash( $_GET['comparison_table'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$per_page  = $this->per_page->choose( $asked );
@@ -93,7 +95,8 @@ final class DashboardScreen {
 		$order     = $asked->for_tab( $tab );
 		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), $tab );
 		$placement = Placement::from_input( $place );
-		$products  = $this->products->list( $term, $link_kind, $page, $per_page, $group, $one, $alerts, $placement, $order );
+		$tables    = TableFilter::from_input( $in );
+		$products  = $this->products->list( $term, $link_kind, $page, $per_page, $group, $one, $alerts, $placement, $order, $tables );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $products->items );
 
 		$this->template->render(
@@ -104,14 +107,15 @@ final class DashboardScreen {
 				'link_kind'     => $link_kind,
 				'group'         => $group,
 				'placement'     => $placement,
+				'tables'        => $tables,
 				'order'         => $order,
 				'group_list'    => $this->groups->all(),
 				'groups_of'     => $this->groups->for_products( $ids ),
 				'links_of'      => null === $this->links ? array() : $this->links->of( $products->items ),
 				'views'         => $this->views->list( get_current_user_id() ),
-				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
+				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order, $tables ),
 				// Every list argument but the page, for the GET forms' hidden inputs (Task 13F).
-				'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
+				'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order, $tables ),
 				'alerts_of'     => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 				'listing'       => $alerts,
 				// The Locations column (Task 36A): each row's count, and whether a 0 is known yet (the clock).
@@ -121,7 +125,7 @@ final class DashboardScreen {
 				// The Alert column's lightbulb (F22 R52-R54; Task O8): posts on the Opportunities tab, rows elsewhere.
 				'opportunities' => $this->opportunities?->per_product( $ids, 'opportunities' === $alerts?->tab ),
 				'clicks_30'     => $this->clicks?->total( time() ),
-				'counts'        => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement ),
+				'counts'        => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement, $tables ),
 				'library'       => $this->products->count(),
 				'notice'        => $asked === $order ? $this->notice->message() : self::opportunity_sort_notice(),
 			)

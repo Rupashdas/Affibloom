@@ -91,4 +91,14 @@ final class SavedViewsTest extends TestCase {
 		self::assertSame( LinkKind::All, LinkKind::from_input( '' ) );
 		self::assertSame( LinkKind::All, LinkKind::from_input( 'AMAZON' ) );
 	}
+
+	/** F25 R59 (Task T16): a view keeps the Comparison table filter; Lasso's values and nothing else. */
+	public function test_a_view_keeps_the_comparison_table_filter(): void {
+		$tables = \Affibloom\Domain\Product\TableFilter::class;
+		$view   = new \Affibloom\Domain\Dashboard\SavedView( 'v', 'In tables', '', LinkKind::All, 10, 0, '', \Affibloom\Domain\Product\Placement::Any, new \Affibloom\Domain\Product\ListOrder(), $tables::InTable );
+		self::assertTrue( $view->shows( '', LinkKind::All, 10, 0, '', \Affibloom\Domain\Product\Placement::Any, new \Affibloom\Domain\Product\ListOrder(), $tables::InTable ) );
+		self::assertFalse( $view->shows( '', LinkKind::All, 10 ) );
+		self::assertSame( $tables::NotInTable, $tables::from_input( 'not_in_table' ) );
+		self::assertSame( $tables::Any, $tables::from_input( 'anything' ) );
+	}
 }

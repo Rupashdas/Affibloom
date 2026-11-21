@@ -151,6 +151,7 @@
 	var linkType = document.getElementById( 'affibloom-filter-link-type' );
 	var groupFilter = document.getElementById( 'affibloom-filter-group' );
 	var placementFilter = document.getElementById( 'affibloom-filter-placements' );
+	var tableFilter = document.getElementById( 'affibloom-filter-table' );
 	var status = document.getElementById( 'affibloom-list-status' );
 	var errorTemplate = document.getElementById( 'affibloom-list-error' );
 	var sizeSelect = document.getElementById( 'affibloom-per-page' );
@@ -162,6 +163,8 @@
 		group: parseInt( params.get( 'group' ), 10 ) || 0,
 		// The Placements filter (Task 36D): '', has_placements or no_placements.
 		placements: params.get( 'placements' ) || '',
+		// The Comparison table filter (F25 Task T16): '', in_table or not_in_table.
+		comparison_table: params.get( 'comparison_table' ) || '',
 		// Lasso's ?post_id= (Task 13F; F19 D24): one product, kept by every list change until Reset or a pill.
 		post_id: parseInt( params.get( 'post_id' ), 10 ) || 0,
 		paged: parseInt( params.get( 'paged' ), 10 ) || 1,
@@ -185,6 +188,7 @@
 		args.set( 'link_type', list.link_type );
 		args.set( 'group', String( list.group || 0 ) );
 		args.set( 'placements', list.placements || '' );
+		args.set( 'comparison_table', list.comparison_table || '' );
 		args.set( 'post_id', String( list.post_id || 0 ) );
 		args.set( 'paged', String( list.paged ) );
 		args.set( 'per_page', String( list.per_page ) );
@@ -200,7 +204,7 @@
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, post_id: current.post_id, paged: 1, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter };
+		var next = { s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, comparison_table: current.comparison_table, post_id: current.post_id, paged: 1, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -308,13 +312,14 @@
 				parseInt( pill.getAttribute( 'data-view-group' ), 10 ) === current.group &&
 				( pill.getAttribute( 'data-view-filter' ) || '' ) === current.filter &&
 				( pill.getAttribute( 'data-view-placements' ) || '' ) === current.placements &&
+				( pill.getAttribute( 'data-view-comparison-table' ) || '' ) === current.comparison_table &&
 				( pill.getAttribute( 'data-view-orderby' ) || '' ) === current.orderby &&
 				( pill.getAttribute( 'data-view-order' ) || '' ) === current.order &&
 				parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) === current.per_page ) {
 				match = pill;
 			}
 		} );
-		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.placements && '' === current.orderby && '' === current.filter ) {
+		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.placements && '' === current.comparison_table && '' === current.orderby && '' === current.filter ) {
 			match = pills[ 0 ];
 		}
 		pills.forEach( function ( pill ) {
@@ -348,7 +353,10 @@
 		if ( placementFilter ) {
 			placementFilter.value = current.placements;
 		}
-		var filters = ( current.link_type ? 1 : 0 ) + ( current.group ? 1 : 0 ) + ( current.placements ? 1 : 0 );
+		if ( tableFilter ) {
+			tableFilter.value = current.comparison_table;
+		}
+		var filters = ( current.link_type ? 1 : 0 ) + ( current.group ? 1 : 0 ) + ( current.placements ? 1 : 0 ) + ( current.comparison_table ? 1 : 0 );
 		var badge = document.querySelector( '.affibloom-filters__count' );
 		if ( badge ) {
 			badge.textContent = String( filters );
@@ -381,7 +389,7 @@
 				return;
 			}
 			var data = response.data;
-			current = { s: data.term, link_type: data.link_type, group: data.group, placements: data.placements || '', post_id: data.post_id, paged: data.page, per_page: data.per_page, orderby: data.orderby || '', order: data.order || '', filter: data.filter || '' };
+			current = { s: data.term, link_type: data.link_type, group: data.group, placements: data.placements || '', comparison_table: data.comparison_table || '', post_id: data.post_id, paged: data.page, per_page: data.per_page, orderby: data.orderby || '', order: data.order || '', filter: data.filter || '' };
 
 			region.innerHTML = data.html;
 			quick.id = null; // An open quick edit went with the old rows.
@@ -441,7 +449,7 @@
 		if ( ! button || button.disabled ) {
 			return;
 		}
-		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), placements: current.placements, filter: current.filter } );
+		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), placements: current.placements, comparison_table: current.comparison_table, filter: current.filter } );
 		if ( current.orderby && current.order ) {
 			args.set( 'orderby', current.orderby );
 			args.set( 'order', current.order );
@@ -507,6 +515,7 @@
 				link_type: back.get( 'link_type' ) || '',
 				group: parseInt( back.get( 'group' ), 10 ) || 0,
 				placements: back.get( 'placements' ) || '',
+				comparison_table: back.get( 'comparison_table' ) || '',
 				post_id: parseInt( back.get( 'post_id' ), 10 ) || 0,
 				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
 				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
@@ -649,6 +658,17 @@
 			} );
 		}
 
+		// The Comparison table filter, as the placements are (F25 Task T16).
+		if ( tableFilter ) {
+			tableFilter.addEventListener( 'change', function () {
+				guarded( function () {
+					load( listWith( { comparison_table: tableFilter.value } ), true, false );
+				}, tableFilter, true, function () {
+					tableFilter.value = current.comparison_table;
+				} );
+			} );
+		}
+
 		// Lasso's "Reset filters": search, filters and page size back to the defaults.
 		panel.querySelector( '.affibloom-filters__reset' ).addEventListener( 'click', function ( event ) {
 			guarded( reset, event.currentTarget, true );
@@ -664,7 +684,7 @@
 		if ( search ) {
 			search.value = '';
 		}
-		load( { s: '', link_type: '', group: 0, placements: '', post_id: 0, paged: 1, per_page: 10, orderby: '', order: '', filter: '' }, true, false );
+		load( { s: '', link_type: '', group: 0, placements: '', comparison_table: '', post_id: 0, paged: 1, per_page: 10, orderby: '', order: '', filter: '' }, true, false );
 	}
 
 	var toolbar = document.querySelector( '.affibloom-toolbar' );
@@ -697,6 +717,7 @@
 						link_type: pill.getAttribute( 'data-view-link-type' ),
 						group: parseInt( pill.getAttribute( 'data-view-group' ), 10 ) || 0,
 						placements: pill.getAttribute( 'data-view-placements' ) || '',
+						comparison_table: pill.getAttribute( 'data-view-comparison-table' ) || '',
 						paged: 1,
 						per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
 						filter: pill.getAttribute( 'data-view-filter' ) || '',
@@ -781,7 +802,7 @@
 			wp.apiFetch( {
 				path: '/affibloom/v1/dashboard/views',
 				method: 'POST',
-				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter },
+				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, comparison_table: current.comparison_table, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter },
 			} ).then( function ( response ) {
 				replaceViews( response.data.html );
 				nameField.value = '';

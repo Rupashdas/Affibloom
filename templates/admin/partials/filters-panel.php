@@ -1,14 +1,14 @@
 <?php
 /**
  * Lasso's Filters button and panel (dashboard.php, lasso-dashboard-filters-panel), with Lasso's fields, options,
- * labels and help text. Link type (Task 13E), Group (Task G5) and Placements (Task 36D) work; Comparison table is there
- * and says "Coming soon" until the Tables area brings its data.
+ * labels and help text: Link type (Task 13E), Group (Task G5), Placements (Task 36D) and Comparison table (F25 R59,
+ * Task T16).
  *
  * Lasso opens the panel beside the table; here it is a card under the button, because eight columns in a 1320px
  * column leave no room for a 280px side panel without squeezing the Link Name.
  *
  * @package Affibloom
- * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>, args: array<string, string>, placement?: \Affibloom\Domain\Product\Placement} $view
+ * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>, args: array<string, string>, placement?: \Affibloom\Domain\Product\Placement, tables?: \Affibloom\Domain\Product\TableFilter} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use Affibloom\Domain\Dashboard\SavedViews;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\Placement;
+use Affibloom\Domain\Product\TableFilter;
 
 $link_types = array(
 	LinkKind::All->value       => __( 'All types', 'affibloom' ),
@@ -28,11 +29,13 @@ $placements = array(
 	Placement::NotInContent->value => __( 'Not in content', 'affibloom' ),
 );
 $placement  = $view['placement'] ?? Placement::Any;
-$pending    = array(
-	// [ id, label, Lasso's first option ].
-	array( 'affibloom-filter-table', __( 'Comparison table', 'affibloom' ), __( 'Any', 'affibloom' ) ),
+$in_tables  = $view['tables'] ?? TableFilter::Any;
+$table_list = array(
+	TableFilter::Any->value        => __( 'Any', 'affibloom' ),
+	TableFilter::InTable->value    => __( 'In a comparison table', 'affibloom' ),
+	TableFilter::NotInTable->value => __( 'Not in any table', 'affibloom' ),
 );
-$active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['group'] ? 0 : 1 ) + ( Placement::Any === $placement ? 0 : 1 );
+$active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['group'] ? 0 : 1 ) + ( Placement::Any === $placement ? 0 : 1 ) + ( TableFilter::Any === $in_tables ? 0 : 1 );
 ?>
 <div class="affibloom-filters">
 	<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-filters__toggle"
@@ -68,7 +71,7 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 				'admin/partials/list-args',
 				array(
 					'args'   => $view['args'],
-					'except' => array( 'link_type', 'group', 'placements' ),
+					'except' => array( 'link_type', 'group', 'placements', 'comparison_table' ),
 				)
 			);
 			?>
@@ -101,18 +104,17 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 					<?php endforeach; ?>
 				</select>
 			</div>
+			<?php // Lasso's Comparison table (dashboard.php 182-189; F25 R59, Task T16): in a table, or in none. ?>
+			<div class="affibloom-filters__field">
+				<label class="affibloom-filters__label" for="affibloom-filter-table"><?php esc_html_e( 'Comparison table', 'affibloom' ); ?></label>
+				<select id="affibloom-filter-table" class="affibloom-select" name="comparison_table">
+					<?php foreach ( $table_list as $value => $label ) : ?>
+						<option value="<?php echo esc_attr( (string) $value ); ?>" <?php selected( (string) $value, $in_tables->value ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
 			<button type="submit" class="affibloom-button affibloom-button--small affibloom-button--primary affibloom-no-js"><?php esc_html_e( 'Apply', 'affibloom' ); ?></button>
 			</form>
-
-			<?php foreach ( $pending as $field ) : ?>
-				<div class="affibloom-filters__field">
-					<label class="affibloom-filters__label" for="<?php echo esc_attr( $field[0] ); ?>"><?php echo esc_html( $field[1] ); ?>
-						<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?></label>
-					<select id="<?php echo esc_attr( $field[0] ); ?>" class="affibloom-select" disabled aria-describedby="affibloom-soon-note">
-						<option><?php echo esc_html( $field[2] ); ?></option>
-					</select>
-				</div>
-			<?php endforeach; ?>
 
 			<form class="affibloom-filters__field affibloom-filters__save" novalidate>
 				<span class="affibloom-filters__label">

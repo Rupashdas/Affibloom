@@ -568,4 +568,28 @@ test.describe( 'F25 Comparison tables', () => {
 		await expect( page.getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeVisible();
 		await expect( page.locator( '[data-table-preview]' ) ).toBeHidden();
 	} );
+
+	// AC20 (T16; R59).
+	test( 'AC20 the Dashboard's Comparison table filter narrows the list, counts as a filter and is kept in a saved view', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const inside = createProduct( { name: `Tabled ${ word }` } );
+		createProduct( { name: `Loose ${ word }` } );
+		createTable( unique( 'F25 AC20' ), 'column', 'Cactus', [ inside ] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ word }` );
+		await page.getByRole( 'button', { name: /Filters/ } ).click();
+		await page.getByLabel( 'Comparison table' ).selectOption( { label: 'In a comparison table' } );
+		await expect( page ).toHaveURL( /comparison_table=in_table/ );
+		await expect( page.getByRole( 'link', { name: `Tabled ${ word }` } ) ).toBeVisible();
+		await expect( page.getByRole( 'link', { name: `Loose ${ word }` } ) ).toHaveCount( 0 );
+		await expect( page.locator( '.affibloom-filters__count' ) ).toHaveText( '1' );
+
+		await page.getByLabel( 'Comparison table' ).selectOption( { label: 'Not in any table' } );
+		await expect( page.getByRole( 'link', { name: `Loose ${ word }` } ) ).toBeVisible();
+		await expect( page.getByRole( 'link', { name: `Tabled ${ word }` } ) ).toHaveCount( 0 );
+
+		const name = unique( 'F25 AC20 view' );
+		await page.getByPlaceholder( 'Name this view' ).fill( name );
+		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await expect( page.getByRole( 'link', { name } ) ).toHaveAttribute( 'data-view-comparison-table', 'not_in_table' );
+	} );
 } );

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Domain\Product\TableFilter;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Dashboard\ViewNotFound;
@@ -91,29 +92,35 @@ final class DashboardController implements Module {
 	 */
 	public function routes(): void {
 		$list = array(
-			's'          => array(
+			's'                => array(
 				'type'    => 'string',
 				'default' => '',
 			),
-			'link_type'  => array(
+			'link_type'        => array(
 				'type'    => 'string',
 				'enum'    => self::LINK_TYPES,
 				'default' => '',
 			),
 			// The Group filter (Task G5): 0 all groups, -1 "Not in Groups", else a group's ID.
-			'group'      => array(
+			'group'            => array(
 				'type'    => 'integer',
 				'minimum' => -1,
 				'default' => 0,
 			),
 			// The Placements filter (Task 36D): '', has_placements, no_placements.
-			'placements' => array(
+			'placements'       => array(
 				'type'    => 'string',
 				'enum'    => array_map( static fn( Placement $placement ): string => $placement->value, Placement::cases() ),
 				'default' => '',
 			),
+			// The Comparison table filter (F25 R59, Task T16): '', in_table, not_in_table.
+			'comparison_table' => array(
+				'type'    => 'string',
+				'enum'    => array_map( static fn( TableFilter $tables ): string => $tables->value, TableFilter::cases() ),
+				'default' => '',
+			),
 			// 0 asks for the size this editor chose last (PerPage).
-			'per_page'   => array(
+			'per_page'         => array(
 				'type'    => 'integer',
 				'minimum' => 0,
 				'default' => 0,
@@ -230,19 +237,20 @@ final class DashboardController implements Module {
 		$order     = $asked->for_tab( $tab );
 		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), $tab );
 		$placement = Placement::from_input( (string) $request->get_param( 'placements' ) );
-		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one, $alerts, $placement, $order );
+		$tables    = TableFilter::from_input( (string) $request->get_param( 'comparison_table' ) );
+		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one, $alerts, $placement, $order, $tables );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $list->items );
 
 		return new WP_REST_Response(
 			array(
 				'data' => array(
-					'html'       => $this->template->fetch(
+					'html'             => $this->template->fetch(
 						'admin/partials/product-list',
 						array(
 							'products'      => $list,
 							'term'          => $term->text(),
-							'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
-							'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
+							'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order, $tables ),
+							'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order, $tables ),
 							'alerts_of'     => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 							'listing'       => $alerts,
 							'order'         => $order,
@@ -254,24 +262,25 @@ final class DashboardController implements Module {
 							'opportunities' => $this->opportunities?->per_product( $ids, AlertListing::OPPORTUNITIES === $alerts?->tab ),
 						)
 					),
-					'term'       => $term->text(),
-					'link_type'  => $link_kind->value,
-					'group'      => $group,
-					'placements' => $placement->value,
-					'page'       => $list->current(),
-					'per_page'   => $per_page,
-					'total'      => $list->total,
+					'term'             => $term->text(),
+					'link_type'        => $link_kind->value,
+					'group'            => $group,
+					'placements'       => $placement->value,
+					'comparison_table' => $tables->value,
+					'page'             => $list->current(),
+					'per_page'         => $per_page,
+					'total'            => $list->total,
 					// Every answer carries the library's size, as Lasso's carries its counts, so the Products tile and
 					// the search placeholder follow a delete, a revive or a quick edit at once (Task 13I; F19 D18).
-					'library'    => $this->products->count(),
-					'post_id'    => $one,
-					'orderby'    => $order->column,
-					'order'      => $order->direction,
-					'filter'     => null === $alerts ? '' : $alerts->tab,
-					'notice'     => $asked === $order ? '' : DashboardScreen::opportunity_sort_notice(),
+					'library'          => $this->products->count(),
+					'post_id'          => $one,
+					'orderby'          => $order->column,
+					'order'            => $order->direction,
+					'filter'           => null === $alerts ? '' : $alerts->tab,
+					'notice'           => $asked === $order ? '' : DashboardScreen::opportunity_sort_notice(),
 					// The tabs' counts follow the search and the filters (Task 31B; F11 R24).
-					'alerts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement ),
-					'url'        => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts, $placement, $order ),
+					'alerts'           => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement, $tables ),
+					'url'              => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts, $placement, $order, $tables ),
 				),
 			)
 		);
@@ -296,7 +305,8 @@ final class DashboardController implements Module {
 			(string) $request->get_param( 'filter' ),
 			Placement::from_input( (string) $request->get_param( 'placements' ) ),
 			// F19 R10 (Task O8): a view keeps the opportunity count only with the Opportunities tab.
-			ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) )->for_tab( (string) $request->get_param( 'filter' ) )
+			ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) )->for_tab( (string) $request->get_param( 'filter' ) ),
+			TableFilter::from_input( (string) $request->get_param( 'comparison_table' ) )
 		);
 
 		try {
@@ -355,6 +365,7 @@ final class DashboardController implements Module {
 							'group'     => null === $active ? 0 : $active->group,
 							'filter'    => null === $active ? '' : $active->filter,
 							'placement' => null === $active ? Placement::Any : $active->placement,
+							'tables'    => null === $active ? TableFilter::Any : $active->tables,
 							'order'     => null === $active ? new ListOrder() : $active->order,
 							'group_ids' => array_map( static fn( $group ): int => $group->id, $this->groups->all() ),
 						)

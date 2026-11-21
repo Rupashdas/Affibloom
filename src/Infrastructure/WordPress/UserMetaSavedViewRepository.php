@@ -16,6 +16,7 @@ use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
+use Affibloom\Domain\Product\TableFilter;
 
 /**
  * Saved Dashboard views in user meta, one list per editor, in Lasso's shape (`id`, `name`, `filters`). Lasso keeps
@@ -49,7 +50,8 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 				isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0,
 				$tab,
 				Placement::from_input( isset( $filters['placements'] ) && is_string( $filters['placements'] ) ? $filters['placements'] : '' ),
-				ListOrder::from_input( isset( $filters['orderby'] ) && is_string( $filters['orderby'] ) ? $filters['orderby'] : '', isset( $filters['order'] ) && is_string( $filters['order'] ) ? $filters['order'] : '' )->for_tab( $tab )
+				ListOrder::from_input( isset( $filters['orderby'] ) && is_string( $filters['orderby'] ) ? $filters['orderby'] : '', isset( $filters['order'] ) && is_string( $filters['order'] ) ? $filters['order'] : '' )->for_tab( $tab ),
+				TableFilter::from_input( isset( $filters['comparison_table'] ) && is_string( $filters['comparison_table'] ) ? $filters['comparison_table'] : '' )
 			);
 		}
 
@@ -71,14 +73,15 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 					'id'      => $view->id,
 					'name'    => $view->name,
 					'filters' => array(
-						's'          => $view->term,
-						'link_type'  => $view->link_kind->value,
-						'per_page'   => $view->per_page,
-						'group'      => $view->group,
-						'filter'     => $view->filter,
-						'placements' => $view->placement->value,
-						'orderby'    => $view->order->column,
-						'order'      => $view->order->direction,
+						's'                => $view->term,
+						'link_type'        => $view->link_kind->value,
+						'per_page'         => $view->per_page,
+						'group'            => $view->group,
+						'filter'           => $view->filter,
+						'placements'       => $view->placement->value,
+						'orderby'          => $view->order->column,
+						'order'            => $view->order->direction,
+						'comparison_table' => $view->tables->value,
 					),
 				),
 				$views->all()
