@@ -78,7 +78,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task 37A: Security review
 - [x] Task 37B: Performance review
 - [x] Task 37C: Accessibility review
-- [ ] Task 37D: Compatibility review
+- [x] Task 37D: Compatibility review (smoke step 5 runs with Task 39)
 
 ### Uninstall and export (roadmap 8.5; F37 TL5, F9)
 
@@ -452,10 +452,10 @@ New code appears only as fixes, each with a test.
 
 **Files:** create the two files; modify whatever the findings need.
 
-- [ ] **Step 1: Failing test.** `tests/E2E/compat.spec.ts`: with LiteSpeed Cache active and purged, a guide loaded
+- [x] **Step1: Failing test.** `tests/E2E/compat.spec.ts`: with LiteSpeed Cache active and purged, a guide loaded
   twice as a visitor renders its boxes from cache and a click is still counted; the cloaked link (F24) still
   redirects and counts; a page with each shortcode (F31) renders. Expected: red where cache changes the result.
-- [ ] **Step 2: Caching and plugins on the local copy** (`bash tools/local-wp.sh plugin list` shows what is active; check
+- [x] **Step2: Caching and plugins on the local copy** (`bash tools/local-wp.sh plugin list` shows what is active; check
   each):
   - Activate LiteSpeed Cache with the production settings. Purge, and load a guide as a visitor twice. Check that the
     boxes render from cache and that a click is still counted.
@@ -470,14 +470,14 @@ New code appears only as fixes, each with a test.
     scripts and styles are not removed or broken by other plugins' admin assets.
   - Check Affibloom and Lasso active together (the state during the cutover window): no fatal, no duplicate output of a
     box, and a recorded verdict on which plugin answers `[lasso]` (F31).
-- [ ] **Step 3: PHP versions.** The matrix is what this machine and staging offer, not a CI matrix (deviation 10):
+- [x] **Step3: PHP versions.** The matrix is what this machine and staging offer, not a CI matrix (deviation 10):
   - **Local's PHP 8.3:** the whole E2E suite against Local, and `composer analyse`;
   - **the machine's PHP 8.5 CLI:** `composer lint` and the unit suite; record deprecation notices (8.4 and 8.5
     deprecations such as implicit nullable parameters are findings);
   - **PHP 8.3 (production's version) on staging:** the smoke test of step 5;
   - PHP 8.3 is the plugin's minimum (decision F7, Task 2X0), so the Local and staging runs cover it; PHPStan's
     `phpVersion` is 80300.
-- [ ] **Step 4: WordPress versions.** Local's WordPress version and staging's are the two that can run; the minimum
+- [x] **Step4: WordPress versions.** Local's WordPress version and staging's are the two that can run; the minimum
   (7.1.4, decision F7) and the integration suite need wp-env (Docker), which this machine lacks. Record the integration tests
   that have not run on this machine (list the files in `tests/Integration/`) and that they stay unrun until a machine with wp-env is
   available; Plugin Check's required-version and deprecated-function checks (Task 37A) stand in for 7.1.4.
@@ -485,12 +485,17 @@ New code appears only as fixes, each with a test.
   upload it to staging through wp-admin, and check: activation; the Dashboard opens; add a product; place a box;
   a guide renders it; a click is counted; the Logs and DB Status screens open; Plugin Check has no new finding.
   Staging's Lasso stays active (staging memory): note any conflict.
-- [ ] **Step 6: Fix,** each with a test, and record the findings and the runs that did not happen.
-- [ ] **Step 7: Run and look.** `npx playwright test compat` green; open `docs/reviews/compatibility.md` and check that
+- [x] **Step6: Fix,** each with a test, and record the findings and the runs that did not happen.
+- [x] **Step7: Run and look.** `npx playwright test compat` green; open `docs/reviews/compatibility.md` and check that
   every plugin, PHP version and WordPress version row has a verdict or a "not run" with its reason.
-- [ ] **Step 8: Commit:** "Review the compatibility with caching, SEO and ad plugins and with PHP versions
+- [x] **Step8: Commit:** "Review the compatibility with caching, SEO and ad plugins and with PHP versions
 
   Findings, the runs available on this machine and what could not be run are recorded in docs/reviews/compatibility.md."
+
+*Note (2026-11-22):* C1 fixed in Affibloom (LiteSpeed's Delayed JS lost the first click; the click script now
+carries LiteSpeed's and Cloudflare's bypass attributes, so the runbook needs no exclusion). Page caching (nginx) and
+Mediavine cannot run on Local; step 5's smoke runs with Task 39's install check on the fresh site, which was still on
+PHP 8.2 (`docs/reviews/compatibility.md`).
 
 ---
 ### Task 38: Uninstall opt-in, the Uninstall card and the product export

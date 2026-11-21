@@ -25,6 +25,13 @@ final class ClickScript implements Module {
 	/** The script's handle. */
 	public const HANDLE = 'affibloom-clicks';
 
+	/** The attributes that keep page optimisers from delaying or combining the click script (script_attributes()). */
+	private const KEEP = array(
+		'data-no-defer'    => '1',
+		'data-no-optimize' => '1',
+		'data-cfasync'     => 'false',
+	);
+
 	/**
 	 * Builds the loader.
 	 *
@@ -39,6 +46,31 @@ final class ClickScript implements Module {
 	 */
 	public function register(): void {
 		add_filter( 'the_content', array( $this, 'maybe_enqueue' ), 999 );
+		add_filter( 'wp_script_attributes', array( $this, 'script_attributes' ) );
+		add_filter( 'wp_inline_script_attributes', array( $this, 'inline_attributes' ) );
+	}
+
+	/**
+	 * Marks the click script for page optimisers to leave alone (Task 37D, finding C1): LiteSpeed's "Load JS Deferred:
+	 * Delayed", production's setting, held it until the reader's first move, so a first click on a box was not counted.
+	 * `data-no-defer` and `data-no-optimize` are LiteSpeed's (no delay; no minify or combine), `data-cfasync` is
+	 * Cloudflare Rocket Loader's. The script is 2 KB and waits for nothing.
+	 *
+	 * @param array<string, string|bool> $attributes The script tag's attributes.
+	 * @return array<string, string|bool>
+	 */
+	public function script_attributes( array $attributes ): array {
+		return self::HANDLE . '-js' === ( $attributes['id'] ?? '' ) ? $attributes + self::KEEP : $attributes;
+	}
+
+	/**
+	 * The same for the line before it that gives the script its settings (`affibloomClicks`).
+	 *
+	 * @param array<string, string|bool> $attributes The inline script tag's attributes.
+	 * @return array<string, string|bool>
+	 */
+	public function inline_attributes( array $attributes ): array {
+		return self::HANDLE . '-js-before' === ( $attributes['id'] ?? '' ) ? $attributes + self::KEEP : $attributes;
 	}
 
 	/**
