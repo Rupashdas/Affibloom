@@ -70,7 +70,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### F12 — Clicks
 
 - [x] Task 33A: A reader clicks a product element — `clicks.js` and `POST /affibloom/v1/clicks`
-- [ ] Task 33B: Bots and repeats are not counted
+- [x] Task 33B: Bots and repeats are not counted
 - [ ] Task 33C: Old click rows are removed — `affibloom_daily`
 - [ ] Task 33D: Settings → General — Page and Link-Level Tracking
 - [ ] Task 34A: The Dashboard's Clicks column, sortable
@@ -433,11 +433,15 @@ product, post and button, leave the count unchanged; after 30 s a click counts a
 **Files:** the above; `tests/Unit/Domain/BotFilterTest.php`; extend `ClicksRouteTest.php`, `ClickTrackerTest.php`,
 `F12.spec.ts` (AC7).
 
-- [ ] **Step 1: Failing tests** (Googlebot, empty UA, headless; repeat within 30 s; after expiry by deleting the
+- [x] **Step 1: Failing tests** (Googlebot, empty UA, headless; repeat within 30 s; after expiry by deleting the
   transient).
-- [ ] **Step 2: Filter and guard** (salted hash, nothing stored but the 30 s transient).
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Ignore bots and repeat clicks".
+- [x] **Step 2: Filter and guard** (salted hash, nothing stored but the 30 s transient).
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Ignore bots and repeat clicks".
+
+*Note (2026-11-21):* the reader's key is their address and user agent with the product, post and button; the guard
+stores only an HMAC-named transient for 30 s. Headless browsers are bots, so F12's click ACs set a reader's user agent
+(`test.use`). Checked: unit, phpcs, analyse; on Local four beacons (reader, the same again, Googlebot, empty) stored 1.
 
 ---
 

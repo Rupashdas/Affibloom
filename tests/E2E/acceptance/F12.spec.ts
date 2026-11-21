@@ -3,6 +3,9 @@ import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, uniqu
 
 // F12 Click counts and where used (docs/features/F12/requirements.md).
 test.describe( 'F12 Clicks and where used', () => {
+	// Headless Chromium says "HeadlessChrome", which the bot filter (33B) rightly refuses; the clicks here are a reader's.
+	test.use( { userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' } );
+
 	test.beforeEach( async ( { context } ) => {
 		await blockTrackers( context );
 		// Box links open the merchant in a new tab; stop that navigation, the click is what is tested.
@@ -95,6 +98,29 @@ test.describe( 'F12 Clicks and where used', () => {
 			expect( answer.status() ).toBe( 204 );
 		}
 		expect( wp( 'db', 'query', `SELECT COUNT(*) FROM wp_affibloom_clicks WHERE product_id = ${ gone }`, '--skip-column-names' ) ).toBe( '0' );
+	} );
+
+	// AC6, AC7 (33B; D5, D6).
+	const clickOnce = ( request: import( '@playwright/test' ).APIRequestContext, body: object, agent?: string ) =>
+		request.post( '/wp-json/affibloom/v1/clicks', { data: JSON.stringify( body ), headers: { 'Content-Type': 'text/plain', ...( undefined === agent ? {} : { 'User-Agent': agent } ) } } );
+	const stored = ( id: number ) => Number( wp( 'db', 'query', `SELECT COALESCE(SUM(clicks), 0) FROM wp_affibloom_clicks WHERE product_id = ${ id }`, '--skip-column-names' ) );
+
+	test( 'AC6 a bot or an empty user agent is not counted', async ( { request } ) => {
+		const id = createProduct( { name: unique( 'F12 AC6' ) } );
+		for ( const agent of [ 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', '' ] ) {
+			expect( ( await clickOnce( request, { p: id, h: 0, l: 0, b: '1' }, agent ) ).status() ).toBe( 204 );
+		}
+		expect( stored( id ) ).toBe( 0 );
+	} );
+
+	test( 'AC7 a repeat within 30 seconds is not counted; after it, it is', async ( { request } ) => {
+		const id = createProduct( { name: unique( 'F12 AC7' ) } );
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+		expect( stored( id ) ).toBe( 1 );
+		wp( 'transient', 'delete', '--all' ); // the 30 seconds pass
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+		expect( stored( id ) ).toBe( 2 );
 	} );
 
 	test( 'AC16 with the click route blocked the link still opens and no error shows', async ( { page, context } ) => {

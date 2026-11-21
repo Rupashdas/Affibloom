@@ -4,6 +4,7 @@ namespace Affibloom\Tests\Unit\Application\Clicks;
 use Affibloom\Application\Clicks\ClickInput;
 use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Application\Clicks\PostDirectory;
+use Affibloom\Application\Clicks\RepeatGuard;
 use Affibloom\Domain\Clicks\Button;
 use Affibloom\Domain\Clicks\ClickStore;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -24,6 +25,10 @@ final class ClickTrackerTest extends TestCase {
 
 	private ClickTracker $tracker;
 
+	private RepeatGuard $guard;
+
+	private const READER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+
 	protected function setUp(): void {
 		$this->products = new InMemoryProductRepository();
 		$test           = $this;
@@ -39,7 +44,20 @@ final class ClickTrackerTest extends TestCase {
 				return 50 === $post_id;
 			}
 		};
-		$this->tracker = new ClickTracker( $this->products, $posts, $store );
+		$guard         = new class() implements RepeatGuard {
+			/** @var array<string, true> */
+			public array $seen = array();
+
+			public function first( string $key ): bool {
+				if ( isset( $this->seen[ $key ] ) ) {
+					return false;
+				}
+				$this->seen[ $key ] = true;
+				return true;
+			}
+		};
+		$this->guard   = $guard;
+		$this->tracker = new ClickTracker( $this->products, $posts, $store, $guard );
 	}
 
 	public function added( string $row ): void {
@@ -50,8 +68,8 @@ final class ClickTrackerTest extends TestCase {
 		$id  = $this->product( 'ball' );
 		$now = (int) gmmktime( 23, 59, 59, 11, 21, 2026 );
 
-		self::assertTrue( $this->tracker->track( new ClickInput( $id, 50, 7, Button::from_input( '2' ) ), $now ) );
-		self::assertTrue( $this->tracker->track( new ClickInput( $id, 0, 0, Button::from_input( 'link' ) ), $now + 1 ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $id, 50, 7, Button::from_input( '2' ) ), $now, self::READER, '1.2.3.4' ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $id, 0, 0, Button::from_input( 'link' ) ), $now + 1, self::READER, '1.2.3.4' ) );
 		self::assertSame( array( "2026-11-21 {$id} 50 7 2", "2026-11-22 {$id} 0 0 link" ), $this->added );
 	}
 
@@ -61,10 +79,24 @@ final class ClickTrackerTest extends TestCase {
 		$this->products->retire( $this->products->get( $retired ), $kept );
 		$button = Button::from_input( '1' );
 
-		self::assertFalse( $this->tracker->track( new ClickInput( 999, 50, 0, $button ), 0 ) );
-		self::assertFalse( $this->tracker->track( new ClickInput( $kept, 51, 0, $button ), 0 ) );
-		self::assertTrue( $this->tracker->track( new ClickInput( $retired, 50, 0, $button ), 0 ) );
+		self::assertFalse( $this->tracker->track( new ClickInput( 999, 50, 0, $button ), 0, self::READER, 'a' ) );
+		self::assertFalse( $this->tracker->track( new ClickInput( $kept, 51, 0, $button ), 0, self::READER, 'a' ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $retired, 50, 0, $button ), 0, self::READER, 'a' ) );
 		self::assertSame( array( "1970-01-01 {$kept} 50 0 1" ), $this->added );
+	}
+
+	/** Task 33B (F12 D5, D6, AC6, AC7). */
+	public function test_machines_and_repeats_are_not_counted_but_another_reader_or_button_is(): void {
+		$id    = $this->product( 'ball' );
+		$click = new ClickInput( $id, 50, 0, Button::from_input( '1' ) );
+
+		self::assertFalse( $this->tracker->track( $click, 0, 'Googlebot/2.1', 'a' ) );
+		self::assertFalse( $this->tracker->track( $click, 0, '', 'a' ) );
+		self::assertTrue( $this->tracker->track( $click, 0, self::READER, 'a' ) );
+		self::assertFalse( $this->tracker->track( $click, 1, self::READER, 'a' ) );
+		self::assertTrue( $this->tracker->track( $click, 1, self::READER, 'b' ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $id, 50, 0, Button::from_input( '2' ) ), 1, self::READER, 'a' ) );
+		self::assertCount( 3, $this->added );
 	}
 
 	public function test_the_body_is_read_strictly(): void {
