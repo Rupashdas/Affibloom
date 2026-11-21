@@ -16,6 +16,17 @@ if ( ! is_array( $affibloom_input ) ) {
 	WP_CLI::error( 'create-product.php: the argument is not a JSON object.' );
 }
 
+// What the product's save stores beside the given fields (PostTypeProductRepository): the base domain Link
+// Opportunities match links by (F22 D5), and Detect Opportunities from the site's Link Defaults (F22 R41, D9).
+$affibloom_meta = (array) ( $affibloom_input['meta'] ?? array() );
+if ( isset( $affibloom_meta['_affibloom_url'] ) && ! isset( $affibloom_meta['_affibloom_domain'] ) ) {
+	$affibloom_meta['_affibloom_domain'] = \Affibloom\Domain\Opportunity\BaseDomain::of( (string) $affibloom_meta['_affibloom_url'] );
+}
+if ( ! isset( $affibloom_meta['_affibloom_detect_opportunities'] ) ) {
+	$affibloom_settings = (array) get_option( 'affibloom_settings', array() );
+	$affibloom_meta['_affibloom_detect_opportunities'] = ( $affibloom_settings['detect_opportunities'] ?? true ) ? '1' : '0';
+}
+
 // wp_insert_post() and add_post_meta() strip one level of slashes, so their input is slashed first, as
 // `wp post create` and `wp post meta add` do; otherwise a backslash in a title or a meta value would be lost.
 $affibloom_id = wp_insert_post(
@@ -24,7 +35,7 @@ $affibloom_id = wp_insert_post(
 			'post_type'   => 'affibloom_product',
 			'post_status' => 'publish',
 			'post_title'  => (string) ( $affibloom_input['title'] ?? 'Test product' ),
-			'meta_input'  => (array) ( $affibloom_input['meta'] ?? array() ),
+			'meta_input'  => $affibloom_meta,
 		)
 	),
 	true

@@ -92,7 +92,8 @@ test.describe( 'F12 Clicks and where used', () => {
 
 	test( 'AC14 trashed and unknown products are not counted; a repointed one counts for its target', async ( { request } ) => {
 		const gone = createProduct( { name: unique( 'F12 AC14 gone' ) } );
-		wp( 'post', 'delete', String( gone ) );
+		// Products have no trash (a delete is for good), so "trashed" here is a product that is gone.
+		wp( 'post', 'delete', String( gone ), '--force' );
 		for ( const p of [ gone, 999999999, 'x' ] ) {
 			const answer = await request.post( '/wp-json/affibloom/v1/clicks', { data: JSON.stringify( { p, h: 0, l: 0, b: '1' } ), headers: { 'Content-Type': 'text/plain' } } );
 			expect( answer.status() ).toBe( 204 );

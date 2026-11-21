@@ -38,6 +38,8 @@ test.describe( 'C3 Google Analytics click events', () => {
 			button_text2: 'Check Price',
 		} );
 		await page.goto( newPostWith( `${ boxBlock( id ) }<!-- wp:paragraph --><p><a href="https://www.example.com/c3-link" data-affibloom-id="${ id }">the shoe</a></p><!-- /wp:paragraph -->` ) );
+		// The links stay on this page, whose dataLayer the test reads (clicks.js listens first, in the capture phase).
+		await page.evaluate( () => document.addEventListener( 'click', ( event ) => event.preventDefault() ) );
 
 		await page.locator( '.affibloom-box .affibloom-button-1' ).click();
 		await page.locator( '.affibloom-box .affibloom-button-2' ).click();
@@ -70,15 +72,17 @@ test.describe( 'C3 Google Analytics click events', () => {
 		const id = createProduct( { name: unique( 'C3 AC3' ) } );
 		await page.goto( newPostWith( boxBlock( id ) ) );
 		await expect( page.locator( '.affibloom-box' ) ).toBeVisible(); // Affibloom is on the page
-		await expect( page.locator( 'script[src*="googletagmanager.com/gtag/js"]' ) ).toHaveCount( 0 );
+		// Affibloom's own tag: the site's theme and other plugins print theirs.
+		await expect( page.locator( 'script#affibloom-gtag-js, script#affibloom-gtag-js-before' ) ).toHaveCount( 0 );
 	} );
 
 	test( 'AC10 with Click Tracking on and IDs, gtag.js loads for the first ID and every ID is configured', async ( { page } ) => {
 		setSettings( { ga_tracking_id: 'G-FIRST1, G-SECOND2', ga_click_tracking: true, ga_pageview: false, ga_anonymize_ip: true } );
 		await page.goto( newPostWith( '<p>Any page.</p>' ) );
-		await expect( page.locator( 'script[src*="googletagmanager.com/gtag/js?id=G-FIRST1"]' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'script#affibloom-gtag-js[src*="googletagmanager.com/gtag/js?id=G-FIRST1"]' ) ).toHaveCount( 1 );
+		// Affibloom's IDs: the site's own snippet configures its own.
 		const configs = await page.evaluate( () =>
-			( ( window as unknown as { dataLayer: unknown[] } ).dataLayer ).map( ( entry ) => Array.from( entry as ArrayLike< unknown > ) ).filter( ( entry ) => 'config' === entry[ 0 ] )
+			( ( window as unknown as { dataLayer: unknown[] } ).dataLayer ).map( ( entry ) => Array.from( entry as ArrayLike< unknown > ) ).filter( ( entry ) => 'config' === entry[ 0 ] && [ 'G-FIRST1', 'G-SECOND2' ].includes( entry[ 1 ] as string ) )
 		);
 		expect( configs ).toEqual( [
 			[ 'config', 'G-FIRST1', { send_page_view: false, anonymize_ip: true } ],
@@ -90,8 +94,10 @@ test.describe( 'C3 Google Analytics click events', () => {
 	// AC8, AC9 (C3B; R9, R10, D4): Google Tag Manager's dataLayer, then analytics.js.
 	test( 'AC8 with no gtag but a dataLayer, the click pushes the event object', async ( { page } ) => {
 		setSettings( { ga_tracking_id: 'G-TEST123', ga_click_tracking: true } );
+		// gtag blocked (a consent tool, say): a fixed, empty global that no script on the page can define.
 		await page.addInitScript( () => {
 			delete ( window as unknown as { gtag?: unknown } ).gtag;
+			Object.defineProperty( window, 'gtag', { value: undefined, writable: false, configurable: false } );
 		} );
 		const name = unique( 'C3 AC8' );
 		const id = createProduct( { name, url: `https://www.example.com/${ unique( 'c3-8' ) }`, button_text: 'Buy Now' } );
@@ -110,6 +116,9 @@ test.describe( 'C3 Google Analytics click events', () => {
 			const w = window as unknown as { gtag?: unknown; dataLayer?: unknown; ga: ( ...args: unknown[] ) => void; gaCalls: unknown[][] };
 			delete w.gtag;
 			delete w.dataLayer;
+			// Neither gtag nor a dataLayer: fixed, empty globals that no script on the page can define.
+			Object.defineProperty( window, 'gtag', { value: undefined, writable: false, configurable: false } );
+			Object.defineProperty( window, 'dataLayer', { value: undefined, writable: false, configurable: false } );
 			w.gaCalls = [];
 			w.ga = ( ...args: unknown[] ) => w.gaCalls.push( args );
 		} );

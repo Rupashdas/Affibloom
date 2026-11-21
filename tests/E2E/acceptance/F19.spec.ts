@@ -533,7 +533,8 @@ test.describe( 'F19 Dashboard list', () => {
 		}
 		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10&paged=2' );
 		await page.locator( 'th.affibloom-col-locations' ).getByRole( 'link' ).click();
+		// The Locations sort counts every product's index rows: on Local (700+ products) it takes about 4.5 s.
+		await expect( page ).toHaveURL( /orderby=locations&order=desc/, { timeout: 15000 } );
 		await expect( page ).toHaveURL( /paged=2/ );
-		await expect( page ).toHaveURL( /orderby=locations&order=desc/ );
 	} );
 } );

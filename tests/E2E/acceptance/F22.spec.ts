@@ -5,6 +5,8 @@ import { blockTrackers, createProduct, newPostWith, setSettings, unique, wp } fr
 test.describe( 'F22 Opportunities', () => {
 	test.beforeEach( async ( { context } ) => {
 		await blockTrackers( context );
+		// Lasso's default, which new products take: a run that stopped inside AC7 would leave it off.
+		setSettings( { detect_opportunities: true } );
 	} );
 
 	/** A product on its own domain and a post with untied links to that domain: one opportunity per link. */
@@ -34,17 +36,23 @@ test.describe( 'F22 Opportunities', () => {
 		await page.getByLabel( 'Search Opportunities' ).fill( `${ domain } item-1` );
 		await page.getByLabel( 'Search Opportunities' ).press( 'Enter' );
 		await expect( page.locator( '[data-found]' ) ).toHaveText( '3 Found' ); // item-1, item-10, item-11
+		// Each click redraws the list in place: the next one waits for the address to carry the sort.
 		await page.getByRole( 'button', { name: 'URL', exact: true } ).click();
+		await expect( page ).toHaveURL( /order=asc/ );
 		await page.getByRole( 'button', { name: 'URL', exact: true } ).click();
+		await expect( page ).toHaveURL( /order=desc/ );
 		await expect( page.locator( '.affibloom-table--opportunities tbody tr' ).first() ).toContainText( 'item-11' );
 
 		await page.getByLabel( 'Search Opportunities' ).fill( 'nothing-like-this' );
 		await page.getByLabel( 'Search Opportunities' ).press( 'Enter' );
-		await expect( page.getByText( 'No opportunities found.' ) ).toBeVisible();
+		await expect( page.locator( '#affibloom-opportunities-list' ).getByText( 'No opportunities found.' ) ).toBeVisible();
 
 		const intro = page.locator( '[data-intro="links"]' );
 		if ( await intro.count() ) {
+			// The box hides at once; its choice is saved in the background, which the reload waits for.
+			const saved = page.waitForResponse( ( r ) => r.url().includes( '/opportunities/intros/' ) );
 			await intro.getByRole( 'button', { name: 'Close this box for good' } ).click();
+			await saved;
 			await page.reload();
 			await expect( page.locator( '[data-intro="links"]' ) ).toHaveCount( 0 );
 			wp( 'eval', "$s = get_option( 'affibloom_settings', array() ); $s['education_hidden'] = array(); update_option( 'affibloom_settings', $s );" );
@@ -98,11 +106,11 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( row ).toHaveCount( 1 ); // both links are untied
 		await expect( page ).toHaveURL( /show=unmonetized/ );
 		await page.getByLabel( 'Post type' ).selectOption( 'page' );
-		await expect( page.getByText( "Looks like we're coming up empty." ) ).toBeVisible();
+		await expect( page.locator( '#affibloom-opportunities-list' ).getByText( "Looks like we're coming up empty." ) ).toBeVisible();
 		await page.getByLabel( 'Post type' ).selectOption( 'post' );
 		await page.getByLabel( 'Min link clicks' ).fill( '1' );
 		await page.getByLabel( 'Min link clicks' ).press( 'Enter' );
-		await expect( page.getByText( "Looks like we're coming up empty." ) ).toBeVisible(); // no product, no clicks
+		await expect( page.locator( '#affibloom-opportunities-list' ).getByText( "Looks like we're coming up empty." ) ).toBeVisible(); // no product, no clicks
 	} );
 
 	// AC5, AC6 (O5; R34-R39, D9).

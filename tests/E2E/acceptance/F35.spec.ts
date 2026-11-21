@@ -6,16 +6,28 @@ import { blockTrackers, newPostWith, setSettings, unique, wp } from '../utils';
 // Note for the run: the import makes a product for every untied Amazon link on the copy (up to 100 a run). On a copy
 // whose Amazon API is connected (C1), each new product asks Amazon for its data once.
 
-const run = () => wp( 'cron', 'event', 'run', 'affibloom_amazon_import' );
+// A run, after any run another request started (its lock, at most five minutes) has finished: a held lock skips the run.
+const run = () => {
+	for ( let tries = 0; tries < 60 && 'yes' === wp( 'eval', "echo get_option( 'affibloom_amazon_import_lock' ) ? 'yes' : 'no';" ); tries++ ) {
+		Atomics.wait( new Int32Array( new SharedArrayBuffer( 4 ) ), 0, 0, 2000 );
+	}
+	wp( 'cron', 'event', 'run', 'affibloom_amazon_import' );
+};
+// Switching it on schedules a run now, which any page load can start through WP-Cron: the tests that read the queue
+// move the next run an hour ahead (`init` keeps an event that is already scheduled), so nothing drains it meanwhile.
+const holdImport = () =>
+	wp( 'eval', "wp_clear_scheduled_hook( 'affibloom_amazon_import' ); wp_schedule_event( time() + HOUR_IN_SECONDS, 'affibloom_five_minutes', 'affibloom_amazon_import' );" );
 const amazonProducts = ( asin: string ) =>
 	Number( wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_asin', `--meta_value=${ asin }`, '--format=count' ) );
 // A made-up ASIN, unique per run: 10 characters, B0 then 8 letters or digits.
-const asin = () => ( 'B0' + unique( 'f35' ).replace( /[^a-z0-9]/gi, '' ).toUpperCase() ).slice( 0, 10 ).padEnd( 10, 'X' );
+// Random, not from unique(): its first characters come from the clock and repeat for about 46 seconds.
+const asin = () => 'B0' + Math.random().toString( 36 ).slice( 2, 10 ).toUpperCase().padEnd( 8, 'X' );
 
 test.describe( 'F35 Amazon auto-monetization', () => {
 	test.beforeEach( async ( { context } ) => {
 		await blockTrackers( context );
 		setSettings( { auto_monetize_amazon: true } );
+		holdImport(); // the tests run the import themselves
 	} );
 
 	test.afterAll( () => {
@@ -45,6 +57,9 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 	} );
 
 	test( "AC2 the front end prints the product's link with the site's tag, rel and target", async ( { page } ) => {
+		// One tracking ID: with Multiple IDs on, a partner's tag learned into the whitelist (AM6, as AC1's) is kept.
+		// The site's rel and target are its Link Defaults, which the product takes when it is made (Local has both off).
+		setSettings( { multiple_tracking_ids: false, nofollow: true, new_tab: true } );
 		const code = asin();
 		const id = newPostWith( `<p><a href="https://www.amazon.com/dp/${ code }?tag=other-20">this</a></p>` ).replace( '/?p=', '' );
 		run();
@@ -53,6 +68,8 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		const link = page.locator( `a[data-affibloom-id="${ product }"]` );
 		await expect( link ).toHaveAttribute( 'href', /tag=vbvault-20/ );
 		await expect( link ).toHaveAttribute( 'rel', /nofollow/ );
+		await expect( link ).toHaveAttribute( 'target', '_blank' );
+		setSettings( { multiple_tracking_ids: true, nofollow: false, new_tab: false } ); // Local's values
 	} );
 
 	// AC3 (AM2; R28, D14): amzn.to answers 301 to the product page (stubbed: the suite never reaches Amazon's hosts).
@@ -81,7 +98,8 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		const dialog = page.getByRole( 'dialog', { name: 'Enable Auto-Amazon' } );
 
 		await tag.fill( '' );
-		await toggle.check( { force: true } );
+		// A click, not check(): the switch answers by staying off (or by asking first), which check() takes for a failure.
+		await toggle.click( { force: true } );
 		await expect( page.getByText( 'Tracking ID must be set to use Auto-Amazon.' ) ).toBeVisible();
 		await expect( toggle ).not.toBeChecked();
 
@@ -96,7 +114,7 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		await expect( toggle ).not.toBeChecked();
 		await expect( multiple ).not.toBeChecked();
 
-		await toggle.check( { force: true } );
+		await toggle.click( { force: true } );
 		await dialog.getByRole( 'button', { name: 'Enable' } ).click();
 		await expect( toggle ).toBeChecked();
 		await page.getByRole( 'button', { name: 'Save Changes' } ).click();

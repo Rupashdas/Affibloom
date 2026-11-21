@@ -340,7 +340,8 @@ test.describe( 'C1 Amazon product data', () => {
 
 	test( "AC6 AC10 the hourly refresh updates only due Amazon data, oldest first, and keeps the editor's name and image (C1Q4b)", () => {
 		credentials( valid );
-		setSettings( { update_pricing_daily: true } );
+		// "Only update products with Locations" (C1E) would skip these products, which no post uses; its arm is unit-tested.
+		setSettings( { update_pricing_daily: true, pricing_locations_only: false } );
 		/** Stores a row for an ASIN as Amazon's data of some hours ago. */
 		const row = ( asin: string, price: string, hoursAgo: number ) =>
 			wp( 'eval', `global $wpdb; $wpdb->replace( $wpdb->prefix . 'affibloom_amazon_products', array( 'asin' => '${ asin }', 'country' => 'us', 'name' => 'Stored name', 'price' => '${ price }', 'base_url' => '', 'monetized_url' => '', 'image' => 'https://m.media-amazon.com/images/I/old.jpg', 'features' => '[]', 'source' => 'creators', 'last_updated' => gmdate( 'Y-m-d H:i:s', time() - ${ hoursAgo } * 3600 ) ) );` );
@@ -350,9 +351,13 @@ test.describe( 'C1 Amazon product data', () => {
 		createProduct( { name: 'Fresh one', type: 'amazon', asin: fresh, url: `https://www.amazon.com/dp/${ fresh }?tag=vbvault-20` } );
 		// Only this test's rows are due: every other Amazon product gets a fresh row (C1I's fixture).
 		wp( 'eval-file', 'tests/E2E/fixtures/isolate-amazon-pending.php', JSON.stringify( [] ) );
+		// The site's stored rows are fresh too: older ones would be due first, and the stub knows only the test's ASINs.
+		wp( 'eval', "global $wpdb; $wpdb->query( $wpdb->prepare( \"UPDATE {$wpdb->prefix}affibloom_amazon_products SET last_updated = %s\", gmdate( 'Y-m-d H:i:s' ) ) );" );
 		row( stale, '$1.00', 48 );
 		row( fresh, '$2.00', 1 );
 		stub( 'ok' );
+		// A run the site's own hourly event left going would keep this tick from starting one (C1Q4b, RUN_SECONDS).
+		wp( 'eval', "delete_option( 'affibloom_amazon_refresh' );" );
 
 		wp( 'eval', "do_action( 'affibloom_amazon_refresh' );" );
 
@@ -372,7 +377,7 @@ test.describe( 'C1 Amazon product data', () => {
 		wp( 'eval', "do_action( 'affibloom_amazon_refresh' );" );
 		expect( cacheRow( stale, 'us' ) ).toMatchObject( { price: '$1.00' } );
 		expect( requests() ).toBe( 0 );
-		setSettings( { update_pricing_daily: true } );
+		setSettings( { update_pricing_daily: true, pricing_locations_only: true } ); // the live site's values
 	} );
 
 	test( 'AC7 with no credentials the Product Data API card says "Not set up" and nothing is sent to Amazon', async ( { page } ) => {

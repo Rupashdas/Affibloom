@@ -17,8 +17,13 @@ test.describe( 'C2 Affiliate link auto-detection', () => {
 		setSettings( { auto_detect_links: true } );
 	} );
 
-	// The background run a detection schedules (C2C; F35 D5): run it now rather than wait for WP-Cron.
-	const runDetection = () => wp( 'cron', 'event', 'run', 'affibloom_auto_detect' );
+	// The background run a detection schedules (C2C; F35 D5): run it now rather than wait for WP-Cron. A save whose links
+	// all have products schedules nothing, and `wp cron event run` refuses an event that is not scheduled.
+	const runDetection = () => {
+		if ( 'yes' === wp( 'eval', "echo wp_next_scheduled( 'affibloom_auto_detect' ) ? 'yes' : 'no';" ) ) {
+			wp( 'cron', 'event', 'run', 'affibloom_auto_detect' );
+		}
+	};
 	const productOf = ( url: string ) =>
 		wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_url', `--meta_value=${ url }`, '--field=ID' );
 
@@ -68,7 +73,9 @@ test.describe( 'C2 Affiliate link auto-detection', () => {
 
 	test( 'AC4 links that match no known network create nothing', () => {
 		const shop = `https://www.example.com/${ unique( 'c2-shop' ) }`;
-		const amazon = 'https://www.amazon.com/dp/B0C2AC4XXX?tag=vbvault-20';
+		// A fresh ASIN: the Amazon import (F35, AM1) makes products from Amazon links in posts, so a fixed one exists after a run.
+		const asin = ( 'B0' + unique( 'x' ).replace( /[^a-z0-9]/gi, '' ).toUpperCase() + '00000000' ).slice( 0, 10 );
+		const amazon = `https://www.amazon.com/dp/${ asin }?tag=vbvault-20`;
 		newPostWith( `<p><a href="${ shop }">A shop</a> and <a href="${ amazon }">Amazon</a> and <a href="/about/">us</a>.</p>` );
 		expect( productsFor( shop ) ).toBe( 0 );
 		expect( productsFor( amazon ) ).toBe( 0 );
@@ -86,7 +93,7 @@ test.describe( 'C2 Affiliate link auto-detection', () => {
 	const detected = ( url: string ) =>
 		wp( 'eval', `global $wpdb; echo wp_json_encode( $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) AS n, MAX(product_id) AS product, MAX(network) AS network FROM {$wpdb->prefix}affibloom_detected_links WHERE url = %s", '${ url }' ) ) );` );
 	const scheduled = () => wp( 'eval', "echo wp_next_scheduled( 'affibloom_auto_detect' ) ? 'yes' : 'no';" );
-	const clearRun = () => wp( 'cron', 'event', 'delete', 'affibloom_auto_detect' );
+	const clearRun = () => wp( 'eval', "wp_clear_scheduled_hook( 'affibloom_auto_detect' );" );
 
 	test( 'AC2, AC3, AC7 an Impact link is recorded once per URL; the post is unchanged; the run is scheduled', () => {
 		const url = impactLink();

@@ -268,7 +268,8 @@ test.describe( 'F31 Shortcode', () => {
 		await page.evaluate( () => document.addEventListener( 'copy', ( event ) => {
 			( window as unknown as { copied: string } ).copied = ( event.target as HTMLTextAreaElement ).value;
 		} ) );
-		const button = page.getByRole( 'button', { name: 'Copy Shortcode' } );
+		// By its attribute: while it reads "Copied!" its name is not "Copy Shortcode".
+		const button = page.locator( '[data-table-copy]' );
 		await button.click();
 		expect( await page.evaluate( () => ( window as unknown as { copied?: string } ).copied ) ).toBe( `[affibloom type="table" id="${ id }"]` );
 		await expect( button ).toHaveText( 'Copied!' );

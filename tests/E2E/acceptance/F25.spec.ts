@@ -299,6 +299,7 @@ test.describe( 'F25 Comparison tables', () => {
 
 	// AC9 (T6; R29-R31, R33, D7, D11).
 	test( 'AC9 plain cells save as you type; a removed field keeps its values; a row\'s gutter removes the row', async ( { page } ) => {
+		test.slow(); // A row, a field and two removals, each a save and a redraw.
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const product = createProduct( { name: `Cell ${ word }` } );
 		const id = await tableWith( page, 'column', [ product ] );
