@@ -251,7 +251,20 @@ final class LinkCheckServiceTest extends TestCase {
 		$this->assertFalse( $this->service()->amazon_api() );
 	}
 
+	/** Deviation 148 (Task C1H): with the daily Amazon refresh on, it files Amazon products; the pass leaves them. */
+	public function test_with_the_daily_amazon_refresh_on_the_pass_leaves_amazon_products_to_it(): void {
+		$this->amazon_configured = true;
+		$this->issues->amazon    = array( 2 => array( 'https://www.amazon.com/dp/B0GONE0001', 'B0GONE0001', 'us' ) );
+
+		$this->service()->start_pass( '2026-11-21' );
+		$this->service()->run_batch();
+
+		$this->assertSame( array(), $this->amazon_asked );
+		$this->assertNull( $this->issues->get( 2 ) );
+	}
+
 	public function test_with_the_amazon_api_the_pass_asks_it_and_never_requests_amazon(): void {
+		$this->settings                     = new InMemorySettingsRepository( array( 'update_pricing_daily' => false ) );
 		$this->amazon_configured            = true;
 		$this->issues->amazon               = array(
 			2 => array( 'https://www.amazon.com/dp/B0GONE0001', 'B0GONE0001', 'us' ),

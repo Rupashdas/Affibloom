@@ -77,7 +77,7 @@ final class LinkCheckService {
 			return false;
 		}
 		$this->issues->delete_orphans();
-		$queue = $this->issues->due( $this->locations_only(), $this->amazon->is_configured() );
+		$queue = $this->issues->due( $this->locations_only(), $this->checks_amazon() );
 		$this->passes->save( new CheckPass( $day, count( $queue ), 0, $queue ) );
 		$this->job->dispatch();
 
@@ -166,7 +166,7 @@ final class LinkCheckService {
 	 * @return Generator<int, CheckOutcome>
 	 */
 	public function run_all(): Generator {
-		foreach ( $this->issues->due( $this->locations_only(), $this->amazon->is_configured() ) as $product_id ) {
+		foreach ( $this->issues->due( $this->locations_only(), $this->checks_amazon() ) as $product_id ) {
 			$outcome = $this->check( $product_id );
 			if ( null !== $outcome ) {
 				yield $outcome;
@@ -256,6 +256,15 @@ final class LinkCheckService {
 		if ( $wait > 0 ) {
 			$this->job->dispatch( $wait );
 		}
+	}
+
+	/**
+	 * Whether the pass asks the product API about Amazon products: while it is configured, unless "Update Amazon pricing
+	 * daily" is on, when C1's hourly refresh files their availability instead (deviation 148; Task C1H), so no item is
+	 * asked twice a day.
+	 */
+	private function checks_amazon(): bool {
+		return $this->amazon->is_configured() && ! $this->settings->get()->bool( 'update_pricing_daily' );
 	}
 
 	/**

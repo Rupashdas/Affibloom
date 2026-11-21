@@ -41,12 +41,14 @@ final class AmazonDataService {
 	 * @param AmazonCatalog           $catalog     The Creators API.
 	 * @param AmazonProductRepository $products    Amazon's data per ASIN and store.
 	 * @param ProductRepository       $library     The products, for Refresh.
+	 * @param LinkHealth|null         $health      What each fetch tells link health (C1 D11; Task C1H).
 	 */
 	public function __construct(
 		private CredentialsRepository $credentials,
 		private AmazonCatalog $catalog,
 		private AmazonProductRepository $products,
-		private ProductRepository $library
+		private ProductRepository $library,
+		private ?LinkHealth $health = null
 	) {}
 
 	/**
@@ -75,10 +77,12 @@ final class AmazonDataService {
 				return false;
 			}
 			$this->products->touch( $item_asin->value, $country, $now );
+			$this->health?->not_found( $item_asin->value, $country );
 			return true;
 		}
 
 		$data = AmazonProduct::from_item( $item, $item_asin, $country, $link, $now );
+		$this->health?->found( $item_asin->value, $country, ! $data->out_of_stock );
 		if ( $data->complete() ) {
 			$this->products->save( $data );
 		} else {
@@ -206,10 +210,14 @@ final class AmazonDataService {
 			if ( CatalogError::THROTTLED === $error->kind ) {
 				return SyncOutcome::throttled( $error->retry_after );
 			}
+			if ( CatalogError::NOT_FOUND === $error->kind ) {
+				$this->health?->not_found( $asin->value, $country );
+			}
 			return SyncOutcome::failed( CatalogError::NOT_FOUND === $error->kind ? SyncOutcome::NOT_FOUND : SyncOutcome::FAILED );
 		}
 
 		$data = AmazonProduct::from_item( $item, $asin, $country, $product->url->value(), gmdate( 'Y-m-d H:i:s' ) );
+		$this->health?->found( $asin->value, $country, ! $data->out_of_stock );
 		// Lasso's "incomplete" is a title or image missing, which is also what its table refuses (complete()).
 		if ( ! $data->complete() ) {
 			return SyncOutcome::failed( SyncOutcome::INCOMPLETE );
@@ -272,10 +280,14 @@ final class AmazonDataService {
 		try {
 			$item = $this->catalog->item( $credentials, $asin, $country );
 		} catch ( CatalogError $error ) {
+			if ( CatalogError::NOT_FOUND === $error->kind ) {
+				$this->health?->not_found( $asin->value, $country );
+			}
 			throw new RefreshFailed( RefreshFailed::FAILED, $error->kind ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- a code; the words are the Interface's.
 		}
 
 		$data = AmazonProduct::from_item( $item, $asin, $country, $product->url->value(), gmdate( 'Y-m-d H:i:s' ) );
+		$this->health?->found( $asin->value, $country, ! $data->out_of_stock );
 		if ( $data->complete() ) {
 			$this->products->save( $data );
 			$data = $this->products->find( $asin->value, $country ) ?? $data;

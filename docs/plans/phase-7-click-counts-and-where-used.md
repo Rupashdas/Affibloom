@@ -95,7 +95,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### C1 — Amazon: refresh job and availability
 
 - [x] Task C1E: The scheduled refresh job
-- [ ] Task C1H: Availability handed to link health
+- [x] Task C1H: Availability handed to link health
 
 ### F22 — Opportunities
 
@@ -824,10 +824,17 @@ the due query found 6 products, 1 of them used in content.
 
 **Files:** the port, adapter, `Plugin.php`; `C1.spec.ts` AC13.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Port and adapter.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Record Amazon out-of-stock and not-found results for link health".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Port and adapter.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Record Amazon out-of-stock and not-found results for link health".
+
+*Note (2026-11-21):* the port is `Application\Amazon\LinkHealth` (`found()`, `not_found()`), called by
+`AmazonDataService::refresh_row()`, `sync()` and `refresh()`; `fill()` has no stored product yet (its save check
+files it). The adapter `Application\LinkHealth\AmazonLinkHealth` files each product of the ASIN and store through
+`LinkCheckService::record()`. Deviation 148's other half: while "Update Amazon pricing daily" is on, the daily pass
+leaves Amazon products to the refresh. Checked: unit (hand-off, the pass both ways), phpcs, analyse; on Local the
+adapter opened `000` for the Molten ball and resolved it on "in stock" (no Amazon request: Local holds real credentials).
 
 ---
 

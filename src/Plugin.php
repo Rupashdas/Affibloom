@@ -128,6 +128,7 @@ use Affibloom\Interface\Cron\LinkCheckCron;
 use Affibloom\Application\LinkHealth\CatalogProductCheck;
 use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\LinkHealth\LinkCheckJobStatus;
+use Affibloom\Application\LinkHealth\AmazonLinkHealth;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\Locations\LocationPreview;
@@ -416,7 +417,7 @@ final class Plugin {
 	 * Amazon's data on products (C1C, C1D, C1I).
 	 */
 	private function amazon_data(): AmazonDataService {
-		$this->amazon_data ??= new AmazonDataService( new OptionCredentialsRepository(), $this->catalog(), new TableAmazonProductRepository(), new PostTypeProductRepository() );
+		$this->amazon_data ??= new AmazonDataService( new OptionCredentialsRepository(), $this->catalog(), new TableAmazonProductRepository(), new PostTypeProductRepository(), new AmazonLinkHealth( $this->link_checks(), new TableLinkIssueRepository(), new PostTypeProductRepository() ) );
 		return $this->amazon_data;
 	}
 
