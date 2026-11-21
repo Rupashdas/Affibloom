@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 	data-search-many="<?php esc_attr_e( 'Search %s Groups', 'affibloom' ); ?>"
 	<?php /* translators: %s: how many links the group holds. */ ?>
 	data-links="<?php esc_attr_e( '%s link(s)', 'affibloom' ); ?>"
+	data-added-label="<?php esc_attr_e( 'Added', 'affibloom' ); ?>"
 	data-prev-label="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next-label="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>">
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-table-add-group-title">

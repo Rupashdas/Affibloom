@@ -156,6 +156,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 148. Task 30C (2026-11-18): Amazon products are checked through C1's API whenever its credentials work; a down API or refused credentials check nothing; C1E must leave them to its refresh (R5).
 - 149. Task 31D (2026-11-19): the export's three Lasso-named columns are `fields`, `custom_redirect`, `custom_thumbnail` (no Lasso names in Affibloom).
 - 150. The user (2026-11-20): Show Features on the product page draws its bullets in the box's description block; the preview frames load the site's icon CSS.
+- 151. Table builder rework (the user, 2026-11-21): live drag-and-drop by grips and whole cards, keyboard drag, a selection inspector, an icon picker for badges and buttons; Move buttons and the button dialog go.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2933,3 +2934,41 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     preview routes add `IconStyles::preview_css()` to their CSS: the site's Additional CSS (the imported icons' rules)
     and the added icons', since an admin page has neither and the button and badge icons did not show. Checked by unit
     tests (BoxBuilder, ProductInput, IconStyles) and on product 20767 in the browser.
+
+151. **Table builder rework (the user, 2026-11-21).** The user: the builder "feels less polished and is not as
+    user-friendly" than Lasso's; improve drag-and-drop, selection, customization and the editing workflow, and give
+    badges and buttons a proper icon picker. An audit of T3-T15 found, besides the look: a value typed just before a
+    move, add or remove showed its old text after the redraw (the save landed after the server drew the builder); the
+    price and description editors wrote into elements a redraw had replaced; one failed write dropped every queued
+    write; a stale revision left the page failing with no way out; the redraw reset the grid's scroll and focus; a new
+    table ignored Theme and the switches; badges showed their `<span>` markup. The changes:
+    - **Writes** (D4 kept): a structural write first sends every value still waiting to be saved, so the redraw has
+      them; a failed write fails alone; a stale revision shows "Reload" and stops; a redraw keeps the grid's scroll,
+      the focus and the selection. On a new table, Theme and the switches wait (disabled) until it is named.
+    - **Drag-and-drop** (D9 changed, as deviation 134 did for the product page): Lasso's live sortable without jQuery
+      UI. A product, a row (Vertical) or column (Horizontal) and a field move under the pointer while the others make
+      room (each grid cell is re-placed live by `grid-row`/`grid-column`, animated), and the drop saves the order.
+      It looks as every drag in the plugin (drag-rows.js; the user, 2026-11-21): the held card, column or row floats
+      under the pointer tilted with a deep shadow while grey slots its size mark where it will land. Rows and
+      columns get a gutter with their own grip, instead of the first product's cell. A field card drags by its grip
+      or its body (not from its inputs, editors, image or buttons, Lasso's cancel list) to another place in its cell
+      or to another row/column, for every product at once. The grid scrolls while dragging near its edge; Escape
+      cancels. Keyboard: a grip is a button; Space or Enter lifts, the arrows move, Space or Enter drops, Escape puts
+      back, each step announced. The Move up/down and Move to previous/next buttons go.
+    - **Selection and the inspector**: clicking a product, a field or a row selects it (outlined; the same field is
+      marked in every product) and a panel beside the grid (under it on narrow screens) shows what can be changed:
+      a product's badge (icon and words) and removal; a field's name, its moves and removal from every product; a
+      button's text with its icon and, for the Secondary, its address (R35's dialog goes; the rule and its sentences
+      stay); a row's removal. Escape or clicking empty space clears it.
+    - **Icon picker** (badges and button texts; F28's library): a searchable grid of the library's icons (their
+      pictures and names), "No icon", the current one marked, the keyboard (arrows, Enter, Escape) and, for those who
+      may change settings, "Add icon" from the media library (F28's POST /icons). The stored form stays F28's
+      `<span class="<class>-icon"></span> <words>` (D3): the reader's box, the site's CSS and migrated content read it,
+      and nobody types it any more. The canvas draws a badge or button with its icon's picture.
+    - **Add Product** and **Add Group** keep their dialog open and mark what was added "Added" (R17 closed it after
+      one); a product already in the table reads "Added" (Lasso's "already exists" sentence stays for a direct request).
+    - Checked: F25 AC3-AC12, AC15 and AC19 in Playwright (AC5, AC9, AC11, AC12 rewritten for the inspector and the
+      drag; AC11b new for the icon picker).
+    - **Structure**: table-builder.js becomes a small core (the write queue, the redraw, the selection) and modules
+      for the settings, the cells, the drag, the inspector and the icon picker, sharing one `affibloomTableBuilder`.
+

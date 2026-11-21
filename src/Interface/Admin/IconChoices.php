@@ -66,6 +66,39 @@ final class IconChoices {
 	}
 
 	/**
+	 * Each icon's picture by its class, leaving out pictures that are missing: how the table builder draws a badge or a
+	 * button with its icon (F25, deviation 151).
+	 *
+	 * @return array<string, string>
+	 */
+	public function sources(): array {
+		$sources = array();
+		foreach ( $this->rows() as $row ) {
+			if ( ! $row['missing'] ) {
+				$sources[ $row['icon']->css_class ] = $row['src'];
+			}
+		}
+		return $sources;
+	}
+
+	/**
+	 * The library as the table builder's icon picker lists it (deviation 151): class, name, picture, missing.
+	 *
+	 * @return list<array{class: string, name: string, src: string, missing: bool}>
+	 */
+	public function listing(): array {
+		return array_map(
+			static fn( array $row ): array => array(
+				'class'   => $row['icon']->css_class,
+				'name'    => $row['icon']->name,
+				'src'     => $row['src'],
+				'missing' => $row['missing'],
+			),
+			$this->rows()
+		);
+	}
+
+	/**
 	 * The file in the uploads folder a link points to, or '' when it points elsewhere (another host, a theme): then
 	 * Affibloom cannot tell whether it is there and does not flag it. The scheme is ignored (the admin may run on https
 	 * while the uploads URL says http); a query or fragment is dropped.

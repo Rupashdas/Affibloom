@@ -22,6 +22,7 @@ use Affibloom\Domain\Table\TableRuleBroken;
 use Affibloom\Domain\Table\TableStyle;
 use Affibloom\Domain\Table\TableTheme;
 use Affibloom\Interface\Admin\Capabilities;
+use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\TablesScreen;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
@@ -49,8 +50,9 @@ final class TablesController implements Module {
 	 * @param TableService      $tables   The tables.
 	 * @param Template          $template The list's template.
 	 * @param TablePreview|null $preview  The reader's table for Preview Table (T15).
+	 * @param IconChoices|null  $icons    The icon library, for badges and buttons (deviation 151).
 	 */
-	public function __construct( private TableService $tables, private Template $template, private ?TablePreview $preview = null ) {}
+	public function __construct( private TableService $tables, private Template $template, private ?TablePreview $preview = null, private ?IconChoices $icons = null ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -706,7 +708,7 @@ final class TablesController implements Module {
 	 * @param Table $table The table.
 	 */
 	private function builder( Table $table ): string {
-		return $this->template->fetch( 'admin/partials/table-builder', $this->tables->builder( $table ) );
+		return $this->template->fetch( 'admin/partials/table-builder', $this->tables->builder( $table ) + array( 'icons' => $this->icons?->sources() ?? array() ) );
 	}
 
 	/**

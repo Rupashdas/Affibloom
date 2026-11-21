@@ -114,7 +114,7 @@ test.describe( 'F25 Comparison tables', () => {
 	} );
 
 	// AC4 (T4; R17-R20, R22).
-	test( 'AC4 Add Product: the picker, the starting layout filled from each product, a product only once', async ( { page } ) => {
+	test( 'AC4 Add Product: the picker (it stays open, an added product reads "Added"), the starting layout filled from each product, a product only once', async ( { page } ) => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const first = createProduct( { name: `Alpha ${ word } shoe`, price: '$49', badge: 'Best Pick', image_url: 'https://placehold.co/120x120.png' } );
 		const second = createProduct( { name: `Beta ${ word } ball`, price: '$19' } );
@@ -123,12 +123,15 @@ test.describe( 'F25 Comparison tables', () => {
 
 		const dialog = page.getByRole( 'dialog', { name: 'Add Product to Table' } );
 		const add = async ( name: string ) => {
-			await page.getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+			await page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Product', exact: true } ).click();
 			await dialog.getByRole( 'searchbox' ).fill( name );
 			await dialog.getByRole( 'searchbox' ).press( 'Enter' );
 			await dialog.getByRole( 'button', { name: `Add Product: ${ name }` } ).click();
+			// Deviation 151: the picker stays open for the next; the product's button reads Added.
+			await expect( dialog.getByRole( 'button', { name: `Added: ${ name }` } ) ).toBeDisabled();
+			await dialog.getByRole( 'button', { name: 'Close' } ).click();
 		};
-		await page.getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+		await page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Product', exact: true } ).click();
 		await expect( dialog.getByRole( 'searchbox' ) ).toHaveAttribute( 'placeholder', /^Search [\d,]+ URLs$/ );
 		await dialog.getByRole( 'searchbox' ).fill( `zz${ word }zz` );
 		await dialog.getByRole( 'searchbox' ).press( 'Enter' );
@@ -136,9 +139,7 @@ test.describe( 'F25 Comparison tables', () => {
 		await dialog.getByRole( 'button', { name: 'Close' } ).click();
 
 		await add( `Alpha ${ word } shoe` );
-		await expect( dialog ).toBeHidden();
 		await add( `Beta ${ word } ball` );
-		await expect( dialog ).toBeHidden();
 		const stored = JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) );
 		expect( stored.groups.map( ( group: { fields: number[] } ) => group.fields ) ).toEqual( [ [ 99991 ], [ 99990, 1, 99994 ], [ 99992 ] ] );
 		expect( stored.products ).toEqual( [ { id: first, badge: 'Best Pick' }, { id: second, badge: '' } ] );
@@ -146,32 +147,42 @@ test.describe( 'F25 Comparison tables', () => {
 		expect( stored.values[ String( second ) ] ).toMatchObject( { 99990: `Beta ${ word } ball`, 99994: '$19' } );
 		await expect( page.locator( '.affibloom-table-cell--head' ) ).toHaveCount( 2 );
 
-		await add( `Alpha ${ word } shoe` );
-		await expect( dialog.getByText( 'This product already exists, please select another product' ) ).toBeVisible();
+		// A product in the table cannot be added again: its button reads Added.
+		await page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+		await dialog.getByRole( 'searchbox' ).fill( `Alpha ${ word } shoe` );
+		await dialog.getByRole( 'searchbox' ).press( 'Enter' );
+		await expect( dialog.getByRole( 'button', { name: `Added: Alpha ${ word } shoe` } ) ).toBeDisabled();
 	} );
 
 	// AC5 (T4; R21, R23).
-	test( 'AC5 the header cell: Badge saved on leaving it, a grip, Remove this product, Add field', async ( { page } ) => {
+	test( 'AC5 the header cell: Badge (in the inspector) saved on leaving it, a grip, Remove this product, Add field', async ( { page } ) => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const first = createProduct( { name: `Gamma ${ word } knee pad` } );
 		const second = createProduct( { name: `Delta ${ word } net` } );
 		const id = createTable( unique( 'F25 AC5' ), 'row', 'Cactus', [] );
 		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
 		for ( const name of [ `Gamma ${ word } knee pad`, `Delta ${ word } net` ] ) {
-			await page.getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+			await page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Product', exact: true } ).click();
 			const dialog = page.getByRole( 'dialog', { name: 'Add Product to Table' } );
 			await dialog.getByRole( 'searchbox' ).fill( name );
 			await dialog.getByRole( 'searchbox' ).press( 'Enter' );
 			await dialog.getByRole( 'button', { name: `Add Product: ${ name }` } ).click();
-			await expect( dialog ).toBeHidden();
+			await expect( dialog.getByRole( 'button', { name: `Added: ${ name }` } ) ).toBeDisabled();
+			await dialog.getByRole( 'button', { name: 'Close' } ).click();
 		}
 
 		const head = page.locator( `.affibloom-table-cell--head[data-table-product="${ first }"]` );
-		await expect( head.locator( '.affibloom-grip' ) ).toBeVisible();
+		await expect( head.locator( '[data-table-drag="product"]' ) ).toBeVisible();
 		await expect( head.getByRole( 'button', { name: 'Add field' } ) ).toBeVisible();
-		await head.getByLabel( 'Badge' ).fill( '  Top Pick  ' );
-		await head.getByLabel( 'Badge' ).blur();
+		// Deviation 151: the badge chip selects the product; the inspector edits its badge.
+		await head.getByRole( 'button', { name: `Badge of Gamma ${ word } knee pad` } ).click();
+		const inspector = page.locator( '[data-table-inspector]' );
+		await expect( inspector.getByRole( 'heading', { name: `Gamma ${ word } knee pad` } ) ).toBeVisible();
+		await expect( inspector.getByLabel( 'Badge', { exact: true } ) ).toBeFocused();
+		await inspector.getByLabel( 'Badge', { exact: true } ).fill( '  Top Pick  ' );
+		await inspector.getByLabel( 'Badge', { exact: true } ).blur();
 		await expect.poll( () => JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) ).products[ 0 ].badge ).toBe( 'Top Pick' );
+		await expect( head.locator( '[data-table-badge-edit]' ) ).toHaveText( 'Top Pick' );
 
 		await page.locator( `.affibloom-table-cell--head[data-table-product="${ second }"]` ).getByRole( 'button', { name: /^Remove "/ } ).click();
 		const confirm = page.getByRole( 'dialog', { name: `Remove "Delta ${ word } net"?` } );
@@ -197,14 +208,15 @@ test.describe( 'F25 Comparison tables', () => {
 
 		const dialog = page.getByRole( 'dialog', { name: 'Add group to Table' } );
 		const addGroup = async () => {
-			await page.getByRole( 'button', { name: 'Add Group', exact: true } ).click();
+			await page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Group', exact: true } ).click();
 			await dialog.getByRole( 'searchbox' ).fill( `F25 AC6 ${ word }` );
 			await dialog.getByRole( 'searchbox' ).press( 'Enter' );
 			await expect( dialog.getByText( '2 link(s)' ) ).toBeVisible();
 			await dialog.getByRole( 'button', { name: `Add Group: F25 AC6 ${ word }` } ).click();
-			await expect( dialog ).toBeHidden();
+			await expect( dialog.getByRole( 'button', { name: `Added: F25 AC6 ${ word }` } ) ).toBeDisabled();
+			await dialog.getByRole( 'button', { name: 'Close' } ).click();
 		};
-		await page.getByRole( 'button', { name: 'Add Group', exact: true } ).click();
+		await page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Group', exact: true } ).click();
 		await expect( dialog.getByRole( 'searchbox' ) ).toHaveAttribute( 'placeholder', /^Search [\d,]+ Groups$/ );
 		await dialog.getByRole( 'button', { name: 'Close' } ).click();
 
@@ -264,7 +276,7 @@ test.describe( 'F25 Comparison tables', () => {
 		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'Pros' );
 		await dialog.getByRole( 'button', { name: 'Add Pros' } ).click();
 		await expect( dialog ).toBeHidden();
-		await expect( page.getByLabel( 'Pros' ) ).toHaveCount( 2 );
+		await expect( page.getByRole( 'textbox', { name: 'Pros', exact: true } ) ).toHaveCount( 2 );
 		const groups = stored( id ).groups;
 		expect( groups[ groups.length - 1 ].fields ).toEqual( [ 2 ] );
 
@@ -286,11 +298,11 @@ test.describe( 'F25 Comparison tables', () => {
 	} );
 
 	// AC9 (T6; R29-R31, R33, D7, D11).
-	test( 'AC9 plain cells save as you type; a removed field keeps its values; Remove same field takes the row', async ( { page } ) => {
+	test( 'AC9 plain cells save as you type; a removed field keeps its values; a row\'s gutter removes the row', async ( { page } ) => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const product = createProduct( { name: `Cell ${ word }` } );
 		const id = await tableWith( page, 'column', [ product ] );
-		const rating = page.getByLabel( 'Primary Rating' );
+		const rating = page.getByRole( 'spinbutton', { name: 'Primary Rating', exact: true } );
 		await rating.fill( '7' );
 		await expect( rating ).toHaveValue( '5' );
 		await page.getByRole( 'button', { name: 'Add Row' } ).click();
@@ -298,18 +310,20 @@ test.describe( 'F25 Comparison tables', () => {
 		const dialog = page.getByRole( 'dialog', { name: 'Add Field' } );
 		await dialog.getByPlaceholder( 'Find a field by searching here' ).fill( 'Pros' );
 		await dialog.getByRole( 'button', { name: 'Add Pros' } ).click();
-		await page.getByLabel( 'Pros' ).fill( 'Light\n\nGrippy' );
+		await page.getByRole( 'textbox', { name: 'Pros', exact: true } ).fill( 'Light\n\nGrippy' );
 		await expect.poll( () => stored( id ).values[ String( product ) ] ).toMatchObject( { 1: '5', 2: 'Light\nGrippy' } );
 
 		await page.getByRole( 'button', { name: 'Remove Pros' } ).click();
 		const confirm = page.getByRole( 'dialog', { name: 'Remove "Pros"?' } );
 		await expect( confirm.getByText( 'No data is deleted and the Field can always be added back.' ) ).toBeVisible();
 		await confirm.getByRole( 'button', { name: 'Remove' } ).click();
-		await expect( page.getByLabel( 'Pros' ) ).toHaveCount( 0 );
+		await expect( page.getByRole( 'textbox', { name: 'Pros', exact: true } ) ).toHaveCount( 0 );
 		expect( stored( id ).values[ String( product ) ][ '2' ] ).toBe( 'Light\nGrippy' );
 
+		// Deviation 151: a row goes from its gutter, after a question.
 		const rows = stored( id ).groups.length;
-		await page.getByRole( 'button', { name: 'Remove same field →' } ).last().click();
+		await page.locator( '[data-table-remove-row]' ).last().click();
+		await page.getByRole( 'dialog', { name: 'Remove this row?' } ).getByRole( 'button', { name: 'Remove' } ).click();
 		await expect.poll( () => stored( id ).groups.length ).toBe( rows - 1 );
 	} );
 
@@ -320,7 +334,7 @@ test.describe( 'F25 Comparison tables', () => {
 		const id = await tableWith( page, 'column', [ plain ] );
 		const cell = ( field: number ) => page.locator( `[data-table-product="${ plain }"] [data-table-field="${ field }"]` );
 
-		await cell( 99991 ).getByRole( 'button', { name: /Update Image/ } ).click();
+		await cell( 99991 ).locator( '[data-table-image]' ).click();
 		await expect( page.locator( '.media-modal:visible .media-frame-title' ) ).toHaveText( 'Select an Image' );
 		await expect( page.locator( '.media-modal:visible .media-button-select' ) ).toHaveText( 'Select Image' );
 		await page.keyboard.press( 'Escape' );
@@ -349,73 +363,133 @@ test.describe( 'F25 Comparison tables', () => {
 	} );
 
 	// AC11 (T8; R29, R35).
-	test( 'AC11 button cells: Edit "<field>", the Primary\'s link read only, the Secondary\'s typed, Lasso\'s sentences', async ( { page } ) => {
+	test( 'AC11 button cells: the inspector edits the selected product\'s button, the Primary\'s link read only, the Secondary\'s typed, Lasso\'s sentences', async ( { page } ) => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const product = createProduct( { name: `Button ${ word }` } );
 		const id = await tableWith( page, 'column', [ product ] );
 		const cell = ( field: number ) => page.locator( `[data-table-product="${ product }"] [data-table-field="${ field }"]` );
-		const dialog = ( name: string ) => page.getByRole( 'dialog', { name: `Edit "${ name }"` } );
+		const inspector = page.locator( '[data-table-inspector]' );
+		const save = () => inspector.getByRole( 'button', { name: 'Save button' } ).click();
 
+		// Deviation 151: the button on the canvas selects its field; the inspector has its text and address.
 		await cell( 99992 ).getByRole( 'button', { name: 'Edit Primary Button' } ).click();
-		await expect( dialog( 'Primary Button' ).getByLabel( 'Button URL' ) ).not.toBeEditable();
-		await dialog( 'Primary Button' ).getByLabel( 'Button Text' ).fill( '' );
-		await dialog( 'Primary Button' ).getByRole( 'button', { name: 'Save' } ).click();
-		await expect( dialog( 'Primary Button' ).getByText( 'Missing the "Button Text" information' ) ).toBeVisible();
-		await dialog( 'Primary Button' ).getByLabel( 'Button Text' ).fill( 'Check Price' );
-		await dialog( 'Primary Button' ).getByRole( 'button', { name: 'Save' } ).click();
+		await expect( inspector.getByRole( 'heading', { name: 'Primary Button' } ) ).toBeVisible();
+		await expect( inspector.getByLabel( 'Button URL' ) ).not.toBeEditable();
+		await expect( inspector.getByLabel( 'Button Text', { exact: true } ) ).toBeFocused();
+		await inspector.getByLabel( 'Button Text', { exact: true } ).fill( '' );
+		await save();
+		await expect( inspector.getByText( 'Missing the "Button Text" information' ) ).toBeVisible();
+		await inspector.getByLabel( 'Button Text', { exact: true } ).fill( 'Check Price' );
+		await save();
 		await expect( cell( 99992 ) ).toContainText( 'Check Price' );
 
-		await cell( 99992 ).locator( 'xpath=ancestor::*[@data-table-group][1]' ).getByRole( 'button', { name: 'Add field' } ).click();
+		await cell( 99992 ).locator( 'xpath=ancestor::*[@data-table-group][1]' ).getByRole( 'button', { name: 'Field', exact: true } ).click();
 		const fields = page.getByRole( 'dialog', { name: 'Add Field' } );
 		await fields.getByPlaceholder( 'Find a field by searching here' ).fill( 'Secondary' );
 		await fields.getByRole( 'button', { name: 'Add Secondary Button' } ).click();
 		await expect( cell( 99993 ).getByText( 'No Secondary Button URL set.' ) ).toBeVisible();
 		await cell( 99993 ).getByRole( 'button', { name: 'Edit Secondary Button' } ).click();
-		await dialog( 'Secondary Button' ).getByLabel( 'Button Text' ).fill( 'Compare' );
-		await dialog( 'Secondary Button' ).getByRole( 'button', { name: 'Save' } ).click();
-		await expect( dialog( 'Secondary Button' ).getByText( 'Missing the "Button URL" information' ) ).toBeVisible();
-		await dialog( 'Secondary Button' ).getByLabel( 'Button URL' ).fill( 'https://shop.example/compare' );
-		await dialog( 'Secondary Button' ).getByRole( 'button', { name: 'Save' } ).click();
+		await inspector.getByLabel( 'Button Text', { exact: true } ).fill( 'Compare' );
+		await save();
+		await expect( inspector.getByText( 'Missing the "Button URL" information' ) ).toBeVisible();
+		await inspector.getByLabel( 'Button URL' ).fill( 'https://shop.example/compare' );
+		await save();
 		await expect( cell( 99993 ).getByText( 'No Secondary Button URL set.' ) ).toHaveCount( 0 );
 		expect( JSON.parse( stored( id ).values[ String( product ) ][ '99993' ] ) ).toEqual( { button_text: 'Compare', url: 'https://shop.example/compare' } );
 	} );
 
-	// AC12 (T9; R36-R39, D9).
-	test( 'AC12 products, rows and fields reorder by drag and by the Move buttons; a field moves to another row with its values', async ( { page } ) => {
+	// Deviation 151: the icon picker for badges and buttons, from the site's library; the stored text is F28's span.
+	test( 'AC11b the icon picker: search, choose, "No icon"; the canvas draws the icon, the store keeps the span', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const product = createProduct( { name: `Icon ${ word }`, badge: 'Best' } );
+		const id = await tableWith( page, 'column', [ product ] );
+		const icons = JSON.parse( ( await page.locator( '[data-table-inspector]' ).getAttribute( 'data-icons' ) ) ?? '[]' ) as Array<{ class: string; name: string }>;
+		test.skip( 0 === icons.length, 'The site has no icons in its library.' );
+		const icon = icons[ 0 ];
+		const head = page.locator( `.affibloom-table-cell--head[data-table-product="${ product }"]` );
+		const inspector = page.locator( '[data-table-inspector]' );
+
+		await head.locator( '[data-table-badge-edit]' ).click();
+		await inspector.getByRole( 'button', { name: 'Badge icon: No icon' } ).click();
+		const picker = page.getByRole( 'dialog', { name: 'Choose an icon' } );
+		await picker.getByRole( 'searchbox', { name: 'Search icons' } ).fill( icon.name );
+		await expect( picker.getByRole( 'option', { name: icon.name } ) ).toBeVisible();
+		await picker.getByRole( 'option', { name: icon.name } ).click();
+		await expect( picker ).toBeHidden();
+		await expect.poll( () => stored( id ).products[ 0 ].badge ).toBe( `<span class="${ icon.class }"></span> Best` );
+		await expect( head.locator( '[data-table-badge-edit] img.affibloom-table-icon' ) ).toBeVisible();
+		await expect( head.locator( '[data-table-badge-edit]' ) ).not.toContainText( '<span' );
+
+		// The keyboard: the picker opens on its button, Escape closes it and gives the focus back; "No icon" takes it off.
+		const choose = inspector.getByRole( 'button', { name: `Badge icon: ${ icon.name }` } );
+		await choose.press( 'Enter' );
+		await page.keyboard.press( 'Escape' );
+		await expect( picker ).toBeHidden();
+		await expect( choose ).toBeFocused();
+		await choose.click();
+		await picker.getByRole( 'option', { name: 'No icon' } ).click();
+		await expect.poll( () => stored( id ).products[ 0 ].badge ).toBe( 'Best' );
+		await page.reload();
+		await expect( head.locator( '[data-table-badge-edit] img' ) ).toHaveCount( 0 );
+	} );
+
+	// AC12 (T9; R36-R39, D9; deviation 151).
+	test( 'AC12 products, rows and fields reorder by drag (the others make room) and by the keyboard; a field moves to another row with its values', async ( { page } ) => {
+		test.slow(); // Six moves, each a save and a redraw.
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const a = createProduct( { name: `Order ${ word } a`, price: '$1' } );
 		const b = createProduct( { name: `Order ${ word } b`, price: '$2' } );
 		const id = await tableWith( page, 'column', [ a, b ] );
 		const order = () => stored( id ).products.map( ( entry: { id: number } ) => entry.id );
+		const grip = ( product: number ) => page.locator( `[data-table-product="${ product }"].affibloom-table-cell--head [data-table-drag="product"]` );
 
-		// The keyboard way: Move product right on the first product.
-		await page.locator( `[data-table-product="${ a }"].affibloom-table-cell--head` ).getByRole( 'button', { name: 'Move product right' } ).press( 'Enter' );
+		// The keyboard: Space lifts, the arrow moves, Space drops; the grip keeps the focus.
+		await grip( a ).focus();
+		await page.keyboard.press( 'Space' );
+		await page.keyboard.press( 'ArrowRight' );
+		await page.keyboard.press( 'Space' );
 		await expect.poll( order ).toEqual( [ b, a ] );
+		await expect( grip( a ) ).toBeFocused();
+		// Escape puts it back and saves nothing.
+		await page.keyboard.press( 'Space' );
+		await page.keyboard.press( 'ArrowLeft' );
+		await page.keyboard.press( 'Escape' );
+		await expect( page.locator( `[data-table-product="${ a }"].affibloom-table-cell--head` ) ).toHaveCSS( 'grid-column-start', '3' );
+		expect( order() ).toEqual( [ b, a ] );
 
-		// A drag: the first product's grip onto the second's header cell, right half.
-		const grip = page.locator( `[data-table-product="${ b }"].affibloom-table-cell--head [data-table-drag="product"]` );
-		const target = page.locator( `[data-table-product="${ a }"].affibloom-table-cell--head` );
-		const from = await grip.boundingBox();
-		const to = await target.boundingBox();
+		// A drag: the first product's grip past the second's middle; the columns change places before the drop.
+		const from = await grip( b ).boundingBox();
+		const to = await page.locator( `[data-table-product="${ a }"].affibloom-table-cell--head` ).boundingBox();
 		await page.mouse.move( from!.x + from!.width / 2, from!.y + from!.height / 2 );
 		await page.mouse.down();
-		await page.mouse.move( to!.x + to!.width - 10, to!.y + 40, { steps: 6 } );
+		await page.mouse.move( to!.x + to!.width - 10, to!.y + 20, { steps: 8 } );
+		await expect( page.locator( `[data-table-product="${ b }"].affibloom-table-cell--head` ) ).toHaveCSS( 'grid-column-start', '3' );
 		await page.mouse.up();
 		await expect.poll( order ).toEqual( [ a, b ] );
 
-		// Rows: the button row up, above the name row.
+		// Rows: the last row's grip up one, by the keyboard.
 		const groups = () => stored( id ).groups.map( ( group: { id: string } ) => group.id );
 		const before = groups();
-		await page.getByRole( 'button', { name: 'Move row up' } ).last().press( 'Enter' );
+		await page.locator( '.affibloom-table-cell--gutter [data-table-drag="group"]' ).last().focus();
+		await page.keyboard.press( 'Space' );
+		await page.keyboard.press( 'ArrowUp' );
+		await page.keyboard.press( 'Space' );
 		await expect.poll( groups ).toEqual( [ before[ 0 ], before[ 2 ], before[ 1 ] ] );
 
-		// A field: Price to the next row, with every product's value.
-		const price = page.locator( `[data-table-product="${ a }"] [data-table-field="99994"]` );
-		await price.hover();
-		await price.getByRole( 'button', { name: 'Move to next row' } ).click();
-		await expect.poll( () => stored( id ).groups[ 2 ].fields ).toContain( 99994 );
+		// A field: Price dragged by its card into another row, for every product, with every product's value.
+		const price = page.locator( `[data-table-product="${ a }"] [data-table-field="99994"] .affibloom-table-field__name` );
+		const row = page.locator( `.affibloom-table-cell[data-table-kind="cell"][data-table-product="${ a }"][data-table-group="${ before[ 1 ] }"]` );
+		const p = await price.boundingBox();
+		const r = await row.boundingBox();
+		await page.mouse.move( p!.x + 10, p!.y + 5 );
+		await page.mouse.down();
+		await page.mouse.move( r!.x + 40, r!.y + r!.height - 8, { steps: 10 } );
+		await page.mouse.up();
+		await expect.poll( () => stored( id ).groups.find( ( group: { id: string } ) => group.id === before[ 1 ] ).fields ).toContain( 99994 );
 		expect( stored( id ).values[ String( b ) ][ '99994' ] ).toBe( '$2' );
 
+		// The canvas is drawn again once the answer is in; leaving before it would ask first.
+		await expect( page.locator( '[data-table-status]' ) ).toHaveText( 'Saved' );
 		await page.reload();
 		await expect( page.locator( '.affibloom-table-cell--head' ).first() ).toHaveAttribute( 'data-table-product', String( a ) );
 	} );
@@ -459,7 +533,7 @@ test.describe( 'F25 Comparison tables', () => {
 		const question = page.getByRole( 'dialog', { name: /^Delete "/ } );
 		await expect( question.getByText( "If deleted, you won't be able to get its back." ) ).toBeVisible();
 		await question.getByRole( 'button', { name: 'OK' } ).click();
-		await expect( page ).toHaveURL( /page=affibloom-tables/ );
+		await expect( page ).toHaveURL( /page=affibloom-tables/, { timeout: 15000 } );
 		expect( wp( 'post', 'list', '--post_type=affibloom_table', `--post__in=${ unused }`, '--format=count' ) ).toBe( '0' );
 
 		const used = createTable( unique( 'F25 AC15 used' ), 'column', 'Cactus', [] );
@@ -552,25 +626,25 @@ test.describe( 'F25 Comparison tables', () => {
 	} );
 
 	// AC19 (T15; R54, D18).
-	test( 'AC19 Preview Table: the reader's table in place of the builder, Edit Table, a redraw on a setting change', async ( { page } ) => {
+	test( "AC19 Preview Table: the reader's table in place of the builder, Edit Table, a redraw on a setting change", async ( { page } ) => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		await tableWith( page, 'row', [ createProduct( { name: `Preview ${ word }` } ) ] );
 		await page.getByRole( 'button', { name: 'Preview Table' } ).click();
 		const frame = page.frameLocator( '[data-table-preview] iframe' );
 		await expect( frame.locator( '.affibloom-display-table.affibloom-table-cactus-theme' ) ).toBeVisible();
 		await expect( page.getByRole( 'button', { name: 'Edit Table' } ) ).toBeVisible();
-		await expect( page.getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeHidden();
+		await expect( page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeHidden();
 
 		await page.getByLabel( 'Theme' ).selectOption( 'Money' );
 		await expect( frame.locator( '.affibloom-display-table.affibloom-table-money-theme' ) ).toBeVisible();
 
 		await page.getByRole( 'button', { name: 'Edit Table' } ).click();
-		await expect( page.getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeVisible();
+		await expect( page.getByRole( 'toolbar', { name: 'Table tools' } ).getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeVisible();
 		await expect( page.locator( '[data-table-preview]' ) ).toBeHidden();
 	} );
 
 	// AC20 (T16; R59).
-	test( 'AC20 the Dashboard's Comparison table filter narrows the list, counts as a filter and is kept in a saved view', async ( { page } ) => {
+	test( "AC20 the Dashboard's Comparison table filter narrows the list, counts as a filter and is kept in a saved view", async ( { page } ) => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const inside = createProduct( { name: `Tabled ${ word }` } );
 		createProduct( { name: `Loose ${ word }` } );

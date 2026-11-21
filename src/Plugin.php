@@ -612,7 +612,7 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice ),
 				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() ),
 				new TablesScreen( $this->template(), $this->table_service(), $notice ),
-				new TableScreen( $this->template(), $this->table_service() )
+				new TableScreen( $this->template(), $this->table_service(), $choices )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
@@ -641,7 +641,7 @@ final class Plugin {
 			new TablePostType(),
 			// F25 R60, D15 (Task T17): a product deleted for good leaves its tables.
 			new TableProductHooks( $this->table_service() ),
-			new TablesController( $this->table_service(), $this->template(), new TablePreview( $renderer, $display_html, $box_assets, $icon_css, $display ) ),
+			new TablesController( $this->table_service(), $this->template(), new TablePreview( $renderer, $display_html, $box_assets, $icon_css, $display ), $choices ),
 			new ContentExportController( $this->content_export() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),

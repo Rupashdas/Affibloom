@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 	data-failed-text="<?php esc_attr_e( 'Could not add the product. Please try again.', 'affibloom' ); ?>"
 	<?php /* translators: %s: how many products the library holds. */ ?>
 	data-search-many="<?php esc_attr_e( 'Search %s URLs', 'affibloom' ); ?>"
+	data-added-label="<?php esc_attr_e( 'Added', 'affibloom' ); ?>"
 	data-prev-label="<?php esc_attr_e( 'Previous page', 'affibloom' ); ?>" data-next-label="<?php esc_attr_e( 'Next page', 'affibloom' ); ?>">
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-table-add-product-title">

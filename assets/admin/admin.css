@@ -3147,48 +3147,183 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-settings__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .affibloom-table-settings .affibloom-toggle-row { padding: 2px 0; }
 @media (max-width: 900px) { .affibloom-table-settings { grid-template-columns: minmax(0, 1fr); } }
-.affibloom-table-builder { margin-top: 24px; }
-.affibloom-table-builder__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.affibloom-table-builder__preview { margin-left: auto; }
 .affibloom-table-page__delete { margin: 24px 0 0; }
 
-/* Task T4 (F25 R21, R34): the builder's grid; widths split evenly up to five products (or groups), past five the
-   grid keeps 220px tracks and scrolls. A product's header cell: grip, Add field, Remove, then Badge and its image. */
+/*
+ * The table builder (F25 R21, R34-R39; deviation 151). The toolbar over the workspace: the canvas, and beside it (under
+ * it below 1200px) the inspector. The canvas is a grid whose cells are placed one by one, so a product or a row can be
+ * placed again while it is dragged. Vertical: a 44px gutter column, then a column per product (split evenly up to five,
+ * 220px each past five, the grid scrolling sideways). Horizontal: a 40px gutter row, then a row per product; the first
+ * column holds the products' header cells.
+ */
+.affibloom-table-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 24px 0 12px; }
+.affibloom-table-toolbar__preview { margin-left: auto; }
+.affibloom-table-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 272px; gap: 16px; align-items: start; }
+.affibloom-table-workspace--new { grid-template-columns: minmax(0, 1fr); }
+.affibloom-table-workspace__canvas { min-width: 0; }
+.affibloom-table-builder { margin-top: 0; }
+.affibloom-table-workspace--new .affibloom-table-builder { margin-top: 24px; }
+@media (max-width: 1199px) { .affibloom-table-workspace { grid-template-columns: minmax(0, 1fr); } }
+.affibloom-table-empty__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 16px 0 0; }
+
 .affibloom-table-grid-scroll { position: relative; overflow-x: auto; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-card); }
-.affibloom-table-grid { display: grid; grid-template-columns: repeat(var(--affibloom-table-columns), minmax(150px, 1fr)); min-width: 100%; }
-.affibloom-table-grid--wide { grid-template-columns: repeat(var(--affibloom-table-columns), 220px); width: max-content; }
-.affibloom-table-cell { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 16px; border-right: 1px solid var(--affibloom-line); border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-table-grid { display: grid; min-width: 100%; }
+.affibloom-table-grid--column { grid-template-columns: 44px repeat(var(--affibloom-table-tracks), minmax(168px, 1fr)); }
+.affibloom-table-grid--column.affibloom-table-grid--wide { grid-template-columns: 44px repeat(var(--affibloom-table-tracks), 220px); width: max-content; }
+.affibloom-table-grid--row { grid-template-columns: minmax(220px, 1.3fr) repeat(var(--affibloom-table-tracks), minmax(180px, 1fr)); grid-template-rows: 40px; }
+.affibloom-table-grid--row.affibloom-table-grid--wide { grid-template-columns: 240px repeat(var(--affibloom-table-tracks), 220px); width: max-content; }
+
+.affibloom-table-cell { position: relative; display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; border-right: 1px solid var(--affibloom-line); border-bottom: 1px solid var(--affibloom-line); background: var(--affibloom-white); }
+.affibloom-table-cell--corner { padding: 0; background: var(--affibloom-subtle); }
 .affibloom-table-cell--head { background: var(--affibloom-subtle); }
-.affibloom-table-cell__tools { display: flex; align-items: center; gap: 2px; }
-.affibloom-table-cell__tools .affibloom-grip { margin-right: auto; cursor: default; }
-.affibloom-table-cell__tools .affibloom-icon-button { width: 28px; height: 28px; }
-.affibloom-table-cell__badge { width: 100%; }
-.affibloom-table-field { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+
+/* A row's (column's) gutter: its grip and, on hover or focus, its remove. */
+.affibloom-table-cell--gutter { align-items: center; justify-content: flex-start; gap: 2px; padding: 10px 4px; background: var(--affibloom-subtle); cursor: grab; }
+.affibloom-table-grid--row .affibloom-table-cell--gutter { flex-direction: row; justify-content: center; padding: 4px 8px; }
+.affibloom-table-gutter__remove { display: inline-grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-400); cursor: pointer; opacity: 0; transition: opacity .12s; }
+.affibloom-table-gutter__remove svg { width: 15px; height: 15px; }
+.affibloom-table-gutter__remove:hover, .affibloom-table-gutter__remove:focus-visible { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+.affibloom-table-cell--gutter:hover .affibloom-table-gutter__remove, .affibloom-table-cell--gutter:focus-within .affibloom-table-gutter__remove, .affibloom-table-cell--gutter.is-selected .affibloom-table-gutter__remove { opacity: 1; }
+
+/* Grips: product, row and field. Buttons, so the keyboard can lift them. */
+.affibloom-table-grip { display: inline-grid; flex: 0 0 auto; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-400); cursor: grab; touch-action: none; user-select: none; }
+.affibloom-table-grip svg { width: 16px; height: 16px; }
+.affibloom-table-grip:hover { background: var(--affibloom-brand-50); color: var(--affibloom-brand-700); }
+.affibloom-table-grip:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); color: var(--affibloom-brand-700); }
+
+/* A product's header cell: the bar (grip, name, Add field, Remove), the badge, the heading's fields. */
+.affibloom-table-cell__bar { display: flex; align-items: center; gap: 2px; margin: -4px -4px 0; cursor: grab; }
+.affibloom-table-cell__bar .affibloom-icon-button { width: 28px; height: 28px; }
+.affibloom-table-cell__name { flex: 1 1 auto; min-width: 0; padding: 4px 6px; overflow: hidden; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-900); font: 700 14px/20px var(--affibloom-font); text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.affibloom-table-cell__name:hover { background: var(--affibloom-white); color: var(--affibloom-brand-700); }
+.affibloom-table-cell__name:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-table-badge { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; max-width: 100%; min-height: 28px; padding: 3px 10px; border: 1px solid transparent; border-radius: var(--affibloom-radius-full); background: var(--affibloom-brand-600); color: #fff; font: 600 12px/18px var(--affibloom-font); cursor: pointer; }
+.affibloom-table-badge .affibloom-table-icon-text__words { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-table-badge .affibloom-table-icon { filter: brightness(0) invert(1); }
+.affibloom-table-badge:hover { background: var(--affibloom-brand-700); }
+.affibloom-table-badge:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-table-badge--none { border: 1px dashed var(--affibloom-control-line); background: var(--affibloom-white); color: var(--affibloom-ink-500); }
+.affibloom-table-badge--none svg { width: 14px; height: 14px; }
+.affibloom-table-badge--none:hover { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-25); color: var(--affibloom-brand-700); }
+.affibloom-table-icon { display: inline-block; flex: 0 0 auto; width: 16px; height: 16px; object-fit: contain; }
+.affibloom-table-icon--unknown { color: var(--affibloom-warning-700); }
+.affibloom-table-icon--unknown svg { width: 16px; height: 16px; }
+.affibloom-table-cell__fields { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.affibloom-table-cell__add { display: inline-flex; align-self: flex-start; align-items: center; gap: 4px; margin-top: auto; padding: 4px 8px; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-500); font: 500 12px/16px var(--affibloom-font); cursor: pointer; opacity: 0; transition: opacity .12s; }
+.affibloom-table-cell__add svg { width: 14px; height: 14px; }
+.affibloom-table-cell__add:hover, .affibloom-table-cell__add:focus-visible { background: var(--affibloom-brand-50); color: var(--affibloom-brand-700); }
+.affibloom-table-cell:hover .affibloom-table-cell__add, .affibloom-table-cell:focus-within .affibloom-table-cell__add, .affibloom-table-cell__add:focus-visible { opacity: 1; }
+
+/* A field card (Lasso's): the grip down its left edge, then the name, its ×, and the editor. */
+.affibloom-table-field { display: flex; gap: 0; min-width: 0; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); overflow-wrap: anywhere; cursor: grab; transition: border-color .12s, box-shadow .12s; }
+.affibloom-table-field:hover { border-color: var(--affibloom-line-strong); }
+.affibloom-table-field__grip { width: 20px; height: auto; min-height: 36px; border-radius: 0; border-right: 1px solid var(--affibloom-line); background: var(--affibloom-subtle); }
+.affibloom-table-field__grip svg { width: 14px; height: 14px; }
+.affibloom-table-field__body { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; padding: 6px 8px 8px; cursor: default; }
+.affibloom-table-field__head { display: flex; align-items: center; justify-content: space-between; gap: 6px; cursor: grab; }
+.affibloom-table-field__head .affibloom-table-field__name { flex: 1 1 auto; min-width: 0; overflow-wrap: normal; cursor: grab; }
 .affibloom-table-field__name { color: var(--affibloom-ink-500); font: 600 11px/16px var(--affibloom-font); letter-spacing: .02em; text-transform: uppercase; }
 .affibloom-table-field__value, .affibloom-table-field__rich { color: var(--affibloom-ink-900); font-size: 14px; line-height: 20px; }
 .affibloom-table-field__empty { color: var(--affibloom-ink-400); }
-.affibloom-table-field__image { display: block; max-width: 100%; max-height: 120px; margin: 4px auto 0; object-fit: contain; }
-.affibloom-table-field__rating { display: inline-flex; align-items: center; gap: 4px; color: var(--affibloom-ink-900); font-weight: 600; }
-.affibloom-table-field__rating svg { width: 16px; height: 16px; color: #f5b400; }
-.affibloom-table-field__button { align-self: flex-start; padding: 6px 14px; border-radius: var(--affibloom-radius-control); background: var(--affibloom-brand-600); color: #fff; font: 600 13px/18px var(--affibloom-font); }
-
-/* Task T6 (F25 R25-R33): a field's name and its remove (×), the plain editors, an empty row's "Click to add a Field",
-   each cell's Add field (+) and Vertical's "Remove same field →". */
-.affibloom-table-field__head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.affibloom-table-field__remove { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: var(--affibloom-radius-full); background: none; color: var(--affibloom-ink-400); cursor: pointer; }
+.affibloom-table-field__image { display: block; max-width: 100%; max-height: 120px; margin: 4px auto 0; object-fit: contain; -webkit-user-drag: none; }
+.affibloom-table-field__remove { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: var(--affibloom-radius-full); background: none; color: var(--affibloom-ink-400); cursor: pointer; opacity: 0; transition: opacity .12s; }
 .affibloom-table-field__remove svg { width: 14px; height: 14px; }
+.affibloom-table-field:hover .affibloom-table-field__remove, .affibloom-table-field:focus-within .affibloom-table-field__remove, .affibloom-table-field.is-selected .affibloom-table-field__remove { opacity: 1; }
 .affibloom-table-field__remove:hover, .affibloom-table-field__remove:focus-visible { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
 .affibloom-table-field__input { width: 100%; min-width: 0; }
-.affibloom-table-field__rating { display: flex; align-items: center; gap: 8px; }
+.affibloom-table-field__rating { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .affibloom-table-field__rating .affibloom-table-field__input { width: 76px; flex: 0 0 auto; }
 .affibloom-table-field__rating .affibloom-stars { flex: 0 0 auto; font-size: 14px; white-space: nowrap; }
 .affibloom-table-cell__empty { width: 100%; min-height: 64px; padding: 12px; border: 1px dashed var(--affibloom-control-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-subtle); color: var(--affibloom-ink-500); font: 500 13px/18px var(--affibloom-font); cursor: pointer; }
 .affibloom-table-cell__empty:hover, .affibloom-table-cell__empty:focus-visible { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-600); }
-.affibloom-table-cell__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
-.affibloom-table-cell__foot .affibloom-icon-button { width: 28px; height: 28px; }
-.affibloom-table-cell__remove-row { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; white-space: nowrap; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-500); font: 500 12px/16px var(--affibloom-font); cursor: pointer; }
-.affibloom-table-cell__remove-row svg { width: 14px; height: 14px; }
-.affibloom-table-cell__remove-row:hover, .affibloom-table-cell__remove-row:focus-visible { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
+
+/* A button cell: the button as readers see it, with its icon; it opens the inspector's editor. */
+.affibloom-table-button-chip { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; max-width: 100%; padding: 6px 14px; border: 0; border-radius: var(--affibloom-radius-control); background: var(--affibloom-brand-600); color: #fff; font: 600 13px/18px var(--affibloom-font); cursor: pointer; }
+.affibloom-table-button-chip .affibloom-table-icon-text__words { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-table-button-chip .affibloom-table-icon { filter: brightness(0) invert(1); }
+.affibloom-table-button-chip[data-button-primary="0"] { border: 1px solid var(--affibloom-brand-600); background: var(--affibloom-white); color: var(--affibloom-brand-700); }
+.affibloom-table-button-chip[data-button-primary="0"] .affibloom-table-icon { filter: none; }
+.affibloom-table-button-chip:hover { background: var(--affibloom-brand-700); color: #fff; }
+.affibloom-table-button-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+
+/* The selection: a product's column (row), a row's cells, a field in every product (its own card the strongest). */
+.affibloom-table-cell.is-selected { background: var(--affibloom-brand-25); }
+.affibloom-table-cell--head.is-selected { box-shadow: inset 0 3px 0 var(--affibloom-brand-600); }
+.affibloom-table-grid--row .affibloom-table-cell--head.is-selected { box-shadow: inset 3px 0 0 var(--affibloom-brand-600); }
+.affibloom-table-cell--gutter.is-selected { box-shadow: inset 3px 0 0 var(--affibloom-brand-600); }
+.affibloom-table-grid--row .affibloom-table-cell--gutter.is-selected { box-shadow: inset 0 3px 0 var(--affibloom-brand-600); }
+.affibloom-table-field.is-selected { border-color: var(--affibloom-brand-line); box-shadow: 0 0 0 1px var(--affibloom-brand-line); }
+.affibloom-table-field.is-selected-own { border-color: var(--affibloom-brand-600); box-shadow: 0 0 0 2px var(--affibloom-brand-ring); }
+
+/* Dragging looks as every drag in the plugin (drag-rows.js; the shared ".is-dragging" and "affibloom-drag-slot"): the
+   held copy floats tilted with a deep shadow, grey slots its size hold its place. The keyboard outlines what it holds. */
+.affibloom-table-held { position: fixed; z-index: 100000; box-sizing: border-box; margin: 0; overflow: hidden; border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); pointer-events: none; }
+.affibloom-table-held--product, .affibloom-table-held--group { border: 1px solid var(--affibloom-line); }
+.affibloom-table-held .affibloom-table-cell { border-right: 0; }
+.affibloom-table-cell.is-slot { background: rgba(22, 32, 26, 0.07); box-shadow: none; }
+.affibloom-table-field.is-slot { border-color: transparent; background: rgba(22, 32, 26, 0.07); box-shadow: none; }
+.affibloom-table-cell.is-slot > *, .affibloom-table-field.is-slot > * { visibility: hidden; }
+.affibloom-table-cell.is-lifted { z-index: 1; background: var(--affibloom-brand-25); box-shadow: inset 0 0 0 2px var(--affibloom-brand-600); }
+.affibloom-table-field.is-lifted { border-color: var(--affibloom-brand-600); box-shadow: 0 0 0 2px var(--affibloom-brand-ring); }
+@media (prefers-reduced-motion: reduce) { .affibloom-table-cell, .affibloom-table-field, .affibloom-table-held { transition: none !important; } }
+
+/* The inspector. */
+.affibloom-table-inspector { position: sticky; top: 46px; display: flex; flex-direction: column; gap: 14px; padding: 16px; }
+.affibloom-table-inspector__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; }
+.affibloom-table-inspector__title { margin: 0; overflow: hidden; color: var(--affibloom-ink-900); font: 700 16px/22px var(--affibloom-font-display); text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-table-inspector__part { display: flex; flex-direction: column; gap: 14px; }
+.affibloom-table-inspector__part[hidden] { display: none; }
+.affibloom-table-inspector__lead { margin: 0; color: var(--affibloom-ink-700); font: 400 14px/21px var(--affibloom-font); }
+.affibloom-table-inspector__tips { margin: 0; padding: 0 0 0 18px; color: var(--affibloom-ink-600); font: 400 13px/19px var(--affibloom-font); }
+.affibloom-table-inspector__tips li { margin: 0 0 6px; }
+.affibloom-table-inspector__subject { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0; color: var(--affibloom-ink-900); font: 400 14px/20px var(--affibloom-font); }
+.affibloom-admin .affibloom-table-inspector__link { display: inline-flex; align-items: center; gap: 4px; color: var(--affibloom-brand-700); font: 500 13px/18px var(--affibloom-font); text-decoration: none; }
+.affibloom-admin .affibloom-table-inspector__link:hover { text-decoration: underline; }
+.affibloom-table-inspector__link svg { width: 14px; height: 14px; }
+.affibloom-table-inspector__kind { display: inline-block; padding: 2px 8px; border-radius: var(--affibloom-radius-full); background: var(--affibloom-sunk); color: var(--affibloom-ink-600); font: 600 11px/16px var(--affibloom-font); letter-spacing: .02em; text-transform: uppercase; }
+.affibloom-table-inspector__button { display: flex; flex-direction: column; gap: 12px; padding: 12px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-subtle); }
+.affibloom-table-inspector__button[hidden] { display: none; }
+.affibloom-table-inspector__button .affibloom-field__hint { margin: 0; }
+.affibloom-table-inspector__button .affibloom-input[readonly] { background: var(--affibloom-sunk); color: var(--affibloom-ink-500); }
+.affibloom-table-inspector__button [type="submit"] { align-self: flex-start; }
+.affibloom-table-inspector__danger { align-self: flex-start; color: var(--affibloom-danger-700); }
+.affibloom-table-inspector__danger:hover { border-color: var(--affibloom-danger-700); background: var(--affibloom-danger-50); color: var(--affibloom-danger-800); }
+.affibloom-table-inspector__danger svg { width: 16px; height: 16px; }
+.affibloom-table-inspector__manage { margin: 0; padding-top: 12px; border-top: 1px solid var(--affibloom-line); font: 500 13px/18px var(--affibloom-font); }
+.affibloom-admin .affibloom-table-inspector__manage a { color: var(--affibloom-brand-700); text-decoration: none; }
+.affibloom-admin .affibloom-table-inspector__manage a:hover { text-decoration: underline; }
+@media (max-width: 1199px) { .affibloom-table-inspector { position: static; } }
+
+/* An icon box: the icon's button (it opens the picker), then the words. */
+.affibloom-icon-input { display: flex; align-items: stretch; min-width: 0; }
+.affibloom-icon-input__icon { display: inline-grid; flex: 0 0 auto; place-items: center; width: 40px; padding: 0; border: 1px solid var(--affibloom-control-line); border-right: 0; border-radius: var(--affibloom-radius-control) 0 0 var(--affibloom-radius-control); background: var(--affibloom-subtle); cursor: pointer; }
+.affibloom-icon-input__icon:hover { background: var(--affibloom-brand-50); }
+.affibloom-icon-input__icon:focus-visible { position: relative; z-index: 1; outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-icon-input__glyph { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; background: var(--affibloom-brand-600); }
+.affibloom-icon-input__glyph img { width: 16px; height: 16px; object-fit: contain; }
+.affibloom-icon-input__glyph.is-none { background: none; }
+.affibloom-icon-input__glyph.is-none::before { content: ""; width: 14px; height: 14px; border: 1.5px dashed var(--affibloom-ink-400); border-radius: 4px; }
+.affibloom-admin .affibloom-icon-input .affibloom-icon-input__words { flex: 1 1 auto; min-width: 0; border-radius: 0 var(--affibloom-radius-control) var(--affibloom-radius-control) 0; }
+
+/* The icon picker: a popover with a search box and a grid of icons, "No icon" first. */
+.affibloom-icon-popover { position: fixed; z-index: 100001; display: flex; flex-direction: column; gap: 10px; width: 300px; max-width: calc(100vw - 16px); padding: 12px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-toast); }
+.affibloom-icon-popover__search { width: 100%; }
+.affibloom-icon-popover__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; max-height: 240px; overflow-y: auto; }
+.affibloom-icon-popover__option { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 8px 4px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); color: var(--affibloom-ink-700); font: 500 11px/14px var(--affibloom-font); cursor: pointer; }
+.affibloom-icon-popover__option[hidden] { display: none; }
+.affibloom-icon-popover__option:hover { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-25); }
+.affibloom-icon-popover__option:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-icon-popover__option[aria-selected="true"] { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); color: var(--affibloom-brand-800); box-shadow: 0 0 0 1px var(--affibloom-brand-600); }
+/* The site's icons are drawn white for its coloured buttons and badges, so they sit on the brand colour here too. */
+.affibloom-icon-popover__picture { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: var(--affibloom-radius-control); background: var(--affibloom-brand-600); }
+.affibloom-icon-popover__picture img { width: 18px; height: 18px; object-fit: contain; }
+.affibloom-icon-popover__picture.is-none { background: none; }
+.affibloom-icon-popover__picture.is-none::before { content: ""; width: 16px; height: 16px; border: 1.5px dashed var(--affibloom-ink-400); border-radius: 4px; }
+.affibloom-icon-popover__name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-icon-popover__empty { margin: 0; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); }
+.affibloom-icon-popover__add { align-self: flex-start; }
+.is-previewing .affibloom-table-workspace { grid-template-columns: minmax(0, 1fr); }
+.is-previewing .affibloom-table-inspector { display: none; }
 
 /* Task T7 (F25 R29, R32): the picture opens the media library ("Update Image" over it on hover or focus); the price is a
    box like an input that becomes one rich editor in place ("N/A" while empty); the description with its edit icon. */
@@ -3209,37 +3344,6 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-field__rich p { margin: 0 0 6px; }
 .affibloom-table-description .affibloom-modal__panel { max-width: 720px; }
 .affibloom-table-description__title { display: flex; align-items: center; gap: 8px; }
-
-/* Task T8 (F25 R35): a button cell, the button with its edit icon; 'Edit "<button>"' with its two boxes. */
-.affibloom-table-field__buttons { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.affibloom-table-field__buttons .affibloom-table-field__button { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.affibloom-table-field__buttons .affibloom-icon-button { flex: 0 0 auto; width: 28px; height: 28px; }
-.affibloom-table-button { display: flex; flex-direction: column; gap: 16px; }
-.affibloom-table-button .affibloom-input[readonly] { background: var(--affibloom-subtle); color: var(--affibloom-ink-500); }
-
-/* Task T9 (F25 R36-R39, D9): grips and Move buttons, shown while the cell is hovered or holds the focus; the chevrons
-   point the way an item moves (sideways for a Vertical table's products and a Horizontal table's columns). */
-.affibloom-table-move { display: inline-flex; align-items: center; gap: 0; }
-.affibloom-table-move__grip { width: 20px; height: 24px; cursor: grab; }
-.affibloom-table-move__step { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-500); cursor: pointer; opacity: 0; transition: opacity .12s; }
-.affibloom-table-move__step svg { width: 14px; height: 14px; }
-.affibloom-table-move__step:hover:not(:disabled) { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
-.affibloom-table-move__step:disabled { cursor: default; color: var(--affibloom-control-line); }
-.affibloom-table-cell:hover .affibloom-table-move__step, .affibloom-table-cell:focus-within .affibloom-table-move__step, .affibloom-table-move__step:focus-visible { opacity: 1; }
-.affibloom-table-builder--column [data-table-move="product"] .affibloom-table-move__step svg,
-.affibloom-table-builder--row [data-table-move="group"] .affibloom-table-move__step svg,
-.affibloom-table-builder--row .affibloom-table-field__shift svg { transform: rotate(-90deg); }
-.affibloom-table-cell__tools .affibloom-table-move { margin-right: auto; }
-.affibloom-table-cell__group { display: flex; align-items: center; margin: -6px 0 -2px -6px; }
-.affibloom-table-field__head { position: relative; }
-.affibloom-table-field__head .affibloom-table-field__name { flex: 1 1 auto; min-width: 0; overflow-wrap: normal; }
-.affibloom-table-field__tools { position: absolute; top: -6px; right: 22px; z-index: 2; display: inline-flex; align-items: center; padding: 1px 2px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-card); opacity: 0; pointer-events: none; transition: opacity .12s; }
-.affibloom-table-field:hover > .affibloom-table-field__head .affibloom-table-field__tools,
-.affibloom-table-field:focus-within > .affibloom-table-field__head .affibloom-table-field__tools { opacity: 1; pointer-events: auto; }
-.affibloom-table-field__tools .affibloom-table-move__grip { width: 16px; }
-.affibloom-table-field__shift { display: inline-flex; margin-left: 2px; padding-left: 2px; border-left: 1px solid var(--affibloom-line); }
-#affibloom-table-builder.is-dragging, #affibloom-table-builder.is-dragging * { cursor: grabbing; user-select: none; }
-.affibloom-table-builder .is-drop-target { outline: 2px dashed var(--affibloom-brand-600); outline-offset: -3px; }
 
 /* Task T10 (F25 R40): "Table Locations", a large dialog of posts: the title over its address, a view icon. */
 .affibloom-table-locations .affibloom-modal__panel { max-width: 760px; }

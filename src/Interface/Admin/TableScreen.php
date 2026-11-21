@@ -30,10 +30,11 @@ final class TableScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template     $template Template renderer.
-	 * @param TableService $tables   The tables.
+	 * @param Template         $template Template renderer.
+	 * @param TableService     $tables   The tables.
+	 * @param IconChoices|null $icons    The icon library, for badges and buttons (deviation 151).
 	 */
-	public function __construct( private Template $template, private TableService $tables ) {}
+	public function __construct( private Template $template, private TableService $tables, private ?IconChoices $icons = null ) {}
 
 	/**
 	 * Before any output: a table that does not exist goes back to the list.
@@ -59,10 +60,12 @@ final class TableScreen {
 		$this->template->render(
 			'admin/table',
 			array(
-				'table'    => $this->table,
-				'untitled' => null === $this->table ? $this->tables->untitled() : '',
-				'all'      => $this->tables->count(),
-				'builder'  => $this->tables->builder( $this->table ?? new Table( null, '' ) ),
+				'table'        => $this->table,
+				'untitled'     => null === $this->table ? $this->tables->untitled() : '',
+				'all'          => $this->tables->count(),
+				'builder'      => $this->tables->builder( $this->table ?? new Table( null, '' ) ) + array( 'icons' => $this->icons?->sources() ?? array() ),
+				'icons'        => $this->icons?->listing() ?? array(),
+				'can_add_icon' => current_user_can( Capabilities::SETTINGS ),
 			)
 		);
 	}

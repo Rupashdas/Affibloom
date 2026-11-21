@@ -169,7 +169,18 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-tables', $this->plugin_url . 'assets/admin/tables.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-field-dialog', $this->plugin_url . 'assets/admin/field-dialog.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
-			wp_enqueue_script( 'affibloom-table-builder', $this->plugin_url . 'assets/admin/table-builder.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-product-search', 'affibloom-field-dialog' ), $this->version, true );
+			// The builder's core, then its modules, which share it (deviation 151); the icon picker for badges and buttons.
+			wp_enqueue_script( 'affibloom-icon-popover', $this->plugin_url . 'assets/admin/icon-popover.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-table-builder', $this->plugin_url . 'assets/admin/table-builder.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			$modules = array(
+				'settings'  => array( 'affibloom-table-builder' ),
+				'cells'     => array( 'affibloom-table-builder', 'affibloom-product-search', 'affibloom-field-dialog' ),
+				'drag'      => array( 'affibloom-table-builder' ),
+				'inspector' => array( 'affibloom-table-builder', 'affibloom-table-builder-cells', 'affibloom-icon-popover' ),
+			);
+			foreach ( $modules as $module => $needs ) {
+				wp_enqueue_script( 'affibloom-table-builder-' . $module, $this->plugin_url . 'assets/admin/table-builder-' . $module . '.js', $needs, $this->version, true );
+			}
 		}
 		if ( str_contains( $hook_suffix, TablesScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
