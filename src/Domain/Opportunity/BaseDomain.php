@@ -30,4 +30,18 @@ final class BaseDomain {
 
 		return str_starts_with( $host, 'www.' ) ? substr( $host, 4 ) : $host;
 	}
+
+	/**
+	 * The domain a product is matched by (`_affibloom_domain`): its URL's, except that an Amazon short link (`amzn.to`,
+	 * `amzn.com`) is Amazon's. Lasso resolves the short link when it stores the product, so its base domain is
+	 * amazon.com, which the lists leave out (F22 R71, R96); kept as amzn.to, the product would take every short link on
+	 * the site as its opportunities.
+	 *
+	 * @param string $url The product's URL.
+	 */
+	public static function of_product( string $url ): string {
+		$domain = self::of( $url );
+
+		return in_array( $domain, array( 'amzn.to', 'amzn.com' ), true ) ? 'amazon.com' : $domain;
+	}
 }

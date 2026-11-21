@@ -438,6 +438,10 @@ final class Plugin {
 			10 => static function (): void {
 				( new Table( TableAmazonShortLinkRepository::TABLE, TableAmazonShortLinkRepository::COLUMNS ) )->create();
 			},
+			// F22 R71: a product on an Amazon short link is Amazon's, not a suggestion for every short link.
+			11 => static function (): void {
+				ProductDomainBackfill::run();
+			},
 		);
 	}
 

@@ -70,7 +70,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'_affibloom_url'                  => $product->url->value(),
 				'_affibloom_url_key'              => $product->url->key(),
 				// The base domain Link Opportunities matches links by (F22 D5; Task O1).
-				'_affibloom_domain'               => BaseDomain::of( $product->url->value() ),
+				'_affibloom_domain'               => BaseDomain::of_product( $product->url->value() ),
 				'_affibloom_type'                 => $product->type->value,
 				'_affibloom_new_tab'              => self::flag( $product->new_tab ),
 				'_affibloom_nofollow'             => self::flag( $product->nofollow ),

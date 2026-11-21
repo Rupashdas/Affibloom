@@ -20,7 +20,7 @@ if ( ! is_array( $affibloom_input ) ) {
 // Opportunities match links by (F22 D5), and Detect Opportunities from the site's Link Defaults (F22 R41, D9).
 $affibloom_meta = (array) ( $affibloom_input['meta'] ?? array() );
 if ( isset( $affibloom_meta['_affibloom_url'] ) && ! isset( $affibloom_meta['_affibloom_domain'] ) ) {
-	$affibloom_meta['_affibloom_domain'] = \Affibloom\Domain\Opportunity\BaseDomain::of( (string) $affibloom_meta['_affibloom_url'] );
+	$affibloom_meta['_affibloom_domain'] = \Affibloom\Domain\Opportunity\BaseDomain::of_product( (string) $affibloom_meta['_affibloom_url'] );
 }
 if ( ! isset( $affibloom_meta['_affibloom_detect_opportunities'] ) ) {
 	$affibloom_settings = (array) get_option( 'affibloom_settings', array() );
