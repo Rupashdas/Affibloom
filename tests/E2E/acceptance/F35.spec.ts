@@ -30,8 +30,14 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		holdImport(); // the tests run the import themselves
 	} );
 
+	// The import learns partner tags into the whitelist (AM6; AC1, AC4 add made-up ones): the site's list is put back.
+	let whitelist: string[] = [];
+	test.beforeAll( () => {
+		whitelist = JSON.parse( wp( 'eval', 'echo wp_json_encode( array_values( (array) ( get_option( "affibloom_settings", array() )["tracking_id_whitelist"] ?? array() ) ) );' ) ) as string[];
+	} );
+
 	test.afterAll( () => {
-		setSettings( { auto_monetize_amazon: false } ); // Local's value: no import between runs
+		setSettings( { auto_monetize_amazon: false, tracking_id_whitelist: whitelist } ); // Local's values: no import between runs
 	} );
 
 	test( 'AC1 an Amazon link in a post becomes one product at the next run; again: none; the post is unchanged', () => {
