@@ -379,4 +379,44 @@ test.describe( 'F25 Comparison tables', () => {
 		await expect( cell( 99993 ).getByText( 'No Secondary Button URL set.' ) ).toHaveCount( 0 );
 		expect( JSON.parse( stored( id ).values[ String( product ) ][ '99993' ] ) ).toEqual( { button_text: 'Compare', url: 'https://shop.example/compare' } );
 	} );
+
+	// AC12 (T9; R36-R39, D9).
+	test( 'AC12 products, rows and fields reorder by drag and by the Move buttons; a field moves to another row with its values', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const a = createProduct( { name: `Order ${ word } a`, price: '$1' } );
+		const b = createProduct( { name: `Order ${ word } b`, price: '$2' } );
+		const id = await tableWith( page, 'column', [ a, b ] );
+		const order = () => stored( id ).products.map( ( entry: { id: number } ) => entry.id );
+
+		// The keyboard way: Move product right on the first product.
+		await page.locator( `[data-table-product="${ a }"].affibloom-table-cell--head` ).getByRole( 'button', { name: 'Move product right' } ).press( 'Enter' );
+		await expect.poll( order ).toEqual( [ b, a ] );
+
+		// A drag: the first product's grip onto the second's header cell, right half.
+		const grip = page.locator( `[data-table-product="${ b }"].affibloom-table-cell--head [data-table-drag="product"]` );
+		const target = page.locator( `[data-table-product="${ a }"].affibloom-table-cell--head` );
+		const from = await grip.boundingBox();
+		const to = await target.boundingBox();
+		await page.mouse.move( from!.x + from!.width / 2, from!.y + from!.height / 2 );
+		await page.mouse.down();
+		await page.mouse.move( to!.x + to!.width - 10, to!.y + 40, { steps: 6 } );
+		await page.mouse.up();
+		await expect.poll( order ).toEqual( [ a, b ] );
+
+		// Rows: the button row up, above the name row.
+		const groups = () => stored( id ).groups.map( ( group: { id: string } ) => group.id );
+		const before = groups();
+		await page.getByRole( 'button', { name: 'Move row up' } ).last().press( 'Enter' );
+		await expect.poll( groups ).toEqual( [ before[ 0 ], before[ 2 ], before[ 1 ] ] );
+
+		// A field: Price to the next row, with every product's value.
+		const price = page.locator( `[data-table-product="${ a }"] [data-table-field="99994"]` );
+		await price.hover();
+		await price.getByRole( 'button', { name: 'Move to next row' } ).click();
+		await expect.poll( () => stored( id ).groups[ 2 ].fields ).toContain( 99994 );
+		expect( stored( id ).values[ String( b ) ][ '99994' ] ).toBe( '$2' );
+
+		await page.reload();
+		await expect( page.locator( '.affibloom-table-cell--head' ).first() ).toHaveAttribute( 'data-table-product', String( a ) );
+	} );
 } );

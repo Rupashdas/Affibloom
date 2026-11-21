@@ -23,6 +23,9 @@
  *   a description's edit icon opens "Description Editor" and Save stores it.
  * - Buttons (T8): the edit icon opens 'Edit "<field>"' (the Primary's address read only); Save stores the text and
  *   the Secondary's address and draws the builder again; a missing one gets Lasso's sentence under its box.
+ * - Order (T9; D9): a product, a row or column and a field are dragged by their grips (pointer events: the item under
+ *   the pointer is marked, the drop sends the new order) or moved one place by their Move buttons; a field also moves
+ *   to the previous or next row (column), or is dropped on another one. Each move redraws the builder.
  */
 ( function () {
 	'use strict';
@@ -555,6 +558,16 @@
 			editPrice( price );
 			return;
 		}
+		var stepButton = event.target.closest( '[data-table-step]' );
+		if ( stepButton ) {
+			stepped( stepButton, parseInt( stepButton.dataset.tableStep, 10 ) );
+			return;
+		}
+		var shiftButton = event.target.closest( '[data-table-shift]' );
+		if ( shiftButton ) {
+			shifted( shiftButton, parseInt( shiftButton.dataset.tableShift, 10 ) );
+			return;
+		}
 		var editButton = event.target.closest( '[data-table-button]' );
 		if ( editButton ) {
 			openButton( editButton );
@@ -656,6 +669,193 @@
 	buttonForm.addEventListener( 'submit', function ( event ) {
 		event.preventDefault();
 		buttonSave.click();
+	} );
+
+	// Order (T9; R36-R39, D9).
+	var unique = function ( list ) {
+		return list.filter( function ( item, index ) {
+			return list.indexOf( item ) === index;
+		} );
+	};
+	var productOrder = function () {
+		return unique( Array.prototype.map.call( region.querySelectorAll( '.affibloom-table-cell--head' ), function ( head ) {
+			return head.getAttribute( 'data-table-product' );
+		} ) );
+	};
+	// The groups as the first product's cells hold them, the heading group first.
+	var groupOrder = function () {
+		var first = productOrder()[ 0 ];
+		return Array.prototype.map.call( region.querySelectorAll( '.affibloom-table-cell[data-table-product="' + first + '"]' ), function ( cell ) {
+			return cell.getAttribute( 'data-table-group' );
+		} );
+	};
+	var fieldOrder = function ( cell ) {
+		return Array.prototype.map.call( cell.querySelectorAll( '[data-table-field]' ), function ( field ) {
+			return parseInt( field.dataset.tableField, 10 );
+		} );
+	};
+	var sendOrder = function ( data ) {
+		enqueue( {
+			send: function ( current ) {
+				return wp.apiFetch( { path: path + '/order', method: 'PUT', data: Object.assign( { revision: current }, data ) } );
+			},
+		} );
+	};
+	var moveField = function ( from, field, to, position ) {
+		enqueue( {
+			send: function ( current ) {
+				return wp.apiFetch( {
+					path: path + '/groups/' + encodeURIComponent( from ) + '/fields/' + field + '/move',
+					method: 'POST',
+					data: { revision: current, to_group: to, position: position },
+				} );
+			},
+		} );
+	};
+	// An item placed before or after another in a list.
+	var place = function ( list, item, target, after ) {
+		var rest = list.filter( function ( entry ) {
+			return entry !== item;
+		} );
+		var at = rest.indexOf( target ) + ( after ? 1 : 0 );
+		rest.splice( at, 0, item );
+		return rest;
+	};
+	var step = function ( list, item, by ) {
+		var at = list.indexOf( item );
+		var to = at + by;
+		if ( at < 0 || to < 0 || to >= list.length ) {
+			return null;
+		}
+		var moved = list.slice();
+		moved.splice( at, 1 );
+		moved.splice( to, 0, item );
+		return moved;
+	};
+	// What a drag or a step moves: { kind, item, group, cell } for the grip or button inside it.
+	var moving = function ( control ) {
+		var kind = control.closest( '[data-table-move]' ).dataset.tableMove;
+		var cell = control.closest( '[data-table-group]' );
+		if ( 'product' === kind ) {
+			return { kind: kind, item: cell.getAttribute( 'data-table-product' ) };
+		}
+		if ( 'group' === kind ) {
+			return { kind: kind, item: cell.getAttribute( 'data-table-group' ) };
+		}
+		return { kind: kind, item: parseInt( control.closest( '[data-table-field]' ).dataset.tableField, 10 ), group: cell.getAttribute( 'data-table-group' ), cell: cell };
+	};
+	var stepped = function ( control, by ) {
+		var what = moving( control );
+		var order;
+		if ( 'product' === what.kind ) {
+			order = step( productOrder(), what.item, by );
+			return order && sendOrder( { products: order.map( Number ) } );
+		}
+		if ( 'group' === what.kind ) {
+			order = step( groupOrder().slice( 1 ), what.item, by );
+			return order && sendOrder( { groups: order } );
+		}
+		order = step( fieldOrder( what.cell ), what.item, by );
+		return order && sendOrder( { cell: { group: what.group, fields: order } } );
+	};
+	var shifted = function ( button, by ) {
+		var cell = button.closest( '[data-table-group]' );
+		var groups = groupOrder();
+		var to = groups[ groups.indexOf( cell.getAttribute( 'data-table-group' ) ) + by ];
+		if ( to ) {
+			moveField( cell.getAttribute( 'data-table-group' ), parseInt( button.closest( '[data-table-field]' ).dataset.tableField, 10 ), to, 9999 );
+		}
+	};
+
+	// Dragging by a grip: the item under the pointer is the drop target.
+	var dragging = null;
+	var targetAt = function ( event ) {
+		var under = document.elementFromPoint( event.clientX, event.clientY );
+		if ( ! under || ! region.contains( under ) ) {
+			return null;
+		}
+		if ( 'product' === dragging.kind ) {
+			return under.closest( '[data-table-product]' );
+		}
+		if ( 'group' === dragging.kind ) {
+			var cell = under.closest( '.affibloom-table-cell:not(.affibloom-table-cell--head)' );
+			return cell;
+		}
+		return under.closest( '[data-table-field]' ) || under.closest( '[data-table-group]' );
+	};
+	var mark = function ( element ) {
+		region.querySelectorAll( '.is-drop-target' ).forEach( function ( marked ) {
+			marked.classList.remove( 'is-drop-target' );
+		} );
+		if ( element ) {
+			element.classList.add( 'is-drop-target' );
+		}
+	};
+	region.addEventListener( 'pointerdown', function ( event ) {
+		var grip = event.target.closest( '[data-table-drag]' );
+		if ( ! grip || 0 !== event.button ) {
+			return;
+		}
+		event.preventDefault();
+		dragging = moving( grip );
+		dragging.grip = grip;
+		grip.setPointerCapture( event.pointerId );
+		region.classList.add( 'is-dragging' );
+	} );
+	region.addEventListener( 'pointermove', function ( event ) {
+		if ( dragging ) {
+			mark( targetAt( event ) );
+		}
+	} );
+	var drop = function ( event ) {
+		if ( ! dragging ) {
+			return;
+		}
+		var what = dragging;
+		var target = targetAt( event );
+		dragging = null;
+		mark( null );
+		region.classList.remove( 'is-dragging' );
+		if ( ! target ) {
+			return;
+		}
+		var box = target.getBoundingClientRect();
+		var after = 'product' === what.kind && ! target.closest( '.affibloom-table-builder--row' )
+			? event.clientX > box.left + box.width / 2
+			: event.clientY > box.top + box.height / 2;
+		if ( 'product' === what.kind ) {
+			var product = target.getAttribute( 'data-table-product' );
+			if ( product !== what.item ) {
+				sendOrder( { products: place( productOrder(), what.item, product, after ).map( Number ) } );
+			}
+			return;
+		}
+		if ( 'group' === what.kind ) {
+			var group = target.getAttribute( 'data-table-group' );
+			var across = !! target.closest( '.affibloom-table-builder--row' );
+			after = across ? event.clientX > box.left + box.width / 2 : after;
+			if ( group !== what.item && groupOrder().indexOf( group ) > 0 ) {
+				sendOrder( { groups: place( groupOrder().slice( 1 ), what.item, group, after ) } );
+			}
+			return;
+		}
+		var cell = target.closest( '[data-table-group]' );
+		var to = cell.getAttribute( 'data-table-group' );
+		var onField = target.hasAttribute( 'data-table-field' ) ? parseInt( target.dataset.tableField, 10 ) : null;
+		if ( to === what.group ) {
+			if ( null !== onField && onField !== what.item ) {
+				sendOrder( { cell: { group: to, fields: place( fieldOrder( what.cell ), what.item, onField, after ) } } );
+			}
+			return;
+		}
+		var fields = fieldOrder( cell );
+		moveField( what.group, what.item, to, null === onField ? fields.length : fields.indexOf( onField ) + ( after ? 1 : 0 ) );
+	};
+	region.addEventListener( 'pointerup', drop );
+	region.addEventListener( 'pointercancel', function () {
+		dragging = null;
+		mark( null );
+		region.classList.remove( 'is-dragging' );
 	} );
 
 	// A price box opens on Enter or Space too.

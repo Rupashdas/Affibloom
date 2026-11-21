@@ -3217,6 +3217,30 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-button { display: flex; flex-direction: column; gap: 16px; }
 .affibloom-table-button .affibloom-input[readonly] { background: var(--affibloom-subtle); color: var(--affibloom-ink-500); }
 
+/* Task T9 (F25 R36-R39, D9): grips and Move buttons, shown while the cell is hovered or holds the focus; the chevrons
+   point the way an item moves (sideways for a Vertical table's products and a Horizontal table's columns). */
+.affibloom-table-move { display: inline-flex; align-items: center; gap: 0; }
+.affibloom-table-move__grip { width: 20px; height: 24px; cursor: grab; }
+.affibloom-table-move__step { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: var(--affibloom-radius-control); background: none; color: var(--affibloom-ink-500); cursor: pointer; opacity: 0; transition: opacity .12s; }
+.affibloom-table-move__step svg { width: 14px; height: 14px; }
+.affibloom-table-move__step:hover:not(:disabled) { background: var(--affibloom-subtle); color: var(--affibloom-ink-900); }
+.affibloom-table-move__step:disabled { cursor: default; color: var(--affibloom-control-line); }
+.affibloom-table-cell:hover .affibloom-table-move__step, .affibloom-table-cell:focus-within .affibloom-table-move__step, .affibloom-table-move__step:focus-visible { opacity: 1; }
+.affibloom-table-builder--column [data-table-move="product"] .affibloom-table-move__step svg,
+.affibloom-table-builder--row [data-table-move="group"] .affibloom-table-move__step svg,
+.affibloom-table-builder--row .affibloom-table-field__shift svg { transform: rotate(-90deg); }
+.affibloom-table-cell__tools .affibloom-table-move { margin-right: auto; }
+.affibloom-table-cell__group { display: flex; align-items: center; margin: -6px 0 -2px -6px; }
+.affibloom-table-field__head { position: relative; }
+.affibloom-table-field__head .affibloom-table-field__name { flex: 1 1 auto; min-width: 0; overflow-wrap: normal; }
+.affibloom-table-field__tools { position: absolute; top: -6px; right: 22px; z-index: 2; display: inline-flex; align-items: center; padding: 1px 2px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-card); opacity: 0; pointer-events: none; transition: opacity .12s; }
+.affibloom-table-field:hover > .affibloom-table-field__head .affibloom-table-field__tools,
+.affibloom-table-field:focus-within > .affibloom-table-field__head .affibloom-table-field__tools { opacity: 1; pointer-events: auto; }
+.affibloom-table-field__tools .affibloom-table-move__grip { width: 16px; }
+.affibloom-table-field__shift { display: inline-flex; margin-left: 2px; padding-left: 2px; border-left: 1px solid var(--affibloom-line); }
+#affibloom-table-builder.is-dragging, #affibloom-table-builder.is-dragging * { cursor: grabbing; user-select: none; }
+.affibloom-table-builder .is-drop-target { outline: 2px dashed var(--affibloom-brand-600); outline-offset: -3px; }
+
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
 .affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }

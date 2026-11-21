@@ -28,7 +28,7 @@ use Closure;
 
 /**
  * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4) and a
- * group's (T5), rows, columns, fields and cell values (T6). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
+ * group's (T5), rows, columns, fields and cell values (T6-T8), their order (T9). Later tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
  */
 final class TableService {
 
@@ -321,6 +321,53 @@ final class TableService {
 				return $table->set_value( $product, $field, TableValues::button( trim( $text ), $link ) );
 			}
 		);
+	}
+
+	/**
+	 * A new order of the products, the rows or columns, or one cell's fields (R36-R38; Task T9).
+	 *
+	 * @param int                  $id       The table.
+	 * @param int                  $revision The revision the editor's copy has.
+	 * @param array<string, mixed> $order    `products` (product IDs), `groups` (group IDs) or `cell` ({group, fields}).
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `invalid_order`,
+	 *                      `group_missing`.
+	 */
+	public function order( int $id, int $revision, array $order ): ?Table {
+		return $this->change(
+			$id,
+			$revision,
+			static function ( Table $table ) use ( $order ): Table {
+				if ( isset( $order['products'] ) && is_array( $order['products'] ) ) {
+					return $table->order_products( array_values( array_map( 'intval', $order['products'] ) ) );
+				}
+				if ( isset( $order['groups'] ) && is_array( $order['groups'] ) ) {
+					return $table->order_groups( array_values( array_map( 'strval', $order['groups'] ) ) );
+				}
+				$cell = isset( $order['cell'] ) && is_array( $order['cell'] ) ? $order['cell'] : array();
+				if ( isset( $cell['group'], $cell['fields'] ) && is_array( $cell['fields'] ) ) {
+					return $table->order_cell( (string) $cell['group'], array_values( array_map( 'intval', $cell['fields'] ) ) );
+				}
+				throw new TableRuleBroken( 'invalid_order' );
+			}
+		);
+	}
+
+	/**
+	 * A field moved to another row or column (R39; Task T9).
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param string $from     The group it is in.
+	 * @param int    $field    The field.
+	 * @param string $to       The group it goes to.
+	 * @param int    $position Its place there, from 0.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `field_exists`,
+	 *                      `field_missing`, `group_missing`.
+	 */
+	public function move_field( int $id, int $revision, string $from, int $field, string $to, int $position ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->move_field( $from, $field, $to, $position ) );
 	}
 
 	/**

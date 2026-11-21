@@ -6,7 +6,8 @@
  * or Lasso's empty state. Vertical: a column per product, its header cell on top and a row per field group; Horizontal:
  * a row per product, its header cell first and a column per group. Widths split evenly up to five; past five the grid
  * scrolls. Every write answers with this partial, so the builder never drifts from the store. Task T6: Add Row / Add
- * Column, "Click to add a Field" in an empty one, Add field (+) in every cell, Vertical's "Remove same field →".
+ * Column, "Click to add a Field" in an empty one, Add field (+) in every cell, Vertical's "Remove same field →". Task
+ * T9: a grip and Move buttons on each product's header cell and, in the first product's cells, on each row or column.
  *
  * @package Affibloom
  * @var array{table: \Affibloom\Domain\Table\Table, fields: array<int, \Affibloom\Domain\Fields\Field>, names: array<int, string>, amazon: array<int, string>} $view
@@ -26,6 +27,8 @@ $buttons    = array(
 	array( 'add-line', $horizontal ? __( 'Add Column', 'affibloom' ) : __( 'Add Row', 'affibloom' ), 'plus', true ),
 );
 $columns    = $horizontal ? 1 + count( $body ) : count( $table->products );
+$last       = count( $table->products ) - 1;
+$group_at   = array_flip( array_column( $table->groups, 'id' ) );
 // Lasso's order (R34): a Vertical table reads across (each group a row of every product's cells); a Horizontal table
 // reads down (each product a row of its header cell and its groups).
 $layout = array();
@@ -76,11 +79,24 @@ if ( $horizontal ) {
 				<?php
 				foreach ( $layout as [ $kind, $product, $group ] ) :
 					$name = $view['names'][ $product->id ] ?? '';
+					$at   = (int) array_search( $product, $table->products, true );
 					if ( 'head' === $kind ) :
 						?>
 						<div class="affibloom-table-cell affibloom-table-cell--head" data-table-product="<?php echo esc_attr( (string) $product->id ); ?>" data-table-group="<?php echo esc_attr( (string) ( $table->groups[0]['id'] ?? '' ) ); ?>" data-product-name="<?php echo esc_attr( $name ); ?>">
 							<div class="affibloom-table-cell__tools">
-								<span class="affibloom-grip" aria-hidden="true"><?php $this->render( 'admin/partials/icon', array( 'name' => 'grip' ) ); ?></span>
+								<?php
+								$this->render(
+									'admin/partials/table-move',
+									array(
+										'kind'     => 'product',
+										'label'    => $name,
+										'previous' => $horizontal ? __( 'Move product up', 'affibloom' ) : __( 'Move product left', 'affibloom' ),
+										'next'     => $horizontal ? __( 'Move product down', 'affibloom' ) : __( 'Move product right', 'affibloom' ),
+										'first'    => 0 === $at,
+										'last'     => $last === $at,
+									)
+								);
+								?>
 								<button type="button" class="affibloom-icon-button" data-table-add-field aria-haspopup="dialog" title="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>" aria-label="<?php esc_attr_e( 'Add field', 'affibloom' ); ?>">
 									<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
 								</button>
@@ -101,12 +117,33 @@ if ( $horizontal ) {
 									'values'  => $table->values[ $product->id ] ?? array(),
 									'product' => $product->id,
 									'amazon'  => $view['amazon'][ $product->id ] ?? null,
+									'group'   => 0,
+									'groups'  => count( $table->groups ),
+									'across'  => $horizontal,
 								)
 							);
 							?>
 						</div>
 					<?php else : ?>
 						<div class="affibloom-table-cell" data-table-product="<?php echo esc_attr( (string) $product->id ); ?>" data-table-group="<?php echo esc_attr( (string) $group['id'] ); ?>">
+							<?php if ( 0 === $at ) : ?>
+								<div class="affibloom-table-cell__group">
+									<?php
+									// R37: the row (Vertical) or column (Horizontal) is moved from the first product's cell.
+									$this->render(
+										'admin/partials/table-move',
+										array(
+											'kind'     => 'group',
+											'label'    => $horizontal ? __( 'column', 'affibloom' ) : __( 'row', 'affibloom' ),
+											'previous' => $horizontal ? __( 'Move column left', 'affibloom' ) : __( 'Move row up', 'affibloom' ),
+											'next'     => $horizontal ? __( 'Move column right', 'affibloom' ) : __( 'Move row down', 'affibloom' ),
+											'first'    => 1 === $group_at[ $group['id'] ],
+											'last'     => count( $table->groups ) - 1 === $group_at[ $group['id'] ],
+										)
+									);
+									?>
+								</div>
+							<?php endif; ?>
 							<?php if ( array() === $group['fields'] ) : ?>
 								<?php // R25: an empty row or column, every cell offering its first field. ?>
 								<button type="button" class="affibloom-table-cell__empty" data-table-add-field aria-haspopup="dialog"><?php esc_html_e( 'Click to add a Field', 'affibloom' ); ?></button>
@@ -120,6 +157,9 @@ if ( $horizontal ) {
 										'values'  => $table->values[ $product->id ] ?? array(),
 										'product' => $product->id,
 										'amazon'  => $view['amazon'][ $product->id ] ?? null,
+										'group'   => $group_at[ $group['id'] ],
+										'groups'  => count( $table->groups ),
+										'across'  => $horizontal,
 									)
 								);
 								?>

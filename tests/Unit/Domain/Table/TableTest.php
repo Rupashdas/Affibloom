@@ -113,4 +113,32 @@ final class TableTest extends TestCase {
 			}
 		}
 	}
+
+	/** Task T9 (F25 R36-R38): products, groups (the heading kept first) and a cell's fields reorder; a wrong set is refused. */
+	public function test_products_groups_and_fields_reorder(): void {
+		$table = self::laid_out();
+		self::assertSame( array( 8, 7 ), $table->order_products( array( 8, 7 ) )->product_ids() );
+		self::assertSame( array( 'g_head', 'g_two', 'g_one' ), array_column( $table->order_groups( array( 'g_two', 'g_head', 'g_one' ) )->groups, 'id' ) );
+		self::assertSame( array( 99994, 99990, 1 ), $table->order_cell( 'g_one', array( 99994, 99990, 1 ) )->groups[1]['fields'] );
+
+		foreach ( array( static fn() => $table->order_products( array( 7 ) ), static fn() => $table->order_products( array( 7, 7 ) ), static fn() => $table->order_groups( array( 'g_one' ) ), static fn() => $table->order_cell( 'g_one', array( 1, 1, 99994 ) ) ) as $refused ) {
+			try {
+				$refused();
+				self::fail( 'A wrong order was accepted.' );
+			} catch ( \Affibloom\Domain\Table\TableRuleBroken $broken ) {
+				self::assertSame( 'invalid_order', $broken->rule );
+			}
+		}
+	}
+
+	/** Task T9 (F25 R39): a field moves to another group for every product with its values; moved where it is: refused. */
+	public function test_a_field_moves_to_another_group_with_its_values(): void {
+		$table = self::laid_out()->move_field( 'g_two', 99992, 'g_one', 1 );
+		self::assertSame( array( 'g_head', 'g_one' ), array_column( $table->groups, 'id' ), 'The emptied group went.' );
+		self::assertSame( array( 99990, 99992, 1, 99994 ), $table->groups[1]['fields'] );
+		self::assertSame( '8:99992', $table->values[8][99992] );
+
+		$this->expectExceptionObject( new \Affibloom\Domain\Table\TableRuleBroken( 'field_exists' ) );
+		$table->move_field( 'g_one', 1, 'g_one', 0 );
+	}
 }

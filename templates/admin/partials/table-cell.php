@@ -6,10 +6,11 @@
  * its stars. Task T7: the image opens the media library ("Update Image"); the price opens a one-line rich editor in
  * place ("N/A"), except an Amazon product's, which shows the live price read only; the description shows its HTML
  * and an edit icon for "Description Editor". Task T8: a button's edit icon opens 'Edit "<field>"'.
- * table-builder.js saves a value 500 ms after it changes.
+ * table-builder.js saves a value 500 ms after it changes. Task T9: each field has a grip, Move up / Move down in its
+ * cell and Move to the previous / next row (column).
  *
  * @package Affibloom
- * @var array{fields: array<int, \Affibloom\Domain\Fields\Field>, order: list<int>, values: array<int, string>, product: int, amazon?: string|null} $view
+ * @var array{fields: array<int, \Affibloom\Domain\Fields\Field>, order: list<int>, values: array<int, string>, product: int, amazon?: string|null, group: int, groups: int, across: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +18,8 @@ defined( 'ABSPATH' ) || exit;
 use Affibloom\Domain\Fields\FieldType;
 use Affibloom\Domain\Table\StartingLayout;
 
-foreach ( $view['order'] as $field_id ) :
+$count = count( $view['order'] );
+foreach ( $view['order'] as $place => $field_id ) :
 	$field = $view['fields'][ $field_id ] ?? null;
 	if ( null === $field ) {
 		continue;
@@ -32,6 +34,32 @@ foreach ( $view['order'] as $field_id ) :
 	<div class="affibloom-table-field affibloom-table-field--<?php echo esc_attr( $field->type->value ); ?>" data-table-field="<?php echo esc_attr( (string) $field->id ); ?>" data-field-name="<?php echo esc_attr( $field->name ); ?>">
 		<div class="affibloom-table-field__head">
 			<label class="affibloom-table-field__name" for="<?php echo esc_attr( $input ); ?>"><?php echo esc_html( $field->name ); ?></label>
+			<?php // T9: the grip and the Move buttons float over the header while the field is hovered or focused. ?>
+			<span class="affibloom-table-field__tools">
+				<?php
+				$this->render(
+					'admin/partials/table-move',
+					array(
+						'kind'     => 'field',
+						'label'    => $field->name,
+						'previous' => __( 'Move field up', 'affibloom' ),
+						'next'     => __( 'Move field down', 'affibloom' ),
+						'first'    => 0 === $place,
+						'last'     => $count - 1 === $place,
+					)
+				);
+				?>
+				<span class="affibloom-table-field__shift">
+					<button type="button" class="affibloom-table-move__step" data-table-shift="-1"<?php disabled( 0 === $view['group'] ); ?>
+						aria-label="<?php echo esc_attr( $view['across'] ? __( 'Move to previous column', 'affibloom' ) : __( 'Move to previous row', 'affibloom' ) ); ?>" title="<?php echo esc_attr( $view['across'] ? __( 'Move to previous column', 'affibloom' ) : __( 'Move to previous row', 'affibloom' ) ); ?>">
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'chevron-up' ) ); ?>
+					</button>
+					<button type="button" class="affibloom-table-move__step" data-table-shift="1"<?php disabled( $view['groups'] - 1 === $view['group'] ); ?>
+						aria-label="<?php echo esc_attr( $view['across'] ? __( 'Move to next column', 'affibloom' ) : __( 'Move to next row', 'affibloom' ) ); ?>" title="<?php echo esc_attr( $view['across'] ? __( 'Move to next column', 'affibloom' ) : __( 'Move to next row', 'affibloom' ) ); ?>">
+						<?php $this->render( 'admin/partials/icon', array( 'name' => 'chevron-down' ) ); ?>
+					</button>
+				</span>
+			</span>
 			<?php /* translators: %s: the field's name. */ ?>
 			<button type="button" class="affibloom-table-field__remove" data-table-remove-field aria-label="<?php echo esc_attr( sprintf( __( 'Remove %s', 'affibloom' ), $field->name ) ); ?>" title="<?php esc_attr_e( 'Remove', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>

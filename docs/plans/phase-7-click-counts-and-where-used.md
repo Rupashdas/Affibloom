@@ -136,7 +136,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T6: Rows and columns, the Add Field dialog, plain cells
 - [x] Task T7: Image, price and description cells
 - [x] Task T8: Button information
-- [ ] Task T9: Reordering
+- [x] Task T9: Reordering
 - [ ] Task T10: Table Locations
 - [ ] Task T11: Clone and delete
 - [ ] Task T12: The reader's Horizontal table, by shortcode
@@ -1971,13 +1971,15 @@ already exists, please select another field".
 
 **Files:** the above; F25 spec AC12; unit tests for each order and the move refusal.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain and routes.**
-- [ ] **Step 3: Drag and buttons (both
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain and routes.**
+- [x] **Step 3: Drag and buttons (both
   layouts).**
-- [ ] **Step 4: Run and look** (mouse and keyboard only).
-- [ ] **Step 5: Commit** — "Reorder a table's
+- [x] **Step 4: Run and look** (mouse and keyboard only).
+- [x] **Step 5: Commit** — "Reorder a table's
   products, rows and fields".
+
+*Note:* One partial, `table-move.php`, draws the grip and the two Move buttons for products, rows/columns (on the first product's cells) and fields; a field's grip and buttons float over its header while it is hovered or focused (the names had no room otherwise). Drag is pointer events with the item under the pointer marked; the drop sends the new order. Checked: unit tests for each order and the move refusal; in a headless browser a product moved by keyboard and by drag, a row moved, a field moved to the next row, all kept after a reload.
 
 ---
 

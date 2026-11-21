@@ -33,7 +33,8 @@ use WP_REST_Server;
 /**
  * F25's routes (Tasks T1-T17). `POST /tables` (T2, R12) creates a table; `PATCH /tables/{id}` (T3) saves the builder's
  * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them; `/groups`, their
- * `/fields` and `/values` (T6) shape the rows and columns and save the cells. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
+ * `/fields` and `/values` (T6) shape the rows and columns and save the cells; `/order` and a field's `/move` (T9)
+ * reorder them. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
  * (`html`, `url`) and as data (`items`: id, title) for the editor's "Choose a Table", ten a page or the picker's five;
  * anyone who may place displays may read it.
  */
@@ -63,6 +64,48 @@ final class TablesController implements Module {
 			'type'     => 'integer',
 			'minimum'  => 0,
 			'required' => true,
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/order',
+			array(
+				'methods'             => 'PUT',
+				'callback'            => array( $this, 'order' ),
+				'permission_callback' => $can,
+				'args'                => array(
+					'revision' => $revision,
+					'products' => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'integer' ),
+					),
+					'groups'   => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'string' ),
+					),
+					'cell'     => array( 'type' => 'object' ),
+				),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/groups/(?P<group>[A-Za-z0-9_-]+)/fields/(?P<field>\d+)/move',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'move_field' ),
+				'permission_callback' => $can,
+				'args'                => array(
+					'revision' => $revision,
+					'to_group' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+					'position' => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+						'default' => 0,
+					),
+				),
+			)
 		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
@@ -434,6 +477,36 @@ final class TablesController implements Module {
 	}
 
 	/**
+	 * PUT /tables/{id}/order (R36-R38; Task T9): `products`, `groups` or `cell` ({group, fields}) in a new order. 409
+	 * `affibloom_table_invalid_order` (Lasso's "Invalid data").
+	 *
+	 * @param WP_REST_Request $request The table, its revision and the order.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function order( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$order = array_intersect_key( $request->get_params(), array_flip( array( 'products', 'groups', 'cell' ) ) );
+
+		return $this->write(
+			fn(): ?Table => $this->tables->order( (int) $request['id'], (int) $request['revision'], $order ),
+			self::redrawn( ... )
+		);
+	}
+
+	/**
+	 * POST /tables/{id}/groups/{group}/fields/{field}/move (R39; Task T9): the field to another row or column. 409
+	 * `affibloom_table_field_exists` when it is moved where it is.
+	 *
+	 * @param WP_REST_Request $request The table, its revision, the group, the field, `to_group` and `position`.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function move_field( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		return $this->write(
+			fn(): ?Table => $this->tables->move_field( (int) $request['id'], (int) $request['revision'], (string) $request['group'], (int) $request['field'], (string) $request['to_group'], (int) $request['position'] ),
+			self::redrawn( ... )
+		);
+	}
+
+	/**
 	 * A write's answer that redraws the builder.
 	 *
 	 * @param Table  $table The table as saved.
@@ -484,6 +557,7 @@ final class TablesController implements Module {
 			'field_invalid'   => new WP_Error( 'affibloom_table_field_invalid', __( 'That field does not exist.', 'affibloom' ), array( 'status' => 422 ) ),
 			'group_missing', 'field_missing' => new WP_Error( 'affibloom_table_field_missing', __( 'That field is no longer in this table. Reload to see the latest version.', 'affibloom' ), array( 'status' => 404 ) ),
 			'cell_missing'    => new WP_Error( 'affibloom_table_cell_missing', __( 'Unexpected error. Please contact your developer', 'affibloom' ), array( 'status' => 404 ) ),
+			'invalid_order'   => new WP_Error( 'affibloom_table_invalid_order', __( 'Invalid data', 'affibloom' ), array( 'status' => 409 ) ),
 			default           => new WP_Error( 'affibloom_table_product_missing', __( 'That product is no longer in this table. Reload to see the latest version.', 'affibloom' ), array( 'status' => 404 ) ),
 		};
 	}

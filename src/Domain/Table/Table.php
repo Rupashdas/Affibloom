@@ -290,6 +290,98 @@ final class Table {
 	}
 
 	/**
+	 * The products in a new order (R36; Task T9).
+	 *
+	 * @param list<int> $order Every product of the table, once each.
+	 * @throws TableRuleBroken `invalid_order` when it is not the table's products in some order.
+	 */
+	public function order_products( array $order ): self {
+		self::same_items( $this->product_ids(), $order );
+		$by_id = array();
+		foreach ( $this->products as $product ) {
+			$by_id[ $product->id ] = $product;
+		}
+
+		return $this->with( array( 'products' => array_map( static fn( int $id ): TableProduct => $by_id[ $id ], $order ) ) );
+	}
+
+	/**
+	 * The rows (Vertical) or columns (Horizontal) in a new order (R37; Task T9); the heading group stays first.
+	 *
+	 * @param list<string> $order Every group of the table, once each (the heading group may be left out).
+	 * @throws TableRuleBroken `invalid_order` when it is not the table's groups in some order.
+	 */
+	public function order_groups( array $order ): self {
+		$heading = $this->groups[0]['id'] ?? '';
+		$order   = array_merge( array( $heading ), array_values( array_diff( $order, array( $heading ) ) ) );
+		self::same_items( array_column( $this->groups, 'id' ), $order );
+		$by_id = array_column( $this->groups, null, 'id' );
+
+		return $this->with( array( 'groups' => array_map( static fn( string $id ): array => $by_id[ $id ], $order ) ) );
+	}
+
+	/**
+	 * A cell's fields in a new order, for every product (R38; Task T9).
+	 *
+	 * @param string    $group The group.
+	 * @param list<int> $order Every field of the group, once each.
+	 * @throws TableRuleBroken `group_missing`; `invalid_order` when it is not the group's fields in some order.
+	 */
+	public function order_cell( string $group, array $order ): self {
+		$at = $this->group_index( $group );
+		if ( $at < 0 ) {
+			throw new TableRuleBroken( 'group_missing' );
+		}
+		self::same_items( $this->groups[ $at ]['fields'], $order );
+		$groups                  = $this->groups;
+		$groups[ $at ]['fields'] = $order;
+
+		return $this->with( array( 'groups' => $groups ) );
+	}
+
+	/**
+	 * A field moved to another row or column, for every product with its values (R39; Task T9); a body group left
+	 * empty goes.
+	 *
+	 * @param string $from     The group it is in.
+	 * @param int    $field    The field.
+	 * @param string $to       The group it goes to.
+	 * @param int    $position Its place there, from 0 (past the end: last).
+	 * @throws TableRuleBroken `field_exists` (moved where it is), `field_missing`, `group_missing`.
+	 */
+	public function move_field( string $from, int $field, string $to, int $position ): self {
+		if ( $from === $to ) {
+			throw new TableRuleBroken( 'field_exists' );
+		}
+		if ( $this->group_index( $to ) < 0 ) {
+			throw new TableRuleBroken( 'group_missing' );
+		}
+		$moved  = $this->remove_field( $from, $field );
+		$groups = $moved->groups;
+		$at     = $moved->group_index( $to );
+		array_splice( $groups[ $at ]['fields'], max( 0, min( $position, count( $groups[ $at ]['fields'] ) ) ), 0, array( $field ) );
+
+		return $moved->with( array( 'groups' => $groups ) );
+	}
+
+	/**
+	 * Refuses an order that is not the same items, each once.
+	 *
+	 * @param list<int|string> $have  What the table has.
+	 * @param list<int|string> $order The order asked for.
+	 * @throws TableRuleBroken `invalid_order`.
+	 */
+	private static function same_items( array $have, array $order ): void {
+		$sorted_have  = $have;
+		$sorted_order = $order;
+		sort( $sorted_have );
+		sort( $sorted_order );
+		if ( $sorted_have !== $sorted_order ) {
+			throw new TableRuleBroken( 'invalid_order' );
+		}
+	}
+
+	/**
 	 * A group's place, from 0 (the heading group); -1 when it is not in the table.
 	 *
 	 * @param string $group The group.
