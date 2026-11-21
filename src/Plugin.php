@@ -112,6 +112,7 @@ use Affibloom\Infrastructure\WordPress\WpCronHealth;
 use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Interface\Admin\BrokenLinksNotice;
 use Affibloom\Interface\Front\ClickScript;
+use Affibloom\Interface\Front\GaTag;
 use Affibloom\Interface\Cron\ClickRetentionCron;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
@@ -524,6 +525,7 @@ final class Plugin {
 			$box_assets,
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, $icon_css ),
 			$click_js,
+			new GaTag( $this->settings_repository() ),
 			new ClickRetentionCron( new ClickRetention( new TableClickStore() ) ),
 			new ClicksController( new ClickTracker( new PostTypeProductRepository(), new WpPostDirectory(), new TableClickStore(), new TransientRepeatGuard(), $this->settings_repository() ) ),
 			new LocationPreviewController( new LocationPreview( new TableLinkLocationRepository(), new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ) ), $display, $this->settings_repository(), $box_assets, $icon_css ),

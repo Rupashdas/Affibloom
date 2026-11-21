@@ -64,12 +64,27 @@ test.describe( 'C3 Google Analytics click events', () => {
 		setSettings( { ga_click_tracking: true } ); // the live site's value
 	} );
 
-	test( 'AC3 Affibloom adds no Google Analytics script', async ( { page } ) => {
-		setSettings( { ga_click_tracking: true } );
+	// AC3 (replaced by C6) and AC10 (C3C; R11).
+	test( 'AC3 with no ID, Affibloom prints no Google Analytics script', async ( { page } ) => {
+		setSettings( { ga_tracking_id: '', ga_click_tracking: true } );
 		const id = createProduct( { name: unique( 'C3 AC3' ) } );
 		await page.goto( newPostWith( boxBlock( id ) ) );
 		await expect( page.locator( '.affibloom-box' ) ).toBeVisible(); // Affibloom is on the page
-		await expect( page.locator( 'script[id^="affibloom"][src*="googletagmanager"]' ) ).toHaveCount( 0 );
+		await expect( page.locator( 'script[src*="googletagmanager.com/gtag/js"]' ) ).toHaveCount( 0 );
+	} );
+
+	test( 'AC10 with Click Tracking on and IDs, gtag.js loads for the first ID and every ID is configured', async ( { page } ) => {
+		setSettings( { ga_tracking_id: 'G-FIRST1, G-SECOND2', ga_click_tracking: true, ga_pageview: false, ga_anonymize_ip: true } );
+		await page.goto( newPostWith( '<p>Any page.</p>' ) );
+		await expect( page.locator( 'script[src*="googletagmanager.com/gtag/js?id=G-FIRST1"]' ) ).toHaveCount( 1 );
+		const configs = await page.evaluate( () =>
+			( ( window as unknown as { dataLayer: unknown[] } ).dataLayer ).map( ( entry ) => Array.from( entry as ArrayLike< unknown > ) ).filter( ( entry ) => 'config' === entry[ 0 ] )
+		);
+		expect( configs ).toEqual( [
+			[ 'config', 'G-FIRST1', { send_page_view: false, anonymize_ip: true } ],
+			[ 'config', 'G-SECOND2', { send_page_view: false, anonymize_ip: true } ],
+		] );
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false, ga_anonymize_ip: false } );
 	} );
 
 	// AC8, AC9 (C3B; R9, R10, D4): Google Tag Manager's dataLayer, then analytics.js.

@@ -82,7 +82,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task C3A: Settings → General — the Google Analytics section
 - [x] Task C3B: Clicks send Affibloom's Google Analytics events
-- [ ] Task C3C: Load gtag.js for the configured IDs (decision C6: built)
+- [x] Task C3C: Load gtag.js for the configured IDs (decision C6: built)
 
 ### F19 — the Dashboard's sorting mechanism
 
@@ -698,10 +698,15 @@ with Pageview and IP Anonymization; otherwise nothing is printed.
 
 **Files:** the above; `C3.spec.ts` AC10 (AC3 rewritten to "with no ID, no GA script").
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: GaTag.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Load Google Analytics for the configured IDs".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: GaTag.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Load Google Analytics for the configured IDs".
+
+*Note (2026-11-21):* `Interface\Front\GaTag` enqueues on `wp_enqueue_scripts` (footer, `defer`) instead of printing on
+`wp_footer`, with the configuration as its inline "before" script. Local's pages also carry the theme's own GA tag and
+Lasso's (Lasso is active here): after cutover only Affibloom's remains, so the client should keep GA set in one place.
+Checked: phpcs, analyse; on Local GA on: `gtag.js?id=G-TEST123` and its config; off: nothing.
 
 ---
 
