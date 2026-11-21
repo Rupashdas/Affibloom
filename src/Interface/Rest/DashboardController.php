@@ -226,7 +226,8 @@ final class DashboardController implements Module {
 							'listing'   => $alerts,
 							'groups_of' => $this->groups->for_products( $ids ),
 							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
-							'locations' => $this->locations,
+							'locations' => $this->locations?->of( $ids ),
+							'known'     => $this->locations?->known() ?? true,
 						)
 					),
 					'term'      => $term->text(),

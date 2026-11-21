@@ -90,7 +90,9 @@ final class DashboardScreen {
 				'args'       => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts ),
 				'alerts_of'  => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 				'listing'    => $alerts,
-				'locations'  => $this->locations,
+				// The Locations column (Task 36A): each row's count, and whether a 0 is known yet (the clock).
+				'locations'  => $this->locations?->of( $ids ),
+				'known'      => $this->locations?->known() ?? true,
 				'counts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one ),
 				'library'    => $this->products->count(),
 				'notice'     => $this->notice->message(),

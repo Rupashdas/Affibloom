@@ -4,7 +4,7 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, locations?: \Affibloom\Application\Locations\LocationCounts|null} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, locations?: array<int, int>|null, known?: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -105,12 +105,6 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 				</tr>
 			</thead>
 			<tbody>
-				<?php
-				// The Locations column (F12 L1-L3; Task 36A): one count query for the page.
-				$locations       = $view['locations'] ?? null;
-				$location_counts = null === $locations ? array() : $locations->of( array_map( static fn( $product ): int => (int) $product->id, $products->items ) );
-				$locations_known = null === $locations || $locations->known();
-				?>
 				<?php foreach ( $products->items as $product ) : ?>
 					<?php
 					$this->render(
@@ -120,8 +114,8 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 							'groups'    => $view['groups_of'][ (int) $product->id ] ?? array(),
 							'link'      => $view['links_of'][ (int) $product->id ] ?? $product->url->value(),
 							'alert'     => $view['alerts_of'][ (int) $product->id ] ?? null,
-							'locations' => null === $locations ? null : ( $location_counts[ (int) $product->id ] ?? 0 ),
-							'known'     => $locations_known,
+							'locations' => isset( $view['locations'] ) ? ( $view['locations'][ (int) $product->id ] ?? 0 ) : null,
+							'known'     => $view['known'] ?? true,
 						)
 					);
 					?>
