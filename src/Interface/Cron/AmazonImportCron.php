@@ -68,7 +68,7 @@ final class AmazonImportCron implements Module {
 		try {
 			$batch = $this->import->run(
 				self::BATCH,
-				fn(): bool => $this->on(),
+				fn(): bool => $this->still_on(),
 				static function ( int $done, int $total ): void {
 					// "Current batch: x / y" while the run goes (R29, R31; Task AM4).
 					update_option(
@@ -127,9 +127,21 @@ final class AmazonImportCron implements Module {
 	}
 
 	/**
-	 * Whether Auto-Monetization is on, read afresh.
+	 * Whether Auto-Monetization is on.
 	 */
 	private function on(): bool {
 		return $this->settings->get()->bool( 'auto_monetize_amazon' );
+	}
+
+	/**
+	 * Whether Auto-Monetization is still on, asked before each link (D23): read from the database, past the settings
+	 * this request loaded and WordPress's cache of autoloaded options, so a switch-off saved meanwhile stops the run.
+	 */
+	private function still_on(): bool {
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( OptionSettingsRepository::OPTION, 'options' );
+		$saved = get_option( OptionSettingsRepository::OPTION, array() );
+
+		return is_array( $saved ) && ! empty( $saved['auto_monetize_amazon'] );
 	}
 }
