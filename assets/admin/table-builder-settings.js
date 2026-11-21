@@ -113,15 +113,52 @@
 		previewButton.setAttribute( 'aria-pressed', previewing ? 'true' : 'false' );
 		previewButton.querySelector( '[data-preview-text]' ).textContent = previewing ? previewButton.dataset.editLabel : previewButton.dataset.previewLabel;
 	};
+	// While the preview loads (the route, then the frame's stylesheets), a skeleton of the table holds its place
+	// (design system, "Skeleton"): a row per product for Horizontal, a column per product for Vertical, at most five, as
+	// tall as the last preview so a redraw does not jump.
+	var skeleton = function () {
+		var shape = previewBox.querySelector( '.affibloom-table-skeleton' );
+		if ( ! shape ) {
+			shape = document.createElement( 'div' );
+			shape.setAttribute( 'aria-hidden', 'true' );
+			previewBox.appendChild( shape );
+		}
+		var across = 'row' === page.getAttribute( 'data-table-style' );
+		var count = Math.min( 5, Math.max( 1, tb.region.querySelectorAll( '.affibloom-table-cell--head' ).length ) );
+		var cell = across
+			? '<span class="affibloom-skeleton affibloom-table-skeleton__picture"></span><span class="affibloom-table-skeleton__lines"><span class="affibloom-skeleton affibloom-skeleton--title"></span><span class="affibloom-skeleton affibloom-skeleton--line"></span><span class="affibloom-skeleton affibloom-skeleton--short affibloom-skeleton--line"></span></span><span class="affibloom-skeleton affibloom-skeleton--button"></span>'
+			: '<span class="affibloom-skeleton affibloom-table-skeleton__badge"></span><span class="affibloom-skeleton affibloom-table-skeleton__picture"></span><span class="affibloom-skeleton affibloom-skeleton--title"></span><span class="affibloom-skeleton affibloom-skeleton--line"></span><span class="affibloom-skeleton affibloom-skeleton--short affibloom-skeleton--line"></span><span class="affibloom-skeleton affibloom-skeleton--button"></span>';
+		shape.className = 'affibloom-table-skeleton affibloom-table-skeleton--' + ( across ? 'row' : 'column' );
+		shape.style.setProperty( '--affibloom-skeleton-count', String( count ) );
+		shape.innerHTML = new Array( count + 1 ).join( '<span class="affibloom-table-skeleton__item">' + cell + '</span>' );
+		var frame = previewBox.querySelector( 'iframe.affibloom-preview-frame' );
+		shape.style.minHeight = frame && frame.offsetHeight ? frame.offsetHeight + 'px' : '';
+		previewBox.classList.add( 'is-loading' );
+		previewBox.setAttribute( 'aria-busy', 'true' );
+	};
+	var loaded = function () {
+		previewBox.classList.remove( 'is-loading' );
+		previewBox.removeAttribute( 'aria-busy' );
+	};
+	var asked = 0;
 	var preview = function () {
 		page.classList.add( 'is-previewing' );
 		previewBox.hidden = false;
 		previewLabel();
+		skeleton();
+		var mine = ++asked;
 		wp.apiFetch( { path: tb.path + '/preview' } ).then( function ( answer ) {
-			if ( previewing ) {
-				window.affibloomBoxFrame( previewBox, answer.data, previewBox.dataset.frameTitle, function () {} );
+			if ( previewing && mine === asked ) {
+				window.affibloomBoxFrame( previewBox, answer.data, previewBox.dataset.frameTitle, function () {
+					if ( mine === asked ) {
+						loaded();
+					}
+				} );
 			}
 		} ).catch( function ( failure ) {
+			if ( mine === asked ) {
+				loaded();
+			}
 			tb.say( tb.words( failure ) );
 		} );
 	};

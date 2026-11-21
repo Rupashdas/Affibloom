@@ -3363,6 +3363,20 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 /* Task T15 (F25 R54): Preview Table shows the reader's table in its own frame; the builder and the Add buttons hide. */
 .affibloom-table-preview { margin-bottom: 16px; padding: 16px; overflow: hidden; }
 .affibloom-table-preview .affibloom-preview-frame { display: block; width: 100%; border: 0; }
+/* The preview's skeleton while it loads: the frame stays hidden until it is drawn, the shapes hold its place. */
+.affibloom-table-skeleton { display: none; }
+.affibloom-table-preview.is-loading .affibloom-preview-frame { display: none; }
+.affibloom-table-preview.is-loading .affibloom-table-skeleton { display: grid; box-sizing: border-box; gap: 12px; padding: 8px 0; }
+.affibloom-table-skeleton--column { grid-template-columns: repeat(var(--affibloom-skeleton-count), minmax(0, 1fr)); }
+.affibloom-table-skeleton__item { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); }
+.affibloom-table-skeleton--column .affibloom-table-skeleton__item .affibloom-skeleton--title,
+.affibloom-table-skeleton--column .affibloom-table-skeleton__item .affibloom-skeleton--line { width: 90%; }
+.affibloom-table-skeleton--row .affibloom-table-skeleton__item { flex-direction: row; align-items: center; gap: 16px; }
+.affibloom-table-skeleton__badge { width: 88px; height: 22px; border-radius: var(--affibloom-radius-full); }
+.affibloom-table-skeleton__picture { width: 100%; height: 120px; border-radius: var(--affibloom-radius-control); }
+.affibloom-table-skeleton--row .affibloom-table-skeleton__picture { flex: none; width: 96px; height: 72px; }
+.affibloom-table-skeleton__lines { display: grid; flex: 1; gap: 8px; min-width: 0; }
+@media (max-width: 600px) { .affibloom-table-skeleton--column { grid-template-columns: minmax(0, 1fr); } }
 .is-previewing .affibloom-table-grid-scroll,
 .is-previewing .affibloom-table-builder .affibloom-empty,
 .is-previewing [data-table-action^="add-"] { display: none; }
