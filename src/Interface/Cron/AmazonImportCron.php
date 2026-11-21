@@ -93,15 +93,21 @@ final class AmazonImportCron implements Module {
 	}
 
 	/**
-	 * The settings were saved: Auto-Monetization switched off stops the import (D23).
+	 * The settings were saved (Task AM3): Auto-Monetization switched on starts the import at once (D18), switched off
+	 * stops it (D23).
 	 *
 	 * @param mixed $stored The option before.
 	 * @param mixed $saved  The option now.
 	 */
 	public function switched( $stored, $saved ): void {
-		unset( $stored );
-		if ( is_array( $saved ) && array_key_exists( 'auto_monetize_amazon', $saved ) && ! $saved['auto_monetize_amazon'] ) {
+		if ( ! is_array( $saved ) || ! array_key_exists( 'auto_monetize_amazon', $saved ) ) {
+			return;
+		}
+		$was = is_array( $stored ) && ! empty( $stored['auto_monetize_amazon'] );
+		if ( ! $saved['auto_monetize_amazon'] ) {
 			$this->schedule->stop();
+		} elseif ( ! $was ) {
+			$this->schedule->start_now();
 		}
 	}
 

@@ -133,6 +133,9 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 									)
 								);
 								?>
+								<?php // R22 (Task AM3): what amazon-auto-monetize.js says when there is no tracking ID. ?>
+								<p class="affibloom-field__error" id="affibloom-amazon-auto-error" role="alert" hidden
+									data-needs-tag="<?php esc_attr_e( 'Tracking ID must be set to use Auto-Amazon.', 'affibloom' ); ?>"></p>
 							</div>
 						</div>
 
@@ -195,6 +198,7 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 		)
 	);
 	$this->render( 'admin/partials/toast-template' );
+	$this->render( 'admin/partials/amazon-enable-dialog' );
 	?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

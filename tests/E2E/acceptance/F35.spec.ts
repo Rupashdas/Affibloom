@@ -71,6 +71,41 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		expect( wp( 'post', 'get', id, '--field=post_content' ) ).toBe( content );
 	} );
 
+	// AC5 (AM3; R22, R23, D17, D18).
+	test( 'AC5 the switch asks for a tracking ID, turns Multiple IDs on, offers a backup, and Save starts the import', async ( { page, context } ) => {
+		setSettings( { auto_monetize_amazon: false, multiple_tracking_ids: false, tracking_id: 'vbvault-20' } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
+		const toggle = page.getByLabel( 'Enable Amazon Auto-Monetization' );
+		const multiple = page.getByLabel( 'Allow Multiple Tracking IDs' );
+		const tag = page.getByLabel( 'Tracking ID for This Site' );
+		const dialog = page.getByRole( 'dialog', { name: 'Enable Auto-Amazon' } );
+
+		await tag.fill( '' );
+		await toggle.check( { force: true } );
+		await expect( page.getByText( 'Tracking ID must be set to use Auto-Amazon.' ) ).toBeVisible();
+		await expect( toggle ).not.toBeChecked();
+
+		await tag.fill( 'vbvault-20' );
+		await toggle.focus();
+		await page.keyboard.press( 'Space' );
+		await expect( dialog ).toContainText( 'We recommend creating a backup first.' );
+		await expect( multiple ).toBeChecked();
+		const guide = context.waitForEvent( 'page' );
+		await dialog.getByRole( 'button', { name: 'Create a Backup First' } ).click();
+		expect( ( await guide ).url() ).toContain( 'backup' );
+		await expect( toggle ).not.toBeChecked();
+		await expect( multiple ).not.toBeChecked();
+
+		await toggle.check( { force: true } );
+		await dialog.getByRole( 'button', { name: 'Enable' } ).click();
+		await expect( toggle ).toBeChecked();
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByText( 'Settings saved.' ) ).toBeVisible();
+		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) <= time() + 5 ? 'now' : 'later';" ) ).toBe( 'now' );
+		setSettings( { auto_monetize_amazon: false } );
+		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );
+	} );
+
 	test( 'AC8 with Auto-Monetization off the event is not scheduled and a run does nothing', () => {
 		setSettings( { auto_monetize_amazon: false } );
 		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );

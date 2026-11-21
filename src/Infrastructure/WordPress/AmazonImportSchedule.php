@@ -49,6 +49,14 @@ final class AmazonImportSchedule {
 	}
 
 	/**
+	 * Schedules it with its first run now (switched on, D18; Task AM3).
+	 */
+	public function start_now(): void {
+		$this->stop();
+		wp_schedule_event( time(), self::INTERVAL, self::HOOK );
+	}
+
+	/**
 	 * Unschedules it.
 	 */
 	public function stop(): void {

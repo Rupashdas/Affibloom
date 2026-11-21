@@ -114,6 +114,10 @@ final class AdminAssets implements Module {
 			if ( '' === $tab || 'general' === $tab ) {
 				wp_enqueue_script( 'affibloom-general-settings', $this->plugin_url . 'assets/admin/general-settings.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			}
+			// Amazon: the Auto-Monetization switch's checks and "Enable Auto-Amazon" (F35 R22; Task AM3).
+			if ( 'amazon' === $tab ) {
+				wp_enqueue_script( 'affibloom-amazon-auto-monetize', $this->plugin_url . 'assets/admin/amazon-auto-monetize.js', array( 'affibloom-admin' ), $this->version, true );
+			}
 		}
 		// The icon picker on button texts: Settings → Display and the product page (F28, Task 14G).
 		if ( 'display' === $tab || str_contains( $hook_suffix, ProductScreen::SLUG ) ) {

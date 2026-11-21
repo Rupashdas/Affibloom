@@ -117,7 +117,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
 - [x] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
 - [x] Task AM2: Amazon short links — the import's short-link branch and the map
-- [ ] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
+- [x] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
 - [ ] Task AM4: The Amazon import notice — every Affibloom page
 - [ ] Task AM5: The import status card, the Dashboard notice and the General stats
 - [ ] Task AM6: Tracking IDs found in posts join the whitelist — `save_post` through F21
@@ -1519,11 +1519,17 @@ re-runs the check.
 `src/Interface/Admin/AdminAssets.php`, `src/Application/Settings/SettingsService.php`, `src/Plugin.php`; tests
 `tests/Unit/Application/SettingsServiceAmazonScheduleTest.php`, `tests/E2E/acceptance/F35.spec.ts` (AC5, AC8).
 
-- [ ] **Step 1: Failing tests.** AC5's four paths with the keyboard and the mouse; AC8's stop (`wp cron event list`).
-- [ ] **Step 2: The after-save hook.**
-- [ ] **Step 3: Script, dialog, message.**
-- [ ] **Step 4: Run and look** at 1280 and 375 px; dialog focus and Esc.
-- [ ] **Step 5: Commit** — "Guard and schedule Amazon Auto-Monetization from its switch".
+- [x] **Step 1: Failing tests.** AC5's four paths with the keyboard and the mouse; AC8's stop (`wp cron event list`).
+- [x] **Step 2: The after-save hook.**
+- [x] **Step 3: Script, dialog, message.**
+- [x] **Step 4: Run and look** at 1280 and 375 px; dialog focus and Esc.
+- [x] **Step 5: Commit** — "Guard and schedule Amazon Auto-Monetization from its switch".
+
+*Note:* the start and stop live in `AmazonImportCron::switched()` (the settings option's update hook, as AM1's stop),
+not a SettingsService hook; on → `AmazonImportSchedule::start_now()` (first run now, D18), off → `stop()`. D18's
+"rebuild when the index is empty" is not added (the site's index is never empty; F21's own triggers cover a fresh
+install). The error line's words sit on its element, not in `Messages`. Checked: unit (on/off/unchanged); on Local the
+four switch paths in a browser at 1280 px, without saving (saving it on would start a real import here).
 
 ---
 
