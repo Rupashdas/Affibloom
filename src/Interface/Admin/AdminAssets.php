@@ -90,7 +90,8 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, GroupScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			// A group's Links tab: its order, Remove and "Add to Group" (Task G4); it stops at once on any other page.
-			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
+			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array( 'wp-i18n' ), $this->version, true );
+			wp_set_script_translations( 'affibloom-drag-rows', 'affibloom' );
 			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-group-members', $this->plugin_url . 'assets/admin/group-members.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows', 'affibloom-product-search' ), $this->version, true );
 		}
@@ -132,7 +133,8 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
 			wp_enqueue_media();
 			// Buttons, custom fields and features are put in order by dragging (Task FL5; the user, 2026-11-16).
-			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
+			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array( 'wp-i18n' ), $this->version, true );
+			wp_set_script_translations( 'affibloom-drag-rows', 'affibloom' );
 			wp_enqueue_script( 'affibloom-product', $this->plugin_url . 'assets/admin/product.js', array( 'affibloom-admin', 'affibloom-drag-rows' ), $this->version, true );
 			// Custom fields: the rows and the "Add Field" dialog (Task 14C).
 			wp_enqueue_script( 'affibloom-field-dialog', $this->plugin_url . 'assets/admin/field-dialog.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );

@@ -15,6 +15,28 @@
 
 	var SLIDE = 150; // ms, how long a row takes to slide aside or into its slot.
 
+	/**
+	 * Says a keyboard move's new place to screen readers, in one polite live region for the page (U3; Task 37C: a move
+	 * by Arrow Up or Down was silent).
+	 *
+	 * @param {string} words What to say.
+	 */
+	var announce = function ( words ) {
+		var region = document.getElementById( 'affibloom-move-status' );
+		if ( ! region ) {
+			region = document.createElement( 'p' );
+			region.id = 'affibloom-move-status';
+			region.className = 'screen-reader-text';
+			region.setAttribute( 'role', 'status' );
+			region.setAttribute( 'aria-live', 'polite' );
+			document.body.appendChild( region );
+		}
+		region.textContent = '';
+		window.setTimeout( function () {
+			region.textContent = words;
+		}, 50 );
+	};
+
 	var still = function () {
 		return window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 	};
@@ -189,6 +211,13 @@
 				list.insertBefore( row, up ? other : other.nextElementSibling );
 			} );
 			grip.focus(); // Moving the row in the page can drop the focus.
+			var moved = options.movable();
+			announce( window.wp.i18n.sprintf(
+				/* translators: 1: the row's new position, 2: the number of rows. */
+				window.wp.i18n.__( 'Moved to position %1$d of %2$d.', 'affibloom' ),
+				moved.indexOf( row ) + 1,
+				moved.length
+			) );
 			options.dropped();
 		} );
 	};

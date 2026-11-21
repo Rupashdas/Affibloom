@@ -77,7 +77,7 @@ the text below as a deviation in `progress.md`.
 
 - [x] Task 37A: Security review
 - [x] Task 37B: Performance review
-- [ ] Task 37C: Accessibility review
+- [x] Task 37C: Accessibility review
 - [ ] Task 37D: Compatibility review
 
 ### Uninstall and export (roadmap 8.5; F37 TL5, F9)
@@ -375,7 +375,7 @@ New code appears only as fixes, each with a test.
 > Order note: ON5-ON9 come later in this phase. 37C is therefore run after them, or re-run for the wizard, palette,
 > tour and education boxes when they land; the review document lists what was checked when.
 
-- [ ] **Step 1: Failing test.** `tests/E2E/a11y.spec.ts` runs
+- [x] **Step 1: Failing test.** `tests/E2E/a11y.spec.ts` runs
   `new AxeBuilder( { page } ).withTags( [ 'wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa' ] ).analyze()` and expects
   `violations` to be `[]` on:
   - the Dashboard, with the add modal open, the quick edit open, the filters panel open, an Alert tab, and the
@@ -388,7 +388,7 @@ New code appears only as fixes, each with a test.
   - the editor with the block picker open, and a guide with boxes.
 
   Expected: red on the first screen with a violation.
-- [ ] **Step 2: By hand, with only the keyboard.** Record each as checked:
+- [x] **Step 2: By hand, with only the keyboard.** Record each as checked:
   - add a product, edit it, save, delete it, insert a box;
   - add a product to a group and remove it with the **group picker**;
   - **drag-and-move controls** (G4 products in a group, FL5 field order, T9 table columns and rows): each has a
@@ -410,17 +410,22 @@ New code appears only as fixes, each with a test.
   - modals trap focus and return it on close;
   - toasts are announced (`role="status"`);
   - help text is reachable by keyboard and read by a screen reader on every screen (U3).
-- [ ] **Step 3: Contrast.** Check the box's colour contrast with the site's real colours. Report any shortfall to the
+- [x] **Step 3: Contrast.** Check the box's colour contrast with the site's real colours. Report any shortfall to the
   user; colours are the client's choice. Check the admin screens' contrast against the ratios stated in
   `docs/ui/design-system.md` (ADR-8): text, controls, focus rings, the notice tones and the step bar; a shortfall
   there is ours to fix. Check 200% zoom and 375 px width on the Dashboard, the product page and the wizard.
-- [ ] **Step 4: Fix,** each with a test (the failing axe or keyboard case first).
-- [ ] **Step 5: Run and look.** `npx playwright test a11y` green; one pass with a screen reader (NVDA on this machine,
+- [x] **Step 4: Fix,** each with a test (the failing axe or keyboard case first).
+- [x] **Step 5: Run and look.** `npx playwright test a11y` green; one pass with a screen reader (NVDA on this machine,
   if installed; otherwise record that no screen reader was available and what was checked instead) over the product
   page and the wizard.
-- [ ] **Step 6: Commit:** "Review the accessibility of every admin screen and the box
+- [x] **Step 6: Commit:** "Review the accessibility of every admin screen and the box
 
   Findings and their fixes are recorded in docs/reviews/accessibility.md."
+
+*Note (2026-11-22):* run before ON5-ON9 (the order note): the wizard, tour, palette and education boxes are added to
+`a11y.spec.ts` by those tasks. Fixed A1-A7 (24 px targets, the price cell's name, the status contrast, keyboard moves
+announced); A8, the box's button colours (2.44:1), is the user's call; WordPress's TinyMCE and the box previews are left
+out of axe with their reasons. No NVDA on this machine (`docs/reviews/accessibility.md`).
 
 ---
 

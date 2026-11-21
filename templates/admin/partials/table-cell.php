@@ -71,7 +71,13 @@ foreach ( $view['order'] as $field_id ) :
 				<span id="<?php echo esc_attr( $input ); ?>" class="affibloom-table-field__value"><?php echo '' !== $view['amazon'] ? wp_kses_post( $view['amazon'] ) : '—'; ?></span>
 				<span class="affibloom-table-field__note"><?php esc_html_e( 'Amazon prices are updated automatically', 'affibloom' ); ?></span>
 			<?php elseif ( FieldType::Label === $field->type ) : ?>
+				<?php // Named "Edit <field>" and then its value, read from the cell itself, so an empty cell still has a name (Task 37C). ?>
+				<span id="<?php echo esc_attr( $input . '-label' ); ?>" class="screen-reader-text">
+					<?php /* translators: %s: the field's name. */ ?>
+					<?php echo esc_html( sprintf( __( 'Edit %s', 'affibloom' ), $field->name ) ); ?>
+				</span>
 				<div id="<?php echo esc_attr( $input ); ?>" class="affibloom-table-field__price" role="button" tabindex="0" data-table-price
+					aria-labelledby="<?php echo esc_attr( $input . '-label ' . $input ); ?>"
 					data-placeholder="<?php esc_attr_e( 'N/A', 'affibloom' ); ?>"><?php echo wp_kses_post( $value ); ?></div>
 			<?php elseif ( FieldType::Editor === $field->type ) : ?>
 				<div class="affibloom-table-field__description">

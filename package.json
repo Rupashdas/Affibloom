@@ -14,6 +14,7 @@
 		"lint:js": "wp-scripts lint-js blocks assets/editor"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.14.0",
 		"@playwright/test": "^1.65.0",
 		"@wordpress/env": "^10.0.0",
 		"@wordpress/scripts": "^37.1.0"

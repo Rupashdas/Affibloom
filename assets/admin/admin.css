@@ -1103,24 +1103,44 @@
  * focus show it next to the button. A hidden tip takes no space, so it can never widen the page.
  */
 .affibloom-help { position: relative; display: inline-flex; }
+/*
+ * The button is a 24px target (WCAG 2.2 target size, Task 37C) that takes the 18px circle's place: the -3px margin keeps
+ * the layout of an 18px button, and the circle is drawn by ::before.
+ */
 .affibloom-help__button {
+	position: relative;
+	z-index: 0;
 	display: grid;
 	place-items: center;
-	width: 18px;
-	height: 18px;
+	width: 24px;
+	height: 24px;
+	margin: -3px;
 	padding: 0;
-	border: 1px solid var(--affibloom-control-line);
+	border: 0;
 	border-radius: var(--affibloom-radius-full);
-	background: var(--affibloom-white);
+	background: transparent;
 	color: var(--affibloom-ink-600);
 	font: 600 11px/1 var(--affibloom-font);
 	cursor: help;
-	transition: color var(--affibloom-ease), border-color var(--affibloom-ease);
+	transition: color var(--affibloom-ease);
+}
+.affibloom-help__button::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 3px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-white);
+	transition: border-color var(--affibloom-ease);
 }
 .affibloom-help__button:hover,
 .affibloom-help.is-open .affibloom-help__button {
-	border-color: var(--affibloom-brand-600);
 	color: var(--affibloom-brand-600);
+}
+.affibloom-help__button:hover::before,
+.affibloom-help.is-open .affibloom-help__button::before {
+	border-color: var(--affibloom-brand-600);
 }
 .affibloom-help__text {
 	position: absolute;
@@ -1386,18 +1406,19 @@
 	display: block;
 	overflow: hidden;
 	color: var(--affibloom-ink-900);
-	font: 600 15px/22px var(--affibloom-font);
+	/* 24px lines for the name and the URL under it: two links a target apart (WCAG 2.2 target size, Task 37C). */
+	font: 600 15px/24px var(--affibloom-font);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 .affibloom-admin .affibloom-row__url {
 	display: block;
 	max-width: 100%;
-	margin-top: 2px;
+	margin-top: 0;
 	overflow: hidden;
 	color: var(--affibloom-ink-600);
 	font-size: 13px;
-	line-height: 18px;
+	line-height: 24px;
 	text-decoration: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -1614,14 +1635,29 @@
 	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5 8.5 14 15 6.5'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .affibloom-admin .affibloom-pill:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
-.affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove) .affibloom-pill { padding-right: 32px; }
+/*
+ * A saved view with its ×: the item draws the pill and holds the link and the × side by side, so the two targets do not
+ * overlap (WCAG 2.2 target size, Task 37C); it looks as one pill with the × at its end.
+ */
+.affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove) {
+	box-sizing: border-box;
+	height: 32px;
+	padding-right: 3px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: var(--affibloom-radius-full);
+	background: var(--affibloom-white);
+	transition: border-color var(--affibloom-ease);
+}
+.affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove) .affibloom-pill { height: 30px; padding-right: 4px; border: 0; background: transparent; }
+.affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove):has(.affibloom-pill:hover) { border-color: var(--affibloom-line-strong); }
+.affibloom-admin .affibloom-views__item:has(.affibloom-pill__remove):has(.affibloom-pill[aria-current="true"]) { border-color: var(--affibloom-brand-line); background: var(--affibloom-brand-50); }
 .affibloom-admin .affibloom-pill__remove {
-	position: absolute;
-	right: 4px;
+	flex: none;
 	display: grid;
 	place-items: center;
-	width: 22px;
-	height: 22px;
+	/* 24px: WCAG 2.2 target size (Task 37C). */
+	width: 24px;
+	height: 24px;
 	padding: 0;
 	border: 0;
 	border-radius: var(--affibloom-radius-full);
@@ -3190,12 +3226,13 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table--tables .affibloom-col-clone { width: 100px; text-align: center; }
 .affibloom-table--tables th .affibloom-help { margin-left: 4px; vertical-align: middle; }
 .affibloom-table-products { margin: 0; padding: 0; list-style: none; }
-.affibloom-table-products li { margin: 0 0 2px; }
-.affibloom-admin .affibloom-table-products a { color: var(--affibloom-brand-700); text-decoration: none; }
+.affibloom-table-products li { margin: 0; }
+/* A 24px line per link: WCAG 2.2 target size (Task 37C). */
+.affibloom-admin .affibloom-table-products a { display: inline-block; min-height: 24px; line-height: 24px; color: var(--affibloom-brand-700); text-decoration: none; }
 .affibloom-admin .affibloom-table-products a:hover { text-decoration: underline; }
 .affibloom-table-products__none { color: var(--affibloom-ink-500); }
 /* Task T3 (F25 R13-R16): the builder's settings row (Name, Options, Style, Theme), its status, its actions. */
-.affibloom-table-page__status { color: var(--affibloom-ink-500); font: 500 13px/20px var(--affibloom-font); }
+.affibloom-table-page__status { color: var(--affibloom-ink-600); font: 500 13px/20px var(--affibloom-font); }
 .affibloom-table-settings { display: grid; grid-template-columns: minmax(200px, 2fr) minmax(220px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr); gap: 16px 24px; align-items: start; padding: 20px 24px; }
 .affibloom-table-settings__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .affibloom-table-settings .affibloom-toggle-row { padding: 2px 0; }
