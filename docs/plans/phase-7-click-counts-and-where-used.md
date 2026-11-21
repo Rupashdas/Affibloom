@@ -64,7 +64,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 36A: The Dashboard's Locations column — count, sort, clock
 - [x] Task 36B: The product page's Locations tab
 - [x] Task 36C: Link with Context preview and the Clicks column
-- [ ] Task 36D: The Placements filter
+- [x] Task 36D: The Placements filter
 - [ ] Task 36E: Deleting a product in use is blocked
 
 ### F12 — Clicks
@@ -320,11 +320,16 @@ route on Local (box, grid, text link, 404), both previews at 1280 px.
 
 **Files:** `DashboardUrl`, `SavedViews`, the repository condition, `filters-panel.php`, `dashboard.js`; `tests/E2E/acceptance/F12.spec.ts` (AC24), the F19 filter specs rerun.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Filter.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** —
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Filter.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** —
   "Filter products by whether they are in content".
+
+*Note (2026-11-21):* `Domain\Product\Placement` (Lasso's values) rides next to the Group filter through the list
+route, `DashboardUrl` (`placements=`), the alert tabs' counts, the CSV export and saved views (`filters.placements`).
+The SQL is `TableLinkLocationRepository::used_sql()`, the count's rule as EXISTS. Checked: unit, phpcs, analyse, the
+route on Local (8 = 3 in content + 5 not), the panel at 1280 px.
 
 ---
 

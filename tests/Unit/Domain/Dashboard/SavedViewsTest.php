@@ -76,6 +76,13 @@ final class SavedViewsTest extends TestCase {
 		self::assertTrue( $view->shows( 'shoes', LinkKind::Amazon, 25 ) );
 		self::assertFalse( $view->shows( 'shoes', LinkKind::All, 25 ) );
 		self::assertFalse( $view->shows( 'shoes', LinkKind::Amazon, 10 ) );
+		self::assertFalse( $view->shows( 'shoes', LinkKind::Amazon, 25, 0, '', \Affibloom\Domain\Product\Placement::InContent ) );
+	}
+
+	public function test_placements_accept_lassos_values_and_nothing_else(): void {
+		self::assertSame( \Affibloom\Domain\Product\Placement::InContent, \Affibloom\Domain\Product\Placement::from_input( 'has_placements' ) );
+		self::assertSame( \Affibloom\Domain\Product\Placement::NotInContent, \Affibloom\Domain\Product\Placement::from_input( 'no_placements' ) );
+		self::assertSame( \Affibloom\Domain\Product\Placement::Any, \Affibloom\Domain\Product\Placement::from_input( 'anything' ) );
 	}
 
 	public function test_link_kind_accepts_lassos_values_and_nothing_else(): void {

@@ -151,6 +151,33 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * "This product is used somewhere" as SQL (F12 L1, D20; the Placements filter, Task 36D): a row tied or assigned to
+	 * it, or a group display of one of its groups. Written for the indexes: product_id and assigned_product_id each.
+	 *
+	 * @param string $product The SQL expression of the product's ID (a column of the outer query).
+	 */
+	public static function used_sql( string $product ): string {
+		global $wpdb;
+
+		$table = $wpdb->prefix . self::TABLE;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product is a column of the caller's query, never input.
+		$sql = $wpdb->prepare(
+			"( EXISTS ( SELECT 1 FROM %i AS afl_t WHERE afl_t.assigned_product_id = {$product} OR ( afl_t.assigned_product_id = 0 AND afl_t.product_id = {$product} ) )
+				OR EXISTS ( SELECT 1 FROM %i AS afl_g JOIN %i AS afl_tt ON afl_tt.taxonomy = %s AND afl_g.display_ref = CONCAT('group:', afl_tt.term_id)
+					JOIN %i AS afl_tr ON afl_tr.term_taxonomy_id = afl_tt.term_taxonomy_id WHERE afl_tr.object_id = {$product} ) )",
+			$table,
+			$table,
+			$wpdb->term_taxonomy,
+			GroupTaxonomy::NAME,
+			$wpdb->term_relationships
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $sql;
+	}
+
+	/**
 	 * How many places each product is used in (F12 L1, D20; the Dashboard's column, Task 36A; the export's
 	 * location_count, Task 31D): its rows, an editor's assignment first, plus the group displays (`display_ref`
 	 * "group:<term id>") whose group holds it, read from the group's members now (F21 D2). A display tied to the product

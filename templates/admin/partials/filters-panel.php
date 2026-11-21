@@ -1,32 +1,38 @@
 <?php
 /**
  * Lasso's Filters button and panel (dashboard.php, lasso-dashboard-filters-panel), with Lasso's fields, options,
- * labels and help text. Link type works (Task 13E); Group, Placements and Comparison table are there and say
- * "Coming soon" until the Groups area, the content link index and the Tables area bring their data.
+ * labels and help text. Link type (Task 13E), Group (Task G5) and Placements (Task 36D) work; Comparison table is there
+ * and says "Coming soon" until the Tables area brings its data.
  *
  * Lasso opens the panel beside the table; here it is a card under the button, because eight columns in a 1320px
  * column leave no room for a 280px side panel without squeezing the Link Name.
  *
  * @package Affibloom
- * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>, args: array<string, string>} $view
+ * @var array{link_kind: \Affibloom\Domain\Product\LinkKind, group: int, group_list: list<\Affibloom\Domain\Group\Group>, args: array<string, string>, placement?: \Affibloom\Domain\Product\Placement} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Domain\Dashboard\SavedViews;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 
 $link_types = array(
 	LinkKind::All->value       => __( 'All types', 'affibloom' ),
 	LinkKind::Amazon->value    => __( 'Amazon', 'affibloom' ),
 	LinkKind::NonAmazon->value => __( 'Non-Amazon', 'affibloom' ),
 );
+$placements = array(
+	Placement::Any->value          => __( 'Any placement', 'affibloom' ),
+	Placement::InContent->value    => __( 'In content', 'affibloom' ),
+	Placement::NotInContent->value => __( 'Not in content', 'affibloom' ),
+);
+$placement  = $view['placement'] ?? Placement::Any;
 $pending    = array(
 	// [ id, label, Lasso's first option ].
-	array( 'affibloom-filter-placements', __( 'Placements', 'affibloom' ), __( 'Any placement', 'affibloom' ) ),
 	array( 'affibloom-filter-table', __( 'Comparison table', 'affibloom' ), __( 'Any', 'affibloom' ) ),
 );
-$active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['group'] ? 0 : 1 );
+$active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['group'] ? 0 : 1 ) + ( Placement::Any === $placement ? 0 : 1 );
 ?>
 <div class="affibloom-filters">
 	<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-filters__toggle"
@@ -62,7 +68,7 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 				'admin/partials/list-args',
 				array(
 					'args'   => $view['args'],
-					'except' => array( 'link_type', 'group' ),
+					'except' => array( 'link_type', 'group', 'placements' ),
 				)
 			);
 			?>
@@ -83,6 +89,15 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 				<select id="affibloom-filter-link-type" class="affibloom-select" name="link_type">
 					<?php foreach ( $link_types as $value => $label ) : ?>
 						<option value="<?php echo esc_attr( (string) $value ); ?>" <?php selected( (string) $value, $view['link_kind']->value ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			<?php // Lasso's Placements (dashboard.php 174-181; F12 L13, Task 36D): used somewhere by the Locations count's rule, or not. ?>
+			<div class="affibloom-filters__field">
+				<label class="affibloom-filters__label" for="affibloom-filter-placements"><?php esc_html_e( 'Placements', 'affibloom' ); ?></label>
+				<select id="affibloom-filter-placements" class="affibloom-select" name="placements">
+					<?php foreach ( $placements as $value => $label ) : ?>
+						<option value="<?php echo esc_attr( (string) $value ); ?>" <?php selected( (string) $value, $placement->value ); ?>><?php echo esc_html( $label ); ?></option>
 					<?php endforeach; ?>
 				</select>
 			</div>

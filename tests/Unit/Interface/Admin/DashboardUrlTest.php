@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Affibloom\Tests\Unit\Interface\Admin;
 
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 use Affibloom\Interface\Admin\DashboardUrl;
 use PHPUnit\Framework\TestCase;
 
@@ -28,6 +29,11 @@ final class DashboardUrlTest extends TestCase {
 			),
 			DashboardUrl::args( 'wave', LinkKind::Amazon, 3, 25, -1, 123 )
 		);
+	}
+
+	public function test_the_placements_filter_is_carried_unless_it_is_any(): void {
+		self::assertSame( array( 'placements' => 'no_placements' ), DashboardUrl::args( '', LinkKind::All, 1, 10, 0, 0, null, Placement::NotInContent ) );
+		self::assertArrayNotHasKey( 'placements', DashboardUrl::args( '', LinkKind::All, 1, 10, 0, 0, null, Placement::Any ) );
 	}
 
 	public function test_a_post_id_of_zero_is_no_filter(): void {

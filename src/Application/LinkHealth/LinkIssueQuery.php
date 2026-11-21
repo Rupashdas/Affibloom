@@ -15,6 +15,7 @@ use Affibloom\Domain\LinkHealth\AlertWindow;
 use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\LinkHealth\LinkIssueRepository;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Settings\SettingsRepository;
@@ -100,9 +101,10 @@ final class LinkIssueQuery {
 	 * @param int        $group     The Group filter.
 	 * @param int        $post_id   One product only; 0 for all.
 	 * @return array{broken: int, out_of_stock: int, warm_up: bool, amazon_api: bool}
+	 * @param Placement  $placement The Placements filter (Task 36D).
 	 */
-	public function counts( SearchTerm $term, LinkKind $link_kind, int $group = 0, int $post_id = 0 ): array {
-		$count     = fn( string $tab ): int => $this->products->page( $term, $link_kind, 1, 1, $group, $post_id, $this->listing( '', $tab ) )->total;
+	public function counts( SearchTerm $term, LinkKind $link_kind, int $group = 0, int $post_id = 0, Placement $placement = Placement::Any ): array {
+		$count     = fn( string $tab ): int => $this->products->page( $term, $link_kind, 1, 1, $group, $post_id, $this->listing( '', $tab ), $placement )->total;
 		$activated = ( $this->activated )();
 
 		return array(

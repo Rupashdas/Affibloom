@@ -16,6 +16,7 @@ use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\PlainUrlKey;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductPage;
@@ -40,6 +41,9 @@ final class PostTypeProductRepository implements ProductRepository {
 
 	/** The query variable that marks the Dashboard's queries the Alert sort and tab change (alert_clauses()). */
 	private const ALERTS_VAR = 'affibloom_alerts';
+
+	/** The query var that carries the Placements filter (Task 36D). */
+	private const PLACEMENT_VAR = 'affibloom_placement';
 
 	/**
 	 * Stores the post with every field in one call, as Lasso's meta_input does: a new product is inserted, one with an
@@ -716,8 +720,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param int               $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
 	 * @param int               $post_id   One product only (Lasso's `?post_id=`, F19 R30): 0 for all; still published only.
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
+	 * @param Placement         $placement The Placements filter (F12 L13, Task 36D).
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -783,9 +788,15 @@ final class PostTypeProductRepository implements ProductRepository {
 			);
 		}
 
+		// Lasso's Placements filter (dashboard.php 174-181; F12 L13, Task 36D): used somewhere by the Locations count's rule, or not.
+		if ( Placement::Any !== $placement ) {
+			$list[ self::PLACEMENT_VAR ] = $placement;
+		}
+
 		$filter  = $this->search_filter();
 		$clauses = null !== $alerts && $alerts->is_active() ? self::alert_clauses( $alerts ) : null;
 		add_filter( 'posts_where', $filter, 10, 2 );
+		add_filter( 'posts_where', array( self::class, 'placement_where' ), 10, 2 );
 		if ( null !== $clauses ) {
 			$list[ self::ALERTS_VAR ] = true;
 			add_filter( 'posts_clauses', $clauses, 10, 2 );
@@ -819,12 +830,32 @@ final class PostTypeProductRepository implements ProductRepository {
 			}
 		} finally {
 			remove_filter( 'posts_where', $filter, 10 );
+			remove_filter( 'posts_where', array( self::class, 'placement_where' ), 10 );
 			if ( null !== $clauses ) {
 				remove_filter( 'posts_clauses', $clauses, 10 );
 			}
 		}
 
 		return new ProductPage( $items, $total, $wanted, $per_page );
+	}
+
+	/**
+	 * The Placements filter as a WHERE for the two queries above, and for them only (F12 L13; Task 36D): the product is
+	 * used, or not, by TableLinkLocationRepository's rule.
+	 *
+	 * @param string   $where The query's WHERE.
+	 * @param WP_Query $query The query.
+	 */
+	public static function placement_where( string $where, WP_Query $query ): string {
+		global $wpdb;
+
+		$placement = $query->get( self::PLACEMENT_VAR );
+		if ( ! $placement instanceof Placement || Placement::Any === $placement ) {
+			return $where;
+		}
+		$used = TableLinkLocationRepository::used_sql( "{$wpdb->posts}.ID" );
+
+		return $where . ( Placement::InContent === $placement ? " AND {$used}" : " AND NOT {$used}" );
 	}
 
 	/**

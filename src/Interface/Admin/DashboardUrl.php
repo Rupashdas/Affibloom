@@ -12,6 +12,7 @@ namespace Affibloom\Interface\Admin;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 
 /**
  * The Dashboard's own address for a list. The page and the REST route that refreshes it (Task 13D) both build it
@@ -31,9 +32,10 @@ final class DashboardUrl {
 	 * @param int               $group     The Group filter (Task G5): 0 for all groups, -1 for products in no group, else a group's ID.
 	 * @param int               $post_id   One product only (Lasso's `?post_id=`, Task 13F; F19 D24); 0 for all.
 	 * @param AlertListing|null $alerts The Alert sort (`order_by=detection_date&order_type=`, Task 31A) and tab (`filter=`, Task 31B).
+	 * @param Placement         $placement The Placements filter (`placements=`, Task 36D).
 	 */
-	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): string {
-		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts );
+	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any ): string {
+		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement );
 
 		return add_query_arg( array_map( 'rawurlencode', $args ), admin_url( 'admin.php' ) );
 	}
@@ -50,9 +52,10 @@ final class DashboardUrl {
 	 * @param int               $group     As to().
 	 * @param int               $post_id   As to().
 	 * @param AlertListing|null $alerts As to().
+	 * @param Placement         $placement As to().
 	 * @return array<string, string>
 	 */
-	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null ): array {
+	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any ): array {
 		$args = array();
 		if ( '' !== $term ) {
 			$args['s'] = $term;
@@ -62,6 +65,9 @@ final class DashboardUrl {
 		}
 		if ( 0 !== $group ) {
 			$args['group'] = (string) $group;
+		}
+		if ( Placement::Any !== $placement ) {
+			$args['placements'] = $placement->value;
 		}
 		if ( $post_id > 0 ) {
 			$args['post_id'] = (string) $post_id;

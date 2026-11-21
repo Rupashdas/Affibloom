@@ -14,6 +14,7 @@ use Affibloom\Application\LinkHealth\IssueLinksExport;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
@@ -80,6 +81,10 @@ final class DashboardExportController implements Module {
 							'type'    => 'string',
 							'default' => '',
 						),
+						'placements' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
 						'order_by'   => array(
 							'type'    => 'string',
 							'default' => '',
@@ -115,7 +120,7 @@ final class DashboardExportController implements Module {
 			return new WP_Error( 'affibloom_export_stream', __( 'Could not open export stream.', 'affibloom' ), array( 'status' => 500 ) );
 		}
 		$count = -1;
-		foreach ( $this->export->rows( $term, LinkKind::from_input( (string) $request->get_param( 'link_type' ) ), $group, $listing ) as $row ) {
+		foreach ( $this->export->rows( $term, LinkKind::from_input( (string) $request->get_param( 'link_type' ) ), $group, $listing, Placement::from_input( (string) $request->get_param( 'placements' ) ) ) as $row ) {
 			fputcsv( $stream, $row, ',', '"', '' );
 			++$count;
 		}

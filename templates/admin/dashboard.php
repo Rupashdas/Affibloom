@@ -69,6 +69,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 							'per_page'  => $products->per_page,
 							'group'     => $view['group'],
 							'filter'    => isset( $view['listing'] ) ? $view['listing']->tab : '',
+							'placement' => $view['placement'] ?? \Affibloom\Domain\Product\Placement::Any,
 							'group_ids' => array_map( static fn( $choice ): int => $choice->id, $view['group_list'] ),
 						)
 					);
@@ -77,6 +78,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 						array(
 							'link_kind'  => $view['link_kind'],
 							'group'      => $view['group'],
+							'placement'  => $view['placement'] ?? \Affibloom\Domain\Product\Placement::Any,
 							'group_list' => $view['group_list'],
 							'args'       => $view['args'],
 						)

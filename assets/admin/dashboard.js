@@ -150,6 +150,7 @@
 	var search = document.getElementById( 'affibloom-search' );
 	var linkType = document.getElementById( 'affibloom-filter-link-type' );
 	var groupFilter = document.getElementById( 'affibloom-filter-group' );
+	var placementFilter = document.getElementById( 'affibloom-filter-placements' );
 	var status = document.getElementById( 'affibloom-list-status' );
 	var errorTemplate = document.getElementById( 'affibloom-list-error' );
 	var sizeSelect = document.getElementById( 'affibloom-per-page' );
@@ -159,6 +160,8 @@
 		link_type: params.get( 'link_type' ) || '',
 		// The Group filter (Task G5): 0 all groups, -1 "Not in Groups", else a group's ID.
 		group: parseInt( params.get( 'group' ), 10 ) || 0,
+		// The Placements filter (Task 36D): '', has_placements or no_placements.
+		placements: params.get( 'placements' ) || '',
 		// Lasso's ?post_id= (Task 13F; F19 D24): one product, kept by every list change until Reset or a pill.
 		post_id: parseInt( params.get( 'post_id' ), 10 ) || 0,
 		paged: parseInt( params.get( 'paged' ), 10 ) || 1,
@@ -180,6 +183,7 @@
 		args.set( 's', list.s );
 		args.set( 'link_type', list.link_type );
 		args.set( 'group', String( list.group || 0 ) );
+		args.set( 'placements', list.placements || '' );
 		args.set( 'post_id', String( list.post_id || 0 ) );
 		args.set( 'paged', String( list.paged ) );
 		args.set( 'per_page', String( list.per_page ) );
@@ -195,7 +199,7 @@
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, group: current.group, post_id: current.post_id, paged: 1, per_page: current.per_page, order: current.order, filter: current.filter };
+		var next = { s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, post_id: current.post_id, paged: 1, per_page: current.per_page, order: current.order, filter: current.filter };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -301,11 +305,12 @@
 				pill.getAttribute( 'data-view-link-type' ) === current.link_type &&
 				parseInt( pill.getAttribute( 'data-view-group' ), 10 ) === current.group &&
 				( pill.getAttribute( 'data-view-filter' ) || '' ) === current.filter &&
+				( pill.getAttribute( 'data-view-placements' ) || '' ) === current.placements &&
 				parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) === current.per_page ) {
 				match = pill;
 			}
 		} );
-		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.filter ) {
+		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.placements && '' === current.filter ) {
 			match = pills[ 0 ];
 		}
 		pills.forEach( function ( pill ) {
@@ -336,7 +341,10 @@
 		if ( groupFilter ) {
 			groupFilter.value = String( current.group );
 		}
-		var filters = ( current.link_type ? 1 : 0 ) + ( current.group ? 1 : 0 );
+		if ( placementFilter ) {
+			placementFilter.value = current.placements;
+		}
+		var filters = ( current.link_type ? 1 : 0 ) + ( current.group ? 1 : 0 ) + ( current.placements ? 1 : 0 );
 		var badge = document.querySelector( '.affibloom-filters__count' );
 		if ( badge ) {
 			badge.textContent = String( filters );
@@ -369,7 +377,7 @@
 				return;
 			}
 			var data = response.data;
-			current = { s: data.term, link_type: data.link_type, group: data.group, post_id: data.post_id, paged: data.page, per_page: data.per_page, order: data.order || '', filter: data.filter || '' };
+			current = { s: data.term, link_type: data.link_type, group: data.group, placements: data.placements || '', post_id: data.post_id, paged: data.page, per_page: data.per_page, order: data.order || '', filter: data.filter || '' };
 
 			region.innerHTML = data.html;
 			quick.id = null; // An open quick edit went with the old rows.
@@ -427,7 +435,7 @@
 		}
 		var label = button.querySelector( '[data-export-label]' );
 		var text = label.textContent;
-		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), filter: current.filter } );
+		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), placements: current.placements, filter: current.filter } );
 		if ( current.order ) {
 			args.set( 'order_by', 'detection_date' );
 			args.set( 'order_type', current.order );
@@ -518,6 +526,7 @@
 				s: back.get( 's' ) || '',
 				link_type: back.get( 'link_type' ) || '',
 				group: parseInt( back.get( 'group' ), 10 ) || 0,
+				placements: back.get( 'placements' ) || '',
 				post_id: parseInt( back.get( 'post_id' ), 10 ) || 0,
 				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
 				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
@@ -648,6 +657,17 @@
 			} );
 		}
 
+		// The Placements filter, as the group is (Task 36D; F12 L13).
+		if ( placementFilter ) {
+			placementFilter.addEventListener( 'change', function () {
+				guarded( function () {
+					load( listWith( { placements: placementFilter.value } ), true, false );
+				}, placementFilter, true, function () {
+					placementFilter.value = current.placements;
+				} );
+			} );
+		}
+
 		// Lasso's "Reset filters": search, filters and page size back to the defaults.
 		panel.querySelector( '.affibloom-filters__reset' ).addEventListener( 'click', function ( event ) {
 			guarded( reset, event.currentTarget, true );
@@ -663,7 +683,7 @@
 		if ( search ) {
 			search.value = '';
 		}
-		load( { s: '', link_type: '', group: 0, post_id: 0, paged: 1, per_page: 10, order: '', filter: '' }, true, false );
+		load( { s: '', link_type: '', group: 0, placements: '', post_id: 0, paged: 1, per_page: 10, order: '', filter: '' }, true, false );
 	}
 
 	var toolbar = document.querySelector( '.affibloom-toolbar' );
@@ -695,6 +715,7 @@
 						s: pill.getAttribute( 'data-view-s' ),
 						link_type: pill.getAttribute( 'data-view-link-type' ),
 						group: parseInt( pill.getAttribute( 'data-view-group' ), 10 ) || 0,
+						placements: pill.getAttribute( 'data-view-placements' ) || '',
 						paged: 1,
 						per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
 						filter: pill.getAttribute( 'data-view-filter' ) || '',
@@ -777,7 +798,7 @@
 			wp.apiFetch( {
 				path: '/affibloom/v1/dashboard/views',
 				method: 'POST',
-				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, per_page: current.per_page, filter: current.filter },
+				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, per_page: current.per_page, filter: current.filter },
 			} ).then( function ( response ) {
 				replaceViews( response.data.html );
 				nameField.value = '';

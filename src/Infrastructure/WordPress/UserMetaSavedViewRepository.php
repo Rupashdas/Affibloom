@@ -13,6 +13,7 @@ use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViewRepository;
 use Affibloom\Domain\Dashboard\SavedViews;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 
 /**
  * Saved Dashboard views in user meta, one list per editor, in Lasso's shape (`id`, `name`, `filters`). Lasso keeps
@@ -42,7 +43,8 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 				LinkKind::from_input( isset( $filters['link_type'] ) && is_string( $filters['link_type'] ) ? $filters['link_type'] : '' ),
 				isset( $filters['per_page'] ) ? absint( $filters['per_page'] ) : 0,
 				isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0,
-				isset( $filters['filter'] ) && in_array( $filters['filter'], array( 'broken-links', 'out-of-stock' ), true ) ? $filters['filter'] : ''
+				isset( $filters['filter'] ) && in_array( $filters['filter'], array( 'broken-links', 'out-of-stock' ), true ) ? $filters['filter'] : '',
+				Placement::from_input( isset( $filters['placements'] ) && is_string( $filters['placements'] ) ? $filters['placements'] : '' )
 			);
 		}
 
@@ -64,11 +66,12 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 					'id'      => $view->id,
 					'name'    => $view->name,
 					'filters' => array(
-						's'         => $view->term,
-						'link_type' => $view->link_kind->value,
-						'per_page'  => $view->per_page,
-						'group'     => $view->group,
-						'filter'    => $view->filter,
+						's'          => $view->term,
+						'link_type'  => $view->link_kind->value,
+						'per_page'   => $view->per_page,
+						'group'      => $view->group,
+						'filter'     => $view->filter,
+						'placements' => $view->placement->value,
 					),
 				),
 				$views->all()

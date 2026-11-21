@@ -130,6 +130,39 @@ test.describe( 'F12 Clicks and where used', () => {
 		await expect( page.locator( '.affibloom-table--locations tbody td.affibloom-col-clicks' ).first() ).toHaveText( '0' );
 	} );
 
+	// AC24 (36D; L13): Placements narrows the list with the count's rule, counts as a filter and is kept in saved views.
+	test( 'AC24 the Placements filter: in content, not in content, kept in a saved view', async ( { page } ) => {
+		const prefix = unique( 'F12 AC24' );
+		const used = createProduct( { name: `${ prefix } used` } );
+		const grouped = createProduct( { name: `${ prefix } grouped` } );
+		const unused = createProduct( { name: `${ prefix } unused` } );
+		const slug = createGroup( unique( 'F12 AC24 group' ), [ grouped ] );
+		newPostWith( boxBlock( used ) + `<p>[affibloom type="grid" group="${ slug }"]</p>` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( prefix ) }` );
+		await page.getByRole( 'button', { name: 'Filters' } ).click();
+		const rows = page.locator( '.affibloom-table tbody tr[data-product-id]' );
+
+		await page.getByLabel( 'Placements' ).selectOption( 'has_placements' );
+		await expect( rows ).toHaveCount( 2 );
+		await expect( page.locator( `tr[data-product-id="${ unused }"]` ) ).toHaveCount( 0 );
+		await expect( page ).toHaveURL( /placements=has_placements/ );
+		await expect( page.locator( '.affibloom-filters__count' ) ).toHaveText( '1' );
+
+		await page.getByLabel( 'Placements' ).selectOption( 'no_placements' );
+		await expect( rows ).toHaveCount( 1 );
+		await expect( page.locator( `tr[data-product-id="${ unused }"]` ) ).toHaveCount( 1 );
+
+		const name = unique( 'AC24 view' );
+		await page.getByLabel( 'Save as' ).fill( name );
+		await page.getByLabel( 'Save as' ).press( 'Enter' );
+		await expect( page.locator( '.affibloom-pill', { hasText: name } ) ).toHaveAttribute( 'data-view-placements', 'no_placements' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.locator( '.affibloom-pill', { hasText: name } ).click();
+		await expect( page ).toHaveURL( /placements=no_placements/ );
+		await expect( rows ).toHaveCount( 1 );
+	} );
+
 	// AC26 (36B; decision 6): unpublished hosts are listed with their status and count as use.
 	test( 'AC26 a draft that uses the product is listed with its status', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F12 AC26' ) } );

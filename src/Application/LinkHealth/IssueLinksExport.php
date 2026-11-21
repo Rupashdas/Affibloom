@@ -15,6 +15,7 @@ use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\LinkHealth\LinkIssue;
 use Affibloom\Domain\LinkHealth\LinkIssueRepository;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\SearchTerm;
@@ -61,13 +62,14 @@ final class IssueLinksExport {
 	 * @param int          $group     The Group filter.
 	 * @param AlertListing $listing   The tab and the sort.
 	 * @return Generator<int, list<string>>
+	 * @param Placement    $placement The Placements filter (Task 36D).
 	 */
-	public function rows( SearchTerm $term, LinkKind $link_kind, int $group, AlertListing $listing ): Generator {
+	public function rows( SearchTerm $term, LinkKind $link_kind, int $group, AlertListing $listing, Placement $placement = Placement::Any ): Generator {
 		yield self::COLUMNS;
 		$library = $this->fields->all();
 		$page    = 1;
 		do {
-			$list = $this->products->page( $term, $link_kind, $page, self::PAGE, $group, 0, $listing );
+			$list = $this->products->page( $term, $link_kind, $page, self::PAGE, $group, 0, $listing, $placement );
 			$ids  = array_map( static fn( Product $product ): int => (int) $product->id, $list->items );
 			$rows = $this->issues->rows( $ids );
 			$tags = ( $this->groups )( $ids );
