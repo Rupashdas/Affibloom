@@ -66,7 +66,8 @@ interface ProductRepository {
 	public function find_by_plain_key( string $key ): ?Product;
 
 	/**
-	 * Sets one of the link switches (`new_tab`, `nofollow`, `sponsored`, `show_disclosure`) on every product, whatever
+	 * Sets one of the link switches (`new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `cloak`,
+	 * `detect_opportunities`) on every product, whatever
 	 * its status, adding it where it is missing (Task 9D; Lasso's lasso_override_display_option).
 	 *
 	 * @param string $field The product field.

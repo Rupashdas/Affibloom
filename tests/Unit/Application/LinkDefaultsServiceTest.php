@@ -25,7 +25,27 @@ final class LinkDefaultsServiceTest extends TestCase {
 
 	public function test_an_unknown_key_is_refused(): void {
 		$this->expectException( \InvalidArgumentException::class );
-		( new LinkDefaultsService( new InMemoryProductRepository() ) )->apply_to_all( 'detect_opportunities', true );
+		( new LinkDefaultsService( new InMemoryProductRepository() ) )->apply_to_all( 'allow_duplicates', true );
+	}
+
+	public function test_detect_opportunities_is_pushed_to_every_product(): void {
+		$repo = new InMemoryProductRepository();
+		$repo->save( Product::draft( 'One', AffiliateUrl::from_string( 'https://a.example/1' ), Settings::from_array( array() ) ) );
+		$repo->save( Product::draft( 'Two', AffiliateUrl::from_string( 'https://a.example/2' ), Settings::from_array( array() ) ) );
+
+		$count = ( new LinkDefaultsService( $repo ) )->apply_to_all( 'detect_opportunities', false );
+
+		self::assertSame( 2, $count );
+		self::assertSame( array( 'detect_opportunities' => false ), $repo->flags_set );
+		foreach ( $repo->saved as $product ) {
+			self::assertFalse( $product->detect_opportunities );
+		}
+	}
+
+	public function test_a_new_product_takes_detect_opportunities_off_once_saved_off(): void {
+		$product = Product::draft( 'One', AffiliateUrl::from_string( 'https://a.example/1' ), Settings::from_array( array( 'detect_opportunities' => false ) ) );
+
+		self::assertFalse( $product->detect_opportunities );
 	}
 
 	public function test_link_cloaking_is_pushed_to_the_products_cloak_flag(): void {

@@ -37,7 +37,7 @@ use WP_Query;
 final class PostTypeProductRepository implements ProductRepository {
 
 	/** The product fields that are switches on the primary link, which a changed link default can be pushed to (Task 9D). */
-	private const LINK_SWITCHES = array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'cloak' );
+	private const LINK_SWITCHES = array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'cloak', 'detect_opportunities' );
 
 	/** The query variable that carries the search to the WHERE filter, and nothing else. */
 	private const SEARCH_VAR = 'affibloom_search';

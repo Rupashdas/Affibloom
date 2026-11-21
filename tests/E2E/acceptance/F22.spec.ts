@@ -134,6 +134,35 @@ test.describe( 'F22 Opportunities', () => {
 		setSettings( { detect_opportunities: true } );
 	} );
 
+	// AC7 (O6; R41-R43).
+	test( 'AC7 Link Defaults: Only New Links changes nothing; Override All Links turns it off on every product', async ( { page } ) => {
+		const first = createProduct( { name: unique( 'F22 AC7a' ) } );
+		const second = createProduct( { name: unique( 'F22 AC7b' ) } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
+		const toggle = page.getByLabel( 'Detect Opportunities', { exact: true } );
+		const dialog = page.getByRole( 'dialog', { name: 'Update Link Settings' } );
+
+		await toggle.setChecked( false );
+		await expect( dialog ).toContainText( 'Affibloom will disable the option Detect Opportunities' );
+		await dialog.getByRole( 'button', { name: 'Only New Links' } ).click();
+		expect( wp( 'post', 'meta', 'get', String( first ), '_affibloom_detect_opportunities' ) ).not.toBe( '0' );
+
+		await toggle.setChecked( true );
+		await dialog.getByRole( 'button', { name: 'Only New Links' } ).click();
+		await toggle.setChecked( false );
+		await dialog.getByRole( 'button', { name: 'Override All Links' } ).click();
+		await expect( page.getByText( 'All products updated.' ) ).toBeVisible();
+		expect( wp( 'post', 'meta', 'get', String( first ), '_affibloom_detect_opportunities' ) ).toBe( '0' );
+		expect( wp( 'post', 'meta', 'get', String( second ), '_affibloom_detect_opportunities' ) ).toBe( '0' );
+
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.getByText( 'Settings saved.' ) ).toBeVisible();
+		const fresh = createProduct( { name: unique( 'F22 AC7 new' ) } );
+		expect( wp( 'post', 'meta', 'get', String( fresh ), '_affibloom_detect_opportunities' ) ).toBe( '0' );
+		setSettings( { detect_opportunities: true } );
+		wp( 'eval', "do_action( 'rest_api_init' ); wp_set_current_user( 1 ); $r = new WP_REST_Request( 'POST', '/affibloom/v1/settings/link-defaults/apply' ); $r->set_body_params( array( 'key' => 'detect_opportunities', 'value' => true ) ); rest_do_request( $r );" );
+	} );
+
 	// AC12 (O4; R29-R31).
 	test( "AC12 Content › post: the post's text links, product links first with Monetize on", async ( { page } ) => {
 		const url = `https://www.example.com/${ unique( 'f22-ac12' ) }`;

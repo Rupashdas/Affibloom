@@ -104,7 +104,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O3: Content Opportunities
 - [x] Task O4: A post's links (Content › post)
 - [x] Task O5: The product page's Opportunities tab and Detect Opportunities
-- [ ] Task O6: Detect Opportunities in Settings, and Override All Links
+- [x] Task O6: Detect Opportunities in Settings, and Override All Links
 - [ ] Task O7: Dismiss, and Undo
 - [ ] Task O8: The Dashboard's tile, filter tab and lightbulb
 - [ ] Task O9: Export CSV of content opportunities
@@ -1080,11 +1080,15 @@ show for affected links. Doesn’t change how Affibloom finds opportunities in t
 
 **Files:** the above; tests F22 **AC7**; F9's spec (the new switch).
 
-- [ ] **Step 1: Failing tests** (AC7: Override All Links → every product's meta '0'; Only New Links → unchanged; a new
+- [x] **Step 1: Failing tests** (AC7: Override All Links → every product's meta '0'; Only New Links → unchanged; a new
   product after save takes '0').
-- [ ] **Step 2: Setting and override.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Add Detect Opportunities to Link Defaults".
+- [x] **Step 2: Setting and override.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Add Detect Opportunities to Link Defaults".
+
+*Note:* the setting and the switch were already there (O5); O6 marks it for "Update Link Settings" and lets F9's
+`LinkDefaultsService` push it through `set_flag_for_all( 'detect_opportunities' )`, so no separate
+`ProductService::set_detect_opportunities_for_all()`. Checked: unit tests; the route on Local set all 729 products; the dialog at 1280 px.
 
 ---
 
