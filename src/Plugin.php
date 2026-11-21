@@ -658,7 +658,7 @@ final class Plugin {
 	 * The product page's Locations tab and its route (F12; Task 36B).
 	 */
 	private function location_service(): LocationService {
-		return new LocationService( new TableLinkLocationRepository() );
+		return new LocationService( new TableLinkLocationRepository(), new ClickReport( new TableClickStore() ) );
 	}
 
 	/**

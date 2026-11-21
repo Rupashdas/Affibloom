@@ -21,6 +21,10 @@ final class ClickReportTest extends TestCase {
 				return 'x' === $day ? 0 : 41;
 			}
 
+			public function by_location( string $day, array $location_ids ): array {
+				return array( 3 => 4 );
+			}
+
 			public function delete_before( string $day ): void {}
 
 			public function totals_since( string $day, array $product_ids ): array {
@@ -36,5 +40,6 @@ final class ClickReportTest extends TestCase {
 		self::assertSame( array( 9 => 0, 7 => 12 ), $totals );
 		self::assertSame( array(), ( new ClickReport( $store ) )->totals_for( array(), 0 ) );
 		self::assertSame( 41, ( new ClickReport( $store ) )->total( 0 ) );
+		self::assertSame( array( 2 => 0, 3 => 4 ), ( new ClickReport( $store ) )->by_location( array( 2, 3 ), 0 ) );
 	}
 }

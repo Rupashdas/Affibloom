@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Locations;
 
+use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\LinkIndex\LocationPage;
 
@@ -22,9 +23,10 @@ final class LocationService {
 	/**
 	 * Builds the service.
 	 *
-	 * @param LinkLocationRepository $rows The link index.
+	 * @param LinkLocationRepository $rows   The link index.
+	 * @param ClickReport|null       $clicks The clicks per location (Task 34C).
 	 */
-	public function __construct( private LinkLocationRepository $rows ) {}
+	public function __construct( private LinkLocationRepository $rows, private ?ClickReport $clicks = null ) {}
 
 	/**
 	 * One page of the posts that use the product.
@@ -36,5 +38,16 @@ final class LocationService {
 	 */
 	public function page( int $product_id, string $search, string $order, int $page ): LocationPage {
 		return $this->rows->product_locations( $product_id, trim( $search ), 'asc' === $order ? 'asc' : 'desc', max( 1, $page ), LocationPage::PER_PAGE );
+	}
+
+	/**
+	 * Each place's clicks in the last 30 days on this page (F12 AC13, Locations D25; Task 34C).
+	 *
+	 * @param LocationPage $page The page.
+	 * @param int          $now  Now, as a Unix time.
+	 * @return array<int, int> By location ID.
+	 */
+	public function clicks( LocationPage $page, int $now ): array {
+		return null === $this->clicks ? array() : $this->clicks->by_location( $page->place_ids(), $now );
 	}
 }

@@ -54,6 +54,23 @@ final class ClickReport {
 	}
 
 	/**
+	 * Each location's clicks in the last 30 days, 0 for none (the Locations tab's Clicks, F12 R11 replaced; Task 34C).
+	 *
+	 * @param list<int> $location_ids The link index rows.
+	 * @param int       $now          Now, as a Unix time.
+	 * @return array<int, int> By location ID, in the order asked.
+	 */
+	public function by_location( array $location_ids, int $now ): array {
+		$found  = array() === $location_ids ? array() : $this->clicks->by_location( self::since( $now ), $location_ids );
+		$totals = array();
+		foreach ( $location_ids as $id ) {
+			$totals[ $id ] = $found[ $id ] ?? 0;
+		}
+
+		return $totals;
+	}
+
+	/**
 	 * The first day counted.
 	 *
 	 * @param int $now Now, as a Unix time.

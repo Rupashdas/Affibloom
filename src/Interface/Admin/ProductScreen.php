@@ -189,16 +189,18 @@ final class ProductScreen {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 		// F12 D22 (Task 36B): Locations is a tab of this page (`&tab=locations`), its list redrawn in place.
 		if ( 'locations' === $tab && null !== $this->locations ) {
-			$term  = isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '';
-			$order = isset( $_GET['order'] ) && in_array( $_GET['order'], array( 'asc', 'desc' ), true ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '';
-			$paged = isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : 1;
+			$term      = isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '';
+			$order     = isset( $_GET['order'] ) && in_array( $_GET['order'], array( 'asc', 'desc' ), true ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '';
+			$paged     = isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : 1;
+			$locations = $this->locations->page( $id, $term, $order, $paged );
 			$this->template->render(
 				'admin/product-locations',
 				array(
 					'product'     => $this->product,
 					'public_link' => $public_link,
 					'tabs'        => self::tabs( $id, 'locations', count( $variants ), $used ),
-					'locations'   => $this->locations->page( $id, $term, $order, $paged ),
+					'locations'   => $locations,
+					'clicks'      => $this->locations->clicks( $locations, time() ),
 					'term'        => $term,
 					'order'       => $order,
 					'url'         => self::locations_url( $id, $term, 1, $order ),

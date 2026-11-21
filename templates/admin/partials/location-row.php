@@ -4,7 +4,7 @@
  * group's nested rows), Link with Context and Type, both opening the preview (Task 36C), and Clicks.
  *
  * @package Affibloom
- * @var array{host: \Affibloom\Domain\LinkIndex\LocationHost, place: \Affibloom\Domain\LinkIndex\ProductLocation, nested: bool} $view
+ * @var array{host: \Affibloom\Domain\LinkIndex\LocationHost, place: \Affibloom\Domain\LinkIndex\ProductLocation, nested: bool, clicks?: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -42,6 +42,6 @@ $place_type  = $place_types[ $place->kind() ];
 			<span class="screen-reader-text"><?php echo esc_html( $place_type[1] ); ?></span>
 		</button>
 	</td>
-	<?php // Clicks in the last 30 days (L11, D25): 0 until Task 34C counts clicks per location. ?>
-	<td class="affibloom-col-clicks">0</td>
+	<?php // Clicks in the last 30 days (L11, D25; Task 34C). ?>
+	<td class="affibloom-col-clicks"><?php echo esc_html( number_format_i18n( $view['clicks'] ?? 0 ) ); ?></td>
 </tr>

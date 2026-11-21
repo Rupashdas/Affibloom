@@ -86,6 +86,30 @@ KEY location_day (location_id,day)';
 	}
 
 	/**
+	 * Each location's clicks from a day on, in one query (the location_day index).
+	 *
+	 * @param string    $day          The first UTC day counted, "Y-m-d".
+	 * @param list<int> $location_ids The link index rows.
+	 * @return array<int, int> By location ID; a location without clicks is left out.
+	 */
+	public function by_location( string $day, array $location_ids ): array {
+		global $wpdb;
+
+		$ids = implode( ',', array_filter( array_map( 'intval', $location_ids ) ) );
+		if ( '' === $ids ) {
+			return array();
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Affibloom's own table, one query per tab page; the IDs are integers.
+		$found  = $wpdb->get_results( $wpdb->prepare( "SELECT location_id, SUM(clicks) AS clicks FROM %i WHERE day >= %s AND location_id IN ({$ids}) GROUP BY location_id", $wpdb->prefix . self::TABLE, $day ), ARRAY_A );
+		$totals = array();
+		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			$totals[ (int) $row['location_id'] ] = (int) $row['clicks'];
+		}
+
+		return $totals;
+	}
+
+	/**
 	 * Removes the rows of days before this one.
 	 *
 	 * @param string $day The first UTC day kept, "Y-m-d".

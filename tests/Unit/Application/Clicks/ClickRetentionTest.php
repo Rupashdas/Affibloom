@@ -25,6 +25,10 @@ final class ClickRetentionTest extends TestCase {
 				return 'x' === $day ? 0 : 41;
 			}
 
+			public function by_location( string $day, array $location_ids ): array {
+				return array( 3 => 4 );
+			}
+
 			public function delete_before( string $day ): void {
 				$this->before = $day;
 			}

@@ -103,6 +103,7 @@ final class LocationsController implements Module {
 						'admin/partials/locations-list',
 						array(
 							'locations' => $page,
+							'clicks'    => $this->locations->clicks( $page, time() ),
 							'term'      => $term,
 							'order'     => $order,
 							'url'       => ProductScreen::locations_url( $id, $term, 1, $order ),

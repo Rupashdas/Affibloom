@@ -9,7 +9,7 @@
  * Lasso's help site is left out); empty after a search says so.
  *
  * @package Affibloom
- * @var array{locations: \Affibloom\Domain\LinkIndex\LocationPage, term: string, order: string, url: string} $view
+ * @var array{locations: \Affibloom\Domain\LinkIndex\LocationPage, clicks?: array<int, int>, term: string, order: string, url: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -99,7 +99,15 @@ $columns    = array(
 				<tbody>
 					<?php foreach ( $locations->items as $host ) : ?>
 						<?php if ( count( $host->places ) > 1 ) : ?>
-							<?php $this->render( 'admin/partials/location-group-row', array( 'host' => $host ) ); ?>
+							<?php
+							$this->render(
+								'admin/partials/location-group-row',
+								array(
+									'host'   => $host,
+									'clicks' => array_sum( array_map( static fn( $place ): int => $view['clicks'][ $place->id ] ?? 0, $host->places ) ),
+								)
+							);
+							?>
 							<?php foreach ( $host->places as $place ) : ?>
 								<?php
 								$this->render(
@@ -108,6 +116,7 @@ $columns    = array(
 										'host'   => $host,
 										'place'  => $place,
 										'nested' => true,
+										'clicks' => $view['clicks'][ $place->id ] ?? 0,
 									)
 								);
 								?>
@@ -121,6 +130,7 @@ $columns    = array(
 										'host'   => $host,
 										'place'  => $place,
 										'nested' => false,
+										'clicks' => $view['clicks'][ $place->id ] ?? 0,
 									)
 								);
 								?>

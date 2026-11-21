@@ -5,7 +5,7 @@
  * GET /products/{id}/locations renders, so the page and the in-place list (product-locations.js) share one template.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, public_link: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}, locations: \Affibloom\Domain\LinkIndex\LocationPage, term: string, order: string, url: string} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, public_link: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}, locations: \Affibloom\Domain\LinkIndex\LocationPage, clicks?: array<int, int>, term: string, order: string, url: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,6 +50,7 @@ $product = $view['product'];
 					'admin/partials/locations-list',
 					array(
 						'locations' => $view['locations'],
+						'clicks'    => $view['clicks'] ?? array(),
 						'term'      => $view['term'],
 						'order'     => $view['order'],
 						'url'       => $view['url'],

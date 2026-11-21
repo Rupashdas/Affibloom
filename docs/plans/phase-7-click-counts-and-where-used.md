@@ -75,7 +75,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 33D: Settings → General — Page and Link-Level Tracking
 - [x] Task 34A: The Dashboard's Clicks column, sortable
 - [x] Task 34B: The Clicks (30 days) tile
-- [ ] Task 34C: Clicks per location on the Locations tab
+- [x] Task 34C: Clicks per location on the Locations tab
 - Task 34D: dropped with 26J (decision E1: start from zero)
 
 ### C3 — Google Analytics events
@@ -589,11 +589,16 @@ none; a post's group row shows its locations' sum.
 
 **Files:** the above; `F12.spec.ts` AC13 (and Locations AC23 turns green).
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Report.**
-- [ ] **Step 3: Cells.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Show each location's clicks".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Report.**
+- [x] **Step 3: Cells.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Show each location's clicks".
+
+*Note (2026-11-21):* `LocationService::clicks()` reads `ClickReport::by_location()` for the page's place IDs
+(`LocationPage::place_ids()`), for the screen and the route alike; the group row now has its own Clicks cell (the
+sum). A box's clicks carry location 0 (33A), so a display row shows 0 until boxes stamp their location. Checked: unit,
+phpcs, analyse; on Local the clicked text link shows 1, the rest 0; the tab at 1280 px.
 
 ---
 

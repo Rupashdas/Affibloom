@@ -63,6 +63,22 @@ final class LocationPage {
 	}
 
 	/**
+	 * Every place's index row on this page (the Clicks column, Task 34C).
+	 *
+	 * @return list<int>
+	 */
+	public function place_ids(): array {
+		$ids = array();
+		foreach ( $this->items as $host ) {
+			foreach ( $host->places as $place ) {
+				$ids[] = $place->id;
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
 	 * Where the page starts in the whole list, for the query.
 	 */
 	public function offset(): int {

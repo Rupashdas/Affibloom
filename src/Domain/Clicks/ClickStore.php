@@ -47,4 +47,13 @@ interface ClickStore {
 	 * @param string $day The first UTC day counted, "Y-m-d".
 	 */
 	public function total_since( string $day ): int;
+
+	/**
+	 * Each location's clicks from a day on (the Locations tab, Task 34C).
+	 *
+	 * @param string    $day          The first UTC day counted, "Y-m-d".
+	 * @param list<int> $location_ids The link index rows.
+	 * @return array<int, int> By location ID; a location without clicks is left out.
+	 */
+	public function by_location( string $day, array $location_ids ): array;
 }
