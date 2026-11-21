@@ -77,10 +77,13 @@ final class LinkIndexCron implements Module {
 	}
 
 	/**
-	 * Runs one batch, unless another is running or the server is busy (then it waits a minute).
+	 * Runs one batch, unless another is running or the server is busy: then it waits a minute. A batch that finds the
+	 * lock taken goes back on the schedule, so the chain is never dropped (the 2026-11-21 stall: an admin page took the
+	 * due batch while another page still ran one; 35F).
 	 */
 	public function batch(): void {
 		if ( ! $this->lock->acquire() ) {
+			$this->job->dispatch( CpuGuard::BUSY_WAIT );
 			return;
 		}
 		try {
@@ -112,11 +115,17 @@ final class LinkIndexCron implements Module {
 	}
 
 	/**
-	 * Where WP-Cron is disabled, an admin page runs up to "Maximum cronjob at a time" (1-3) due batches itself (D12).
+	 * Where WP-Cron is disabled, an admin page runs up to "Maximum cronjob at a time" (1-3) due batches itself (D12),
+	 * after restarting a broken chain.
 	 */
 	public function catch_up(): void {
 		if ( ! defined( 'DISABLE_WP_CRON' ) || ! DISABLE_WP_CRON ) {
 			return;
+		}
+		// A running rebuild with no batch waiting lost its chain (a request that died mid-batch): it gets one back. Only
+		// one batch is ever queued, so this cannot start a second chain.
+		if ( $this->state->get()->running() && false === wp_next_scheduled( self::BATCH ) ) {
+			$this->job->dispatch();
 		}
 		$limit = max( 1, min( 3, $this->settings->get()->int( 'manual_process_limit' ) ) );
 		for ( $run = 0; $run < $limit; $run++ ) {
