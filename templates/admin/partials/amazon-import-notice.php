@@ -12,9 +12,10 @@ defined( 'ABSPATH' ) || exit;
 
 use Affibloom\Domain\Monetize\AmazonImportStatus;
 
-[ $import_queue, $import_dashboard, $import_indexed, $import_running, $import_total, $import_completed ] = array_map( 'intval', $view['notice']->args + array( 0, 0, 0, 0, 0, 0 ) );
+[ $import_queue, $import_dashboard, $import_indexed, $import_running, $import_total, $import_completed, $import_context ] = array_map( 'intval', $view['notice']->args + array( 0, 0, 0, 0, 0, 0, 0 ) );
 ?>
-<section class="affibloom-notice affibloom-notice--update affibloom-import" data-amazon-import-notice aria-label="<?php esc_attr_e( 'Amazon import', 'affibloom' ); ?>">
+<?php // The Dashboard's first-day explanation (R32, Task AM5) is complete from the start: the poller leaves it. ?>
+<section class="affibloom-notice affibloom-notice--update affibloom-import" data-amazon-import-notice<?php echo 1 === $import_context ? ' data-amazon-context' : ''; ?> aria-label="<?php esc_attr_e( 'Amazon import', 'affibloom' ); ?>">
 	<span class="affibloom-chip"><?php $this->render( 'admin/partials/icon', array( 'name' => 'refresh' ) ); ?></span>
 	<div class="affibloom-import__body" data-affibloom-amazon-status aria-live="polite">
 		<?php $this->render( 'admin/partials/amazon-import-status', array( 'status' => new AmazonImportStatus( $import_queue, $import_dashboard, $import_indexed, 1 === $import_running, $import_total, $import_completed ) ) ); ?>

@@ -11,6 +11,7 @@ namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\LinkIndex\LinkIndexStatus;
 use Affibloom\Application\Amazon\CredentialsService;
+use Affibloom\Application\Monetize\AmazonImportStatusService;
 use Affibloom\Application\Settings\DetectionChoices;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Domain\Amazon\Marketplace;
@@ -26,13 +27,14 @@ final class SettingsScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template           $template    Template renderer.
-	 * @param SettingsService    $settings    Settings use cases.
-	 * @param DisplayScreen      $display     The Display tab, which has its own model and screen.
-	 * @param Notice             $notice      The toast after a save.
-	 * @param DetectionChoices   $choices     What Custom Link Detection can scan (General).
-	 * @param CredentialsService $credentials The Amazon tab's Product Data API card (C1A).
-	 * @param LinkIndexStatus    $link_index  General's Link Index card (Task 9J).
+	 * @param Template                       $template    Template renderer.
+	 * @param SettingsService                $settings    Settings use cases.
+	 * @param DisplayScreen                  $display     The Display tab, which has its own model and screen.
+	 * @param Notice                         $notice      The toast after a save.
+	 * @param DetectionChoices               $choices     What Custom Link Detection can scan (General).
+	 * @param CredentialsService             $credentials The Amazon tab's Product Data API card (C1A).
+	 * @param LinkIndexStatus                $link_index  General's Link Index card (Task 9J).
+	 * @param AmazonImportStatusService|null $import The Amazon import's card and General figures (F35; Task AM5).
 	 */
 	public function __construct(
 		private Template $template,
@@ -41,7 +43,8 @@ final class SettingsScreen {
 		private Notice $notice,
 		private DetectionChoices $choices,
 		private CredentialsService $credentials,
-		private LinkIndexStatus $link_index
+		private LinkIndexStatus $link_index,
+		private ?AmazonImportStatusService $import = null
 	) {}
 
 	/**
@@ -75,6 +78,12 @@ final class SettingsScreen {
 				'fields'     => 'general' === $tab ? $this->choices->custom_fields() : array(),
 				'has_acf'    => 'general' === $tab && $this->choices->has_acf(),
 				'link_index' => 'general' === $tab ? LinkIndexText::of( $this->link_index->figures( time() ) ) : array(),
+				// F35 R33, R34 (Task AM5): the import's card on Amazon, its figures in General's Link Index card.
+				'import'     => match ( $tab ) {
+					'amazon'  => $this->import?->card(),
+					'general' => $this->import?->general( time() ),
+					default   => null,
+				},
 			)
 		);
 	}

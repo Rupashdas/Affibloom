@@ -590,7 +590,8 @@ final class Plugin {
 					$notice,
 					$detection,
 					$amazon,
-					$this->link_index_status()
+					$this->link_index_status(),
+					$this->amazon_import_status()
 				),
 				new GroupsScreen( $this->template(), $groups, $notice ),
 				new GroupScreen( $this->template(), $groups, $notice ),
@@ -720,7 +721,8 @@ final class Plugin {
 			new PostTypeProductRepository(),
 			$this->settings_repository(),
 			new UserMetaBannerDismissals( 'affibloom_amazon_import_dismissed' ),
-			static fn(): array => (array) get_option( AmazonImportCron::STATE, array() )
+			static fn(): array => (array) get_option( AmazonImportCron::STATE, array() ),
+			static fn(): int => (int) get_option( OptionPluginState::ACTIVATED_AT, 0 )
 		);
 	}
 

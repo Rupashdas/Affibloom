@@ -24,7 +24,7 @@
 				block.innerHTML = data.html;
 			} );
 			var banner = document.querySelector( '[data-amazon-import-notice]' );
-			if ( data.complete && banner ) {
+			if ( data.complete && banner && ! banner.hasAttribute( 'data-amazon-context' ) ) {
 				banner.classList.add( 'is-leaving' );
 				window.setTimeout( function () {
 					banner.remove();

@@ -55,6 +55,7 @@ $card_data = array(
 							$card_data + array(
 								'link_index' => $view['link_index'],
 								'support'    => $view['support'],
+								'import'     => $view['import'] ?? null,
 							)
 						);
 						$this->render(

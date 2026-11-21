@@ -126,6 +126,23 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		await expect( page.locator( '[data-amazon-import-notice]' ) ).toBeVisible();
 	} );
 
+	// AC7 (AM5; R33, R34, D21). The Dashboard's first-day notice needs an idle, empty queue: its rule is
+	// AmazonImportStatusContextTest's.
+	test( 'AC7 Settings shows the import status on Amazon and its figures in General', async ( { page } ) => {
+		newPostWith( `<p><a href="https://www.amazon.com/dp/${ asin() }">queued</a></p>` );
+		wp( 'eval', 'update_option( "affibloom_activated_at", time() );' );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
+		await expect( page.getByText( 'Amazon import status' ) ).toBeVisible();
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		const card = page.locator( '#affibloom-card-link-index' );
+		await expect( card ).toContainText( 'Amazon import' );
+		await expect( card ).toContainText( /indexed placements · [\d,]+ Dashboard links/ );
+
+		setSettings( { auto_monetize_amazon: false } );
+		await page.reload();
+		await expect( card ).not.toContainText( 'Link Index vs Dashboard' );
+	} );
+
 	test( 'AC8 with Auto-Monetization off the event is not scheduled and a run does nothing', () => {
 		setSettings( { auto_monetize_amazon: false } );
 		expect( wp( 'eval', "echo wp_next_scheduled( 'affibloom_amazon_import' ) ? 'yes' : 'no';" ) ).toBe( 'no' );

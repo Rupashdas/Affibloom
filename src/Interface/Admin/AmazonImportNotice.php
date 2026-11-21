@@ -37,11 +37,17 @@ final class AmazonImportNotice implements NoticeProvider {
 	 * @return list<ShellNotice>
 	 */
 	public function notices( string $page ): array {
-		unset( $page ); // Every Affibloom page, as Lasso's is_lasso_page().
 		if ( ! current_user_can( Capabilities::PRODUCTS ) ) {
 			return array();
 		}
-		$status = $this->status->notice( get_current_user_id() );
+		// The banner on every Affibloom page, as Lasso's is_lasso_page(); on the Dashboard, once the import is idle, the
+		// first day's explanation instead (R32; Task AM5), which stays until it is dismissed.
+		$status  = $this->status->notice( get_current_user_id() );
+		$context = 0;
+		if ( null === $status && AdminMenu::SLUG === $page ) {
+			$status  = $this->status->dashboard_notice( get_current_user_id(), time() );
+			$context = 1;
+		}
 		if ( null === $status ) {
 			return array();
 		}
@@ -50,7 +56,7 @@ final class AmazonImportNotice implements NoticeProvider {
 			new ShellNotice(
 				self::KEY,
 				ShellNotice::UPDATE,
-				array( $status->queue, $status->dashboard, $status->indexed, $status->running ? 1 : 0, $status->total, $status->completed )
+				array( $status->queue, $status->dashboard, $status->indexed, $status->running ? 1 : 0, $status->total, $status->completed, $context )
 			),
 		);
 	}

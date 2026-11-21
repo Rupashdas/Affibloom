@@ -6,7 +6,7 @@
  * "Ready to rebuild?" first (Task 35G).
  *
  * @package Affibloom
- * @var array{link_index: array{status: string, progress_text: string, eta_text: string, last_updated_text: string, links_text: string, links_indexed: int}, support: bool} $view
+ * @var array{link_index: array{status: string, progress_text: string, eta_text: string, last_updated_text: string, links_text: string, links_indexed: int}, support: bool, import?: \Affibloom\Domain\Monetize\AmazonImportStatus|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -33,6 +33,9 @@ $running = 'running' === $index['status'];
 			<dt><?php esc_html_e( 'Links Indexed', 'affibloom' ); ?></dt>
 			<dd data-link-index-links><?php echo esc_html( $index['links_text'] ); ?></dd>
 		</dl>
+		<?php if ( null !== ( $view['import'] ?? null ) ) : ?>
+			<?php $this->render( 'admin/partials/amazon-import-general-stats', array( 'status' => $view['import'] ) ); ?>
+		<?php endif; ?>
 		<?php if ( $view['support'] ) : ?>
 			<p class="affibloom-card__actions">
 				<button type="button" class="affibloom-button affibloom-button--secondary" data-link-index-rebuild><?php esc_html_e( 'Rebuild Database', 'affibloom' ); ?></button>

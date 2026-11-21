@@ -119,7 +119,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task AM2: Amazon short links — the import's short-link branch and the map
 - [x] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
 - [x] Task AM4: The Amazon import notice — every Affibloom page
-- [ ] Task AM5: The import status card, the Dashboard notice and the General stats
+- [x] Task AM5: The import status card, the Dashboard notice and the General stats
 - [ ] Task AM6: Tracking IDs found in posts join the whitelist — `save_post` through F21
 
 **Migration of the opportunity and auto-detect data (after F22 and F35 exist):**
@@ -1600,11 +1600,17 @@ Index vs Dashboard" ("%1$s indexed placements · %2$s Dashboard links") with Las
 **Files:** create the partials; modify the Amazon and General tab templates, `DashboardScreen`, `AmazonImportNotice`,
 `amazon-import-status.js`; tests unit `AmazonImportStatusContextTest.php`, E2E F35 AC7.
 
-- [ ] **Step 1: Failing tests.** AC7 (each surface shown and hidden by its rule; dismiss on the Dashboard).
-- [ ] **Step 2: The rule.**
-- [ ] **Step 3: The three surfaces.**
-- [ ] **Step 4: Run and look** (1280/375).
-- [ ] **Step 5: Commit** — "Show the Amazon import on Settings and the Dashboard".
+- [x] **Step 1: Failing tests.** AC7 (each surface shown and hidden by its rule; dismiss on the Dashboard).
+- [x] **Step 2: The rule.**
+- [x] **Step 3: The three surfaces.**
+- [x] **Step 4: Run and look** (1280/375).
+- [x] **Step 5: Commit** — "Show the Amazon import on Settings and the Dashboard".
+
+*Note:* the rule is `AmazonImportStatus::shows_context()` and the service's `card()`, `general()`,
+`dashboard_notice()`; `affibloom_activated_at` already existed (TL1's `OptionPluginState`). The Dashboard notice is
+AM4's provider with a context flag the poller leaves alone; the General figures share the Link Index card's first
+column. Checked: unit; on Local (lock held, setting on without its save hook, then off) the Amazon card and the General
+figures at 1280 px, General at 375 px. The Dashboard's idle notice needs an empty queue (384 here): unit only.
 
 ---
 

@@ -51,6 +51,16 @@ final class AmazonImportStatus {
 	}
 
 	/**
+	 * Whether the status is worth explaining outside the banner (R32, R34; Task AM5): while there is work, or in the first
+	 * 24 hours after activation when the index has more placements than the Dashboard has links.
+	 *
+	 * @param bool $first_day Within 24 hours of activation.
+	 */
+	public function shows_context( bool $first_day ): bool {
+		return $this->busy() || ( $first_day && $this->indexed > $this->dashboard );
+	}
+
+	/**
 	 * The batch's progress in percent: 5 while running without a total (R29).
 	 */
 	public function percent(): int {

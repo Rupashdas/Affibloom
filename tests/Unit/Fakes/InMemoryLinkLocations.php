@@ -39,8 +39,11 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return array();
 	}
 
+	/** What stats() answers (Task AM5's status tests). */
+	public ?LinkIndexStats $figures = null;
+
 	public function stats(): LinkIndexStats {
-		return new LinkIndexStats();
+		return $this->figures ?? new LinkIndexStats();
 	}
 
 	public function host_links( int $host_id ): array {

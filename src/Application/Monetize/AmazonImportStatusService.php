@@ -25,6 +25,9 @@ use Closure;
  */
 final class AmazonImportStatusService {
 
+	/** The first day after activation, in seconds (R32's window). */
+	private const FIRST_DAY = 86400;
+
 	/**
 	 * Builds the service.
 	 *
@@ -33,6 +36,7 @@ final class AmazonImportStatusService {
 	 * @param SettingsRepository     $settings   The site's settings.
 	 * @param BannerDismissals       $dismissals Who hid the notice for which counts.
 	 * @param Closure                $batch      The batch the cron recorded: fn(): array{running?: bool, total?: int, completed?: int}.
+	 * @param Closure|null           $activated  When Affibloom was activated, as a Unix time: fn(): int (Task AM5; D19).
 	 */
 	public function __construct(
 		private LinkLocationRepository $rows,
@@ -40,7 +44,66 @@ final class AmazonImportStatusService {
 		private SettingsRepository $settings,
 		private BannerDismissals $dismissals,
 		private Closure $batch,
+		private ?Closure $activated = null,
 	) {}
+
+	/**
+	 * Settings → Amazon's "Amazon import status" card (R33; Task AM5): the status while Auto-Monetization is on.
+	 */
+	public function card(): ?AmazonImportStatus {
+		return $this->on() ? $this->status() : null;
+	}
+
+	/**
+	 * Settings → General's figures in the Link Index card (R34, D21; Task AM5), under R32's rule.
+	 *
+	 * @param int $now Now, as a Unix time.
+	 */
+	public function general( int $now ): ?AmazonImportStatus {
+		if ( ! $this->on() ) {
+			return null;
+		}
+		$status = $this->status();
+
+		return $status->shows_context( $this->first_day( $now ) ) ? $status : null;
+	}
+
+	/**
+	 * The Dashboard's notice (R32; Task AM5): the import idle or complete, in the first 24 hours after activation, with
+	 * more placements indexed than Dashboard links, and not dismissed for these counts.
+	 *
+	 * @param int $user The person.
+	 * @param int $now  Now, as a Unix time.
+	 */
+	public function dashboard_notice( int $user, int $now ): ?AmazonImportStatus {
+		if ( ! $this->on() ) {
+			return null;
+		}
+		$status = $this->status();
+		if ( $status->busy() || ! $status->shows_context( $this->first_day( $now ) ) ) {
+			return null;
+		}
+
+		return $this->dismissals->get( $user ) !== $status->fingerprint() ? $status : null;
+	}
+
+	/**
+	 * Within 24 hours of Affibloom's activation (D19: Lasso's Pro warm-up is licence-bound and has no equivalent).
+	 *
+	 * @param int $now Now, as a Unix time.
+	 */
+	private function first_day( int $now ): bool {
+		$at = null === $this->activated ? 0 : (int) ( $this->activated )();
+
+		return $at > 0 && $now - $at < self::FIRST_DAY;
+	}
+
+	/**
+	 * Whether Auto-Monetization is on.
+	 */
+	private function on(): bool {
+		return $this->settings->get()->bool( 'auto_monetize_amazon' );
+	}
 
 	/**
 	 * The status now.
@@ -65,7 +128,7 @@ final class AmazonImportStatusService {
 	 * @param int $user The person.
 	 */
 	public function notice( int $user ): ?AmazonImportStatus {
-		if ( ! $this->settings->get()->bool( 'auto_monetize_amazon' ) ) {
+		if ( ! $this->on() ) {
 			return null;
 		}
 		$status = $this->status();

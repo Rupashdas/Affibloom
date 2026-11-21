@@ -1963,6 +1963,9 @@
 .affibloom-import__bar { display: block; max-width: 280px; height: 4px; margin: 6px 0 2px; border-radius: 2px; background: var(--affibloom-line); overflow: hidden; }
 .affibloom-import__bar span { display: block; height: 100%; background: var(--affibloom-brand-600); }
 @media (prefers-reduced-motion: reduce) { .affibloom-import { transition: none; } }
+/* Settings → Amazon's "Amazon import status" under the switch (R33; Task AM5). */
+.affibloom-import-card { margin-top: 4px; padding: 14px 16px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-chip); background: var(--affibloom-subtle); }
+.affibloom-admin .affibloom-import-card .affibloom-label { margin: 0 0 6px; }
 .affibloom-admin .affibloom-bulk-sync__actions .affibloom-notice__close { margin-left: 0; }
 @media (max-width: 599px) {
 	.affibloom-bulk-sync__actions { flex-basis: 100%; justify-content: space-between; }
@@ -2131,6 +2134,9 @@
 .affibloom-amazon-data__list dd,
 .affibloom-facts dd { margin: 0; color: var(--affibloom-ink-900); overflow-wrap: anywhere; }
 .affibloom-facts[hidden] { display: none; }
+/* The Link Index card's two lists share one first column, so the Amazon figures (Task AM5) line up with the index's. */
+[data-link-index] .affibloom-facts { grid-template-columns: 11rem minmax(0, 1fr); }
+[data-link-index] .affibloom-facts + .affibloom-facts { margin-top: 8px; }
 .affibloom-card__actions { margin: 16px 0 0; }
 @media (max-width: 600px) {
 	.affibloom-amazon-data__body { grid-template-columns: minmax(0, 1fr); }
