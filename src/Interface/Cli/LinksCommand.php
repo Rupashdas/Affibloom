@@ -14,13 +14,16 @@ use Affibloom\Domain\LinkIndex\LinkIndexStats;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\LinkIndex\LinkType;
 use Affibloom\Domain\LinkIndex\RebuildStateRepository;
+use Affibloom\Domain\Monetize\Network;
+use Affibloom\Domain\Monetize\NetworkExtractor;
+use Affibloom\Domain\Monetize\NetworkRegistry;
 use Affibloom\Module;
 use RuntimeException;
 use WP_CLI;
 
 /**
  * `wp affibloom links rebuild [--post=<id>] [--dry-run]` and `wp affibloom links status` (F21 D18): the link index
- * built in this request, and its figures.
+ * built in this request, and its figures; `wp affibloom links detect <url>` (F35, Task C2A): a link's affiliate network.
  */
 final class LinksCommand implements Module {
 
@@ -30,8 +33,9 @@ final class LinksCommand implements Module {
 	 * @param LinkIndexRebuild       $rebuild The rebuild.
 	 * @param LinkLocationRepository $rows    The index.
 	 * @param RebuildStateRepository $state   Where a background rebuild stands.
+	 * @param NetworkRegistry|null   $networks Lasso's affiliate networks, for `detect` (F35; Task C2A).
 	 */
-	public function __construct( private LinkIndexRebuild $rebuild, private LinkLocationRepository $rows, private RebuildStateRepository $state ) {}
+	public function __construct( private LinkIndexRebuild $rebuild, private LinkLocationRepository $rows, private RebuildStateRepository $state, private ?NetworkRegistry $networks = null ) {}
 
 	/**
 	 * Adds the commands when WP-CLI is running.
@@ -74,6 +78,55 @@ final class LinksCommand implements Module {
 			WP_CLI::line( self::by_type( $stats ) );
 		}
 		WP_CLI::success( self::summary( $stats, $dry_run ) );
+	}
+
+	/**
+	 * Says which affiliate network a link belongs to and what it carries (F35 R2-R9; C2 AC6; Task C2A).
+	 *
+	 * ## OPTIONS
+	 *
+	 * <url>
+	 * : The link.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp affibloom links detect "https://goto.walmart.com/c/3512787/565706/9383?u=https%3A%2F%2Fwww.walmart.com%2F"
+	 *
+	 * @param list<string>          $args       The link.
+	 * @param array<string, string> $assoc_args Unused.
+	 */
+	public function detect( array $args, array $assoc_args ): void {
+		unset( $assoc_args );
+		$network = $this->networks?->match( $args[0] ?? '' );
+		WP_CLI::line( null === $network ? 'No known network.' : self::detected( $network, $args[0] ) );
+	}
+
+	/**
+	 * The line for a network link: Amazon is the Amazon import's (R5), the four of R8 are affiliate links Lasso never
+	 * detects, the 32 others say what they carry.
+	 *
+	 * @param Network $network The network.
+	 * @param string  $url     The link.
+	 */
+	private static function detected( Network $network, string $url ): string {
+		if ( $network->is_amazon() ) {
+			return $network->name . ": not detected (Amazon is the Amazon import's)";
+		}
+		$head = sprintf( '%1$s (%2$s)', $network->name, $network->slug );
+		if ( ! $network->is_detected() ) {
+			return $head . ': an affiliate link, not auto-detected';
+		}
+		$link  = NetworkExtractor::read( $network, $url );
+		$parts = array_filter(
+			array(
+				'' === $link->affiliate_id ? '' : 'affiliate ' . $link->affiliate_id,
+				'' === $link->advertiser_id ? '' : 'advertiser ' . $link->advertiser_id,
+				'' === $link->deep_link ? '' : 'deep link ' . $link->deep_link,
+				'' === $link->domain ? '' : 'domain ' . $link->domain,
+			)
+		);
+
+		return $head . ': ' . ( array() === $parts ? 'an affiliate link' : implode( ', ', $parts ) );
 	}
 
 	/**

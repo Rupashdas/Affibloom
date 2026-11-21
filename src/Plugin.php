@@ -15,6 +15,7 @@ use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
+use Affibloom\Domain\Monetize\NetworkRegistry;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
 use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
 use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
@@ -280,6 +281,13 @@ final class Plugin {
 	 * @var GuardedCatalog|null
 	 */
 	private ?GuardedCatalog $catalog = null;
+
+	/**
+	 * The affiliate-network registry, once read (Task C2A).
+	 *
+	 * @var NetworkRegistry|null
+	 */
+	private ?NetworkRegistry $networks = null;
 
 	/**
 	 * The link indexer, shared by the rebuild and the save hooks (F21); built on first use.
@@ -633,7 +641,7 @@ final class Plugin {
 			$this->upgrade_hooks(),
 			new UpgradeCommand( $upgrader ),
 			new AmazonCommand( $amazon, $catalog ),
-			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository(), new OptionLinkIndexState() ),
+			new LinksCommand( $this->link_index_rebuild(), new TableLinkLocationRepository(), new OptionLinkIndexState(), $this->networks() ),
 			new LinkIndexHooks( $this->link_indexer(), new TableLinkLocationRepository(), $this->host_query() ),
 			new LinkIndexCron( $this->link_index_rebuild(), new OptionLinkIndexState(), new OptionLock( 'affibloom_link_index_lock', 60 ), new WpCronBackgroundJob( LinkIndexCron::BATCH ), $this->cpu_guard(), $this->settings_repository(), $this->job_slots() ),
 			new LinkCheckCron( $this->link_checks(), new OptionLock( 'affibloom_link_check_lock', 60 ), $this->cpu_guard(), $this->job_slots(), new WpCronBackgroundJob( LinkCheckCron::BATCH ) ),
@@ -674,6 +682,17 @@ final class Plugin {
 	 */
 	private function location_counts(): LocationCounts {
 		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
+	}
+
+	/**
+	 * Lasso's affiliate-network registry (F35 R2-R9, D2; Task C2A), read once from resources/networks.php.
+	 */
+	private function networks(): NetworkRegistry {
+		if ( null === $this->networks ) {
+			$this->networks = NetworkRegistry::from_array( require dirname( __DIR__ ) . '/resources/networks.php' );
+		}
+
+		return $this->networks;
 	}
 
 	/**

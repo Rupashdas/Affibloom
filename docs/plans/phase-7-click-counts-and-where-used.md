@@ -112,7 +112,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F35 and C2 — auto-detect and Amazon auto-monetization
 
-- [ ] Task C2A: The affiliate-network registry — `wp affibloom links detect <url>`
+- [x] Task C2A: The affiliate-network registry — `wp affibloom links detect <url>`
 - [ ] Task C2B: Detecting affiliate links when a post is indexed — `save_post`
 - [ ] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
 - [ ] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
@@ -1285,20 +1285,27 @@ usage error.
 `tests/Unit/Domain/Monetize/{NetworkRegistryTest,NetworkExtractorTest}.php`,
 `tests/Integration/LinksDetectCommandTest.php`, `tests/E2E/acceptance/C2.spec.ts` (AC6).
 
-- [ ] **Step 1: Failing tests.** E2E C2 AC6: the command on one URL per network family (Impact both shapes, Post
+- [x] **Step 1: Failing tests.** E2E C2 AC6: the command on one URL per network family (Impact both shapes, Post
   Affiliate Pro by fragment, Awin, a registry-only network, Amazon, a plain link). Unit: a data provider over all 37
   entries with Lasso's example URLs (the class doc blocks, the regexes' own hosts), one non-match each, first-match
   order, the accidental matches of R6 pinned (CAKE `a=1&x&c=2`, FlexOffers `fxo.co` mid-URL, TradeTracker `?tt=1`),
   every Appendix B rule (case-insensitive keys, `&amp;`, `u0026`, Partnerize `/destination:`). Expected red: no
   subcommand / no class.
-- [ ] **Step 2: The data file.** Transcribe Lasso's three JSON files and the 32 classes into `resources/networks.php` by a
+- [x] **Step 2: The data file.** Transcribe Lasso's three JSON files and the 32 classes into `resources/networks.php` by a
   one-off script run by hand (not committed), then check the counts (37, 32, 805, 21) in a unit test.
-- [ ] **Step 3: Domain classes** (R2's order, R3's two host forms, R4, R5, R9).
-- [ ] **Step 4: The subcommand.**
-- [ ] **Step 5: Run and look.** The 16 URLs of `wp_lasso_auto_monetize` give Lasso's stored network and IDs (15 Impact,
+- [x] **Step 3: Domain classes** (R2's order, R3's two host forms, R4, R5, R9).
+- [x] **Step 4: The subcommand.**
+- [x] **Step 5: Run and look.** The 16 URLs of `wp_lasso_auto_monetize` give Lasso's stored network and IDs (15 Impact,
   1 Post Affiliate Pro); `wp affibloom links detect` over the site's 3,015 indexed URLs (a loop in `wp eval`) finds only
   the 29 Mizuno links and the 30 rows of the 16 products.
-- [ ] **Step 6: Commit** — "Recognise every affiliate network Lasso knows".
+- [x] **Step 6: Commit** — "Recognise every affiliate network Lasso knows".
+
+*Note:* `resources/networks.php` was generated from Lasso's three JSON files and its 32 classes (names and slugs read
+from the classes, ID and deep-link keys per Appendix B); its guard also accepts the unit suite's `AFFIBLOOM_VERSION`.
+No `LinksDetectCommandTest` (WP-CLI is not loaded in the integration suite); C2 AC6 runs the command itself. Checked:
+unit (48 network cases); on Local all 17 rows of `wp_lasso_auto_monetize` give Lasso's network and IDs (its deep-link
+fallback to the product's target is C2B/C2C's), and the 4,675 indexed URLs find the 29 Mizuno Impact links plus 6
+fixture links.
 
 ---
 

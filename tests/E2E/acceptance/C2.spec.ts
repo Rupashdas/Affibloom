@@ -55,4 +55,20 @@ test.describe( 'C2 Affiliate link auto-detection', () => {
 		expect( productsFor( url ) ).toBe( 0 );
 		setSettings( { auto_detect_links: true } ); // the live site's value
 	} );
+
+	// AC6 (C2A; F35 R2-R9): the command names the network and what the link carries.
+	test( 'AC6 wp affibloom links detect names the network, one link per family', () => {
+		const detect = ( url: string ) => wp( 'affibloom', 'links', 'detect', url );
+		expect( detect( 'https://goto.walmart.com/c/3512787/565706/9383?u=https%3A%2F%2Fwww.walmart.com%2Fip%2F1' ) ).toBe(
+			'Impact (impact): affiliate 3512787, advertiser 9383, deep link https://www.walmart.com/ip/1, domain walmart.com'
+		);
+		expect( detect( 'https://mizunousa.sjv.io/jR4ZQP' ) ).toBe( 'Impact (impact): affiliate jR4ZQP' );
+		expect( detect( 'https://shop.example/p#a_aid=me' ) ).toBe( 'Post Affiliate Pro (postaffiliatepro): an affiliate link' );
+		expect( detect( 'https://www.awin1.com/cread.php?awinmid=1234&awinaffid=567&ued=https%3A%2F%2Fshop.example.com%2Fx' ) ).toBe(
+			'Awin (awin): affiliate 567, advertiser 1234, deep link https://shop.example.com/x, domain shop.example.com'
+		);
+		expect( detect( 'https://everflow.io/abc' ) ).toBe( 'Everflow (everflow): an affiliate link, not auto-detected' );
+		expect( detect( 'https://www.amazon.com/dp/B0TEST0001' ) ).toBe( "Amazon Associates: not detected (Amazon is the Amazon import's)" );
+		expect( detect( 'https://plain.example/page' ) ).toBe( 'No known network.' );
+	} );
 } );
