@@ -444,6 +444,13 @@
 				send: function ( current ) {
 					return wp.apiFetch( { path: path + '/groups', method: 'POST', data: { revision: current } } );
 				},
+				// The new row or column is the last: brought into view, as a wide grid may hide it.
+				done: function () {
+					var gutters = region.querySelectorAll( '.affibloom-table-cell--gutter' );
+					if ( gutters.length ) {
+						gutters[ gutters.length - 1 ].scrollIntoView( { block: 'nearest', inline: 'nearest', behavior: 'smooth' } );
+					}
+				},
 			} );
 			return;
 		}

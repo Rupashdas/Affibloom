@@ -3242,7 +3242,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-button-chip .affibloom-table-icon-text__words { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-table-button-chip .affibloom-table-icon { filter: brightness(0) invert(1); }
 .affibloom-table-button-chip[data-button-primary="0"] { border: 1px solid var(--affibloom-brand-600); background: var(--affibloom-white); color: var(--affibloom-brand-700); }
-.affibloom-table-button-chip[data-button-primary="0"] .affibloom-table-icon { filter: none; }
+/* The site's icons are white: on the outlined button they sit on the brand colour, as in the picker. */
+.affibloom-table-button-chip[data-button-primary="0"] .affibloom-table-icon { box-sizing: border-box; width: 18px; height: 18px; padding: 2px; border-radius: 4px; background: var(--affibloom-brand-600); filter: none; }
 .affibloom-table-button-chip:hover { background: var(--affibloom-brand-700); color: #fff; }
 .affibloom-table-button-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
 
@@ -3276,6 +3277,11 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-inspector__lead { margin: 0; color: var(--affibloom-ink-700); font: 400 14px/21px var(--affibloom-font); }
 .affibloom-table-inspector__tips { margin: 0; padding: 0 0 0 18px; color: var(--affibloom-ink-600); font: 400 13px/19px var(--affibloom-font); }
 .affibloom-table-inspector__tips li { margin: 0 0 6px; }
+/* The panel's title names the selection: a field's or a row's name is not said twice, a long product name is cut. */
+[data-inspector-part="field"] [data-inspector-field-name],
+[data-inspector-part="row"] .affibloom-table-inspector__subject { display: none; }
+.affibloom-table-inspector__subject strong,
+.affibloom-table-inspector__button [data-inspector-button-for] { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .affibloom-table-inspector__subject { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0; color: var(--affibloom-ink-900); font: 400 14px/20px var(--affibloom-font); }
 .affibloom-admin .affibloom-table-inspector__link { display: inline-flex; align-items: center; gap: 4px; color: var(--affibloom-brand-700); font: 500 13px/18px var(--affibloom-font); text-decoration: none; }
 .affibloom-admin .affibloom-table-inspector__link:hover { text-decoration: underline; }
