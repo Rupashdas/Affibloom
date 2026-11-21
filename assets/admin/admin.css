@@ -442,9 +442,7 @@
 	padding: 0 124px 0 20px;
 	box-shadow: var(--affibloom-shadow-card);
 	font-size: 15px;
-	transition: border-color var(--affibloom-ease);
 }
-.affibloom-admin .affibloom-page__search--wide .affibloom-search:hover:not(:focus) { border-color: var(--affibloom-line-strong); }
 /* Lasso's shortcut hint, inside the search box on its right, drawn as a key. */
 .affibloom-search-kbd {
 	position: absolute;
@@ -622,19 +620,42 @@
 	color: var(--affibloom-ink-900);
 	font-weight: 600;
 }
-.affibloom-admin .affibloom-input {
+/*
+ * One control for every text field, search and select (the user, 2026-11-22: the same look in every state). A select
+ * marked only `affibloom-select` used to keep wp-admin's (grey border, 2px corners, blue hover and focus), and the
+ * white background of `select.affibloom-input` wiped wp-admin's arrow; both now take this rule and the arrow below.
+ * Rest: control-line border. Hover: line-strong. Focus: brand-600 border and the brand ring (wp-admin's transparent
+ * outline stays for Windows High Contrast). Disabled: subtle, ink-600. Error: danger-700 (below, "Text field error").
+ */
+.affibloom-admin .affibloom-input,
+.affibloom-admin .affibloom-select {
 	width: 100%;
 	height: 38px;
-	/* wp-admin's forms.css gives text inputs min-height: 40px, which would beat the design's 38px. */
+	/* wp-admin's forms.css gives text inputs and selects min-height: 40px, which would beat the design's 38px. */
 	min-height: 38px;
+	max-width: none;
 	margin: 0;
 	padding: 0 12px;
 	border: 1px solid var(--affibloom-control-line);
 	border-radius: var(--affibloom-radius-control);
-	background: var(--affibloom-white);
+	background-color: var(--affibloom-white);
 	box-shadow: none;
 	color: var(--affibloom-ink-900);
 	font: 400 14px/20px var(--affibloom-font);
+	transition: border-color var(--affibloom-ease), box-shadow var(--affibloom-ease);
+}
+/* The select's arrow: the kit's chevron-down in ink-600, where wp-admin draws its own. */
+.affibloom-admin select.affibloom-input,
+.affibloom-admin .affibloom-select {
+	padding-right: 34px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2355625a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+	background-position: right 10px center;
+	background-repeat: no-repeat;
+	background-size: 16px 16px;
+	line-height: 20px;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
 }
 .affibloom-admin .affibloom-input--area {
 	height: auto;
@@ -642,9 +663,21 @@
 	padding: 9px 12px;
 	resize: vertical;
 }
-.affibloom-admin .affibloom-input:focus {
+.affibloom-admin .affibloom-input:hover,
+.affibloom-admin .affibloom-select:hover { border-color: var(--affibloom-line-strong); color: var(--affibloom-ink-900); }
+.affibloom-admin .affibloom-input:focus,
+.affibloom-admin .affibloom-select:focus {
 	border-color: var(--affibloom-brand-600);
+	outline: 2px solid transparent;
 	box-shadow: 0 0 0 3px var(--affibloom-brand-ring);
+	color: var(--affibloom-ink-900);
+}
+.affibloom-admin .affibloom-input:disabled,
+.affibloom-admin .affibloom-select:disabled {
+	border-color: var(--affibloom-control-line);
+	background-color: var(--affibloom-subtle);
+	color: var(--affibloom-ink-600);
+	cursor: not-allowed;
 }
 .affibloom-admin .affibloom-input::placeholder { color: var(--affibloom-ink-500); }
 .affibloom-admin .affibloom-color {
@@ -962,7 +995,6 @@
 .affibloom-admin input[type="color"].affibloom-swatch::-webkit-color-swatch-wrapper { padding: 0; }
 .affibloom-admin input[type="color"].affibloom-swatch::-webkit-color-swatch { border: 0; border-radius: 6px; }
 .affibloom-admin input[type="color"].affibloom-swatch::-moz-color-swatch { border: 0; border-radius: 6px; }
-.affibloom-admin .affibloom-select { padding-right: 32px; line-height: 32px; }
 
 /*
  * 7c. Two columns of cards, as Lasso's Amazon tab (the user, 2026-11-13): each column a stack of cards, the form's
@@ -1000,8 +1032,13 @@
 	background: var(--affibloom-white);
 	cursor: text;
 }
-.affibloom-tags:focus-within { border-color: var(--affibloom-brand-600); }
-.affibloom-tags.is-disabled { background: var(--affibloom-subtle); cursor: not-allowed; opacity: 0.6; }
+/* The tag and picker boxes are fields too: the same hover, focus and transition as the text field. */
+.affibloom-tags,
+.affibloom-picker__chips { transition: border-color var(--affibloom-ease), box-shadow var(--affibloom-ease); }
+.affibloom-tags:hover,
+.affibloom-picker__chips:hover { border-color: var(--affibloom-line-strong); }
+.affibloom-tags:focus-within { border-color: var(--affibloom-brand-600); box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-tags.is-disabled { border-color: var(--affibloom-control-line); background: var(--affibloom-subtle); cursor: not-allowed; opacity: 0.6; }
 .affibloom-tag {
 	display: inline-flex;
 	align-items: center;
@@ -1623,7 +1660,6 @@
 .affibloom-admin .affibloom-filters__field { display: grid; gap: 6px; margin: 0; }
 .affibloom-filters__label { display: flex; align-items: center; gap: 6px; color: var(--affibloom-ink-900); font: 600 13px/18px var(--affibloom-font); }
 .affibloom-admin .affibloom-filters__field .affibloom-select { width: 100%; max-width: none; height: 34px; min-height: 34px; }
-.affibloom-admin .affibloom-filters__field .affibloom-select:disabled { background: var(--affibloom-subtle); color: var(--affibloom-ink-400); }
 .affibloom-filters__inline { display: flex; gap: 8px; }
 .affibloom-admin .affibloom-filters__inline .affibloom-input { height: 32px; min-height: 32px; }
 .affibloom-filters__save .affibloom-field__error:empty { display: none; }
@@ -1709,8 +1745,7 @@
 }
 .affibloom-admin .affibloom-pagination .prev::before { transform: rotate(-135deg) translate(-2px, -2px); }
 .affibloom-admin .affibloom-pagination .next::before { transform: rotate(45deg) translate(-2px, -2px); }
-.affibloom-admin .affibloom-pagination a:focus-visible,
-.affibloom-admin .affibloom-pager__size select:focus-visible {
+.affibloom-admin .affibloom-pagination a:focus-visible {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;
 }
@@ -1816,8 +1851,6 @@
 	cursor: default;
 }
 .affibloom-tabs__tab.is-disabled:hover { color: var(--affibloom-ink-500); }
-/* wp-admin caps a select's width; this one fills its column like the text fields. */
-.affibloom-admin select.affibloom-input { max-width: none; }
 /*
  * MD5: two columns, 58% / 42%. The left holds the form's cards (Lasso's left column, then its right one) and the Amazon
  * data; the right is sticky under the WordPress toolbar and the header (32 + 64 + 16px), scrolling inside itself when
@@ -1867,11 +1900,6 @@
 	padding: 20px;
 	border: 2px dashed var(--affibloom-control-line);
 	border-radius: var(--affibloom-radius-card);
-}
-.affibloom-admin .affibloom-input:disabled {
-	background: var(--affibloom-subtle);
-	color: var(--affibloom-ink-600);
-	cursor: not-allowed;
 }
 /*
  * The save bar (MD5): Lasso's footer stuck to the foot of the window, so Save Changes is always in reach; "Unsaved
@@ -3028,7 +3056,10 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
    Amazon lines) shows under it on hover and focus; a clock beside the number during the first 24 hours. */
 .affibloom-tile--alert { position: relative; color: inherit; text-decoration: none; cursor: pointer; transition: border-color 120ms ease, box-shadow 120ms ease; }
 .affibloom-tile--alert:hover { border-color: var(--affibloom-ink-400); }
-.affibloom-tile--alert:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+/* wp-admin's `a:focus` (2px corners, blue text) and the kit's `:where(a):focus` (no shadow) would square the card, tint
+   it and drop its shadow while it has focus; the card keeps all three, and the keyboard ring is added to the shadow. */
+.affibloom-admin a.affibloom-tile--alert:focus { border-radius: var(--affibloom-radius-card); box-shadow: var(--affibloom-shadow-card); color: inherit; }
+.affibloom-admin a.affibloom-tile--alert:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring), var(--affibloom-shadow-card); }
 .affibloom-tile--broken-links[aria-current="true"] { border-color: var(--affibloom-danger-700); background: var(--affibloom-danger-50); }
 .affibloom-tile--out-of-stock[aria-current="true"] { border-color: var(--affibloom-warning-icon); background: var(--affibloom-warning-50); }
 .affibloom-tile--broken-links .affibloom-chip { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }
