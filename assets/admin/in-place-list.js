@@ -18,7 +18,9 @@
  *  - args:          arguments every request carries, e.g. { product: 7 }, or a function that returns them at each
  *                   request (a filter bar outside the list; optional).
  *
- * It returns { reload() }, which loads page 1 again with the current search and sort (a filter changed).
+ * It returns { reload() }, which loads page 1 again with the current search and sort (a filter changed), and
+ * { refresh() }, which draws the current page again and moves the focus to it (a row was dismissed, Task O7). Each drawn
+ * list fires `affibloom:list-loaded` on the region with the answer's data ({ total, … }), for counts kept elsewhere.
  */
 ( function () {
 	'use strict';
@@ -87,6 +89,7 @@
 					search.value = current.s;
 				}
 				announce();
+				region.dispatchEvent( new CustomEvent( 'affibloom:list-loaded', { detail: data } ) );
 				if ( focus ) {
 					var card = region.querySelector( '.affibloom-card' );
 					if ( card ) {
@@ -140,6 +143,9 @@
 		return {
 			reload: function () {
 				load( { s: current.s, paged: 1, order: current.order, orderby: current.orderby }, true, false );
+			},
+			refresh: function () {
+				load( current, false, true );
 			},
 		};
 	};

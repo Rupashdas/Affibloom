@@ -318,6 +318,27 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * Dismisses a row, or brings it back (F22 R45, D11; Task O7).
+	 *
+	 * @param int  $id      The row's ID.
+	 * @param bool $ignored True to dismiss, false to undo.
+	 * @return bool False when the row is gone.
+	 */
+	public function set_ignored( int $id, bool $ignored ): bool {
+		global $wpdb;
+
+		$table = $wpdb->prefix . self::TABLE;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one row.
+		if ( null === $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE id = %d', $table, $id ) ) ) {
+			return false;
+		}
+		$wpdb->update( $table, array( 'is_ignored' => $ignored ? 1 : 0 ), array( 'id' => $id ), array( '%d' ), array( '%d' ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		return true;
+	}
+
+	/**
 	 * One row by its ID.
 	 *
 	 * @param int $id The row's ID.

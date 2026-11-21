@@ -674,7 +674,7 @@ final class Plugin {
 	 * The Opportunities lists (F22; Task O1).
 	 */
 	private function opportunity_service(): OpportunityService {
-		return new OpportunityService( new TableOpportunityRepository() );
+		return new OpportunityService( new TableOpportunityRepository(), new TableLinkLocationRepository() );
 	}
 
 	/**

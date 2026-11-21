@@ -17,6 +17,7 @@ use Affibloom\Interface\Admin\OpportunitiesScreen;
 use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -24,7 +25,8 @@ use WP_REST_Server;
 /**
  * F22's routes (D3, D8, D20; Tasks O1, O2): `GET /opportunities/links`, `/domains` and `/domains/{domain}/links` answer
  * the list drawn by the partial the page printed, `{ html, term, page, orderby, order, total, url }`;
- * `POST /opportunities/intros/{box}` closes an intro box for good.
+ * `POST /opportunities/intros/{box}` closes an intro box for good; `POST` and `DELETE
+ * /opportunities/locations/{row}/dismiss` dismiss a Link Opportunity and undo it (Task O7).
  */
 final class OpportunitiesController implements Module {
 
@@ -72,6 +74,21 @@ final class OpportunitiesController implements Module {
 		}
 		register_rest_route(
 			ProductsController::NAMESPACE,
+			'/opportunities/locations/(?P<row>\d+)/dismiss',
+			array(
+				'methods'             => array( WP_REST_Server::CREATABLE, WP_REST_Server::DELETABLE ),
+				'callback'            => array( $this, 'dismiss' ),
+				'permission_callback' => array( $this, 'can_dismiss' ),
+				'args'                => array(
+					'row' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
+				),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
 			'/opportunities/intros/(?P<box>[a-z]+)',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -82,6 +99,47 @@ final class OpportunitiesController implements Module {
 						'type' => 'string',
 						'enum' => IntroBoxes::BOXES,
 					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Who may dismiss a row or undo it (D20): people who manage products and may edit the post the link is in. A row
+	 * that is gone passes here, so the callback can answer 404.
+	 *
+	 * @param WP_REST_Request $request Request with the row.
+	 * @phpstan-param WP_REST_Request<array{row: int}> $request
+	 */
+	public function can_dismiss( WP_REST_Request $request ): bool {
+		if ( ! current_user_can( Capabilities::PRODUCTS ) ) {
+			return false;
+		}
+		$host = $this->opportunities->host_of( (int) $request['row'] );
+
+		return 0 === $host || current_user_can( 'edit_post', $host );
+	}
+
+	/**
+	 * POST (Dismiss) or DELETE (Undo) /opportunities/locations/{row}/dismiss (R44-R46, D11): `{ data: { id, dismissed } }`,
+	 * 404 when the row is gone.
+	 *
+	 * @param WP_REST_Request $request Request with the row.
+	 * @phpstan-param WP_REST_Request<array{row: int}> $request
+	 */
+	public function dismiss( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$row       = (int) $request['row'];
+		$dismissed = 'DELETE' !== $request->get_method();
+		$found     = $dismissed ? $this->opportunities->dismiss( $row ) : $this->opportunities->restore( $row );
+		if ( ! $found ) {
+			return new WP_Error( 'affibloom_location_gone', __( 'This link is no longer on the page.', 'affibloom' ), array( 'status' => 404 ) );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'id'        => $row,
+					'dismissed' => $dismissed,
 				),
 			)
 		);

@@ -69,6 +69,17 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return $all[ $id - 1 ] ?? null;
 	}
 
+	/** @var array<int, bool> set_ignored()'s writes, by row. */
+	public array $ignored = array();
+
+	public function set_ignored( int $id, bool $ignored ): bool {
+		if ( null === $this->find( $id ) ) {
+			return false;
+		}
+		$this->ignored[ $id ] = $ignored;
+		return true;
+	}
+
 	public function counts_for( array $product_ids ): array {
 		$counts = array();
 		foreach ( $this->rows as $rows ) {

@@ -105,7 +105,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O4: A post's links (Content › post)
 - [x] Task O5: The product page's Opportunities tab and Detect Opportunities
 - [x] Task O6: Detect Opportunities in Settings, and Override All Links
-- [ ] Task O7: Dismiss, and Undo
+- [x] Task O7: Dismiss, and Undo
 - [ ] Task O8: The Dashboard's tile, filter tab and lightbulb
 - [ ] Task O9: Export CSV of content opportunities
 - [ ] Task O10: Monetize and unmonetize at render time (N1-A)
@@ -1117,12 +1117,18 @@ dismissed. Domains, Detected Links and Content still list the link (as Lasso).
 **Files:** the above; tests F22 **AC8**; integration `DismissTest.php` (dismiss, re-index the host, still dismissed;
 undo; 404 for a gone row).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Repository, the F21 carry-over, service, routes.**
-- [ ] **Step 3: Dialog, notice with Undo, row removal.**
-- [ ] **Step 4: Run and look** (keyboard focus returns to the
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Repository, the F21 carry-over, service, routes.**
+- [x] **Step 3: Dialog, notice with Undo, row removal.**
+- [x] **Step 4: Run and look** (keyboard focus returns to the
   list after the dialog).
-- [ ] **Step 5: Commit** — "Add Dismiss to opportunities, kept across rescans".
+- [x] **Step 5: Commit** — "Add Dismiss to opportunities, kept across rescans".
+
+*Note:* `LinkLocationRepository::set_ignored()` (the index's interface, not a `LinkLocationsTable` class); F21's
+`replace_host()` already kept `is_ignored` by identity. The `edit_post` check is the route's permission callback (the
+service names the host, `host_of()`). The dialog reuses `delete-modal.php` (an icon and data words added) instead of a
+new partial; the words live on it, not in `Messages`. The toast gained an optional action (Undo). Checked: unit tests; on
+Local dismiss 10 → 9, a re-save kept it dismissed, Undo → 10, 404 for a gone row; both screens at 1280 px, focus on the list.
 
 ---
 

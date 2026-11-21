@@ -4,7 +4,8 @@
  * Filter by URL and Open in New Window under it on hover or focus; the post to its editor with Filter by Content and
  * Open in New Window; the Suggestion to the product's page with Filter by Link (not when the list is already one
  * product's); the Type icon, which opens the preview; the Monetize switch, which comes with O10 and is shown disabled
- * until then. On the product page's tab the filter links are left out (R35).
+ * until then; the × asks "Dismiss This Opportunity" (R44, Task O7). On the product page's tab the filter links are left
+ * out (R35).
  *
  * @package Affibloom
  * @var array{opportunity: \Affibloom\Domain\Opportunity\Opportunity, filtered: bool, product_page?: bool} $view
@@ -21,6 +22,8 @@ $edit        = (string) get_edit_post_link( $opportunity->host_id, 'raw' );
 $host_title  = '' !== $opportunity->host_title ? $opportunity->host_title : __( '(no title)', 'affibloom' );
 /* translators: %s: the link's address. */
 $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place->url );
+/* translators: %s: the link's address. */
+$dismiss_label = sprintf( __( 'Dismiss %s', 'affibloom' ), $opportunity->place->url );
 ?>
 <tr data-location-id="<?php echo esc_attr( (string) $opportunity->place->id ); ?>">
 	<td class="affibloom-col-url">
@@ -60,5 +63,12 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place
 			<input type="checkbox" class="affibloom-toggle__input" role="switch" disabled aria-label="<?php echo esc_attr( $monetize_label ); ?>" aria-describedby="affibloom-soon-note">
 			<span class="affibloom-toggle__track" aria-hidden="true"></span>
 		</span>
+	</td>
+	<td class="affibloom-col-dismiss">
+		<button type="button" class="affibloom-icon-button" data-affibloom-open="affibloom-dismiss-opportunity"
+			data-dismiss-opportunity="<?php echo esc_attr( (string) $opportunity->place->id ); ?>"
+			aria-label="<?php echo esc_attr( $dismiss_label ); ?>" title="<?php esc_attr_e( 'Dismiss', 'affibloom' ); ?>">
+			<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
+		</button>
 	</td>
 </tr>

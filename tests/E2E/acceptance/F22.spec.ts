@@ -29,7 +29,7 @@ test.describe( 'F22 Opportunities', () => {
 		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&product=${ product }` );
 		await expect( page.locator( '[data-found]' ) ).toHaveText( '12 Found' );
 		await expect( page.locator( '.affibloom-table--opportunities tbody tr' ) ).toHaveCount( 10 );
-		await expect( page.locator( '.affibloom-table--opportunities thead' ).getByRole( 'columnheader' ) ).toHaveText( [ /URL/, /Content/, /Suggestion/, /Type/, /Monetize/ ] );
+		await expect( page.locator( '.affibloom-table--opportunities thead' ).getByRole( 'columnheader' ) ).toHaveText( [ /URL/, /Content/, /Suggestion/, /Type/, /Monetize/, /Dismiss/ ] );
 
 		await page.getByLabel( 'Search Opportunities' ).fill( `${ domain } item-1` );
 		await page.getByLabel( 'Search Opportunities' ).press( 'Enter' );
@@ -161,6 +161,42 @@ test.describe( 'F22 Opportunities', () => {
 		expect( wp( 'post', 'meta', 'get', String( fresh ), '_affibloom_detect_opportunities' ) ).toBe( '0' );
 		setSettings( { detect_opportunities: true } );
 		wp( 'eval', "do_action( 'rest_api_init' ); wp_set_current_user( 1 ); $r = new WP_REST_Request( 'POST', '/affibloom/v1/settings/link-defaults/apply' ); $r->set_body_params( array( 'key' => 'detect_opportunities', 'value' => true ) ); rest_do_request( $r );" );
+	} );
+
+	// AC8 (O7; R44-R49, D10-D12).
+	test( 'AC8 Dismiss hides the link everywhere it is suggested, survives a re-save, and Undo brings it back', async ( { page } ) => {
+		const { product, title, domain } = fixture( 2 );
+		const host = Number( wp( 'post', 'list', '--post_type=post', `--title=${ title }`, '--field=ID' ) );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }&tab=opportunities` );
+		await expect( page.locator( '[data-tab-count="opportunities"]' ) ).toHaveText( '2' );
+
+		await page.getByRole( 'button', { name: `Dismiss https://www.${ domain }/item-0` } ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Dismiss This Opportunity' } );
+		await expect( dialog ).toContainText( 'If you dismiss this, it will no longer appear as an opportunity.' );
+		await dialog.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '2 Found' );
+
+		await page.getByRole( 'button', { name: `Dismiss https://www.${ domain }/item-0` } ).click();
+		await dialog.getByRole( 'button', { name: 'Dismiss', exact: true } ).click();
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
+		await expect( page.locator( '[data-tab-count="opportunities"]' ) ).toHaveText( '1' );
+		await expect( page.locator( '.affibloom-card--table' ) ).toBeFocused();
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Opportunity dismissed.' );
+
+		// The post saved again re-indexes it: still dismissed. Domains' Detected Links still list it (D12).
+		wp( 'post', 'update', String( host ), '--post_status=publish' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&product=${ product }` );
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=domain&domain=${ domain }` );
+		await expect( page.locator( '.affibloom-list' ) ).toContainText( 'item-0' );
+
+		// Undo, from a fresh dismissal's notice.
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&product=${ product }` );
+		await page.getByRole( 'button', { name: `Dismiss https://www.${ domain }/item-1` } ).click();
+		await page.getByRole( 'dialog', { name: 'Dismiss This Opportunity' } ).getByRole( 'button', { name: 'Dismiss', exact: true } ).click();
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '0 Found' );
+		await page.locator( '.affibloom-toast' ).getByRole( 'button', { name: 'Undo' } ).click();
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
 	} );
 
 	// AC12 (O4; R29-R31).

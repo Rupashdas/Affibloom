@@ -923,7 +923,15 @@
 		}
 	}
 
-	function toast( message, failed ) {
+	/**
+	 * A toast, bottom right. One with an action (Undo, Task O7) stays as long as a failure's, so the button can be
+	 * reached; pressing it runs the action and closes the toast.
+	 *
+	 * @param {string}  message The words.
+	 * @param {boolean} failed  The failure look.
+	 * @param {Object}  action  Optional: { label, run }.
+	 */
+	function toast( message, failed, action ) {
 		var template = document.getElementById( 'affibloom-toast-template' );
 		var host = document.querySelector( '.affibloom-admin' );
 		if ( ! template || ! host ) {
@@ -934,10 +942,20 @@
 		element.querySelector( '[data-toast-icon="success"]' ).hidden = failed;
 		element.querySelector( '[data-toast-icon="error"]' ).hidden = ! failed;
 		element.classList.toggle( 'affibloom-toast--error', failed );
+		var button = element.querySelector( '[data-toast-action]' );
+		if ( action && button ) {
+			button.textContent = action.label;
+			button.hidden = false;
+			element.classList.add( 'affibloom-toast--action' );
+			button.addEventListener( 'click', function () {
+				element.remove();
+				action.run();
+			} );
+		}
 		host.appendChild( element );
 		window.setTimeout( function () {
 			element.remove();
-		}, failed ? 9500 : 4500 );
+		}, failed || action ? 9500 : 4500 );
 	}
 
 	/**

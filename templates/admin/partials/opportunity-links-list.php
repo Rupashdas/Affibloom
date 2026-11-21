@@ -19,6 +19,8 @@ $columns = array(
 	array( 'suggestion', __( 'Suggestion', 'affibloom' ), __( 'The name of a product with the same domain as this URL. Click link to edit.', 'affibloom' ), 'suggestion' ),
 	array( 'type', __( 'Type', 'affibloom' ), __( 'Click to see a snippet of this link as it appears on your site.', 'affibloom' ), '' ),
 	array( 'monetize', __( 'Monetize', 'affibloom' ), '', '' ),
+	// The × (R44): no visible heading; the screen reader's is the tooltip slot.
+	array( 'dismiss', '', __( 'Dismiss', 'affibloom' ), '' ),
 );
 ?>
 <p class="affibloom-found" data-found>

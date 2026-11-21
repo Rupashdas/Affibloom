@@ -95,4 +95,14 @@ interface LinkLocationRepository {
 	 * @param int $id The row's ID.
 	 */
 	public function find( int $id ): ?LinkLocation;
+
+	/**
+	 * Dismisses a row on the Opportunities screens, or brings it back (F22 R44-R49, D10, D11; Task O7). A rescan keeps
+	 * the flag while the row's identity stays (replace_host()).
+	 *
+	 * @param int  $id      The row's ID.
+	 * @param bool $ignored True to dismiss, false to undo.
+	 * @return bool False when the row is gone.
+	 */
+	public function set_ignored( int $id, bool $ignored ): bool;
 }

@@ -10,13 +10,14 @@ declare( strict_types=1 );
 namespace Affibloom\Application\Opportunities;
 
 use Affibloom\Application\Clicks\ClickReport;
+use Affibloom\Domain\LinkIndex\LinkLocationRepository;
 use Affibloom\Domain\Opportunity\ContentFilter;
 use Affibloom\Domain\Opportunity\OpportunityPage;
 use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Domain\Opportunity\OpportunityRepository;
 
 /**
- * F22's lists over the link index (Tasks O1-O9). Link Opportunities: untied links to a domain the site already has a
+ * F22's lists over the link index (Tasks O1-O9), and Dismiss and its Undo (Task O7). Link Opportunities: untied links to a domain the site already has a
  * product for (D4).
  */
 final class OpportunityService {
@@ -24,9 +25,40 @@ final class OpportunityService {
 	/**
 	 * Builds the service.
 	 *
-	 * @param OpportunityRepository $opportunities The queries.
+	 * @param OpportunityRepository  $opportunities The queries.
+	 * @param LinkLocationRepository $locations     The link index, for Dismiss and Undo (Task O7).
 	 */
-	public function __construct( private OpportunityRepository $opportunities ) {}
+	public function __construct( private OpportunityRepository $opportunities, private LinkLocationRepository $locations ) {}
+
+	/**
+	 * The post a row of the index is in, for the routes' `edit_post` check (D20); 0 when the row is gone.
+	 *
+	 * @param int $row The row's ID.
+	 */
+	public function host_of( int $row ): int {
+		return $this->locations->find( $row )?->host_id ?? 0;
+	}
+
+	/**
+	 * Dismisses an opportunity (R44-R46, D12): the row leaves Link Opportunities, the product tab and their counts, and
+	 * stays dismissed across rescans (D10). Domains, Detected Links, Content and a post's links still list it.
+	 *
+	 * @param int $row The row's ID.
+	 * @return bool False when the row is gone.
+	 */
+	public function dismiss( int $row ): bool {
+		return $this->locations->set_ignored( $row, true );
+	}
+
+	/**
+	 * Brings a dismissed opportunity back: the notice's Undo (D11).
+	 *
+	 * @param int $row The row's ID.
+	 * @return bool False when the row is gone.
+	 */
+	public function restore( int $row ): bool {
+		return $this->locations->set_ignored( $row, false );
+	}
 
 	/**
 	 * One page of Link Opportunities.

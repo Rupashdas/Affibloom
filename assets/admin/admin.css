@@ -2418,8 +2418,14 @@ html.affibloom-is-dragging * { cursor: grabbing !important; user-select: none; }
 .affibloom-toast__icon .affibloom-icon { width: 16px; height: 16px; stroke-width: 2.2; }
 /* The failure toast (Task 15A): the same card, a white cross on danger-700 (6.6:1). */
 .affibloom-toast--error .affibloom-toast__icon { background: var(--affibloom-danger-700); color: var(--affibloom-white); }
-/* A failure says what to do next, so it stays longer (C1 R23's warning is two sentences). */
-.affibloom-toast--error { animation-duration: 9s; }
+/* A failure says what to do next, so it stays longer (C1 R23's warning is two sentences); so does one with an action. */
+.affibloom-toast--error,
+.affibloom-toast--action { animation-duration: 9s; }
+/* The toast's one action (Undo, Task O7): a text button in the toast's icon green, on the dark card. */
+.affibloom-admin .affibloom-toast__action { flex: none; margin: -4px -6px -4px 4px; padding: 4px 8px; border: 0; border-radius: var(--affibloom-radius-segment); background: none; color: var(--affibloom-toast-icon); font: 600 14px/20px var(--affibloom-font); cursor: pointer; }
+.affibloom-admin .affibloom-toast__action:hover { background: rgba(255, 255, 255, 0.1); }
+.affibloom-admin .affibloom-toast__action:focus-visible { outline: 2px solid var(--affibloom-toast-icon); outline-offset: 1px; }
+.affibloom-toast__action[hidden] { display: none; }
 .affibloom-toast__icon[hidden] { display: none; }
 /* Above the product page's save bar (MD5). */
 .affibloom-admin:has(.affibloom-product__footer) .affibloom-toast { bottom: 88px; }
@@ -3098,6 +3104,12 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table--opportunities .affibloom-col-content { width: 24%; }
 .affibloom-table--opportunities .affibloom-col-type { width: 72px; text-align: center; }
 .affibloom-table--opportunities .affibloom-col-monetize { width: 96px; text-align: center; }
+/* The × (R44, Task O7): Lasso's is at the row's top right; here its own narrow last column, on the first line. */
+.affibloom-table--opportunities .affibloom-col-dismiss { width: 68px; text-align: right; }
+.affibloom-table--opportunities td.affibloom-col-dismiss { padding-top: 12px; }
+/* A dismissed row fades while the list is drawn again (R45's flash and collapse). */
+.affibloom-table--opportunities tr.is-dismissed { opacity: 0; transition: opacity 0.2s ease; }
+@media (prefers-reduced-motion: reduce) { .affibloom-table--opportunities tr.is-dismissed { transition: none; } }
 .affibloom-table--opportunities th .affibloom-help { margin-left: 4px; vertical-align: middle; }
 /* Every cell starts at the top, so a link and its actions line up across the row. */
 .affibloom-table--opportunities td { vertical-align: top; padding-top: 16px; padding-bottom: 14px; }

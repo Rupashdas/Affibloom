@@ -130,5 +130,26 @@ if ( null !== $list_back ) {
 	</div>
 	<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 	<?php $this->render( 'admin/partials/location-preview-modal' ); ?>
+	<?php
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'            => 'affibloom-dismiss-opportunity',
+			'title'         => __( 'Dismiss This Opportunity', 'affibloom' ),
+			'text'          => __( 'If you dismiss this, it will no longer appear as an opportunity.', 'affibloom' ),
+			'confirm_label' => __( 'Dismiss', 'affibloom' ),
+			'confirm_attr'  => 'data-dismiss-confirm',
+			'busy_label'    => __( 'Dismissing…', 'affibloom' ),
+			'failed_text'   => __( 'Dismiss failed.', 'affibloom' ),
+			'icon'          => 'close',
+			'data'          => array(
+				'done-text'   => __( 'Opportunity dismissed.', 'affibloom' ),
+				'undo-label'  => __( 'Undo', 'affibloom' ),
+				'undo-failed' => __( 'Could not undo. Please try again.', 'affibloom' ),
+			),
+		)
+	);
+	?>
+	<?php $this->render( 'admin/partials/toast-template' ); ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

@@ -8,10 +8,11 @@
  * Each page passes its id, title and sentence; the script on the page does the delete.
  * Task 2X1 reuses it, on its second use, for the product page's "Remove this button?": a view may give the confirm
  * button's label, its attribute (the page's script finds the button by it) and the words of the busy and failed states;
- * without them it is the delete dialog.
+ * without them it is the delete dialog. Task O7's "Dismiss This Opportunity" gives its chip's icon and the words its
+ * script shows after the answer (`data`, printed as data-* attributes).
  *
  * @package Affibloom
- * @var array{id: string, title: string, text: string, confirm_label?: string, confirm_attr?: string, busy_label?: string, failed_text?: string} $view
+ * @var array{id: string, title: string, text: string, confirm_label?: string, confirm_attr?: string, busy_label?: string, failed_text?: string, icon?: string, data?: array<string, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,12 +27,15 @@ $failed_text   = $view['failed_text'] ?? __( 'Could not delete. Please try again
 ?>
 <div id="<?php echo esc_attr( $modal_id ); ?>" class="affibloom-modal" hidden
 	data-dashboard-url="<?php echo esc_url( admin_url( 'admin.php?page=' . AdminMenu::SLUG ) ); ?>"
-	data-failed-text="<?php echo esc_attr( $failed_text ); ?>">
+	data-failed-text="<?php echo esc_attr( $failed_text ); ?>"
+	<?php foreach ( $view['data'] ?? array() as $data_key => $data_value ) : ?>
+		data-<?php echo esc_attr( $data_key ); ?>="<?php echo esc_attr( $data_value ); ?>"
+	<?php endforeach; ?>>
 	<div class="affibloom-modal__backdrop" data-affibloom-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr( $modal_id ); ?>-title" aria-describedby="<?php echo esc_attr( $modal_id ); ?>-text">
 		<div class="affibloom-modal__head">
 			<?php // Meadow's dialog chip (MD6): the danger tint and the bin, as the action destroys. ?>
-			<span class="affibloom-chip affibloom-modal__chip affibloom-chip--danger" aria-hidden="true"><?php $this->render( 'admin/partials/icon', array( 'name' => 'trash' ) ); ?></span>
+			<span class="affibloom-chip affibloom-modal__chip affibloom-chip--danger" aria-hidden="true"><?php $this->render( 'admin/partials/icon', array( 'name' => $view['icon'] ?? 'trash' ) ); ?></span>
 			<h2 id="<?php echo esc_attr( $modal_id ); ?>-title" class="affibloom-modal__title"><?php echo esc_html( $view['title'] ); ?></h2>
 			<button type="button" class="affibloom-modal__close" data-affibloom-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'close' ) ); ?>
