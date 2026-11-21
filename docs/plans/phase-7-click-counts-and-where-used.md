@@ -114,7 +114,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task C2A: The affiliate-network registry — `wp affibloom links detect <url>`
 - [x] Task C2B: Detecting affiliate links when a post is indexed — `save_post`
-- [ ] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
+- [x] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
 - [ ] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
 - [ ] Task AM2: Amazon short links — the import's short-link branch and the map
 - [ ] Task AM3: Switching Auto-Monetization on and off — Settings → Amazon
@@ -1383,16 +1383,23 @@ A link whose product was deleted for good comes back as a product on the next da
 tests `tests/Unit/Application/AffiliateDetectorCreateTest.php`, `tests/Integration/AutoDetectCronTest.php`,
 `tests/E2E/acceptance/C2.spec.ts` (AC1, AC2, AC8, AC9; AC1's title check follows N1).
 
-- [ ] **Step 1: Failing tests.** E2E AC1 (`wp cron event run affibloom_auto_detect`, then one product with the URL as
+- [x] **Step 1: Failing tests.** E2E AC1 (`wp cron event run affibloom_auto_detect`, then one product with the URL as
   written, cloaking 0, the F18 D3 name — HTTP stubbed), AC2 (second save and run: one product), AC8 (delete the product
   for good, run the daily event: a new one), AC9 (front end: the product's `rel`; md5 unchanged). Red: no event.
-- [ ] **Step 2: The cloaking option on `create_from_url`** (unit: a new product stores `link_cloaking` false; an existing
+- [x] **Step 2: The cloaking option on `create_from_url`** (unit: a new product stores `link_cloaking` false; an existing
   one is untouched).
-- [ ] **Step 3: `create_products`, the cron module, the lock.**
-- [ ] **Step 4: The resolver lookup.**
-- [ ] **Step 5: Run and look.** On this copy after migration: the run creates nothing (16 tied); a test post with a new
+- [x] **Step 3: `create_products`, the cron module, the lock.**
+- [x] **Step 4: The resolver lookup.**
+- [x] **Step 5: Run and look.** On this copy after migration: the run creates nothing (16 tied); a test post with a new
   `*.sjv.io` link: one product, Dashboard row, front end attributes; switch Auto-Detect off: both events cleared.
-- [ ] **Step 6: Commit** — "Turn detected affiliate links into products".
+- [x] **Step 6: Commit** — "Turn detected affiliate links into products".
+
+*Note:* cloaking off rides on the settings the add reads (`link_cloaking` false for that add); the cron module is
+`Interface\Cron\AutoDetectCron` with an `OptionLock`. Switching off reads the saved option from the hook's arguments
+(a repository read earlier in the request kept the old value). C2's older AC1-AC3 now run the event after the save and
+follow N1's naming. Checked: unit; on Local the run reused the 8 existing products of the recorded links (republished,
+as Lasso) and made one new one with cloaking off; after a re-save the link is tied and printed with its product,
+content unchanged; switching off cleared both events, a page load with it on scheduled the daily one again.
 
 ---
 

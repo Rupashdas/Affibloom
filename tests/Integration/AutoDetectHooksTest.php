@@ -62,7 +62,7 @@ final class AutoDetectHooksTest extends WP_UnitTestCase {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $wpdb->prefix . TableDetectedLinkRepository::TABLE ) );
 
 		$this->auto_detect( false );
-		$this->hooks->switched();
+		$this->hooks->switched( array( 'auto_detect_links' => true ), array( 'auto_detect_links' => false ) );
 		$this->hooks->indexed( 1, self::rows() );
 
 		self::assertSame( 0, self::recorded() );

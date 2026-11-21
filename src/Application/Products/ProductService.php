@@ -459,11 +459,15 @@ final class ProductService {
 	 * - but when no published product has the link and a trashed or retired one does, that one is published again
 	 *   and answered as new (Task 17D; Lasso republishes the match and opens it without its "already exists" warning).
 	 *
-	 * @param string $input What was pasted.
+	 * A detected affiliate link (F35 R14, D5; Task C2C) asks for Link Cloaking off whatever the site default, as Lasso's
+	 * `lasso_add_a_new_link( url, { link_cloaking: '0' } )`; a product found is left as it is.
+	 *
+	 * @param string $input        What was pasted.
+	 * @param bool   $cloaking_off A new product is made with Link Cloaking off.
 	 * @throws InvalidField      When the input is empty, or neither a link nor a bare ASIN.
 	 * @throws RuntimeException When the product cannot be stored.
 	 */
-	public function create_from_url( string $input ): AddedLink {
+	public function create_from_url( string $input, bool $cloaking_off = false ): AddedLink {
 		$url   = $this->rules->typed( $input );
 		$typed = $url;
 
@@ -476,6 +480,9 @@ final class ProductService {
 
 		$resolved = $this->links->resolve( $url );
 		$settings = $this->settings->get();
+		if ( $cloaking_off ) {
+			$settings = $settings->with( array( 'link_cloaking' => false ) );
+		}
 
 		if ( $resolved->url !== $url->value() && $this->rules->follows( $url, $settings ) ) {
 			$url      = AffiliateUrl::from_string( $resolved->url );

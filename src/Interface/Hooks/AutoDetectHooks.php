@@ -25,6 +25,9 @@ final class AutoDetectHooks implements Module {
 	/** The background run that makes products for detected links (Task C2C). */
 	public const EVENT = 'affibloom_auto_detect';
 
+	/** The daily run that catches the rest (Task C2C; Lasso's daily `lasso_auto_monetize`). */
+	public const DAILY = 'affibloom_auto_detect_daily';
+
 	/**
 	 * Builds the hooks.
 	 *
@@ -38,7 +41,7 @@ final class AutoDetectHooks implements Module {
 	 */
 	public function register(): void {
 		add_action( 'affibloom_link_index_indexed', array( $this, 'indexed' ), 10, 2 );
-		add_action( 'update_option_' . OptionSettingsRepository::OPTION, array( $this, 'switched' ) );
+		add_action( 'update_option_' . OptionSettingsRepository::OPTION, array( $this, 'switched' ), 10, 2 );
 	}
 
 	/**
@@ -58,11 +61,17 @@ final class AutoDetectHooks implements Module {
 	}
 
 	/**
-	 * The settings were saved: with Auto-Detect off, the scheduled run goes (D23).
+	 * The settings were saved: with Auto-Detect off, both runs go (D23). The saved value is read from what WordPress
+	 * stored, not from a repository that may have read the option before.
+	 *
+	 * @param mixed $stored The option before.
+	 * @param mixed $saved  The option now.
 	 */
-	public function switched(): void {
-		if ( ! $this->settings->get()->bool( 'auto_detect_links' ) ) {
+	public function switched( $stored, $saved ): void {
+		unset( $stored );
+		if ( is_array( $saved ) && array_key_exists( 'auto_detect_links', $saved ) && ! $saved['auto_detect_links'] ) {
 			wp_clear_scheduled_hook( self::EVENT );
+			wp_clear_scheduled_hook( self::DAILY );
 		}
 	}
 }

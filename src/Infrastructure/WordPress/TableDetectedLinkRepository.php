@@ -65,4 +65,58 @@ KEY product_id (product_id)";
 			)
 		);
 	}
+
+	/**
+	 * Rows still without a published product, oldest first.
+	 *
+	 * @param int $limit At most this many.
+	 * @return array<int, string> The link, by row ID.
+	 */
+	public function without_product( int $limit ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one background run.
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT d.id, d.url FROM %i AS d LEFT JOIN %i AS p ON p.ID = d.product_id AND p.post_type = %s AND p.post_status = 'publish'
+				WHERE d.product_id = 0 OR p.ID IS NULL ORDER BY d.id LIMIT %d",
+				$wpdb->prefix . self::TABLE,
+				$wpdb->posts,
+				ProductPostType::NAME,
+				max( 1, $limit )
+			),
+			ARRAY_A
+		);
+		$found = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$found[ (int) $row['id'] ] = (string) $row['url'];
+		}
+
+		return $found;
+	}
+
+	/**
+	 * Records the product made for a row.
+	 *
+	 * @param int $id         The row.
+	 * @param int $product_id The product.
+	 */
+	public function set_product( int $id, int $product_id ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one row.
+		$wpdb->update( $wpdb->prefix . self::TABLE, array( 'product_id' => $product_id ), array( 'id' => $id ), array( '%d' ), array( '%d' ) );
+	}
+
+	/**
+	 * The product recorded for a link; 0 when none.
+	 *
+	 * @param string $url The link as written.
+	 */
+	public function product_for( string $url ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, by its unique key; the resolver keeps the answer for the run.
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT product_id FROM %i WHERE url_hash = %s', $wpdb->prefix . self::TABLE, md5( $url ) ) );
+	}
 }

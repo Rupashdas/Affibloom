@@ -24,4 +24,28 @@ interface DetectedLinkRepository {
 	 * @param int          $product_id The product it already is; 0 when none.
 	 */
 	public function record( string $url, DetectedLink $link, int $product_id ): void;
+
+	/**
+	 * Rows still without a published product (R13, D5; Task C2C): never made, or whose product was deleted or is no longer
+	 * published, oldest first.
+	 *
+	 * @param int $limit At most this many.
+	 * @return array<int, string> The link, by row ID.
+	 */
+	public function without_product( int $limit ): array;
+
+	/**
+	 * Records the product made for a row (C2 AC7).
+	 *
+	 * @param int $id         The row.
+	 * @param int $product_id The product.
+	 */
+	public function set_product( int $id, int $product_id ): void;
+
+	/**
+	 * The product recorded for a link (F35 R15's lookup; Task C2C); 0 when none.
+	 *
+	 * @param string $url The link as written.
+	 */
+	public function product_for( string $url ): int;
 }

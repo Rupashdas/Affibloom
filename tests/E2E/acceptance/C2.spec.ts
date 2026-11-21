@@ -17,27 +17,53 @@ test.describe( 'C2 Affiliate link auto-detection', () => {
 		setSettings( { auto_detect_links: true } );
 	} );
 
-	test( 'AC1 saving a published post with an Impact link creates one product for it', () => {
+	// The background run a detection schedules (C2C; F35 D5): run it now rather than wait for WP-Cron.
+	const runDetection = () => wp( 'cron', 'event', 'run', 'affibloom_auto_detect' );
+	const productOf = ( url: string ) =>
+		wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_url', `--meta_value=${ url }`, '--field=ID' );
+
+	test( 'AC1 saving a published post with an Impact link creates one product for it, in the background', () => {
 		const url = impactLink();
 		newPostWith( `<p><a href="${ url }">Mizuno Wave Lightning Z8</a></p>` );
+		expect( productsFor( url ) ).toBe( 0 ); // never in the save request (D5)
+		runDetection();
 		expect( productsFor( url ) ).toBe( 1 );
-		const title = wp( 'post', 'list', '--post_type=affibloom_product', '--meta_key=_affibloom_url', `--meta_value=${ url }`, '--field=post_title' );
-		expect( title ).toBe( 'Mizuno Wave Lightning Z8' );
+		const id = productOf( url );
+		// Named as a pasted link would be (F18 D3; F35 N1, decided 2026-11-14), Primary URL as written, cloaking off.
+		expect( wp( 'post', 'get', id, '--field=post_title' ) ).not.toBe( '' );
+		expect( wp( 'post', 'meta', 'get', id, '_affibloom_url' ) ).toBe( url );
+		expect( wp( 'post', 'meta', 'get', id, '_affibloom_cloak' ) ).toBe( '0' );
 	} );
 
 	test( 'AC2 saving the same post again creates nothing new', () => {
 		const url = impactLink();
 		const id = newPostWith( `<p><a href="${ url }">Mizuno Wave Momentum 3</a></p>` ).replace( '/?p=', '' );
+		runDetection();
 		wp( 'post', 'update', id, '--post_title=C2 AC2 saved again' );
+		runDetection();
 		expect( productsFor( url ) ).toBe( 1 );
 	} );
 
-	test( "AC3 the post's content is unchanged after detection", () => {
+	test( "AC3, AC9 the post's content is unchanged; the front end prints the product's link", async ( { page } ) => {
 		const url = impactLink();
 		const content = `<p>Try the <a href="${ url }">Mizuno Wave Dimension</a> first.</p>`;
 		const id = newPostWith( content ).replace( '/?p=', '' );
-		expect( productsFor( url ) ).toBe( 1 );
+		runDetection();
+		wp( 'post', 'update', id, '--post_status=publish' ); // indexed again: the link now resolves to its product
+		const product = productOf( url );
 		expect( wp( 'post', 'get', id, '--field=post_content' ) ).toBe( content );
+		await page.goto( `/?p=${ id }` );
+		await expect( page.locator( `a[data-affibloom-id="${ product }"]` ) ).toHaveAttribute( 'href', url );
+	} );
+
+	test( 'AC8 a product deleted for good comes back on the daily run', () => {
+		const url = impactLink();
+		newPostWith( `<p><a href="${ url }">Mizuno</a></p>` );
+		runDetection();
+		wp( 'post', 'delete', productOf( url ), '--force' );
+		expect( productsFor( url ) ).toBe( 0 );
+		wp( 'cron', 'event', 'run', 'affibloom_auto_detect_daily' );
+		expect( productsFor( url ) ).toBe( 1 );
 	} );
 
 	test( 'AC4 links that match no known network create nothing', () => {

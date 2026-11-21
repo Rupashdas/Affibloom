@@ -120,6 +120,7 @@ use Affibloom\Infrastructure\WordPress\WpScheduledEvents;
 use Affibloom\Infrastructure\WordPress\WpCronHealth;
 use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Interface\Admin\BrokenLinksNotice;
+use Affibloom\Interface\Cron\AutoDetectCron;
 use Affibloom\Interface\Front\ClickScript;
 use Affibloom\Interface\Front\GaTag;
 use Affibloom\Interface\Cron\ClickRetentionCron;
@@ -430,7 +431,7 @@ final class Plugin {
 	 * Every scheduled hook: each cron module's HOOKS. A new cron module adds its list here.
 	 */
 	private static function cron_registry(): CronRegistry {
-		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS, LinkCheckCron::HOOKS );
+		return new CronRegistry( BulkAddCron::HOOKS, AmazonBulkSyncCron::HOOKS, AmazonRefreshCron::HOOKS, GeniusCleanupCron::HOOKS, LinkIndexCron::HOOKS, LinkCheckCron::HOOKS, AutoDetectCron::HOOKS );
 	}
 
 	/**
@@ -591,7 +592,9 @@ final class Plugin {
 			// F22 N1-B (Task O10): "Edit in post" opens the editor with the link selected.
 			new LocationSelector( new TableLinkLocationRepository(), plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			// F35 R12, D3 (Task C2B): network links recorded when a post is indexed.
-			new AutoDetectHooks( new AffiliateDetector( $this->networks(), new TableDetectedLinkRepository() ), $this->settings_repository() ),
+			new AutoDetectHooks( $this->affiliate_detector( $products ), $this->settings_repository() ),
+			// F35 R13, D5 (Task C2C): products for detected links, in the background.
+			new AutoDetectCron( $this->affiliate_detector( $products ), new OptionLock( 'affibloom_auto_detect_lock', 5 * 60 ), $this->settings_repository() ),
 			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
@@ -694,6 +697,15 @@ final class Plugin {
 	}
 
 	/**
+	 * Detection and its products (F35; Tasks C2B, C2C).
+	 *
+	 * @param ProductService $products The add path.
+	 */
+	private function affiliate_detector( ProductService $products ): AffiliateDetector {
+		return new AffiliateDetector( $this->networks(), new TableDetectedLinkRepository(), $products );
+	}
+
+	/**
 	 * Lasso's affiliate-network registry (F35 R2-R9, D2; Task C2A), read once from resources/networks.php.
 	 */
 	private function networks(): NetworkRegistry {
@@ -784,7 +796,7 @@ final class Plugin {
 		if ( null !== $this->link_indexer ) {
 			return $this->link_indexer;
 		}
-		$links = new ProductResolver( new PostTypeProductRepository() );
+		$links = new ProductResolver( new PostTypeProductRepository(), new TableDetectedLinkRepository() );
 
 		$this->link_indexer = new LinkIndexer(
 			new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ),

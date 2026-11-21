@@ -3,9 +3,8 @@ namespace Affibloom\Tests\Unit\Application;
 
 use Affibloom\Application\Monetize\AffiliateDetector;
 use Affibloom\Domain\LinkIndex\LinkLocation;
-use Affibloom\Domain\Monetize\DetectedLink;
-use Affibloom\Domain\Monetize\DetectedLinkRepository;
 use Affibloom\Domain\Monetize\NetworkRegistry;
+use Affibloom\Tests\Unit\Fakes\InMemoryDetectedLinks;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,19 +12,19 @@ use PHPUnit\Framework\TestCase;
  */
 final class AffiliateDetectorTest extends TestCase {
 
-	/** @var list<array{string, string, int}> */
-	private array $recorded = array();
+	private InMemoryDetectedLinks $detected;
+
+	protected function setUp(): void {
+		$this->detected = new InMemoryDetectedLinks();
+	}
 
 	private function detector(): AffiliateDetector {
-		$repo = new class( $this->recorded ) implements DetectedLinkRepository {
-			public function __construct( private array &$recorded ) {}
+		return new AffiliateDetector( NetworkRegistry::from_array( require dirname( __DIR__, 3 ) . '/resources/networks.php' ), $this->detected );
+	}
 
-			public function record( string $url, DetectedLink $link, int $product_id ): void {
-				$this->recorded[] = array( $url, $link->network->integration, $product_id );
-			}
-		};
-
-		return new AffiliateDetector( NetworkRegistry::from_array( require dirname( __DIR__, 3 ) . '/resources/networks.php' ), $repo );
+	/** @return list<array{string, string, int}> */
+	private function recorded(): array {
+		return array_values( array_map( static fn( array $row ): array => array( $row['url'], $row['network'], $row['product'] ), $this->detected->rows ) );
 	}
 
 	private static function row( string $url, string $type = 'external', string $display = 'Text', int $product = 0 ): LinkLocation {
@@ -44,7 +43,7 @@ final class AffiliateDetectorTest extends TestCase {
 		self::assertSame( 1, $pending );
 		self::assertSame(
 			array( array( 'https://mizunousa.sjv.io/jR4ZQP', 'Impact', 0 ), array( 'https://www.awin1.com/cread.php?awinmid=1&awinaffid=2', 'Awin', 40 ) ),
-			$this->recorded
+			$this->recorded()
 		);
 	}
 
@@ -60,6 +59,6 @@ final class AffiliateDetectorTest extends TestCase {
 		);
 
 		self::assertSame( 0, $pending );
-		self::assertSame( array(), $this->recorded );
+		self::assertSame( array(), $this->recorded() );
 	}
 }
