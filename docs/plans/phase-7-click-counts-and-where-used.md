@@ -113,7 +113,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### F35 and C2 — auto-detect and Amazon auto-monetization
 
 - [x] Task C2A: The affiliate-network registry — `wp affibloom links detect <url>`
-- [ ] Task C2B: Detecting affiliate links when a post is indexed — `save_post`
+- [x] Task C2B: Detecting affiliate links when a post is indexed — `save_post`
 - [ ] Task C2C: Products for detected links — WP-Cron `affibloom_auto_detect`
 - [ ] Task AM1: The Amazon import — WP-Cron `affibloom_amazon_import`
 - [ ] Task AM2: Amazon short links — the import's short-link branch and the map
@@ -1337,14 +1337,20 @@ the link is recorded (seen with `wp db query` or C2C's product). With Auto-Detec
 `tests/Unit/Application/AffiliateDetectorTest.php`, `tests/Integration/AutoDetectHooksTest.php`,
 `tests/E2E/acceptance/C2.spec.ts` (AC3, AC4, AC5, AC7; AC2's "recorded once").
 
-- [ ] **Step 1: Failing tests.** E2E: a post with an Impact link → one row (`wp db query` through `wp eval`), content md5
+- [x] **Step 1: Failing tests.** E2E: a post with an Impact link → one row (`wp db query` through `wp eval`), content md5
   unchanged; saved again → still one row; a plain shop link, an internal link and an Amazon link → no row; setting off →
   no row and no event scheduled; a URL already a product → row with its `product_id`, nothing scheduled. Red: no table.
-- [ ] **Step 2: Table and repository.**
-- [ ] **Step 3: The detector and the hooks** (the event is 35A's).
-- [ ] **Step 4: Run and look.** `wp affibloom links rebuild` on this copy: 16 rows, all tied to the migrated products,
+- [x] **Step 2: Table and repository.**
+- [x] **Step 3: The detector and the hooks** (the event is 35A's).
+- [x] **Step 4: Run and look.** `wp affibloom links rebuild` on this copy: 16 rows, all tied to the migrated products,
   no event scheduled; content of the 5 posts unchanged (md5 before/after).
-- [ ] **Step 5: Commit** — "Record affiliate links when a post is indexed".
+- [x] **Step 5: Commit** — "Record affiliate links when a post is indexed".
+
+*Note:* names follow the plugin's layout: `Infrastructure\WordPress\TableDetectedLinkRepository` (schema step 9),
+`Interface\Hooks\AutoDetectHooks`; `record()` ties a row without a product when the link already is one (ON DUPLICATE
+KEY). Displays are skipped (Lasso scans anchors). Checked: unit; on Local with Auto-Detect on (it had been left off),
+`wp affibloom links rebuild` recorded 9 URLs (7 Mizuno Impact, 1 Post Affiliate Pro, 1 Skimlinks), scheduled the run,
+and left the 10 posts' content unchanged; none tied, as Local has no migrated Lasso products until Phase M.
 
 ---
 

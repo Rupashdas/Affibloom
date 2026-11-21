@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, newPostWith, setSettings, unique, wp } from '../utils';
+import { blockTrackers, createProduct, newPostWith, setSettings, unique, wp } from '../utils';
 
 // C2 Automatic affiliate link detection (docs/features/C2/requirements.md). In scope since 2026-11-12.
 const productsFor = ( url: string ) =>
@@ -54,6 +54,51 @@ test.describe( 'C2 Affiliate link auto-detection', () => {
 		newPostWith( `<p><a href="${ url }">Mizuno Wave Stealth</a></p>` );
 		expect( productsFor( url ) ).toBe( 0 );
 		setSettings( { auto_detect_links: true } ); // the live site's value
+	} );
+
+	// C2B (F35 R10-R12, D3, D4): recording, when a post is indexed. Rows are read through wp eval.
+	const detected = ( url: string ) =>
+		wp( 'eval', `global $wpdb; echo wp_json_encode( $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) AS n, MAX(product_id) AS product, MAX(network) AS network FROM {$wpdb->prefix}affibloom_detected_links WHERE url = %s", '${ url }' ) ) );` );
+	const scheduled = () => wp( 'eval', "echo wp_next_scheduled( 'affibloom_auto_detect' ) ? 'yes' : 'no';" );
+	const clearRun = () => wp( 'cron', 'event', 'delete', 'affibloom_auto_detect' );
+
+	test( 'AC2, AC3, AC7 an Impact link is recorded once per URL; the post is unchanged; the run is scheduled', () => {
+		const url = impactLink();
+		const title = unique( 'c2b-post' );
+		newPostWith( `<p><a href="${ url }">Mizuno Wave</a> and again <a href="${ url }">here</a>.</p>`, title );
+		const host = wp( 'post', 'list', '--post_type=post', `--title=${ title }`, '--field=ID' );
+		const before = wp( 'eval', `echo md5( get_post_field( 'post_content', ${ host }, 'raw' ) );` );
+		expect( JSON.parse( detected( url ) ) ).toMatchObject( { n: '1', network: 'Impact' } );
+		expect( scheduled() ).toBe( 'yes' );
+
+		wp( 'post', 'update', host, '--post_status=publish' );
+		expect( JSON.parse( detected( url ) ).n ).toBe( '1' );
+		expect( wp( 'eval', `echo md5( get_post_field( 'post_content', ${ host }, 'raw' ) );` ) ).toBe( before );
+	} );
+
+	test( 'AC4, AC5 plain, internal and Amazon links record nothing; with the setting off nothing is recorded or scheduled', () => {
+		const shop = `https://www.example.com/${ unique( 'c2b-shop' ) }`;
+		const amazon = 'https://www.amazon.com/dp/B0C2B00001';
+		newPostWith( `<p><a href="${ shop }">Shop</a>, <a href="${ amazon }">Amazon</a>, <a href="/about/">us</a>.</p>` );
+		expect( JSON.parse( detected( shop ) ).n ).toBe( '0' );
+		expect( JSON.parse( detected( amazon ) ).n ).toBe( '0' );
+
+		setSettings( { auto_detect_links: false } );
+		clearRun();
+		const url = impactLink();
+		newPostWith( `<p><a href="${ url }">Mizuno</a></p>` );
+		expect( JSON.parse( detected( url ) ).n ).toBe( '0' );
+		expect( scheduled() ).toBe( 'no' );
+		setSettings( { auto_detect_links: true } );
+	} );
+
+	test( 'AC7 a link that is already a product is recorded with that product, and nothing is scheduled', () => {
+		const url = impactLink();
+		const product = createProduct( { name: unique( 'c2b-product' ), url } );
+		clearRun();
+		newPostWith( `<p><a href="${ url }">Mizuno</a></p>` );
+		expect( JSON.parse( detected( url ) ) ).toMatchObject( { n: '1', product: String( product ) } );
+		expect( scheduled() ).toBe( 'no' );
 	} );
 
 	// AC6 (C2A; F35 R2-R9): the command names the network and what the link carries.

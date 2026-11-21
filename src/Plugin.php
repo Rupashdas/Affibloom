@@ -12,6 +12,7 @@ namespace Affibloom;
 use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
+use Affibloom\Application\Monetize\AffiliateDetector;
 use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
@@ -25,6 +26,7 @@ use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
 use Affibloom\Infrastructure\WordPress\TableClickStore;
 use Affibloom\Infrastructure\WordPress\ProductDomainBackfill;
+use Affibloom\Infrastructure\WordPress\TableDetectedLinkRepository;
 use Affibloom\Infrastructure\WordPress\TableOpportunityRepository;
 use Affibloom\Infrastructure\WordPress\TransientRepeatGuard;
 use Affibloom\Infrastructure\WordPress\WpPostDirectory;
@@ -121,6 +123,7 @@ use Affibloom\Interface\Admin\BrokenLinksNotice;
 use Affibloom\Interface\Front\ClickScript;
 use Affibloom\Interface\Front\GaTag;
 use Affibloom\Interface\Cron\ClickRetentionCron;
+use Affibloom\Interface\Hooks\AutoDetectHooks;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
@@ -406,6 +409,10 @@ final class Plugin {
 			8 => static function (): void {
 				ProductDomainBackfill::run();
 			},
+			// Task C2B: the detected affiliate links (F35 D4).
+			9 => static function (): void {
+				( new Table( TableDetectedLinkRepository::TABLE, TableDetectedLinkRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 
@@ -583,6 +590,8 @@ final class Plugin {
 			new ClassicButton( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			// F22 N1-B (Task O10): "Edit in post" opens the editor with the link selected.
 			new LocationSelector( new TableLinkLocationRepository(), plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+			// F35 R12, D3 (Task C2B): network links recorded when a post is indexed.
+			new AutoDetectHooks( new AffiliateDetector( $this->networks(), new TableDetectedLinkRepository() ), $this->settings_repository() ),
 			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
