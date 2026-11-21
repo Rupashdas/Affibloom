@@ -24,4 +24,11 @@ interface ClickStore {
 	 * @param Button $button     What was clicked.
 	 */
 	public function add( string $day, int $product_id, int $post_id, int $location, Button $button ): void;
+
+	/**
+	 * Removes the rows of days before this one (ADR-005's 400 days; Task 33C).
+	 *
+	 * @param string $day The first UTC day kept, "Y-m-d".
+	 */
+	public function delete_before( string $day ): void;
 }

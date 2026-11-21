@@ -48,4 +48,16 @@ KEY location_day (location_id,day)';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one upsert per click.
 		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (day, product_id, post_id, location_id, button, clicks) VALUES (%s, %d, %d, %d, %s, 1) ON DUPLICATE KEY UPDATE clicks = clicks + 1', $wpdb->prefix . self::TABLE, $day, $product_id, $post_id, $location, $button->value ) );
 	}
+
+	/**
+	 * Removes the rows of days before this one.
+	 *
+	 * @param string $day The first UTC day kept, "Y-m-d".
+	 */
+	public function delete_before( string $day ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, once a day.
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE day < %s', $wpdb->prefix . self::TABLE, $day ) );
+	}
 }

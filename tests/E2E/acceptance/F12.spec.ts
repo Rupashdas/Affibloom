@@ -123,6 +123,17 @@ test.describe( 'F12 Clicks and where used', () => {
 		expect( stored( id ) ).toBe( 2 );
 	} );
 
+	// AC8 (33C; ADR-005): rows older than 400 days go with the daily job.
+	test( 'AC8 the daily job removes click rows older than 400 days', () => {
+		const id = createProduct( { name: unique( 'F12 AC8' ) } );
+		for ( const age of [ 399, 400, 401 ] ) {
+			wp( 'db', 'query', `INSERT INTO wp_affibloom_clicks (day, product_id, post_id, location_id, button, clicks) VALUES (UTC_DATE() - INTERVAL ${ age } DAY, ${ id }, 0, 0, '1', 1)` );
+		}
+		wp( 'cron', 'event', 'run', 'affibloom_daily' );
+		const days = wp( 'db', 'query', `SELECT DATEDIFF(UTC_DATE(), day) FROM wp_affibloom_clicks WHERE product_id = ${ id } ORDER BY day DESC`, '--skip-column-names' );
+		expect( days.split( /\s+/ ).filter( Boolean ) ).toEqual( [ '399', '400' ] );
+	} );
+
 	test( 'AC16 with the click route blocked the link still opens and no error shows', async ( { page, context } ) => {
 		const id = createProduct( { name: unique( 'F12 AC16' ), url: 'https://www.example.com/ac16' } );
 		await context.route( '**/wp-json/affibloom/v1/clicks', ( route ) => route.abort() );

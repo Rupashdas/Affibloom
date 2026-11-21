@@ -38,6 +38,10 @@ final class ClickTrackerTest extends TestCase {
 			public function add( string $day, int $product_id, int $post_id, int $location, Button $button ): void {
 				$this->test->added( "{$day} {$product_id} {$post_id} {$location} {$button->value}" );
 			}
+
+			public function delete_before( string $day ): void {
+				$this->test->added( "before {$day}" );
+			}
 		};
 		$posts         = new class() implements PostDirectory {
 			public function is_public( int $post_id ): bool {

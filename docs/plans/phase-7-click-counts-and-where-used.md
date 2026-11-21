@@ -71,7 +71,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task 33A: A reader clicks a product element — `clicks.js` and `POST /affibloom/v1/clicks`
 - [x] Task 33B: Bots and repeats are not counted
-- [ ] Task 33C: Old click rows are removed — `affibloom_daily`
+- [x] Task 33C: Old click rows are removed — `affibloom_daily`
 - [ ] Task 33D: Settings → General — Page and Link-Level Tracking
 - [ ] Task 34A: The Dashboard's Clicks column, sortable
 - [ ] Task 34B: The Clicks (30 days) tile
@@ -463,10 +463,13 @@ stores only an HMAC-named transient for 30 s. Headless browsers are bots, so F12
 
 **Files:** the above, `tests/Integration/ClickRetentionTest.php`; modify `Plugin.php`.
 
-- [ ] **Step 1: Failing test** (rows at 399, 400, 401 days; `wp cron event run affibloom_daily`).
-- [ ] **Step 2: Retention.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Remove click rows after 400 days".
+- [x] **Step 1: Failing test** (rows at 399, 400, 401 days; `wp cron event run affibloom_daily`).
+- [x] **Step 2: Retention.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Remove click rows after 400 days".
+
+*Note (2026-11-21):* the hook is `Interface\Cron\ClickRetentionCron` on `affibloom_daily`; `ClickRetentionTest` is unit
+(the integration suite does not run). Checked: unit, phpcs, analyse; on Local rows of 399, 400 and 401 days: 401 removed.
 
 ---
 
