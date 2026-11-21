@@ -56,11 +56,62 @@ test.describe( 'F12 Clicks and where used', () => {
 	test( 'AC2 the Locations tab lists the posts that use the product', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F12 AC2' ) } );
 		const title = unique( 'F12 AC2 post' );
-		newPostWith( boxBlock( id ), title ); // saving the post updates the usage index
+		newPostWith( boxBlock( id ), title ); // saving the post indexes it
 
 		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }` );
 		await page.locator( '.affibloom-tabs a', { hasText: 'Locations' } ).click();
 		await expect( page.getByText( title ) ).toBeVisible();
+	} );
+
+	// AC21 (36B; L4-L9, L12, D22, D23).
+	test( 'AC21 the Locations tab: columns, grouped rows, sort, search and the empty state', async ( { page } ) => {
+		const url = `https://www.example.com/${ unique( 'f12-ac21' ) }`;
+		const id = createProduct( { name: unique( 'F12 AC21' ), url } );
+		const two = unique( 'F12 AC21 A two' );
+		const one = unique( 'F12 AC21 B one' );
+		newPostWith( boxBlock( id ) + `<p>Read the <a href="${ url }">review link</a>.</p>`, two );
+		newPostWith( boxBlock( id ), one );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }&tab=locations` );
+		await expect( page.locator( '.affibloom-tabs [aria-current="page"]' ) ).toContainText( 'Locations' );
+		await expect( page.locator( '.affibloom-tabs [aria-current="page"]' ) ).toContainText( '3' );
+		const head = page.locator( '.affibloom-table--locations thead' );
+		await expect( head.getByRole( 'columnheader' ) ).toHaveText( [ /Content/, /Link with Context/, /Type/, /Clicks/ ] );
+
+		// One location is a row; two are a group row "(2 locations)" that expands.
+		const group = page.locator( 'tr.affibloom-location-group', { hasText: two } );
+		await expect( group ).toContainText( '(2 locations)' );
+		await expect( page.locator( 'tr[data-location-of]', { hasText: 'review link' } ) ).toBeHidden();
+		await group.getByRole( 'button', { name: 'Toggle locations for this post' } ).click();
+		await expect( page.locator( 'tr[data-location-of]', { hasText: 'review link' } ) ).toBeVisible();
+
+		// Content sorts: the first click is ascending.
+		await page.getByRole( 'button', { name: 'Content', exact: true } ).click();
+		await expect( page.locator( '.affibloom-table--locations tbody tr:not([data-location-of])' ).first() ).toContainText( two );
+		await page.getByRole( 'button', { name: 'Content', exact: true } ).click();
+		await expect( page.locator( '.affibloom-table--locations tbody tr:not([data-location-of])' ).first() ).toContainText( one );
+
+		// Search finds by post title and by link text.
+		await page.getByLabel( 'Search Locations' ).fill( 'review link' );
+		await page.getByLabel( 'Search Locations' ).press( 'Enter' );
+		await expect( page.locator( '.affibloom-pager__range' ) ).toHaveText( '1-1 of 1' );
+		await expect( page ).toHaveURL( /s=review/ );
+
+		// A product used nowhere: Lasso's empty state.
+		const none = createProduct( { name: unique( 'F12 AC21 none' ) } );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ none }&tab=locations` );
+		await expect( page.getByText( 'Add This Link Anywhere On Your Website' ) ).toBeVisible();
+	} );
+
+	// AC26 (36B; decision 6): unpublished hosts are listed with their status and count as use.
+	test( 'AC26 a draft that uses the product is listed with its status', async ( { page } ) => {
+		const id = createProduct( { name: unique( 'F12 AC26' ) } );
+		const title = unique( 'F12 AC26 draft' );
+		wp( 'post', 'create', '--post_type=post', '--post_status=draft', `--post_title=${ title }`, `--post_content=${ boxBlock( id ) }` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }&tab=locations` );
+		const row = page.locator( 'tbody tr', { hasText: title } );
+		await expect( row.locator( '.affibloom-location__status' ) ).toHaveText( 'Draft' );
 	} );
 
 	test( 'AC3 a product in use cannot be deleted', async ( { page } ) => {

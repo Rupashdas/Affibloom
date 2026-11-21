@@ -10,6 +10,8 @@ declare( strict_types=1 );
 namespace Affibloom\Interface\Admin;
 
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\Locations\LocationCounts;
+use Affibloom\Application\Locations\LocationService;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Display\DisplaySettingsService;
@@ -59,6 +61,8 @@ final class ProductScreen {
 	 * @param PublicLinks|null       $links    The public link and the cloaked address's start (F24, Task CL3).
 	 * @param VariantService|null    $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
 	 * @param LinkIssueQuery|null    $alerts   The page's issue bars (F11, Task 31C).
+	 * @param LocationService|null   $locations The Locations tab (F12, Task 36B).
+	 * @param LocationCounts|null    $counts    The Locations tab's count, on every tab (F12 L4).
 	 */
 	public function __construct(
 		private Template $template,
@@ -73,7 +77,32 @@ final class ProductScreen {
 		private ?PublicLinks $links = null,
 		private ?VariantService $variants = null,
 		private ?LinkIssueQuery $alerts = null,
+		private ?LocationService $locations = null,
+		private ?LocationCounts $counts = null,
 	) {}
+
+	/**
+	 * The Locations tab's address with its search, page and order (F12 D22; Task 36B); the defaults are left out.
+	 *
+	 * @param int    $id    The product.
+	 * @param string $term  The search.
+	 * @param int    $page  The page.
+	 * @param string $order '', 'asc' or 'desc'.
+	 */
+	public static function locations_url( int $id, string $term = '', int $page = 1, string $order = '' ): string {
+		$args = array( 'tab' => 'locations' );
+		if ( '' !== $term ) {
+			$args['s'] = rawurlencode( $term );
+		}
+		if ( $page > 1 ) {
+			$args['paged'] = $page;
+		}
+		if ( '' !== $order ) {
+			$args['order'] = $order;
+		}
+
+		return add_query_arg( $args, self::url( $id ) );
+	}
 
 	/**
 	 * The admin address of a product's page.
@@ -152,17 +181,41 @@ final class ProductScreen {
 		if ( null === $this->product ) {
 			return;
 		}
+		$id          = (int) $this->product->id;
 		$variants    = null === $this->variants ? array() : $this->variants->list( $this->product );
 		$public_link = null === $this->links ? $this->product->url->value() : $this->links->for( $this->product );
+		$used        = null === $this->counts ? null : ( $this->counts->of( array( $id ) )[ $id ] ?? 0 );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which tab and list to show, no action behind it.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		// F12 D22 (Task 36B): Locations is a tab of this page (`&tab=locations`), its list redrawn in place.
+		if ( 'locations' === $tab && null !== $this->locations ) {
+			$term  = isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '';
+			$order = isset( $_GET['order'] ) && in_array( $_GET['order'], array( 'asc', 'desc' ), true ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '';
+			$paged = isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : 1;
+			$this->template->render(
+				'admin/product-locations',
+				array(
+					'product'     => $this->product,
+					'public_link' => $public_link,
+					'tabs'        => self::tabs( $id, 'locations', count( $variants ), $used ),
+					'locations'   => $this->locations->page( $id, $term, $order, $paged ),
+					'term'        => $term,
+					'order'       => $order,
+					'url'         => self::locations_url( $id, $term, 1, $order ),
+				)
+			);
+			return;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		// F27 D3: Variants is a tab of this page (`&tab=variants`).
-		if ( 'variants' === ( isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which tab to show, no action behind it.
+		if ( 'variants' === $tab ) {
 			$kind = VariantKind::of( $this->product );
 			$this->template->render(
 				'admin/product-variants',
 				array(
 					'product'     => $this->product,
 					'public_link' => $public_link,
-					'tabs'        => self::tabs( (int) $this->product->id, 'variants', count( $variants ) ),
+					'tabs'        => self::tabs( $id, 'variants', count( $variants ), $used ),
 					'kind'        => $kind,
 					'rows'        => VariantRows::of( $this->product, $variants ),
 					// Add Variant's suggestion for an Amazon product: the site's tracking ID (R10).
@@ -187,7 +240,7 @@ final class ProductScreen {
 				'issues'       => null === $this->alerts ? null : $this->alerts->notices( (int) $this->product->id, ProductType::Amazon === $this->product->type ),
 				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
 				'public_link'  => $public_link,
-				'tabs'         => self::tabs( (int) $this->product->id, 'details', count( $variants ) ),
+				'tabs'         => self::tabs( $id, 'details', count( $variants ), $used ),
 				'cloak_base'   => null === $this->links ? '' : $this->links->base(),
 				// Lasso's placeholders are the site's button texts (get_lasso_url: *_button_text_default).
 				'button_text'  => $palette->value( 'primary_button_text' ),
@@ -223,15 +276,16 @@ final class ProductScreen {
 	}
 
 	/**
-	 * Lasso's four tabs under the product's name (header.php 245-297): Details and Variants, the latter with its count on
-	 * every tab (F27 R4); Locations and Opportunities come with their areas.
+	 * Lasso's four tabs under the product's name (header.php 245-297): Details, Locations with its count (F12 L4; Task
+	 * 36B) and Variants with its count on every tab (F27 R4); Opportunities comes with its area.
 	 *
-	 * @param int    $id       The product's ID.
-	 * @param string $current  The tab shown: 'details' or 'variants'.
-	 * @param int    $variants How many variants the product has.
+	 * @param int      $id        The product's ID.
+	 * @param string   $current   The tab shown: 'details', 'locations' or 'variants'.
+	 * @param int      $variants  How many variants the product has.
+	 * @param int|null $locations How many places use it; null while the Locations tab is not wired (a "Soon" tab).
 	 * @return array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}
 	 */
-	private static function tabs( int $id, string $current, int $variants ): array {
+	private static function tabs( int $id, string $current, int $variants, ?int $locations = null ): array {
 		return array(
 			'label' => __( 'Product sections', 'affibloom' ),
 			'items' => array(
@@ -240,7 +294,13 @@ final class ProductScreen {
 					'url'     => self::url( $id ),
 					'current' => 'details' === $current,
 				),
-				array( 'label' => __( 'Locations', 'affibloom' ) ),
+				null === $locations ? array( 'label' => __( 'Locations', 'affibloom' ) ) : array(
+					'label'     => __( 'Locations', 'affibloom' ),
+					'url'       => self::locations_url( $id ),
+					'current'   => 'locations' === $current,
+					'count'     => $locations,
+					'show_zero' => true,
+				),
 				array( 'label' => __( 'Opportunities', 'affibloom' ) ),
 				array(
 					'label'     => __( 'Variants', 'affibloom' ),

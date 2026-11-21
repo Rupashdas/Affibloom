@@ -3,7 +3,8 @@
  * A list that redraws without a page reload (F26 D15, Groups' D13), taken out of groups.js on its second user, the
  * Fields list (Task FL1).
  *
- * The server renders the list with the partial the page printed and answers `{ html, term, page, url }`; this script
+ * The server renders the list with the partial the page printed and answers `{ html, term, page, url }` (and `order`
+ * for a list with a sortable header: a [data-list-sort] button names the order it asks for); this script
  * swaps the markup in and keeps the address bar in step, so reload, Back and bookmarks work. It never builds markup of
  * its own. Without JavaScript the search is a form and the pages are links.
  *
@@ -23,7 +24,7 @@
 		var status = options.status;
 		var errorTemplate = options.errorTemplate;
 		var params = new URLSearchParams( window.location.search );
-		var current = { s: params.get( 's' ) || '', paged: parseInt( params.get( 'paged' ), 10 ) || 1 };
+		var current = { s: params.get( 's' ) || '', paged: parseInt( params.get( 'paged' ), 10 ) || 1, order: params.get( 'order' ) || '' };
 		var requests = 0;
 
 		var busy = function ( on ) {
@@ -41,7 +42,7 @@
 		 * Loads a list. Only the newest request may draw: a slow answer to an older one is dropped, so searching and
 		 * paging quickly cannot leave the list showing something that was not asked for last.
 		 *
-		 * @param {Object}  list     The search and the page.
+		 * @param {Object}  list     The search, the page and the order.
 		 * @param {boolean} remember Push the result's address into the history (not when answering Back).
 		 * @param {boolean} focus    Move the focus to the list (after a page link, which the new list replaces).
 		 */
@@ -51,13 +52,16 @@
 			var args = new URLSearchParams();
 			args.set( 'search', list.s );
 			args.set( 'page', String( list.paged ) );
+			if ( list.order ) {
+				args.set( 'order', list.order );
+			}
 
 			wp.apiFetch( { path: options.path + '?' + args.toString() } ).then( function ( response ) {
 				if ( mine !== requests ) {
 					return;
 				}
 				var data = response.data;
-				current = { s: data.term, paged: data.page };
+				current = { s: data.term, paged: data.page, order: data.order || '' };
 				region.innerHTML = data.html;
 				busy( false );
 				if ( remember ) {
@@ -92,24 +96,30 @@
 		if ( search && search.form ) {
 			search.form.addEventListener( 'submit', function ( event ) {
 				event.preventDefault();
-				load( { s: search.value, paged: 1 }, true, false );
+				load( { s: search.value, paged: 1, order: current.order }, true, false );
 			} );
 		}
 
 		// Page links. A Ctrl-, Cmd- or Shift-click still opens a new tab or window, as any link does.
 		region.addEventListener( 'click', function ( event ) {
+			// A sortable header: the first page in the order it names.
+			var sort = event.target.closest( '[data-list-sort]' );
+			if ( sort ) {
+				load( { s: current.s, paged: 1, order: sort.getAttribute( 'data-list-sort' ) }, true, false );
+				return;
+			}
 			var link = event.target.closest( '.affibloom-pagination a' );
 			if ( ! link || 0 !== event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ) {
 				return;
 			}
 			event.preventDefault();
-			load( { s: current.s, paged: parseInt( new URL( link.href ).searchParams.get( 'paged' ), 10 ) || 1 }, true, true );
+			load( { s: current.s, paged: parseInt( new URL( link.href ).searchParams.get( 'paged' ), 10 ) || 1, order: current.order }, true, true );
 		} );
 
 		// Back and Forward: draw the list the address names, without pushing it again.
 		window.addEventListener( 'popstate', function () {
 			var back = new URLSearchParams( window.location.search );
-			load( { s: back.get( 's' ) || '', paged: parseInt( back.get( 'paged' ), 10 ) || 1 }, false, false );
+			load( { s: back.get( 's' ) || '', paged: parseInt( back.get( 'paged' ), 10 ) || 1, order: back.get( 'order' ) || '' }, false, false );
 		} );
 	};
 }() );

@@ -60,6 +60,10 @@ final class LinkIndexHooksTest extends TestCase {
 			public function stats(): LinkIndexStats {
 				return new LinkIndexStats();
 			}
+			public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): \Affibloom\Domain\LinkIndex\LocationPage {
+				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
+			}
+
 			public function counts_for( array $product_ids ): array {
 				return array();
 			}

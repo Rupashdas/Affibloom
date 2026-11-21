@@ -3007,3 +3007,34 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 
 /* Task 31D: Export CSV sits above the list on the issue tabs, right-aligned. */
 .affibloom-export { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+
+/*
+ * Task 36B (F12 L4-L7): the product page's Locations tab. Content holds the post's title (its status beside it when it
+ * is not published) and its permalink under it; a post with several places is a group row with a toggle, its places in
+ * nested rows indented under it. Link with Context is one line, cut with an ellipsis; a display's shortcode is in mono.
+ */
+.affibloom-table.affibloom-table--locations { min-width: 720px; }
+.affibloom-table--locations .affibloom-col-content { width: 38%; }
+.affibloom-table--locations .affibloom-col-type { width: 80px; text-align: center; }
+.affibloom-table--locations .affibloom-col-clicks { width: 92px; text-align: center; }
+.affibloom-table--locations th .affibloom-help { margin-left: 4px; vertical-align: middle; }
+.affibloom-location__title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--affibloom-ink-900); font: 600 14px/20px var(--affibloom-font); }
+.affibloom-admin .affibloom-location__title a { color: inherit; text-decoration: none; }
+.affibloom-admin .affibloom-location__title a:hover { color: var(--affibloom-brand-700); text-decoration: underline; }
+.affibloom-location__status { padding: 1px 8px; border-radius: var(--affibloom-radius-chip); background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); font: 600 12px/18px var(--affibloom-font); }
+.affibloom-admin .affibloom-location__permalink { display: block; max-width: 100%; overflow: hidden; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-admin .affibloom-location__permalink:hover { color: var(--affibloom-brand-700); text-decoration: underline; }
+.affibloom-location__group { display: flex; align-items: flex-start; gap: 12px; }
+.affibloom-location__group > div { min-width: 0; }
+.affibloom-location__places { color: var(--affibloom-ink-500); font: 500 13px/18px var(--affibloom-font); }
+.affibloom-location__toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-segment); background: #fff; color: var(--affibloom-ink-700); cursor: pointer; }
+.affibloom-location__toggle:hover { border-color: var(--affibloom-brand-600); color: var(--affibloom-brand-700); }
+.affibloom-location__toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-location__toggle .affibloom-icon { width: 16px; height: 16px; transition: transform 0.15s ease; }
+.affibloom-location__toggle[aria-expanded="true"] .affibloom-icon { transform: rotate(180deg); }
+.affibloom-location--nested td { background: var(--affibloom-brand-25); }
+.affibloom-location--nested .affibloom-col-content { border-left: 3px solid var(--affibloom-brand-600); }
+.affibloom-location__context { display: block; max-width: 420px; overflow: hidden; color: var(--affibloom-ink-700); font: 400 14px/20px var(--affibloom-font); text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-location__context--code { font: 400 13px/20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.affibloom-location__type { color: var(--affibloom-ink-500); }
+@media (prefers-reduced-motion: reduce) { .affibloom-location__toggle .affibloom-icon { transition: none; } }

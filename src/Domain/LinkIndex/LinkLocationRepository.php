@@ -75,4 +75,17 @@ interface LinkLocationRepository {
 	 * @return array<int, int> By product ID; a product used nowhere is left out.
 	 */
 	public function counts_for( array $product_ids ): array;
+
+	/**
+	 * One page of the posts that use a product, each with its places (F12 L5-L7, D22, D23; Task 36B): the rows that
+	 * L1 counts, hosts ordered by title, their rows by ID; a search keeps the rows whose host title, text or URL holds
+	 * it.
+	 *
+	 * @param int    $product_id The product.
+	 * @param string $search     The search, '' for none.
+	 * @param string $order      'asc' or 'desc', by host title.
+	 * @param int    $page       The page, from 1.
+	 * @param int    $per_page   Hosts per page.
+	 */
+	public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): LocationPage;
 }

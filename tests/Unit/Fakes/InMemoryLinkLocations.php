@@ -55,6 +55,14 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return $links;
 	}
 
+	/** @var list<array{int, string, string, int, int}> product_locations()' arguments, in order. */
+	public array $asked = array();
+
+	public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): \Affibloom\Domain\LinkIndex\LocationPage {
+		$this->asked[] = array( $product_id, $search, $order, $page, $per_page );
+		return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, $page, $per_page );
+	}
+
 	public function counts_for( array $product_ids ): array {
 		$counts = array();
 		foreach ( $this->rows as $rows ) {

@@ -12,7 +12,10 @@ namespace Affibloom\Infrastructure\WordPress;
 use Affibloom\Domain\LinkIndex\LinkIndexStats;
 use Affibloom\Domain\LinkIndex\LinkLocation;
 use Affibloom\Domain\LinkIndex\LinkLocationRepository;
+use Affibloom\Domain\LinkIndex\LocationHost;
 use Affibloom\Domain\LinkIndex\LocationKey;
+use Affibloom\Domain\LinkIndex\LocationPage;
+use Affibloom\Domain\LinkIndex\ProductLocation;
 use RuntimeException;
 
 /**
@@ -191,6 +194,72 @@ KEY display_type (display_type)";
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * One page of the posts that use a product (Task 36B): the rows L1 counts (counts_for()'s), found by the product's
+	 * own rows and by the group displays of its groups; three queries: the hosts' total, the page's hosts, their rows.
+	 *
+	 * @param int    $product_id The product.
+	 * @param string $search     The search, '' for none: host title, link text or URL (D23).
+	 * @param string $order      'asc' or 'desc', by host title.
+	 * @param int    $page       The page, from 1.
+	 * @param int    $per_page   Hosts per page.
+	 */
+	public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): LocationPage {
+		global $wpdb;
+
+		$groups = wp_get_object_terms( $product_id, GroupTaxonomy::NAME, array( 'fields' => 'ids' ) );
+		$refs   = is_array( $groups ) ? array_map( static fn( $id ): string => 'group:' . (int) $id, $groups ) : array();
+		$where  = 'IF(l.assigned_product_id > 0, l.assigned_product_id, l.product_id) = %d';
+		$args   = array( $product_id );
+		if ( array() !== $refs ) {
+			$where = "( {$where} OR l.display_ref IN (" . implode( ',', array_fill( 0, count( $refs ), '%s' ) ) . ') )';
+			$args  = array_merge( $args, $refs );
+		}
+		if ( '' !== $search ) {
+			$like   = '%' . $wpdb->esc_like( $search ) . '%';
+			$where .= ' AND ( p.post_title LIKE %s OR l.anchor_text LIKE %s OR l.url LIKE %s )';
+			$args   = array_merge( $args, array( $like, $like, $like ) );
+		}
+		$from      = array( $wpdb->prefix . self::TABLE, $wpdb->posts );
+		$direction = 'asc' === $order ? 'ASC' : 'DESC';
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table, read for one admin screen; $where holds only placeholders and $direction is ASC or DESC.
+		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(DISTINCT l.host_id) FROM %i AS l JOIN %i AS p ON p.ID = l.host_id WHERE {$where}", ...$from, ...$args ) );
+		$shell = new LocationPage( array(), $total, $page, $per_page );
+		$hosts = 0 === $total ? array() : $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT l.host_id, p.post_title, p.post_status, MAX(l.host_url) AS host_url FROM %i AS l JOIN %i AS p ON p.ID = l.host_id
+				WHERE {$where} GROUP BY l.host_id, p.post_title, p.post_status ORDER BY p.post_title {$direction}, l.host_id {$direction} LIMIT %d OFFSET %d",
+				...array_merge( $from, $args, array( $per_page, $shell->offset() ) )
+			),
+			ARRAY_A
+		);
+		$hosts = is_array( $hosts ) ? $hosts : array();
+		$ids   = implode( ',', array_map( static fn( array $host ): int => (int) $host['host_id'], $hosts ) );
+		$rows  = '' === $ids ? array() : $wpdb->get_results(
+			$wpdb->prepare( "SELECT l.id, l.host_id, l.display_type, l.url, l.anchor_text, l.display_ref FROM %i AS l JOIN %i AS p ON p.ID = l.host_id WHERE {$where} AND l.host_id IN ({$ids}) ORDER BY l.id", ...$from, ...$args ),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		$places = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$places[ (int) $row['host_id'] ][] = new ProductLocation(
+				(int) $row['id'],
+				(string) $row['display_type'],
+				(string) $row['url'],
+				null === $row['anchor_text'] ? null : (string) $row['anchor_text'],
+				null === $row['display_ref'] ? null : (string) $row['display_ref']
+			);
+		}
+		$items = array_map(
+			static fn( array $host ): LocationHost => new LocationHost( (int) $host['host_id'], (string) $host['post_title'], (string) $host['post_status'], (string) $host['host_url'], $places[ (int) $host['host_id'] ] ?? array() ),
+			$hosts
+		);
+
+		return new LocationPage( $items, $total, $shell->current(), $per_page );
 	}
 
 	/**

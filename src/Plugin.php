@@ -120,6 +120,7 @@ use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\LinkHealth\LinkCheckJobStatus;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Application\Locations\LocationCounts;
+use Affibloom\Application\Locations\LocationService;
 use Affibloom\Application\LinkHealth\IssueLinksExport;
 use Affibloom\Interface\Rest\DashboardExportController;
 use Affibloom\Infrastructure\Http\HttpLinkStatusChecker;
@@ -175,6 +176,7 @@ use Affibloom\Interface\Rest\ProductFieldsController;
 use Affibloom\Interface\Rest\ProductResource;
 use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
+use Affibloom\Interface\Rest\LocationsController;
 use Affibloom\Interface\Rest\VariantsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
 use Affibloom\Interface\Rest\EditorController;
@@ -515,7 +517,7 @@ final class Plugin {
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts() ),
-				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query() ),
+				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query(), $this->location_service(), $this->location_counts() ),
 				new SettingsScreen(
 					$this->template(),
 					$settings,
@@ -541,6 +543,7 @@ final class Plugin {
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
 			new VariantsController( $products, $variants, $this->template() ),
+			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
 			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts() ),
@@ -629,6 +632,13 @@ final class Plugin {
 	 */
 	private function location_counts(): LocationCounts {
 		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
+	}
+
+	/**
+	 * The product page's Locations tab and its route (F12; Task 36B).
+	 */
+	private function location_service(): LocationService {
+		return new LocationService( new TableLinkLocationRepository() );
 	}
 
 	/**

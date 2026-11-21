@@ -62,7 +62,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### F21 / F12 — Locations (where used)
 
 - [x] Task 36A: The Dashboard's Locations column — count, sort, clock
-- [ ] Task 36B: The product page's Locations tab
+- [x] Task 36B: The product page's Locations tab
 - [ ] Task 36C: Link with Context preview and the Clicks column
 - [ ] Task 36D: The Placements filter
 - [ ] Task 36E: Deleting a product in use is blocked
@@ -260,12 +260,17 @@ Content sorts, search, status labels for unpublished hosts, Lasso's empty state.
 | templates `product-locations.php`, partials `location-row.php`, `location-group-row.php` | `ProductScreen` |
 
 **Files:** the above; E2E F12 AC2, AC21, AC26.
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Service and route.**
-- [ ] **Step 3: Tab.**
-- [ ] **Step 4: Run and
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Service and route.**
+- [x] **Step 3: Tab.**
+- [x] **Step 4: Run and
   look.**
-- [ ] **Step 5: Commit** — "List a product's locations on its page".
+- [x] **Step 5: Commit** — "List a product's locations on its page".
+
+*Note (2026-11-21):* the rows come from `LinkLocationRepository::product_locations()` (domain `LocationPage`,
+`LocationHost`, `ProductLocation`); the host's title and status are read with the rows. `in-place-list.js` learned a
+sortable header (`data-list-sort`, `order`) for Content. Clicks is a "Soon" cell until 36C. Checked: unit, phpcs, the
+route through WP-CLI (paging, search, 404), the tab at 1280 px.
 
 ---
 

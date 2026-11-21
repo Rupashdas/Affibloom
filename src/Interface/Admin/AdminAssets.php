@@ -133,6 +133,11 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-product-save', $this->plugin_url . 'assets/admin/product-save.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );
 			// The Variants tab: its search and Copy (F27, Task V1).
 			wp_enqueue_script( 'affibloom-variants', $this->plugin_url . 'assets/admin/variants.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			// The Locations tab: its list in place and the group rows (F12, Task 36B).
+			if ( 'locations' === $tab ) {
+				wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+				wp_enqueue_script( 'affibloom-product-locations', $this->plugin_url . 'assets/admin/product-locations.js', array( 'affibloom-in-place-list' ), $this->version, true );
+			}
 		}
 
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).
