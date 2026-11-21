@@ -253,6 +253,61 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( button ).toHaveAttribute( 'title', 'No content opportunities to export for the current filters.' );
 	} );
 
+	// AC11 (O10; R64-R73, N1-N3, D21, D22).
+	test( "AC11 Monetize prints the product's link at render time; the stored post never changes; off restores it", async ( { page } ) => {
+		const { product, title } = fixture( 1 );
+		const name = wp( 'post', 'get', String( product ), '--field=post_title' );
+		const host = Number( wp( 'post', 'list', '--post_type=post', `--title=${ title }`, '--field=ID' ) );
+		const stored = wp( 'post', 'get', String( host ), '--field=post_content' );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&product=${ product }` );
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
+		const row = page.locator( '.affibloom-table--opportunities tbody tr' ).first();
+
+		// Closing the dialog without a choice turns the switch off again.
+		await row.locator( '.affibloom-toggle' ).click();
+		const dialog = page.getByRole( 'dialog', { name: 'Monetize' } );
+		await expect( dialog ).toBeVisible();
+		await expect( dialog.getByRole( 'button', { name: 'Create a Link' } ) ).toBeVisible();
+		await page.keyboard.press( 'Escape' );
+		await expect( row.getByRole( 'switch' ) ).not.toBeChecked();
+
+		await row.locator( '.affibloom-toggle' ).click();
+		await dialog.getByRole( 'searchbox' ).fill( name );
+		await dialog.getByRole( 'button', { name: `Monetize: ${ name }` } ).click();
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '0 Found' );
+
+		// The front end prints the product's link; the stored post is byte for byte the same.
+		await page.goto( `/?p=${ host }` );
+		await expect( page.locator( `a[data-affibloom-id="${ product }"]` ) ).toHaveCount( 1 );
+		expect( wp( 'post', 'get', String( host ), '--field=post_content' ) ).toBe( stored );
+
+		// A post's links: on, "Monetized with …", Edit in post; off brings the stored link back.
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=post&post=${ host }` );
+		const line = page.locator( 'tbody tr', { hasText: `Monetized with ${ name }` } );
+		await expect( line.getByRole( 'switch' ) ).toBeChecked();
+		await expect( line.getByRole( 'link', { name: 'Edit in post' } ) ).toHaveAttribute( 'href', /affibloom_location=\d+/ );
+		await line.locator( '.affibloom-toggle' ).click();
+		await expect( page.getByText( `Monetized with ${ name }` ) ).toHaveCount( 0 );
+		await page.goto( `/?p=${ host }` );
+		await expect( page.locator( `a[data-affibloom-id="${ product }"]` ) ).toHaveCount( 0 );
+		expect( wp( 'post', 'get', String( host ), '--field=post_content' ) ).toBe( stored );
+	} );
+
+	test( 'AC11 a link tied by its own address is on and disabled, and says why', async ( { page } ) => {
+		const url = `https://www.example.com/${ unique( 'f22-ac11-tied' ) }`;
+		createProduct( { name: unique( 'F22 AC11 tied' ), url } );
+		const title = unique( 'F22 AC11 tied post' );
+		newPostWith( `<p>Get <a href="${ url }">it</a>.</p>`, title );
+		const host = Number( wp( 'post', 'list', '--post_type=post', `--title=${ title }`, '--field=ID' ) );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=post&post=${ host }` );
+		const toggle = page.locator( 'tbody tr' ).first().getByRole( 'switch' );
+		await expect( toggle ).toBeChecked();
+		await expect( toggle ).toBeDisabled();
+		await expect( page.locator( 'tbody tr .affibloom-toggle' ).first() ).toHaveAttribute( 'title', "This link is in the post's content; edit the post to change it." );
+	} );
+
 	// AC12 (O4; R29-R31).
 	test( "AC12 Content › post: the post's text links, product links first with Monetize on", async ( { page } ) => {
 		const url = `https://www.example.com/${ unique( 'f22-ac12' ) }`;

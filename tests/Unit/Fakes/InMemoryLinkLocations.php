@@ -80,6 +80,17 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		return true;
 	}
 
+	/** @var array<int, int> set_assigned()'s writes, by row. */
+	public array $assigned = array();
+
+	public function set_assigned( int $id, int $product_id ): bool {
+		if ( null === $this->find( $id ) ) {
+			return false;
+		}
+		$this->assigned[ $id ] = $product_id;
+		return true;
+	}
+
 	public function counts_for( array $product_ids ): array {
 		$counts = array();
 		foreach ( $this->rows as $rows ) {

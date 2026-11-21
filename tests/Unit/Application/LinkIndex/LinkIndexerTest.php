@@ -72,6 +72,10 @@ final class LinkIndexerTest extends TestCase {
 				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
 			}
 
+			public function set_assigned( int $id, int $product_id ): bool {
+				return false;
+			}
+
 			public function set_ignored( int $id, bool $ignored ): bool {
 				return false;
 			}
@@ -216,6 +220,10 @@ final class LinkIndexerTest extends TestCase {
 			}
 			public function product_locations( int $product_id, string $search, string $order, int $page, int $per_page ): \Affibloom\Domain\LinkIndex\LocationPage {
 				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
+			}
+
+			public function set_assigned( int $id, int $product_id ): bool {
+				return false;
 			}
 
 			public function set_ignored( int $id, bool $ignored ): bool {

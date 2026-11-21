@@ -339,6 +339,30 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * Ties a row to a product at render time, or clears that (F22 N1-A; Task O10). A rescan copies an assignment into
+	 * `product_id` (LinkLocation::keeping()), so a tie that came from the assignment moves with it, and goes with it.
+	 *
+	 * @param int $id         The row's ID.
+	 * @param int $product_id The product; 0 clears the assignment.
+	 * @return bool False when the row is gone.
+	 */
+	public function set_assigned( int $id, int $product_id ): bool {
+		global $wpdb;
+
+		$table = $wpdb->prefix . self::TABLE;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one row.
+		if ( null === $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE id = %d', $table, $id ) ) ) {
+			return false;
+		}
+		$product_id = max( 0, $product_id );
+		// product_id first: MySQL sets the columns in order, so the test reads the old assignment.
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET product_id = IF( assigned_product_id > 0 AND product_id = assigned_product_id, %d, product_id ), assigned_product_id = %d WHERE id = %d', $table, $product_id, $product_id, $id ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		return true;
+	}
+
+	/**
 	 * One row by its ID.
 	 *
 	 * @param int $id The row's ID.

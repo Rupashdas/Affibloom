@@ -180,6 +180,7 @@ use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Editor\ClassicButton;
 use Affibloom\Interface\Editor\EditorAssets;
+use Affibloom\Interface\Editor\LocationSelector;
 use Affibloom\Interface\Editor\ElementorWidget;
 use Affibloom\Interface\Front\AffibloomShortcode;
 use Affibloom\Interface\Front\BoxAssets;
@@ -572,6 +573,8 @@ final class Plugin {
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
 			new ClassicButton( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+			// F22 N1-B (Task O10): "Edit in post" opens the editor with the link selected.
+			new LocationSelector( new TableLinkLocationRepository(), plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			new ElementorWidget( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $editor_assets, $box_assets ),
 			new EditorController( new PostTypeProductRepository(), new TableAmazonProductRepository(), $fields, $groups ),
 			new AmazonController( $amazon, $data, $this->bulk_sync(), $search ),
@@ -688,7 +691,7 @@ final class Plugin {
 	 * The Opportunities lists (F22; Task O1).
 	 */
 	private function opportunity_service(): OpportunityService {
-		return new OpportunityService( new TableOpportunityRepository(), new TableLinkLocationRepository() );
+		return new OpportunityService( new TableOpportunityRepository(), new TableLinkLocationRepository(), new PostTypeProductRepository(), fn( int $host ): ?array => $this->link_indexer()->index( $host ) );
 	}
 
 	/**

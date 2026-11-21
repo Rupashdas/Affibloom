@@ -2,7 +2,7 @@
 /**
  * A post's links (F22 R29-R31, D7; Task O4; Lasso's opportunities/content-links.php and rows/content-link-row.php):
  * "N Found", the table URL (with Filter by URL and Open in New Window under it), Link (the text or image address,
- * which opens the preview), Type and Monetize (on for a tied link; disabled until O10); product links first.
+ * which opens the preview), Type and Monetize (on for a tied link; Task O10's switch); product links first.
  * GET /opportunities/posts/{id}/links renders this same partial (D3).
  *
  * @package Affibloom
@@ -11,6 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Domain\Opportunity\AmazonDomains;
 use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
 
@@ -49,11 +50,7 @@ $columns = array(
 				?>
 				<tbody>
 					<?php foreach ( $list->items as $detected ) : ?>
-						<?php
-						$place = $detected->place;
-						/* translators: %s: the link's address. */
-						$monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $place->url );
-						?>
+						<?php $place = $detected->place; ?>
 						<tr data-location-id="<?php echo esc_attr( (string) $place->id ); ?>">
 							<td class="affibloom-col-url">
 								<a class="affibloom-opportunity__main" href="<?php echo esc_url( $place->url ); ?>" target="_blank" rel="noopener noreferrer" title="<?php echo esc_attr( $place->url ); ?>"><?php echo esc_html( $place->url ); ?></a>
@@ -62,7 +59,15 @@ $columns = array(
 										<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::DOMAIN_LINKS ), 1, $detected->domain ) ); ?>"><?php esc_html_e( 'Filter by URL', 'affibloom' ); ?></a>
 									<?php endif; ?>
 									<a class="affibloom-opportunity__action" href="<?php echo esc_url( $place->url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open in New Window', 'affibloom' ); ?></a>
+									<?php $in_post = OpportunitiesScreen::edit_in_post_url( $detected->host_id, (int) $place->id ); ?>
+									<?php if ( '' !== $in_post ) : ?>
+										<a class="affibloom-opportunity__action" href="<?php echo esc_url( $in_post ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Edit in post', 'affibloom' ); ?></a>
+									<?php endif; ?>
 								</span>
+								<?php if ( $detected->assigned > 0 ) : ?>
+									<?php /* translators: %s: the product's name. */ ?>
+									<span class="affibloom-opportunity__assigned"><?php echo esc_html( sprintf( __( 'Monetized with %s', 'affibloom' ), $detected->assigned_name ) ); ?></span>
+								<?php endif; ?>
 							</td>
 							<td class="affibloom-col-link">
 								<button type="button" class="affibloom-location__context" data-location-preview="<?php echo esc_attr( (string) $place->id ); ?>"
@@ -70,11 +75,18 @@ $columns = array(
 							</td>
 							<td class="affibloom-col-type"><?php $this->render( 'admin/partials/location-type', array( 'place' => $place ) ); ?></td>
 							<td class="affibloom-col-monetize">
-								<?php // On for a tied link (R30); Monetize itself comes with Task O10. ?>
-								<span class="affibloom-toggle" title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>">
-									<input type="checkbox" class="affibloom-toggle__input" role="switch" disabled <?php checked( $detected->tied ); ?> aria-label="<?php echo esc_attr( $monetize_label ); ?>" aria-describedby="affibloom-soon-note">
-									<span class="affibloom-toggle__track" aria-hidden="true"></span>
-								</span>
+								<?php
+								// On for a tied link (R30); Monetize and Unmonetize (Task O10).
+								$this->render(
+									'admin/partials/monetize-switch',
+									array(
+										'row'    => $place->id,
+										'url'    => $place->url,
+										'state'  => $detected->assigned > 0 ? 'on' : ( $detected->tied ? 'content' : 'off' ),
+										'amazon' => AmazonDomains::in_url( $place->url ),
+									)
+								);
+								?>
 							</td>
 						</tr>
 					<?php endforeach; ?>

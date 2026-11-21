@@ -27,7 +27,8 @@ use WP_REST_Server;
  * F22's routes (D3, D8, D20; Tasks O1, O2): `GET /opportunities/links`, `/domains` and `/domains/{domain}/links` answer
  * the list drawn by the partial the page printed, `{ html, term, page, orderby, order, total, url }`;
  * `POST /opportunities/intros/{box}` closes an intro box for good; `POST` and `DELETE
- * /opportunities/locations/{row}/dismiss` dismiss a Link Opportunity and undo it (Task O7).
+ * /opportunities/locations/{row}/dismiss` dismiss a Link Opportunity and undo it (Task O7); `PUT` and `DELETE
+ * /opportunities/locations/{row}/assignment` monetize a link at render time and undo it (Task O10).
  */
 final class OpportunitiesController implements Module {
 
@@ -91,6 +92,33 @@ final class OpportunitiesController implements Module {
 		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
+			'/opportunities/locations/(?P<row>\d+)/assignment',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'assign' ),
+					'permission_callback' => array( $this, 'can_dismiss' ),
+					'args'                => array(
+						'row'     => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+						'product' => array(
+							'type'     => 'integer',
+							'minimum'  => 1,
+							'required' => true,
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'unassign' ),
+					'permission_callback' => array( $this, 'can_dismiss' ),
+				),
+			)
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
 			'/opportunities/intros/(?P<box>[a-z]+)',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -107,7 +135,7 @@ final class OpportunitiesController implements Module {
 	}
 
 	/**
-	 * Who may dismiss a row or undo it (D20): people who manage products and may edit the post the link is in. A row
+	 * Who may dismiss a row, monetize it, or undo either (D20): people who manage products and may edit the post the link is in. A row
 	 * that is gone passes here, so the callback can answer 404.
 	 *
 	 * @param WP_REST_Request $request Request with the row.
@@ -142,6 +170,55 @@ final class OpportunitiesController implements Module {
 				'data' => array(
 					'id'        => $row,
 					'dismissed' => $dismissed,
+				),
+			)
+		);
+	}
+
+	/**
+	 * PUT /opportunities/locations/{row}/assignment (R64-R69, N1-A; Task O10): the link prints the product's link at
+	 * render time. 404 for a row that is gone, 409 for a link tied by its own address (N3), 422 for a product that is
+	 * not published.
+	 *
+	 * @param WP_REST_Request $request Request with the row and the product.
+	 * @phpstan-param WP_REST_Request<array{row: int, product: int}> $request
+	 */
+	public function assign( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$row     = (int) $request['row'];
+		$product = (int) $request['product'];
+
+		return match ( $this->opportunities->assign( $row, $product ) ) {
+			'gone'       => new WP_Error( 'affibloom_location_gone', __( 'This link is no longer on the page.', 'affibloom' ), array( 'status' => 404 ) ),
+			'in_content' => new WP_Error( 'affibloom_tied_in_content', __( "This link is in the post's content; edit the post to change it.", 'affibloom' ), array( 'status' => 409 ) ),
+			'no_product' => new WP_Error( 'affibloom_invalid_product', __( 'Choose a published product.', 'affibloom' ), array( 'status' => 422 ) ),
+			default      => new WP_REST_Response(
+				array(
+					'data' => array(
+						'id'      => $row,
+						'product' => $product,
+					),
+				)
+			),
+		};
+	}
+
+	/**
+	 * DELETE /opportunities/locations/{row}/assignment (R72, N1-A; Task O10): readers see the stored link again.
+	 *
+	 * @param WP_REST_Request $request Request with the row.
+	 * @phpstan-param WP_REST_Request<array{row: int}> $request
+	 */
+	public function unassign( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$row = (int) $request['row'];
+		if ( ! $this->opportunities->unassign( $row ) ) {
+			return new WP_Error( 'affibloom_location_gone', __( 'This link is no longer on the page.', 'affibloom' ), array( 'status' => 404 ) );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => array(
+					'id'      => $row,
+					'product' => 0,
 				),
 			)
 		);

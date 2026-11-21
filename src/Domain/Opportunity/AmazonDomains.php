@@ -45,6 +45,18 @@ final class AmazonDomains {
 	public const ALL = array( ...self::EXCLUDED, 'amzn.com', 'amzn.to' );
 
 	/**
+	 * Whether a link's address is Amazon's by Lasso's Monetize test (R64: `www.amazon.`, `//amazon.` or `amzn.`), so
+	 * the Monetize dialog fills Create a Link in with it (N2; Task O10).
+	 *
+	 * @param string $url The link's address.
+	 */
+	public static function in_url( string $url ): bool {
+		$url = strtolower( $url );
+
+		return str_contains( $url, 'www.amazon.' ) || str_contains( $url, '//amazon.' ) || str_contains( $url, 'amzn.' );
+	}
+
+	/**
 	 * Whether a base domain is one of them.
 	 *
 	 * @param string $domain The base domain.

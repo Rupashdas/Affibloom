@@ -64,6 +64,10 @@ final class LinkIndexHooksTest extends TestCase {
 				return new \Affibloom\Domain\LinkIndex\LocationPage( array(), 0, 1 );
 			}
 
+			public function set_assigned( int $id, int $product_id ): bool {
+				return false;
+			}
+
 			public function set_ignored( int $id, bool $ignored ): bool {
 				return false;
 			}

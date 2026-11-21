@@ -4,6 +4,10 @@ namespace Affibloom\Tests\Unit\Application\Opportunities;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Domain\LinkIndex\LinkLocation;
 use Affibloom\Domain\Opportunity\OpportunityRepository;
+use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\Product;
+use Affibloom\Domain\Product\ProductRepository;
+use Affibloom\Domain\Settings\Settings;
 use Affibloom\Tests\Unit\Fakes\InMemoryLinkLocations;
 use PHPUnit\Framework\TestCase;
 
@@ -50,5 +54,39 @@ final class OpportunityServiceTest extends TestCase {
 
 		self::assertSame( array( 7 => 2 ), $service->per_product( array( 7, 8 ), true ) );
 		self::assertSame( array( 7 => 5 ), $service->per_product( array( 7, 8 ), false ) );
+	}
+
+	/** Monetize (F22 R64-R72, N1-A, N3; Task O10). */
+	public function test_assign_checks_the_row_its_own_tie_and_the_product(): void {
+		$products = $this->createStub( ProductRepository::class );
+		$products->method( 'get' )->willReturnCallback(
+			static fn( int $id ): ?Product => 5 === $id ? Product::draft( 'Five', AffiliateUrl::from_string( 'https://shop.example/5' ), Settings::from_array( array() ) )->with( array( 'id' => 5 ) ) : null
+		);
+		$this->locations->rows[43] = array( new LinkLocation( 43, 'https://site.example/b/', 'post_content', 1, 9, 'product', '', 'https://shop.example/9', md5( 'x' ) ) );
+		$service = new OpportunityService( $this->createStub( OpportunityRepository::class ), $this->locations, $products );
+
+		self::assertSame( 'gone', $service->assign( 9, 5 ) );
+		self::assertSame( 'in_content', $service->assign( 2, 5 ) );
+		self::assertSame( 'no_product', $service->assign( 1, 6 ) );
+		self::assertSame( '', $service->assign( 1, 5 ) );
+		self::assertSame( array( 1 => 5 ), $this->locations->assigned );
+	}
+
+	public function test_unassign_clears_the_row_and_indexes_its_post_again(): void {
+		$indexed = array();
+		$service = new OpportunityService(
+			$this->createStub( OpportunityRepository::class ),
+			$this->locations,
+			null,
+			static function ( int $host ) use ( &$indexed ): ?array {
+				$indexed[] = $host;
+				return null;
+			}
+		);
+
+		self::assertTrue( $service->unassign( 1 ) );
+		self::assertSame( array( 1 => 0 ), $this->locations->assigned );
+		self::assertSame( array( 42 ), $indexed );
+		self::assertFalse( $service->unassign( 9 ) );
 	}
 }

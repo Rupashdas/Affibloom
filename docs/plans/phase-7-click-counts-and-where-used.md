@@ -108,7 +108,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O7: Dismiss, and Undo
 - [x] Task O8: The Dashboard's tile, filter tab and lightbulb
 - [x] Task O9: Export CSV of content opportunities
-- [ ] Task O10: Monetize and unmonetize at render time (N1-A)
+- [x] Task O10: Monetize and unmonetize at render time (N1-A)
 
 ### F35 and C2 — auto-detect and Amazon auto-monetization
 
@@ -1239,13 +1239,22 @@ to change it." (or, with an original URL, offers N3's override). Each row also h
 **Files:** the above; tests F22 **AC11** (with a byte comparison of `post_content` before and after), integration
 `AssignmentTest.php` (render output, survives re-index, drops when the anchor's URL changes).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Carry-over and filter read** (the column is 35A's).
-- [ ] **Step 3: Service, routes.**
-- [ ] **Step 4: Dialog, switch states, Edit in post.**
-- [ ] **Step 5: Run and look** (front end of #4375 before and
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Carry-over and filter read** (the column is 35A's).
+- [x] **Step 3: Service, routes.**
+- [x] **Step 4: Dialog, switch states, Edit in post.**
+- [x] **Step 5: Run and look** (front end of #4375 before and
   after; the editor shows the stored link).
-- [ ] **Step 6: Commit** — "Monetize opportunities at render time, without editing posts".
+- [x] **Step 6: Commit** — "Monetize opportunities at render time, without editing posts".
+
+*Note:* a rescan copies an assignment into `product_id` (35I's `keeping()`), so `set_assigned()` moves that copied tie
+with the assignment and Unmonetize re-indexes the post (else the row stayed tied). Create a Link assigns the new
+product to the row at once (Lasso shows its quick-detail and leaves the choice to a second search). A post's monetized
+link says "Monetized with <product>". The product search is shared with Add to Group (`product-search.js`, second use).
+**Not built: N3's original-URL override** (it needs an index flag read by every "tied" check, ~34 places; no Local row
+has an original URL different from its own until Phase M imports Lasso's) — the user is asked at Phase 7's end; tied
+rows show N3's disabled switch and tooltip. Checked: unit, analyse; on Local 10 → 9 Found, the front end printing the
+product's link with `post_content` byte-identical, off restoring it, Create a Link, Edit in post selecting the paragraph.
 
 ---
 

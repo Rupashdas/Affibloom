@@ -26,6 +26,9 @@ final class DetectedLink {
 	 * @param string          $host_url   The post's permalink, as indexed.
 	 * @param bool            $tied       Whether the link is tied to a product.
 	 * @param string          $domain     The link's base domain; '' for a product or internal link.
+	 * @param int             $assigned   The product Monetize tied it to at render time (Task O10); 0 when none, and
+	 *                                    when $tied is true with 0 the link is tied by its own address.
+	 * @param string          $assigned_name That product's name.
 	 */
 	public function __construct(
 		public readonly ProductLocation $place,
@@ -34,5 +37,7 @@ final class DetectedLink {
 		public readonly string $host_url,
 		public readonly bool $tied = false,
 		public readonly string $domain = '',
+		public readonly int $assigned = 0,
+		public readonly string $assigned_name = '',
 	) {}
 }

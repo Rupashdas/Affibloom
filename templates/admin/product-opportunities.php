@@ -103,5 +103,6 @@ $list_args = (string) wp_json_encode(
 	);
 	?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/monetize-modal' ); ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

@@ -88,7 +88,8 @@ final class AdminAssets implements Module {
 			wp_enqueue_script( 'affibloom-groups', $this->plugin_url . 'assets/admin/groups.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			// A group's Links tab: its order, Remove and "Add to Group" (Task G4); it stops at once on any other page.
 			wp_enqueue_script( 'affibloom-drag-rows', $this->plugin_url . 'assets/admin/drag-rows.js', array(), $this->version, true );
-			wp_enqueue_script( 'affibloom-group-members', $this->plugin_url . 'assets/admin/group-members.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-group-members', $this->plugin_url . 'assets/admin/group-members.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-drag-rows', 'affibloom-product-search' ), $this->version, true );
 		}
 
 		// The Fields list in place (Task FL1) and the field form (Task FL2); the hook suffix of both Fields pages holds
@@ -140,7 +141,9 @@ final class AdminAssets implements Module {
 			if ( 'opportunities' === $tab ) {
 				wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 				wp_enqueue_script( 'affibloom-location-preview', $this->plugin_url . 'assets/admin/location-preview.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
-				wp_enqueue_script( 'affibloom-opportunities', $this->plugin_url . 'assets/admin/opportunities.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'affibloom-location-preview' ), $this->version, true );
+				// Monetize's product search (Task O10), shared with Add to Group.
+				wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+				wp_enqueue_script( 'affibloom-opportunities', $this->plugin_url . 'assets/admin/opportunities.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'affibloom-location-preview', 'affibloom-product-search' ), $this->version, true );
 			}
 			if ( 'locations' === $tab ) {
 				wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
@@ -153,7 +156,9 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, OpportunitiesScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-location-preview', $this->plugin_url . 'assets/admin/location-preview.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
-			wp_enqueue_script( 'affibloom-opportunities', $this->plugin_url . 'assets/admin/opportunities.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'affibloom-location-preview' ), $this->version, true );
+			// Monetize's product search (Task O10), shared with Add to Group.
+			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-opportunities', $this->plugin_url . 'assets/admin/opportunities.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'affibloom-location-preview', 'affibloom-product-search' ), $this->version, true );
 		}
 
 		// The "Button icons" card chooses its image from the media library (F28, Task 14F).

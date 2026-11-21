@@ -754,6 +754,14 @@
 			busy( true );
 			wp.apiFetch( { path: '/affibloom/v1/products', method: 'POST', data: { url: field.value } } )
 				.then( function ( response ) {
+					// Opened from Monetize's Create a Link (F22 R65, Task O10): the new product goes back to it.
+					if ( monetizing ) {
+						monetizing = false;
+						busy( false );
+						modal.dispatchEvent( new CustomEvent( 'affibloom:link-created', { detail: response.data } ) );
+						hideModal();
+						return;
+					}
 					window.location.assign( response.data.redirect_to );
 				} )
 				.catch( function ( failure ) {
@@ -835,7 +843,14 @@
 			window.location.reload();
 		} );
 
+		// Monetize's Create a Link (F22 R65, N2; Task O10): no redirect; an Amazon row's address filled in.
+		var monetizing = false;
 		modal.addEventListener( 'affibloom:open', function ( event ) {
+			monetizing = 'monetize' === event.detail.mode;
+			if ( monetizing ) {
+				field.value = modal.dataset.prefill || '';
+				field.focus();
+			}
 			if ( 'bulk' === event.detail.mode ) {
 				enterBulk();
 			} else if ( 'amazon' === event.detail.mode ) {
@@ -844,6 +859,7 @@
 			}
 		} );
 		modal.addEventListener( 'affibloom:close', function () {
+			monetizing = false;
 			setTab( 'url' );
 			resetSearch();
 			leaveBulk();

@@ -105,4 +105,14 @@ interface LinkLocationRepository {
 	 * @return bool False when the row is gone.
 	 */
 	public function set_ignored( int $id, bool $ignored ): bool;
+
+	/**
+	 * Ties a row to a product at render time, or clears that (F22 N1-A, R64-R72; Task O10): `assigned_product_id`, kept
+	 * by the row's identity on a rescan (replace_host()).
+	 *
+	 * @param int $id         The row's ID.
+	 * @param int $product_id The product; 0 clears the assignment.
+	 * @return bool False when the row is gone.
+	 */
+	public function set_assigned( int $id, int $product_id ): bool;
 }

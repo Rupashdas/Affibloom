@@ -5,6 +5,8 @@
  * R25), the Type icon's preview (location-preview.js), and the intro box's ×, which closes it for good
  * (POST /opportunities/intros/{box}); a failed save puts the box back.
  *
+ * Monetize (R64-R72; Task O10): see monetizing() below.
+ *
  * Dismiss (R44-R46, D11; Task O7): a row's × opens "Dismiss This Opportunity"; Dismiss posts
  * /opportunities/locations/{row}/dismiss, the row fades and the list is drawn again (its count and pager follow, and the
  * focus lands on the list), and the toast "Opportunity dismissed." offers Undo, which deletes the flag and draws the
@@ -54,6 +56,7 @@
 			window.affibloomLocationPreview( region );
 		}
 		dismissals( region, list );
+		monetizing( region, list );
 	}
 
 	/**
@@ -91,6 +94,137 @@
 			}
 			window.affibloomCsvDownload( button, button.getAttribute( 'data-export-path' ) + '?' + args.toString() );
 		} );
+	}
+
+	/**
+	 * Monetize (R64-R72, N1-A, N2; Task O10). A switch turned on opens "Monetize": a product's Monetize stores the
+	 * assignment (PUT …/assignment) and the list is drawn again (the link leaves the opportunity lists; on a post's
+	 * links it shows "Monetized with …"); Create a Link hands over to Add a Link (the address filled in for an Amazon
+	 * link), whose new product is then chosen. Closing either dialog without a choice turns the switch off. A switch
+	 * turned off clears the assignment (DELETE …/assignment).
+	 *
+	 * @param {HTMLElement} listRegion The list region.
+	 * @param {Object}      inPlace    The in-place list ({ refresh() }).
+	 */
+	function monetizing( listRegion, inPlace ) {
+		var modal = document.getElementById( 'affibloom-monetize' );
+		var adder = document.getElementById( 'affibloom-add-modal' );
+		if ( ! modal ) {
+			return;
+		}
+		var input = modal.querySelector( '#affibloom-monetize-search' );
+		var placeholder = input.getAttribute( 'placeholder' );
+		var pending = null;
+		var settled = false;
+		var handing = false;
+		var path = function ( id ) {
+			return '/affibloom/v1/opportunities/locations/' + encodeURIComponent( id ) + '/assignment';
+		};
+		var finder = window.affibloomProductSearch( {
+			modal: modal,
+			input: input,
+			results: modal.querySelector( '[data-monetize-results]' ),
+			pages: modal.querySelector( '[data-monetize-pages]' ),
+			error: modal.querySelector( '[data-monetize-error]' ),
+			perPage: 6,
+			button: function () {
+				return { label: modal.dataset.chooseLabel, disabled: false };
+			},
+			choose: function ( item, button ) {
+				button.disabled = true;
+				assign( item.id, function () {
+					button.disabled = false;
+					finder.problem( modal.dataset.failedText );
+				} );
+			},
+			// "Search URLs" becomes "Search N URLs" once the library's size is known (R65).
+			loaded: function ( data, term ) {
+				if ( '' === term ) {
+					input.setAttribute( 'placeholder', modal.dataset.searchMany.replace( '%s', Number( data.total ).toLocaleString() ) );
+				}
+			},
+		} );
+
+		function assign( product, failed ) {
+			var chosen = pending;
+			wp.apiFetch( { path: path( chosen.row ), method: 'PUT', data: { product: product } } ).then( function () {
+				settled = true;
+				window.affibloomModal.hide();
+				var line = listRegion.querySelector( 'tr[data-location-id="' + chosen.row + '"]' );
+				if ( line ) {
+					line.classList.add( 'is-monetized' );
+				}
+				window.affibloomToast( modal.dataset.doneText, false );
+				window.setTimeout( inPlace.refresh, 400 );
+			} ).catch( function ( error ) {
+				if ( failed ) {
+					failed( error );
+				} else {
+					chosen.input.checked = false;
+					window.affibloomToast( ( error && error.message ) || modal.dataset.failedText, true );
+				}
+			} );
+		}
+
+		listRegion.addEventListener( 'change', function ( event ) {
+			var toggle = event.target.closest( '[data-monetize]' );
+			if ( ! toggle ) {
+				return;
+			}
+			var row = toggle.getAttribute( 'data-monetize' );
+			if ( toggle.checked ) {
+				pending = { row: row, input: toggle, amazon: toggle.hasAttribute( 'data-monetize-amazon' ), url: toggle.getAttribute( 'data-monetize-url' ) };
+				settled = false;
+				window.affibloomModal.show( modal, toggle );
+				return;
+			}
+			wp.apiFetch( { path: path( row ), method: 'DELETE' } ).then( function () {
+				window.affibloomToast( modal.dataset.offText, false );
+				inPlace.refresh();
+			} ).catch( function () {
+				toggle.checked = true;
+				window.affibloomToast( modal.dataset.offFailed, true );
+			} );
+		} );
+
+		modal.addEventListener( 'affibloom:open', function () {
+			input.value = '';
+			finder.search( true );
+		} );
+		modal.addEventListener( 'affibloom:close', function () {
+			if ( pending && ! settled && ! handing ) {
+				pending.input.checked = false;
+			}
+		} );
+
+		// Create a Link (R65, N2): Add a Link in its monetize mode; the new product is assigned to the row.
+		modal.querySelector( '[data-monetize-create]' ).addEventListener( 'click', function () {
+			if ( ! adder || ! pending ) {
+				return;
+			}
+			handing = true;
+			window.affibloomModal.hide();
+			handing = false;
+			adder.dataset.prefill = pending.amazon ? pending.url : '';
+			pending.input.setAttribute( 'data-affibloom-mode', 'monetize' );
+			window.affibloomModal.show( adder, pending.input );
+			pending.input.removeAttribute( 'data-affibloom-mode' );
+		} );
+		if ( adder ) {
+			adder.addEventListener( 'affibloom:link-created', function ( event ) {
+				if ( pending && ! settled ) {
+					assign( event.detail.id );
+				}
+			} );
+			adder.addEventListener( 'affibloom:close', function () {
+				// Closed without a new product: the switch goes off, as when "Monetize" closes.
+				window.setTimeout( function () {
+					if ( pending && ! settled && adder.hidden && modal.hidden ) {
+						pending.input.checked = false;
+					}
+				}, 0 );
+			} );
+		}
 	}
 
 	/**

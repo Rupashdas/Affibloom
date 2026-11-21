@@ -3112,6 +3112,14 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 /* The × (R44, Task O7): Lasso's is at the row's top right; here its own narrow last column, on the first line. */
 .affibloom-table--opportunities .affibloom-col-dismiss { width: 68px; text-align: right; }
 .affibloom-table--opportunities td.affibloom-col-dismiss { padding-top: 12px; }
+/* Monetize (R65, R69; Task O10): the search and Create a Link side by side; a monetized row flashes green; a post's
+   monetized link says which product it prints. */
+.affibloom-monetize__search { display: flex; gap: 12px; align-items: center; }
+.affibloom-monetize__search .affibloom-input { flex: 1 1 auto; min-width: 0; }
+.affibloom-monetize__search .affibloom-button { flex: none; }
+@media (max-width: 600px) { .affibloom-monetize__search { flex-wrap: wrap; } .affibloom-monetize__search .affibloom-button { width: 100%; justify-content: center; } }
+.affibloom-table--opportunities tr.is-monetized { background: var(--affibloom-success-50); transition: background 0.2s ease; }
+.affibloom-admin .affibloom-opportunity__assigned { display: block; margin-top: 2px; color: var(--affibloom-success-700); font: 500 12px/16px var(--affibloom-font); }
 /* A dismissed row fades while the list is drawn again (R45's flash and collapse). */
 .affibloom-table--opportunities tr.is-dismissed { opacity: 0; transition: opacity 0.2s ease; }
 @media (prefers-reduced-motion: reduce) { .affibloom-table--opportunities tr.is-dismissed { transition: none; } }

@@ -79,6 +79,18 @@ final class OpportunitiesScreen {
 	}
 
 	/**
+	 * "Edit in post" (F22 N1-B; Task O10): the post's editor, told which link to select (assets/editor/select-location.js).
+	 *
+	 * @param int $host_id The post.
+	 * @param int $row     The link's index row.
+	 */
+	public static function edit_in_post_url( int $host_id, int $row ): string {
+		$edit = (string) get_edit_post_link( $host_id, 'raw' );
+
+		return '' === $edit ? '' : add_query_arg( 'affibloom_location', $row, $edit );
+	}
+
+	/**
 	 * The list a request asks for.
 	 *
 	 * @param string $kind    Which list (OpportunityQuery's constants).

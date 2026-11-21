@@ -599,19 +599,19 @@ final class TableOpportunityRepository implements OpportunityRepository {
 	private function detected( string $where, array $args, string $order, int $page ): OpportunityPage {
 		global $wpdb;
 
-		$from = $wpdb->prepare( 'FROM %i AS l JOIN %i AS h ON h.ID = l.host_id', $wpdb->prefix . TableLinkLocationRepository::TABLE, $wpdb->posts );
+		$from = $wpdb->prepare( 'FROM %i AS l JOIN %i AS h ON h.ID = l.host_id LEFT JOIN %i AS ap ON ap.ID = l.assigned_product_id', $wpdb->prefix . TableLinkLocationRepository::TABLE, $wpdb->posts, $wpdb->posts );
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table, one screen; $from is prepared, $where holds only placeholders, $order is from an allow-list.
 		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) {$from} WHERE {$where}", ...$args ) );
 		$shell = new OpportunityPage( array(), $total, $page );
 		$rows  = 0 === $total ? array() : $wpdb->get_results(
-			$wpdb->prepare( "SELECT l.id, l.url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, ( l.product_id > 0 OR l.assigned_product_id > 0 ) AS tied {$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ),
+			$wpdb->prepare( "SELECT l.id, l.url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, ( l.product_id > 0 OR l.assigned_product_id > 0 ) AS tied, l.assigned_product_id AS assigned, ap.post_title AS assigned_name {$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ),
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		$items = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$items[] = new DetectedLink( self::place( $row ), (int) $row['host_id'], (string) $row['host_title'], (string) $row['host_url'], '1' === (string) $row['tied'], (string) $row['domain'] );
+			$items[] = new DetectedLink( self::place( $row ), (int) $row['host_id'], (string) $row['host_title'], (string) $row['host_url'], '1' === (string) $row['tied'], (string) $row['domain'], (int) $row['assigned'], (string) $row['assigned_name'] );
 		}
 
 		return new OpportunityPage( $items, $total, $shell->current() );
