@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Front;
 
+use Affibloom\Domain\Analytics\GaSettings;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Module;
 
@@ -16,7 +17,8 @@ use Affibloom\Module;
  * Prints `assets/front/clicks.js` where a reader can click a product (F12 D3, AC17, AC19; Task 33A): when a box is drawn
  * (BoxAssets calls enqueue()) or the content holds a tied link (`the_content` at 999, after the links are stamped at
  * 20). Its settings, the route and the page's post, are the same for every visitor, so cached pages count. Nothing in
- * the admin or the editor's previews, and nothing while Page and Link-Level Tracking is off (F12 AC9; Task 33D).
+ * the admin or the editor's previews. It is printed while Page and Link-Level Tracking (F12 AC9; Task 33D) or GA Click
+ * Tracking (C3 D6; Task C3B) is on, and its settings say which of the two to do.
  */
 final class ClickScript implements Module {
 
@@ -57,13 +59,21 @@ final class ClickScript implements Module {
 	 * Enqueues the script with its settings, once; in the footer, so a box drawn late in the page still gets it.
 	 */
 	public function enqueue(): void {
-		if ( is_admin() || wp_script_is( self::HANDLE, 'enqueued' ) || ! $this->settings->get()->bool( 'click_tracking' ) ) {
+		if ( is_admin() || wp_script_is( self::HANDLE, 'enqueued' ) ) {
+			return;
+		}
+		$site  = $this->settings->get();
+		$count = $site->bool( 'click_tracking' );
+		$ga    = GaSettings::of( $site )->clicks;
+		if ( ! $count && ! $ga ) {
 			return;
 		}
 		wp_enqueue_script( self::HANDLE, $this->url . 'assets/front/clicks.js', array(), $this->version, true );
 		$settings = array(
-			'url'  => rest_url( 'affibloom/v1/clicks' ),
-			'post' => is_singular() ? (int) get_queried_object_id() : 0,
+			'url'   => rest_url( 'affibloom/v1/clicks' ),
+			'post'  => is_singular() ? (int) get_queried_object_id() : 0,
+			'count' => $count,
+			'ga'    => $ga,
 		);
 		wp_add_inline_script( self::HANDLE, 'window.affibloomClicks = ' . wp_json_encode( $settings ) . ';', 'before' );
 	}

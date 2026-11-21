@@ -81,7 +81,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### C3 — Google Analytics events
 
 - [x] Task C3A: Settings → General — the Google Analytics section
-- [ ] Task C3B: Clicks send Affibloom's Google Analytics events
+- [x] Task C3B: Clicks send Affibloom's Google Analytics events
 - [ ] Task C3C: Load gtag.js for the configured IDs (decision C6: built)
 
 ### F19 — the Dashboard's sorting mechanism
@@ -664,12 +664,18 @@ nothing; the click still counts.
 **Files:** the above; `tests/Unit/Domain/GaEventNameTest.php`; `C3.spec.ts` AC1 (extended: title, image, button 3),
 AC2, AC8, AC9.
 
-- [ ] **Step 1: Failing tests.** `C3.spec.ts` is code and exists: **its expected event and parameter names change first** (to the names above), so it fails for the right reason; then `GaEventNameTest` and the other cases.
-- [ ] **Step 2: Name table (PHP and JS) and sending.**
-- [ ] **Step 3: Run and
+- [x] **Step 1: Failing tests.** `C3.spec.ts` is code and exists: **its expected event and parameter names change first** (to the names above), so it fails for the right reason; then `GaEventNameTest` and the other cases.
+- [x] **Step 2: Name table (PHP and JS) and sending.**
+- [x] **Step 3: Run and
   look** (stub gtag; then the site's tag on this copy with GA's network blocked).
-- [ ] **Step 4: Commit** — "Send
+- [x] **Step 4: Commit** — "Send
   Affibloom's own Google Analytics click events".
+
+*Note (2026-11-21):* the names live in `clicks.js` only; no PHP `GaEventName` (nothing on the server names an event, so it
+would have no caller). `ClickScript` prints the script when either setting is on and passes `count` and `ga`. An
+in-content link has no product name attribute (35H stamps the ID and location), so its `event_category` is the link's
+text. Checked: phpcs, analyse; on Local with a stub gtag: button 1 and the image send `affibloom_primary_click`
+("Buy Now"), a tied text link `affibloom_link_click`.
 
 ---
 

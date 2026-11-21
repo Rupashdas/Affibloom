@@ -27,8 +27,8 @@ test.describe( 'C3 Google Analytics click events', () => {
 		} );
 	} );
 
-	test( 'AC1 box buttons and product links send Lasso\'s events', async ( { page } ) => {
-		setSettings( { ga_click_tracking: true } );
+	test( 'AC1 box buttons, title, image and product links send Affibloom\'s events', async ( { page } ) => {
+		setSettings( { ga_tracking_id: 'G-TEST123', ga_click_tracking: true } );
 		const name = unique( 'C3 AC1' );
 		const id = createProduct( {
 			name,
@@ -41,11 +41,15 @@ test.describe( 'C3 Google Analytics click events', () => {
 
 		await page.locator( '.affibloom-box .affibloom-button-1' ).click();
 		await page.locator( '.affibloom-box .affibloom-button-2' ).click();
-		await page.locator( `a[data-affibloom-id="${ id }"]:not(.affibloom-button-1):not(.affibloom-button-2)` ).click();
+		await page.locator( '.affibloom-box a.affibloom-image' ).first().click();
+		await page.locator( `p a[data-affibloom-id="${ id }"]` ).click();
 
 		const sent = await events( page );
-		expect( sent.map( ( e ) => e[ 1 ] ) ).toEqual( [ 'Lasso Display Primary Click', 'Lasso Display Secondary Click', 'Lasso Link Click' ] );
-		expect( sent[ 0 ][ 2 ] ).toMatchObject( { event_category: name, event_label: 'Buy Now', lasso_title: name } );
+		expect( sent.map( ( e ) => e[ 1 ] ) ).toEqual( [ 'affibloom_primary_click', 'affibloom_secondary_click', 'affibloom_primary_click', 'affibloom_link_click' ] );
+		expect( sent[ 0 ][ 2 ] ).toMatchObject( { event_category: name, event_label: 'Buy Now', affibloom_title: name } );
+		expect( sent[ 1 ][ 2 ] ).toMatchObject( { event_label: 'Check Price' } );
+		expect( sent[ 2 ][ 2 ] ).toMatchObject( { event_label: 'Buy Now' } ); // the image sends the first button's text
+		expect( sent[ 3 ][ 2 ] ).toMatchObject( { event_label: 'the shoe', affibloom_text: 'the shoe' } );
 	} );
 
 	test( 'AC2 with the setting off, nothing is sent and the click still counts', async ( { page } ) => {
@@ -66,6 +70,43 @@ test.describe( 'C3 Google Analytics click events', () => {
 		await page.goto( newPostWith( boxBlock( id ) ) );
 		await expect( page.locator( '.affibloom-box' ) ).toBeVisible(); // Affibloom is on the page
 		await expect( page.locator( 'script[id^="affibloom"][src*="googletagmanager"]' ) ).toHaveCount( 0 );
+	} );
+
+	// AC8, AC9 (C3B; R9, R10, D4): Google Tag Manager's dataLayer, then analytics.js.
+	test( 'AC8 with no gtag but a dataLayer, the click pushes the event object', async ( { page } ) => {
+		setSettings( { ga_tracking_id: 'G-TEST123', ga_click_tracking: true } );
+		await page.addInitScript( () => {
+			delete ( window as unknown as { gtag?: unknown } ).gtag;
+		} );
+		const name = unique( 'C3 AC8' );
+		const id = createProduct( { name, url: `https://www.example.com/${ unique( 'c3-8' ) }`, button_text: 'Buy Now' } );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		await page.locator( '.affibloom-box .affibloom-button-1' ).click();
+
+		const pushed = await page.evaluate( () => ( ( window as unknown as { dataLayer: Array< Record< string, unknown > > } ).dataLayer ).filter( ( entry ) => 'affibloom_primary_click' === entry.event ) );
+		expect( pushed ).toHaveLength( 1 );
+		expect( pushed[ 0 ] ).toMatchObject( { event_category: name, event_label: 'Buy Now', affibloom_title: name } );
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false } );
+	} );
+
+	test( 'AC9 with only analytics.js, the click sends ga( send, event, … )', async ( { page } ) => {
+		setSettings( { ga_tracking_id: 'UA-1-1', ga_click_tracking: true } );
+		await page.addInitScript( () => {
+			const w = window as unknown as { gtag?: unknown; dataLayer?: unknown; ga: ( ...args: unknown[] ) => void; gaCalls: unknown[][] };
+			delete w.gtag;
+			delete w.dataLayer;
+			w.gaCalls = [];
+			w.ga = ( ...args: unknown[] ) => w.gaCalls.push( args );
+		} );
+		const name = unique( 'C3 AC9' );
+		const href = `https://www.example.com/${ unique( 'c3-9' ) }`;
+		const id = createProduct( { name, url: href } );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		await page.locator( '.affibloom-box .affibloom-button-1' ).click();
+
+		const calls = await page.evaluate( () => ( window as unknown as { gaCalls: unknown[][] } ).gaCalls );
+		expect( calls ).toEqual( [ [ 'send', 'event', name, 'affibloom_primary_click', expect.stringContaining( 'http' ) ] ] );
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false } );
 	} );
 
 	// AC4-AC7 (C3A; R1-R6, D5): Settings → General → Google Analytics.
