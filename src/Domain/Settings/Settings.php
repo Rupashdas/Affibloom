@@ -33,6 +33,8 @@ final class Settings {
 		'ga_click_tracking'               => false,
 		'ga_pageview'                     => false,
 		'ga_anonymize_ip'                 => false,
+		// General: Advanced Click Tracking (F12 D7; Task 33D). Lasso's performance_event_tracking, on by default.
+		'click_tracking'                  => true,
 		// General: Cloaked Link Prefix and Smart CSS Loading (Task 9G). Smart CSS is on for a fresh install (decision C5).
 		'link_prefix'                     => '',
 		// Earlier prefixes, which keep answering (F24 N2; Task CL5). Kept by the save, not a field.

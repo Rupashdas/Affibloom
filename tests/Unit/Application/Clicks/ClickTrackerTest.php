@@ -11,6 +11,7 @@ use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -26,6 +27,8 @@ final class ClickTrackerTest extends TestCase {
 	private ClickTracker $tracker;
 
 	private RepeatGuard $guard;
+
+	private InMemorySettingsRepository $settings;
 
 	private const READER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
@@ -61,7 +64,8 @@ final class ClickTrackerTest extends TestCase {
 			}
 		};
 		$this->guard   = $guard;
-		$this->tracker = new ClickTracker( $this->products, $posts, $store, $guard );
+		$this->settings = new InMemorySettingsRepository( array() );
+		$this->tracker  = new ClickTracker( $this->products, $posts, $store, $guard, $this->settings );
 	}
 
 	public function added( string $row ): void {
@@ -101,6 +105,16 @@ final class ClickTrackerTest extends TestCase {
 		self::assertTrue( $this->tracker->track( $click, 1, self::READER, 'b' ) );
 		self::assertTrue( $this->tracker->track( new ClickInput( $id, 50, 0, Button::from_input( '2' ) ), 1, self::READER, 'a' ) );
 		self::assertCount( 3, $this->added );
+	}
+
+	/** Task 33D (F12 D7, AC9): off, nothing is counted; on again, counting resumes. */
+	public function test_page_and_link_level_tracking_off_counts_nothing(): void {
+		$id = $this->product( 'ball' );
+		$this->settings->save( Settings::from_array( array( 'click_tracking' => false ) ) );
+
+		self::assertFalse( $this->tracker->track( new ClickInput( $id, 50, 0, Button::from_input( '1' ) ), 0, self::READER, 'a' ) );
+		$this->settings->save( Settings::from_array( array( 'click_tracking' => true ) ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $id, 50, 0, Button::from_input( '1' ) ), 0, self::READER, 'a' ) );
 	}
 
 	public function test_the_body_is_read_strictly(): void {

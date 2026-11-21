@@ -39,6 +39,7 @@ final class SettingsService {
 			'ga_click_tracking'      => 'bool',
 			'ga_pageview'            => 'bool',
 			'ga_anonymize_ip'        => 'bool',
+			'click_tracking'         => 'bool',
 			'link_prefix'            => 'slug',
 			'smart_css'              => 'bool',
 			'performance_mode'       => 'performance_mode',

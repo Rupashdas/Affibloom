@@ -39,6 +39,7 @@ $card_data = array(
 					<div class="affibloom-columns__column">
 						<?php
 						$this->render( 'admin/partials/settings-general-analytics', $card_data );
+						$this->render( 'admin/partials/settings-general-click-tracking', $card_data );
 						$this->render( 'admin/partials/settings-general-prefix', $card_data );
 						$this->render( 'admin/partials/settings-general-smart-css', $card_data );
 						if ( $view['support'] ) {

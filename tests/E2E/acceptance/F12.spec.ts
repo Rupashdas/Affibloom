@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, unique, wp } from '../utils';
+import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, setSettings, unique, wp } from '../utils';
 
 // F12 Click counts and where used (docs/features/F12/requirements.md).
 test.describe( 'F12 Clicks and where used', () => {
@@ -132,6 +132,32 @@ test.describe( 'F12 Clicks and where used', () => {
 		wp( 'cron', 'event', 'run', 'affibloom_daily' );
 		const days = wp( 'db', 'query', `SELECT DATEDIFF(UTC_DATE(), day) FROM wp_affibloom_clicks WHERE product_id = ${ id } ORDER BY day DESC`, '--skip-column-names' );
 		expect( days.split( /\s+/ ).filter( Boolean ) ).toEqual( [ '399', '400' ] );
+	} );
+
+	// AC9 (33D; R14, D7): Settings → General → Advanced Click Tracking, Page and Link-Level Tracking.
+	test( 'AC9 Page and Link-Level Tracking off: no clicks.js and nothing counted; on: counting resumes', async ( { page, request } ) => {
+		const id = createProduct( { name: unique( 'F12 AC9' ) } );
+		const path = newPostWith( boxBlock( id ) );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		const toggle = page.getByLabel( 'Page and Link-Level Tracking' );
+		await expect( page.getByRole( 'heading', { name: 'Advanced Click Tracking' } ) ).toBeVisible();
+		await expect( toggle ).toBeChecked();
+		try {
+			await toggle.uncheck();
+			await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+			await expect( page.locator( '.affibloom-toast' ) ).toBeVisible();
+
+			await page.goto( path );
+			await expect( page.locator( 'script[src*="assets/front/clicks.js"]' ) ).toHaveCount( 0 );
+			await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+			expect( stored( id ) ).toBe( 0 );
+		} finally {
+			setSettings( { click_tracking: true } );
+		}
+		await page.goto( path );
+		await expect( page.locator( 'script[src*="assets/front/clicks.js"]' ) ).toHaveCount( 1 );
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+		expect( stored( id ) ).toBe( 1 );
 	} );
 
 	test( 'AC16 with the click route blocked the link still opens and no error shows', async ( { page, context } ) => {

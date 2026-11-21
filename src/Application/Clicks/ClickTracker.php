@@ -12,24 +12,27 @@ namespace Affibloom\Application\Clicks;
 use Affibloom\Domain\Clicks\BotFilter;
 use Affibloom\Domain\Clicks\ClickStore;
 use Affibloom\Domain\Product\ProductRepository;
+use Affibloom\Domain\Settings\SettingsRepository;
 
 /**
  * A reader's click on a product element, counted on the site (F12 D1, D2, D9; Task 33A): for a published product, or
  * for the product a retired one was repointed to; in a public post, or in none (a click outside a post counts with
  * post 0); a post that readers cannot open is not counted. The day is UTC (edge case 6). A machine's click and a
- * repeat within 30 seconds are not counted (D5, D6; Task 33B).
+ * repeat within 30 seconds are not counted (D5, D6; Task 33B), and nothing is while Page and Link-Level Tracking is off
+ * (D7, AC9; Task 33D).
  */
 final class ClickTracker {
 
 	/**
 	 * Builds the tracker.
 	 *
-	 * @param ProductRepository $products The library.
-	 * @param PostDirectory     $posts    Which posts are public.
-	 * @param ClickStore        $clicks   The counts.
-	 * @param RepeatGuard       $repeats  Holds back the same click for 30 seconds.
+	 * @param ProductRepository  $products The library.
+	 * @param PostDirectory      $posts    Which posts are public.
+	 * @param ClickStore         $clicks   The counts.
+	 * @param RepeatGuard        $repeats  Holds back the same click for 30 seconds.
+	 * @param SettingsRepository $settings The site's settings: Page and Link-Level Tracking (Task 33D).
 	 */
-	public function __construct( private ProductRepository $products, private PostDirectory $posts, private ClickStore $clicks, private RepeatGuard $repeats ) {}
+	public function __construct( private ProductRepository $products, private PostDirectory $posts, private ClickStore $clicks, private RepeatGuard $repeats, private SettingsRepository $settings ) {}
 
 	/**
 	 * Counts the click, or ignores it; whether it was counted.
@@ -40,7 +43,7 @@ final class ClickTracker {
 	 * @param string     $reader     What tells readers apart for 30 seconds (their address); never stored as such.
 	 */
 	public function track( ClickInput $click, int $now, string $user_agent, string $reader ): bool {
-		if ( BotFilter::is_bot( $user_agent ) ) {
+		if ( ! $this->settings->get()->bool( 'click_tracking' ) || BotFilter::is_bot( $user_agent ) ) {
 			return false;
 		}
 		$product = $this->product( $click->product_id );

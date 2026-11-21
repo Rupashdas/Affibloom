@@ -72,7 +72,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 33A: A reader clicks a product element — `clicks.js` and `POST /affibloom/v1/clicks`
 - [x] Task 33B: Bots and repeats are not counted
 - [x] Task 33C: Old click rows are removed — `affibloom_daily`
-- [ ] Task 33D: Settings → General — Page and Link-Level Tracking
+- [x] Task 33D: Settings → General — Page and Link-Level Tracking
 - [ ] Task 34A: The Dashboard's Clicks column, sortable
 - [ ] Task 34B: The Clicks (30 days) tile
 - [ ] Task 34C: Clicks per location on the Locations tab
@@ -494,10 +494,15 @@ stores nothing. On: counting resumes.
 
 **Files:** the above; `F12.spec.ts` AC9; `docs/ui/design-system.md` unchanged (existing toggle row).
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Setting, screen, the two checks.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Let the site owner switch click counting off".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Setting, screen, the two checks.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Let the site owner switch click counting off".
+
+*Note (2026-11-21):* the card is `settings-general-click-tracking.php`, after Google Analytics; C3's "unless GA Click
+Tracking is on" joins with C3A/C3B. The Lasso import of `performance_event_tracking` is the migrator's (Phase M,
+deviation 146). Checked: unit, phpcs, analyse; on Local off: no `clicks.js`, nothing stored; on: both back; the card at
+1280 px.
 
 ---
 

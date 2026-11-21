@@ -487,7 +487,7 @@ final class Plugin {
 		$amazon     = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
 		$search     = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
 		$upgrader   = self::upgrader();
-		$click_js   = new ClickScript( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION );
+		$click_js   = new ClickScript( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->settings_repository() );
 		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector(), $click_js );
 		// The display modal's assets: the block editor's, the Classic editor's and Elementor's (ED2) share them.
 		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
@@ -524,7 +524,7 @@ final class Plugin {
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, $icon_css ),
 			$click_js,
 			new ClickRetentionCron( new ClickRetention( new TableClickStore() ) ),
-			new ClicksController( new ClickTracker( new PostTypeProductRepository(), new WpPostDirectory(), new TableClickStore(), new TransientRepeatGuard() ) ),
+			new ClicksController( new ClickTracker( new PostTypeProductRepository(), new WpPostDirectory(), new TableClickStore(), new TransientRepeatGuard(), $this->settings_repository() ) ),
 			new LocationPreviewController( new LocationPreview( new TableLinkLocationRepository(), new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ) ), $display, $this->settings_repository(), $box_assets, $icon_css ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg', $icon_css ),
 			$shortcode,
