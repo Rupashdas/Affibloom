@@ -163,7 +163,8 @@ final class AdminAssets implements Module {
 		if ( str_contains( $hook_suffix, TablesScreen::TABLE_SLUG ) && ! str_contains( $hook_suffix, TablesScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			wp_enqueue_script( 'affibloom-tables', $this->plugin_url . 'assets/admin/tables.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'wp-api-fetch' ), $this->version, true );
-			wp_enqueue_script( 'affibloom-table-builder', $this->plugin_url . 'assets/admin/table-builder.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-product-search', $this->plugin_url . 'assets/admin/product-search.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-table-builder', $this->plugin_url . 'assets/admin/table-builder.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-product-search' ), $this->version, true );
 		}
 		if ( str_contains( $hook_suffix, TablesScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );

@@ -131,7 +131,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task T1: The Tables list, and `GET /tables`
 - [x] Task T2: Create a table
 - [x] Task T3: The builder page and the table's settings
-- [ ] Task T4: Products in a table — add, starting layout, badge, remove
+- [x] Task T4: Products in a table — add, starting layout, badge, remove
 - [ ] Task T5: Add a group to a table
 - [ ] Task T6: Rows and columns, the Add Field dialog, plain cells
 - [ ] Task T7: Image, price and description cells
@@ -1804,13 +1804,15 @@ Rating, Price | Primary Button, filled from the product; later products the same
 **Files:** the above; F25 spec AC4-AC5; unit tests (starting layout, later products, duplicates, initial values,
 remove).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain and values.**
-- [ ] **Step 3: Routes.**
-- [ ] **Step 4: Picker and header cell.**
-- [ ] **Step 5: Run and look.**
-- [ ] **Step 6: Commit** — "Add and remove a
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain and values.**
+- [x] **Step 3: Routes.**
+- [x] **Step 4: Picker and header cell.**
+- [x] **Step 5: Run and look.**
+- [x] **Step 6: Commit** — "Add and remove a
   table's products, with Lasso's starting layout".
+
+*Note:* Removing the last product also clears the layout and values, so the next first product brings the starting layout again (Lasso keeps groups per product). An empty Primary Button text is kept as '' (the page draws the site's default text). ProductInput::icon_markup() became public on its second use (the badge). Checked on Local: the three routes (200, 409 duplicate, 422 unknown, 404 not in table), and in a headless browser the picker ("Search 19 URLs", none found, duplicate refused), badge, Remove, both styles at 1280 and 375 px.
 
 ---
 

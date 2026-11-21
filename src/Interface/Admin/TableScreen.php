@@ -60,6 +60,7 @@ final class TableScreen {
 				'table'    => $this->table,
 				'untitled' => null === $this->table ? $this->tables->untitled() : '',
 				'all'      => $this->tables->count(),
+				'builder'  => $this->tables->builder( $this->table ?? new Table( null, '' ) ),
 			)
 		);
 	}

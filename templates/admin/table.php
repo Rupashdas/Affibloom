@@ -6,7 +6,7 @@
  * (no `id` in the address), naming it creates it.
  *
  * @package Affibloom
- * @var array{table: \Affibloom\Domain\Table\Table|null, untitled: string, all: int} $view
+ * @var array{table: \Affibloom\Domain\Table\Table|null, untitled: string, all: int, builder: array<string, mixed>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -103,7 +103,7 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 			<p class="affibloom-field__error" data-table-error role="alert" hidden></p>
 
 			<div id="affibloom-table-builder" data-table-builder-region>
-				<?php $this->render( 'admin/partials/table-builder', array( 'table' => $table ) ); ?>
+				<?php $this->render( 'admin/partials/table-builder', $view['builder'] ); ?>
 			</div>
 
 			<p class="affibloom-table-page__delete">
@@ -114,5 +114,23 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 	</div>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 	<?php $this->render( 'admin/partials/table-create-modal' ); ?>
+	<?php $this->render( 'admin/partials/table-product-picker' ); ?>
+	<?php
+	// Lasso's 'Remove "<name>"?' (R23); the script puts the product's name in the title.
+	$this->render(
+		'admin/partials/delete-modal',
+		array(
+			'id'            => 'affibloom-table-remove-product',
+			'title'         => '',
+			'text'          => __( "If removed, you won't be able to get its back.", 'affibloom' ),
+			'confirm_label' => __( 'OK', 'affibloom' ),
+			'confirm_attr'  => 'data-table-remove-confirm',
+			'busy_label'    => __( 'Removing…', 'affibloom' ),
+			'failed_text'   => __( 'Could not remove the product. Please try again.', 'affibloom' ),
+			/* translators: %s: the product's name. */
+			'data'          => array( 'title-template' => __( 'Remove "%s"?', 'affibloom' ) ),
+		)
+	);
+	?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

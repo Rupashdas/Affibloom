@@ -21,6 +21,7 @@ use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Application\Tables\TableService;
+use Affibloom\Application\Tables\TableValues;
 use Affibloom\Domain\Monetize\NetworkRegistry;
 use Affibloom\Infrastructure\WordPress\AmazonImportSchedule;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
@@ -732,7 +733,15 @@ final class Plugin {
 	 * The comparison tables (F25; Task T1).
 	 */
 	private function table_service(): TableService {
-		return new TableService( new PostTypeTableRepository(), new IndexTableLocations() );
+		$fields = new FieldsService( new OptionFieldRepository(), new PostTypeProductRepository(), new PostMetaFieldUsage() );
+
+		return new TableService(
+			new PostTypeTableRepository(),
+			new IndexTableLocations(),
+			new PostTypeProductRepository(),
+			new TableValues( ( new PublicLinks( $this->settings_repository() ) )->for( ... ) ),
+			$fields->all( ... )
+		);
 	}
 
 	/**

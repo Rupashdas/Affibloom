@@ -3152,6 +3152,26 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-builder__preview { margin-left: auto; }
 .affibloom-table-page__delete { margin: 24px 0 0; }
 
+/* Task T4 (F25 R21, R34): the builder's grid; widths split evenly up to five products (or groups), past five the
+   grid keeps 220px tracks and scrolls. A product's header cell: grip, Add field, Remove, then Badge and its image. */
+.affibloom-table-grid-scroll { overflow-x: auto; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-card); }
+.affibloom-table-grid { display: grid; grid-template-columns: repeat(var(--affibloom-table-columns), minmax(150px, 1fr)); min-width: 100%; }
+.affibloom-table-grid--wide { grid-template-columns: repeat(var(--affibloom-table-columns), 220px); width: max-content; }
+.affibloom-table-cell { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 16px; border-right: 1px solid var(--affibloom-line); border-bottom: 1px solid var(--affibloom-line); }
+.affibloom-table-cell--head { background: var(--affibloom-subtle); }
+.affibloom-table-cell__tools { display: flex; align-items: center; gap: 2px; }
+.affibloom-table-cell__tools .affibloom-grip { margin-right: auto; cursor: default; }
+.affibloom-table-cell__tools .affibloom-icon-button { width: 28px; height: 28px; }
+.affibloom-table-cell__badge { width: 100%; }
+.affibloom-table-field { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.affibloom-table-field__name { color: var(--affibloom-ink-500); font: 600 11px/16px var(--affibloom-font); letter-spacing: .02em; text-transform: uppercase; }
+.affibloom-table-field__value, .affibloom-table-field__rich { color: var(--affibloom-ink-900); font-size: 14px; line-height: 20px; }
+.affibloom-table-field__empty { color: var(--affibloom-ink-400); }
+.affibloom-table-field__image { display: block; max-width: 100%; max-height: 120px; margin: 4px auto 0; object-fit: contain; }
+.affibloom-table-field__rating { display: inline-flex; align-items: center; gap: 4px; color: var(--affibloom-ink-900); font-weight: 600; }
+.affibloom-table-field__rating svg { width: 16px; height: 16px; color: #f5b400; }
+.affibloom-table-field__button { align-self: flex-start; padding: 6px 14px; border-radius: var(--affibloom-radius-control); background: var(--affibloom-brand-600); color: #fff; font: 600 13px/18px var(--affibloom-font); }
+
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
 .affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }

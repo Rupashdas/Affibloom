@@ -9,29 +9,44 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Tables;
 
+use Affibloom\Domain\Fields\Field;
 use Affibloom\Domain\InvalidField;
+use Affibloom\Domain\Product\ProductRepository;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Table\StartingLayout;
 use Affibloom\Domain\Table\Table;
 use Affibloom\Domain\Table\TableChanged;
 use Affibloom\Domain\Table\TableLocations;
 use Affibloom\Domain\Table\TablePage;
 use Affibloom\Domain\Table\TableRepository;
+use Affibloom\Domain\Table\TableRuleBroken;
 use Affibloom\Domain\Table\TableStyle;
 use Affibloom\Domain\Table\TableTheme;
 use Affibloom\Domain\Table\UntitledName;
+use Closure;
 
 /**
- * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3). Later tasks add the rest.
+ * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3), its products (T4). Later
+ * tasks add the rest. Every builder write carries the table's revision (D4) and moves it on.
  */
 final class TableService {
 
 	/**
 	 * Builds the service.
 	 *
-	 * @param TableRepository $tables    The tables.
-	 * @param TableLocations  $locations Where they are used (F21's index).
+	 * @param TableRepository   $tables    The tables.
+	 * @param TableLocations    $locations Where they are used (F21's index).
+	 * @param ProductRepository $products  The products a table holds (T4).
+	 * @param TableValues       $values    A product's starting values (R22; T4).
+	 * @param Closure           $library   The field library: fn(): FieldLibrary (the cells' names and kinds; T4).
 	 */
-	public function __construct( private TableRepository $tables, private TableLocations $locations ) {}
+	public function __construct(
+		private TableRepository $tables,
+		private TableLocations $locations,
+		private ProductRepository $products,
+		private TableValues $values,
+		private Closure $library,
+	) {}
 
 	/**
 	 * One page of the Tables list (R8).
@@ -72,10 +87,110 @@ final class TableService {
 	 * @param int                  $revision The revision the editor's copy has.
 	 * @param array<string, mixed> $changes  The settings changed.
 	 * @return Table|null The table as saved; null when it is gone.
-	 * @throws TableChanged When the table moved on since the editor's copy.
-	 * @throws InvalidField When the title is blank ('table_title_blank').
+	 * @throws TableChanged When the table moved on since the editor's copy; InvalidField when the title is blank
+	 *                      ('table_title_blank', from settings()).
 	 */
 	public function update( int $id, int $revision, array $changes ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->with( self::settings( $changes ) ) );
+	}
+
+	/**
+	 * A product added last (R18-R22; Task T4): the first brings the starting layout; each cell starts with the
+	 * product's value (TableValues); its badge starts as the product's own badge.
+	 *
+	 * @param int $id       The table.
+	 * @param int $revision The revision the editor's copy has.
+	 * @param int $product  The product.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableRuleBroken `product_invalid` (no such product), `product_exists` (R18); TableChanged when the table
+	 *                         moved on since the editor's copy.
+	 */
+	public function add_product( int $id, int $revision, int $product ): ?Table {
+		$found = $this->products->get( $product );
+		if ( null === $found || null === $found->id ) {
+			throw new TableRuleBroken( 'product_invalid' );
+		}
+		$own = $this->products->fields( $product );
+
+		return $this->change(
+			$id,
+			$revision,
+			fn( Table $table ): Table => $table->add_product(
+				$product,
+				$found->badge,
+				fn( int $field ): string => $this->values->for( $found, $own, $field ),
+				static fn(): string => 'g_' . bin2hex( random_bytes( 6 ) )
+			)
+		);
+	}
+
+	/**
+	 * A product's badge (R21; Task T4).
+	 *
+	 * @param int    $id       The table.
+	 * @param int    $revision The revision the editor's copy has.
+	 * @param int    $product  The product.
+	 * @param string $badge    The badge, cleaned by the caller.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `product_missing` when the
+	 *                      product is not in the table.
+	 */
+	public function set_badge( int $id, int $revision, int $product, string $badge ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->set_badge( $product, $badge ) );
+	}
+
+	/**
+	 * A product and its cells taken out (R23; Task T4).
+	 *
+	 * @param int $id       The table.
+	 * @param int $revision The revision the editor's copy has.
+	 * @param int $product  The product.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy; TableRuleBroken `product_missing` when the
+	 *                      product is not in the table.
+	 */
+	public function remove_product( int $id, int $revision, int $product ): ?Table {
+		return $this->change( $id, $revision, static fn( Table $table ): Table => $table->remove_product( $product ) );
+	}
+
+	/**
+	 * What the builder draws besides the table (D5): each field the table shows (name, kind) and each product's name.
+	 *
+	 * @param Table $table The table.
+	 * @return array{table: Table, fields: array<int, Field>, names: array<int, string>}
+	 */
+	public function builder( Table $table ): array {
+		$library = ( $this->library )();
+		$fields  = array();
+		foreach ( $table->field_ids() as $field ) {
+			$found = $library->find( $field );
+			if ( null !== $found ) {
+				$fields[ $field ] = $found;
+			}
+		}
+		$names = array();
+		foreach ( $table->product_ids() as $product ) {
+			$names[ $product ] = $this->products->get( $product )->name ?? (string) ( $table->values[ $product ][ StartingLayout::PRODUCT_NAME ] ?? '' );
+		}
+
+		return array(
+			'table'  => $table,
+			'fields' => $fields,
+			'names'  => $names,
+		);
+	}
+
+	/**
+	 * One builder write (D4): the stored table, the editor's revision checked, the change made, the revision moved on.
+	 *
+	 * @param int     $id       The table.
+	 * @param int     $revision The revision the editor's copy has.
+	 * @param Closure $edit     The change: fn( Table ): Table.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy. The edit's own refusals (TableRuleBroken,
+	 *                      InvalidField) pass through.
+	 */
+	private function change( int $id, int $revision, Closure $edit ): ?Table {
 		$table = $this->tables->get( $id );
 		if ( null === $table ) {
 			return null;
@@ -83,7 +198,20 @@ final class TableService {
 		if ( $table->revision !== $revision ) {
 			throw new TableChanged( 'This table was changed in another window.' );
 		}
-		$with = array( 'revision' => $table->revision + 1 );
+		$changed = $edit( $table );
+
+		return $this->tables->save( $changed->with( array( 'revision' => $table->revision + 1 ) ) );
+	}
+
+	/**
+	 * The settings' changes as the table's properties (T3).
+	 *
+	 * @param array<string, mixed> $changes The settings changed.
+	 * @return array<string, mixed>
+	 * @throws InvalidField When the title is blank ('table_title_blank').
+	 */
+	private static function settings( array $changes ): array {
+		$with = array();
 		if ( array_key_exists( 'title', $changes ) ) {
 			$with['name'] = trim( (string) $changes['title'] );
 			if ( '' === $with['name'] ) {
@@ -102,7 +230,7 @@ final class TableService {
 			}
 		}
 
-		return $this->tables->save( $table->with( $with ) );
+		return $with;
 	}
 
 	/**

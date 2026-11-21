@@ -112,4 +112,74 @@ test.describe( 'F25 Comparison tables', () => {
 		await page.getByLabel( 'Name', { exact: true } ).press( 'Enter' );
 		await expect( page ).toHaveURL( /page=affibloom-table&id=\d+/ );
 	} );
+
+	// AC4 (T4; R17-R20, R22).
+	test( 'AC4 Add Product: the picker, the starting layout filled from each product, a product only once', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const first = createProduct( { name: `Alpha ${ word } shoe`, price: '$49', badge: 'Best Pick', image_url: 'https://placehold.co/120x120.png' } );
+		const second = createProduct( { name: `Beta ${ word } ball`, price: '$19' } );
+		const id = createTable( unique( 'F25 AC4' ), 'column', 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+
+		const dialog = page.getByRole( 'dialog', { name: 'Add Product to Table' } );
+		const add = async ( name: string ) => {
+			await page.getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+			await dialog.getByRole( 'searchbox' ).fill( name );
+			await dialog.getByRole( 'searchbox' ).press( 'Enter' );
+			await dialog.getByRole( 'button', { name: `Add Product: ${ name }` } ).click();
+		};
+		await page.getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+		await expect( dialog.getByRole( 'searchbox' ) ).toHaveAttribute( 'placeholder', /^Search [\d,]+ URLs$/ );
+		await dialog.getByRole( 'searchbox' ).fill( `zz${ word }zz` );
+		await dialog.getByRole( 'searchbox' ).press( 'Enter' );
+		await expect( dialog.getByText( "Looks like we're coming up empty, partner." ) ).toBeVisible();
+		await dialog.getByRole( 'button', { name: 'Close' } ).click();
+
+		await add( `Alpha ${ word } shoe` );
+		await expect( dialog ).toBeHidden();
+		await add( `Beta ${ word } ball` );
+		await expect( dialog ).toBeHidden();
+		const stored = JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) );
+		expect( stored.groups.map( ( group: { fields: number[] } ) => group.fields ) ).toEqual( [ [ 99991 ], [ 99990, 1, 99994 ], [ 99992 ] ] );
+		expect( stored.products ).toEqual( [ { id: first, badge: 'Best Pick' }, { id: second, badge: '' } ] );
+		expect( stored.values[ String( first ) ] ).toMatchObject( { 99990: `Alpha ${ word } shoe`, 99994: '$49', 99991: 'https://placehold.co/120x120.png' } );
+		expect( stored.values[ String( second ) ] ).toMatchObject( { 99990: `Beta ${ word } ball`, 99994: '$19' } );
+		await expect( page.locator( '.affibloom-table-cell--head' ) ).toHaveCount( 2 );
+
+		await add( `Alpha ${ word } shoe` );
+		await expect( dialog.getByText( 'This product already exists, please select another product' ) ).toBeVisible();
+	} );
+
+	// AC5 (T4; R21, R23).
+	test( 'AC5 the header cell: Badge saved on leaving it, a grip, Remove this product, Add field', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		const first = createProduct( { name: `Gamma ${ word } knee pad` } );
+		const second = createProduct( { name: `Delta ${ word } net` } );
+		const id = createTable( unique( 'F25 AC5' ), 'row', 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+		for ( const name of [ `Gamma ${ word } knee pad`, `Delta ${ word } net` ] ) {
+			await page.getByRole( 'button', { name: 'Add Product', exact: true } ).click();
+			const dialog = page.getByRole( 'dialog', { name: 'Add Product to Table' } );
+			await dialog.getByRole( 'searchbox' ).fill( name );
+			await dialog.getByRole( 'searchbox' ).press( 'Enter' );
+			await dialog.getByRole( 'button', { name: `Add Product: ${ name }` } ).click();
+			await expect( dialog ).toBeHidden();
+		}
+
+		const head = page.locator( `.affibloom-table-cell--head[data-table-product="${ first }"]` );
+		await expect( head.locator( '.affibloom-grip' ) ).toBeVisible();
+		await expect( head.getByRole( 'button', { name: 'Add field' } ) ).toBeVisible();
+		await head.getByLabel( 'Badge' ).fill( '  Top Pick  ' );
+		await head.getByLabel( 'Badge' ).blur();
+		await expect.poll( () => JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) ).products[ 0 ].badge ).toBe( 'Top Pick' );
+
+		await page.locator( `.affibloom-table-cell--head[data-table-product="${ second }"]` ).getByRole( 'button', { name: /^Remove "/ } ).click();
+		const confirm = page.getByRole( 'dialog', { name: `Remove "Delta ${ word } net"?` } );
+		await expect( confirm.getByText( "If removed, you won't be able to get its back." ) ).toBeVisible();
+		await confirm.getByRole( 'button', { name: 'OK' } ).click();
+		await expect( page.locator( '.affibloom-table-cell--head' ) ).toHaveCount( 1 );
+		const stored = JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) );
+		expect( stored.products.map( ( entry: { id: number } ) => entry.id ) ).toEqual( [ first ] );
+		expect( stored.values[ String( second ) ] ).toBeUndefined();
+	} );
 } );

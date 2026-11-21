@@ -241,7 +241,7 @@ final class ProductInput {
 	 *
 	 * @param mixed $value Raw value.
 	 */
-	private static function icon_markup( mixed $value ): string {
+	public static function icon_markup( mixed $value ): string {
 		$text = (string) preg_replace( '/<(script|style)\b[^>]*>.*?<\/\1>/is', '', self::scalar( $value ) );
 
 		return wp_kses( $text, self::ICON_MARKUP );
