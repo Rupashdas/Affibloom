@@ -34,6 +34,14 @@ interface ProductRepository {
 	public function get( int $id ): ?Product;
 
 	/**
+	 * Loads these products in one go, so that get() reads them without asking the storage again in this request
+	 * (Task 37B: a page of boxes loads its products once, not once per box).
+	 *
+	 * @param list<int> $ids Post IDs.
+	 */
+	public function prime( array $ids ): void;
+
+	/**
 	 * A published product's custom fields, or null when there is no such product (Task 14C).
 	 *
 	 * @param int $id Post ID.
@@ -112,7 +120,7 @@ interface ProductRepository {
 	 * @param SearchTerm        $term      What to look for; an empty term lists everything.
 	 * @param LinkKind          $link_kind Lasso's "Link type" filter (Task 13E).
 	 * @param int               $page      Page number, from 1.
-	 * @param int               $per_page  Products per page.
+	 * @param int               $per_page  Products per page; 0 counts only (the total, no items: Task 37B).
 	 * @param int               $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
 	 * @param int               $post_id   One product only (F19 R30, Task 13F): 0 for all.
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.

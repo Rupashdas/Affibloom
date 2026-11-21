@@ -28,6 +28,14 @@ use Affibloom\Domain\Opportunity\OpportunityRepository;
  */
 final class TableOpportunityRepository implements OpportunityRepository {
 
+	/**
+	 * The products with an opportunity, read once in this request (product_ids()); null until read. Only the Dashboard
+	 * list reads it, and nothing in that request writes the index (dismissing and assigning are requests of their own).
+	 *
+	 * @var list<int>|null
+	 */
+	private static ?array $with_opportunities = null;
+
 	/** Each sortable column's SQL (R10; an allow-list, so no input reaches ORDER BY). */
 	private const SORT = array(
 		'url'        => 'l.url',
@@ -144,22 +152,51 @@ final class TableOpportunityRepository implements OpportunityRepository {
 	}
 
 	/**
-	 * A product's Link Opportunities as a correlated SQL count, for the Dashboard's Opportunities tab and its sort
-	 * (F22 R50-R52, D13; Task O8): the posts with an opportunity for the product in the column given. The product's own
-	 * status is the outer query's (the Dashboard lists published products).
+	 * A product's Link Opportunities as an SQL value, for the Dashboard's Opportunities sort (F22 R50-R52, D13; Task
+	 * O8): the posts with an opportunity for the product in the column given, 0 for none. The product's own status is
+	 * the outer query's (the Dashboard lists published products). The counts are made once for every product
+	 * (self::per_product_sql()) and looked up per row: a count made per row scanned the index's untied links once per
+	 * product, ~0.9 s for 740 products against ~0.3 s (Task 37B, finding P3).
 	 *
 	 * @param string $id_column The product ID column of the outer query, e.g. "wp_posts.ID".
 	 */
 	public static function count_sql( string $id_column ): string {
+		return 'COALESCE( ( SELECT afo.posts FROM ' . self::per_product_sql() . " AS afo WHERE afo.product = {$id_column} ), 0 )";
+	}
+
+	/**
+	 * The products with at least one Link Opportunity: the Opportunities tab and its count on every Dashboard list
+	 * (F22 R50, D13; Task O8). Read once per request and kept, as one list request asks for it up to three times (the
+	 * tab's count, the tab's page and its total); one set, not a test per product (Task 37B, finding P3: ~1 s per use
+	 * became ~0.2 s once).
+	 *
+	 * @return list<int>
+	 */
+	public static function product_ids(): array {
+		if ( null === self::$with_opportunities ) {
+			global $wpdb;
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Affibloom's own table; per_product_sql() is prepared; kept for the request.
+			self::$with_opportunities = array_map( 'intval', $wpdb->get_col( 'SELECT afo.product FROM ' . self::per_product_sql() . ' AS afo' ) );
+		}
+
+		return self::$with_opportunities;
+	}
+
+	/**
+	 * D4's rule grouped by product: each product with an opportunity and the number of posts it has one in, as a
+	 * derived table (`product`, `posts`).
+	 */
+	private static function per_product_sql(): string {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $id_column is the caller's column name; the rule holds only placeholders.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the rule holds only placeholders.
 		$sql = (string) $wpdb->prepare(
-			"(SELECT COUNT(DISTINCT l.host_id) FROM %i AS l
+			"( SELECT dm.post_id AS product, COUNT(DISTINCT l.host_id) AS posts FROM %i AS l
 			JOIN %i AS h ON h.ID = l.host_id
-			JOIN %i AS dm ON dm.post_id = {$id_column} AND dm.meta_key = '_affibloom_domain' AND dm.meta_value = l.domain
-			LEFT JOIN %i AS dop ON dop.post_id = {$id_column} AND dop.meta_key = '_affibloom_detect_opportunities'
-			WHERE " . self::rule() . ')',
+			JOIN %i AS dm ON dm.meta_key = '_affibloom_domain' AND dm.meta_value = l.domain
+			LEFT JOIN %i AS dop ON dop.post_id = dm.post_id AND dop.meta_key = '_affibloom_detect_opportunities'
+			WHERE " . self::rule() . ' GROUP BY dm.post_id )',
 			$wpdb->prefix . TableLinkLocationRepository::TABLE,
 			$wpdb->posts,
 			$wpdb->postmeta,

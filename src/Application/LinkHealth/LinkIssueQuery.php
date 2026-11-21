@@ -107,7 +107,7 @@ final class LinkIssueQuery {
 	 * @param TableFilter $tables    The Comparison table filter (F25 R59, Task T16).
 	 */
 	public function counts( SearchTerm $term, LinkKind $link_kind, int $group = 0, int $post_id = 0, Placement $placement = Placement::Any, TableFilter $tables = TableFilter::Any ): array {
-		$count     = fn( string $tab ): int => $this->products->page( $term, $link_kind, 1, 1, $group, $post_id, $this->listing( '', $tab ), $placement, new ListOrder(), $tables )->total;
+		$count     = fn( string $tab ): int => $this->products->page( $term, $link_kind, 1, 0, $group, $post_id, $this->listing( '', $tab ), $placement, new ListOrder(), $tables )->total;
 		$activated = ( $this->activated )();
 
 		return array(

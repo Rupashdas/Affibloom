@@ -52,6 +52,7 @@ use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
 use Affibloom\Application\Amazon\PriceRefreshService;
 use Affibloom\Application\Amazon\AmazonDataService;
 use Affibloom\Application\Box\BoxBuilder;
+use Affibloom\Application\Shortcode\DisplayPreload;
 use Affibloom\Application\Shortcode\ShortcodeRenderer;
 use Affibloom\Application\Box\RepointResolver;
 use Affibloom\Application\Amazon\AmazonSearchService;
@@ -145,6 +146,7 @@ use Affibloom\Interface\Hooks\TrackingIdHooks;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
+use Affibloom\Interface\Front\DisplayPreloadFilter;
 use Affibloom\Interface\Front\DisplayRenderFilter;
 use Affibloom\Interface\Front\LinkAttributesFilter;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
@@ -591,6 +593,7 @@ final class Plugin {
 			new LocationPreviewController( new LocationPreview( new TableLinkLocationRepository(), new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ) ), $display, $this->settings_repository(), $box_assets, $icon_css ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/', $icon_css, $display_html ),
 			$shortcode,
+			new DisplayPreloadFilter( new DisplayPreload( new PostTypeProductRepository(), new TableAmazonProductRepository() ) ),
 			new WidgetShortcodes(),
 			$cloaked,
 			new LinkAttributesFilter( $rendered, new PublicLinks( $this->settings_repository() ) ),

@@ -153,7 +153,8 @@ KEY display_type (display_type)";
 
 	/**
 	 * "This product is used somewhere" as SQL (F12 L1, D20; the Placements filter, Task 36D): a row tied or assigned to
-	 * it, or a group display of one of its groups. Written for the indexes: product_id and assigned_product_id each.
+	 * it, or a group display of one of its groups. Written for the indexes: product_id and assigned_product_id each,
+	 * in a test of their own (one test with "assigned OR (no assignment AND tied)" could use neither; Task 37B, P2).
 	 *
 	 * @param string $product The SQL expression of the product's ID (a column of the outer query).
 	 */
@@ -164,9 +165,11 @@ KEY display_type (display_type)";
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product is a column of the caller's query, never input.
 		$sql = $wpdb->prepare(
-			"( EXISTS ( SELECT 1 FROM %i AS afl_t WHERE afl_t.assigned_product_id = {$product} OR ( afl_t.assigned_product_id = 0 AND afl_t.product_id = {$product} ) )
+			"( EXISTS ( SELECT 1 FROM %i AS afl_t WHERE afl_t.assigned_product_id = {$product} )
+				OR EXISTS ( SELECT 1 FROM %i AS afl_u WHERE afl_u.product_id = {$product} AND afl_u.assigned_product_id = 0 )
 				OR EXISTS ( SELECT 1 FROM %i AS afl_g JOIN %i AS afl_tt ON afl_tt.taxonomy = %s AND afl_g.display_ref = CONCAT('group:', afl_tt.term_id)
 					JOIN %i AS afl_tr ON afl_tr.term_taxonomy_id = afl_tt.term_taxonomy_id WHERE afl_tr.object_id = {$product} ) )",
+			$table,
 			$table,
 			$table,
 			$wpdb->term_taxonomy,
@@ -180,7 +183,10 @@ KEY display_type (display_type)";
 
 	/**
 	 * A product's Locations count as an SQL value (F12 L1; the Locations sort, Task 13K): the rows tied or assigned to
-	 * it plus the group displays of its groups, as counts_for() counts them.
+	 * it plus the group displays of its groups, as counts_for() counts them. The rows assigned to it and the rows tied
+	 * to it with no assignment are two counts, each on its index: one count with "assigned OR (no assignment AND tied)"
+	 * could use neither and read every row once per product, ~1.7 s for 740 products against ~0.08 s (Task 37B,
+	 * finding P2). The two sets never overlap (an assigned row has an assignment).
 	 *
 	 * @param string $product The SQL expression of the product's ID (a column of the outer query).
 	 */
@@ -191,10 +197,12 @@ KEY display_type (display_type)";
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product is a column of the caller's query, never input.
 		$sql = $wpdb->prepare(
-			"( ( SELECT COUNT(*) FROM %i AS afc_t WHERE afc_t.assigned_product_id = {$product} OR ( afc_t.assigned_product_id = 0 AND afc_t.product_id = {$product} ) )
+			"( ( SELECT COUNT(*) FROM %i AS afc_t WHERE afc_t.assigned_product_id = {$product} )
+				+ ( SELECT COUNT(*) FROM %i AS afc_u WHERE afc_u.product_id = {$product} AND afc_u.assigned_product_id = 0 )
 				+ ( SELECT COUNT(*) FROM %i AS afc_g JOIN %i AS afc_tt ON afc_tt.taxonomy = %s AND afc_g.display_ref = CONCAT('group:', afc_tt.term_id)
 					JOIN %i AS afc_tr ON afc_tr.term_taxonomy_id = afc_tt.term_taxonomy_id
 					WHERE afc_tr.object_id = {$product} AND afc_tr.object_id <> IF(afc_g.assigned_product_id > 0, afc_g.assigned_product_id, afc_g.product_id) ) )",
+			$table,
 			$table,
 			$table,
 			$wpdb->term_taxonomy,

@@ -68,6 +68,13 @@ final class InMemoryProductRepository implements ProductRepository {
 		);
 	}
 
+	/** @var list<list<int>> Each prime() call's IDs. */
+	public array $primed = array();
+
+	public function prime( array $ids ): void {
+		$this->primed[] = $ids;
+	}
+
 	public function get( int $id ): ?Product {
 		foreach ( $this->saved as $product ) {
 			if ( $product->id === $id ) {

@@ -12,6 +12,13 @@ final class InMemoryAmazonProducts implements AmazonProductRepository {
 	/** @var array<string, AmazonProduct> By "ASIN|country". */
 	public array $rows = array();
 
+	/** @var list<list<array{0: string, 1: string}>> Each prime() call's keys. */
+	public array $primed = array();
+
+	public function prime( array $keys ): void {
+		$this->primed[] = $keys;
+	}
+
 	public function find( string $asin, string $country ): ?AmazonProduct {
 		return $this->rows[ $asin . '|' . $country ] ?? null;
 	}

@@ -24,6 +24,15 @@ final class TableAmazonProductRepository implements AmazonProductRepository {
 	/** The table's name without the site's prefix. */
 	public const TABLE = 'affibloom_amazon_products';
 
+	/**
+	 * The rows read in this request, by "ASIN|country", a missing one as null (Task 37B: a page's boxes, their schema
+	 * and the preview read each row once). Static, as several instances serve one request; save() and touch() forget
+	 * the row they write.
+	 *
+	 * @var array<string, AmazonProduct|null>
+	 */
+	private static array $read = array();
+
 	/** Its definition, as dbDelta reads it (Infrastructure\Schema\Table). */
 	public const COLUMNS = "asin varchar(20) NOT NULL,
 country char(2) NOT NULL DEFAULT 'us',
@@ -52,14 +61,57 @@ PRIMARY KEY  (asin,country)";
 	 * @param string $country The store's country code.
 	 */
 	public function find( string $asin, string $country ): ?AmazonProduct {
-		global $wpdb;
+		$key = $asin . '|' . $country;
+		if ( ! array_key_exists( $key, self::$read ) ) {
+			global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, read once per add or refresh.
-		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE asin = %s AND country = %s', $wpdb->prefix . self::TABLE, $asin, $country ), ARRAY_A );
-		if ( ! is_array( $row ) ) {
-			return null;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table; kept for the request in self::$read.
+			$row                = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE asin = %s AND country = %s', $wpdb->prefix . self::TABLE, $asin, $country ), ARRAY_A );
+			self::$read[ $key ] = is_array( $row ) ? self::product( $row ) : null;
 		}
 
+		return self::$read[ $key ];
+	}
+
+	/**
+	 * Reads these rows with one query and keeps them for the request, a missing one as null (Task 37B).
+	 *
+	 * @param list<array{0: string, 1: string}> $keys Each an ASIN and its store's country code.
+	 */
+	public function prime( array $keys ): void {
+		$wanted = array();
+		foreach ( $keys as $pair ) {
+			if ( ! array_key_exists( $pair[0] . '|' . $pair[1], self::$read ) ) {
+				$wanted[ $pair[0] . '|' . $pair[1] ] = $pair;
+			}
+		}
+		if ( array() === $wanted ) {
+			return;
+		}
+		global $wpdb;
+
+		$values = array( $wpdb->prefix . self::TABLE );
+		foreach ( $wanted as $key => $pair ) {
+			array_push( $values, $pair[0], $pair[1] );
+			self::$read[ $key ] = null;
+		}
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table; the list holds only placeholders, one pair per key.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( 'SELECT * FROM %i WHERE (asin, country) IN (' . implode( ', ', array_fill( 0, count( $wanted ), '(%s, %s)' ) ) . ')', ...$values ),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		foreach ( (array) $rows as $row ) {
+			self::$read[ $row['asin'] . '|' . $row['country'] ] = self::product( $row );
+		}
+	}
+
+	/**
+	 * A stored row as the domain's value.
+	 *
+	 * @param array<string, mixed> $row The table's columns.
+	 */
+	private static function product( array $row ): AmazonProduct {
 		$features = json_decode( (string) $row['features'], true );
 
 		return new AmazonProduct(
@@ -105,6 +157,7 @@ PRIMARY KEY  (asin,country)";
 			array( '%s' ),
 			array( '%s', '%s' )
 		);
+		unset( self::$read[ $asin . '|' . $country ] );
 	}
 
 	/**
@@ -144,5 +197,6 @@ PRIMARY KEY  (asin,country)";
 			),
 			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%f', '%f' )
 		);
+		unset( self::$read[ $product->asin . '|' . $product->country ] );
 	}
 }

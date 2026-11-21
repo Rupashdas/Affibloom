@@ -76,7 +76,7 @@ the text below as a deviation in `progress.md`.
 ### Reviews of everything built (roadmap 8.1-8.4)
 
 - [x] Task 37A: Security review
-- [ ] Task 37B: Performance review
+- [x] Task 37B: Performance review
 - [ ] Task 37C: Accessibility review
 - [ ] Task 37D: Compatibility review
 
@@ -298,12 +298,12 @@ New code appears only as fixes, each with a test.
 
 **Files:** create the two files; modify whatever the findings need (for example the meta cache priming).
 
-- [ ] **Step 1: Failing test.** `tests/E2E/performance.spec.ts` asserts, with the query count read from Query Monitor's
+- [x] **Step 1: Failing test.** `tests/E2E/performance.spec.ts` asserts, with the query count read from Query Monitor's
   response headers (or, if this install does not send them, from a throwaway mu-plugin in `.local/`, gitignored, that
   adds `get_num_queries()` to a response header): a guide with 10 boxes adds no more than 3 queries over the same page
   without boxes; the cache warm-up of the 34 guides makes no request to an outside service; the click route and the
   cloaked-link redirect each run in a fixed small number of queries. Expected: red wherever a box costs a query.
-- [ ] **Step 2: Reader-facing pages.** On the local copy, with Query Monitor active, measure with Lasso active and
+- [x] **Step 2: Reader-facing pages.** On the local copy, with Query Monitor active, measure with Lasso active and
   Affibloom inactive, then with Lasso off and Affibloom active:
   - `/best-volleyball-shoes-for-hitters/`, and two more guides;
   - one page with no box;
@@ -315,12 +315,12 @@ New code appears only as fixes, each with a test.
   Lighthouse three times per page (`npx lighthouse <url> --preset=desktop --only-categories=performance --output=json`)
   and record the median Largest Contentful Paint and Total Blocking Time. Include the render-time content filter (F21
   35H): time it on the longest guide.
-- [ ] **Step 3: Admin screens.** Measure queries and time for the Dashboard (263 products, each page size, search,
+- [x] **Step 3: Admin screens.** Measure queries and time for the Dashboard (263 products, each page size, search,
   filters, the Alert tabs, saved views), the product page and its Locations tab, Groups, Fields (usage counts read
   every product's `_affibloom_fields`), Tables, Opportunities (links, domains, content), Import, History, Logs, DB
   Status and Settings General (the Link Index card and its refresh). A screen with a query count that grows with the
   number of rows is a finding.
-- [ ] **Step 4: Background load against Lasso's real list.** Take the rows of F11's inventory (E1-E31, and the process
+- [x] **Step 4: Background load against Lasso's real list.** Take the rows of F11's inventory (E1-E31, and the process
   classes in table B) as the baseline. On the local copy with Lasso active, `bash tools/local-wp.sh cron event list`
   gives Lasso's events present today; record how many fire per day and per hour. With Affibloom active alone, list its
   events (`CronRegistry`) and run each once (`bash tools/local-wp.sh cron event run <hook>`), recording time, queries
@@ -331,13 +331,20 @@ New code appears only as fixes, each with a test.
     requests to outside hosts;
   - nothing runs at a high frequency without work queued (the chained single events stop when the queue is empty);
   - the link check, the index build and imports respect the CPU threshold and the performance mode (F9, F11 32C).
-- [ ] **Step 5: Fix.** If a guide runs one query per box, add `update_postmeta_cache()` for all box product IDs,
+- [x] **Step 5: Fix.** If a guide runs one query per box, add `update_postmeta_cache()` for all box product IDs,
   collected before the boxes render, and prove the gain with the numbers. Any other finding gets its fix and its test.
-- [ ] **Step 6: Run and look.** `npx playwright test performance` green; re-measure the fixed pages and put the before
+- [x] **Step 6: Run and look.** `npx playwright test performance` green; re-measure the fixed pages and put the before
   and after numbers in `performance.md`. Expected: Affibloom equal or better on every measure.
-- [ ] **Step 7: Commit:** "Review the performance of pages, screens and background jobs
+- [x] **Step 7: Commit:** "Review the performance of pages, screens and background jobs
 
   Numbers, the comparison with Lasso's job list and the fixes are recorded in docs/reviews/performance.md."
+
+*Note (2026-11-22):* fixed P1 (2-3 queries per box: `DisplayPreloadFilter` primes the post's products and Amazon
+rows, ten boxes now +5 queries), P2 (Locations sort 5.7 s: the `OR` count split on its indexes, the count query without
+`ORDER BY`), P3 (the Opportunities set per request, not per product); `docs/reviews/performance.md`. Queries come from a
+test-only mu-plugin the spec installs (no Query Monitor); the budget is "a fixed 5", not 3 (the field library and WP
+Rocket's setting are read once per request). Lasso's jobs come from F11's inventory: its licence is off on Local. The
+Amazon jobs were not run (Local holds the real credentials).
 
 ---
 

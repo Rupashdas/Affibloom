@@ -23,6 +23,14 @@ interface AmazonProductRepository {
 	public function find( string $asin, string $country ): ?AmazonProduct;
 
 	/**
+	 * Reads these rows in one go, so that find() answers them without asking the storage again in this request (Task
+	 * 37B: a page of boxes reads its Amazon data once, not once per box).
+	 *
+	 * @param list<array{0: string, 1: string}> $keys Each an ASIN and its store's country code.
+	 */
+	public function prime( array $keys ): void;
+
+	/**
 	 * Stores a row, replacing the one for the same ASIN and store.
 	 *
 	 * @param AmazonProduct $product The row; only a complete one (AmazonProduct::complete()) is passed.

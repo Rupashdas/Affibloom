@@ -113,7 +113,7 @@ final class AmazonImportStatusService {
 
 		return new AmazonImportStatus(
 			$this->rows->amazon_queue_size(),
-			$this->products->page( SearchTerm::from_input( '' ), LinkKind::Amazon, 1, 1 )->total,
+			$this->products->page( SearchTerm::from_input( '' ), LinkKind::Amazon, 1, 0 )->total,
 			$this->rows->stats()->links,
 			(bool) ( $batch['running'] ?? false ),
 			(int) ( $batch['total'] ?? 0 ),

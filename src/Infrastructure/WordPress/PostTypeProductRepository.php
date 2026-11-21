@@ -52,6 +52,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	/** The query var that carries the Locations or Clicks sort (Task 13K). */
 	private const ORDER_VAR = 'affibloom_order';
 
+	/** The query var that marks page()'s count, which keeps no ORDER BY (Task 37B). */
+	private const COUNT_VAR = 'affibloom_count_only';
+
 	/**
 	 * Stores the post with every field in one call, as Lasso's meta_input does: a new product is inserted, one with an
 	 * ID is updated in place (Task 15A), which also makes it the most recently changed on the Dashboard (F19's order).
@@ -201,6 +204,18 @@ final class PostTypeProductRepository implements ProductRepository {
 		delete_post_meta( $id, '_affibloom_button_url' );
 		foreach ( $buttons->urls() as $url ) {
 			add_post_meta( $id, '_affibloom_button_url', wp_slash( $url ) );
+		}
+	}
+
+	/**
+	 * Loads these products' posts and meta with two queries, into WordPress's caches, so get() reads them without one
+	 * query per product (Task 37B).
+	 *
+	 * @param list<int> $ids Post IDs.
+	 */
+	public function prime( array $ids ): void {
+		if ( array() !== $ids ) {
+			_prime_post_caches( $ids, false, true );
 		}
 	}
 
@@ -726,7 +741,7 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param SearchTerm        $term      What to look for; an empty term lists everything.
 	 * @param LinkKind          $link_kind Lasso's "Link type" filter: Amazon's products, the others', or all (Task 13E).
 	 * @param int               $page      Page number, from 1.
-	 * @param int               $per_page  Products per page.
+	 * @param int               $per_page  Products per page; 0 counts only (the total, no items: Task 37B).
 	 * @param int               $group     The Group filter (F23 R22): 0 for all, -1 for products in no group, else a group's ID.
 	 * @param int               $post_id   One product only (Lasso's `?post_id=`, F19 R30): 0 for all; still published only.
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
@@ -735,8 +750,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param TableFilter       $tables    The Comparison table filter (F25 R59, Task T16).
 	 */
 	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder(), TableFilter $tables = TableFilter::Any ): ProductPage {
-		$per_page = max( 1, $per_page );
-		$list     = array(
+		$count_only = $per_page < 1;
+		$per_page   = max( 1, $per_page );
+		$list       = array(
 			'post_type'              => ProductPostType::NAME,
 			'post_status'            => 'publish',
 			// Lasso's order (post_modified DESC) has no second key, so products sharing a time could show on two pages
@@ -830,18 +846,22 @@ final class PostTypeProductRepository implements ProductRepository {
 		}
 
 		try {
+			// The count needs no order: without one, the Locations, Clicks and Alert sorts are worked out once, for the
+			// page, not twice (Task 37B, finding P2).
 			$counter = new WP_Query(
-				$list + array(
+				array(
 					'fields'         => 'ids',
 					'posts_per_page' => 1,
-				)
+					'orderby'        => 'none',
+					self::COUNT_VAR  => true,
+				) + $list
 			);
 			$total   = (int) $counter->found_posts;
 			$pages   = max( 1, (int) ceil( $total / $per_page ) );
 			$wanted  = min( max( 1, $page ), $pages );
 
 			$items = array();
-			if ( $total > 0 ) {
+			if ( $total > 0 && ! $count_only ) {
 				$query = new WP_Query(
 					$list + array(
 						'posts_per_page' => $per_page,
@@ -880,7 +900,7 @@ final class PostTypeProductRepository implements ProductRepository {
 		global $wpdb;
 
 		$order = $query->get( self::ORDER_VAR );
-		if ( ! $order instanceof ListOrder ) {
+		if ( ! $order instanceof ListOrder || true === $query->get( self::COUNT_VAR ) ) {
 			return $orderby;
 		}
 		$direction = ListOrder::ASC === $order->direction ? 'ASC' : 'DESC';
@@ -940,9 +960,10 @@ final class PostTypeProductRepository implements ProductRepository {
 				$clauses['where'] .= " AND {$out}";
 			} elseif ( AlertListing::OPPORTUNITIES === $alerts->tab ) {
 				// F22 R50, R52, D13 (Task O8): the products with a Link Opportunity, by D4's rule.
-				$clauses['where'] .= ' AND ' . TableOpportunityRepository::count_sql( "{$wpdb->posts}.ID" ) . ' > 0';
+				$with              = TableOpportunityRepository::product_ids();
+				$clauses['where'] .= array() === $with ? ' AND 1 = 0' : " AND {$wpdb->posts}.ID IN (" . implode( ',', $with ) . ')';
 			}
-			if ( '' !== $alerts->order ) {
+			if ( '' !== $alerts->order && true !== $query->get( self::COUNT_VAR ) ) {
 				$direction          = AlertListing::DESC === $alerts->order ? 'DESC' : 'ASC';
 				$clauses['orderby'] = "({$shown}) IS NULL ASC, ({$shown}) {$direction}, {$wpdb->posts}.post_modified DESC, {$wpdb->posts}.ID DESC";
 			}
