@@ -42,6 +42,10 @@ final class ClickTrackerTest extends TestCase {
 				$this->test->added( "{$day} {$product_id} {$post_id} {$location} {$button->value}" );
 			}
 
+			public function totals_since( string $day, array $product_ids ): array {
+				return array();
+			}
+
 			public function delete_before( string $day ): void {
 				$this->test->added( "before {$day}" );
 			}

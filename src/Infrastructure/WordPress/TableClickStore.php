@@ -50,6 +50,30 @@ KEY location_day (location_id,day)';
 	}
 
 	/**
+	 * Each product's clicks from a day on, in one query (the product_day index).
+	 *
+	 * @param string    $day         The first UTC day counted, "Y-m-d".
+	 * @param list<int> $product_ids The products.
+	 * @return array<int, int> By product ID; a product without clicks is left out.
+	 */
+	public function totals_since( string $day, array $product_ids ): array {
+		global $wpdb;
+
+		$ids = implode( ',', array_map( 'intval', $product_ids ) );
+		if ( '' === $ids ) {
+			return array();
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Affibloom's own table, one query per list page; the IDs are integers.
+		$found  = $wpdb->get_results( $wpdb->prepare( "SELECT product_id, SUM(clicks) AS clicks FROM %i WHERE day >= %s AND product_id IN ({$ids}) GROUP BY product_id", $wpdb->prefix . self::TABLE, $day ), ARRAY_A );
+		$totals = array();
+		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			$totals[ (int) $row['product_id'] ] = (int) $row['clicks'];
+		}
+
+		return $totals;
+	}
+
+	/**
 	 * Removes the rows of days before this one.
 	 *
 	 * @param string $day The first UTC day kept, "Y-m-d".

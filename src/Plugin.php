@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
@@ -535,7 +536,7 @@ final class Plugin {
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts() ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ) ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query(), $this->location_service(), $this->location_counts() ),
 				new SettingsScreen(
 					$this->template(),
@@ -565,7 +566,7 @@ final class Plugin {
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
-			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts() ),
+			new DashboardController( $products, $per_page, $views, $this->template(), $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ) ),
 			new DashboardExportController(
 				new IssueLinksExport(
 					new PostTypeProductRepository(),

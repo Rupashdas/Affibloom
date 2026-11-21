@@ -6,7 +6,7 @@
  *
  * The Alert cell is link health's (alert-cell.php, Task 31A). Locations is the product's count in the link index, a link to
  * its Locations tab, or Lasso's clock while the first full index has not finished (F12 L1-L3, D20, D21; Task 36A).
- * Placeholder until its tasks: Clicks (Tasks 33-34). Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
+ * Clicks is the product's clicks in the last 30 days, in bold (F12 R10, D8; Task 34A); its header sorts from 13K. Shortcode copies `[affibloom id]` (F31 R30, Task 18S10). The name and the image open the product page
  * (Task 14A), as Lasso's do; the link under the name opens the public link (F24 R14; Task CL7): the cloaked address
  * of a cloaked product, else the destination.
  *
@@ -16,7 +16,7 @@
  * of this one and back.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations?: int|null, known?: bool} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations?: int|null, known?: bool, clicks?: int|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -92,7 +92,15 @@ $public_link  = $view['link'] ?? $product->url->value();
 			<a class="affibloom-count-link" href="<?php echo esc_url( add_query_arg( 'tab', 'locations', $product_page ) ); ?>" title="<?php echo esc_attr( sprintf( _n( 'Used in %d place', 'Used in %d places', $view['locations'], 'affibloom' ), $view['locations'] ) ); ?>"><?php echo esc_html( (string) $view['locations'] ); ?></a>
 		<?php endif; ?>
 	</td>
-	<td class="affibloom-col-clicks"><?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?></td>
+	<td class="affibloom-col-clicks">
+		<?php
+		if ( isset( $view['clicks'] ) ) {
+			echo esc_html( number_format_i18n( $view['clicks'] ) );
+		} else {
+			$this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) );
+		}
+		?>
+	</td>
 	<td class="affibloom-col-actions">
 		<span class="affibloom-row__actions">
 			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary" data-quick-edit="<?php echo esc_attr( $product_id ); ?>"

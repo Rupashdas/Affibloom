@@ -13,6 +13,7 @@ use Affibloom\Interface\PublicLinks;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Product\LinkKind;
@@ -38,6 +39,7 @@ final class DashboardScreen {
 	 * @param PublicLinks|null    $links    The rows' public links (F24 R14; Task CL7).
 	 * @param LinkIssueQuery|null $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
 	 * @param LocationCounts|null $locations The Locations column (F12 L1-L3; Task 36A).
+	 * @param ClickReport|null    $clicks    The Clicks column (F12 R10, D8; Task 34A).
 	 */
 	public function __construct(
 		private Template $template,
@@ -49,6 +51,7 @@ final class DashboardScreen {
 		private ?PublicLinks $links = null,
 		private ?LinkIssueQuery $alerts = null,
 		private ?LocationCounts $locations = null,
+		private ?ClickReport $clicks = null,
 	) {}
 
 	/**
@@ -97,6 +100,7 @@ final class DashboardScreen {
 				// The Locations column (Task 36A): each row's count, and whether a 0 is known yet (the clock).
 				'locations'  => $this->locations?->of( $ids ),
 				'known'      => $this->locations?->known() ?? true,
+				'clicks'     => $this->clicks?->totals_for( $ids, time() ),
 				'counts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement ),
 				'library'    => $this->products->count(),
 				'notice'     => $this->notice->message(),

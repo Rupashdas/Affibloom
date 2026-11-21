@@ -73,7 +73,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 33B: Bots and repeats are not counted
 - [x] Task 33C: Old click rows are removed — `affibloom_daily`
 - [x] Task 33D: Settings → General — Page and Link-Level Tracking
-- [ ] Task 34A: The Dashboard's Clicks column, sortable
+- [x] Task 34A: The Dashboard's Clicks column, sortable
 - [ ] Task 34B: The Clicks (30 days) tile
 - [ ] Task 34C: Clicks per location on the Locations tab
 - Task 34D: dropped with 26J (decision E1: start from zero)
@@ -528,11 +528,15 @@ deviation 146). Checked: unit, phpcs, analyse; on Local off: no `clicks.js`, not
 **Files:** the above; `tests/Integration/ClickReportTest.php` (30-day edge), `DashboardClicksSortTest.php`; `F12.spec.ts`
 AC10 (AC11, the sort, runs in 13K); F19 AC rerun (header changed).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Report** (the sort is 13K's).
-- [ ] **Step 3: Column.**
-- [ ] **Step 4: Run and look** (1280, 375 px; the sort both ways is checked in 13K).
-- [ ] **Step 5: Commit** — "Show and sort 30-day clicks on the Dashboard".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Report** (the sort is 13K's).
+- [x] **Step 3: Column.**
+- [x] **Step 4: Run and look** (1280, 375 px; the sort both ways is checked in 13K).
+- [x] **Step 5: Commit** — "Show and sort 30-day clicks on the Dashboard".
+
+*Note (2026-11-21):* `ClickReport::totals_for()` over `ClickStore::totals_since()`; the screen and the route pass the
+figures, the row prints them. The header's sort and the AC11 run are 13K's. `ClickReportTest` is unit (the integration
+suite does not run). Checked: unit, phpcs, analyse, the Dashboard at 1280 px (the clicked product shows 1).
 
 ---
 

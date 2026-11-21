@@ -15,6 +15,7 @@ use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Dashboard\ViewNotFound;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
+use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Dashboard\SavedView;
@@ -58,6 +59,7 @@ final class DashboardController implements Module {
 	 * @param PublicLinks|null    $links    The rows' public links (F24 R14; Task CL7).
 	 * @param LinkIssueQuery|null $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
 	 * @param LocationCounts|null $locations The Locations column (F12 L1-L3; Task 36A).
+	 * @param ClickReport|null    $clicks    The Clicks column (F12 R10, D8; Task 34A).
 	 */
 	public function __construct(
 		private ProductService $products,
@@ -68,6 +70,7 @@ final class DashboardController implements Module {
 		private ?PublicLinks $links = null,
 		private ?LinkIssueQuery $alerts = null,
 		private ?LocationCounts $locations = null,
+		private ?ClickReport $clicks = null,
 	) {}
 
 	/**
@@ -236,6 +239,7 @@ final class DashboardController implements Module {
 							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
 							'locations' => $this->locations?->of( $ids ),
 							'known'     => $this->locations?->known() ?? true,
+							'clicks'    => $this->clicks?->totals_for( $ids, time() ),
 						)
 					),
 					'term'       => $term->text(),

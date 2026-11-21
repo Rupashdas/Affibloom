@@ -104,6 +104,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 							'listing'   => $view['listing'] ?? null,
 							'locations' => $view['locations'] ?? null,
 							'known'     => $view['known'] ?? true,
+							'clicks'    => $view['clicks'] ?? null,
 						)
 					);
 					?>

@@ -24,7 +24,7 @@ test.describe( 'F12 Clicks and where used', () => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom' );
 		await page.getByLabel( 'Search', { exact: true } ).fill( name );
 		await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
-		await expect( page.locator( `tr[data-product-id="${ id }"] td.affibloom-clicks` ) ).toHaveText( '1' );
+		await expect( page.locator( `tr[data-product-id="${ id }"] td.affibloom-col-clicks` ) ).toHaveText( '1' );
 	} );
 
 	// AC20 (36A; L1-L3, D20, D21): the count is the tied rows plus the group displays that show the product, a link to
@@ -158,6 +158,45 @@ test.describe( 'F12 Clicks and where used', () => {
 		await expect( page.locator( 'script[src*="assets/front/clicks.js"]' ) ).toHaveCount( 1 );
 		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
 		expect( stored( id ) ).toBe( 1 );
+	} );
+
+	// AC10 (34A; R10, D8), AC12 (34B; U9), AC13 (34C; R11 replaced).
+	test( "AC10 the Dashboard's Clicks column shows each product's 30-day clicks, 0 when none", async ( { page, request } ) => {
+		const id = createProduct( { name: unique( 'F12 AC10' ) } );
+		const none = createProduct( { name: unique( 'F12 AC10 none' ) } );
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '2' } );
+		wp( 'db', 'query', `INSERT INTO wp_affibloom_clicks (day, product_id, post_id, location_id, button, clicks) VALUES (UTC_DATE() - INTERVAL 30 DAY, ${ id }, 0, 0, 'title', 5)` );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom&post_id=${ id }` );
+		await expect( page.locator( 'th.affibloom-col-clicks' ) ).not.toContainText( 'Soon' );
+		await expect( page.locator( `tr[data-product-id="${ id }"] td.affibloom-col-clicks` ) ).toHaveText( '2' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&post_id=${ none }` );
+		await expect( page.locator( `tr[data-product-id="${ none }"] td.affibloom-col-clicks` ) ).toHaveText( '0' );
+	} );
+
+	test( 'AC12 the Clicks (30 days) figure is the sum over published products', async ( { page, request } ) => {
+		const id = createProduct( { name: unique( 'F12 AC12' ) } );
+		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
+		const sum = wp( 'db', 'query', "SELECT COALESCE(SUM(c.clicks), 0) FROM wp_affibloom_clicks c JOIN wp_posts p ON p.ID = c.product_id AND p.post_type = 'affibloom_product' AND p.post_status = 'publish' WHERE c.day >= UTC_DATE() - INTERVAL 29 DAY", '--skip-column-names' );
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await expect( page.locator( '[data-clicks-total]' ) ).toHaveText( Number( sum ).toLocaleString( 'en-US' ) );
+	} );
+
+	test( "AC13 the Locations tab's Clicks column shows each location's 30-day clicks; a group row their sum", async ( { page, request } ) => {
+		const url = `https://www.example.com/${ unique( 'f12-ac13' ) }`;
+		const id = createProduct( { name: unique( 'F12 AC13' ), url } );
+		const title = unique( 'F12 AC13 post' );
+		newPostWith( boxBlock( id ) + `<p>Read <a href="${ url }">the AC13 review</a>.</p>`, title );
+		const location = Number( wp( 'db', 'query', `SELECT id FROM wp_affibloom_link_locations WHERE product_id = ${ id } AND display_type = 'Text'`, '--skip-column-names' ) );
+		await clickOnce( request, { p: id, h: 0, l: location, b: 'link' } );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ id }&tab=locations` );
+		await expect( page.locator( 'tr.affibloom-location-group', { hasText: title } ).locator( 'td.affibloom-col-clicks' ) ).toHaveText( '1' );
+		await page.locator( '[data-location-toggle]' ).click();
+		await expect( page.locator( 'tr[data-location-of]', { hasText: 'the AC13 review' } ).locator( 'td.affibloom-col-clicks' ) ).toHaveText( '1' );
+		await expect( page.locator( 'tr[data-location-of]' ).filter( { hasNotText: 'the AC13 review' } ).locator( 'td.affibloom-col-clicks' ) ).toHaveText( '0' );
 	} );
 
 	test( 'AC16 with the click route blocked the link still opens and no error shows', async ( { page, context } ) => {

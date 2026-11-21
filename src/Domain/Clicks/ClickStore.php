@@ -31,4 +31,13 @@ interface ClickStore {
 	 * @param string $day The first UTC day kept, "Y-m-d".
 	 */
 	public function delete_before( string $day ): void;
+
+	/**
+	 * Each product's clicks from a day on (Task 34A).
+	 *
+	 * @param string    $day         The first UTC day counted, "Y-m-d".
+	 * @param list<int> $product_ids The products.
+	 * @return array<int, int> By product ID; a product without clicks is left out.
+	 */
+	public function totals_since( string $day, array $product_ids ): array;
 }

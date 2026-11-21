@@ -4,7 +4,7 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, locations?: array<int, int>|null, known?: bool} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, locations?: array<int, int>|null, known?: bool, clicks?: array<int, int>|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -31,7 +31,7 @@ $columns     = array(
 	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), false ),
 	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), false ),
 	array( 'affibloom-col-locations', __( 'Locations', 'affibloom' ), false ),
-	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), true ),
+	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), false ),
 	array( 'affibloom-col-actions', __( 'Actions', 'affibloom' ), false ),
 );
 ?>
@@ -116,6 +116,7 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 							'alert'     => $view['alerts_of'][ (int) $product->id ] ?? null,
 							'locations' => isset( $view['locations'] ) ? ( $view['locations'][ (int) $product->id ] ?? 0 ) : null,
 							'known'     => $view['known'] ?? true,
+							'clicks'    => isset( $view['clicks'] ) ? ( $view['clicks'][ (int) $product->id ] ?? 0 ) : null,
 						)
 					);
 					?>

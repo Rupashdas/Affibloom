@@ -17,6 +17,10 @@ final class ClickRetentionTest extends TestCase {
 
 			public function add( string $day, int $product_id, int $post_id, int $location, Button $button ): void {}
 
+			public function totals_since( string $day, array $product_ids ): array {
+				return array();
+			}
+
 			public function delete_before( string $day ): void {
 				$this->before = $day;
 			}
