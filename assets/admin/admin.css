@@ -3128,6 +3128,20 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 /* The × (R44, Task O7): Lasso's is at the row's top right; here its own narrow last column, on the first line. */
 .affibloom-table--opportunities .affibloom-col-dismiss { width: 68px; text-align: right; }
 .affibloom-table--opportunities td.affibloom-col-dismiss { padding-top: 12px; }
+/* Task T1 (F25 R6, R7): the Tables list's columns; a table's products one per line. */
+.affibloom-table.affibloom-table--tables { min-width: 860px; }
+.affibloom-table--tables .affibloom-col-name { width: 24%; }
+.affibloom-table--tables .affibloom-col-theme,
+.affibloom-table--tables .affibloom-col-style { width: 110px; }
+.affibloom-table--tables .affibloom-col-locations { width: 100px; text-align: center; }
+.affibloom-table--tables .affibloom-col-clone { width: 100px; text-align: center; }
+.affibloom-table--tables th .affibloom-help { margin-left: 4px; vertical-align: middle; }
+.affibloom-table-products { margin: 0; padding: 0; list-style: none; }
+.affibloom-table-products li { margin: 0 0 2px; }
+.affibloom-admin .affibloom-table-products a { color: var(--affibloom-brand-700); text-decoration: none; }
+.affibloom-admin .affibloom-table-products a:hover { text-decoration: underline; }
+.affibloom-table-products__none { color: var(--affibloom-ink-500); }
+
 /* Monetize (R65, R69; Task O10): the search and Create a Link side by side; a monetized row flashes green; a post's
    monetized link says which product it prints. */
 .affibloom-monetize__search { display: flex; gap: 12px; align-items: center; }

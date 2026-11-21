@@ -20,6 +20,7 @@ use Affibloom\Application\Monetize\AmazonShortLinks;
 use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
+use Affibloom\Application\Tables\TableService;
 use Affibloom\Domain\Monetize\NetworkRegistry;
 use Affibloom\Infrastructure\WordPress\AmazonImportSchedule;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
@@ -27,17 +28,21 @@ use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
 use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
 use Affibloom\Infrastructure\WordPress\Builders\ThriveSource;
 use Affibloom\Infrastructure\WordPress\Builders\WprmSource;
+use Affibloom\Infrastructure\WordPress\IndexTableLocations;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
+use Affibloom\Infrastructure\WordPress\PostTypeTableRepository;
 use Affibloom\Infrastructure\WordPress\TableAmazonShortLinkRepository;
 use Affibloom\Infrastructure\WordPress\TableClickStore;
 use Affibloom\Infrastructure\WordPress\ProductDomainBackfill;
 use Affibloom\Infrastructure\WordPress\TableDetectedLinkRepository;
 use Affibloom\Infrastructure\WordPress\TableOpportunityRepository;
+use Affibloom\Infrastructure\WordPress\TablePostType;
 use Affibloom\Infrastructure\WordPress\TransientRepeatGuard;
 use Affibloom\Infrastructure\WordPress\WpPostDirectory;
 use Affibloom\Interface\Admin\AmazonImportNotice;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
+use Affibloom\Interface\Admin\TablesScreen;
 use Affibloom\Interface\Cron\AmazonImportCron;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
 use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
@@ -214,6 +219,7 @@ use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Rest\LocationPreviewController;
 use Affibloom\Interface\Rest\LocationsController;
+use Affibloom\Interface\Rest\TablesController;
 use Affibloom\Interface\Rest\VariantsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
 use Affibloom\Interface\Rest\EditorController;
@@ -599,7 +605,8 @@ final class Plugin {
 				new GroupScreen( $this->template(), $groups, $notice ),
 				new FieldsScreen( $this->template(), $fields, $notice ),
 				new FieldScreen( $this->template(), $fields, $notice ),
-				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() )
+				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() ),
+				new TablesScreen( $this->template(), $this->table_service() )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
@@ -624,6 +631,9 @@ final class Plugin {
 			new VariantsController( $products, $variants, $this->template() ),
 			new OpportunitiesController( $this->opportunity_service(), $this->intro_boxes(), $this->template(), $this->content_export() ),
 			new AmazonImportController( $this->amazon_import_status(), $this->template() ),
+			// F25 (Task T1): comparison tables, stored as posts; the list's route.
+			new TablePostType(),
+			new TablesController( $this->table_service(), $this->template() ),
 			new ContentExportController( $this->content_export() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
@@ -714,6 +724,13 @@ final class Plugin {
 	 */
 	private function location_counts(): LocationCounts {
 		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
+	}
+
+	/**
+	 * The comparison tables (F25; Task T1).
+	 */
+	private function table_service(): TableService {
+		return new TableService( new PostTypeTableRepository(), new IndexTableLocations() );
 	}
 
 	/**
@@ -923,6 +940,7 @@ final class Plugin {
 			$this->navigation = new AdminNavigation();
 			$this->navigation->register( new NavItem( 'dashboard', AdminMenu::SLUG, static fn (): string => __( 'Dashboard', 'affibloom' ), 'home', Capabilities::PRODUCTS, array( ProductScreen::SLUG ) ) );
 			$this->navigation->register( new NavItem( 'opportunities', OpportunitiesScreen::SLUG, static fn (): string => __( 'Opportunities', 'affibloom' ), 'bulb', Capabilities::PRODUCTS ) );
+			$this->navigation->register( new NavItem( 'tables', TablesScreen::SLUG, static fn (): string => __( 'Tables', 'affibloom' ), 'table', Capabilities::PRODUCTS, array( TablesScreen::TABLE_SLUG ) ) );
 			$this->navigation->register( new NavItem( 'groups', GroupsScreen::SLUG, static fn (): string => __( 'Groups', 'affibloom' ), 'layers', Capabilities::PRODUCTS, array( GroupScreen::SLUG ) ) );
 			// A menu item only: Lasso's header has no Fields tab (F26 D13).
 			$this->navigation->register( new NavItem( 'fields', FieldsScreen::SLUG, static fn (): string => __( 'Fields', 'affibloom' ), 'list', Capabilities::PRODUCTS, array( FieldScreen::SLUG ) ) );

@@ -43,6 +43,7 @@ final class AdminMenu implements Module {
 	 * @param FieldsScreen             $fields     The Fields list (Task FL1).
 	 * @param FieldScreen              $field      One field, or a new one (Task FL2).
 	 * @param OpportunitiesScreen|null $opportunities Opportunities (F22, Task O1).
+	 * @param TablesScreen|null        $tables     The Tables list (F25, Task T1).
 	 */
 	public function __construct(
 		private AdminNavigation $navigation,
@@ -54,6 +55,7 @@ final class AdminMenu implements Module {
 		FieldsScreen $fields,
 		private FieldScreen $field,
 		?OpportunitiesScreen $opportunities = null,
+		?TablesScreen $tables = null,
 	) {
 		$this->screens = array(
 			self::SLUG           => array( $dashboard, 'render' ),
@@ -63,6 +65,9 @@ final class AdminMenu implements Module {
 		);
 		if ( null !== $opportunities ) {
 			$this->screens[ OpportunitiesScreen::SLUG ] = array( $opportunities, 'render' );
+		}
+		if ( null !== $tables ) {
+			$this->screens[ TablesScreen::SLUG ] = array( $tables, 'render' );
 		}
 	}
 

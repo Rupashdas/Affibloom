@@ -128,7 +128,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F25 — Comparison tables (with F31's table Copy Shortcode after T12)
 
-- [ ] Task T1: The Tables list, and `GET /tables`
+- [x] Task T1: The Tables list, and `GET /tables`
 - [ ] Task T2: Create a table
 - [ ] Task T3: The builder page and the table's settings
 - [ ] Task T4: Products in a table — add, starting layout, badge, remove
@@ -1684,12 +1684,18 @@ Beautiful Comparison Tables" and its text.
 `tests/Unit/Application/TableServiceTest.php` (search arms); modify `src/Plugin.php`, `AdminMenu`, `AdminAssets`,
 `templates/admin/partials/header.php`, `assets/admin/admin.css`, `docs/ui/design-system.md` (Tables list row).
 
-- [ ] **Step 1: Failing tests.** AC1 with three tables made by a WP-CLI fixture (a product name search; the cleaning
+- [x] **Step 1: Failing tests.** AC1 with three tables made by a WP-CLI fixture (a product name search; the cleaning
   of R8; the empty state); unit tests for the search arms. Expected red: no Tables tab.
-- [ ] **Step 2: Domain, repository, service, post type.**
-- [ ] **Step 3: Screen, route, templates, script.**
-- [ ] **Step 4: Run and look.** Checks; F25 AC1 and F19's header specs; by hand at 1280 and 375 px.
-- [ ] **Step 5: Commit** — "Add Lasso's Tables list".
+- [x] **Step 2: Domain, repository, service, post type.**
+- [x] **Step 3: Screen, route, templates, script.**
+- [x] **Step 4: Run and look.** Checks; F25 AC1 and F19's header specs; by hand at 1280 and 375 px.
+- [x] **Step 5: Commit** — "Add Lasso's Tables list".
+
+*Note:* the address keeps `s` and `paged` (the shared in-place list's, as Groups and Opportunities), not D16's
+`search=`. The search rule is `Domain\Table\TableSearch` (tables are read whole and few, so it runs in PHP);
+`TableTheme` and `FieldGroup` wait for the tasks that use them. Create Table and Clone show "Coming soon" until T2 and
+T11. Checked: unit; on Local three tables made by the new fixture (`tests/E2E/fixtures/create-table.php`), the route's
+search ("skim" 2, "shoe" 1, "best vol" 1, "zzz" 0), the list at 1280 px.
 
 ---
 
