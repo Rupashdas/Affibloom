@@ -29,7 +29,7 @@ final class TablesScreen {
 	 *
 	 * @param Template     $template Template renderer.
 	 * @param TableService $tables   The tables.
-	 * @param Notice|null  $notice   The toast after a redirect: "Table created." (Task T2).
+	 * @param Notice|null  $notice   The toast after a redirect.
 	 */
 	public function __construct( private Template $template, private TableService $tables, private ?Notice $notice = null ) {}
 

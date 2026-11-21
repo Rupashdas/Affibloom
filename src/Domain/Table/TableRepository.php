@@ -45,4 +45,11 @@ interface TableRepository {
 	 * @return Table The table as stored, with its ID.
 	 */
 	public function save( Table $table ): Table;
+
+	/**
+	 * Whether a table has this exact name (UntitledName, R14; Task T3).
+	 *
+	 * @param string $name The name.
+	 */
+	public function name_taken( string $name ): bool;
 }

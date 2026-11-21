@@ -44,6 +44,7 @@ final class AdminMenu implements Module {
 	 * @param FieldScreen              $field      One field, or a new one (Task FL2).
 	 * @param OpportunitiesScreen|null $opportunities Opportunities (F22, Task O1).
 	 * @param TablesScreen|null        $tables     The Tables list (F25, Task T1).
+	 * @param TableScreen|null         $table      A table's builder (F25, Task T3).
 	 */
 	public function __construct(
 		private AdminNavigation $navigation,
@@ -56,6 +57,7 @@ final class AdminMenu implements Module {
 		private FieldScreen $field,
 		?OpportunitiesScreen $opportunities = null,
 		?TablesScreen $tables = null,
+		private ?TableScreen $table = null,
 	) {
 		$this->screens = array(
 			self::SLUG           => array( $dashboard, 'render' ),
@@ -113,6 +115,9 @@ final class AdminMenu implements Module {
 		$this->add_detail_page( __( 'Link Details', 'affibloom' ), ProductScreen::SLUG, array( $this->product, 'render' ), array( $this->product, 'guard' ) );
 		$this->add_detail_page( __( 'Group', 'affibloom' ), GroupScreen::SLUG, array( $this->group, 'render' ), array( $this->group, 'guard' ) );
 		$this->add_detail_page( __( 'Field', 'affibloom' ), FieldScreen::SLUG, array( $this->field, 'render' ), array( $this->field, 'guard' ) );
+		if ( null !== $this->table ) {
+			$this->add_detail_page( __( 'Table', 'affibloom' ), TablesScreen::TABLE_SLUG, array( $this->table, 'render' ), array( $this->table, 'guard' ) );
+		}
 	}
 
 	/**
@@ -123,6 +128,7 @@ final class AdminMenu implements Module {
 		remove_submenu_page( self::SLUG, ProductScreen::SLUG );
 		remove_submenu_page( self::SLUG, GroupScreen::SLUG );
 		remove_submenu_page( self::SLUG, FieldScreen::SLUG );
+		remove_submenu_page( self::SLUG, TablesScreen::TABLE_SLUG );
 	}
 
 	/**

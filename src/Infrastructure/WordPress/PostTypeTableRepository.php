@@ -16,6 +16,7 @@ use Affibloom\Domain\Table\TableProduct;
 use Affibloom\Domain\Table\TableRepository;
 use Affibloom\Domain\Table\TableSearch;
 use Affibloom\Domain\Table\TableStyle;
+use Affibloom\Domain\Table\TableTheme;
 use RuntimeException;
 use WP_Post;
 
@@ -111,7 +112,7 @@ final class PostTypeTableRepository implements TableRepository {
 			$post->ID,
 			$post->post_title,
 			TableStyle::from_stored( (string) ( $data['style'] ?? '' ) ),
-			(string) ( $data['theme'] ?? 'Cactus' ),
+			TableTheme::from_stored( (string) ( $data['theme'] ?? '' ) ),
 			$products,
 			array_values( (array) ( $data['groups'] ?? array() ) ),
 			(array) ( $data['values'] ?? array() ),
@@ -165,5 +166,17 @@ final class PostTypeTableRepository implements TableRepository {
 		);
 
 		return $table->with( array( 'id' => (int) $id ) );
+	}
+
+	/**
+	 * Whether a table has this exact name.
+	 *
+	 * @param string $name The name.
+	 */
+	public function name_taken( string $name ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one lookup for the builder's placeholder.
+		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM %i WHERE post_type = %s AND post_status = 'publish' AND post_title = %s LIMIT 1", $wpdb->posts, TablePostType::NAME, $name ) );
 	}
 }

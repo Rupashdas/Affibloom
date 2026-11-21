@@ -12,13 +12,16 @@ namespace Affibloom\Application\Tables;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Table\Table;
+use Affibloom\Domain\Table\TableChanged;
 use Affibloom\Domain\Table\TableLocations;
 use Affibloom\Domain\Table\TablePage;
 use Affibloom\Domain\Table\TableRepository;
 use Affibloom\Domain\Table\TableStyle;
+use Affibloom\Domain\Table\TableTheme;
+use Affibloom\Domain\Table\UntitledName;
 
 /**
- * F25's tables (Tasks T1-T17): the list first (T1). Later tasks add creating, editing and cloning.
+ * F25's tables (Tasks T1-T17): the list (T1), creating (T2), the builder's settings (T3). Later tasks add the rest.
  */
 final class TableService {
 
@@ -50,6 +53,63 @@ final class TableService {
 	 */
 	public function create( string $name, TableStyle $style ): Table {
 		return $this->tables->save( Table::draft( $name, $style ) );
+	}
+
+	/**
+	 * One table, or null (Task T3).
+	 *
+	 * @param int $id The table.
+	 */
+	public function get( int $id ): ?Table {
+		return $this->tables->get( $id );
+	}
+
+	/**
+	 * The builder's settings saved at once (R14, R15, D4; Task T3): any of title, style, theme, show_headers,
+	 * show_field_name. The write must carry the stored revision; a blank title is refused; the revision moves on.
+	 *
+	 * @param int                  $id       The table.
+	 * @param int                  $revision The revision the editor's copy has.
+	 * @param array<string, mixed> $changes  The settings changed.
+	 * @return Table|null The table as saved; null when it is gone.
+	 * @throws TableChanged When the table moved on since the editor's copy.
+	 * @throws InvalidField When the title is blank ('table_title_blank').
+	 */
+	public function update( int $id, int $revision, array $changes ): ?Table {
+		$table = $this->tables->get( $id );
+		if ( null === $table ) {
+			return null;
+		}
+		if ( $table->revision !== $revision ) {
+			throw new TableChanged( 'This table was changed in another window.' );
+		}
+		$with = array( 'revision' => $table->revision + 1 );
+		if ( array_key_exists( 'title', $changes ) ) {
+			$with['name'] = trim( (string) $changes['title'] );
+			if ( '' === $with['name'] ) {
+				throw new InvalidField( 'title', 'table_title_blank' );
+			}
+		}
+		if ( array_key_exists( 'style', $changes ) ) {
+			$with['style'] = TableStyle::from_stored( (string) $changes['style'] );
+		}
+		if ( array_key_exists( 'theme', $changes ) ) {
+			$with['theme'] = TableTheme::from_stored( (string) $changes['theme'] );
+		}
+		foreach ( array( 'show_headers', 'show_field_name' ) as $toggle ) {
+			if ( array_key_exists( $toggle, $changes ) ) {
+				$with[ $toggle ] = (bool) $changes[ $toggle ];
+			}
+		}
+
+		return $this->tables->save( $table->with( $with ) );
+	}
+
+	/**
+	 * The name field's placeholder for a table not yet named (R14).
+	 */
+	public function untitled(): string {
+		return UntitledName::next( fn( string $name ): bool => $this->tables->name_taken( $name ) );
 	}
 
 	/**

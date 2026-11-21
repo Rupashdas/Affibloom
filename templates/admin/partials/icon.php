@@ -55,6 +55,8 @@ $icon_paths = array(
 	// The display types in the editor's "Choose a Display Type" (Task 23A); Single, List and Image use box, list, image.
 	'grid'          => '<path d="M3.5 3.5h5v5h-5zM11.5 3.5h5v5h-5zM3.5 11.5h5v5h-5zM11.5 11.5h5v5h-5z"/>',
 	'table'         => '<path d="M3.5 4.5h13v11h-13zM3.5 8h13M3.5 11.75h13M8 8v7.5"/>',
+	// Preview Table (F25 R16, Task T3).
+	'eye'           => '<path d="M2.5 10s2.75-5 7.5-5 7.5 5 7.5 5-2.75 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.25"/>',
 	// Create Table's style tiles (F25 R12, Task T2): products in columns, products in rows.
 	'table-columns' => '<path d="M3.5 4.5h13v11h-13zM7.83 4.5v11M12.17 4.5v11"/>',
 	'table-rows'    => '<path d="M3.5 4.5h13v11h-13zM3.5 8.17h13M3.5 11.83h13"/>',

@@ -130,7 +130,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task T1: The Tables list, and `GET /tables`
 - [x] Task T2: Create a table
-- [ ] Task T3: The builder page and the table's settings
+- [x] Task T3: The builder page and the table's settings
 - [ ] Task T4: Products in a table — add, starting layout, badge, remove
 - [ ] Task T5: Add a group to a table
 - [ ] Task T6: Rows and columns, the Add Field dialog, plain cells
@@ -1767,12 +1767,14 @@ version."
 **Files:** the above; F25 spec AC3; unit tests for `UntitledName`, update and the revision refusal; `admin.css`,
 design-system row (builder band and settings row).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Service, route, revision.**
-- [ ] **Step 3: Page and script.**
-- [ ] **Step 4: Run and look** (both styles, every theme name, 375 px).
-- [ ] **Step 5: Commit** — "Open a table in
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Service, route, revision.**
+- [x] **Step 3: Page and script.**
+- [x] **Step 4: Run and look** (both styles, every theme name, 375 px).
+- [x] **Step 5: Commit** — "Open a table in
   Lasso's builder and save its settings as you go".
+
+*Note:* Create Table (T2) now opens the new table's builder instead of the list's "Table created." toast (removed; AC2 updated). Before a table has an id, only the name and Style go with its creation; Theme and the switches save once it exists. Checked: PATCH 200/422/409/404 on Local; the builder at 1280 (both styles) and 375 px; naming an untitled table and a stale second window in a headless browser.
 
 ---
 

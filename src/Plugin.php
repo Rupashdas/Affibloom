@@ -42,6 +42,7 @@ use Affibloom\Infrastructure\WordPress\TransientRepeatGuard;
 use Affibloom\Infrastructure\WordPress\WpPostDirectory;
 use Affibloom\Interface\Admin\AmazonImportNotice;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
+use Affibloom\Interface\Admin\TableScreen;
 use Affibloom\Interface\Admin\TablesScreen;
 use Affibloom\Interface\Cron\AmazonImportCron;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
@@ -606,7 +607,8 @@ final class Plugin {
 				new FieldsScreen( $this->template(), $fields, $notice ),
 				new FieldScreen( $this->template(), $fields, $notice ),
 				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() ),
-				new TablesScreen( $this->template(), $this->table_service(), $notice )
+				new TablesScreen( $this->template(), $this->table_service(), $notice ),
+				new TableScreen( $this->template(), $this->table_service() )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,

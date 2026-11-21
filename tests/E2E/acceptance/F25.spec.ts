@@ -62,8 +62,54 @@ test.describe( 'F25 Comparison tables', () => {
 		await dialog.getByLabel( 'Table Name' ).fill( name );
 		await dialog.getByText( 'Horizontal' ).click();
 		await dialog.getByRole( 'button', { name: 'Create Table' } ).click();
-		await expect( page.getByText( 'Table created.' ) ).toBeVisible();
+		// T3: the new table opens in its builder.
+		await expect( page ).toHaveURL( /page=affibloom-table&id=\d+/ );
 		const id = wp( 'post', 'list', '--post_type=affibloom_table', `--title=${ name }`, '--field=ID' );
 		expect( JSON.parse( wp( 'post', 'meta', 'get', id, '_affibloom_table', '--format=json' ) ) ).toMatchObject( { style: 'row', theme: 'Cactus', show_headers: true } );
+	} );
+
+	// AC3 (T3; R13-R16, D4, D5).
+	test( 'AC3 the builder: the heading follows the name, settings save at once, Show Headers is Horizontal only, a stale window is refused', async ( { page } ) => {
+		const id = createTable( unique( 'F25 AC3' ), 'column', 'Cactus', [] );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+		await expect( page.getByText( 'Add a Product or Group to get started.' ) ).toBeVisible();
+		await expect( page.getByRole( 'link', { name: /All Tables \d+/ } ) ).toBeVisible();
+		await expect( page.getByLabel( 'Show Headers' ) ).toBeHidden();
+		await expect( page.getByRole( 'button', { name: 'Add Row' } ) ).toBeVisible();
+
+		const name = unique( 'F25 AC3 renamed' );
+		await page.getByLabel( 'Name', { exact: true } ).fill( name );
+		await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( name );
+		await page.getByLabel( 'Name', { exact: true } ).press( 'Enter' );
+		await expect( page.getByRole( 'status' ).filter( { hasText: 'Saved' } ) ).toBeVisible();
+
+		await page.getByLabel( 'Style' ).selectOption( 'row' );
+		await expect( page.getByRole( 'button', { name: 'Add Column' } ) ).toBeVisible();
+		await expect( page.getByLabel( 'Show Headers' ) ).toBeVisible();
+		await page.getByLabel( 'Theme' ).selectOption( 'Llama' );
+		await expect( page.locator( '.affibloom-table-theme--llama' ) ).toBeVisible();
+		await expect.poll( () => JSON.parse( wp( 'post', 'meta', 'get', String( id ), '_affibloom_table', '--format=json' ) ) ).toMatchObject( { style: 'row', theme: 'Llama' } );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+
+		// A blank name is not saved; the heading goes back to the placeholder only while typing.
+		await page.getByLabel( 'Name', { exact: true } ).fill( '' );
+		await page.getByLabel( 'Name', { exact: true } ).press( 'Tab' );
+		expect( wp( 'post', 'get', String( id ), '--field=post_title' ) ).toBe( name );
+
+		// Another window still holds the old revision.
+		const other = await page.context().newPage();
+		await other.goto( `/wp-admin/admin.php?page=affibloom-table&id=${ id }` );
+		await page.getByLabel( 'Theme' ).selectOption( 'Flow' );
+		await expect( page.getByRole( 'status' ).filter( { hasText: 'Saved' } ) ).toBeVisible();
+		await other.getByLabel( 'Theme' ).selectOption( 'Money' );
+		await expect( other.getByText( 'This table was changed in another window. Reload to see the latest version.' ) ).toBeVisible();
+		await other.close();
+
+		// Without an id: the placeholder, and naming it creates the table.
+		await page.goto( '/wp-admin/admin.php?page=affibloom-table' );
+		await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( /^Untitled Table( \d+)?$/ );
+		await page.getByLabel( 'Name', { exact: true } ).fill( unique( 'F25 AC3 new' ) );
+		await page.getByLabel( 'Name', { exact: true } ).press( 'Enter' );
+		await expect( page ).toHaveURL( /page=affibloom-table&id=\d+/ );
 	} );
 } );

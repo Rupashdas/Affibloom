@@ -56,6 +56,8 @@ final class Messages {
 			'group_name_required' => __( 'Name is required.', 'affibloom' ),
 			// Create Table's empty name (F25 R12; Task T2).
 			'table_name_required' => __( 'Please fill out "Table Name" field', 'affibloom' ),
+			// The builder's Name left blank (F25 R15; Task T3).
+			'table_title_blank'   => __( 'Please input table name', 'affibloom' ),
 			'group_name_taken'    => __( 'A group with this name already exists.', 'affibloom' ),
 			// The Product Data API card's Validate (C1 R21): Lasso's words.
 			'amazon_validated'    => __( 'Amazon Creators API credentials verified successfully.', 'affibloom' ),

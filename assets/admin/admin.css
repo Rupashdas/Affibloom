@@ -3141,6 +3141,17 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-admin .affibloom-table-products a { color: var(--affibloom-brand-700); text-decoration: none; }
 .affibloom-admin .affibloom-table-products a:hover { text-decoration: underline; }
 .affibloom-table-products__none { color: var(--affibloom-ink-500); }
+/* Task T3 (F25 R13-R16): the builder's settings row (Name, Options, Style, Theme), its status, its actions. */
+.affibloom-table-page__status { color: var(--affibloom-ink-500); font: 500 13px/20px var(--affibloom-font); }
+.affibloom-table-settings { display: grid; grid-template-columns: minmax(200px, 2fr) minmax(220px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr); gap: 16px 24px; align-items: start; padding: 20px 24px; }
+.affibloom-table-settings__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.affibloom-table-settings .affibloom-toggle-row { padding: 2px 0; }
+@media (max-width: 900px) { .affibloom-table-settings { grid-template-columns: minmax(0, 1fr); } }
+.affibloom-table-builder { margin-top: 24px; }
+.affibloom-table-builder__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.affibloom-table-builder__preview { margin-left: auto; }
+.affibloom-table-page__delete { margin: 24px 0 0; }
+
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
 .affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }
