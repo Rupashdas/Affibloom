@@ -225,7 +225,9 @@ final class TableOpportunityRepository implements OpportunityRepository {
 			ARRAY_A
 		);
 		$rows  = is_array( $rows ) ? $rows : array();
-		// What could monetize each domain (R19): the name of a product of that domain, any status.
+		// What could monetize each domain (R19): "Amazon Associates" for any of Lasso's 23 Amazon domains, short links
+		// included, ahead of a product's name (pages/class-ajax.php 732-737); else the name of a product of that
+		// domain, any status.
 		$names = array();
 		if ( array() !== $rows ) {
 			$domains = array_map( static fn( array $row ): string => (string) $row['domain'], $rows );
@@ -249,7 +251,7 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		$items = array();
 		foreach ( $rows as $row ) {
 			$domain  = (string) $row['domain'];
-			$items[] = new DomainCount( $domain, (int) $row['links'], $names[ $domain ] ?? ( AmazonDomains::excludes( $domain ) ? 'Amazon Associates' : '' ) );
+			$items[] = new DomainCount( $domain, (int) $row['links'], in_array( $domain, AmazonDomains::ALL, true ) ? 'Amazon Associates' : ( $names[ $domain ] ?? '' ) );
 		}
 
 		return new OpportunityPage( $items, $total, $shell->current() );
