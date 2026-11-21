@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom;
 
+use Affibloom\Application\Clicks\ClickTracker;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
 use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
 use Affibloom\Infrastructure\WordPress\Builders\TablePressSource;
@@ -16,6 +17,8 @@ use Affibloom\Infrastructure\WordPress\Builders\ThriveSource;
 use Affibloom\Infrastructure\WordPress\Builders\WprmSource;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
+use Affibloom\Infrastructure\WordPress\TableClickStore;
+use Affibloom\Infrastructure\WordPress\WpPostDirectory;
 use Affibloom\Interface\Cron\AmazonRefreshCron;
 use Affibloom\Infrastructure\WordPress\PostMetaDueAmazonData;
 use Affibloom\Infrastructure\WordPress\OptionRefreshRunRepository;
@@ -105,12 +108,14 @@ use Affibloom\Infrastructure\WordPress\WpScheduledEvents;
 use Affibloom\Infrastructure\WordPress\WpCronHealth;
 use Affibloom\Application\Jobs\JobSlots;
 use Affibloom\Interface\Admin\BrokenLinksNotice;
+use Affibloom\Interface\Front\ClickScript;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
 use Affibloom\Interface\Front\CloakedLinkRedirect;
 use Affibloom\Interface\Front\DisplayRenderFilter;
 use Affibloom\Interface\Front\LinkAttributesFilter;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
+use Affibloom\Interface\Rest\ClicksController;
 use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
 use Affibloom\Interface\Cron\LinkIndexCron;
@@ -370,6 +375,10 @@ final class Plugin {
 			6 => static function (): void {
 				( new Table( TableLinkIssueRepository::TABLE, TableLinkIssueRepository::COLUMNS ) )->create();
 			},
+			// Task 33A: the click counts (F12 D2, ADR-005 with location_id).
+			7 => static function (): void {
+				( new Table( TableClickStore::TABLE, TableClickStore::COLUMNS ) )->create();
+			},
 		);
 	}
 
@@ -475,7 +484,8 @@ final class Plugin {
 		$amazon     = new CredentialsService( new OptionCredentialsRepository(), $catalog, $this->settings_repository() );
 		$search     = new AmazonSearchService( $data, $catalog, $this->settings_repository(), new TransientSearchResults() );
 		$upgrader   = self::upgrader();
-		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector() );
+		$click_js   = new ClickScript( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION );
+		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector(), $click_js );
 		// The display modal's assets: the block editor's, the Classic editor's and Elementor's (ED2) share them.
 		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
 
@@ -509,6 +519,8 @@ final class Plugin {
 			),
 			$box_assets,
 			new ProductPreviewController( $products, new PostTypeProductRepository(), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, $icon_css ),
+			$click_js,
+			new ClicksController( new ClickTracker( new PostTypeProductRepository(), new WpPostDirectory(), new TableClickStore() ) ),
 			new LocationPreviewController( new LocationPreview( new TableLinkLocationRepository(), new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ) ), $display, $this->settings_repository(), $box_assets, $icon_css ),
 			new DisplayPreviewController( $display, $this->settings_repository(), $box_builder, $box_html, $box_assets, plugin_dir_url( $this->file ) . 'assets/admin/images/essentialism.jpg', $icon_css ),
 			$shortcode,

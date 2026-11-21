@@ -69,7 +69,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F12 — Clicks
 
-- [ ] Task 33A: A reader clicks a product element — `clicks.js` and `POST /affibloom/v1/clicks`
+- [x] Task 33A: A reader clicks a product element — `clicks.js` and `POST /affibloom/v1/clicks`
 - [ ] Task 33B: Bots and repeats are not counted
 - [ ] Task 33C: Old click rows are removed — `affibloom_daily`
 - [ ] Task 33D: Settings → General — Page and Link-Level Tracking
@@ -393,15 +393,23 @@ contacted. With the route blocked, nothing visible happens either.
 modify `Migrator.php`, `BoxAssets.php`, `LassoIdMap.php`, `LegacyBlockConverter.php` (interface type), `Plugin.php`,
 `docs/decisions/ADR-005.md` (the `location_id` column), `tests/E2E/acceptance/F12.spec.ts`.
 
-- [ ] **Step 1: Failing tests.** E2E AC1, AC4 (title, image, button 2, button 3, link, middle-click), AC14, AC16
+- [x] **Step 1: Failing tests.** E2E AC1, AC4 (title, image, button 2, button 3, link, middle-click), AC14, AC16
   (route aborted, link still opens), AC18 (record all request hosts), AC19 (a post without products has no
   `clicks.js`). Integration: counted; unknown product; unpublished post; repointed ID counted for the target; 204 each.
   Red: no route.
-- [ ] **Step 2: Domain and table** (`Button` enum `1`-`9`, `title`, `image`, `link`; upsert).
-- [ ] **Step 3: Tracker and route** (body ≤ 1 KB, `absint`, no cookie).
-- [ ] **Step 4: The script and its enqueue** (sendBeacon, fetch keepalive fallback).
-- [ ] **Step 5: Run and look.** DevTools: one `POST …/clicks` 204 per click; the row in the table; no other host.
-- [ ] **Step 6: Commit** — "Count clicks on product elements with a first-party script".
+- [x] **Step 2: Domain and table** (`Button` enum `1`-`9`, `title`, `image`, `link`; upsert).
+- [x] **Step 3: Tracker and route** (body ≤ 1 KB, `absint`, no cookie).
+- [x] **Step 4: The script and its enqueue** (sendBeacon, fetch keepalive fallback).
+- [x] **Step 5: Run and look.** DevTools: one `POST …/clicks` 204 per click; the row in the table; no other host.
+- [x] **Step 6: Commit** — "Count clicks on product elements with a first-party script".
+
+*Note (2026-11-21):* no Lasso parts (deviation 146): `LassoIdLookup`, `LassoIdMap` and `LegacyBlockConverter` are not
+touched; the script reads only `a[data-affibloom-id]`. The table is `Infrastructure\WordPress\TableClickStore` (schema
+step 7). The first button has no `data-affibloom-btn`, so `clicks.js` names it by `affibloom-button-1`. A box's links
+carry no `data-affibloom-location`, so their clicks store location 0 (D2). `ClicksRouteTest` is unit
+(`ClickTrackerTest`), as the integration suite does not run. Checked: unit, phpcs, analyse; on Local, clicks on button
+1, the image and a tied text link stored as `1`, `image`, `link` (with its location); only the site's host; no
+`clicks.js` on a post without products; 204 and no cookie for a junk body.
 
 ---
 

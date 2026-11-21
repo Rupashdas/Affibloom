@@ -1,0 +1,51 @@
+<?php
+/**
+ * The click counts in {prefix}affibloom_clicks.
+ *
+ * @package Affibloom
+ */
+
+declare( strict_types=1 );
+
+namespace Affibloom\Infrastructure\WordPress;
+
+use Affibloom\Domain\Clicks\Button;
+use Affibloom\Domain\Clicks\ClickStore;
+
+/**
+ * `{prefix}affibloom_clicks` (F12 D2, ADR-005 with `location_id`; Task 33A): one row per UTC day, product, host post,
+ * location and button, holding that day's total. A click is one atomic upsert, so two readers clicking in the same
+ * second are both counted (edge case 3). Rows older than 400 days go with the daily job (Task 33C).
+ */
+final class TableClickStore implements ClickStore {
+
+	/** The table's name without the site's prefix. */
+	public const TABLE = 'affibloom_clicks';
+
+	/** Its definition, as dbDelta reads it (Infrastructure\Schema\Table). */
+	public const COLUMNS = 'day date NOT NULL,
+product_id bigint(20) unsigned NOT NULL,
+post_id bigint(20) unsigned NOT NULL DEFAULT 0,
+location_id bigint(20) unsigned NOT NULL DEFAULT 0,
+button varchar(8) NOT NULL,
+clicks int(10) unsigned NOT NULL DEFAULT 0,
+PRIMARY KEY  (day,product_id,post_id,location_id,button),
+KEY product_day (product_id,day),
+KEY location_day (location_id,day)';
+
+	/**
+	 * Adds one click to its day's total.
+	 *
+	 * @param string $day        The UTC day, "Y-m-d".
+	 * @param int    $product_id The product.
+	 * @param int    $post_id    The post; 0 when none.
+	 * @param int    $location   The link index row; 0 when none.
+	 * @param Button $button     What was clicked.
+	 */
+	public function add( string $day, int $product_id, int $post_id, int $location, Button $button ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one upsert per click.
+		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (day, product_id, post_id, location_id, button, clicks) VALUES (%s, %d, %d, %d, %s, 1) ON DUPLICATE KEY UPDATE clicks = clicks + 1', $wpdb->prefix . self::TABLE, $day, $product_id, $post_id, $location, $button->value ) );
+	}
+}

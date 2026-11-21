@@ -84,6 +84,7 @@ final class BoxAssets implements Module {
 	 * @param DisplaySettingsService $display  The Display settings.
 	 * @param SettingsRepository     $settings The site's settings.
 	 * @param BoxDetector            $detector Whether the page shows a box.
+	 * @param ClickScript|null       $clicks   The click counter, wherever a box is (F12 D3; Task 33A).
 	 */
 	public function __construct(
 		private readonly string $dir,
@@ -92,6 +93,7 @@ final class BoxAssets implements Module {
 		private readonly DisplaySettingsService $display,
 		private readonly SettingsRepository $settings,
 		private readonly BoxDetector $detector,
+		private readonly ?ClickScript $clicks = null,
 	) {}
 
 	/**
@@ -244,6 +246,8 @@ final class BoxAssets implements Module {
 		wp_enqueue_style( self::STYLE, $this->url . 'assets/front/box.css', array(), $this->file_version( 'assets/front/box.css' ) );
 		// R36 (deviation 136): the Copy to Clipboard button's script, in the footer, wherever a box is.
 		wp_enqueue_script( self::COPY_JS, $this->url . 'assets/front/copy-clipboard.js', array(), $this->file_version( 'assets/front/copy-clipboard.js' ), true );
+		// F12 D3 (Task 33A): a box's buttons, title and image count their clicks.
+		$this->clicks?->enqueue();
 		// R64: the classic box loads neither the advanced stylesheet nor the phone-layout script.
 		if ( ! $this->display->current()->advanced() ) {
 			return;

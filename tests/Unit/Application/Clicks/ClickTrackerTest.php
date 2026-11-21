@@ -1,0 +1,87 @@
+<?php
+namespace Affibloom\Tests\Unit\Application\Clicks;
+
+use Affibloom\Application\Clicks\ClickInput;
+use Affibloom\Application\Clicks\ClickTracker;
+use Affibloom\Application\Clicks\PostDirectory;
+use Affibloom\Domain\Clicks\Button;
+use Affibloom\Domain\Clicks\ClickStore;
+use Affibloom\Domain\Product\AffiliateUrl;
+use Affibloom\Domain\Product\Product;
+use Affibloom\Domain\Settings\Settings;
+use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * A reader's click (F12 AC4, AC5, AC14, D2, D4, D9, edge cases 1, 2, 4, 6; Task 33A).
+ */
+final class ClickTrackerTest extends TestCase {
+
+	private InMemoryProductRepository $products;
+
+	/** @var list<string> */
+	private array $added = array();
+
+	private ClickTracker $tracker;
+
+	protected function setUp(): void {
+		$this->products = new InMemoryProductRepository();
+		$test           = $this;
+		$store          = new class( $test ) implements ClickStore {
+			public function __construct( private ClickTrackerTest $test ) {}
+
+			public function add( string $day, int $product_id, int $post_id, int $location, Button $button ): void {
+				$this->test->added( "{$day} {$product_id} {$post_id} {$location} {$button->value}" );
+			}
+		};
+		$posts         = new class() implements PostDirectory {
+			public function is_public( int $post_id ): bool {
+				return 50 === $post_id;
+			}
+		};
+		$this->tracker = new ClickTracker( $this->products, $posts, $store );
+	}
+
+	public function added( string $row ): void {
+		$this->added[] = $row;
+	}
+
+	public function test_a_click_on_a_published_product_in_a_public_post_is_a_day_row(): void {
+		$id  = $this->product( 'ball' );
+		$now = (int) gmmktime( 23, 59, 59, 11, 21, 2026 );
+
+		self::assertTrue( $this->tracker->track( new ClickInput( $id, 50, 7, Button::from_input( '2' ) ), $now ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $id, 0, 0, Button::from_input( 'link' ) ), $now + 1 ) );
+		self::assertSame( array( "2026-11-21 {$id} 50 7 2", "2026-11-22 {$id} 0 0 link" ), $this->added );
+	}
+
+	public function test_unknown_trashed_and_hidden_post_clicks_are_ignored_and_a_repoint_counts_for_its_target(): void {
+		$kept    = $this->product( 'kept' );
+		$retired = $this->product( 'retired' );
+		$this->products->retire( $this->products->get( $retired ), $kept );
+		$button = Button::from_input( '1' );
+
+		self::assertFalse( $this->tracker->track( new ClickInput( 999, 50, 0, $button ), 0 ) );
+		self::assertFalse( $this->tracker->track( new ClickInput( $kept, 51, 0, $button ), 0 ) );
+		self::assertTrue( $this->tracker->track( new ClickInput( $retired, 50, 0, $button ), 0 ) );
+		self::assertSame( array( "1970-01-01 {$kept} 50 0 1" ), $this->added );
+	}
+
+	public function test_the_body_is_read_strictly(): void {
+		$click = ClickInput::from_body( '{"p":"12","h":5,"l":"3","b":"image"}' );
+
+		self::assertNotNull( $click );
+		self::assertSame( array( 12, 5, 3, 'image' ), array( $click->product_id, $click->post_id, $click->location, $click->button->value ) );
+		self::assertNull( ClickInput::from_body( '{"p":"x","b":"1"}' ) );
+		self::assertNull( ClickInput::from_body( '{"p":3,"b":"0"}' ) );
+		self::assertNull( ClickInput::from_body( '{"p":3,"b":"buy"}' ) );
+		self::assertNull( ClickInput::from_body( 'not json' ) );
+		self::assertNull( ClickInput::from_body( '{"p":3,"b":"1","x":"' . str_repeat( 'a', 1100 ) . '"}' ) );
+		self::assertSame( '99', Button::from_input( 99 )?->value );
+		self::assertNull( Button::from_input( '100' ) );
+	}
+
+	private function product( string $name ): int {
+		return (int) $this->products->save( Product::draft( $name, AffiliateUrl::from_string( 'https://www.example.com/' . $name ), Settings::from_array( array() ) ) )->id;
+	}
+}

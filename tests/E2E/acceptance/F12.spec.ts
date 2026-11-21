@@ -53,6 +53,77 @@ test.describe( 'F12 Clicks and where used', () => {
 		await expect( page.locator( `tr[data-product-id="${ id }"] td.affibloom-col-locations` ) ).toHaveText( '0' );
 	} );
 
+	// AC4, AC5, AC14, AC16, AC18, AC19 (33A; R5-R8, D1-D4, D9, D10).
+	test( 'AC4 every product element counts for its product, middle-click too; a plain link does not', async ( { page, context } ) => {
+		const url = `https://www.example.com/${ unique( 'f12-ac4' ) }`;
+		const id = createProduct( { name: unique( 'F12 AC4' ), url } );
+		const path = newPostWith( boxBlock( id ) + `<p>Read <a href="${ url }">the review</a> or <a href="https://www.example.com/plain">a plain link</a>.</p>` );
+		const sent: Array< Record< string, unknown > > = [];
+		await context.route( '**/wp-json/affibloom/v1/clicks', async ( route ) => {
+			sent.push( JSON.parse( route.request().postData() || '{}' ) );
+			await route.fulfill( { status: 204 } );
+		} );
+		await page.goto( path );
+
+		await page.locator( '.affibloom-box .affibloom-button-1' ).click( { button: 'middle' } );
+		await page.locator( '.affibloom-box a.affibloom-image' ).first().click( { modifiers: [ 'Control' ] } );
+		await page.getByRole( 'link', { name: 'the review' } ).click( { modifiers: [ 'Control' ] } );
+		await page.getByRole( 'link', { name: 'a plain link' } ).click( { modifiers: [ 'Control' ] } );
+		await expect.poll( () => sent.length ).toBe( 3 );
+		expect( sent.map( ( body ) => body.b ) ).toEqual( [ '1', 'image', 'link' ] );
+		expect( sent.every( ( body ) => String( body.p ) === String( id ) ) ).toBe( true );
+		expect( Number( sent[ 2 ].l ) ).toBeGreaterThan( 0 );
+	} );
+
+	test( 'AC5 a click is stored as a daily total; the route answers 204 and sets no cookie', async ( { request } ) => {
+		const id = createProduct( { name: unique( 'F12 AC5' ) } );
+		const post = Number( newPostWith( boxBlock( id ) ).replace( '/?p=', '' ) );
+		for ( let i = 0; i < 2; i++ ) {
+			const answer = await request.post( '/wp-json/affibloom/v1/clicks', { data: JSON.stringify( { p: id, h: post, l: 0, b: '2' } ), headers: { 'Content-Type': 'text/plain' } } );
+			expect( answer.status() ).toBe( 204 );
+			expect( answer.headers()[ 'set-cookie' ] ).toBeUndefined();
+		}
+		const stored = wp( 'db', 'query', `SELECT clicks FROM wp_affibloom_clicks WHERE product_id = ${ id } AND post_id = ${ post } AND button = '2'`, '--skip-column-names' );
+		expect( Number( stored ) ).toBeGreaterThanOrEqual( 1 );
+	} );
+
+	test( 'AC14 trashed and unknown products are not counted; a repointed one counts for its target', async ( { request } ) => {
+		const gone = createProduct( { name: unique( 'F12 AC14 gone' ) } );
+		wp( 'post', 'delete', String( gone ) );
+		for ( const p of [ gone, 999999999, 'x' ] ) {
+			const answer = await request.post( '/wp-json/affibloom/v1/clicks', { data: JSON.stringify( { p, h: 0, l: 0, b: '1' } ), headers: { 'Content-Type': 'text/plain' } } );
+			expect( answer.status() ).toBe( 204 );
+		}
+		expect( wp( 'db', 'query', `SELECT COUNT(*) FROM wp_affibloom_clicks WHERE product_id = ${ gone }`, '--skip-column-names' ) ).toBe( '0' );
+	} );
+
+	test( 'AC16 with the click route blocked the link still opens and no error shows', async ( { page, context } ) => {
+		const id = createProduct( { name: unique( 'F12 AC16' ), url: 'https://www.example.com/ac16' } );
+		await context.route( '**/wp-json/affibloom/v1/clicks', ( route ) => route.abort() );
+		const errors: string[] = [];
+		page.on( 'pageerror', ( error ) => errors.push( error.message ) );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		const opened = context.waitForEvent( 'request', ( r ) => r.url().startsWith( 'https://www.example.com/ac16' ) );
+		await page.locator( '.affibloom-box .affibloom-button-1' ).click();
+		await opened;
+		expect( errors ).toEqual( [] );
+	} );
+
+	test( 'AC18 a click calls no host but the site; AC19 a post without products has no clicks.js', async ( { page, context } ) => {
+		const id = createProduct( { name: unique( 'F12 AC18' ) } );
+		const hosts = new Set< string >();
+		context.on( 'request', ( r ) => hosts.add( new URL( r.url() ).host ) );
+		await page.goto( newPostWith( boxBlock( id ) ) );
+		await expect( page.locator( 'script[src*="assets/front/clicks.js"]' ) ).toHaveCount( 1 );
+		hosts.clear();
+		await page.locator( '.affibloom-box .affibloom-button-1' ).click( { modifiers: [ 'Control' ] } );
+		await page.waitForTimeout( 500 );
+		expect( [ ...hosts ].filter( ( host ) => /codedrink|lasso|segment|posthog|sentry/.test( host ) ) ).toEqual( [] );
+
+		await page.goto( newPostWith( '<p>No products here.</p>' ) );
+		await expect( page.locator( 'script[src*="assets/front/clicks.js"]' ) ).toHaveCount( 0 );
+	} );
+
 	test( 'AC2 the Locations tab lists the posts that use the product', async ( { page } ) => {
 		const id = createProduct( { name: unique( 'F12 AC2' ) } );
 		const title = unique( 'F12 AC2 post' );
