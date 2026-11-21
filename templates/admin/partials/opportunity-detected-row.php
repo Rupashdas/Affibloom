@@ -2,13 +2,16 @@
 /**
  * One detected link (F22 R21; Tasks O2, O4; Lasso's rows/domain-link-row.php): the URL (a new tab), the post to its
  * editor with Filter by Content and Open in New Window, the Link (its context, which opens the preview), the Type icon
- * and the Monetize switch. Filter by Content and Monetize come with O4 and O10 and are shown disabled until then.
+ * and the Monetize switch, which comes with O10 and is shown disabled until then.
  *
  * @package Affibloom
  * @var array{link: \Affibloom\Domain\Opportunity\DetectedLink} $view
  */
 
 defined( 'ABSPATH' ) || exit;
+
+use Affibloom\Domain\Opportunity\OpportunityQuery;
+use Affibloom\Interface\Admin\OpportunitiesScreen;
 
 $detected   = $view['link'];
 $place      = $detected->place;
@@ -28,7 +31,7 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $place->url );
 			<span class="affibloom-opportunity__main"><?php echo esc_html( $host_title ); ?></span>
 		<?php endif; ?>
 		<span class="affibloom-opportunity__actions">
-			<span class="affibloom-opportunity__action is-disabled" aria-disabled="true" aria-describedby="affibloom-soon-note"><?php esc_html_e( 'Filter by Content', 'affibloom' ); ?></span>
+			<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::POST_LINKS ), 1, '', null, $detected->host_id ) ); ?>"><?php esc_html_e( 'Filter by Content', 'affibloom' ); ?></a>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( $detected->host_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open in New Window', 'affibloom' ); ?></a>
 		</span>
 	</td>

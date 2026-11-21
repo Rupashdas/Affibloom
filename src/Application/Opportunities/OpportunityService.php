@@ -66,4 +66,14 @@ final class OpportunityService {
 	public function content( OpportunityQuery $query, ContentFilter $filter, int $now ): OpportunityPage {
 		return $this->opportunities->content( $query, $filter, ClickReport::since( $now ) );
 	}
+
+	/**
+	 * One page of a post's links (R29-R31; Task O4).
+	 *
+	 * @param int              $post  The post, 0 for every published post.
+	 * @param OpportunityQuery $query The search and page.
+	 */
+	public function post_links( int $post, OpportunityQuery $query ): OpportunityPage {
+		return $this->opportunities->post_links( max( 0, $post ), $query );
+	}
 }

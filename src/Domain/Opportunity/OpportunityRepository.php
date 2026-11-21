@@ -46,4 +46,13 @@ interface OpportunityRepository {
 	 * @param string           $since  The first UTC day of Min link clicks' 30 days, "Y-m-d".
 	 */
 	public function content( OpportunityQuery $query, ContentFilter $filter, string $since ): OpportunityPage;
+
+	/**
+	 * One page of a post's links (R29, R31): its text and image links, tied or not, product links first; every
+	 * published post's when $post is 0.
+	 *
+	 * @param int              $post  The post, 0 for all.
+	 * @param OpportunityQuery $query The search and page.
+	 */
+	public function post_links( int $post, OpportunityQuery $query ): OpportunityPage;
 }

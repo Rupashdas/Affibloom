@@ -598,6 +598,9 @@
 }
 .affibloom-toggle__input:checked + .affibloom-toggle__track { background-color: var(--affibloom-brand-600); }
 .affibloom-toggle__input:checked + .affibloom-toggle__track::after { transform: translateX(20px); }
+/* WordPress shows a disabled, checked checkbox at 0.7 opacity; the switch's own input stays invisible (Task O4). */
+.affibloom-admin .affibloom-toggle__input:disabled,
+.affibloom-admin .affibloom-toggle__input:disabled:checked::before { opacity: 0; }
 .affibloom-toggle__input:focus-visible + .affibloom-toggle__track {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;

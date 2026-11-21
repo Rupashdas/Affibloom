@@ -198,6 +198,31 @@ final class TableOpportunityRepository implements OpportunityRepository {
 	}
 
 	/**
+	 * One page of a post's links (R29, R31): its Text and Image-only rows, tied or not, in a published post; a search
+	 * matches the URL or the text; product links first, then internal, then external (Lasso's link type descending),
+	 * then the index's order.
+	 *
+	 * @param int              $post  The post, 0 for every published post.
+	 * @param OpportunityQuery $query The search and page.
+	 */
+	public function post_links( int $post, OpportunityQuery $query ): OpportunityPage {
+		$where = "h.post_status = 'publish' AND l.display_type IN ('Text', 'Image-only anchor text')";
+		$args  = array();
+		if ( $post > 0 ) {
+			$where .= ' AND l.host_id = %d';
+			$args[] = $post;
+		}
+		$words = $query->words();
+		if ( array() !== $words ) {
+			$where .= ' AND ( l.url LIKE %s OR l.anchor_text LIKE %s )';
+			$args[] = self::like( $words );
+			$args[] = self::like( $words );
+		}
+
+		return $this->detected( $where, $args, 'l.link_type DESC, l.id ASC', $query->page );
+	}
+
+	/**
 	 * One page of Content Opportunities (R24-R26, D17, D18): each published post with index rows, its link count and
 	 * how many are tied; a search matches the title; the filter narrows by unmonetized links, type (posts, pages; all
 	 * types includes reusable blocks), category and the 30-day clicks of the products tied in it. Default order: the
@@ -290,14 +315,14 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) {$from} WHERE {$where}", ...$args ) );
 		$shell = new OpportunityPage( array(), $total, $page );
 		$rows  = 0 === $total ? array() : $wpdb->get_results(
-			$wpdb->prepare( "SELECT l.id, l.url, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title {$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ),
+			$wpdb->prepare( "SELECT l.id, l.url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, ( l.product_id > 0 OR l.assigned_product_id > 0 ) AS tied {$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ),
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		$items = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$items[] = new DetectedLink( self::place( $row ), (int) $row['host_id'], (string) $row['host_title'], (string) $row['host_url'] );
+			$items[] = new DetectedLink( self::place( $row ), (int) $row['host_id'], (string) $row['host_title'], (string) $row['host_url'], '1' === (string) $row['tied'], (string) $row['domain'] );
 		}
 
 		return new OpportunityPage( $items, $total, $shell->current() );

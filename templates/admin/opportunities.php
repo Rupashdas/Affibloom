@@ -5,7 +5,7 @@
  * back), the sub-tabs, Search, and the list region. The list partial is the one GET /opportunities/* renders (D3).
  *
  * @package Affibloom
- * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain: string, filter: \Affibloom\Domain\Opportunity\ContentFilter, list: \Affibloom\Domain\Opportunity\OpportunityPage, product: \Affibloom\Domain\Product\Product|null, intro: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool}>}} $view
+ * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain: string, filter: \Affibloom\Domain\Opportunity\ContentFilter, post: int, list: \Affibloom\Domain\Opportunity\OpportunityPage, product: \Affibloom\Domain\Product\Product|null, intro: string, tabs: array{label: string, items: list<array{label: string, url?: string, current?: bool}>}} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,6 +50,14 @@ $lists = array(
 		'admin/partials/opportunity-domain-links-list',
 	),
 	OpportunityQuery::CONTENT      => array( __( 'Content Opportunities', 'affibloom' ), null, '/affibloom/v1/opportunities/content', array(), 'admin/partials/opportunity-content-list' ),
+	OpportunityQuery::POST_LINKS   => array(
+		/* translators: %s: a post's title. */
+		sprintf( __( 'Content › %s', 'affibloom' ), $view['post'] > 0 ? get_the_title( $view['post'] ) : __( 'All content', 'affibloom' ) ),
+		array( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::CONTENT ) ), __( 'Content Opportunities', 'affibloom' ) ),
+		'/affibloom/v1/opportunities/posts/' . $view['post'] . '/links',
+		array(),
+		'admin/partials/opportunity-post-links-list',
+	),
 );
 [ $page_title, $list_back, $list_path, $list_args, $partial ] = $lists[ $query->kind ];
 
@@ -59,6 +67,7 @@ $head = array(
 	'actions_args' => array(
 		'query'  => $query,
 		'domain' => $list_domain,
+		'post'   => $view['post'],
 	),
 	'below'        => 'admin/partials/section-tabs',
 	'below_args'   => $view['tabs'],
@@ -103,7 +112,7 @@ if ( null !== $list_back ) {
 						'list'   => $view['list'],
 						'query'  => $query,
 						'domain' => $list_domain,
-						'url'    => OpportunitiesScreen::url( $query, 1, $list_domain, $view['filter'] ),
+						'url'    => OpportunitiesScreen::url( $query, 1, $list_domain, $view['filter'], $view['post'] ),
 					)
 				);
 				?>

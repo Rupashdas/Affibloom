@@ -102,7 +102,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O1: The Opportunities nav and Link Opportunities
 - [x] Task O2: Domains and Detected Links
 - [x] Task O3: Content Opportunities
-- [ ] Task O4: A post's links (Content › post)
+- [x] Task O4: A post's links (Content › post)
 - [ ] Task O5: The product page's Opportunities tab and Detect Opportunities
 - [ ] Task O6: Detect Opportunities in Settings, and Override All Links
 - [ ] Task O7: Dismiss, and Undo
@@ -1007,10 +1007,15 @@ then external; search by URL or anchor text. Without a post, every published pos
 
 **Files:** the above; tests F22 **AC12**, an integration case in `ContentOpportunitiesTest.php`.
 
-- [ ] **Step 1: Failing tests** (AC12: #4375's Text and Image-only rows, tied ones first and on; displays absent).
-- [ ] **Step 2: Query, route, partial.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Add a post's links under Content Opportunities".
+- [x] **Step 1: Failing tests** (AC12: #4375's Text and Image-only rows, tied ones first and on; displays absent).
+- [x] **Step 2: Query, route, partial.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Add a post's links under Content Opportunities".
+
+*Note (2026-11-21):* built on Detected Links' query (`detected()`), whose row now carries `tied` and `domain`; the tab
+is `tab=post&post=<id>` (every post's links with `post=0`) and every Filter by Content and Content's titles lead there.
+A disabled, checked switch now stays drawn as the switch (WordPress's `:disabled` opacity rule beat the toggle's).
+Checked: unit, phpcs, analyse; on Local post 20778's one tied link with Monetize on; the list at 1280 px.
 
 ---
 

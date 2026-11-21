@@ -49,11 +49,13 @@ final class OpportunitiesController implements Module {
 	public function routes(): void {
 		$can   = static fn(): bool => current_user_can( Capabilities::PRODUCTS );
 		$lists = array(
-			'/opportunities/links'   => OpportunityQuery::LINKS,
-			'/opportunities/domains' => OpportunityQuery::DOMAINS,
+			'/opportunities/links'                     => OpportunityQuery::LINKS,
+			'/opportunities/domains'                   => OpportunityQuery::DOMAINS,
 			// A domain as the index stores it: lower case letters, digits, dots and hyphens.
 			'/opportunities/domains/(?P<domain>[a-z0-9.-]+)/links' => OpportunityQuery::DOMAIN_LINKS,
-			'/opportunities/content' => OpportunityQuery::CONTENT,
+			'/opportunities/content'                   => OpportunityQuery::CONTENT,
+			// A post's links; 0 lists every published post's (R31).
+			'/opportunities/posts/(?P<post>\d+)/links' => OpportunityQuery::POST_LINKS,
 		);
 		foreach ( $lists as $route => $kind ) {
 			register_rest_route(
@@ -162,13 +164,15 @@ final class OpportunitiesController implements Module {
 			OpportunityQuery::DOMAINS      => $this->opportunities->domains( $query ),
 			OpportunityQuery::DOMAIN_LINKS => $this->opportunities->domain_links( $domain, $query ),
 			OpportunityQuery::CONTENT      => $this->opportunities->content( $query, $filter, time() ),
-			default                        => $this->opportunities->links( $query ),
+			OpportunityQuery::POST_LINKS   => $this->opportunities->post_links( (int) $request['post'], $query ),
+			default                       => $this->opportunities->links( $query ),
 		};
 		$partials = array(
 			OpportunityQuery::LINKS        => 'admin/partials/opportunity-links-list',
 			OpportunityQuery::DOMAINS      => 'admin/partials/opportunity-domains-list',
 			OpportunityQuery::DOMAIN_LINKS => 'admin/partials/opportunity-domain-links-list',
 			OpportunityQuery::CONTENT      => 'admin/partials/opportunity-content-list',
+			OpportunityQuery::POST_LINKS   => 'admin/partials/opportunity-post-links-list',
 		);
 
 		return new WP_REST_Response(
@@ -180,7 +184,7 @@ final class OpportunitiesController implements Module {
 							'list'   => $page,
 							'query'  => $query,
 							'domain' => $domain,
-							'url'    => OpportunitiesScreen::url( $query, 1, $domain, $filter ),
+							'url'    => OpportunitiesScreen::url( $query, 1, $domain, $filter, (int) $request['post'] ),
 						)
 					),
 					'term'    => $query->search,
@@ -188,7 +192,7 @@ final class OpportunitiesController implements Module {
 					'orderby' => $query->orderby,
 					'order'   => $query->order,
 					'total'   => $page->total,
-					'url'     => OpportunitiesScreen::url( $query, $page->current(), $domain, $filter ),
+					'url'     => OpportunitiesScreen::url( $query, $page->current(), $domain, $filter, (int) $request['post'] ),
 				),
 			)
 		);

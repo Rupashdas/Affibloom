@@ -3,8 +3,8 @@
  * One Link Opportunity (F22 R11, R12, D7; Task O1; Lasso's rows/link-opportunity-row.php): the URL (a new tab) with
  * Filter by URL and Open in New Window under it on hover or focus; the post to its editor with Filter by Content and
  * Open in New Window; the Suggestion to the product's page with Filter by Link (not when the list is already one
- * product's); the Type icon, which opens the preview; the Monetize switch. Filter by Content and Monetize come with
- * their tasks (O4, O10) and are shown disabled until then.
+ * product's); the Type icon, which opens the preview; the Monetize switch, which comes with O10 and is shown disabled
+ * until then.
  *
  * @package Affibloom
  * @var array{opportunity: \Affibloom\Domain\Opportunity\Opportunity, filtered: bool} $view
@@ -37,7 +37,7 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place
 			<span class="affibloom-opportunity__main"><?php echo esc_html( $host_title ); ?></span>
 		<?php endif; ?>
 		<span class="affibloom-opportunity__actions">
-			<span class="affibloom-opportunity__action is-disabled" aria-disabled="true" aria-describedby="affibloom-soon-note"><?php esc_html_e( 'Filter by Content', 'affibloom' ); ?></span>
+			<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::POST_LINKS ), 1, '', null, $opportunity->host_id ) ); ?>"><?php esc_html_e( 'Filter by Content', 'affibloom' ); ?></a>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( $opportunity->host_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open in New Window', 'affibloom' ); ?></a>
 		</span>
 	</td>

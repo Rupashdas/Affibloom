@@ -105,6 +105,26 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( page.getByText( "Looks like we're coming up empty." ) ).toBeVisible(); // no product, no clicks
 	} );
 
+	// AC12 (O4; R29-R31).
+	test( "AC12 Content › post: the post's text links, product links first with Monetize on", async ( { page } ) => {
+		const url = `https://www.example.com/${ unique( 'f22-ac12' ) }`;
+		const product = createProduct( { name: unique( 'F22 AC12' ), url } );
+		const title = unique( 'F22 AC12 post' );
+		newPostWith( `<p><a href="https://plain-${ unique( 'x' ) }.example/a">an external link</a> and <a href="${ url }">the product</a>.</p>`, title );
+		const host = Number( wp( 'post', 'list', '--post_type=post', `--title=${ title }`, '--field=ID' ) );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=content&s=${ encodeURIComponent( title ) }` );
+		await page.getByRole( 'link', { name: title } ).click();
+		await expect( page.getByRole( 'heading', { name: `Content › ${ title }` } ) ).toBeVisible();
+		await expect( page ).toHaveURL( new RegExp( `tab=post.*post=${ host }|post=${ host }.*tab=post` ) );
+		const rows = page.locator( '.affibloom-table--opportunities tbody tr' );
+		await expect( rows ).toHaveCount( 2 );
+		await expect( rows.first() ).toContainText( 'the product' );
+		await expect( rows.first().getByRole( 'switch' ) ).toBeChecked();
+		await expect( rows.nth( 1 ).getByRole( 'switch' ) ).not.toBeChecked();
+		expect( product ).toBeGreaterThan( 0 );
+	} );
+
 	// AC13 (O1; R74-R80, D14, D15).
 	test( 'AC13 nothing of keywords, Programs or Marketplace, and no request to Lasso', async ( { page, context } ) => {
 		const hosts = new Set< string >();

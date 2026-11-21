@@ -20,6 +20,7 @@ final class OpportunityQuery {
 	public const DOMAINS      = 'domains';
 	public const DOMAIN_LINKS = 'domain';
 	public const CONTENT      = 'content';
+	public const POST_LINKS   = 'post';
 
 	/** Each list's sortable columns, with the direction a header click starts with (R7: asc unless Lasso's init). */
 	public const COLUMNS = array(
@@ -36,6 +37,7 @@ final class OpportunityQuery {
 			'url'        => 'asc',
 			'post_title' => 'asc',
 		),
+		self::POST_LINKS   => array(),
 		self::CONTENT      => array(
 			'post_modified'   => 'asc',
 			'detection_title' => 'asc',

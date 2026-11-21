@@ -20,7 +20,8 @@ use Affibloom\Interface\Template;
 /**
  * Opportunities (F22 R1-R28, D1-D8; Tasks O1-O3): `admin.php?page=affibloom-opportunities` with `tab=links` (Link
  * Opportunities, the default; `&product=<id>` is Lasso's "Filter by Link"), `tab=domains` (Domain Opportunities),
- * `tab=domain&domain=<d>` (Detected Links) and `tab=content` (Content Opportunities, with its filter bar's arguments). The page prints the first list; opportunities.js redraws it in place (D3).
+ * `tab=domain&domain=<d>` (Detected Links), `tab=content` (Content Opportunities, with its filter bar's arguments) and
+ * `tab=post&post=<id>` (a post's links; every post's without one). The page prints the first list; opportunities.js redraws it in place (D3).
  */
 final class OpportunitiesScreen {
 
@@ -44,9 +45,13 @@ final class OpportunitiesScreen {
 	 * @param int|null           $page   Another page than the query's; null for its own.
 	 * @param string             $domain Detected Links' domain.
 	 * @param ContentFilter|null $filter Content's filter bar.
+	 * @param int                $post   A post's links' post.
 	 */
-	public static function url( OpportunityQuery $query, ?int $page = null, string $domain = '', ?ContentFilter $filter = null ): string {
+	public static function url( OpportunityQuery $query, ?int $page = null, string $domain = '', ?ContentFilter $filter = null, int $post = 0 ): string {
 		$args = array( 'page' => self::SLUG ) + ( null === $filter ? array() : $filter->args() );
+		if ( $post > 0 ) {
+			$args['post'] = $post;
+		}
 		if ( OpportunityQuery::LINKS !== $query->kind ) {
 			$args['tab'] = $query->kind;
 		}
@@ -93,9 +98,11 @@ final class OpportunitiesScreen {
 	 * @param OpportunityQuery   $query  The list.
 	 * @param string             $domain Detected Links' domain.
 	 * @param ContentFilter|null $filter Content's filter bar.
+	 * @param int                $post   A post's links' post.
 	 */
-	public function page( OpportunityQuery $query, string $domain = '', ?ContentFilter $filter = null ): OpportunityPage {
+	public function page( OpportunityQuery $query, string $domain = '', ?ContentFilter $filter = null, int $post = 0 ): OpportunityPage {
 		return match ( $query->kind ) {
+			OpportunityQuery::POST_LINKS   => $this->opportunities->post_links( $post, $query ),
 			OpportunityQuery::DOMAINS      => $this->opportunities->domains( $query ),
 			OpportunityQuery::DOMAIN_LINKS => $this->opportunities->domain_links( $domain, $query ),
 			OpportunityQuery::CONTENT      => $this->opportunities->content( $query, $filter ?? new ContentFilter(), time() ),
@@ -122,6 +129,7 @@ final class OpportunitiesScreen {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- a read-only list, with no action behind it.
 		$tab    = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : OpportunityQuery::LINKS;
 		$domain = isset( $_GET['domain'] ) ? strtolower( sanitize_text_field( wp_unslash( $_GET['domain'] ) ) ) : '';
+		$post   = isset( $_GET['post'] ) ? absint( wp_unslash( $_GET['post'] ) ) : 0;
 		$query  = self::query(
 			$tab,
 			isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '',
@@ -145,7 +153,7 @@ final class OpportunitiesScreen {
 		// The Domain box shows on Domains and on Detected Links (R23).
 		$box = match ( $query->kind ) {
 			OpportunityQuery::LINKS   => 'links',
-			OpportunityQuery::CONTENT => 'content',
+			OpportunityQuery::CONTENT, OpportunityQuery::POST_LINKS => 'content',
 			default                   => 'domains',
 		};
 
@@ -154,11 +162,18 @@ final class OpportunitiesScreen {
 			array(
 				'query'   => $query,
 				'domain'  => $domain,
-				'list'    => $this->page( $query, $domain, $filter ),
+				'list'    => $this->page( $query, $domain, $filter, $post ),
+				'post'    => $post,
 				'filter'  => $filter,
 				'product' => $product,
 				'intro'   => $this->intros->shows( $box ) ? $box : '',
-				'tabs'    => self::tabs( OpportunityQuery::DOMAIN_LINKS === $query->kind ? OpportunityQuery::DOMAINS : $query->kind ),
+				'tabs'    => self::tabs(
+					match ( $query->kind ) {
+						OpportunityQuery::DOMAIN_LINKS => OpportunityQuery::DOMAINS,
+						OpportunityQuery::POST_LINKS   => OpportunityQuery::CONTENT,
+						default                        => $query->kind,
+					}
+				),
 			)
 		);
 	}

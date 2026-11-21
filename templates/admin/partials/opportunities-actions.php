@@ -4,7 +4,7 @@
  * it is a form that reloads the list; opportunities.js redraws it in place instead. It keeps the product filter.
  *
  * @package Affibloom
- * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain?: string} $view
+ * @var array{query: \Affibloom\Domain\Opportunity\OpportunityQuery, domain?: string, post?: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,6 +20,9 @@ $query = $view['query'];
 	<?php endif; ?>
 	<?php if ( '' !== ( $view['domain'] ?? '' ) ) : ?>
 		<input type="hidden" name="domain" value="<?php echo esc_attr( $view['domain'] ); ?>">
+	<?php endif; ?>
+	<?php if ( ( $view['post'] ?? 0 ) > 0 ) : ?>
+		<input type="hidden" name="post" value="<?php echo esc_attr( (string) $view['post'] ); ?>">
 	<?php endif; ?>
 	<?php if ( $query->product > 0 ) : ?>
 		<input type="hidden" name="product" value="<?php echo esc_attr( (string) $query->product ); ?>">

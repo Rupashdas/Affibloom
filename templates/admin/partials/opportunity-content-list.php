@@ -2,7 +2,7 @@
 /**
  * Content Opportunities' list region (F22 R24, R26, R28, D7; Task O3; Lasso's opportunities/content.php and
  * rows/content-opportunity-row.php): "N Found", the table Last Updated ("Nov 9th, 2026"), Content, Permalink (the path,
- * which opens the post), Links, newest first; all four sort. A post's links open with O4 ("Coming soon" until then).
+ * which opens the post), Links, newest first; all four sort. A post's title opens its links (Task O4).
  * With none, Lasso's "Looks like we're coming up empty." GET /opportunities/content renders this same partial (D3).
  *
  * @package Affibloom
@@ -10,6 +10,9 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+use Affibloom\Domain\Opportunity\OpportunityQuery;
+use Affibloom\Interface\Admin\OpportunitiesScreen;
 
 $list    = $view['list'];
 $columns = array(
@@ -55,7 +58,7 @@ $site    = untrailingslashit( (string) preg_replace( '#^https?://#', '', home_ur
 						<tr>
 							<td class="affibloom-col-updated"><?php echo esc_html( false === $timestamp ? '' : date_i18n( 'M jS, Y', $timestamp ) ); ?></td>
 							<td class="affibloom-col-content">
-								<span class="affibloom-opportunity__main" title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>" aria-describedby="affibloom-soon-note"><?php echo esc_html( '' !== $content_row->title ? $content_row->title : __( '(no title)', 'affibloom' ) ); ?></span>
+								<a class="affibloom-opportunity__main" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::POST_LINKS ), 1, '', null, $content_row->host_id ) ); ?>"><?php echo esc_html( '' !== $content_row->title ? $content_row->title : __( '(no title)', 'affibloom' ) ); ?></a>
 							</td>
 							<td class="affibloom-col-permalink">
 								<a class="affibloom-opportunity__main" href="<?php echo esc_url( $content_row->url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( '' !== $short ? $short : '/' ); ?></a>
