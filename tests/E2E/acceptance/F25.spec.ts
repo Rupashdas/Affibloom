@@ -44,7 +44,7 @@ test.describe( 'F25 Comparison tables', () => {
 
 		await search.fill( `nothing ${ word }` );
 		await search.press( 'Enter' );
-		await expect( page.getByText( 'Create Beautiful Comparison Tables' ) ).toBeVisible();
+		await expect( page.locator( '#affibloom-tables-list' ).getByText( 'Create Beautiful Comparison Tables' ) ).toBeVisible();
 	} );
 
 	// AC2 (T2; R12).
@@ -497,16 +497,18 @@ test.describe( 'F25 Comparison tables', () => {
 	// AC13 (T10; R9, R40, D13): an index row seeded for a draft, as the index records a table placed in a post.
 	test( 'AC13 Table Locations: the count opens the dialog, title to its editor, address and view', async ( { page } ) => {
 		const title = unique( 'F25 AC13 post' );
-		const table = createTable( unique( 'F25 AC13' ), 'column', 'Cactus', [] );
+		const name = unique( 'F25 AC13' );
+		const table = createTable( name, 'column', 'Cactus', [] );
 		const post = Number( wp( 'post', 'create', `--post_title=${ title }`, '--post_status=draft', '--porcelain' ) );
 		wp( 'eval', `global $wpdb; $wpdb->insert( $wpdb->prefix . 'affibloom_link_locations', array( 'host_id' => ${ post }, 'link_type' => 'display', 'display_type' => 'table', 'display_ref' => 'table:${ table }', 'url' => 'x', 'original_url' => 'x', 'url_md5' => md5( 'table-${ table }' ), 'detected_at' => current_time( 'mysql' ) ) );` );
 
-		await page.goto( `/wp-admin/admin.php?page=affibloom-tables&search=${ encodeURIComponent( 'F25 AC13' ) }` );
-		await page.getByRole( 'button', { name: /^Locations of F25 AC13/ } ).first().click();
+		// Its own table: earlier runs leave others named "F25 AC13 …".
+		await page.goto( `/wp-admin/admin.php?page=affibloom-tables&s=${ encodeURIComponent( name ) }` );
+		await page.getByRole( 'button', { name: `Locations of ${ name }` } ).click();
 		const dialog = page.getByRole( 'dialog', { name: 'Table Locations' } );
 		await expect( dialog.getByRole( 'columnheader', { name: /Content/ } ) ).toBeVisible();
 		await expect( dialog.getByRole( 'columnheader', { name: 'Action' } ) ).toBeVisible();
-		await expect( dialog.getByRole( 'link', { name: title } ) ).toHaveAttribute( 'href', new RegExp( `post=${ post }&action=edit` ) );
+		await expect( dialog.getByRole( 'link', { name: title, exact: true } ) ).toHaveAttribute( 'href', new RegExp( `post=${ post }&action=edit` ) );
 		await expect( dialog.getByRole( 'link', { name: `View ${ title }` } ) ).toHaveAttribute( 'target', '_blank' );
 	} );
 
@@ -515,7 +517,7 @@ test.describe( 'F25 Comparison tables', () => {
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const id = await tableWith( page, 'row', [ createProduct( { name: `Clone ${ word }`, badge: 'Top' } ) ] );
 		const name = wp( 'post', 'get', String( id ), '--field=post_title' );
-		await page.goto( `/wp-admin/admin.php?page=affibloom-tables&search=${ encodeURIComponent( name ) }` );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-tables&s=${ encodeURIComponent( name ) }` );
 		await page.getByRole( 'button', { name: `Clone ${ name }` } ).click();
 		const dialog = page.getByRole( 'dialog', { name: `Do you want to clone ${ name }` } );
 		await dialog.getByRole( 'button', { name: 'OK' } ).click();
@@ -571,8 +573,9 @@ test.describe( 'F25 Comparison tables', () => {
 		const first = wrapper.locator( 'tbody tr' ).first().locator( 'td.td-template-1' ).first();
 		await expect( first.locator( '.badge-text-wrapper .badge-text' ) ).toHaveText( 'Top Pick' );
 		await expect( first.locator( '.img-container a img.affibloom-image-no-lazy' ) ).toHaveAttribute( 'alt', `Reader ${ word }` );
-		await expect( wrapper.locator( 'a.btn.affibloom-button-1' ) ).toHaveAttribute( 'data-affibloom-box-trackable', 'true' );
-		await expect( wrapper.locator( '.affibloom-price .affibloom-latest-price' ) ).toHaveText( 'N/A' );
+		// The table and its phone cards both carry the button; the first is the table's.
+		await expect( wrapper.locator( 'a.btn.affibloom-button-1' ).first() ).toHaveAttribute( 'data-affibloom-box-trackable', 'true' );
+		await expect( wrapper.locator( '.affibloom-price .affibloom-latest-price' ).first() ).toHaveText( 'N/A' );
 
 		// A missing table draws nothing.
 		const missing = wp( 'post', 'create', '--post_title=F25 AC16 missing', '--post_status=draft', '--post_content=[affibloom type="table" id="999999"]', '--porcelain' );
@@ -582,6 +585,7 @@ test.describe( 'F25 Comparison tables', () => {
 
 	// AC17 (T13; R45).
 	test( 'AC17 a Vertical table: the badge row first, a row per field, set widths up to four products, a scrolling row past four', async ( { page } ) => {
+		test.slow(); // Two tables of nine products, then the site's front end.
 		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
 		const products = [ 1, 2, 3, 4, 5 ].map( ( n ) => createProduct( { name: `Vertical ${ word } ${ n }`, badge: 1 === n ? 'Best' : '' } ) );
 		const four = await tableWith( page, 'column', products.slice( 0, 4 ) );
