@@ -2793,7 +2793,10 @@ body.affibloom-has-modal { overflow: hidden; }
 	.affibloom-share-kit { grid-template-columns: minmax(0, 1fr); }
 	.affibloom-share-kit__buttons { grid-column: 1; grid-row: auto; margin-top: 10px; }
 	.affibloom-product__footer { flex-wrap: wrap; padding: 10px 16px; }
-	.affibloom-page__head-row:has(> .affibloom-page__image) { align-items: flex-start; gap: 14px; }
+	.affibloom-page__head-row:has(> .affibloom-page__image) { flex-wrap: wrap; align-items: flex-start; gap: 14px; }
+	/* A product's head keeps its picture beside the title; its actions (the Variants tab's Search and Add Variant) go to a
+	   line of their own instead of squeezing the title (the 2026-11-21 browser test; V1). */
+	.affibloom-page__head-row:has(> .affibloom-page__image) .affibloom-page__head-text { flex: 1 1 0; }
 	.affibloom-page__image { width: 56px; height: 56px; }
 	/* Groups: three columns fit a phone, the description wraps and the Links count keeps a narrow column. */
 	.affibloom-page__actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; }
