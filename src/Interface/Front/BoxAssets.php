@@ -141,6 +141,9 @@ final class BoxAssets implements Module {
 		if ( is_admin() ) {
 			return;
 		}
+		// F12 D3, AC19 (Task 33A): a drawn box's buttons, title and image count their clicks. Only here, not with the
+		// stylesheets: with Smart CSS off those load on every page, and a page without products gets no clicks.js.
+		$this->clicks?->enqueue();
 		if ( '' !== $image ) {
 			$this->originals[ $image ] = true;
 		}
@@ -249,8 +252,6 @@ final class BoxAssets implements Module {
 		wp_enqueue_style( self::TABLE_STYLE, $this->url . 'assets/front/table.css', array( self::STYLE ), $this->file_version( 'assets/front/table.css' ) );
 		// R36 (deviation 136): the Copy to Clipboard button's script, in the footer, wherever a box is.
 		wp_enqueue_script( self::COPY_JS, $this->url . 'assets/front/copy-clipboard.js', array(), $this->file_version( 'assets/front/copy-clipboard.js' ), true );
-		// F12 D3 (Task 33A): a box's buttons, title and image count their clicks.
-		$this->clicks?->enqueue();
 		// R64: the classic box loads neither the advanced stylesheet nor the phone-layout script.
 		if ( ! $this->display->current()->advanced() ) {
 			return;
