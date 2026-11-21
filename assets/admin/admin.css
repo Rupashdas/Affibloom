@@ -1069,7 +1069,8 @@
 .affibloom-tags__clear { margin-left: auto; background: none; color: var(--affibloom-ink-600); }
 .affibloom-admin .affibloom-tags__input {
 	flex: 1;
-	min-width: 120px;
+	/* Wide enough for the whole "Select Tracking IDs" placeholder; with less room left it starts a new line. */
+	min-width: 160px;
 	min-height: 28px;
 	margin: 0;
 	padding: 0 4px;
