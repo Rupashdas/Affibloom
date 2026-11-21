@@ -129,7 +129,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 ### F25 — Comparison tables (with F31's table Copy Shortcode after T12)
 
 - [x] Task T1: The Tables list, and `GET /tables`
-- [ ] Task T2: Create a table
+- [x] Task T2: Create a table
 - [ ] Task T3: The builder page and the table's settings
 - [ ] Task T4: Products in a table — add, starting layout, badge, remove
 - [ ] Task T5: Add a group to a table
@@ -1723,11 +1723,17 @@ fill out "Table Name" field'. A good name shows the spinner and opens the new ta
 
 **Files:** the above; F25 spec AC2; unit tests for create.
 
-- [ ] **Step 1: Failing tests** (AC2: empty name refused, Vertical default, Horizontal chosen, `create=1`).
-- [ ] **Step 2: Service and route.**
-- [ ] **Step 3: The dialog.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Create a comparison table from Lasso's dialog".
+- [x] **Step 1: Failing tests** (AC2: empty name refused, Vertical default, Horizontal chosen, `create=1`).
+- [x] **Step 2: Service and route.**
+- [x] **Step 3: The dialog.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Create a comparison table from Lasso's dialog".
+
+*Note:* the empty name is `Table::draft()`'s `InvalidField` ('table_name_required', Lasso's words, 422 on `title`). The
+list head's button opens the dialog (`add_modal`), and Create Table's tiles got their own icons (columns, rows). Until
+T3 the new table lands on the list with "Table created." (`affibloom_notice`). Checked: unit; in the browser at
+1280 px: `&create=1` opens it and leaves the address, the empty name refused, a Horizontal table stored with Cactus,
+headers and field names on, revision 1.
 
 ---
 

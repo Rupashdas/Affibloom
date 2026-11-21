@@ -3141,6 +3141,14 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-admin .affibloom-table-products a { color: var(--affibloom-brand-700); text-decoration: none; }
 .affibloom-admin .affibloom-table-products a:hover { text-decoration: underline; }
 .affibloom-table-products__none { color: var(--affibloom-ink-500); }
+/* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
+.affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
+.affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }
+.affibloom-table-styles__tile input { position: absolute; opacity: 0; pointer-events: none; }
+.affibloom-table-styles__tile:hover { border-color: var(--affibloom-brand-600); }
+.affibloom-table-styles__tile:has(input:checked) { border-color: var(--affibloom-brand-600); background: var(--affibloom-brand-50); box-shadow: 0 0 0 1px var(--affibloom-brand-600); }
+.affibloom-table-styles__tile:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-table-styles__name { font: 600 14px/20px var(--affibloom-font); color: var(--affibloom-ink-900); }
 
 /* Monetize (R65, R69; Task O10): the search and Create a Link side by side; a monetized row flashes green; a post's
    monetized link says which product it prints. */

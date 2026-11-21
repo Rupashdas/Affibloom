@@ -5,7 +5,7 @@
  * renders, so the page and the in-place list share one template.
  *
  * @package Affibloom
- * @var array{tables: \Affibloom\Domain\Table\TablePage, locations: array<int, int>, all: int, term: string, url: string} $view
+ * @var array{tables: \Affibloom\Domain\Table\TablePage, locations: array<int, int>, all: int, term: string, url: string, notice?: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -31,8 +31,8 @@ $search_label = sprintf( __( 'Search All %s Tables', 'affibloom' ), number_forma
 					'search_id'    => 'affibloom-tables-search',
 					'search_label' => $search_label,
 					'term'         => $view['term'],
-					// Create Table comes with Task T2.
 					'add_url'      => '',
+					'add_modal'    => 'affibloom-table-create',
 					'add_label'    => __( 'Create Table', 'affibloom' ),
 				),
 			)
@@ -65,6 +65,8 @@ $search_label = sprintf( __( 'Search All %s Tables', 'affibloom' ), number_forma
 		</div>
 	</div>
 	<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
+	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ?? '' ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php $this->render( 'admin/partials/table-create-modal' ); ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

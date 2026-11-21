@@ -9,10 +9,13 @@ declare( strict_types=1 );
 
 namespace Affibloom\Application\Tables;
 
+use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Table\Table;
 use Affibloom\Domain\Table\TableLocations;
 use Affibloom\Domain\Table\TablePage;
 use Affibloom\Domain\Table\TableRepository;
+use Affibloom\Domain\Table\TableStyle;
 
 /**
  * F25's tables (Tasks T1-T17): the list first (T1). Later tasks add creating, editing and cloning.
@@ -36,6 +39,17 @@ final class TableService {
 	 */
 	public function list( SearchTerm $term, int $page, int $per_page = TablePage::PER_PAGE ): TablePage {
 		return $this->tables->page( $term, max( 1, $page ), max( 1, $per_page ) );
+	}
+
+	/**
+	 * Creates a table (R12; Task T2).
+	 *
+	 * @param string     $name  The name typed.
+	 * @param TableStyle $style The tile chosen (Vertical by default).
+	 * @throws InvalidField When the name is blank.
+	 */
+	public function create( string $name, TableStyle $style ): Table {
+		return $this->tables->save( Table::draft( $name, $style ) );
 	}
 
 	/**

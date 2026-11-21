@@ -606,7 +606,7 @@ final class Plugin {
 				new FieldsScreen( $this->template(), $fields, $notice ),
 				new FieldScreen( $this->template(), $fields, $notice ),
 				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() ),
-				new TablesScreen( $this->template(), $this->table_service() )
+				new TablesScreen( $this->template(), $this->table_service(), $notice )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,

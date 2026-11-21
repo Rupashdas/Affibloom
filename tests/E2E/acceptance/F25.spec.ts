@@ -46,4 +46,24 @@ test.describe( 'F25 Comparison tables', () => {
 		await search.press( 'Enter' );
 		await expect( page.getByText( 'Create Beautiful Comparison Tables' ) ).toBeVisible();
 	} );
+
+	// AC2 (T2; R12).
+	test( 'AC2 Create Table: a name is needed, Vertical is the default, Horizontal can be chosen, &create=1 opens it', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-tables&create=1' );
+		const dialog = page.getByRole( 'dialog', { name: 'Create Table' } );
+		await expect( dialog ).toBeVisible();
+		await expect( page ).not.toHaveURL( /create=1/ );
+		await expect( dialog.getByRole( 'radio', { name: 'Vertical' } ) ).toBeChecked();
+
+		await dialog.getByRole( 'button', { name: 'Create Table' } ).click();
+		await expect( dialog ).toContainText( 'Please fill out "Table Name" field' );
+
+		const name = unique( 'F25 AC2' );
+		await dialog.getByLabel( 'Table Name' ).fill( name );
+		await dialog.getByText( 'Horizontal' ).click();
+		await dialog.getByRole( 'button', { name: 'Create Table' } ).click();
+		await expect( page.getByText( 'Table created.' ) ).toBeVisible();
+		const id = wp( 'post', 'list', '--post_type=affibloom_table', `--title=${ name }`, '--field=ID' );
+		expect( JSON.parse( wp( 'post', 'meta', 'get', id, '_affibloom_table', '--format=json' ) ) ).toMatchObject( { style: 'row', theme: 'Cactus', show_headers: true } );
+	} );
 } );

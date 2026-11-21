@@ -2,10 +2,10 @@
 /**
  * The head actions of a list screen (Groups, Fields; design system 0b.4): its search, then its "Add New" button, in one
  * row level with the title. Moved out of the two screens' bands by Task MD3. Without an `add_url` the button is shown
- * disabled, "Coming soon" (Tables' Create Table until Task T2).
+ * disabled, "Coming soon"; with an `add_modal` it opens that dialog (Tables' Create Table, Task T2).
  *
  * @package Affibloom
- * @var array{slug: string, search_id: string, search_label: string, term: string, add_url: string, add_label: string} $view
+ * @var array{slug: string, search_id: string, search_label: string, term: string, add_url: string, add_label: string, add_modal?: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +16,12 @@ defined( 'ABSPATH' ) || exit;
 	<input type="search" id="<?php echo esc_attr( $view['search_id'] ); ?>" class="affibloom-input affibloom-search" name="s"
 		value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $view['search_label'] ); ?>">
 </form>
-<?php if ( '' === $view['add_url'] ) : ?>
+<?php if ( '' !== ( $view['add_modal'] ?? '' ) ) : ?>
+	<button type="button" class="affibloom-button affibloom-button--primary" data-affibloom-open="<?php echo esc_attr( $view['add_modal'] ); ?>" aria-haspopup="dialog">
+		<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
+		<span><?php echo esc_html( $view['add_label'] ); ?></span>
+	</button>
+<?php elseif ( '' === $view['add_url'] ) : ?>
 	<button type="button" class="affibloom-button affibloom-button--primary" disabled title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>">
 		<?php $this->render( 'admin/partials/icon', array( 'name' => 'plus' ) ); ?>
 		<span><?php echo esc_html( $view['add_label'] ); ?></span>

@@ -37,4 +37,13 @@ final class TableTest extends TestCase {
 		self::assertTrue( TableSearch::matches( SearchTerm::from_input( "molten's/v5" ), 'Shoes', array( 'Molten Sports V5M5000' ) ) );
 		self::assertFalse( TableSearch::matches( SearchTerm::from_input( 'zzz' ), 'Shoes', array( 'Molten' ) ) );
 	}
+
+	/** Task T2 (F25 R12): Create Table's defaults and its refusal. */
+	public function test_a_drafted_table_is_cactus_with_headers_and_field_names_and_needs_a_name(): void {
+		$table = Table::draft( '  Shoes  ', TableStyle::Row );
+		self::assertSame( array( null, 'Shoes', TableStyle::Row, 'Cactus', true, true, 1 ), array( $table->id, $table->name, $table->style, $table->theme, $table->show_headers, $table->show_field_name, $table->revision ) );
+
+		$this->expectException( \Affibloom\Domain\InvalidField::class );
+		Table::draft( '   ', TableStyle::Column );
+	}
 }

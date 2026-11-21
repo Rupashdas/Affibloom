@@ -16,6 +16,7 @@ use Affibloom\Domain\Table\TableProduct;
 use Affibloom\Domain\Table\TableRepository;
 use Affibloom\Domain\Table\TableSearch;
 use Affibloom\Domain\Table\TableStyle;
+use RuntimeException;
 use WP_Post;
 
 /**
@@ -118,5 +119,51 @@ final class PostTypeTableRepository implements TableRepository {
 			(bool) ( $data['show_field_name'] ?? false ),
 			(int) ( $data['revision'] ?? 0 )
 		);
+	}
+
+	/**
+	 * Stores a table whole: its name as the post's title, the rest in one meta (D1).
+	 *
+	 * @param Table $table The table.
+	 * @return Table The table as stored, with its ID.
+	 * @throws RuntimeException When WordPress refuses the post.
+	 */
+	public function save( Table $table ): Table {
+		$post = array(
+			'post_type'   => TablePostType::NAME,
+			'post_status' => 'publish',
+			'post_title'  => $table->name,
+		);
+		if ( null !== $table->id ) {
+			$post['ID'] = $table->id;
+		}
+		$id = null === $table->id ? wp_insert_post( wp_slash( $post ), true ) : wp_update_post( wp_slash( $post ), true );
+		if ( is_wp_error( $id ) ) {
+			throw new RuntimeException( 'Could not save the table.' );
+		}
+		update_post_meta(
+			(int) $id,
+			TablePostType::META,
+			wp_slash(
+				array(
+					'style'           => $table->style->value,
+					'theme'           => $table->theme,
+					'products'        => array_map(
+						static fn( TableProduct $product ): array => array(
+							'id'    => $product->id,
+							'badge' => $product->badge,
+						),
+						$table->products
+					),
+					'groups'          => $table->groups,
+					'values'          => $table->values,
+					'show_headers'    => $table->show_headers,
+					'show_field_name' => $table->show_field_name,
+					'revision'        => $table->revision,
+				)
+			)
+		);
+
+		return $table->with( array( 'id' => (int) $id ) );
 	}
 }

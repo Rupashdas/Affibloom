@@ -52,6 +52,7 @@ final class Notice {
 			'group-saved'      => __( 'Group saved.', 'affibloom' ),
 			// On the Groups list after Delete This Group (Task G2): Lasso's words.
 			'group-deleted'    => __( 'Successfully deleted the Group.', 'affibloom' ),
+			'table-created'    => __( 'Table created.', 'affibloom' ),
 			// After a field is saved from the Fields screen (Task FL2, F26 D18): U6's plain wording for Lasso's toast.
 			'field-saved'      => __( 'Field saved.', 'affibloom' ),
 			// On the Fields list after Delete This Field (Task FL3): Lasso's words.

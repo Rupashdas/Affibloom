@@ -29,8 +29,9 @@ final class TablesScreen {
 	 *
 	 * @param Template     $template Template renderer.
 	 * @param TableService $tables   The tables.
+	 * @param Notice|null  $notice   The toast after a redirect: "Table created." (Task T2).
 	 */
-	public function __construct( private Template $template, private TableService $tables ) {}
+	public function __construct( private Template $template, private TableService $tables, private ?Notice $notice = null ) {}
 
 	/**
 	 * The list's address with its search and page; the defaults left out.
@@ -85,6 +86,7 @@ final class TablesScreen {
 				'all'       => $this->tables->count(),
 				'term'      => $term->text(),
 				'url'       => self::url( $term->text() ),
+				'notice'    => null === $this->notice ? '' : $this->notice->message(),
 			)
 		);
 	}

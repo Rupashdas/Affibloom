@@ -162,7 +162,7 @@ final class AdminAssets implements Module {
 		// Tables (F25, Task T1): the list in place.
 		if ( str_contains( $hook_suffix, TablesScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
-			wp_enqueue_script( 'affibloom-tables', $this->plugin_url . 'assets/admin/tables.js', array( 'affibloom-in-place-list' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-tables', $this->plugin_url . 'assets/admin/tables.js', array( 'affibloom-admin', 'affibloom-in-place-list', 'wp-api-fetch' ), $this->version, true );
 		}
 
 		// Opportunities (F22, Task O1): the lists in place, the preview and the intro boxes.

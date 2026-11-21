@@ -37,4 +37,12 @@ interface TableRepository {
 	 * @param int $id The table.
 	 */
 	public function get( int $id ): ?Table;
+
+	/**
+	 * Stores a table whole (D1): a new one is added, a stored one replaced.
+	 *
+	 * @param Table $table The table.
+	 * @return Table The table as stored, with its ID.
+	 */
+	public function save( Table $table ): Table;
 }
