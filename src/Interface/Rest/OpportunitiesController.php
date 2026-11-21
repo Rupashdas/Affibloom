@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Rest;
 
+use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Domain\Opportunity\OpportunityQuery;
@@ -36,8 +37,9 @@ final class OpportunitiesController implements Module {
 	 * @param OpportunityService $opportunities The lists.
 	 * @param IntroBoxes         $intros        The intro boxes.
 	 * @param Template           $template      The list's template.
+	 * @param ContentExport|null $export        Content's Export CSV count, with every Content page (R58; Task O9).
 	 */
-	public function __construct( private OpportunityService $opportunities, private IntroBoxes $intros, private Template $template ) {}
+	public function __construct( private OpportunityService $opportunities, private IntroBoxes $intros, private Template $template, private ?ContentExport $export = null ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -152,7 +154,7 @@ final class OpportunitiesController implements Module {
 	 * @param string $kind Which list.
 	 * @return array<string, array<string, mixed>>
 	 */
-	private static function list_args( string $kind ): array {
+	public static function list_args( string $kind ): array {
 		$args = array(
 			'search'  => array(
 				'type'    => 'string',
@@ -260,6 +262,8 @@ final class OpportunitiesController implements Module {
 					'order'   => $query->order,
 					'total'   => $page->total,
 					'url'     => $on_product ? ProductScreen::opportunities_url( $query->product, $query, $page->current() ) : OpportunitiesScreen::url( $query, $page->current(), $domain, $filter, (int) $request['post'] ),
+					// R58 (Task O9): how many anchors Content's Export CSV would write for this list.
+					'exports' => OpportunityQuery::CONTENT === $kind && null !== $this->export ? $this->export->count( $query, $filter, time() ) : null,
 				),
 			)
 		);

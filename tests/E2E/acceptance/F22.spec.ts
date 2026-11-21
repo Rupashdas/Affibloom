@@ -227,6 +227,32 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( page.getByText( 'Sorting by Opportunities is only available on the Opportunities tab.' ) ).toBeVisible();
 	} );
 
+	// AC10 (O9; R57-R63).
+	test( 'AC10 Content: Export CSV downloads the unmonetized anchors of the filtered posts, formula-safe', async ( { page } ) => {
+		const title = unique( 'F22 AC10' );
+		newPostWith( `<p>Try <a href="https://plain-${ unique( 'x' ) }.example/a">=SUM(1)</a> and <a href="https://plain-${ unique( 'y' ) }.example/b">two</a>.</p>`, title );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=content&s=${ encodeURIComponent( title ) }` );
+		const button = page.getByRole( 'button', { name: 'Export CSV' } );
+		await expect( button ).toBeEnabled();
+		await expect( button ).toHaveAttribute( 'title', 'Export unmonetized anchors to CSV' );
+
+		const download = page.waitForEvent( 'download' );
+		await button.click();
+		const file = await download;
+		expect( file.suggestedFilename() ).toMatch( /^affibloom-content-opportunities-\d{4}-\d{2}-\d{2}\.csv$/ );
+		const csv = ( require( 'node:fs' ).readFileSync( await file.path(), 'utf8' ) as string ).trim().split( '\n' );
+		expect( csv[ 0 ] ).toBe( 'post_title,post_url,post_id,post_type,post_categories,post_modified,content_link_clicks,anchor_text,anchor_context,destination_url,link_domain,link_type,display_type,link_location_id,unmonetized_link_count,suggested_product_title,suggested_product_id,suggested_product_edit_url' );
+		expect( csv ).toHaveLength( 3 );
+		expect( csv[ 1 ] ).toContain( '\t=SUM(1)' );
+		await expect( page.locator( '.affibloom-toast' ) ).toContainText( 'Exported 2 anchors.' );
+
+		// Nothing to export: the button is off, with Lasso's title.
+		await page.locator( '#affibloom-content-filters [name="min_clicks"]' ).fill( '999999' );
+		await page.locator( '#affibloom-content-filters [name="min_clicks"]' ).dispatchEvent( 'change' );
+		await expect( button ).toBeDisabled();
+		await expect( button ).toHaveAttribute( 'title', 'No content opportunities to export for the current filters.' );
+	} );
+
 	// AC12 (O4; R29-R31).
 	test( "AC12 Content › post: the post's text links, product links first with Monetize on", async ( { page } ) => {
 		const url = `https://www.example.com/${ unique( 'f22-ac12' ) }`;

@@ -64,4 +64,46 @@ interface OpportunityRepository {
 	 * @return array<int, int> By product ID; a product without any is left out.
 	 */
 	public function counts_for( array $product_ids, bool $hosts ): array;
+
+	/**
+	 * How many anchors the Content Opportunities CSV would write (R58; Task O9).
+	 *
+	 * @param OpportunityQuery $query  The search and sort.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first day of the clicks counted, UTC "Y-m-d".
+	 */
+	public function export_count( OpportunityQuery $query, ContentFilter $filter, string $since ): int;
+
+	/**
+	 * The CSV's posts, as Content lists them, with their type, clicks and unmonetized count (R59, R60; Task O9).
+	 *
+	 * @param OpportunityQuery $query  The search and sort.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first day of the clicks counted, UTC "Y-m-d".
+	 * @return list<array<string, string>> Each: host_id, post_title, host_url, post_type, post_modified, clicks, unmonetized.
+	 */
+	public function export_posts( OpportunityQuery $query, ContentFilter $filter, string $since ): array;
+
+	/**
+	 * Some posts' untied Text and Image-only rows, dismissed ones too, by post then row (R59; Task O9).
+	 *
+	 * @param list<int> $host_ids The posts.
+	 * @return list<array<string, string>> Each: id, host_id, anchor_text, url, domain, link_type, display_type, source, occurrence.
+	 */
+	public function export_links( array $host_ids ): array;
+
+	/**
+	 * Each domain's lowest-ID published product (R60; Task O9).
+	 *
+	 * @return array<string, array{id: int, title: string}> By domain.
+	 */
+	public function suggestions(): array;
+
+	/**
+	 * Some posts' category names, A to Z, joined with ", " (R60; Task O9).
+	 *
+	 * @param list<int> $host_ids The posts.
+	 * @return array<int, string> By post.
+	 */
+	public function categories( array $host_ids ): array;
 }

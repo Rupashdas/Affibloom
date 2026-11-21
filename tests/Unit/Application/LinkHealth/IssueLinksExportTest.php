@@ -67,13 +67,4 @@ final class IssueLinksExportTest extends TestCase {
 		$this->assertSame( 'Checked', IssueLinksExport::row( self::product( 1 ), self::issue( 1, '404', false ), array(), '', 0 )[22] );
 		$this->assertSame( '', IssueLinksExport::row( self::product( 1 ), null, array(), '', 0 )[22] );
 	}
-
-	public function test_cells_that_a_spreadsheet_would_run_are_guarded(): void {
-		$this->assertSame( "\t=SUM(A1)", IssueLinksExport::guard( '=SUM(A1)' ) );
-		$this->assertSame( "\t+cmd", IssueLinksExport::guard( '+cmd' ) );
-		$this->assertSame( "\t@x", IssueLinksExport::guard( '@x' ) );
-		$this->assertSame( "\t-x", IssueLinksExport::guard( '-x' ) );
-		$this->assertSame( '-5', IssueLinksExport::guard( '-5' ) );
-		$this->assertSame( 'Plain', IssueLinksExport::guard( 'Plain' ) );
-	}
 }

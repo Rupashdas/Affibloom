@@ -320,6 +320,207 @@ final class TableOpportunityRepository implements OpportunityRepository {
 	public function content( OpportunityQuery $query, ContentFilter $filter, string $since ): OpportunityPage {
 		global $wpdb;
 
+		[ $group, $args ] = $this->content_hosts( $query, $filter, $since, $filter->min_clicks > 0 );
+		$order            = self::content_order( $query, '' );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table, one screen; the parts are prepared, $group holds only placeholders, $order is from the allow-list.
+		$total = (int) $wpdb->get_var( array() === $args ? "SELECT COUNT(*) FROM ( {$group} ) AS hosts" : $wpdb->prepare( "SELECT COUNT(*) FROM ( {$group} ) AS hosts", ...$args ) );
+		$shell = new OpportunityPage( array(), $total, $query->page );
+		$rows  = 0 === $total ? array() : $wpdb->get_results( $wpdb->prepare( "{$group} ORDER BY {$order}, l.host_id DESC LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ), ARRAY_A );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		$items = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$items[] = new ContentRow( (int) $row['host_id'], (string) $row['post_title'], (string) $row['host_url'], (string) $row['post_modified'], (int) $row['links'], (int) $row['monetized'] );
+		}
+
+		return new OpportunityPage( $items, $total, $shell->current() );
+	}
+
+	/**
+	 * How many anchors the Content Opportunities CSV would write for the list as searched and filtered (R58; Task O9).
+	 *
+	 * @param OpportunityQuery $query  The search and sort.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first day of the clicks counted, UTC "Y-m-d".
+	 */
+	public function export_count( OpportunityQuery $query, ContentFilter $filter, string $since ): int {
+		global $wpdb;
+
+		[ $from, $where, $args ] = $this->export_from( $query, $filter, $since );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Affibloom's own table; $from is built from prepared parts and placeholders.
+		return (int) $wpdb->get_var( array() === $args ? "SELECT COUNT(*) {$from} WHERE {$where}" : $wpdb->prepare( "SELECT COUNT(*) {$from} WHERE {$where}", ...$args ) );
+	}
+
+	/**
+	 * The Content Opportunities CSV's posts (R59, R60; Task O9): those Content lists as searched and filtered, in its
+	 * order, each with its post type, clicks and unmonetized count; one query for the whole file.
+	 *
+	 * @param OpportunityQuery $query  The search and sort.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first day of the clicks counted, UTC "Y-m-d".
+	 * @return list<array<string, string>> Each: host_id, post_title, host_url, post_type, post_modified, clicks, unmonetized.
+	 */
+	public function export_posts( OpportunityQuery $query, ContentFilter $filter, string $since ): array {
+		global $wpdb;
+
+		[ $group, $args ] = $this->content_hosts( $query, $filter, $since, true );
+		$order            = self::content_order( $query, 'hosts.' );
+		$sql              = "SELECT hosts.host_id, hosts.post_title, hosts.host_url, h.post_type, hosts.post_modified, hosts.clicks, hosts.links - hosts.monetized AS unmonetized
+			FROM ( {$group} ) AS hosts" . $wpdb->prepare( ' JOIN %i AS h ON h.ID = hosts.host_id', $wpdb->posts ) . " ORDER BY {$order}, hosts.host_id DESC";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Affibloom's own table; $sql is built from prepared parts and placeholders, $order from the allow-list.
+		$rows = $wpdb->get_results( array() === $args ? $sql : $wpdb->prepare( $sql, ...$args ), ARRAY_A );
+
+		return self::strings( $rows );
+	}
+
+	/**
+	 * Some posts' anchors for the CSV (R59): their untied Text and Image-only rows, dismissed ones too, by post then row.
+	 *
+	 * @param list<int> $host_ids The posts.
+	 * @return list<array<string, string>> Each: id, host_id, anchor_text, url, domain, link_type, display_type, source, occurrence.
+	 */
+	public function export_links( array $host_ids ): array {
+		global $wpdb;
+
+		$ids = array_values( array_filter( array_map( 'intval', $host_ids ) ) );
+		if ( array() === $ids ) {
+			return array();
+		}
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table; the ID list holds only placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT l.id, l.host_id, l.anchor_text, l.url, l.domain, l.link_type, l.display_type, l.source, l.occurrence FROM %i AS l
+				WHERE l.host_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ") AND l.product_id = 0 AND l.assigned_product_id = 0
+					AND l.display_type IN ('Text', 'Image-only anchor text')
+				ORDER BY l.host_id, l.id",
+				$wpdb->prefix . TableLinkLocationRepository::TABLE,
+				...$ids
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		return self::strings( $rows );
+	}
+
+	/**
+	 * Each domain's suggested product for the CSV (R60): the lowest-ID published product with that domain.
+	 *
+	 * @return array<string, array{id: int, title: string}> By domain.
+	 */
+	public function suggestions(): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one read per export.
+		$rows     = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT first.domain, p.ID, p.post_title FROM (
+					SELECT dm.meta_value AS domain, MIN(dm.post_id) AS id FROM %i AS dm
+					JOIN %i AS sp ON sp.ID = dm.post_id AND sp.post_type = %s AND sp.post_status = 'publish'
+					WHERE dm.meta_key = '_affibloom_domain' AND dm.meta_value <> '' GROUP BY dm.meta_value
+				) AS first JOIN %i AS p ON p.ID = first.id",
+				$wpdb->postmeta,
+				$wpdb->posts,
+				ProductPostType::NAME,
+				$wpdb->posts
+			),
+			ARRAY_A
+		);
+		$products = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$products[ (string) $row['domain'] ] = array(
+				'id'    => (int) $row['ID'],
+				'title' => (string) $row['post_title'],
+			);
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Some posts' categories for the CSV (R60): their names, A to Z, joined with ", ".
+	 *
+	 * @param list<int> $host_ids The posts.
+	 * @return array<int, string> By post; a post without categories is left out.
+	 */
+	public function categories( array $host_ids ): array {
+		global $wpdb;
+
+		$ids = array_values( array_filter( array_map( 'intval', $host_ids ) ) );
+		if ( array() === $ids ) {
+			return array();
+		}
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- WordPress's term tables; the ID list holds only placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tr.object_id, GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ', ') AS names FROM %i AS tr
+				JOIN %i AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'category'
+				JOIN %i AS t ON t.term_id = tt.term_id
+				WHERE tr.object_id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ') GROUP BY tr.object_id',
+				$wpdb->term_relationships,
+				$wpdb->term_taxonomy,
+				$wpdb->terms,
+				...$ids
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		$names = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$names[ (int) $row['object_id'] ] = (string) $row['names'];
+		}
+
+		return $names;
+	}
+
+	/**
+	 * Database rows as text.
+	 *
+	 * @param mixed $rows What get_results() gave.
+	 * @return list<array<string, string>>
+	 */
+	private static function strings( mixed $rows ): array {
+		return array_values( array_map( static fn( array $row ): array => array_map( 'strval', $row ), is_array( $rows ) ? $rows : array() ) );
+	}
+
+	/**
+	 * The export count's FROM and WHERE (R58): the Content list's posts (hosts), their untied Text and Image-only rows
+	 * (l), and the post (h).
+	 *
+	 * @param OpportunityQuery $query  The search and sort.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first day of the clicks counted.
+	 * @return array{0: string, 1: string, 2: list<string|int>} The FROM, the WHERE (placeholders only), and their values.
+	 */
+	private function export_from( OpportunityQuery $query, ContentFilter $filter, string $since ): array {
+		global $wpdb;
+
+		[ $group, $args ] = $this->content_hosts( $query, $filter, $since, $filter->min_clicks > 0 );
+		$from             = "FROM ( {$group} ) AS hosts"
+			. $wpdb->prepare( ' JOIN %i AS l ON l.host_id = hosts.host_id', $wpdb->prefix . TableLinkLocationRepository::TABLE );
+		$where            = "l.product_id = 0 AND l.assigned_product_id = 0 AND l.display_type IN ('Text', 'Image-only anchor text')";
+
+		return array( $from, $where, $args );
+	}
+
+	/**
+	 * Content Opportunities' posts as one grouped query (R24-R26): published posts with their link count, monetized
+	 * count and, when asked, their tied products' clicks in the 30 days (D17); the search, Post type, Category,
+	 * Show and Min link clicks applied. Shared by the list and the CSV (Task O9).
+	 *
+	 * @param OpportunityQuery $query  The search.
+	 * @param ContentFilter    $filter The filter bar.
+	 * @param string           $since  The first day of the clicks counted.
+	 * @param bool             $clicks Count the clicks (the Min link clicks filter, or the CSV's column).
+	 * @return array{0: string, 1: list<string|int>} The SQL, placeholders only, and its values.
+	 */
+	private function content_hosts( OpportunityQuery $query, ContentFilter $filter, string $since, bool $clicks ): array {
+		global $wpdb;
+
 		$table  = $wpdb->prefix . TableLinkLocationRepository::TABLE;
 		$join   = '';
 		$where  = "h.post_status = 'publish'";
@@ -340,48 +541,51 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		if ( ContentFilter::UNMONETIZED === $filter->show ) {
 			$having[] = 'links > monetized';
 		}
-		$clicks = '0';
-		if ( $filter->min_clicks > 0 ) {
+		$sum = '0';
+		if ( $clicks ) {
 			// The tied products' clicks in the 30 days, each product once (Lasso sums url_details.clicks; D17).
-			$clicks   = $wpdb->prepare(
+			$sum = $wpdb->prepare(
 				'( SELECT COALESCE(SUM(c.clicks), 0) FROM %i AS c WHERE c.day >= %s AND c.product_id IN ( SELECT IF(t.assigned_product_id > 0, t.assigned_product_id, t.product_id) FROM %i AS t WHERE t.host_id = l.host_id AND ( t.product_id > 0 OR t.assigned_product_id > 0 ) ) )',
 				$wpdb->prefix . TableClickStore::TABLE,
 				$since,
 				$table
 			);
+		}
+		if ( $filter->min_clicks > 0 ) {
 			$having[] = $wpdb->prepare( 'clicks >= %d', $filter->min_clicks );
 		}
 		$having = array() === $having ? '' : ' HAVING ' . implode( ' AND ', $having );
-		$order  = match ( $query->orderby ) {
-			'post_modified'   => 'h.post_modified ' . strtoupper( $query->order ),
-			'detection_title' => 'h.post_title ' . strtoupper( $query->order ),
-			'detection_slug'  => 'host_url ' . strtoupper( $query->order ),
-			'count'           => 'links ' . strtoupper( $query->order ),
-			default           => 'h.post_modified DESC',
-		};
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $clicks and $join are prepared above (table names, a date, an ID: no %).
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sum and $join are prepared above (table names, a date, an ID: no %).
 		$select = $wpdb->prepare(
 			"SELECT l.host_id, h.post_title, h.post_modified, MAX(l.host_url) AS host_url, COUNT(*) AS links,
-				SUM(l.product_id > 0 OR l.assigned_product_id > 0) AS monetized, {$clicks} AS clicks
+				SUM(l.product_id > 0 OR l.assigned_product_id > 0) AS monetized, {$sum} AS clicks
 			FROM %i AS l JOIN %i AS h ON h.ID = l.host_id{$join}",
 			$table,
 			$wpdb->posts
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$group = "{$select} WHERE {$where} GROUP BY l.host_id, h.post_title, h.post_modified{$having}";
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table, one screen; the parts are prepared, $where holds only placeholders, $order is from the allow-list.
-		$total = (int) $wpdb->get_var( array() === $args ? "SELECT COUNT(*) FROM ( {$group} ) AS hosts" : $wpdb->prepare( "SELECT COUNT(*) FROM ( {$group} ) AS hosts", ...$args ) );
-		$shell = new OpportunityPage( array(), $total, $query->page );
-		$rows  = 0 === $total ? array() : $wpdb->get_results( $wpdb->prepare( "{$group} ORDER BY {$order}, l.host_id DESC LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ), ARRAY_A );
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		return array( "{$select} WHERE {$where} GROUP BY l.host_id, h.post_title, h.post_modified{$having}", $args );
+	}
 
-		$items = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$items[] = new ContentRow( (int) $row['host_id'], (string) $row['post_title'], (string) $row['host_url'], (string) $row['post_modified'], (int) $row['links'], (int) $row['monetized'] );
-		}
+	/**
+	 * Content's ORDER BY (R26): its four sortable columns, newest first by default; an allow-list, so no input reaches
+	 * the SQL.
+	 *
+	 * @param OpportunityQuery $query The sort.
+	 * @param string           $alias '' inside the grouped query, 'hosts.' outside it.
+	 */
+	private static function content_order( OpportunityQuery $query, string $alias ): string {
+		$direction = 'asc' === $query->order ? 'ASC' : 'DESC';
+		$inner     = '' === $alias;
 
-		return new OpportunityPage( $items, $total, $shell->current() );
+		return match ( $query->orderby ) {
+			'post_modified'   => ( $inner ? 'h.' : $alias ) . 'post_modified ' . $direction,
+			'detection_title' => ( $inner ? 'h.' : $alias ) . 'post_title ' . $direction,
+			'detection_slug'  => $alias . 'host_url ' . $direction,
+			'count'           => $alias . 'links ' . $direction,
+			default           => ( $inner ? 'h.' : $alias ) . 'post_modified DESC',
+		};
 	}
 
 	/**

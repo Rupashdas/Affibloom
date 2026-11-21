@@ -441,44 +441,12 @@
 		if ( ! button || button.disabled ) {
 			return;
 		}
-		var label = button.querySelector( '[data-export-label]' );
-		var text = label.textContent;
 		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), placements: current.placements, filter: current.filter } );
 		if ( current.orderby && current.order ) {
 			args.set( 'orderby', current.orderby );
 			args.set( 'order', current.order );
 		}
-		button.disabled = true;
-		button.classList.add( 'is-busy' );
-		label.textContent = button.getAttribute( 'data-exporting' );
-		wp.apiFetch( { path: '/affibloom/v1/dashboard/export?' + args.toString(), parse: false } ).then( function ( response ) {
-			var count = parseInt( response.headers.get( 'X-Affibloom-Exported' ), 10 ) || 0;
-			var name = ( /filename="([^"]+)"/.exec( response.headers.get( 'Content-Disposition' ) || '' ) || [] )[ 1 ] || 'affibloom-export.csv';
-			return response.blob().then( function ( blob ) {
-				var link = document.createElement( 'a' );
-				link.href = URL.createObjectURL( blob );
-				link.download = name;
-				document.body.appendChild( link );
-				link.click();
-				link.remove();
-				URL.revokeObjectURL( link.href );
-				window.affibloomToast( 1 === count ? button.getAttribute( 'data-exported-one' ) : button.getAttribute( 'data-exported-many' ).replace( '%s', String( count ) ), false );
-			} );
-		} ).catch( function ( error ) {
-			var shown = button.getAttribute( 'data-failed' );
-			if ( error && 'function' === typeof error.json ) {
-				return error.json().then( function ( body ) {
-					window.affibloomToast( ( body && body.message ) || shown, true );
-				}, function () {
-					window.affibloomToast( shown, true );
-				} );
-			}
-			window.affibloomToast( ( error && error.message ) || shown, true );
-		} ).then( function () {
-			button.disabled = false;
-			button.classList.remove( 'is-busy' );
-			label.textContent = text;
-		} );
+		window.affibloomCsvDownload( button, '/affibloom/v1/dashboard/export?' + args.toString() );
 	} );
 
 	// The header sorts (Task 13K; F19 R1-R3, D10, D11): Alert ascending, descending, then off; Locations and Clicks

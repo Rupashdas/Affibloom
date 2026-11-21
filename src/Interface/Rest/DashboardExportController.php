@@ -20,7 +20,6 @@ use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
 use WP_Error;
-use WP_HTTP_Response;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -34,7 +33,7 @@ use WP_REST_Server;
 final class DashboardExportController implements Module {
 
 	/** The header that carries the number of rows. */
-	public const COUNT_HEADER = 'X-Affibloom-Exported';
+	public const COUNT_HEADER = CsvResponse::COUNT_HEADER;
 
 	/**
 	 * Builds the controller.
@@ -50,7 +49,7 @@ final class DashboardExportController implements Module {
 	 */
 	public function register(): void {
 		add_action( 'rest_api_init', array( $this, 'routes' ) );
-		add_filter( 'rest_pre_serve_request', array( $this, 'serve' ), 10, 4 );
+		add_filter( 'rest_pre_serve_request', array( CsvResponse::class, 'serve' ), 10, 4 );
 	}
 
 	/**
@@ -116,44 +115,8 @@ final class DashboardExportController implements Module {
 		$term    = SearchTerm::from_input( sanitize_text_field( (string) $request->get_param( 's' ) ) );
 		$group   = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
 
-		$stream = fopen( 'php://temp', 'w+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- an in-memory buffer, not a file.
-		if ( false === $stream ) {
-			return new WP_Error( 'affibloom_export_stream', __( 'Could not open export stream.', 'affibloom' ), array( 'status' => 500 ) );
-		}
-		$count = -1;
-		foreach ( $this->export->rows( $term, LinkKind::from_input( (string) $request->get_param( 'link_type' ) ), $group, $listing, Placement::from_input( (string) $request->get_param( 'placements' ) ) ) as $row ) {
-			fputcsv( $stream, $row, ',', '"', '' );
-			++$count;
-		}
-		rewind( $stream );
-		$csv = (string) stream_get_contents( $stream );
-		fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- the buffer above.
+		$rows = $this->export->rows( $term, LinkKind::from_input( (string) $request->get_param( 'link_type' ) ), $group, $listing, Placement::from_input( (string) $request->get_param( 'placements' ) ) );
 
-		$response = new WP_REST_Response( $csv );
-		$response->header( 'Content-Type', 'text/csv; charset=utf-8' );
-		$response->header( 'Content-Disposition', 'attachment; filename="affibloom-' . $filter . '-' . wp_date( 'Y-m-d' ) . '.csv"' );
-		$response->header( self::COUNT_HEADER, (string) $count );
-		$response->header( 'Access-Control-Expose-Headers', self::COUNT_HEADER );
-
-		return $response;
-	}
-
-	/**
-	 * Sends this route's CSV as it is instead of JSON.
-	 *
-	 * @param bool             $served  Whether the request was already served.
-	 * @param WP_HTTP_Response $result  The response.
-	 * @param WP_REST_Request  $request The request.
-	 * @param WP_REST_Server   $server  The server.
-	 * @return bool
-	 */
-	public function serve( $served, $result, $request, $server ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- WordPress passes four.
-		unset( $server );
-		if ( $served || '/' . ProductsController::NAMESPACE . '/dashboard/export' !== $request->get_route() || 200 !== $result->get_status() ) {
-			return (bool) $served;
-		}
-		echo $result->get_data(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a CSV file, its cells written by fputcsv() and guarded against formulas.
-
-		return true;
+		return CsvResponse::of( $rows, 'affibloom-' . $filter . '-' . wp_date( 'Y-m-d' ) . '.csv' );
 	}
 }

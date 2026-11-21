@@ -12,6 +12,7 @@ namespace Affibloom;
 use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Clicks\ClickRetention;
 use Affibloom\Application\Clicks\ClickTracker;
+use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
@@ -126,6 +127,7 @@ use Affibloom\Interface\Front\DisplayRenderFilter;
 use Affibloom\Interface\Front\LinkAttributesFilter;
 use Affibloom\Infrastructure\WordPress\WpPostSlugGuard;
 use Affibloom\Interface\Rest\ClicksController;
+use Affibloom\Interface\Rest\ContentExportController;
 use Affibloom\Interface\Rest\JobsController;
 use Affibloom\Interface\Rest\LinkIndexController;
 use Affibloom\Interface\Cron\LinkIndexCron;
@@ -565,7 +567,7 @@ final class Plugin {
 				new GroupScreen( $this->template(), $groups, $notice ),
 				new FieldsScreen( $this->template(), $fields, $notice ),
 				new FieldScreen( $this->template(), $fields, $notice ),
-				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products )
+				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() )
 			),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
@@ -578,7 +580,8 @@ final class Plugin {
 			new ProductsController( $products, new ProductResource( new PublicLinks( $this->settings_repository() ) ), $groups, $search, new WpSlugConflicts() ),
 			new BulkAddController( $bulk ),
 			new VariantsController( $products, $variants, $this->template() ),
-			new OpportunitiesController( $this->opportunity_service(), $this->intro_boxes(), $this->template() ),
+			new OpportunitiesController( $this->opportunity_service(), $this->intro_boxes(), $this->template(), $this->content_export() ),
+			new ContentExportController( $this->content_export() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
 			new ClassicLinkSearch( new PostTypeProductRepository(), new PublicLinks( $this->settings_repository() ) ),
@@ -668,6 +671,17 @@ final class Plugin {
 	 */
 	private function location_counts(): LocationCounts {
 		return new LocationCounts( new TableLinkLocationRepository(), new OptionLinkIndexState() );
+	}
+
+	/**
+	 * Content Opportunities' Export CSV (F22 R57-R61; Task O9).
+	 */
+	private function content_export(): ContentExport {
+		return new ContentExport(
+			new TableOpportunityRepository(),
+			new PostContentSource( $this->host_query(), $this->settings_repository(), self::builders() ),
+			static fn( int $id ): string => ProductScreen::url( $id )
+		);
 	}
 
 	/**

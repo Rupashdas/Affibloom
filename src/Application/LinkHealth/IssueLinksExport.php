@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Application\LinkHealth;
 
 use Affibloom\Application\Fields\FieldsService;
+use Affibloom\Domain\Export\SpreadsheetCell;
 use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\LinkHealth\LinkIssue;
@@ -83,7 +84,7 @@ final class IssueLinksExport {
 						$custom[] = $field->type->value . ' >> ' . $field->name . ' >> ' . $value->value;
 					}
 				}
-				yield array_map( array( self::class, 'guard' ), self::row( $product, $rows[ $id ] ?? null, $tags[ $id ] ?? array(), implode( '||', $custom ), $used[ $id ] ?? 0 ) );
+				yield array_map( array( SpreadsheetCell::class, 'guard' ), self::row( $product, $rows[ $id ] ?? null, $tags[ $id ] ?? array(), implode( '||', $custom ), $used[ $id ] ?? 0 ) );
 			}
 			++$page;
 		} while ( $list->current() * self::PAGE < $list->total && array() !== $list->items );
@@ -145,14 +146,5 @@ final class IssueLinksExport {
 		}
 
 		return IssueType::OUT_OF_STOCK === $issue->issue_type ? 'Out of stock' : 'Broken (' . $issue->issue_type . ')';
-	}
-
-	/**
-	 * Lasso's formula guard: a cell starting with =, +, @, or - not followed by a digit gets a leading tab.
-	 *
-	 * @param string $cell The cell.
-	 */
-	public static function guard( string $cell ): string {
-		return 1 === preg_match( '/^(?:[=+@]|-(?!\d))/', $cell ) ? "\t" . $cell : $cell;
 	}
 }

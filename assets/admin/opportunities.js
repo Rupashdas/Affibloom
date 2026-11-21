@@ -41,6 +41,7 @@
 				: args,
 		} );
 		if ( filters ) {
+			contentExport( region, filters );
 			filters.addEventListener( 'change', function () {
 				list.reload();
 			} );
@@ -53,6 +54,43 @@
 			window.affibloomLocationPreview( region );
 		}
 		dismissals( region, list );
+	}
+
+	/**
+	 * Content's Export CSV (R57-R59; Task O9): after each list the button follows the answer's count (off, with
+	 * Lasso's title, when the file would be empty); a click downloads the file for the list on screen: the address
+	 * bar's search and sort (the in-place list keeps it current) and the filter bar's values.
+	 *
+	 * @param {HTMLElement}     listRegion The list region.
+	 * @param {HTMLFormElement} filterBar  The filter bar.
+	 */
+	function contentExport( listRegion, filterBar ) {
+		var button = filterBar.querySelector( '[data-export-csv]' );
+		if ( ! button ) {
+			return;
+		}
+		listRegion.addEventListener( 'affibloom:list-loaded', function ( event ) {
+			if ( 'number' !== typeof event.detail.exports ) {
+				return;
+			}
+			button.disabled = 0 === event.detail.exports;
+			button.title = button.getAttribute( button.disabled ? 'data-title-off' : 'data-title-on' );
+		} );
+		button.addEventListener( 'click', function () {
+			var shown = new URLSearchParams( window.location.search );
+			var args = new URLSearchParams();
+			new FormData( filterBar ).forEach( function ( value, key ) {
+				if ( 'page' !== key && 'tab' !== key ) {
+					args.set( key, String( value ) );
+				}
+			} );
+			args.set( 'search', shown.get( 's' ) || '' );
+			if ( shown.get( 'orderby' ) ) {
+				args.set( 'orderby', shown.get( 'orderby' ) );
+				args.set( 'order', shown.get( 'order' ) || '' );
+			}
+			window.affibloomCsvDownload( button, button.getAttribute( 'data-export-path' ) + '?' + args.toString() );
+		} );
 	}
 
 	/**

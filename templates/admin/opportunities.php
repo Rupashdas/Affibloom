@@ -100,7 +100,13 @@ if ( null !== $list_back ) {
 		<div class="affibloom-page__body">
 			<?php
 			if ( OpportunityQuery::CONTENT === $query->kind ) {
-				$this->render( 'admin/partials/opportunity-content-filters', array( 'filter' => $view['filter'] ) );
+				$this->render(
+					'admin/partials/opportunity-content-filters',
+					array(
+						'filter'  => $view['filter'],
+						'exports' => $view['exports'] ?? null,
+					)
+				);
 			}
 			?>
 			<div id="affibloom-opportunities-list" class="affibloom-list" data-list-path="<?php echo esc_attr( $list_path ); ?>"

@@ -3139,6 +3139,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 
 /* Task O3 (F22 R25, R26): Content Opportunities' filter bar (Lasso's four fields in a row) and its table. */
 .affibloom-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 0 0 16px; }
+/* Content's Export CSV ends the bar, as in Lasso (R57, Task O9). */
+.affibloom-filter-bar__export { margin-left: auto; }
 .affibloom-filter-bar__field { display: grid; gap: 4px; min-width: 160px; }
 .affibloom-filter-bar__number { width: 120px; }
 .affibloom-table.affibloom-table--content { min-width: 640px; }

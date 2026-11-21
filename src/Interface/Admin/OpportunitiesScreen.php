@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Interface\Admin;
 
+use Affibloom\Application\Opportunities\ContentExport;
 use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Application\Products\ProductService;
@@ -35,8 +36,9 @@ final class OpportunitiesScreen {
 	 * @param OpportunityService $opportunities The lists.
 	 * @param IntroBoxes         $intros        The intro boxes.
 	 * @param ProductService     $products      The "Filter by Link" product's name.
+	 * @param ContentExport|null $export        Content's Export CSV button: how many anchors (R58; Task O9).
 	 */
-	public function __construct( private Template $template, private OpportunityService $opportunities, private IntroBoxes $intros, private ProductService $products ) {}
+	public function __construct( private Template $template, private OpportunityService $opportunities, private IntroBoxes $intros, private ProductService $products, private ?ContentExport $export = null ) {}
 
 	/**
 	 * A list's address with its search, sort, page and filter; the defaults are left out.
@@ -165,6 +167,8 @@ final class OpportunitiesScreen {
 				'list'    => $this->page( $query, $domain, $filter, $post ),
 				'post'    => $post,
 				'filter'  => $filter,
+				// R57, R58 (Task O9): the button is off when the file would be empty.
+				'exports' => OpportunityQuery::CONTENT === $query->kind && null !== $this->export ? $this->export->count( $query, $filter, time() ) : null,
 				'product' => $product,
 				'intro'   => $this->intros->shows( $box ) ? $box : '',
 				'tabs'    => self::tabs(

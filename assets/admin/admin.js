@@ -1244,6 +1244,50 @@
 	}
 
 	window.affibloomToast = toast;
+
+	/**
+	 * An Export CSV button's download (Task 31D; taken out of dashboard.js on its second use, Task O9): the button
+	 * says "Exporting" while the file is fetched, the browser saves it under the server's name, and a toast says
+	 * "Exported N …" (the button's data-exported-one / -many, from X-Affibloom-Exported) or the server's message.
+	 *
+	 * @param {HTMLButtonElement} button The button.
+	 * @param {string}            path   The route with its arguments.
+	 */
+	window.affibloomCsvDownload = function ( button, path ) {
+		var label = button.querySelector( '[data-export-label]' );
+		var text = label.textContent;
+		button.disabled = true;
+		button.classList.add( 'is-busy' );
+		label.textContent = button.getAttribute( 'data-exporting' );
+		wp.apiFetch( { path: path, parse: false } ).then( function ( response ) {
+			var count = parseInt( response.headers.get( 'X-Affibloom-Exported' ), 10 ) || 0;
+			var name = ( /filename="([^"]+)"/.exec( response.headers.get( 'Content-Disposition' ) || '' ) || [] )[ 1 ] || 'affibloom-export.csv';
+			return response.blob().then( function ( blob ) {
+				var link = document.createElement( 'a' );
+				link.href = URL.createObjectURL( blob );
+				link.download = name;
+				document.body.appendChild( link );
+				link.click();
+				link.remove();
+				URL.revokeObjectURL( link.href );
+				toast( 1 === count ? button.getAttribute( 'data-exported-one' ) : button.getAttribute( 'data-exported-many' ).replace( '%s', String( count ) ), false );
+			} );
+		} ).catch( function ( error ) {
+			var shown = button.getAttribute( 'data-failed' );
+			if ( error && 'function' === typeof error.json ) {
+				return error.json().then( function ( body ) {
+					toast( ( body && body.message ) || shown, true );
+				}, function () {
+					toast( shown, true );
+				} );
+			}
+			toast( ( error && error.message ) || shown, true );
+		} ).then( function () {
+			button.disabled = false;
+			button.classList.remove( 'is-busy' );
+			label.textContent = text;
+		} );
+	};
 	/**
 	 * The named, enabled controls inside an element, as a form would send them: a checkbox or radio only when it is
 	 * checked. For fields that are not in a form at the moment (the Display screen's other display types).

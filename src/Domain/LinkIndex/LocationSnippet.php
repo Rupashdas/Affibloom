@@ -36,12 +36,7 @@ final class LocationSnippet {
 		if ( '' === trim( $html ) || $occurrence < 1 ) {
 			return null;
 		}
-		$document = new DOMDocument();
-		$previous = libxml_use_internal_errors( true );
-		// The meta tag reads the content as UTF-8; the wrapper gives the links a block to stop at.
-		$document->loadHTML( '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><div id="affibloom-snippet-root">' . $html . '</div></body></html>' );
-		libxml_clear_errors();
-		libxml_use_internal_errors( $previous );
+		$document = self::load( $html );
 
 		$seen = 0;
 		foreach ( $document->getElementsByTagName( 'a' ) as $link ) {
@@ -55,6 +50,46 @@ final class LocationSnippet {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Every link's block in one reading of the content (the Content Opportunities CSV's `anchor_context`, F22 R60; Task
+	 * O9): by the link's address and its occurrence (as of() counts them), the block's inner HTML, unmarked.
+	 *
+	 * @param string $html The stored content.
+	 * @return array<string, string> Keyed "<url>\n<occurrence>".
+	 */
+	public static function all( string $html ): array {
+		if ( '' === trim( $html ) ) {
+			return array();
+		}
+		$blocks = array();
+		$seen   = array();
+		foreach ( self::load( $html )->getElementsByTagName( 'a' ) as $link ) {
+			$url          = trim( $link->getAttribute( 'href' ) );
+			$seen[ $url ] = ( $seen[ $url ] ?? 0 ) + 1;
+			$block        = self::block( $link );
+			if ( null !== $block ) {
+				$blocks[ $url . "\n" . $seen[ $url ] ] = trim( self::inner( $block ) );
+			}
+		}
+
+		return $blocks;
+	}
+
+	/**
+	 * The content as a document: the meta tag reads it as UTF-8; the wrapper gives the links a block to stop at.
+	 *
+	 * @param string $html The stored content.
+	 */
+	private static function load( string $html ): DOMDocument {
+		$document = new DOMDocument();
+		$previous = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><div id="affibloom-snippet-root">' . $html . '</div></body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous );
+
+		return $document;
 	}
 
 	/**

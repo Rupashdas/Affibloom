@@ -107,7 +107,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O6: Detect Opportunities in Settings, and Override All Links
 - [x] Task O7: Dismiss, and Undo
 - [x] Task O8: The Dashboard's tile, filter tab and lightbulb
-- [ ] Task O9: Export CSV of content opportunities
+- [x] Task O9: Export CSV of content opportunities
 - [ ] Task O10: Monetize and unmonetize at render time (N1-A)
 
 ### F35 and C2 — auto-detect and Amazon auto-monetization
@@ -1193,11 +1193,19 @@ current search, filters and sort, then "Exported N anchors."; an error shows its
 **Files:** the above; tests F22 **AC10**, unit `CsvRowTest.php`, integration `ContentExportTest.php` (headers, row count
 2,061-style on the fixture, order, guard, dismissed rows included).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Row, export, query.**
-- [ ] **Step 3: Route and button.**
-- [ ] **Step 4: Run and look** (open the file in a spreadsheet; a `=`-cell is text).
-- [ ] **Step 5: Commit** — "Add Lasso's content opportunities CSV export".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Row, export, query.**
+- [x] **Step 3: Route and button.**
+- [x] **Step 4: Run and look** (open the file in a spreadsheet; a `=`-cell is text).
+- [x] **Step 5: Commit** — "Add Lasso's content opportunities CSV export".
+
+*Note:* batches are a hundred posts, not keyset rows: the posts are read once in Content's order (the list's grouped
+query, now shared as `content_hosts()`), their links, categories and content per chunk, each post's HTML parsed once
+(`LocationSnippet::all()`); the first per-row design took over 2 minutes on Local, this one ~7 s for 2,802 anchors.
+`export_batch()` became `export_posts()`, `export_links()`, `suggestions()`, `categories()`. The count rides on Content's
+route as `exports`. Shared on second use: `SpreadsheetCell::guard()` (now with Lasso's leading-space rule, also for 31D's
+export), `CsvResponse` (31D's route uses it), `affibloomCsvDownload()` in admin.js. Checked: unit, analyse; on Local the
+file, its count, the button off at 0, and the Dashboard export still downloading.
 
 ---
 

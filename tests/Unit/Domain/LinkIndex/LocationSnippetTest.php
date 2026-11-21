@@ -26,4 +26,13 @@ final class LocationSnippetTest extends TestCase {
 		self::assertNull( LocationSnippet::of( '<p>No links.</p>', 'https://example.com/a', 1 ) );
 		self::assertNull( LocationSnippet::of( '', 'https://example.com/a', 1 ) );
 	}
+
+	/** Task O9 (F22 R60): every link's block in one reading, keyed by address and occurrence. */
+	public function test_all_gives_each_links_block_by_address_and_occurrence(): void {
+		$blocks = LocationSnippet::all( '<p>One <a href="https://a.example/">a</a>.</p><ul><li>Two <a href="https://a.example/">again</a></li></ul>' );
+
+		self::assertSame( 'One <a href="https://a.example/">a</a>.', $blocks["https://a.example/\n1"] );
+		self::assertSame( 'Two <a href="https://a.example/">again</a>', $blocks["https://a.example/\n2"] );
+		self::assertSame( array(), LocationSnippet::all( '   ' ) );
+	}
 }

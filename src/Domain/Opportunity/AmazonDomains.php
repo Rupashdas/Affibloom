@@ -41,6 +41,9 @@ final class AmazonDomains {
 		'smile.amazon.com',
 	);
 
+	/** All of Lasso's 23, for the CSV's "Amazon Associates" suggestion (R60; Task O9). */
+	public const ALL = array( ...self::EXCLUDED, 'amzn.com', 'amzn.to' );
+
 	/**
 	 * Whether a base domain is one of them.
 	 *
