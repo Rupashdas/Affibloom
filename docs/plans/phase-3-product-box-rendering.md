@@ -1119,8 +1119,8 @@ are drawn as the unsaved settings render them (no "all drawn, hidden by script")
 
 *Note (2026-11-21, the user's report):* the Single-box stand-in for Grid was never removed after DT2. Grid now draws
 Lasso's samples (Essentialism, Atomic Habits, Effortless; one per column, at most 3) through `DisplayHtml::grid`, with
-the unsaved Disclosure in Grids and text; the frame follows its content's height (it scrolled inside). List still uses
-the Single box. Checked at 1280 px: 3 and 2 columns.
+the unsaved Disclosure in Grids and text; the frame follows its content's height (it scrolled inside). List now draws
+the three samples as the site's numbered list (`DisplayHtml::list`, Pros & Cons as Lasso's). Checked at 1280 px.
 
 ---
 

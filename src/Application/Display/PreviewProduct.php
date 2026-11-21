@@ -17,9 +17,9 @@ use Affibloom\Domain\Product\ProductType;
 /**
  * Lasso's samples for Settings → Display (F5 R95; settings.js 3558-3607, settings-display/class-ajax.php 117-197):
  * "Essentialism", $15.99 with a $18.99 basis price, Prime, badge "Our Pick", its description, the demo Pros & Cons and a
- * second button; Grid adds "Atomic Habits" and "Effortless" with their own prices and no badge, one sample per column (at
- * most 3). The second button's link is `#` (D9; Lasso's points to its own site). Lasso builds each as shortcode
- * attributes on a demo item; here the same attributes are BoxOverrides on a product that exists nowhere.
+ * second button; Grid and List add "Atomic Habits" and "Effortless" with their own prices and no badge (Grid: one per
+ * column, at most 3). The second button's link is `#` (D9; Lasso's points to its own site). Lasso builds each as
+ * shortcode attributes on a demo item; here the same attributes are BoxOverrides on a product that exists nowhere.
  */
 final class PreviewProduct {
 
@@ -63,6 +63,13 @@ final class PreviewProduct {
 	 */
 	public static function in_grid( int $columns ): int {
 		return min( count( self::SAMPLES ), max( 1, $columns ) );
+	}
+
+	/**
+	 * How many samples a List preview draws (R95): all three.
+	 */
+	public static function in_list(): int {
+		return count( self::SAMPLES );
 	}
 
 	/**

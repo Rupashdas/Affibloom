@@ -37,11 +37,12 @@ final class PreviewProductTest extends TestCase {
 	}
 
 	/**
-	 * Grid draws one sample per column, at most three (R95): Atomic Habits and Effortless follow Essentialism with their
+	 * Grid draws one sample per column, at most three, List all three (R95): Atomic Habits and Effortless follow Essentialism with their
 	 * own price and picture and no badge.
 	 */
 	public function test_grid_draws_a_sample_per_column(): void {
 		self::assertSame( array( 1, 1, 2, 3, 3 ), array_map( array( PreviewProduct::class, 'in_grid' ), array( 0, 1, 2, 3, 4 ) ) );
+		self::assertSame( 3, PreviewProduct::in_list() );
 
 		$view = ( new BoxBuilder( 'https://site.test/no.webp' ) )->build(
 			PreviewProduct::product( 'https://site.test/images/', 2 ),
