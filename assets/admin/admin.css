@@ -601,6 +601,8 @@
 /* WordPress shows a disabled, checked checkbox at 0.7 opacity; the switch's own input stays invisible (Task O4). */
 .affibloom-admin .affibloom-toggle__input:disabled,
 .affibloom-admin .affibloom-toggle__input:disabled:checked::before { opacity: 0; }
+.affibloom-toggle__input:disabled + .affibloom-toggle__track { opacity: 0.55; }
+.affibloom-admin .affibloom-toggle__input:disabled { cursor: default; }
 .affibloom-toggle__input:focus-visible + .affibloom-toggle__track {
 	outline: 2px solid var(--affibloom-brand-600);
 	outline-offset: 2px;

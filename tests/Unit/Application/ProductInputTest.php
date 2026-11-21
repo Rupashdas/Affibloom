@@ -35,6 +35,12 @@ final class ProductInputTest extends TestCase {
 		self::assertSame( array(), $this->input()->changes( array( 'unknown' => 'x' ) ) );
 	}
 
+	/** Task O5 (F22 R38, D9): Lasso's is_opportunity is the product's Detect Opportunities. */
+	public function test_is_opportunity_switches_detect_opportunities(): void {
+		self::assertSame( array( 'detect_opportunities' => false ), $this->input()->changes( array( 'is_opportunity' => false ) ) );
+		self::assertSame( array( 'detect_opportunities' => true ), $this->input()->changes( array( 'is_opportunity' => '1' ) ) );
+	}
+
 	public function test_an_empty_name_is_the_only_refusal(): void {
 		try {
 			$this->input()->changes(

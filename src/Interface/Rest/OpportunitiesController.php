@@ -14,6 +14,7 @@ use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\OpportunitiesScreen;
+use Affibloom\Interface\Admin\ProductScreen;
 use Affibloom\Interface\Template;
 use Affibloom\Module;
 use WP_REST_Request;
@@ -121,6 +122,12 @@ final class OpportunitiesController implements Module {
 				'minimum' => 0,
 				'default' => 0,
 			);
+			// The product page's tab (R35, Task O5): its rows without the filter links, its addresses the page's.
+			$args['context'] = array(
+				'type'    => 'string',
+				'enum'    => array( '', 'product' ),
+				'default' => '',
+			);
 		}
 		// Content's filter bar (R25); values outside Lasso's lists are its defaults (ContentFilter).
 		if ( OpportunityQuery::CONTENT === $kind ) {
@@ -157,10 +164,11 @@ final class OpportunitiesController implements Module {
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	public function list( string $kind, WP_REST_Request $request ): WP_REST_Response {
-		$query  = OpportunitiesScreen::query( $kind, sanitize_text_field( (string) $request['search'] ), (string) $request['orderby'], (string) $request['order'], (int) $request['page'], (int) $request['product'] );
-		$domain = strtolower( (string) $request['domain'] );
-		$filter = OpportunitiesScreen::filter( (string) $request['show'], (string) $request['content_type'], (int) $request['category'], (int) $request['min_clicks'] );
-		$page   = match ( $kind ) {
+		$query      = OpportunitiesScreen::query( $kind, sanitize_text_field( (string) $request['search'] ), (string) $request['orderby'], (string) $request['order'], (int) $request['page'], (int) $request['product'] );
+		$domain     = strtolower( (string) $request['domain'] );
+		$on_product = 'product' === $request['context'] && $query->product > 0;
+		$filter     = OpportunitiesScreen::filter( (string) $request['show'], (string) $request['content_type'], (int) $request['category'], (int) $request['min_clicks'] );
+		$page       = match ( $kind ) {
 			OpportunityQuery::DOMAINS      => $this->opportunities->domains( $query ),
 			OpportunityQuery::DOMAIN_LINKS => $this->opportunities->domain_links( $domain, $query ),
 			OpportunityQuery::CONTENT      => $this->opportunities->content( $query, $filter, time() ),
@@ -181,10 +189,11 @@ final class OpportunitiesController implements Module {
 					'html'    => $this->template->fetch(
 						$partials[ $kind ],
 						array(
-							'list'   => $page,
-							'query'  => $query,
-							'domain' => $domain,
-							'url'    => OpportunitiesScreen::url( $query, 1, $domain, $filter, (int) $request['post'] ),
+							'list'         => $page,
+							'query'        => $query,
+							'domain'       => $domain,
+							'url'          => $on_product ? ProductScreen::opportunities_url( $query->product, $query, 1 ) : OpportunitiesScreen::url( $query, 1, $domain, $filter, (int) $request['post'] ),
+							'product_page' => $on_product,
 						)
 					),
 					'term'    => $query->search,
@@ -192,7 +201,7 @@ final class OpportunitiesController implements Module {
 					'orderby' => $query->orderby,
 					'order'   => $query->order,
 					'total'   => $page->total,
-					'url'     => OpportunitiesScreen::url( $query, $page->current(), $domain, $filter, (int) $request['post'] ),
+					'url'     => $on_product ? ProductScreen::opportunities_url( $query->product, $query, $page->current() ) : OpportunitiesScreen::url( $query, $page->current(), $domain, $filter, (int) $request['post'] ),
 				),
 			)
 		);

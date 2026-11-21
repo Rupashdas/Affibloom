@@ -20,7 +20,9 @@ use Affibloom\Application\Groups\GroupService;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Application\Variants\VariantService;
+use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Domain\Amazon\AmazonUrl;
+use Affibloom\Domain\Opportunity\OpportunityQuery;
 use Affibloom\Domain\Display\DisplayType;
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\FieldType;
@@ -48,21 +50,22 @@ final class ProductScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template               $template Template renderer.
-	 * @param ProductService         $products The product library.
-	 * @param DisplaySettingsService $display  The Display settings: the button texts an empty field falls back to.
-	 * @param IconChoices            $icons    The button icons, for the button text pickers (F28, Task 14G).
-	 * @param SettingsService        $settings The site's settings: the disclosure text and Show Price a product falls
-	 *                                         back to (Task 14B).
-	 * @param FieldsService          $fields   The product's custom fields and the field library (Task 14C).
-	 * @param Notice                 $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
-	 * @param GroupService           $groups   The product's groups and the site's, for the group picker (Task G3).
-	 * @param AmazonDataService      $amazon   Whether Refresh can ask Amazon (C1D).
-	 * @param PublicLinks|null       $links    The public link and the cloaked address's start (F24, Task CL3).
-	 * @param VariantService|null    $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
-	 * @param LinkIssueQuery|null    $alerts   The page's issue bars (F11, Task 31C).
-	 * @param LocationService|null   $locations The Locations tab (F12, Task 36B).
-	 * @param LocationCounts|null    $counts    The Locations tab's count, on every tab (F12 L4).
+	 * @param Template                $template Template renderer.
+	 * @param ProductService          $products The product library.
+	 * @param DisplaySettingsService  $display  The Display settings: the button texts an empty field falls back to.
+	 * @param IconChoices             $icons    The button icons, for the button text pickers (F28, Task 14G).
+	 * @param SettingsService         $settings The site's settings: the disclosure text and Show Price a product falls
+	 *                                          back to (Task 14B).
+	 * @param FieldsService           $fields   The product's custom fields and the field library (Task 14C).
+	 * @param Notice                  $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
+	 * @param GroupService            $groups   The product's groups and the site's, for the group picker (Task G3).
+	 * @param AmazonDataService       $amazon   Whether Refresh can ask Amazon (C1D).
+	 * @param PublicLinks|null        $links    The public link and the cloaked address's start (F24, Task CL3).
+	 * @param VariantService|null     $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
+	 * @param LinkIssueQuery|null     $alerts   The page's issue bars (F11, Task 31C).
+	 * @param LocationService|null    $locations The Locations tab (F12, Task 36B).
+	 * @param LocationCounts|null     $counts    The Locations tab's count, on every tab (F12 L4).
+	 * @param OpportunityService|null $opportunities The Opportunities tab and its count (F22 R34-R36, Task O5).
 	 */
 	public function __construct(
 		private Template $template,
@@ -79,7 +82,32 @@ final class ProductScreen {
 		private ?LinkIssueQuery $alerts = null,
 		private ?LocationService $locations = null,
 		private ?LocationCounts $counts = null,
+		private ?OpportunityService $opportunities = null,
 	) {}
+
+	/**
+	 * The Opportunities tab's address with its search, page and sort (F22 R34-R36; Task O5); the defaults left out.
+	 *
+	 * @param int              $id    The product.
+	 * @param OpportunityQuery $query The list.
+	 * @param int|null         $page  Another page than the query's; null for its own.
+	 */
+	public static function opportunities_url( int $id, OpportunityQuery $query, ?int $page = null ): string {
+		$args = array( 'tab' => 'opportunities' );
+		if ( '' !== $query->search ) {
+			$args['s'] = rawurlencode( $query->search );
+		}
+		if ( '' !== $query->orderby ) {
+			$args['orderby'] = $query->orderby;
+			$args['order']   = $query->order;
+		}
+		$page = $page ?? $query->page;
+		if ( $page > 1 ) {
+			$args['paged'] = $page;
+		}
+
+		return add_query_arg( $args, self::url( $id ) );
+	}
 
 	/**
 	 * The Locations tab's address with its search, page and order (F12 D22; Task 36B); the defaults are left out.
@@ -185,8 +213,33 @@ final class ProductScreen {
 		$variants    = null === $this->variants ? array() : $this->variants->list( $this->product );
 		$public_link = null === $this->links ? $this->product->url->value() : $this->links->for( $this->product );
 		$used        = null === $this->counts ? null : ( $this->counts->of( array( $id ) )[ $id ] ?? 0 );
+		// The Opportunities tab's badge on every tab: Link Opportunities' rows for the product (F22 R34; Task O5).
+		$found = null === $this->opportunities ? null : $this->opportunities->links( new OpportunityQuery( '', '', '', 1, $id ) )->total;
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which tab and list to show, no action behind it.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		// F22 R34-R36 (Task O5): Opportunities is a tab of this page (`&tab=opportunities`), Link Opportunities' list for
+		// the product, redrawn in place through GET /opportunities/links?product=&context=product.
+		if ( 'opportunities' === $tab && null !== $this->opportunities ) {
+			$query = new OpportunityQuery(
+				isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '',
+				isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '',
+				isset( $_GET['order'] ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '',
+				isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1,
+				$id
+			);
+			$this->template->render(
+				'admin/product-opportunities',
+				array(
+					'product'     => $this->product,
+					'public_link' => $public_link,
+					'tabs'        => self::tabs( $id, 'opportunities', count( $variants ), $used, $found ),
+					'list'        => $this->opportunities->links( $query ),
+					'query'       => $query,
+					'url'         => self::opportunities_url( $id, $query, 1 ),
+				)
+			);
+			return;
+		}
 		// F12 D22 (Task 36B): Locations is a tab of this page (`&tab=locations`), its list redrawn in place.
 		if ( 'locations' === $tab && null !== $this->locations ) {
 			$term      = isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '';
@@ -198,7 +251,7 @@ final class ProductScreen {
 				array(
 					'product'     => $this->product,
 					'public_link' => $public_link,
-					'tabs'        => self::tabs( $id, 'locations', count( $variants ), $used ),
+					'tabs'        => self::tabs( $id, 'locations', count( $variants ), $used, $found ),
 					'locations'   => $locations,
 					'clicks'      => $this->locations->clicks( $locations, time() ),
 					'term'        => $term,
@@ -217,7 +270,7 @@ final class ProductScreen {
 				array(
 					'product'     => $this->product,
 					'public_link' => $public_link,
-					'tabs'        => self::tabs( $id, 'variants', count( $variants ), $used ),
+					'tabs'        => self::tabs( $id, 'variants', count( $variants ), $used, $found ),
 					'kind'        => $kind,
 					'rows'        => VariantRows::of( $this->product, $variants ),
 					// Add Variant's suggestion for an Amazon product: the site's tracking ID (R10).
@@ -242,7 +295,7 @@ final class ProductScreen {
 				'issues'       => null === $this->alerts ? null : $this->alerts->notices( (int) $this->product->id, ProductType::Amazon === $this->product->type ),
 				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
 				'public_link'  => $public_link,
-				'tabs'         => self::tabs( $id, 'details', count( $variants ), $used ),
+				'tabs'         => self::tabs( $id, 'details', count( $variants ), $used, $found ),
 				// Task 36E (F12 L15, D26): a product in use opens "Hold Up" with its posts instead of the delete question.
 				'in_use'       => null !== $this->locations && ( $used ?? 0 ) > 0 ? $this->locations->page( $id, '', 'asc', 1 ) : null,
 				'in_use_url'   => self::locations_url( $id ),
@@ -288,9 +341,10 @@ final class ProductScreen {
 	 * @param string   $current   The tab shown: 'details', 'locations' or 'variants'.
 	 * @param int      $variants  How many variants the product has.
 	 * @param int|null $locations How many places use it; null while the Locations tab is not wired (a "Soon" tab).
-	 * @return array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool}>}
+	 * @param int|null $opportunities Its Link Opportunities; null while that tab is not wired (Task O5).
+	 * @return array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool, key?: string}>}
 	 */
-	private static function tabs( int $id, string $current, int $variants, ?int $locations = null ): array {
+	private static function tabs( int $id, string $current, int $variants, ?int $locations = null, ?int $opportunities = null ): array {
 		return array(
 			'label' => __( 'Product sections', 'affibloom' ),
 			'items' => array(
@@ -306,7 +360,14 @@ final class ProductScreen {
 					'count'     => $locations,
 					'show_zero' => true,
 				),
-				array( 'label' => __( 'Opportunities', 'affibloom' ) ),
+				null === $opportunities ? array( 'label' => __( 'Opportunities', 'affibloom' ) ) : array(
+					'label'     => __( 'Opportunities', 'affibloom' ),
+					'url'       => add_query_arg( 'tab', 'opportunities', self::url( $id ) ),
+					'current'   => 'opportunities' === $current,
+					'count'     => $opportunities,
+					'show_zero' => true,
+					'key'       => 'opportunities',
+				),
 				array(
 					'label'     => __( 'Variants', 'affibloom' ),
 					'url'       => add_query_arg( 'tab', 'variants', self::url( $id ) ),

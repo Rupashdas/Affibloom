@@ -51,7 +51,7 @@ final class Product {
 	 * @param list<string> $features        The product's feature bullets, in order (C1Q4: Amazon's on add and Refresh,
 	 *                                      editable; separate from the description; shown in the box under the
 	 *                                      description when $show_features is on).
-	 * @param string       $old_genius_url  The last geni.us link given as the Primary URL (Lasso's old_genius_url, C1K).
+	 * @param string       $old_genius_url The last geni.us link given as the Primary URL (Lasso's old_genius_url, C1K).
 	 * @param string       $old_genius_url2 The last geni.us link given to the second button, the first added one (Lasso's
 	 *                                      old_second_btn_genius_url).
 	 * @param bool|null    $show_description Show the description in the box; null when never stored, which Lasso reads
@@ -61,6 +61,8 @@ final class Product {
 	 * @param list<string> $old_slugs       Slugs it had before, which keep answering (F24 N1; meta `_affibloom_old_slugs`).
 	 * @param bool         $show_features   Show the features in the box (meta `_affibloom_show_features`); off unless an
 	 *                                      editor turns it on, so boxes drawn before it keep their look.
+	 * @param bool         $detect_opportunities Detect Opportunities: its domain's links are suggested (F22 D9; meta
+	 *                                           `_affibloom_detect_opportunities`; Task O5).
 	 */
 	public function __construct(
 		public readonly ?int $id,
@@ -93,14 +95,14 @@ final class Product {
 		public readonly bool $cloak = false,
 		public readonly array $old_slugs = array(),
 		public readonly bool $show_features = false,
+		public readonly bool $detect_opportunities = true,
 	) {}
 
 	/**
 	 * A new, unsaved product with the site's link defaults as they are now. Lasso copies them when it creates a link
 	 * (save_lasso_url reads get_lasso_url( 0 )'s new-record values and writes them as meta), so a later change of a
 	 * site default does not reach products that already exist. Link Cloaking is copied too, and the slug is the name's
-	 * (F24 R3, R12; Task CL4). The secondary button's defaults, Detect Opportunities and Commission Upgrades join this
-	 * copy with their settings (Task 11E).
+	 * (F24 R3, R12; Task CL4). Detect Opportunities is copied too (F22 D9; Task O5); Commission Upgrades is left out (deviation 52).
 	 *
 	 * @param string       $name     Name.
 	 * @param AffiliateUrl $url      Primary destination.
@@ -119,6 +121,7 @@ final class Product {
 			prime: true,
 			slug: ProductSlug::for_new( $name, false ),
 			cloak: $defaults->bool( 'link_cloaking' ),
+			detect_opportunities: $defaults->bool( 'detect_opportunities' ),
 		);
 	}
 

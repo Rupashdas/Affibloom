@@ -5,7 +5,7 @@
  * Suggestion sort, ascending first (R7). GET /opportunities/links renders this same partial (D3).
  *
  * @package Affibloom
- * @var array{list: \Affibloom\Domain\Opportunity\OpportunityPage, query: \Affibloom\Domain\Opportunity\OpportunityQuery, url: string} $view
+ * @var array{list: \Affibloom\Domain\Opportunity\OpportunityPage, query: \Affibloom\Domain\Opportunity\OpportunityQuery, url: string, product_page?: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -51,8 +51,9 @@ $columns = array(
 						$this->render(
 							'admin/partials/opportunity-link-row',
 							array(
-								'opportunity' => $opportunity,
-								'filtered'    => $query->product > 0,
+								'opportunity'  => $opportunity,
+								'filtered'     => $query->product > 0,
+								'product_page' => $view['product_page'] ?? false,
 							)
 						);
 						?>

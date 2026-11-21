@@ -99,6 +99,10 @@ final class ProductInput {
 		if ( array_key_exists( 'permalink', $input ) ) {
 			$changes['slug'] = ProductSlug::clean( self::text( $input['permalink'] ) );
 		}
+		// Lasso's is_opportunity (F22 R38, D9; Task O5).
+		if ( array_key_exists( 'is_opportunity', $input ) ) {
+			$changes['detect_opportunities'] = (bool) $input['is_opportunity'];
+		}
 		if ( array_key_exists( 'link_cloaking', $input ) ) {
 			$changes['cloak'] = (bool) $input['link_cloaking'];
 		}

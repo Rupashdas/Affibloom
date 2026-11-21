@@ -195,7 +195,7 @@ final class ProductsController implements Module {
 		foreach ( array( 'name', 'url', 'button_text', 'theme', 'image_url', 'badge', 'price', 'description', 'disclosure', 'permalink' ) as $field ) {
 			$args[ $field ] = array( 'type' => 'string' );
 		}
-		foreach ( array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'show_features', 'link_cloaking' ) as $field ) {
+		foreach ( array( 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'show_features', 'link_cloaking', 'is_opportunity' ) as $field ) {
 			$args[ $field ] = array( 'type' => 'boolean' );
 		}
 		$args['image_id']         = array(

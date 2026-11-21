@@ -4,10 +4,10 @@
  * Filter by URL and Open in New Window under it on hover or focus; the post to its editor with Filter by Content and
  * Open in New Window; the Suggestion to the product's page with Filter by Link (not when the list is already one
  * product's); the Type icon, which opens the preview; the Monetize switch, which comes with O10 and is shown disabled
- * until then.
+ * until then. On the product page's tab the filter links are left out (R35).
  *
  * @package Affibloom
- * @var array{opportunity: \Affibloom\Domain\Opportunity\Opportunity, filtered: bool} $view
+ * @var array{opportunity: \Affibloom\Domain\Opportunity\Opportunity, filtered: bool, product_page?: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,7 +26,9 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place
 	<td class="affibloom-col-url">
 		<a class="affibloom-opportunity__main" href="<?php echo esc_url( $opportunity->place->url ); ?>" target="_blank" rel="noopener noreferrer" title="<?php echo esc_attr( $opportunity->place->url ); ?>"><?php echo esc_html( $opportunity->place->url ); ?></a>
 		<span class="affibloom-opportunity__actions">
+			<?php if ( ! ( $view['product_page'] ?? false ) ) : ?>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::DOMAIN_LINKS ), 1, $opportunity->domain ) ); ?>"><?php esc_html_e( 'Filter by URL', 'affibloom' ); ?></a>
+			<?php endif; ?>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( $opportunity->place->url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open in New Window', 'affibloom' ); ?></a>
 		</span>
 	</td>
@@ -37,13 +39,15 @@ $monetize_label = sprintf( __( 'Monetize %s', 'affibloom' ), $opportunity->place
 			<span class="affibloom-opportunity__main"><?php echo esc_html( $host_title ); ?></span>
 		<?php endif; ?>
 		<span class="affibloom-opportunity__actions">
+			<?php if ( ! ( $view['product_page'] ?? false ) ) : ?>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, 0, OpportunityQuery::POST_LINKS ), 1, '', null, $opportunity->host_id ) ); ?>"><?php esc_html_e( 'Filter by Content', 'affibloom' ); ?></a>
+			<?php endif; ?>
 			<a class="affibloom-opportunity__action" href="<?php echo esc_url( $opportunity->host_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open in New Window', 'affibloom' ); ?></a>
 		</span>
 	</td>
 	<td class="affibloom-col-suggestion">
 		<a class="affibloom-opportunity__main" href="<?php echo esc_url( ProductScreen::url( $opportunity->product_id ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $opportunity->product_name ); ?></a>
-		<?php if ( ! $view['filtered'] ) : ?>
+		<?php if ( ! $view['filtered'] && ! ( $view['product_page'] ?? false ) ) : ?>
 			<span class="affibloom-opportunity__actions">
 				<a class="affibloom-opportunity__action" href="<?php echo esc_url( OpportunitiesScreen::url( new OpportunityQuery( '', '', '', 1, $opportunity->product_id ) ) ); ?>"><?php esc_html_e( 'Filter by Link', 'affibloom' ); ?></a>
 			</span>

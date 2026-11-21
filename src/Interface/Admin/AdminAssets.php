@@ -134,6 +134,14 @@ final class AdminAssets implements Module {
 			// The Variants tab: its search and Copy (F27, Task V1).
 			wp_enqueue_script( 'affibloom-variants', $this->plugin_url . 'assets/admin/variants.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 			// The Locations tab: its list in place and the group rows (F12, Task 36B).
+			// The Opportunities badge follows a save (F22 R34; Task O5).
+			wp_enqueue_script( 'affibloom-product-opportunity-count', $this->plugin_url . 'assets/admin/product-opportunity-count.js', array( 'wp-api-fetch' ), $this->version, true );
+			// The Opportunities tab: its list in place and the preview (F22 R35, Task O5).
+			if ( 'opportunities' === $tab ) {
+				wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+				wp_enqueue_script( 'affibloom-location-preview', $this->plugin_url . 'assets/admin/location-preview.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+				wp_enqueue_script( 'affibloom-opportunities', $this->plugin_url . 'assets/admin/opportunities.js', array( 'affibloom-in-place-list', 'affibloom-location-preview' ), $this->version, true );
+			}
 			if ( 'locations' === $tab ) {
 				wp_enqueue_script( 'affibloom-in-place-list', $this->plugin_url . 'assets/admin/in-place-list.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
 				wp_enqueue_script( 'affibloom-location-preview', $this->plugin_url . 'assets/admin/location-preview.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );

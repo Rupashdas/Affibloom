@@ -6,7 +6,7 @@
  * removed. Meadow (Task MD5) prints it in two parts: `preview`, the frame for the sticky aside, and `fields`, the rest
  * as two cards, *Display content* and *Disclosure & link attributes*, in the same order.
  *
- * Placeholders until their tasks: the live preview (14E, Phase 3), Detect Opportunities (the Opportunities area),
+ * Placeholders until their tasks: the live preview (14E, Phase 3); Detect Opportunities is live (F22 D9, Task O5),
  * and the Amazon price shown from Amazon's data (C1F). Lasso's Commission Upgrades is its
  * cloud's and is left out (deviation 52). Nothing here is stored until Save Changes (Task 15, D2), except Refresh's
  * answer (C1D), which Lasso stores at once.
@@ -307,7 +307,7 @@ endif;
 		$switches = array(
 			array( 'affibloom-sponsored', 'sponsored', __( 'Sponsored', 'affibloom' ), $product->sponsored, __( 'When enabled, this link will be set to sponsored.', 'affibloom' ), false ),
 			array( 'affibloom-show-disclosure', 'show_disclosure', __( 'Show Disclosure', 'affibloom' ), $product->show_disclosure, __( 'Turn this on to show the disclosure in displays for this link.', 'affibloom' ), false ),
-			array( 'affibloom-opportunities', 'is_opportunity', __( 'Detect Opportunities', 'affibloom' ), false, __( 'When disabled, Link Opportunities will not show for this link.', 'affibloom' ), true ),
+			array( 'affibloom-opportunities', 'is_opportunity', __( 'Detect Opportunities', 'affibloom' ), $product->detect_opportunities, __( 'When disabled, Link Opportunities will not show for this product.', 'affibloom' ), false ),
 		);
 		if ( ! $is_amazon ) {
 			// Lasso hides Link Cloaking for Amazon links (url-details.php 491).

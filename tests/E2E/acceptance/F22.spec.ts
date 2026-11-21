@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, createProduct, newPostWith, unique, wp } from '../utils';
+import { blockTrackers, createProduct, newPostWith, setSettings, unique, wp } from '../utils';
 
 // F22 Opportunities (docs/features/F22/requirements.md).
 test.describe( 'F22 Opportunities', () => {
@@ -103,6 +103,35 @@ test.describe( 'F22 Opportunities', () => {
 		await page.getByLabel( 'Min link clicks' ).fill( '1' );
 		await page.getByLabel( 'Min link clicks' ).press( 'Enter' );
 		await expect( page.getByText( "Looks like we're coming up empty." ) ).toBeVisible(); // no product, no clicks
+	} );
+
+	// AC5, AC6 (O5; R34-R39, D9).
+	test( "AC5 the product's Opportunities tab lists its opportunities; the badge is the list's total", async ( { page } ) => {
+		const { product } = fixture( 3 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }` );
+		await expect( page.locator( '[data-tab-count="opportunities"]' ) ).toHaveText( '3' );
+		await page.locator( '.affibloom-tabs a', { hasText: 'Opportunities' } ).click();
+		await expect( page ).toHaveURL( /tab=opportunities/ );
+		await expect( page.locator( '.affibloom-table--opportunities tbody tr' ) ).toHaveCount( 3 );
+		await expect( page.getByText( 'Filter by Link' ) ).toHaveCount( 0 );
+		await page.getByLabel( 'Search Opportunities' ).fill( 'item-2' );
+		await page.getByLabel( 'Search Opportunities' ).press( 'Enter' );
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '1 Found' );
+	} );
+
+	test( 'AC6 Detect Opportunities off: the product leaves every list; a new product takes the setting', async ( { page } ) => {
+		const { product } = fixture( 2 );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }` );
+		await page.getByLabel( 'Detect Opportunities' ).uncheck();
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '[data-tab-count="opportunities"]' ) ).toHaveText( '0' );
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&product=${ product }` );
+		await expect( page.locator( '[data-found]' ) ).toHaveText( '0 Found' );
+
+		setSettings( { detect_opportunities: false } );
+		const fresh = createProduct( { name: unique( 'F22 AC6 new' ) } );
+		expect( wp( 'post', 'meta', 'get', String( fresh ), '_affibloom_detect_opportunities' ) ).toBe( '0' );
+		setSettings( { detect_opportunities: true } );
 	} );
 
 	// AC12 (O4; R29-R31).

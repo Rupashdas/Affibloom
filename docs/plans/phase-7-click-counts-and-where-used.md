@@ -103,7 +103,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task O2: Domains and Detected Links
 - [x] Task O3: Content Opportunities
 - [x] Task O4: A post's links (Content › post)
-- [ ] Task O5: The product page's Opportunities tab and Detect Opportunities
+- [x] Task O5: The product page's Opportunities tab and Detect Opportunities
 - [ ] Task O6: Detect Opportunities in Settings, and Override All Links
 - [ ] Task O7: Dismiss, and Undo
 - [ ] Task O8: The Dashboard's tile, filter tab and lightbulb
@@ -1043,12 +1043,18 @@ product.") is saved with the product; off, the tab is empty, the badge 0 and the
 
 **Files:** the above; tests F22 **AC5**, **AC6**; unit `ProductInputTest` (the flag); F1's spec updated for the tab.
 
-- [ ] **Step 1: Failing tests** (AC5: product #14695's tab lists 3, badge 3; AC6: switch off → 0 here and in O1's list;
+- [x] **Step 1: Failing tests** (AC5: product #14695's tab lists 3, badge 3; AC6: switch off → 0 here and in O1's list;
   a new product takes the setting).
-- [ ] **Step 2: The flag through input, product, repository, resource.**
-- [ ] **Step 3: The tab and the switch.**
-- [ ] **Step 4: Run and look** (F1 and F22 specs; 375 px).
-- [ ] **Step 5: Commit** — "Add the product's Opportunities tab and Detect Opportunities".
+- [x] **Step 2: The flag through input, product, repository, resource.**
+- [x] **Step 3: The tab and the switch.**
+- [x] **Step 4: Run and look** (F1 and F22 specs; 375 px).
+- [x] **Step 5: Commit** — "Add the product's Opportunities tab and Detect Opportunities".
+
+*Note (2026-11-21):* the badge after Save Changes is read by a small listener (`product-opportunity-count.js`) on
+product-save.js's `affibloom:product-saved`, so no `counts.opportunities` in `ProductResource::full()` and no change to
+product-save.js; the resource gains `detect_opportunities`. The tab reuses O1's list (`context=product`: no filter links,
+the product page's addresses) and the Locations tab's search form (now any tab's). Disabled switches are faded.
+Checked: unit (the flag), phpcs, analyse; on Local PATCH off/on: stored 0/1, the product's list 0/10; the tab at 1280 px.
 
 ---
 
