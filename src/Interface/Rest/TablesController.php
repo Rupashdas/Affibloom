@@ -36,7 +36,8 @@ use WP_REST_Server;
  * settings; `/tables/{id}/products` (T4, T5) adds a product or a group's, badges and removes them; `/groups`, their
  * `/fields` and `/values` (T6) shape the rows and columns and save the cells; `/order` and a field's `/move` (T9)
  * reorder them; `/locations` (T10) lists the posts a table is in;
- * `/clone` and DELETE (T11) copy and delete one. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
+ * `/clone` and DELETE (T11) copy and delete one;
+ * `/preview` (T15) draws it as readers see it. `GET /tables` (T1; R8, R55, D3): one page of the list as the Tables screen draws it
  * (`html`, `url`) and as data (`items`: id, title) for the editor's "Choose a Table", ten a page or the picker's five;
  * anyone who may place displays may read it.
  */
@@ -45,10 +46,11 @@ final class TablesController implements Module {
 	/**
 	 * Builds the controller.
 	 *
-	 * @param TableService $tables   The tables.
-	 * @param Template     $template The list's template.
+	 * @param TableService      $tables   The tables.
+	 * @param Template          $template The list's template.
+	 * @param TablePreview|null $preview  The reader's table for Preview Table (T15).
 	 */
-	public function __construct( private TableService $tables, private Template $template ) {}
+	public function __construct( private TableService $tables, private Template $template, private ?TablePreview $preview = null ) {}
 
 	/**
 	 * Hooks into WordPress.
@@ -66,6 +68,15 @@ final class TablesController implements Module {
 			'type'     => 'integer',
 			'minimum'  => 0,
 			'required' => true,
+		);
+		register_rest_route(
+			ProductsController::NAMESPACE,
+			'/tables/(?P<id>\d+)/preview',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'preview' ),
+				'permission_callback' => $can,
+			)
 		);
 		register_rest_route(
 			ProductsController::NAMESPACE,
@@ -609,6 +620,22 @@ final class TablesController implements Module {
 	 */
 	private static function not_found(): WP_Error {
 		return new WP_Error( 'affibloom_table_not_found', __( 'Table is not found', 'affibloom' ), array( 'status' => 404 ) );
+	}
+
+	/**
+	 * GET /tables/{id}/preview (R54, D18; Task T15): the table as readers see it, with its stylesheets, the `:root`
+	 * block and the phone script, for the builder's preview frame. 404 for a table that is gone.
+	 *
+	 * @param WP_REST_Request $request The table.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function preview( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$answer = $this->preview?->of( (int) $request['id'] );
+		if ( null === $answer ) {
+			return self::not_found();
+		}
+
+		return new WP_REST_Response( array( 'data' => $answer ) );
 	}
 
 	/**

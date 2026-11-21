@@ -63,9 +63,11 @@ if ( $horizontal ) {
 				<span><?php echo esc_html( $button[1] ); ?></span>
 			</button>
 		<?php endforeach; ?>
-		<button type="button" class="affibloom-button affibloom-button--secondary affibloom-table-builder__preview" data-table-action="preview" disabled title="<?php esc_attr_e( 'Coming soon', 'affibloom' ); ?>"<?php echo null === $table->id ? ' hidden' : ''; ?>>
+		<?php // R54 (Task T15): Preview Table, which reads Edit Table while the preview shows. ?>
+		<button type="button" class="affibloom-button affibloom-button--secondary affibloom-table-builder__preview" data-table-action="preview" aria-pressed="false"
+			data-preview-label="<?php esc_attr_e( 'Preview Table', 'affibloom' ); ?>" data-edit-label="<?php esc_attr_e( 'Edit Table', 'affibloom' ); ?>"<?php echo null === $table->id ? ' hidden' : ''; ?>>
 			<?php $this->render( 'admin/partials/icon', array( 'name' => 'eye' ) ); ?>
-			<span><?php esc_html_e( 'Preview Table', 'affibloom' ); ?></span>
+			<span data-preview-text><?php esc_html_e( 'Preview Table', 'affibloom' ); ?></span>
 		</button>
 	</div>
 	<?php if ( array() === $table->products ) : ?>

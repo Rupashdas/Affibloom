@@ -3250,6 +3250,13 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table-locations__action { width: 72px; text-align: center; }
 .affibloom-table-locations__list tbody[aria-busy="true"] { opacity: .5; }
 
+/* Task T15 (F25 R54): Preview Table shows the reader's table in its own frame; the builder and the Add buttons hide. */
+.affibloom-table-preview { margin-bottom: 16px; padding: 16px; overflow: hidden; }
+.affibloom-table-preview .affibloom-preview-frame { display: block; width: 100%; border: 0; }
+.is-previewing .affibloom-table-grid-scroll,
+.is-previewing .affibloom-table-builder .affibloom-empty,
+.is-previewing [data-table-action^="add-"] { display: none; }
+
 /* Task T2 (F25 R12): Create Table's two style tiles, radio cards side by side. */
 .affibloom-table-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; padding: 0; border: 0; }
 .affibloom-table-styles__tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 1px solid var(--affibloom-line); border-radius: 12px; background: var(--affibloom-white); cursor: pointer; }

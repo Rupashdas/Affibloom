@@ -111,6 +111,8 @@ $all_label = sprintf( __( 'All Tables %s', 'affibloom' ), number_format_i18n( $v
 			<div id="affibloom-table-builder" data-table-builder-region>
 				<?php $this->render( 'admin/partials/table-builder', $view['builder'] ); ?>
 			</div>
+			<?php // R54 (Task T15): the reader's table, in its own frame, while Preview Table is on. ?>
+			<div class="affibloom-card affibloom-table-preview" data-table-preview hidden data-frame-title="<?php esc_attr_e( 'Table preview', 'affibloom' ); ?>"></div>
 
 			<p class="affibloom-table-page__delete">
 				<?php // R41, D12 (Task T11): unused, Lasso's question; used, "Hold Up". The server checks again. ?>

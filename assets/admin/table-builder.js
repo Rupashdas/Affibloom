@@ -26,6 +26,8 @@
  * - Order (T9; D9): a product, a row or column and a field are dragged by their grips (pointer events: the item under
  *   the pointer is marked, the drop sends the new order) or moved one place by their Move buttons; a field also moves
  *   to the previous or next row (column), or is dropped on another one. Each move redraws the builder.
+ * - Preview Table (T15; R54, D18): the reader's table (GET /tables/{id}/preview) in a frame in place of the builder;
+ *   the button reads Edit Table and the Add buttons hide; a settings change draws the preview again; Edit Table returns.
  * - Copy Shortcode (F31 R33; Task 18S13): copies `[affibloom type="table" id="<id>"]`; the label reads "Copied!" for
  *   1.5 seconds, as the group page's does; a refused copy says so.
  * - Delete This Table (T11; R41, D12): the table's locations are counted first; none → 'Delete "<name>"' → OK deletes
@@ -52,6 +54,8 @@
 	var busy = false;
 	var settings = null;
 	var saved = name.value;
+	var previewing = false;
+	var preview = function () {};
 
 	var say = function ( text ) {
 		error.textContent = text;
@@ -82,6 +86,9 @@
 				}
 				if ( undefined !== data.html ) {
 					region.innerHTML = data.html;
+					if ( previewing ) {
+						preview();
+					}
 				}
 				status.textContent = page.getAttribute( 'data-saved' );
 				if ( job.done ) {
@@ -530,6 +537,15 @@
 			window.affibloomModal.show( groupPicker, addGroup );
 			return;
 		}
+		if ( event.target.closest( '[data-table-action="preview"]' ) ) {
+			if ( previewing ) {
+				editTable();
+			} else {
+				previewing = true;
+				preview();
+			}
+			return;
+		}
 		if ( event.target.closest( '[data-table-action="add-line"]' ) ) {
 			enqueue( {
 				send: function ( current ) {
@@ -861,6 +877,32 @@
 		mark( null );
 		region.classList.remove( 'is-dragging' );
 	} );
+
+	// Preview Table (T15).
+	var previewBox = page.querySelector( '[data-table-preview]' );
+	var previewButton = function () {
+		var button = region.querySelector( '[data-table-action="preview"]' );
+		button.setAttribute( 'aria-pressed', previewing ? 'true' : 'false' );
+		button.querySelector( '[data-preview-text]' ).textContent = previewing ? button.dataset.editLabel : button.dataset.previewLabel;
+	};
+	preview = function () {
+		page.classList.add( 'is-previewing' );
+		previewBox.hidden = false;
+		previewButton();
+		wp.apiFetch( { path: path + '/preview' } ).then( function ( answer ) {
+			if ( previewing ) {
+				window.affibloomBoxFrame( previewBox, answer.data, previewBox.dataset.frameTitle, function () {} );
+			}
+		} ).catch( function ( failure ) {
+			say( words( failure ) );
+		} );
+	};
+	var editTable = function () {
+		previewing = false;
+		page.classList.remove( 'is-previewing' );
+		previewBox.hidden = true;
+		previewButton();
+	};
 
 	// Copy Shortcode (18S13).
 	var copyButton = document.querySelector( '[data-table-copy]' );

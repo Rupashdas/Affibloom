@@ -550,4 +550,22 @@ test.describe( 'F25 Comparison tables', () => {
 		await expect( fourth ).toBeHidden();
 		await expect( page.locator( '.affibloom-display-table' ).first().locator( '.table-vertical-mobile' ) ).toBeHidden();
 	} );
+
+	// AC19 (T15; R54, D18).
+	test( 'AC19 Preview Table: the reader's table in place of the builder, Edit Table, a redraw on a setting change', async ( { page } ) => {
+		const word = unique( 'tbl' ).replace( /[^a-z0-9]/gi, '' );
+		await tableWith( page, 'row', [ createProduct( { name: `Preview ${ word }` } ) ] );
+		await page.getByRole( 'button', { name: 'Preview Table' } ).click();
+		const frame = page.frameLocator( '[data-table-preview] iframe' );
+		await expect( frame.locator( '.affibloom-display-table.affibloom-table-cactus-theme' ) ).toBeVisible();
+		await expect( page.getByRole( 'button', { name: 'Edit Table' } ) ).toBeVisible();
+		await expect( page.getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeHidden();
+
+		await page.getByLabel( 'Theme' ).selectOption( 'Money' );
+		await expect( frame.locator( '.affibloom-display-table.affibloom-table-money-theme' ) ).toBeVisible();
+
+		await page.getByRole( 'button', { name: 'Edit Table' } ).click();
+		await expect( page.getByRole( 'button', { name: 'Add Product', exact: true } ) ).toBeVisible();
+		await expect( page.locator( '[data-table-preview]' ) ).toBeHidden();
+	} );
 } );

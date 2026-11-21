@@ -143,7 +143,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 18S13: A table's Copy Shortcode
 - [x] Task T13: The reader's Vertical table
 - [x] Task T14: Phone cards and breakpoints
-- [ ] Task T15: Preview Table
+- [x] Task T15: Preview Table
 - [ ] Task T16: The Dashboard's Comparison table filter
 - [ ] Task T17: A deleted product leaves its tables
 - [ ] Task 23F: Table — "Choose a Table" in the block (moved here from Phase 4; with 24D's table half)
@@ -2191,11 +2191,13 @@ buttons hide; style, theme and toggle changes redraw the preview; **Edit Table**
 
 **Files:** the above; F25 spec AC19.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Route.**
-- [ ] **Step 3: Toggle.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Preview a table from its builder".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Route.**
+- [x] **Step 3: Toggle.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Preview a table from its builder".
+
+*Note:* The route answers what the product page's preview frame takes (`affibloomBoxFrame`: HTML, the box's and the table's stylesheets, the site's `:root` block and icons, the phone script), built by `Interface\Rest\TablePreview`; so no front CSS is loaded on the admin page itself. Checked in a headless browser: the preview, Edit Table, the Add buttons hidden, a theme change redrawn in the frame.
 
 ---
 

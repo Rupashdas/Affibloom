@@ -260,9 +260,9 @@ final class BoxAssets implements Module {
 	}
 
 	/**
-	 * The `<head>` block's CSS for this site.
+	 * The `<head>` block's CSS for this site (also a table preview's frame, F25 Task T15).
 	 */
-	private function head_css(): string {
+	public function head_css(): string {
 		$display = $this->display->current();
 
 		return self::head_style(
@@ -285,6 +285,13 @@ final class BoxAssets implements Module {
 		}
 
 		return array_map( fn( string $file ): string => add_query_arg( 'ver', $this->file_version( $file ), $this->url . $file ), $sheets );
+	}
+
+	/**
+	 * The comparison tables' stylesheet with its version, for a table preview's frame (F25 R52; Task T15).
+	 */
+	public function table_stylesheet(): string {
+		return add_query_arg( 'ver', $this->file_version( 'assets/front/table.css' ), $this->url . 'assets/front/table.css' );
 	}
 
 	/**

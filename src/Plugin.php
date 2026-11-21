@@ -221,6 +221,7 @@ use Affibloom\Interface\Rest\ProductLinkSearch;
 use Affibloom\Interface\Rest\ProductsController;
 use Affibloom\Interface\Rest\LocationPreviewController;
 use Affibloom\Interface\Rest\LocationsController;
+use Affibloom\Interface\Rest\TablePreview;
 use Affibloom\Interface\Rest\TablesController;
 use Affibloom\Interface\Rest\VariantsController;
 use Affibloom\Interface\Rest\DisplayPreviewController;
@@ -551,8 +552,9 @@ final class Plugin {
 		$box_html     = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
 		$display_html = new DisplayHtml( dirname( $this->file ) . '/templates/front', $box_html, $box_assets );
 		// The block draws its Button and Image displays through the shortcode (Task 23C).
+		$renderer  = new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups, $this->table_service() );
 		$shortcode = new AffibloomShortcode(
-			new ShortcodeRenderer( new PostTypeProductRepository(), new RepointResolver( new PostTypeProductRepository() ), new OptionFieldRepository(), new TableAmazonProductRepository(), $display, $this->settings_repository(), $box_builder, $groups, $this->table_service() ),
+			$renderer,
 			$box_html,
 			$display_html,
 			new AiTextService( new OptionAiTextRepository() )
@@ -636,7 +638,7 @@ final class Plugin {
 			new AmazonImportController( $this->amazon_import_status(), $this->template() ),
 			// F25 (Task T1): comparison tables, stored as posts; the list's route.
 			new TablePostType(),
-			new TablesController( $this->table_service(), $this->template() ),
+			new TablesController( $this->table_service(), $this->template(), new TablePreview( $renderer, $display_html, $box_assets, $icon_css, $display ) ),
 			new ContentExportController( $this->content_export() ),
 			new LocationsController( $products, $this->location_service(), $this->template() ),
 			new ProductLinkSearch( new PublicLinks( $this->settings_repository() ), new PostTypeProductRepository() ),
