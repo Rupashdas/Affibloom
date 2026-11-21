@@ -3248,7 +3248,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 /* A field card (Lasso's): the grip down its left edge, then the name, its ×, and the editor. */
 .affibloom-table-field { display: flex; gap: 0; min-width: 0; border: 1px solid var(--affibloom-line); border-radius: var(--affibloom-radius-control); background: var(--affibloom-white); overflow-wrap: anywhere; cursor: grab; transition: border-color .12s, box-shadow .12s; }
 .affibloom-table-field:hover { border-color: var(--affibloom-line-strong); }
-.affibloom-table-field__grip { width: 20px; height: auto; min-height: 36px; border-radius: 0; border-right: 1px solid var(--affibloom-line); background: var(--affibloom-subtle); }
+/* The grip's left corners follow the card's inside curve; square, its fill covered the card's rounded corners. */
+.affibloom-table-field__grip { width: 20px; height: auto; min-height: 36px; border-radius: calc(var(--affibloom-radius-control) - 1px) 0 0 calc(var(--affibloom-radius-control) - 1px); border-right: 1px solid var(--affibloom-line); background: var(--affibloom-subtle); }
 .affibloom-table-field__grip svg { width: 14px; height: 14px; }
 .affibloom-table-field__body { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; padding: 6px 8px 8px; cursor: default; }
 .affibloom-table-field__head { display: flex; align-items: center; justify-content: space-between; gap: 6px; cursor: grab; }
