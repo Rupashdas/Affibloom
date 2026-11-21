@@ -26,7 +26,8 @@
 	'use strict';
 
 	var TEXTS = [ 'name', 'url', 'button_text', 'badge', 'disclosure', 'theme', 'image_url', 'permalink' ];
-	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'show_features', 'link_cloaking' ];
+	// is_opportunity: Detect Opportunities (F22 R38, D9; Task O5), the switch's field name as Lasso's.
+	var SWITCHES = [ 'new_tab', 'nofollow', 'sponsored', 'show_disclosure', 'prime', 'show_price', 'show_features', 'link_cloaking', 'is_opportunity' ];
 	var toast = window.affibloomToast;
 	var dialog = window.affibloomSaveDialog;
 	var errors = window.affibloomFieldErrors;
