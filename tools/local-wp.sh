@@ -7,7 +7,11 @@ set -euo pipefail
 
 LOCAL_DATA="${LOCAL_DATA:-$APPDATA/Local}"
 LOCAL_SITE_ID="${LOCAL_SITE_ID:-XMaGBQZ-W}"
-LOCAL_PHP_DIR="${LOCAL_PHP_DIR:-$LOCAL_DATA/lightning-services/php-8.3.36+0/bin/win64}"
+# The newest PHP 8.3 that Local has installed: Local replaces the folder when it updates PHP (8.3.36+0 became
+# 8.3.37+4 on 2026-11-22), so the folder is looked up, not fixed.
+if [ -z "${LOCAL_PHP_DIR:-}" ]; then
+	LOCAL_PHP_DIR="$(ls -d "$LOCAL_DATA"/lightning-services/php-8.3.* 2>/dev/null | sort -V | tail -n 1)/bin/win64"
+fi
 LOCAL_MYSQL_DIR="${LOCAL_MYSQL_DIR:-$LOCAL_DATA/lightning-services/mysql-8.4.0+2/bin/win64/bin}"
 LOCAL_WP_CLI="${LOCAL_WP_CLI:-/c/Program Files (x86)/Local/resources/extraResources/bin/wp-cli/wp-cli.phar}"
 # The site's MySQL port, read from Local's run/<site id>/conf/mysql/my.cnf on every run:

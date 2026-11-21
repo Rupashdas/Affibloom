@@ -17,8 +17,9 @@ use Affibloom\Domain\Product\AffiliateUrl;
 use WP_Http;
 
 /**
- * Fetches a page with WordPress's HTTP API, as Lasso does (wp_remote_get with the editor's browser user agent and
- * WordPress's 5-second timeout). Redirects are followed by hand, up to WordPress's usual five, so that a redirect
+ * Fetches a page with WordPress's HTTP API, as Lasso does (with the editor's browser user agent and WordPress's
+ * 5-second timeout), but through wp_safe_remote_get(), which refuses private and local addresses (Lasso:
+ * wp_remote_get; Task 37A, finding S3). Redirects are followed by hand, up to WordPress's usual five, so that a redirect
  * into an Amazon store stops before the store's page is requested; Lasso lets wp_remote_get follow it. An Amazon
  * short link on the way (amzn.to → amzn.to) is followed, since it is only a redirect (Task 12D).
  */
@@ -42,7 +43,8 @@ final class WpPageFetcher implements PageFetcher {
 		$current = $url;
 
 		for ( $hop = 0; $hop <= self::MAX_REDIRECTS; $hop++ ) {
-			$response = wp_remote_get(
+			// Safe: a link must not make the site read a private or local address (Task 37A, finding S3).
+			$response = wp_safe_remote_get(
 				$current,
 				array(
 					'redirection'         => 0,
@@ -74,7 +76,7 @@ final class WpPageFetcher implements PageFetcher {
 	/**
 	 * The redirect target, or ''. A response can carry the header more than once; the last one counts.
 	 *
-	 * @param array<string, mixed> $response A wp_remote_get() response.
+	 * @param array<string, mixed> $response A wp_safe_remote_get() response.
 	 */
 	private function location( array $response ): string {
 		$location = wp_remote_retrieve_header( $response, 'location' );

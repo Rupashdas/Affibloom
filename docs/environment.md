@@ -16,9 +16,11 @@
   the site's php.ini and the bundled WP-CLI (read-only call checked 2026-11-12):
   ```bash
   export PHPRC="$APPDATA/Local/run/XMaGBQZ-W/conf/php"
-  "$APPDATA/Local/lightning-services/php-8.3.36+0/bin/win64/php.exe" \
+  "$APPDATA/Local/lightning-services/php-8.3.37+4/bin/win64/php.exe" \
     "/c/Program Files (x86)/Local/resources/extraResources/bin/wp-cli/wp-cli.phar" <command>
   ```
+  (the folder changes when Local updates PHP: 8.3.36+0 became 8.3.37+4 on 2026-11-22; `tools/local-wp.sh` picks the newest
+  `php-8.3.*` itself).
   **Use `bash tools/local-wp.sh <command>` from the plugin folder** (Task 2): it does the above, puts PHP's
   `ImageMagick` folder on PATH (otherwise a `php_imagick.dll` warning lands on stdout and breaks JSON
   output), adds Local's `mysql` client, and sets `MYSQL_TCP_PORT` (WP-CLI runs mysql with
@@ -68,6 +70,9 @@
   `node node_modules/@playwright/test/cli.js test -c .local/no-login.config.ts <spec> -g "<AC or task>" -x --reporter=line`
   (`-g` picks the task's tests, `-x` stops at the first failure). Looks: `node tools/shot.cjs "wp-admin/admin.php?page=…"`
   (no leading `/`: Git Bash rewrites it), 1280 and 375 px by default, into `.local/shots/`.
+- **A long burst of requests stops Local's PHP workers** (seen 2026-11-22, Task 37A: ~800 REST calls in a row): nginx
+  answers 502 "no live upstreams" until the site is stopped and started again in Local. Keep test walks to a few
+  hundred requests.
 - **Local runs only two PHP workers:** on Windows it starts two `php-cgi.exe` processes (ports 10002, 10003), each
   serving one request at a time; `pm.max_children` in `www.conf` does not apply. The count is hard-coded in Local's
   `lightning-services/php-*/lib/PhpService.js` (`requiredPorts`: 2 on Windows), not a setting (checked 2026-11-15,

@@ -75,7 +75,7 @@ the text below as a deviation in `progress.md`.
 
 ### Reviews of everything built (roadmap 8.1-8.4)
 
-- [ ] Task 37A: Security review
+- [x] Task 37A: Security review
 - [ ] Task 37B: Performance review
 - [ ] Task 37C: Accessibility review
 - [ ] Task 37D: Compatibility review
@@ -202,7 +202,7 @@ New code appears only as fixes, each with a test.
 
 **Files:** create the three files above; modify whatever the findings need.
 
-- [ ] **Step 1: Inventory.** Build `docs/reviews/entry-points.md` from the code, not from the analyses:
+- [x] **Step 1: Inventory.** Build `docs/reviews/entry-points.md` from the code, not from the analyses:
 
   ```bash
   bash tools/local-wp.sh eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === strpos( $r, "/affibloom/" ) ) { echo $r, " ", implode( ",", array_keys( $h[0]["methods"] ) ), "\n"; } }'
@@ -212,14 +212,14 @@ New code appears only as fixes, each with a test.
 
   Compare it with the "Entry points" sections of `docs/features/*/analysis.md`. A route in the code and not in an
   analysis, or the reverse, is a finding.
-- [ ] **Step 2: Failing test (the outermost).** `tests/E2E/security.spec.ts` reads the REST index
+- [x] **Step 2: Failing test (the outermost).** `tests/E2E/security.spec.ts` reads the REST index
   (`/wp-json/affibloom/v1`) and, for every route and method except `POST /clicks`, asserts: anonymous gets 401; a
   logged-in Author (created in the test, removed after) gets 403; an administrator without the REST nonce gets 403
   (`rest_cookie_invalid_nonce`). For each `admin-post.php` action in the inventory: no nonce gets the "link expired"
   stop, an Author gets 403. Expected: red on any route whose `permission_callback` is `__return_true` or too weak. With
   TL6 (Permissions) built, the Author case also runs with the minimum role set to Author and expects 200 only where
   the role is allowed.
-- [ ] **Step 3: Plugin Check.**
+- [x] **Step 3: Plugin Check.**
 
   ```bash
   bash tools/local-wp.sh plugin install plugin-check --activate
@@ -228,7 +228,7 @@ New code appears only as fixes, each with a test.
 
   Fix everything Plugin Check reports, except false positives, each explained in `security.md`. Deactivate and delete
   Plugin Check afterwards (`plugin deactivate plugin-check && plugin delete plugin-check`).
-- [ ] **Step 4: By hand, per entry point.** Record each item as checked in `security.md`, per screen, route, action,
+- [x] **Step 4: By hand, per entry point.** Record each item as checked in `security.md`, per screen, route, action,
   public entry point and cron job from step 1:
   1. **Every write needs a capability check and a nonce:** the `admin_post_*` handlers, each REST route's
      `permission_callback`, the setup wizard, the tour and education routes, the import and migration routes, the
@@ -259,14 +259,20 @@ New code appears only as fixes, each with a test.
   10. **Uploads:** the log folder is not reachable from the web (TL3), the CSV export is not stored on disk.
   11. **A user without the capability gets 403:** the E2E test of step 2 is the proof; add the cases the generic walk
       cannot cover (an Author calling `PATCH /products/{id}` for a product they could not otherwise see).
-- [ ] **Step 5: Fix what the review found,** each fix with a test (the failing case first), `composer lint`, `composer
+- [x] **Step 5: Fix what the review found,** each fix with a test (the failing case first), `composer lint`, `composer
   analyse`, the unit suite on the machine's PHP 8.5 CLI and the E2E suite against Local.
-- [ ] **Step 6: Run and look.** `npx playwright test security`, green; open `docs/reviews/security.md` and check that
+- [x] **Step 6: Run and look.** `npx playwright test security`, green; open `docs/reviews/security.md` and check that
   every inventory row has a verdict.
-- [ ] **Step 7: Commit** the review document, the inventory, the test and the fixes: "Review the security of every
+- [x] **Step 7: Commit** the review document, the inventory, the test and the fixes: "Review the security of every
   entry point
 
   Findings and their fixes are recorded in docs/reviews/security.md."
+
+*Note (2026-11-22):* findings S1-S4 fixed (post-type capabilities, the Elementor field, safe fetches, the
+visitor-reachable index catch-up), S5-S8 stand (`docs/reviews/security.md`). The walk reads the REST server's route table,
+hidden routes too, not the index; an administrator without a nonce is a visitor (401), with a wrong one 403. There is
+no `admin-post` action (saves are REST). Plugin Check was downloaded by hand (Local blocks outgoing HTTP);
+`tools/local-wp.sh` now finds Local's PHP 8.3 folder itself (Local moved to 8.3.37+4 mid-task).
 
 ---
 

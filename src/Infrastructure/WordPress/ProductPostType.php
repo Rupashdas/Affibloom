@@ -26,6 +26,14 @@ final class ProductPostType implements Module {
 	public const RETIRED = 'affibloom_retired';
 
 	/**
+	 * Builds the post type.
+	 *
+	 * @param string $capability The capability that may change products (`Capabilities::PRODUCTS`); every capability of
+	 *                           the type is this one (Task 37A, finding S1).
+	 */
+	public function __construct( private string $capability ) {}
+
+	/**
 	 * Hooks into WordPress.
 	 */
 	public function register(): void {
@@ -68,6 +76,7 @@ final class ProductPostType implements Module {
 				'can_export'       => true,
 				'delete_with_user' => false,
 				'capability_type'  => 'post',
+				'capabilities'     => PostTypeCapabilities::only( $this->capability ),
 				'map_meta_cap'     => true,
 			)
 		);

@@ -123,12 +123,13 @@ final class ElementorDisplayWidget extends Widget_Base {
 	}
 
 	/**
-	 * The page: the shortcode, rendered (R70).
+	 * The page: the shortcode, rendered (R70). The field is kept to post HTML first (Task 37A, finding S2): it is
+	 * whatever the editor typed, and an Author without unfiltered_html must not get a script onto the page through it.
 	 */
 	protected function render(): void {
 		$shortcode = $this->get_settings_for_display( self::SHORTCODE );
 
-		echo do_shortcode( shortcode_unautop( is_string( $shortcode ) ? $shortcode : '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the shortcodes' own output, as the post content's.
+		echo do_shortcode( shortcode_unautop( wp_kses_post( is_string( $shortcode ) ? $shortcode : '' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- post HTML (wp_kses_post) and the shortcodes' own escaped output.
 	}
 
 	/**

@@ -48,7 +48,21 @@ final class ElementorDisplayWidgetTest extends TestCase {
 		self::assertSame( 'textarea', $controls['description_single']['type'] );
 	}
 
+	/**
+	 * Task 37A, finding S2: the field is the editor's text, printed on the page; an Author without unfiltered_html
+	 * must not get a script onto it, as WordPress keeps one out of their post content.
+	 */
+	public function test_the_field_is_kept_to_post_html_before_its_shortcodes_run(): void {
+		Functions\expect( 'wp_kses_post' )->once()->with( '[affibloom id="7"]<script>alert(1)</script>' )->andReturn( '[affibloom id="7"]alert(1)' );
+		Functions\when( 'shortcode_unautop' )->returnArg();
+		Functions\expect( 'do_shortcode' )->once()->with( '[affibloom id="7"]alert(1)' )->andReturn( '<div class="affibloom-box">box</div>alert(1)' );
+		$widget = new ElementorDisplayWidget( array( 'settings' => array( ElementorDisplayWidget::SHORTCODE => '[affibloom id="7"]<script>alert(1)</script>' ) ) );
+
+		self::assertSame( '<div class="affibloom-box">box</div>alert(1)', $widget->stub_render() );
+	}
+
 	public function test_the_page_renders_the_shortcode_and_plain_content_prints_it(): void {
+		Functions\when( 'wp_kses_post' )->returnArg();
 		Functions\expect( 'shortcode_unautop' )->once()->with( '[affibloom id="7"]' )->andReturn( '[affibloom id="7"]' );
 		Functions\expect( 'do_shortcode' )->once()->with( '[affibloom id="7"]' )->andReturn( '<div class="affibloom-box">box</div>' );
 		$widget = new ElementorDisplayWidget( array( 'settings' => array( ElementorDisplayWidget::SHORTCODE => '[affibloom id="7"]' ) ) );

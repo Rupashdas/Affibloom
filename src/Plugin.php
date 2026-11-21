@@ -566,7 +566,7 @@ final class Plugin {
 		);
 
 		return array(
-			new ProductPostType(),
+			new ProductPostType( Capabilities::PRODUCTS ),
 			new GroupTaxonomy(),
 			new ProductBoxBlock(
 				// Built by `npm run build` (wp-scripts, Task 23A): block.json with the editor script and style.
@@ -642,7 +642,7 @@ final class Plugin {
 			new OpportunitiesController( $this->opportunity_service(), $this->intro_boxes(), $this->template(), $this->content_export() ),
 			new AmazonImportController( $this->amazon_import_status(), $this->template() ),
 			// F25 (Task T1): comparison tables, stored as posts; the list's route.
-			new TablePostType(),
+			new TablePostType( Capabilities::PRODUCTS ),
 			// F25 R60, D15 (Task T17): a product deleted for good leaves its tables.
 			new TableProductHooks( $this->table_service() ),
 			new TablesController( $this->table_service(), $this->template(), new TablePreview( $renderer, $display_html, $box_assets, $icon_css, $display ), $choices ),

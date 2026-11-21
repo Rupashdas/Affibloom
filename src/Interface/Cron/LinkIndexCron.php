@@ -16,6 +16,7 @@ use Affibloom\Domain\LinkIndex\RebuildStateRepository;
 use Affibloom\Domain\Settings\SettingsRepository;
 use Affibloom\Application\Jobs\CpuGuard;
 use Affibloom\Application\Jobs\JobSlots;
+use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
 
 /**
@@ -116,9 +117,13 @@ final class LinkIndexCron implements Module {
 
 	/**
 	 * Where WP-Cron is disabled, an admin page runs up to "Maximum cronjob at a time" (1-3) due batches itself (D12),
-	 * after restarting a broken chain.
+	 * after restarting a broken chain. Only for a user with Affibloom's capability: admin_init also runs for a
+	 * visitor's admin-ajax.php and admin-post.php requests, which must not start work (Task 37A, finding S4).
 	 */
 	public function catch_up(): void {
+		if ( ! current_user_can( Capabilities::PRODUCTS ) ) {
+			return;
+		}
 		if ( ! defined( 'DISABLE_WP_CRON' ) || ! DISABLE_WP_CRON ) {
 			return;
 		}

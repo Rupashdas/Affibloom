@@ -23,6 +23,14 @@ final class TablePostType implements Module {
 	public const META = '_affibloom_table';
 
 	/**
+	 * Builds the post type.
+	 *
+	 * @param string $capability The capability that may change tables (`Capabilities::PRODUCTS`); every capability of
+	 *                           the type is this one (Task 37A, finding S1).
+	 */
+	public function __construct( private string $capability ) {}
+
+	/**
 	 * Hooks into WordPress.
 	 */
 	public function register(): void {
@@ -44,6 +52,8 @@ final class TablePostType implements Module {
 				'query_var'    => false,
 				'supports'     => array( 'title' ),
 				'can_export'   => true,
+				'capabilities' => PostTypeCapabilities::only( $this->capability ),
+				'map_meta_cap' => true,
 			)
 		);
 	}
