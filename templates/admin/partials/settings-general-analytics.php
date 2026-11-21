@@ -43,7 +43,7 @@ $clicks   = $has_id && $settings->bool( 'ga_click_tracking' );
 
 		<?php
 		$switches = array(
-			'ga_click_tracking' => array( __( 'Click Tracking', 'affibloom' ), __( 'Enable to begin tracking Affibloom Link clicks in Google Analytics.', 'affibloom' ), ! $has_id, 'click' ),
+			'ga_click_tracking' => array( __( 'Click Tracking', 'affibloom' ), __( 'Enable to begin tracking product clicks in Google Analytics.', 'affibloom' ), ! $has_id, 'click' ),
 			'ga_pageview'       => array( __( 'Pageview', 'affibloom' ), __( 'If you have Google Analytics installed outside of Affibloom, keep this disabled.', 'affibloom' ), ! $clicks, 'pageview' ),
 			'ga_anonymize_ip'   => array( __( 'IP Anonymization', 'affibloom' ), __( "When enabled, we won't report visitors' IP addresses for GDPR compliance.", 'affibloom' ), ! $clicks, 'anonymize' ),
 		);

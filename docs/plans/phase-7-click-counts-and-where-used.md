@@ -80,7 +80,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### C3 — Google Analytics events
 
-- [ ] Task C3A: Settings → General — the Google Analytics section
+- [x] Task C3A: Settings → General — the Google Analytics section
 - [ ] Task C3B: Clicks send Affibloom's Google Analytics events
 - [ ] Task C3C: Load gtag.js for the configured IDs (decision C6: built)
 
@@ -630,11 +630,16 @@ Pageview asks "Enable Pageview" (Enable / Cancel). Save and reload keep the valu
 
 **Files:** the above; `tests/Unit/Domain/GaSettingsTest.php`; `C3.spec.ts` AC4-AC7.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain and service.**
-- [ ] **Step 3: Screen and script.**
-- [ ] **Step 4: Run and look** (keyboard; 375 px).
-- [ ] **Step 5: Commit** — "Add Lasso's Google Analytics settings".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain and service.**
+- [x] **Step 3: Screen and script.**
+- [x] **Step 4: Run and look** (keyboard; 375 px).
+- [x] **Step 5: Commit** — "Add Lasso's Google Analytics settings".
+
+*Note (2026-11-21):* the card, its live rules, the warning and the Pageview confirm were built by 9F (cross-phase
+note "GA card"); C3A adds `Domain\Analytics\GaSettings` (the ID list and the rules, read by C3B and C3C), D5's help
+wording and C3.spec AC4-AC7. The stored keys stay 9F's (`ga_tracking_id`, `ga_pageview`), not D5's names, as values are
+stored under them. No `settings.js` change. Checked: unit, phpcs, the card at 1280 px.
 
 ---
 

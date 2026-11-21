@@ -67,4 +67,69 @@ test.describe( 'C3 Google Analytics click events', () => {
 		await expect( page.locator( '.affibloom-box' ) ).toBeVisible(); // Affibloom is on the page
 		await expect( page.locator( 'script[id^="affibloom"][src*="googletagmanager"]' ) ).toHaveCount( 0 );
 	} );
+
+	// AC4-AC7 (C3A; R1-R6, D5): Settings → General → Google Analytics.
+	test( 'AC4 the three toggles wait for an ID; clearing it or Click Tracking switches the others off', async ( { page } ) => {
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false, ga_pageview: false, ga_anonymize_ip: false } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		const id = page.getByLabel( 'Tracking ID or Property ID', { exact: true } );
+		const click = page.getByLabel( 'Click Tracking', { exact: true } );
+		const pageview = page.getByLabel( 'Pageview', { exact: true } );
+		const anonymize = page.getByLabel( 'IP Anonymization', { exact: true } );
+		await expect( page.getByRole( 'heading', { name: 'Google Analytics' } ) ).toBeVisible();
+		for ( const toggle of [ click, pageview, anonymize ] ) {
+			await expect( toggle ).toBeDisabled();
+		}
+
+		await id.fill( 'G-TEST123' );
+		await expect( click ).toBeEnabled();
+		await click.check();
+		await expect( anonymize ).toBeEnabled();
+		await anonymize.check();
+		await click.uncheck();
+		await expect( anonymize ).not.toBeChecked();
+		await expect( anonymize ).toBeDisabled();
+		await click.check();
+		await id.fill( '' );
+		await expect( click ).not.toBeChecked();
+		await expect( click ).toBeDisabled();
+	} );
+
+	test( 'AC5 clicking the disabled Click Tracking marks the ID field and warns', async ( { page } ) => {
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		await page.locator( '#affibloom-setting-ga_click_tracking' ).locator( 'xpath=ancestor::*[contains(@class,"affibloom-toggle-row")][1]' ).click( { force: true } );
+		await expect( page.getByText( 'Please Enter GA Tracking ID Before Enable Click Tracking' ) ).toBeVisible();
+		await expect( page.getByLabel( 'Tracking ID or Property ID', { exact: true } ) ).toHaveClass( /is-invalid/ );
+	} );
+
+	test( 'AC6 switching Pageview on asks first; Cancel switches it back off', async ( { page } ) => {
+		setSettings( { ga_tracking_id: 'G-TEST123', ga_click_tracking: true, ga_pageview: false } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		const pageview = page.getByLabel( 'Pageview', { exact: true } );
+		await pageview.check();
+		const ask = page.getByRole( 'dialog', { name: 'Enable Pageview' } );
+		await expect( ask.getByRole( 'button', { name: 'Enable' } ) ).toBeVisible();
+		await ask.getByRole( 'button', { name: 'Cancel' } ).click();
+		await expect( pageview ).not.toBeChecked();
+		await pageview.check();
+		await ask.getByRole( 'button', { name: 'Enable' } ).click();
+		await expect( pageview ).toBeChecked();
+	} );
+
+	test( 'AC7 saving keeps the IDs trimmed and the toggles; a reload shows them', async ( { page } ) => {
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false, ga_pageview: false, ga_anonymize_ip: false } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
+		await page.getByLabel( 'Tracking ID or Property ID', { exact: true } ).fill( '  G-ONE111 , UA-2-2  ' );
+		await page.getByLabel( 'Click Tracking', { exact: true } ).check();
+		await page.getByLabel( 'IP Anonymization', { exact: true } ).check();
+		await page.getByRole( 'button', { name: 'Save Changes' } ).click();
+		await expect( page.locator( '.affibloom-toast' ) ).toBeVisible();
+
+		await page.reload();
+		await expect( page.getByLabel( 'Tracking ID or Property ID', { exact: true } ) ).toHaveValue( /^G-ONE111 ?, ?UA-2-2$/ );
+		await expect( page.getByLabel( 'Click Tracking', { exact: true } ) ).toBeChecked();
+		await expect( page.getByLabel( 'IP Anonymization', { exact: true } ) ).toBeChecked();
+		setSettings( { ga_tracking_id: '', ga_click_tracking: false, ga_pageview: false, ga_anonymize_ip: false } );
+	} );
 } );
