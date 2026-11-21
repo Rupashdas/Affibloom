@@ -94,7 +94,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### C1 — Amazon: refresh job and availability
 
-- [ ] Task C1E: The scheduled refresh job
+- [x] Task C1E: The scheduled refresh job
 - [ ] Task C1H: Availability handed to link health
 
 ### F22 — Opportunities
@@ -793,11 +793,16 @@ No click figures are imported. The section is in `archive/phase-7-superseded.md`
 
 **Files:** the above; `RefreshPolicyTest.php`; `C1.spec.ts` AC6 (un-fixme), AC10 via `wp cron event run`.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Policy and query.**
-- [ ] **Step 3: Cron.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Refresh due Amazon products every hour, as Lasso does".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Policy and query.**
+- [x] **Step 3: Cron.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Refresh due Amazon products every hour, as Lasso does".
+
+*Note (2026-11-21):* the Locations arm only (deviation 117): `DueAmazonData::count()`/`due()` take `$used_only`, which
+`PriceRefreshService` reads from "Only update products with Locations"; the SQL is the Locations count's rule
+(`TableLinkLocationRepository::used_sql()`, groups included). Checked: unit (both settings), phpcs, analyse; on Local
+the due query found 6 products, 1 of them used in content.
 
 ---
 

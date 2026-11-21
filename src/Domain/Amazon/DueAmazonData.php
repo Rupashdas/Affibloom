@@ -19,16 +19,18 @@ interface DueAmazonData {
 	/**
 	 * How many ASIN and store pairs are due.
 	 *
-	 * @param string $before The cutoff, "Y-m-d H:i:s" in UTC.
+	 * @param string $before    The cutoff, "Y-m-d H:i:s" in UTC.
+	 * @param bool   $used_only Only products used in content (C1 R38's "Only update products with Locations"; Task C1E).
 	 */
-	public function count( string $before ): int;
+	public function count( string $before, bool $used_only = false ): int;
 
 	/**
 	 * The due pairs, oldest first, each with a product link for the ASIN.
 	 *
-	 * @param string $before The cutoff, "Y-m-d H:i:s" in UTC.
-	 * @param int    $limit  At most this many.
+	 * @param string $before    The cutoff, "Y-m-d H:i:s" in UTC.
+	 * @param int    $limit     At most this many.
+	 * @param bool   $used_only Only products used in content (Task C1E).
 	 * @return list<array{asin: string, country: string, link: string}>
 	 */
-	public function due( string $before, int $limit ): array;
+	public function due( string $before, int $limit, bool $used_only = false ): array;
 }

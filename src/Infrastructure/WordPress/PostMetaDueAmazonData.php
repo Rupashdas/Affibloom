@@ -15,19 +15,21 @@ use Affibloom\Domain\Amazon\Marketplace;
 /**
  * The due ASIN and store pairs (C1 R38; C1Q4b): published Amazon products with an ASIN (as the bulk sync's pending
  * query reads them) whose row in `{prefix}affibloom_amazon_products` is missing or older than the cutoff, oldest first,
- * missing first. A pair shared by several products is one item, with one of their links.
+ * missing first. A pair shared by several products is one item, with one of their links. With "Only update products with
+ * Locations" (Task C1E), only products the link index finds in use, by the Locations count's rule.
  */
 final class PostMetaDueAmazonData implements DueAmazonData {
 
 	/**
 	 * How many pairs are due.
 	 *
-	 * @param string $before The cutoff, "Y-m-d H:i:s" in UTC.
+	 * @param string $before    The cutoff, "Y-m-d H:i:s" in UTC.
+	 * @param bool   $used_only Only products used in content.
 	 */
-	public function count( string $before ): int {
+	public function count( string $before, bool $used_only = false ): int {
 		global $wpdb;
 
-		[ $sql, $values ] = $this->query( $before );
+		[ $sql, $values ] = $this->query( $before, $used_only );
 		$sql              = 'SELECT COUNT(*) FROM ( ' . $sql . ' ) due';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- prepared here; read once an hour.
 		return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$values ) );
@@ -36,17 +38,18 @@ final class PostMetaDueAmazonData implements DueAmazonData {
 	/**
 	 * The due pairs, oldest first.
 	 *
-	 * @param string $before The cutoff, "Y-m-d H:i:s" in UTC.
-	 * @param int    $limit  At most this many.
+	 * @param string $before    The cutoff, "Y-m-d H:i:s" in UTC.
+	 * @param int    $limit     At most this many.
+	 * @param bool   $used_only Only products used in content.
 	 * @return list<array{asin: string, country: string, link: string}>
 	 */
-	public function due( string $before, int $limit ): array {
+	public function due( string $before, int $limit, bool $used_only = false ): array {
 		global $wpdb;
 
 		if ( $limit < 1 ) {
 			return array();
 		}
-		[ $sql, $values ] = $this->query( $before );
+		[ $sql, $values ] = $this->query( $before, $used_only );
 		$sql             .= ' ORDER BY updated IS NOT NULL, updated ASC LIMIT %d';
 		$values[]         = $limit;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- prepared here; read once an hour.
@@ -67,13 +70,16 @@ final class PostMetaDueAmazonData implements DueAmazonData {
 	/**
 	 * The grouped query of due pairs and its values.
 	 *
-	 * @param string $before The cutoff.
+	 * @param string $before    The cutoff.
+	 * @param bool   $used_only Only products used in content.
 	 * @return array{0: string, 1: list<string|int>}
 	 */
-	private function query( string $before ): array {
+	private function query( string $before, bool $used_only ): array {
 		global $wpdb;
 
-		$sql = "SELECT UPPER( a.meta_value ) AS asin, COALESCE( NULLIF( c.meta_value, '' ), %s ) AS country,
+		// The condition is already prepared (its % are escaped for the prepare below).
+		$used = $used_only ? 'AND ' . str_replace( '%', '%%', TableLinkLocationRepository::used_sql( 'p.ID' ) ) : '';
+		$sql  = "SELECT UPPER( a.meta_value ) AS asin, COALESCE( NULLIF( c.meta_value, '' ), %s ) AS country,
 				MIN( u.meta_value ) AS link, MIN( ap.last_updated ) AS updated
 			FROM {$wpdb->posts} p
 			INNER JOIN {$wpdb->postmeta} t ON t.post_id = p.ID AND t.meta_key = '_affibloom_type' AND t.meta_value = 'amazon'
@@ -81,7 +87,7 @@ final class PostMetaDueAmazonData implements DueAmazonData {
 			LEFT JOIN {$wpdb->postmeta} c ON c.post_id = p.ID AND c.meta_key = '_affibloom_amazon_country'
 			LEFT JOIN {$wpdb->postmeta} u ON u.post_id = p.ID AND u.meta_key = '_affibloom_url'
 			LEFT JOIN %i ap ON ap.asin = a.meta_value AND ap.country = COALESCE( NULLIF( c.meta_value, '' ), %s )
-			WHERE p.post_type = %s AND p.post_status = 'publish' AND ( ap.asin IS NULL OR ap.last_updated < %s )
+			WHERE p.post_type = %s AND p.post_status = 'publish' AND ( ap.asin IS NULL OR ap.last_updated < %s ) {$used}
 			GROUP BY UPPER( a.meta_value ), COALESCE( NULLIF( c.meta_value, '' ), %s )";
 
 		return array(

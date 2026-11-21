@@ -37,6 +37,9 @@ final class PriceRefreshServiceTest extends TestCase {
 	private float $now = 1000.0;
 	private InMemoryRequestLedger $ledger;
 
+	/** "Only update products with Locations" for the next service(). */
+	private bool $locations_only = true;
+
 	private function service( bool $on = true, bool $configured = true ): PriceRefreshService {
 		$this->amazon = new FakeAmazonCatalog();
 		$this->rows   = new InMemoryAmazonProducts();
@@ -47,11 +50,11 @@ final class PriceRefreshServiceTest extends TestCase {
 
 		$due = new class( $test ) implements DueAmazonData {
 			public function __construct( private PriceRefreshServiceTest $test ) {}
-			public function count( string $before ): int {
-				return count( $this->test->due_rows() );
+			public function count( string $before, bool $used_only = false ): int {
+				return count( $this->test->due_rows( $used_only ) );
 			}
-			public function due( string $before, int $limit ): array {
-				return array_slice( $this->test->due_rows(), 0, $limit );
+			public function due( string $before, int $limit, bool $used_only = false ): array {
+				return array_slice( $this->test->due_rows( $used_only ), 0, $limit );
 			}
 		};
 		$runs = new class( $test ) implements RefreshRunRepository {
@@ -75,7 +78,7 @@ final class PriceRefreshServiceTest extends TestCase {
 			$runs,
 			$job,
 			$data,
-			new InMemorySettingsRepository( array( 'update_pricing_daily' => $on ) ),
+			new InMemorySettingsRepository( array( 'update_pricing_daily' => $on, 'pricing_locations_only' => $this->locations_only ) ),
 			new GuardedCatalog( $this->amazon, $this->ledger, fn(): float => $this->now, static function ( float $seconds ): void {} ),
 			fn(): float => $this->now,
 			function ( int $seconds ): void {
@@ -85,8 +88,12 @@ final class PriceRefreshServiceTest extends TestCase {
 		);
 	}
 
+	/** @var list<bool> Whether each due query asked for products used in content only (Task C1E). */
+	private array $used_only = array();
+
 	/** @return list<array{asin: string, country: string, link: string}> */
-	public function due_rows(): array {
+	public function due_rows( bool $used_only = false ): array {
+		$this->used_only[] = $used_only;
 		return $this->due;
 	}
 
@@ -110,6 +117,15 @@ final class PriceRefreshServiceTest extends TestCase {
 
 	private function row( string $asin, string $price ): void {
 		$this->rows->save( new AmazonProduct( $asin, 'us', 'Stored', $price, 'USD', 'b', 'm', 'https://m.media-amazon.com/x.jpg', false, '', 0, '', array(), 'creators', '2026-11-01 00:00:00' ) );
+	}
+
+	/** Task C1E (C1 R38): "Only update products with Locations" narrows the due query; off, every product is due. */
+	public function test_only_products_with_locations_are_due_while_the_setting_is_on(): void {
+		$this->service()->tick();
+		$this->locations_only = false;
+		$this->service()->tick();
+
+		self::assertSame( array( true, true, false, false ), $this->used_only );
 	}
 
 	public function test_switched_off_or_without_credentials_nothing_is_asked(): void {

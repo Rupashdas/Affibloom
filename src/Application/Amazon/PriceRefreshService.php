@@ -57,7 +57,7 @@ final class PriceRefreshService {
 	 * @param RefreshRunRepository $runs     The run in progress.
 	 * @param BackgroundJob        $job      What runs process() later.
 	 * @param AmazonDataService    $data     Amazon's data, one row at a time.
-	 * @param SettingsRepository   $settings "Update Amazon pricing daily".
+	 * @param SettingsRepository   $settings "Update Amazon pricing daily" and "Only update products with Locations".
 	 * @param GuardedCatalog       $quota    Calls left today; the run keeps GuardedCatalog::RESERVE of them (C1Q6a).
 	 * @param (Closure(): float)   $clock    Seconds now; microtime() unless a test gives another.
 	 * @param (Closure(int): void) $pause    Waits that many seconds; sleep() unless a test gives another.
@@ -103,7 +103,9 @@ final class PriceRefreshService {
 
 		$cutoff = RefreshPolicy::cutoff( $now );
 		$room   = max( 0, $this->quota->left_today() - GuardedCatalog::RESERVE );
-		$queue  = $this->due->due( $cutoff, min( $room, RefreshPolicy::batch( $this->due->count( $cutoff ) ) ) );
+		// "Only update products with Locations" (C1 R38; Task C1E): only products used in content, when it is on.
+		$used  = $this->settings->get()->bool( 'pricing_locations_only' );
+		$queue = $this->due->due( $cutoff, min( $room, RefreshPolicy::batch( $this->due->count( $cutoff, $used ) ) ), $used );
 		$this->runs->save( array() === $queue ? null : new RefreshRun( $queue, $now ) );
 		$this->process();
 	}
