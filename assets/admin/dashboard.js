@@ -165,8 +165,9 @@
 		// Lasso's ?post_id= (Task 13F; F19 D24): one product, kept by every list change until Reset or a pill.
 		post_id: parseInt( params.get( 'post_id' ), 10 ) || 0,
 		paged: parseInt( params.get( 'paged' ), 10 ) || 1,
-		// The Alert sort (Task 31A: Lasso's order_by=detection_date&order_type=) and the alert tab (Task 31B: filter=).
-		order: 'detection_date' === params.get( 'order_by' ) ? params.get( 'order_type' ) || '' : '',
+		// The header sort (Task 13K; F19 D8: orderby=alert|locations|clicks&order=asc|desc) and the alert tab (31B: filter=).
+		orderby: params.get( 'orderby' ) || '',
+		order: params.get( 'order' ) || '',
 		filter: params.get( 'filter' ) || '',
 		// The size the page was printed with (remembered per editor), so the first search keeps it.
 		per_page: sizeSelect ? parseInt( sizeSelect.value, 10 ) : 0,
@@ -187,9 +188,9 @@
 		args.set( 'post_id', String( list.post_id || 0 ) );
 		args.set( 'paged', String( list.paged ) );
 		args.set( 'per_page', String( list.per_page ) );
-		if ( list.order ) {
-			args.set( 'order_by', 'detection_date' );
-			args.set( 'order_type', list.order );
+		if ( list.orderby && list.order ) {
+			args.set( 'orderby', list.orderby );
+			args.set( 'order', list.order );
 		}
 		if ( list.filter ) {
 			args.set( 'filter', list.filter );
@@ -199,7 +200,7 @@
 
 	/** The current list with some of it changed; any change but a page link starts again at page 1. */
 	function listWith( changes ) {
-		var next = { s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, post_id: current.post_id, paged: 1, per_page: current.per_page, order: current.order, filter: current.filter };
+		var next = { s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, post_id: current.post_id, paged: 1, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter };
 		Object.keys( changes ).forEach( function ( key ) {
 			next[ key ] = changes[ key ];
 		} );
@@ -291,7 +292,7 @@
 			var tab = tile.getAttribute( 'data-alert-tab' );
 			var on = tab !== current.filter;
 			guarded( function () {
-				load( listWith( { filter: on ? tab : '', order: on ? 'asc' : '' } ), true, false );
+				load( listWith( { filter: on ? tab : '', orderby: on ? 'alert' : '', order: on ? 'asc' : '' } ), true, false );
 			}, tile, true );
 		} );
 	}
@@ -306,11 +307,13 @@
 				parseInt( pill.getAttribute( 'data-view-group' ), 10 ) === current.group &&
 				( pill.getAttribute( 'data-view-filter' ) || '' ) === current.filter &&
 				( pill.getAttribute( 'data-view-placements' ) || '' ) === current.placements &&
+				( pill.getAttribute( 'data-view-orderby' ) || '' ) === current.orderby &&
+				( pill.getAttribute( 'data-view-order' ) || '' ) === current.order &&
 				parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) === current.per_page ) {
 				match = pill;
 			}
 		} );
-		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.placements && '' === current.filter ) {
+		if ( ! match && pills[ 0 ] && ! current.post_id && '' === current.s && '' === current.link_type && 0 === current.group && '' === current.placements && '' === current.orderby && '' === current.filter ) {
 			match = pills[ 0 ];
 		}
 		pills.forEach( function ( pill ) {
@@ -377,7 +380,7 @@
 				return;
 			}
 			var data = response.data;
-			current = { s: data.term, link_type: data.link_type, group: data.group, placements: data.placements || '', post_id: data.post_id, paged: data.page, per_page: data.per_page, order: data.order || '', filter: data.filter || '' };
+			current = { s: data.term, link_type: data.link_type, group: data.group, placements: data.placements || '', post_id: data.post_id, paged: data.page, per_page: data.per_page, orderby: data.orderby || '', order: data.order || '', filter: data.filter || '' };
 
 			region.innerHTML = data.html;
 			quick.id = null; // An open quick edit went with the old rows.
@@ -436,9 +439,9 @@
 		var label = button.querySelector( '[data-export-label]' );
 		var text = label.textContent;
 		var args = new URLSearchParams( { s: current.s, link_type: current.link_type, group: String( current.group || 0 ), placements: current.placements, filter: current.filter } );
-		if ( current.order ) {
-			args.set( 'order_by', 'detection_date' );
-			args.set( 'order_type', current.order );
+		if ( current.orderby && current.order ) {
+			args.set( 'orderby', current.orderby );
+			args.set( 'order', current.order );
 		}
 		button.disabled = true;
 		button.classList.add( 'is-busy' );
@@ -473,15 +476,19 @@
 		} );
 	} );
 
-	// The Alert header sorts by the issue's date (Task 31A; F11 R20, AC9): ascending, descending, then off.
+	// The header sorts (Task 13K; F19 R1-R3, D10, D11): Alert ascending, descending, then off; Locations and Clicks
+	// descending, then ascending. Each header is a link to its next state; here it loads in place and keeps the page,
+	// and the focus returns to the same header. A modified click still opens the link elsewhere.
 	region.addEventListener( 'click', function ( event ) {
-		var sort = event.target.closest( '[data-alert-sort]' );
-		if ( ! sort ) {
+		var sort = event.target.closest( '.affibloom-sort[data-sort-orderby]' );
+		if ( ! sort || 0 !== event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ) {
 			return;
 		}
+		event.preventDefault();
+		var column = sort.closest( 'th' ).className;
 		guarded( function () {
-			load( listWith( { order: sort.getAttribute( 'data-alert-sort' ) } ), true, false, function () {
-				var again = region.querySelector( '[data-alert-sort]' );
+			load( listWith( { orderby: sort.getAttribute( 'data-sort-orderby' ), order: sort.getAttribute( 'data-sort-order' ), paged: current.paged } ), true, false, function () {
+				var again = region.querySelector( 'th.' + column.split( ' ' )[ 0 ] + ' .affibloom-sort' );
 				if ( again ) {
 					again.focus();
 				}
@@ -530,7 +537,8 @@
 				post_id: parseInt( back.get( 'post_id' ), 10 ) || 0,
 				paged: parseInt( back.get( 'paged' ), 10 ) || 1,
 				per_page: parseInt( back.get( 'per_page' ), 10 ) || 0,
-				order: 'detection_date' === back.get( 'order_by' ) ? back.get( 'order_type' ) || '' : '',
+				orderby: back.get( 'orderby' ) || '',
+				order: back.get( 'order' ) || '',
 				filter: back.get( 'filter' ) || '',
 			}, false, false );
 		}, null, true, function () {
@@ -683,7 +691,7 @@
 		if ( search ) {
 			search.value = '';
 		}
-		load( { s: '', link_type: '', group: 0, placements: '', post_id: 0, paged: 1, per_page: 10, order: '', filter: '' }, true, false );
+		load( { s: '', link_type: '', group: 0, placements: '', post_id: 0, paged: 1, per_page: 10, orderby: '', order: '', filter: '' }, true, false );
 	}
 
 	var toolbar = document.querySelector( '.affibloom-toolbar' );
@@ -719,7 +727,9 @@
 						paged: 1,
 						per_page: parseInt( pill.getAttribute( 'data-view-per-page' ), 10 ) || current.per_page,
 						filter: pill.getAttribute( 'data-view-filter' ) || '',
-						order: pill.getAttribute( 'data-view-filter' ) ? 'asc' : '',
+						// A view's own sort; a tab view saved before the sort joined views opens oldest alert first, as a tab does.
+						orderby: pill.getAttribute( 'data-view-orderby' ) || ( pill.getAttribute( 'data-view-filter' ) ? 'alert' : '' ),
+						order: pill.getAttribute( 'data-view-order' ) || ( pill.getAttribute( 'data-view-filter' ) ? 'asc' : '' ),
 					}, true, false );
 				}, pill, true );
 				return;
@@ -798,7 +808,7 @@
 			wp.apiFetch( {
 				path: '/affibloom/v1/dashboard/views',
 				method: 'POST',
-				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, per_page: current.per_page, filter: current.filter },
+				data: { name: name, s: current.s, link_type: current.link_type, group: current.group, placements: current.placements, per_page: current.per_page, orderby: current.orderby, order: current.order, filter: current.filter },
 			} ).then( function ( response ) {
 				replaceViews( response.data.html );
 				nameField.value = '';

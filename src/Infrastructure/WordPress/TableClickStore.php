@@ -50,6 +50,19 @@ KEY location_day (location_id,day)';
 	}
 
 	/**
+	 * A product's clicks from a day on as an SQL value (the Clicks sort, Task 13K; F19 R6 `IFNULL(clicks, 0)`).
+	 *
+	 * @param string $product The SQL expression of the product's ID (a column of the outer query).
+	 * @param string $day     The first UTC day counted, "Y-m-d".
+	 */
+	public static function total_sql( string $product, string $day ): string {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product is a column of the caller's query, never input.
+		return $wpdb->prepare( "( SELECT COALESCE(SUM(afk.clicks), 0) FROM %i AS afk WHERE afk.product_id = {$product} AND afk.day >= %s )", $wpdb->prefix . self::TABLE, $day );
+	}
+
+	/**
 	 * Each product's clicks from a day on, in one query (the product_day index).
 	 *
 	 * @param string    $day         The first UTC day counted, "Y-m-d".

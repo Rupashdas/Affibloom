@@ -406,18 +406,18 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		const ids = async () => page.locator( 'tbody tr[data-product-id]' ).evaluateAll( ( rows ) => rows.map( ( row ) => Number( row.getAttribute( 'data-product-id' ) ) ) );
 		const header = page.locator( 'th.affibloom-col-alert' );
 
-		await header.getByRole( 'button' ).click();
+		await header.getByRole( 'link' ).click();
 		await expect( header ).toHaveAttribute( 'aria-sort', 'ascending' );
-		await expect( page ).toHaveURL( /order_by=detection_date&order_type=asc/ );
+		await expect( page ).toHaveURL( /orderby=alert&order=asc/ );
 		expect( await ids() ).toEqual( [ older, newer ] );
 
-		await header.getByRole( 'button' ).click();
+		await header.getByRole( 'link' ).click();
 		await expect( header ).toHaveAttribute( 'aria-sort', 'descending' );
 		expect( await ids() ).toEqual( [ newer, older ] );
 
-		await header.getByRole( 'button' ).click();
+		await header.getByRole( 'link' ).click();
 		await expect( header ).toHaveAttribute( 'aria-sort', 'none' );
-		await expect( page ).not.toHaveURL( /order_by/ );
+		await expect( page ).not.toHaveURL( /orderby/ );
 	} );
 
 	test( 'AC10 the Broken links and Out of stock tabs filter the list, follow the search, and keep in a saved view', async ( { page } ) => {

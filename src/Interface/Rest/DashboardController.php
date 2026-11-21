@@ -22,6 +22,7 @@ use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViews;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\Capabilities;
@@ -176,23 +177,23 @@ final class DashboardController implements Module {
 	}
 
 	/**
-	 * The list's Alert arguments (Tasks 31A, 31B): Lasso's sort names and the tab.
+	 * The list's header sort (F19 D8; Task 13K; any other value is a 400) and the alert tab (Task 31B).
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	private static function alert_args(): array {
 		return array(
-			'order_by'   => array(
+			'orderby' => array(
 				'type'    => 'string',
-				'enum'    => array( '', 'detection_date' ),
+				'enum'    => array( '', ListOrder::ALERT, ListOrder::LOCATIONS, ListOrder::CLICKS ),
 				'default' => '',
 			),
-			'order_type' => array(
+			'order'   => array(
 				'type'    => 'string',
-				'enum'    => array( '', 'asc', 'desc' ),
+				'enum'    => array( '', ListOrder::ASC, ListOrder::DESC ),
 				'default' => '',
 			),
-			'filter'     => array(
+			'filter'  => array(
 				'type'    => 'string',
 				'enum'    => array( '', 'broken-links', 'out-of-stock' ),
 				'default' => '',
@@ -218,9 +219,10 @@ final class DashboardController implements Module {
 		$per_page  = $this->per_page->choose( absint( $request->get_param( 'per_page' ) ) );
 		$group     = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );
 		$one       = absint( $request->get_param( 'post_id' ) );
-		$alerts    = $this->alerts?->listing( 'detection_date' === $request->get_param( 'order_by' ) ? (string) $request->get_param( 'order_type' ) : '', (string) $request->get_param( 'filter' ) );
+		$order     = ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) );
+		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), (string) $request->get_param( 'filter' ) );
 		$placement = Placement::from_input( (string) $request->get_param( 'placements' ) );
-		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one, $alerts, $placement );
+		$list      = $this->products->list( $term, $link_kind, max( 1, absint( $request->get_param( 'paged' ) ) ), $per_page, $group, $one, $alerts, $placement, $order );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $list->items );
 
 		return new WP_REST_Response(
@@ -231,10 +233,11 @@ final class DashboardController implements Module {
 						array(
 							'products'  => $list,
 							'term'      => $term->text(),
-							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement ),
-							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement ),
+							'url'       => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
+							'args'      => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
 							'alerts_of' => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 							'listing'   => $alerts,
+							'order'     => $order,
 							'groups_of' => $this->groups->for_products( $ids ),
 							'links_of'  => null === $this->links ? array() : $this->links->of( $list->items ),
 							'locations' => $this->locations?->of( $ids ),
@@ -253,11 +256,12 @@ final class DashboardController implements Module {
 					// the search placeholder follow a delete, a revive or a quick edit at once (Task 13I; F19 D18).
 					'library'    => $this->products->count(),
 					'post_id'    => $one,
-					'order'      => null === $alerts ? '' : $alerts->order,
+					'orderby'    => $order->column,
+					'order'      => $order->direction,
 					'filter'     => null === $alerts ? '' : $alerts->tab,
 					// The tabs' counts follow the search and the filters (Task 31B; F11 R24).
 					'alerts'     => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement ),
-					'url'        => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts, $placement ),
+					'url'        => DashboardUrl::to( $term->text(), $link_kind, $list->current(), $per_page, $group, $one, $alerts, $placement, $order ),
 				),
 			)
 		);
@@ -280,7 +284,8 @@ final class DashboardController implements Module {
 			$this->per_page->choose( absint( $request->get_param( 'per_page' ) ) ),
 			$this->groups->choose_filter( (int) $request->get_param( 'group' ) ),
 			(string) $request->get_param( 'filter' ),
-			Placement::from_input( (string) $request->get_param( 'placements' ) )
+			Placement::from_input( (string) $request->get_param( 'placements' ) ),
+			ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) )
 		);
 
 		try {
@@ -339,6 +344,7 @@ final class DashboardController implements Module {
 							'group'     => null === $active ? 0 : $active->group,
 							'filter'    => null === $active ? '' : $active->filter,
 							'placement' => null === $active ? Placement::Any : $active->placement,
+							'order'     => null === $active ? new ListOrder() : $active->order,
 							'group_ids' => array_map( static fn( $group ): int => $group->id, $this->groups->all() ),
 						)
 					),

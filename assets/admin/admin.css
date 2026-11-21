@@ -2980,6 +2980,9 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-sort:hover { color: var(--affibloom-ink-900); }
 .affibloom-sort:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
 .affibloom-sort .affibloom-icon { width: 14px; height: 14px; }
+/* Task 13K: the sortable headers are links to their next state (they work without JavaScript), drawn as the button was. */
+.affibloom-admin a.affibloom-sort { text-decoration: none; }
+.affibloom-admin a.affibloom-sort:hover span { text-decoration: underline; }
 .affibloom-alert { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--affibloom-radius-chip); text-decoration: none; }
 .affibloom-alert .affibloom-icon { width: 18px; height: 18px; }
 .affibloom-alert--broken { background: var(--affibloom-danger-50); color: var(--affibloom-danger-700); }

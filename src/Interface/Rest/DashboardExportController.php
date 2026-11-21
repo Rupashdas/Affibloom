@@ -14,6 +14,7 @@ use Affibloom\Application\LinkHealth\IssueLinksExport;
 use Affibloom\Application\LinkHealth\LinkIssueQuery;
 use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Admin\Capabilities;
@@ -85,11 +86,11 @@ final class DashboardExportController implements Module {
 							'type'    => 'string',
 							'default' => '',
 						),
-						'order_by'   => array(
+						'orderby'    => array(
 							'type'    => 'string',
 							'default' => '',
 						),
-						'order_type' => array(
+						'order'      => array(
 							'type'    => 'string',
 							'default' => '',
 						),
@@ -110,7 +111,7 @@ final class DashboardExportController implements Module {
 		if ( ! in_array( $filter, array( AlertListing::BROKEN, AlertListing::OUT_OF_STOCK ), true ) ) {
 			return new WP_Error( 'affibloom_export_filter', __( 'Export is only available on broken-links and out-of-stock views.', 'affibloom' ), array( 'status' => 400 ) );
 		}
-		$order   = 'detection_date' === $request->get_param( 'order_by' ) ? (string) $request->get_param( 'order_type' ) : '';
+		$order   = ListOrder::from_input( (string) $request->get_param( 'orderby' ), (string) $request->get_param( 'order' ) )->direction_of( ListOrder::ALERT );
 		$listing = $this->alerts->listing( $order, $filter );
 		$term    = SearchTerm::from_input( sanitize_text_field( (string) $request->get_param( 's' ) ) );
 		$group   = $this->groups->choose_filter( (int) $request->get_param( 'group' ) );

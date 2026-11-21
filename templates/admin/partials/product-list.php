@@ -4,35 +4,40 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, locations?: array<int, int>|null, known?: bool, clicks?: array<int, int>|null} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, order?: \Affibloom\Domain\Product\ListOrder, locations?: array<int, int>|null, known?: bool, clicks?: array<int, int>|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
+use Affibloom\Domain\Product\ListOrder;
+
 // A `?post_id=` that names no published product is a search that found nothing, not an empty library (Task 13F).
 $products  = $view['products'];
 $searching = '' !== $view['term'] || isset( $view['args']['post_id'] ) || isset( $view['args']['filter'] );
-// The Alert column's sort (F11 R20, AC9; Task 31A): none, oldest issue first, newest first, then none again.
-$alert_order = isset( $view['listing'] ) ? $view['listing']->order : '';
-$alert_next  = array(
-	''     => 'asc',
-	'asc'  => 'desc',
-	'desc' => '',
-)[ $alert_order ];
-$alert_aria  = array(
-	''     => 'none',
-	'asc'  => 'ascending',
-	'desc' => 'descending',
-)[ $alert_order ];
-$columns     = array(
-	// [ class, label, a placeholder until its task ].
-	array( 'affibloom-col-image', __( 'Image', 'affibloom' ), false ),
-	array( 'affibloom-col-name', __( 'Link Name', 'affibloom' ), false ),
-	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), false ),
-	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), false ),
-	array( 'affibloom-col-locations', __( 'Locations', 'affibloom' ), false ),
-	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), false ),
-	array( 'affibloom-col-actions', __( 'Actions', 'affibloom' ), false ),
+// The header sorts (F19 R1, R2, D8-D11; Task 13K): Alert by its issue's date (ascending, descending, off), Locations by
+// the count and Clicks by the 30-day total (descending, then ascending). Each header is a link to the next state that
+// keeps the page (R3), so it works without JavaScript; dashboard.js loads it in place.
+$list_order = $view['order'] ?? new ListOrder();
+$sort_href  = static function ( ListOrder $next ) use ( $view, $products ): string {
+	$args = $next->is_default() ? array() : array(
+		'orderby' => $next->column,
+		'order'   => $next->direction,
+	);
+	if ( $products->current() > 1 ) {
+		$args['paged'] = $products->current();
+	}
+
+	return add_query_arg( $args, remove_query_arg( array( 'orderby', 'order', 'paged' ), $view['url'] ) );
+};
+$columns    = array(
+	// [ class, label, the column it sorts ('' none) ].
+	array( 'affibloom-col-image', __( 'Image', 'affibloom' ), '' ),
+	array( 'affibloom-col-name', __( 'Link Name', 'affibloom' ), '' ),
+	array( 'affibloom-col-groups', __( 'Groups', 'affibloom' ), '' ),
+	array( 'affibloom-col-alert', __( 'Alert', 'affibloom' ), ListOrder::ALERT ),
+	array( 'affibloom-col-locations', __( 'Locations', 'affibloom' ), ListOrder::LOCATIONS ),
+	array( 'affibloom-col-clicks', __( 'Clicks', 'affibloom' ), ListOrder::CLICKS ),
+	array( 'affibloom-col-actions', __( 'Actions', 'affibloom' ), '' ),
 );
 ?>
 <?php
@@ -80,26 +85,25 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 						<input type="checkbox" class="affibloom-check" data-select-page aria-label="<?php esc_attr_e( 'Select all on this page', 'affibloom' ); ?>">
 					</th>
 					<?php foreach ( $columns as $column ) : ?>
-						<?php if ( 'affibloom-col-alert' === $column[0] ) : ?>
-							<th scope="col" class="affibloom-col-alert" aria-sort="<?php echo esc_attr( $alert_aria ); ?>">
-								<button type="button" class="affibloom-sort" data-alert-sort="<?php echo esc_attr( $alert_next ); ?>"
-									title="<?php esc_attr_e( 'Sort by the date the issue was found', 'affibloom' ); ?>">
+						<?php if ( '' !== $column[2] ) : ?>
+							<?php
+							$applied = $list_order->direction_of( $column[2] );
+							$next    = $list_order->next( $column[2] );
+							?>
+							<th scope="col" class="<?php echo esc_attr( $column[0] ); ?>" aria-sort="<?php echo esc_attr( '' === $applied ? 'none' : ( ListOrder::ASC === $applied ? 'ascending' : 'descending' ) ); ?>">
+								<a class="affibloom-sort" href="<?php echo esc_url( $sort_href( $next ) ); ?>"
+									data-sort-orderby="<?php echo esc_attr( $next->column ); ?>" data-sort-order="<?php echo esc_attr( $next->direction ); ?>"
+									<?php echo ListOrder::ALERT === $column[2] ? 'title="' . esc_attr__( 'Sort by the date the issue was found', 'affibloom' ) . '"' : ''; ?>>
 									<span><?php echo esc_html( $column[1] ); ?></span>
-									<?php if ( '' !== $alert_order ) : ?>
-										<?php $this->render( 'admin/partials/icon', array( 'name' => 'asc' === $alert_order ? 'chevron-up' : 'chevron-down' ) ); ?>
+									<?php if ( '' !== $applied ) : ?>
+										<?php $this->render( 'admin/partials/icon', array( 'name' => ListOrder::ASC === $applied ? 'chevron-up' : 'chevron-down' ) ); ?>
 									<?php endif; ?>
-								</button>
+								</a>
 							</th>
 							<?php continue; ?>
 						<?php endif; ?>
 						<th scope="col" class="<?php echo esc_attr( $column[0] ); ?>">
-							<span class="affibloom-th"><?php echo esc_html( $column[1] ); ?>
-							<?php
-							if ( $column[2] ) {
-								$this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) );
-							}
-							?>
-							</span>
+							<span class="affibloom-th"><?php echo esc_html( $column[1] ); ?></span>
 						</th>
 					<?php endforeach; ?>
 				</tr>

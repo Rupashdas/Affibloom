@@ -86,7 +86,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 ### F19 — the Dashboard's sorting mechanism
 
-- [ ] Task 13K: Sort the list by a column header (Alert, Locations, Clicks)
+- [x] Task 13K: Sort the list by a column header (Alert, Locations, Clicks)
 
 ### F10 — migration families: opportunities
 
@@ -746,13 +746,20 @@ and Clicks headers sort the same way: Locations by its count (36A), Clicks by it
 `admin.css`, `docs/ui/design-system.md` (sortable header); tests `ListOrderTest`, `SavedViewsTest`,
 `F19.spec.ts` AC21-AC23, F11 AC rerun.
 
-- [ ] **Step 1: Failing tests.** AC21-AC23; `ListOrderTest` (the cycle for Alert and for a desc-first column); F12 AC11 (Clicks header) and the sort part of F12 AC20 (Locations header) join the E2E file.
-- [ ] **Step 2: Domain.** `ListOrder`, `ListQuery`; `SavedView` holds a `ListOrder` (a stored view without one is the
+- [x] **Step 1: Failing tests.** AC21-AC23; `ListOrderTest` (the cycle for Alert and for a desc-first column); F12 AC11 (Clicks header) and the sort part of F12 AC20 (Locations header) join the E2E file.
+- [x] **Step 2: Domain.** `ListOrder`, `ListQuery`; `SavedView` holds a `ListOrder` (a stored view without one is the
   default).
-- [ ] **Step 3: Repository and route.** The arm map; enums; the answer echoes the applied order.
-- [ ] **Step 4: Header, address, forms, views, Reset.**
-- [ ] **Step 5: Run and look** (both directions and off, page 2 kept, Back, a view, JavaScript off; 375 px header).
-- [ ] **Step 6: Commit** — "Sort the Dashboard by its Alert, Locations and Clicks columns, as Lasso does".
+- [x] **Step 3: Repository and route.** The arm map; enums; the answer echoes the applied order.
+- [x] **Step 4: Header, address, forms, views, Reset.**
+- [x] **Step 5: Run and look** (both directions and off, page 2 kept, Back, a view, JavaScript off; 375 px header).
+- [x] **Step 6: Commit** — "Sort the Dashboard by its Alert, Locations and Clicks columns, as Lasso does".
+
+*Note (2026-11-21):* no `ListQuery` bundle: `ListOrder` rides next to the other list arguments as their last parameter,
+as Placements did (36D); a bundle would rewrite every caller for no behaviour. Alert's arm stays the alert listing's
+(31A); Locations and Clicks are a `posts_orderby` arm over `count_sql()` and `total_sql()` (correlated, `ID DESC`
+last, D9). The old `order_by=detection_date&order_type=` address (31A, the tabs, the broken-links notice, F11 AC9)
+moved to D8's `orderby=alert&order=`; a tab view saved before keeps opening oldest alert first. Checked: unit, phpcs,
+analyse; on Local the three sorts both ways and a 400 for an unknown column; the header at 1280 px.
 
 ---
 

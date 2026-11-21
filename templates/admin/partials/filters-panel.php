@@ -123,8 +123,7 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 						array(
 							'id'    => 'affibloom-view-name-help',
 							'label' => __( 'Save as', 'affibloom' ),
-							// Lasso's tip names the sort and the alert tab as well; they join a view with their tasks.
-							'text'  => __( 'Saves your search, filters and page size under this name. Click the saved view pill to restore it.', 'affibloom' ),
+							'text'  => __( 'Saves your search, filters, sort, page size, and alert tab under this name. Click the saved view pill to restore it.', 'affibloom' ),
 						)
 					);
 					?>
@@ -140,7 +139,7 @@ $active     = ( LinkKind::All === $view['link_kind'] ? 0 : 1 ) + ( 0 === $view['
 
 		<div class="affibloom-filters__foot">
 			<button type="button" class="affibloom-button affibloom-button--small affibloom-button--secondary affibloom-filters__reset"
-				title="<?php esc_attr_e( 'Reset search, filters and page size', 'affibloom' ); ?>"><?php esc_html_e( 'Reset filters', 'affibloom' ); ?></button>
+				title="<?php esc_attr_e( 'Reset search, filters, sort, page size, and alert tab', 'affibloom' ); ?>"><?php esc_html_e( 'Reset filters', 'affibloom' ); ?></button>
 			<span class="affibloom-filters__hint"><?php esc_html_e( 'Filters apply as you toggle', 'affibloom' ); ?></span>
 		</div>
 	</section>

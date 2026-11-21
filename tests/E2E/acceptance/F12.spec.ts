@@ -175,6 +175,28 @@ test.describe( 'F12 Clicks and where used', () => {
 		await expect( page.locator( `tr[data-product-id="${ none }"] td.affibloom-col-clicks` ) ).toHaveText( '0' );
 	} );
 
+	// AC11 (34A via 13K; R10) and AC20's sort part (36A via 13K; L2): first click descending, then ascending.
+	test( 'AC11 the Clicks and Locations headers sort descending first, then ascending', async ( { page, request } ) => {
+		const prefix = unique( 'F12 AC11' );
+		const many = createProduct( { name: `${ prefix } many` } );
+		const none = createProduct( { name: `${ prefix } none` } );
+		await clickOnce( request, { p: many, h: 0, l: 0, b: '1' } );
+		newPostWith( boxBlock( many ) );
+		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( prefix ) }` );
+		const ids = () => page.locator( 'tbody tr[data-product-id]' ).evaluateAll( ( rows ) => rows.map( ( row ) => Number( row.getAttribute( 'data-product-id' ) ) ) );
+
+		for ( const column of [ 'clicks', 'locations' ] ) {
+			const header = page.locator( `th.affibloom-col-${ column }` );
+			await header.getByRole( 'link' ).click();
+			await expect( header ).toHaveAttribute( 'aria-sort', 'descending' );
+			await expect( page ).toHaveURL( new RegExp( `orderby=${ column }&order=desc` ) );
+			expect( await ids() ).toEqual( [ many, none ] );
+			await header.getByRole( 'link' ).click();
+			await expect( header ).toHaveAttribute( 'aria-sort', 'ascending' );
+			expect( await ids() ).toEqual( [ none, many ] );
+		}
+	} );
+
 	test( 'AC12 the Clicks (30 days) figure is the sum over published products', async ( { page, request } ) => {
 		const id = createProduct( { name: unique( 'F12 AC12' ) } );
 		await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );

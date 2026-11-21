@@ -17,6 +17,7 @@ use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Application\Locations\LocationCounts;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Template;
@@ -65,7 +66,8 @@ final class DashboardScreen {
 		$kind  = isset( $_GET['link_type'] ) ? sanitize_key( wp_unslash( $_GET['link_type'] ) ) : '';
 		$group = isset( $_GET['group'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['group'] ) ) : 0;
 		$one   = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
-		$order = isset( $_GET['order_by'], $_GET['order_type'] ) && 'detection_date' === $_GET['order_by'] ? sanitize_key( wp_unslash( $_GET['order_type'] ) ) : '';
+		$sort  = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
+		$dir   = isset( $_GET['order'] ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '';
 		$tab   = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : '';
 		$place = isset( $_GET['placements'] ) ? sanitize_key( wp_unslash( $_GET['placements'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -74,10 +76,12 @@ final class DashboardScreen {
 		$term      = SearchTerm::from_input( $typed );
 		$link_kind = LinkKind::from_input( $kind );
 		// A group that is gone (a bookmark, a saved view) falls back to all groups (F23 edge case 5).
-		$group     = $this->groups->choose_filter( $group );
-		$alerts    = $this->alerts?->listing( $order, $tab );
+		$group = $this->groups->choose_filter( $group );
+		// The header sort (F19 D8; Task 13K): anything but alert, locations or clicks with asc or desc is the default.
+		$order     = ListOrder::from_input( $sort, $dir );
+		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), $tab );
 		$placement = Placement::from_input( $place );
-		$products  = $this->products->list( $term, $link_kind, $page, $per_page, $group, $one, $alerts, $placement );
+		$products  = $this->products->list( $term, $link_kind, $page, $per_page, $group, $one, $alerts, $placement, $order );
 		$ids       = array_map( static fn( $product ): int => (int) $product->id, $products->items );
 
 		$this->template->render(
@@ -88,13 +92,14 @@ final class DashboardScreen {
 				'link_kind'  => $link_kind,
 				'group'      => $group,
 				'placement'  => $placement,
+				'order'      => $order,
 				'group_list' => $this->groups->all(),
 				'groups_of'  => $this->groups->for_products( $ids ),
 				'links_of'   => null === $this->links ? array() : $this->links->of( $products->items ),
 				'views'      => $this->views->list( get_current_user_id() ),
-				'url'        => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement ),
+				'url'        => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
 				// Every list argument but the page, for the GET forms' hidden inputs (Task 13F).
-				'args'       => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement ),
+				'args'       => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order ),
 				'alerts_of'  => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
 				'listing'    => $alerts,
 				// The Locations column (Task 36A): each row's count, and whether a 0 is known yet (the clock).

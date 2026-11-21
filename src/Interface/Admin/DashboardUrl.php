@@ -12,6 +12,7 @@ namespace Affibloom\Interface\Admin;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 
 /**
@@ -31,11 +32,12 @@ final class DashboardUrl {
 	 * @param int               $per_page  Products per page.
 	 * @param int               $group     The Group filter (Task G5): 0 for all groups, -1 for products in no group, else a group's ID.
 	 * @param int               $post_id   One product only (Lasso's `?post_id=`, Task 13F; F19 D24); 0 for all.
-	 * @param AlertListing|null $alerts The Alert sort (`order_by=detection_date&order_type=`, Task 31A) and tab (`filter=`, Task 31B).
+	 * @param AlertListing|null $alerts The alert tab (`filter=`, Task 31B).
 	 * @param Placement         $placement The Placements filter (`placements=`, Task 36D).
+	 * @param ListOrder         $order     The header sort (`orderby=` and `order=`, F19 D8; Task 13K).
 	 */
-	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any ): string {
-		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement );
+	public static function to( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): string {
+		$args = array( 'page' => AdminMenu::SLUG ) + self::args( $term, $link_kind, $page, $per_page, $group, $post_id, $alerts, $placement, $order );
 
 		return add_query_arg( array_map( 'rawurlencode', $args ), admin_url( 'admin.php' ) );
 	}
@@ -53,9 +55,10 @@ final class DashboardUrl {
 	 * @param int               $post_id   As to().
 	 * @param AlertListing|null $alerts As to().
 	 * @param Placement         $placement As to().
+	 * @param ListOrder         $order     As to().
 	 * @return array<string, string>
 	 */
-	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any ): array {
+	public static function args( string $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): array {
 		$args = array();
 		if ( '' !== $term ) {
 			$args['s'] = $term;
@@ -75,9 +78,9 @@ final class DashboardUrl {
 		if ( null !== $alerts && '' !== $alerts->tab ) {
 			$args['filter'] = $alerts->tab;
 		}
-		if ( null !== $alerts && '' !== $alerts->order ) {
-			$args['order_by']   = 'detection_date';
-			$args['order_type'] = $alerts->order;
+		if ( ! $order->is_default() ) {
+			$args['orderby'] = $order->column;
+			$args['order']   = $order->direction;
 		}
 		if ( ProductService::PER_PAGE_DEFAULT !== $per_page ) {
 			$args['per_page'] = (string) $per_page;

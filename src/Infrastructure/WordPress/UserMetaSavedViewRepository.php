@@ -13,6 +13,7 @@ use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViewRepository;
 use Affibloom\Domain\Dashboard\SavedViews;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 
 /**
@@ -44,7 +45,8 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 				isset( $filters['per_page'] ) ? absint( $filters['per_page'] ) : 0,
 				isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0,
 				isset( $filters['filter'] ) && in_array( $filters['filter'], array( 'broken-links', 'out-of-stock' ), true ) ? $filters['filter'] : '',
-				Placement::from_input( isset( $filters['placements'] ) && is_string( $filters['placements'] ) ? $filters['placements'] : '' )
+				Placement::from_input( isset( $filters['placements'] ) && is_string( $filters['placements'] ) ? $filters['placements'] : '' ),
+				ListOrder::from_input( isset( $filters['orderby'] ) && is_string( $filters['orderby'] ) ? $filters['orderby'] : '', isset( $filters['order'] ) && is_string( $filters['order'] ) ? $filters['order'] : '' )
 			);
 		}
 
@@ -72,6 +74,8 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 						'group'      => $view->group,
 						'filter'     => $view->filter,
 						'placements' => $view->placement->value,
+						'orderby'    => $view->order->column,
+						'order'      => $view->order->direction,
 					),
 				),
 				$views->all()

@@ -486,4 +486,54 @@ test.describe( 'F19 Dashboard list', () => {
 		// The library's order is its modified times; parking them must not touch one (Task 13H).
 		expect( modified( sample ) ).toEqual( before );
 	} );
+
+	// AC21-AC23 (13K; R1-R3, D8-D12).
+	test( 'AC21 Alert sorts ascending, descending, then off, with the caret and the address', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		const header = page.locator( 'th.affibloom-col-alert' );
+		await header.getByRole( 'link' ).click();
+		await expect( header ).toHaveAttribute( 'aria-sort', 'ascending' );
+		await expect( header.locator( '.affibloom-icon' ) ).toHaveCount( 1 );
+		await expect( page ).toHaveURL( /orderby=alert&order=asc/ );
+		await header.getByRole( 'link' ).click();
+		await expect( header ).toHaveAttribute( 'aria-sort', 'descending' );
+		await header.getByRole( 'link' ).click();
+		await expect( header ).toHaveAttribute( 'aria-sort', 'none' );
+		await expect( header.locator( '.affibloom-icon' ) ).toHaveCount( 0 );
+		await expect( page ).not.toHaveURL( /orderby/ );
+	} );
+
+	test( 'AC22 a sort is kept by the page size, a search, a filter, a reload and Back, by a saved view, and cleared by Reset', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page.locator( 'th.affibloom-col-clicks' ).getByRole( 'link' ).click();
+		await expect( page ).toHaveURL( /orderby=clicks&order=desc/ );
+		await page.getByLabel( 'Search', { exact: true } ).fill( 'a' );
+		await page.getByLabel( 'Search', { exact: true } ).press( 'Enter' );
+		await expect( page ).toHaveURL( /orderby=clicks&order=desc/ );
+		await page.reload();
+		await expect( page.locator( 'th.affibloom-col-clicks' ) ).toHaveAttribute( 'aria-sort', 'descending' );
+
+		await page.getByRole( 'button', { name: 'Filters' } ).click();
+		const name = unique( 'AC22 view' );
+		await page.getByLabel( 'Save as' ).fill( name );
+		await page.getByLabel( 'Save as' ).press( 'Enter' );
+		await expect( page.locator( '.affibloom-pill', { hasText: name } ) ).toHaveAttribute( 'data-view-orderby', 'clicks' );
+		await page.locator( '.affibloom-filters__reset' ).click();
+		await expect( page ).not.toHaveURL( /orderby/ );
+		await expect( page.locator( 'th.affibloom-col-clicks' ) ).toHaveAttribute( 'aria-sort', 'none' );
+		await page.locator( '.affibloom-pill', { hasText: name } ).click();
+		await expect( page ).toHaveURL( /orderby=clicks&order=desc/ );
+		await page.goBack();
+		await expect( page ).not.toHaveURL( /orderby/ );
+	} );
+
+	test( 'AC23 a header click keeps the page the editor is on', async ( { page } ) => {
+		for ( let i = 0; i < 3; i++ ) {
+			createProduct( { name: unique( 'F19 AC23' ) } );
+		}
+		await page.goto( '/wp-admin/admin.php?page=affibloom&per_page=10&paged=2' );
+		await page.locator( 'th.affibloom-col-locations' ).getByRole( 'link' ).click();
+		await expect( page ).toHaveURL( /paged=2/ );
+		await expect( page ).toHaveURL( /orderby=locations&order=desc/ );
+	} );
 } );

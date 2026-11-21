@@ -108,10 +108,10 @@ final class BrokenLinksNotice implements NoticeProvider, Module {
 		}
 		$url = add_query_arg(
 			array(
-				'page'       => AdminMenu::SLUG,
-				'filter'     => 'broken-links',
-				'order_by'   => 'detection_date',
-				'order_type' => 'asc',
+				'page'    => AdminMenu::SLUG,
+				'filter'  => 'broken-links',
+				'orderby' => 'alert',
+				'order'   => 'asc',
 			),
 			admin_url( 'admin.php' )
 		);

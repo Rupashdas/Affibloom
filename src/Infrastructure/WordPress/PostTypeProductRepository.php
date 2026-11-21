@@ -12,10 +12,12 @@ namespace Affibloom\Infrastructure\WordPress;
 use Affibloom\Domain\Display\Theme;
 use Affibloom\Domain\Fields\ProductFields;
 use Affibloom\Domain\LinkHealth\AlertListing;
+use Affibloom\Application\Clicks\ClickReport;
 use Affibloom\Domain\LinkHealth\IssueType;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Buttons;
 use Affibloom\Domain\Product\LinkKind;
+use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\PlainUrlKey;
 use Affibloom\Domain\Product\Product;
@@ -44,6 +46,9 @@ final class PostTypeProductRepository implements ProductRepository {
 
 	/** The query var that carries the Placements filter (Task 36D). */
 	private const PLACEMENT_VAR = 'affibloom_placement';
+
+	/** The query var that carries the Locations or Clicks sort (Task 13K). */
+	private const ORDER_VAR = 'affibloom_order';
 
 	/**
 	 * Stores the post with every field in one call, as Lasso's meta_input does: a new product is inserted, one with an
@@ -721,8 +726,9 @@ final class PostTypeProductRepository implements ProductRepository {
 	 * @param int               $post_id   One product only (Lasso's `?post_id=`, F19 R30): 0 for all; still published only.
 	 * @param AlertListing|null $alerts The Alert sort and the alert tab (F11, Tasks 31A, 31B); null for neither.
 	 * @param Placement         $placement The Placements filter (F12 L13, Task 36D).
+	 * @param ListOrder         $order     The header sort (F19 R1-R6, D8, D9; Task 13K).
 	 */
-	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any ): ProductPage {
+	public function page( SearchTerm $term, LinkKind $link_kind, int $page, int $per_page, int $group = 0, int $post_id = 0, ?AlertListing $alerts = null, Placement $placement = Placement::Any, ListOrder $order = new ListOrder() ): ProductPage {
 		$per_page = max( 1, $per_page );
 		$list     = array(
 			'post_type'              => ProductPostType::NAME,
@@ -792,11 +798,16 @@ final class PostTypeProductRepository implements ProductRepository {
 		if ( Placement::Any !== $placement ) {
 			$list[ self::PLACEMENT_VAR ] = $placement;
 		}
+		// The Locations and Clicks headers' sort (F19 R6, D9; Task 13K); Alert's is the alert listing's, below.
+		if ( in_array( $order->column, array( ListOrder::LOCATIONS, ListOrder::CLICKS ), true ) ) {
+			$list[ self::ORDER_VAR ] = $order;
+		}
 
 		$filter  = $this->search_filter();
 		$clauses = null !== $alerts && $alerts->is_active() ? self::alert_clauses( $alerts ) : null;
 		add_filter( 'posts_where', $filter, 10, 2 );
 		add_filter( 'posts_where', array( self::class, 'placement_where' ), 10, 2 );
+		add_filter( 'posts_orderby', array( self::class, 'column_orderby' ), 10, 2 );
 		if ( null !== $clauses ) {
 			$list[ self::ALERTS_VAR ] = true;
 			add_filter( 'posts_clauses', $clauses, 10, 2 );
@@ -831,12 +842,36 @@ final class PostTypeProductRepository implements ProductRepository {
 		} finally {
 			remove_filter( 'posts_where', $filter, 10 );
 			remove_filter( 'posts_where', array( self::class, 'placement_where' ), 10 );
+			remove_filter( 'posts_orderby', array( self::class, 'column_orderby' ), 10 );
 			if ( null !== $clauses ) {
 				remove_filter( 'posts_clauses', $clauses, 10 );
 			}
 		}
 
 		return new ProductPage( $items, $total, $wanted, $per_page );
+	}
+
+	/**
+	 * The Locations or Clicks sort as the two queries' ORDER BY, and for them only (F19 R6, D9; Task 13K): the product's
+	 * Locations count (the column's rule, TableLinkLocationRepository::count_sql()) or its clicks in the last 30 days
+	 * (TableClickStore::total_sql()), then the highest ID on a tie.
+	 *
+	 * @param string   $orderby The query's ORDER BY.
+	 * @param WP_Query $query   The query.
+	 */
+	public static function column_orderby( string $orderby, WP_Query $query ): string {
+		global $wpdb;
+
+		$order = $query->get( self::ORDER_VAR );
+		if ( ! $order instanceof ListOrder ) {
+			return $orderby;
+		}
+		$direction = ListOrder::ASC === $order->direction ? 'ASC' : 'DESC';
+		$value     = ListOrder::LOCATIONS === $order->column
+			? TableLinkLocationRepository::count_sql( "{$wpdb->posts}.ID" )
+			: TableClickStore::total_sql( "{$wpdb->posts}.ID", ClickReport::since( time() ) );
+
+		return "{$value} {$direction}, {$wpdb->posts}.ID DESC";
 	}
 
 	/**

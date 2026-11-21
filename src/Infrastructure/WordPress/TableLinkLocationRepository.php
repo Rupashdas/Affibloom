@@ -178,6 +178,34 @@ KEY display_type (display_type)";
 	}
 
 	/**
+	 * A product's Locations count as an SQL value (F12 L1; the Locations sort, Task 13K): the rows tied or assigned to
+	 * it plus the group displays of its groups, as counts_for() counts them.
+	 *
+	 * @param string $product The SQL expression of the product's ID (a column of the outer query).
+	 */
+	public static function count_sql( string $product ): string {
+		global $wpdb;
+
+		$table = $wpdb->prefix . self::TABLE;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product is a column of the caller's query, never input.
+		$sql = $wpdb->prepare(
+			"( ( SELECT COUNT(*) FROM %i AS afc_t WHERE afc_t.assigned_product_id = {$product} OR ( afc_t.assigned_product_id = 0 AND afc_t.product_id = {$product} ) )
+				+ ( SELECT COUNT(*) FROM %i AS afc_g JOIN %i AS afc_tt ON afc_tt.taxonomy = %s AND afc_g.display_ref = CONCAT('group:', afc_tt.term_id)
+					JOIN %i AS afc_tr ON afc_tr.term_taxonomy_id = afc_tt.term_taxonomy_id
+					WHERE afc_tr.object_id = {$product} AND afc_tr.object_id <> IF(afc_g.assigned_product_id > 0, afc_g.assigned_product_id, afc_g.product_id) ) )",
+			$table,
+			$table,
+			$wpdb->term_taxonomy,
+			GroupTaxonomy::NAME,
+			$wpdb->term_relationships
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $sql;
+	}
+
+	/**
 	 * How many places each product is used in (F12 L1, D20; the Dashboard's column, Task 36A; the export's
 	 * location_count, Task 31D): its rows, an editor's assignment first, plus the group displays (`display_ref`
 	 * "group:<term id>") whose group holds it, read from the group's members now (F21 D2). A display tied to the product

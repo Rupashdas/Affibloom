@@ -66,12 +66,12 @@ $amazon_line = __( 'Amazon products are checked through the Amazon API, which is
 		$active = $tile[0] === $shown_tab;
 		$tip    = $tile[3] . ( $warm ? "\n" . $warm_line : '' ) . ( 'out-of-stock' === $tile[0] && ! $counts['amazon_api'] ? "\n" . $amazon_line : '' );
 		$args   = $view['base'] ?? array();
-		unset( $args['filter'], $args['order_by'], $args['order_type'], $args['paged'] );
+		unset( $args['filter'], $args['orderby'], $args['order'], $args['paged'] );
 		if ( ! $active ) {
 			$args += array(
-				'filter'     => $tile[0],
-				'order_by'   => 'detection_date',
-				'order_type' => 'asc',
+				'filter'  => $tile[0],
+				'orderby' => 'alert',
+				'order'   => 'asc',
 			);
 		}
 		$href = add_query_arg( array_map( 'rawurlencode', array( 'page' => \Affibloom\Interface\Admin\AdminMenu::SLUG ) + $args ), admin_url( 'admin.php' ) );
