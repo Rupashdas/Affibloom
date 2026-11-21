@@ -1266,13 +1266,18 @@
 .affibloom-table .affibloom-col-select { width: 56px; padding-right: 0; padding-left: 24px; }
 .affibloom-table .affibloom-col-image { width: 88px; text-align: center; }
 .affibloom-table .affibloom-col-groups { width: 140px; }
-.affibloom-table .affibloom-col-alert { width: 92px; padding-right: 12px; padding-left: 12px; text-align: center; }
-/* Two icons sit side by side, as in Lasso's row (a lightbulb with an issue or the tick, Task O8); the days line goes under. */
+.affibloom-table .affibloom-col-alert { width: 92px; padding-right: 12px; padding-left: 12px; text-align: left; }
+/*
+ * Two icons sit side by side, as in Lasso's row (a lightbulb with an issue or the tick, Task O8); the days line goes under.
+ * They start at the cell's left edge, so a lone lightbulb lines up with the lightbulb of a row that has two icons; a tick
+ * or clock without a lightbulb keeps the lightbulb's place empty, so it lines up with the other rows' ticks and clocks.
+ */
+.affibloom-table td.affibloom-col-alert > .affibloom-alert--checked:first-child,
+.affibloom-table td.affibloom-col-alert > .affibloom-alert--pending:first-child { margin-left: 36px; }
 .affibloom-table td.affibloom-col-alert { white-space: nowrap; }
 .affibloom-table .affibloom-col-locations { width: 112px; padding-right: 12px; padding-left: 12px; text-align: center; }
 .affibloom-table .affibloom-col-clicks { width: 92px; padding-right: 12px; padding-left: 12px; text-align: center; }
 .affibloom-table .affibloom-col-actions { width: 236px; padding-right: 24px; text-align: center; }
-.affibloom-table th.affibloom-col-alert .affibloom-th,
 .affibloom-table th.affibloom-col-locations .affibloom-th,
 .affibloom-table th.affibloom-col-clicks .affibloom-th,
 .affibloom-table th.affibloom-col-image .affibloom-th,
