@@ -116,7 +116,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
 - [x] Task 26H: URL variants — `wp affibloom migrate --only=variants`
 - [x] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
-- [ ] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
+- [x] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
 - [ ] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
 - [ ] Task 26O: Run from the admin page, in batches
 - [ ] Task 26P: Check the migrated products against the baselines
@@ -843,11 +843,22 @@ unchanged. AC18 passes; fingerprint equal.
 
 **Files:** create `TableMapper.php`, `TablesStep.php`; modify `LassoSource.php`, `WpLassoSource.php`; tests `tests/Unit/Application/TableMapperTest.php`, `tests/Integration/TablesStepTest.php` (twice; the three tables of this copy), `tests/E2E/acceptance/F10.spec.ts` (AC16).
 
-- [ ] **Step 1: Failing tests.** AC16: the three tables with their products, order, badges, columns, values; a second run changes nothing; the fingerprint of Lasso's tables equal before and after (AC23). Expected red: the family reports "waiting for F25".
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step** (through `TableService`, so F25's validation applies).
-- [ ] **Step 4: Run and look.** On Local: `--only=tables`; the Tables list; tables 2 and 3 in the builder and in the preview against Lasso's.
-- [ ] **Step 5: Commit** — "Migrate Lasso's comparison tables".
+- [x] **Step 1: Failing tests.** AC16: the three tables with their products, order, badges, columns, values; a second run changes nothing; the fingerprint of Lasso's tables equal before and after (AC23). Expected red: the family reports "waiting for F25".
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step** (through `TableService`, so F25's validation applies).
+- [x] **Step 4: Run and look.** On Local: `--only=tables`; the Tables list; tables 2 and 3 in the builder and in the preview against Lasso's.
+- [x] **Step 5: Commit** — "Migrate Lasso's comparison tables".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=tables [--update]`. Affibloom's API gained `table()` and
+`put_table()` (`Extension\TableAccess`: a table read and stored whole through `TableRepository`, the name required,
+every product and field checked; not cell by cell through `TableService`'s revision-guarded builder calls). In the
+migrator: `LassoSource::tables()` (details, products by `order`, field groups by `order` then as stored, values from
+the group details), `TablesStep` with the mapping inside (no separate `TableMapper`): products through the ID map,
+custom fields through `field_map`, `table_map` in the log, 26C's rule; an unpublished product is left out and named;
+Lasso's Show Title has no Affibloom setting (off in all three here). Local: 3 tables created, then unchanged; four of
+their products were in Affibloom's trash from earlier tests and were put back. The builder shows table 2 as in Lasso
+(Horizontal, Cactus, badges, description and button cells). AC16 passes; fingerprint equal.
 
 ---
 

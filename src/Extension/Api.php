@@ -42,8 +42,9 @@ final class Api {
 	 * @param ViewAccess      $views      What a helper may do with saved Dashboard views and the tour.
 	 * @param VariantAccess   $variants   What a helper may do with a product's URL variants.
 	 * @param IssueAccess     $issues     What a helper may do with link issues and their dismissals.
+	 * @param TableAccess     $tables     What a helper may do with comparison tables.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -437,6 +438,30 @@ final class Api {
 	 */
 	public function dismiss_issue( int $id, string $bar, int $until ): void {
 		$this->issues->dismiss( $id, $bar, $until );
+	}
+
+	/**
+	 * A comparison table whole, `{ name, style, theme, show_headers, show_field_name, products: [{ id, badge }],
+	 * groups: [{ id, fields }], values: { product: { field: value } } }`, or null when there is none (Task 26I).
+	 *
+	 * @param int $id The table.
+	 * @return array{name: string, style: string, theme: string, show_headers: bool, show_field_name: bool, products: list<array{id: int, badge: string}>, groups: list<array{id: string, fields: list<int>}>, values: array<int, array<int, string>>}|null
+	 */
+	public function table( int $id ): ?array {
+		return $this->tables->get( $id );
+	}
+
+	/**
+	 * Stores a comparison table whole, in table()'s shape: a new one when $id is 0, else in place of that table
+	 * (Task 26I). A button cell is its JSON, as the builder stores it.
+	 *
+	 * @param int                  $id   The table to replace; 0 for a new one.
+	 * @param array<string, mixed> $data The table.
+	 * @return int The table's ID.
+	 * @throws \InvalidArgumentException When the name is blank or a product or a field does not exist.
+	 */
+	public function put_table( int $id, array $data ): int {
+		return $this->tables->put( $id, $data );
 	}
 
 	/**

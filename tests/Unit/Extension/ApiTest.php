@@ -1,6 +1,11 @@
 <?php
 namespace Affibloom\Tests\Unit\Extension;
 
+use Affibloom\Domain\Product\SearchTerm;
+use Affibloom\Domain\Table\TablePage;
+use Affibloom\Domain\Table\Table;
+use Affibloom\Domain\Table\TableRepository;
+use Affibloom\Extension\TableAccess;
 use Affibloom\Application\LinkHealth\AlertDismissals;
 use Affibloom\Extension\IssueAccess;
 use Affibloom\Tests\Unit\Fakes\InMemoryLinkIssues;
@@ -149,6 +154,76 @@ final class ApiTest extends TestCase {
 
 		$this->expectException( \InvalidArgumentException::class );
 		$groups->create( 'Best shoes', '' );
+	}
+
+	/** Table access on an in-memory store; fields up to 99999 exist. */
+	public static function tables( ?InMemoryProductRepository $products = null ): TableAccess {
+		$store = new class() implements TableRepository {
+			/** @var array<int, Table> */
+			public array $tables = array();
+			public function get( int $id ): ?Table {
+				return $this->tables[ $id ] ?? null;
+			}
+			public function save( Table $table ): Table {
+				$saved                       = $table->with( array( 'id' => $table->id ?? count( $this->tables ) + 1 ) );
+				$this->tables[ $saved->id ] = $saved;
+
+				return $saved;
+			}
+			public function page( SearchTerm $term, int $page, int $per_page, bool $newest = false ): TablePage {
+				throw new \LogicException( 'Not used.' );
+			}
+			public function count(): int {
+				return count( $this->tables );
+			}
+			public function name_taken( string $name ): bool {
+				return false;
+			}
+			public function delete( int $id ): void {
+				unset( $this->tables[ $id ] );
+			}
+			public function product_ids(): array {
+				return array();
+			}
+			public function containing( int $product ): array {
+				return array();
+			}
+		};
+
+		return new TableAccess( $store, static fn ( int $field ): bool => $field <= 99999, $products ?? new InMemoryProductRepository() );
+	}
+
+	public function test_a_table_is_stored_whole_and_read_back_and_a_missing_product_is_refused(): void {
+		Functions\when( 'esc_html' )->returnArg();
+		$products = new InMemoryProductRepository();
+		$id       = (int) $products->save( Product::draft( 'Ball', AffiliateUrl::from_string( 'https://shop.example/ball' ), Settings::from_array( array() ) ) )->id;
+		$tables   = self::tables( $products );
+		$table    = array(
+			'name'            => 'Best Volleyball',
+			'style'           => 'row',
+			'theme'           => 'Cactus',
+			'show_headers'    => true,
+			'show_field_name' => false,
+			'products'        => array(
+				array(
+					'id'    => $id,
+					'badge' => 'Best Overall',
+				),
+			),
+			'groups'          => array(
+				array(
+					'id'     => 'group_1',
+					'fields' => array( 99991, 99990 ),
+				),
+			),
+			'values'          => array( $id => array( 99990 => 'Ball' ) ),
+		);
+
+		$table_id = $tables->put( 0, $table );
+
+		self::assertSame( $table, $tables->get( $table_id ) );
+		$this->expectException( \InvalidArgumentException::class );
+		$tables->put( 0, array( 'products' => array( array( 'id' => 999 ) ) ) + $table );
 	}
 
 	/** Issue access on in-memory rows and dismissals. */
@@ -349,7 +424,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -366,7 +441,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -386,7 +461,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 

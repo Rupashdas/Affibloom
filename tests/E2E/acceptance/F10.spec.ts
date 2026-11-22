@@ -587,6 +587,19 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26I: Lasso's three tables, with the products Affibloom has published, their order and badges.
+	test( '@local AC16 --only=tables copies each comparison table whole', () => {
+		wp( 'affibloom-lasso', 'migrate', '--only=tables', '--update' );
+		const check = wp(
+			'eval',
+			`global $wpdb; $map = (array) ( get_option( 'affibloom_lasso_migration' )['table_map'] ?? array() ); $out = array(); foreach ( $wpdb->get_results( 'SELECT id, title FROM ' . $wpdb->prefix . 'lasso_table_details' ) as $t ) { $table = get_post( (int) ( $map[ $t->id ] ?? 0 ) ); $out[] = $table && $table->post_title === $t->title ? 'ok' : 'missing ' . $t->id; } echo implode( ',', $out );`
+		);
+		expect( check ).toBe( 'ok,ok,ok' );
+		expect( wp( 'affibloom-lasso', 'migrate', '--only=tables' ) ).toMatch(
+			/^tables: 3 items: 0 created, 0 updated, 3 unchanged, 0 skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {
