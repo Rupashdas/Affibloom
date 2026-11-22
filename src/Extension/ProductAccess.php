@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Extension;
 
+use Affibloom\Application\Products\DuplicateLink;
 use Affibloom\Application\Products\ProductNotFound;
 use Affibloom\Application\Products\ProductService;
 use Affibloom\Application\Products\ValidationFailed;
@@ -84,7 +85,8 @@ final class ProductAccess {
 	 *
 	 * @param int                  $id     The product.
 	 * @param array<string, mixed> $fields Field => value.
-	 * @throws InvalidArgumentException When a field is refused or there is no such published product.
+	 * @throws InvalidArgumentException When a field is refused, the link is another product's, or there is no such
+	 *                                  published product.
 	 */
 	public function update( int $id, array $fields ): void {
 		try {
@@ -93,6 +95,8 @@ final class ProductAccess {
 			throw new InvalidArgumentException( esc_html( self::refusals( $refused ) ) );
 		} catch ( ProductNotFound ) {
 			throw new InvalidArgumentException( esc_html( "No published product $id." ) );
+		} catch ( DuplicateLink ) {
+			throw new InvalidArgumentException( 'url: already_exists' );
 		}
 	}
 

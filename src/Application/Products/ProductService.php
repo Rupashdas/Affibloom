@@ -164,7 +164,7 @@ final class ProductService {
 		}
 	}
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- ValidationFailed comes from validated(); the sniff counts only this method's own throws.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- ValidationFailed and DuplicateLink come from validated() and with_link(); the sniff counts only this method's own throws.
 	/**
 	 * Save Changes on the product page: the fields sent are cleaned by Lasso's rules (Task 15A) and a Primary URL by
 	 * the add flow's (Task 15B), then stored on the same product, all or nothing; a field not sent keeps its stored
@@ -177,6 +177,7 @@ final class ProductService {
 	 * @param array<string, mixed> $input Field => value, as sent.
 	 * @throws ProductNotFound  When there is no published product with that ID.
 	 * @throws ValidationFailed When a field is refused (from validated()).
+	 * @throws DuplicateLink    When the new Primary URL is another product's (from with_link()).
 	 */
 	public function update( int $id, array $input ): Product {
 		// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber

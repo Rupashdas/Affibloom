@@ -16,9 +16,16 @@ test.describe( 'F10 Existing content', () => {
 			'--dry-run',
 			'--only=products'
 		);
-		expect( report ).toMatch(
-			/products: 265 records: \d+ to create, 9 skipped, 1 to retire, 1 to trash, \d+ already migrated, 0 errors \(263 published\)\./
+		const summary = report.match(
+			/products: 265 records: (\d+) to create, 9 skipped, (\d+) to retire, (\d+) to trash, (\d+) already migrated, 0 errors \(263 published\)\./
 		);
+		expect( summary ).not.toBeNull();
+		// Before the migration or after it, every record with a link is to be made or already made (256 = 265 - 9).
+		expect(
+			( summary ?? [] )
+				.slice( 1, 5 )
+				.reduce( ( sum, n ) => sum + Number( n ), 0 )
+		).toBe( 256 );
 		expect( report ).toContain( 'Nothing was written.' );
 		const lines = report
 			.split( '\n' )
@@ -235,6 +242,58 @@ test.describe( 'F10 Existing content', () => {
 			wp( 'post', 'get', product( 15113 ), '--field=post_status' )
 		).toBe( 'trash' );
 		expect( product( 14837 ) ).toBe( '' );
+	} );
+
+	// Task 26B: a Lasso change reaches an untouched product; an edit on both sides is kept unless --force. The test
+	// changes one record's badge in Lasso (Local only) and puts it back.
+	test( '@local AC9 --update takes a Lasso change, keeps an Affibloom edit, and --force takes Lasso’s', () => {
+		const record = '13250';
+		wp( 'affibloom-lasso', 'migrate', '--only=products' );
+		const product = sql(
+			`SELECT post_id FROM wp_postmeta WHERE meta_key = '_affibloom_lasso_id' AND meta_value = '${ record }' ORDER BY post_id LIMIT 1`
+		);
+		const badge = () =>
+			wp( 'post', 'meta', 'get', product, '_affibloom_badge' );
+		const original = wp( 'post', 'meta', 'get', record, 'badge_text' );
+		const update = ( ...flags: string[] ) =>
+			wp(
+				'affibloom-lasso',
+				'migrate',
+				'--only=products',
+				'--update',
+				...flags
+			);
+		try {
+			wp( 'post', 'meta', 'update', record, 'badge_text', 'AC9 Lasso' );
+			expect( update() ).toContain( '1 updated,' );
+			expect( badge() ).toBe( 'AC9 Lasso' );
+
+			wp(
+				'post',
+				'meta',
+				'update',
+				product,
+				'_affibloom_badge',
+				'AC9 Affibloom'
+			);
+			wp(
+				'post',
+				'meta',
+				'update',
+				record,
+				'badge_text',
+				'AC9 Lasso again'
+			);
+			expect( update() ).toContain( '1 changed on both sides (kept)' );
+			expect( badge() ).toBe( 'AC9 Affibloom' );
+
+			expect( update( '--force' ) ).toContain( '1 updated,' );
+			expect( badge() ).toBe( 'AC9 Lasso again' );
+		} finally {
+			wp( 'post', 'meta', 'update', record, 'badge_text', original );
+			update( '--force' );
+		}
+		expect( badge() ).toBe( original );
 	} );
 
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );

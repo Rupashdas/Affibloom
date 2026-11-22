@@ -106,7 +106,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 25C: The dry run — every other family, and what is left behind
 - [x] Task 25D: The report on an admin page
 - [x] Task 26A: Products — `wp affibloom migrate --only=products`
-- [ ] Task 26B: Products again — `--update`
+- [x] Task 26B: Products again — `--update`
 - [ ] Task 26C: Settings — General and Amazon
 - [ ] Task 26D: Settings — Display for Single, Grid and List
 - [ ] Task 26E: Custom fields — definitions and values
@@ -442,10 +442,21 @@ both sides (kept)`; new Lasso records are created; a record deleted in Lasso is 
 **Files:** `ProductsStep.php`, `MigrateCommand.php`; integration test (Lasso-side change, Affibloom-side change,
 both, `--force`); F10 spec AC9.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: The rule.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Refresh migrated products from Lasso without losing edits".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: The rule.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Refresh migrated products from Lasso without losing edits".
+
+*Note (2026-11-22):* `--update [--force]` on `wp affibloom-lasso migrate` (and with `--dry-run`, the preview).
+`ProductsStep::refresh()` compares the record's fields now with the mark's `given` hash (Lasso changed) and the product's
+fields with its `stored` hash (Affibloom changed): Lasso only → `update_product()` and a new mark; both → kept and
+reported unless `--force`; a product no longer published in Affibloom is left as it is (Affibloom reads and updates
+published products only, so nothing trashed is brought back); a record deleted in Lasso is reported, its product kept;
+new records are created. Affibloom's `ProductAccess::update()` turns a `DuplicateLink` into the API's refusal
+(`update()` now declares it). Unit tests with fakes (no integration suite). Local: `--update` gives `256 unchanged` (no
+false change); AC9 changes record 13250's badge in Lasso, checks all three cases and puts it back; Lasso's fingerprint
+is equal to the one before the batch. AC1's test corrected: it now holds before and after the migration (to make +
+already made = 256).
 
 ---
 
