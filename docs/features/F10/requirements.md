@@ -77,9 +77,9 @@ Task 7 turned AC1-AC3 into `tests/E2E/acceptance/F10.spec.ts`; AC4-AC32 join it 
 - **AC3** (built by the migrator, Task LM3; decision A1 reversed, deviation 146) Lasso's blocks convert, and can be reverted. (28B; revert restores the stored content byte for byte.)
 - **AC25** (built by the migrator, Task LM2; decision A1 reversed, deviation 146) `wp affibloom-lasso convert --dry-run` lists, per post, the boxes it would convert and the boxes
   that stay as they are, each with its reason; nothing is written. (28A)
-- **AC26** (not built: decision A1) A bare `[lasso …]` shortcode (in a shortcode block, a paragraph or classic content) is converted by the
+- **AC26** (built by the migrator, Task LM4; decision A1 reversed, deviation 146) A bare `[lasso …]` shortcode (in a shortcode block, a paragraph or classic content) is converted by the
   same rules, or reported. (28C)
-- **AC27** (not built: decision A1) Boxes of the other display types (button, image, grid, list, gallery, table) convert to their Affibloom
+- **AC27** (built by the migrator, Task LM5; decision A1 reversed, deviation 146) Boxes of the other display types (button, image, grid, list, gallery, table) convert to their Affibloom
   blocks, or stay and are reported while that block does not exist. (28D)
 - **AC28** (not built: decision A1) The admin page converts and reverts, one post per request, behind the same lock and a backup tick. (28E)
 

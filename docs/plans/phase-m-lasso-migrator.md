@@ -126,8 +126,8 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task LM2: The conversion's dry run — every Lasso item in content
 - [x] Task LM3: Convert Lasso's blocks, keep a copy, revert
-- [ ] Task LM4: Bare shortcodes, widgets and Elementor data
-- [ ] Task LM5: The other display types, groups and tables
+- [x] Task LM4: Bare shortcodes, widgets and Elementor data
+- [x] Task LM5: The other display types, groups and tables
 - [ ] Task LM6: Lasso's stamps in content
 - [ ] Task LM7: The site's Lasso CSS rules
 - [ ] Task LM8: The conversion from the admin page
@@ -1137,10 +1137,21 @@ widgets or Elementor, no `[lasso-attr]`.
 
 **Files:** the converter and its tests; F10 AC26.
 
-- [ ] **Step 1: Failing tests,** one per host.
-- [ ] **Step 2: The rules and the hosts.**
-- [ ] **Step 3: Run and look** (the 2 on this site).
-- [ ] **Step 4: Commit** — "Convert bare Lasso shortcodes, widgets and Elementor data".
+- [x] **Step 1: Failing tests,** one per host.
+- [x] **Step 2: The rules and the hosts.**
+- [x] **Step 3: Run and look** (the 2 on this site).
+- [x] **Step 4: Commit** — "Convert bare Lasso shortcodes, widgets and Elementor data".
+
+*Note:* migrator `ecd7d77`. One scanner (`LassoMarkup`) finds every Lasso item in document order for both the report
+and the rewrite (LM2-LM3's parse_blocks() order could differ from the text's for shortcodes in container blocks);
+posts, widgets (`widget_text`, `widget_custom_html`, `widget_block`) and Elementor's data are `TextStore`s, each with
+its copy and revert (widgets: the whole option in `affibloom_lasso_pre_conversion_widgets`; Elementor: the meta in
+`_affibloom_lasso_pre_conversion_elementor`, its CSS and element caches cleared). A Shortcode block holding one
+`[lasso]` becomes Affibloom's block; Lasso's Elementor widget becomes Affibloom's (`affibloom_shortcode`, ED2);
+`[lasso-attr]` is reported (it reads meta Lasso never writes, F31 R3). Local: 28 not 2 bare items (test posts since):
+7 Shortcode blocks, 21 bare; dry run 59 places, 335 items, 332 to convert, 3 blocked, as LM2; convert all (332 in 56
+places), posts 21913 and 18233 draw Affibloom's boxes with no shortcode text left, 21913's blocks valid in the editor;
+revert all, 59 posts byte-equal. None in widgets or Elementor here: those two stores are unit-tested.
 
 ---
 
@@ -1167,10 +1178,19 @@ Lasso's cached text when it has one, else is reported. On this copy: none, excep
 
 **Files:** the mappings, a test per type; F10 AC27.
 
-- [ ] **Step 1: Failing tests, per type.**
-- [ ] **Step 2: The mappings.**
-- [ ] **Step 3: Run and look** (the draft 9492 at 1280 px).
-- [ ] **Step 4: Commit** — "Convert Lasso's other display types, groups and tables".
+- [x] **Step 1: Failing tests, per type.**
+- [x] **Step 2: The mappings.**
+- [x] **Step 3: Run and look** (the draft 9492 at 1280 px).
+- [x] **Step 4: Commit** — "Convert Lasso's other display types, groups and tables".
+
+*Note:* migrator `4291778`, Affibloom `473d343`. The types, groups (`group_map`) and tables (`table_map`) were mapped
+by LM2's `LassoAttributes`; what Affibloom's block cannot draw (`link`, SiteStripe, `amazon_url`/`geni_url` without
+an ID) becomes `[affibloom …]` in a Shortcode block (deviation 159), and `amazon_url`/`geni_url` stay attributes that
+Affibloom resolves at render, as Lasso (F31 A6, A7, D2), instead of being looked up at conversion. AI text: Affibloom's
+store was empty ("Task 26 fills it", which no task did); the API gained `ai_text()`/`store_ai_text()`, and a box
+converts with Lasso's cached text (its transient `lasso_chatgpt_response_<format><md5(serialize(prompt))>`, copied
+when the box is written) or is reported. Unit tests per type and for AI text (none on this site). Draft 9492: its two
+tables (22101, 22102) and box drew at 1280 px; reverted byte-equal.
 
 ---
 
