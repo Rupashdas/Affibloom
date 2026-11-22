@@ -175,7 +175,10 @@ final class ApiTest extends TestCase {
 		$access = self::opportunities( $locations );
 
 		self::assertSame( 0, $access->set_original_url( 7, $url, '  ' ) );
+		self::assertSame( $url, $access->original_url( 7, $url ) );
+		self::assertNull( $access->original_url( 7, 'https://other.example/' ) );
 		self::assertSame( 1, $access->set_original_url( 7, $url, 'https://www.amazon.com/dp/B0TEST0001' ) );
+		self::assertSame( 'https://www.amazon.com/dp/B0TEST0001', $access->original_url( 7, $url ) );
 		self::assertSame( 'https://www.amazon.com/dp/B0TEST0001', $locations->rows[7][0]->original_url );
 		self::assertSame( 0, $access->set_original_url( 7, $url, 'https://other.example/' ) );
 	}

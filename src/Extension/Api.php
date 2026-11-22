@@ -489,6 +489,17 @@ final class Api {
 	}
 
 	/**
+	 * The original URL of a post's link: its own URL until set_original_link() gives another (Task 26Q); null when the
+	 * link index has none.
+	 *
+	 * @param int    $post The post.
+	 * @param string $url  The link as the content has it now.
+	 */
+	public function original_link( int $post, string $url ): ?string {
+		return $this->opportunities->original_url( $post, $url );
+	}
+
+	/**
 	 * Gives a post's link the URL it had before another plugin rewrote it, so Monetize's switch can turn it back to that
 	 * URL at render time (Tasks 26Q, GF6; F22 N3, E17). A place given one before keeps it, so a second run changes nothing.
 	 *

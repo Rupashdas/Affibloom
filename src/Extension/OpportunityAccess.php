@@ -63,6 +63,19 @@ final class OpportunityAccess {
 	}
 
 	/**
+	 * The original URL the first place a post holds a link has (its own URL until one is given; Task 26Q's dry run);
+	 * null when the index has none.
+	 *
+	 * @param int    $post The post.
+	 * @param string $url  The link as the content has it now.
+	 */
+	public function original_url( int $post, string $url ): ?string {
+		$row = $this->rows( $post, $url )[0] ?? 0;
+
+		return 0 === $row ? null : ( $this->locations->find( $row )->original_url ?? null );
+	}
+
+	/**
 	 * Gives a post's link the URL it had before another plugin rewrote it (Task 26Q; F22 N3, E17), so its Monetize
 	 * switch can turn it back (Task GF6). Every place the post holds the link counts; a place given one before keeps it.
 	 *
