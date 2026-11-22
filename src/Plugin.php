@@ -617,7 +617,7 @@ final class Plugin {
 		$click_js   = new ClickScript( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->settings_repository() );
 		$box_assets = new BoxAssets( dirname( $this->file ) . '/', plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $display, $this->settings_repository(), new BoxDetector(), $click_js );
 		// The display modal's assets: the block editor's, the Classic editor's and Elementor's (ED2) share them.
-		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
+		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets, $choices->listing( ... ) );
 
 		// The pages helper plugins add (Task LM1), shared by the menu and the extension API.
 		$extensions = new ExtensionScreen( $this->template() );

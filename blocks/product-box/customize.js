@@ -3,17 +3,21 @@
  * labels and help texts (EditorAssets prints them: OverrideTexts). A text field is stored when it is left or on Enter,
  * so the preview redraws then (R42); a toggle at once. A cleared field drops its override; a toggle stores only its
  * non-default value: `hide` for price, field and rating, `enable` for disclosure and data-nosnippet (R39). Double quotes
- * are removed and an anchor id's spaces become `-` (R40); the server cleans the same way (OverrideCatalog).
+ * are removed and an anchor id's spaces become `-` (R40); the server cleans the same way (OverrideCatalog). A badge or
+ * button text has an icon button before its words, which opens the table builder's icon grid (Task 24G).
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import {
+	BaseControl,
 	PanelBody,
 	TextControl,
 	TextareaControl,
 	ToggleControl,
 } from '@wordpress/components';
-import { RawHTML, useEffect, useState } from '@wordpress/element';
+import { useInstanceId } from '@wordpress/compose';
+import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { compose, split } from './icon-text';
 
 /**
  * A typed value as it is stored (R40).
@@ -84,6 +88,108 @@ function TextOverride( { field, value, onStore } ) {
 }
 
 /**
+ * A badge or button text with its icon (Task 24G): the icon button opens the icon grid, whose choice is stored at
+ * once; the words are stored on leaving or on Enter, as a plain text field's.
+ *
+ * @param {Object}                  props         The field.
+ * @param {Object}                  props.field   Its catalogue entry.
+ * @param {string}                  props.value   The stored value.
+ * @param {(value: string) => void} props.onStore Stores a value.
+ */
+function IconTextOverride( { field, value, onStore } ) {
+	const config = window.affibloomEditor || {};
+	const icons = config.icons || [];
+	const labels = config.iconLabels || {};
+	const text = split( value ) || { icon: '', words: '' };
+	const [ draft, setDraft ] = useState( text.words );
+	useEffect( () => setDraft( text.words ), [ text.words ] );
+	const anchor = useRef();
+	const id = useInstanceId( IconTextOverride, 'affibloom-icon-text' );
+
+	const store = ( icon, words ) => {
+		const cleaned = clean( field.name, words );
+		setDraft( cleaned );
+		const next = compose( icon, cleaned );
+		if ( next !== value ) {
+			onStore( next );
+		}
+	};
+	const icon = icons.find( ( one ) => one.class === text.icon );
+	let name = labels.none;
+	if ( '' !== text.icon ) {
+		name = icon ? icon.name : text.icon;
+	}
+	let glyph = 'affibloom-icon-text__glyph is-none';
+	if ( '' !== text.icon ) {
+		glyph =
+			icon && icon.src && ! icon.missing
+				? 'affibloom-icon-text__glyph'
+				: 'affibloom-icon-text__glyph is-unknown';
+	}
+	const open = () => {
+		if ( ! window.affibloomIconPopover ) {
+			return;
+		}
+		window.affibloomIconPopover.open( {
+			anchor: anchor.current,
+			icons,
+			current: text.icon,
+			labels,
+			canAdd: false,
+			choose: ( chosen ) => store( chosen, draft ),
+		} );
+	};
+
+	return (
+		<BaseControl
+			__nextHasNoMarginBottom
+			id={ id }
+			label={ field.label }
+			help={ field.help ? <RawHTML>{ field.help }</RawHTML> : undefined }
+		>
+			<div className="affibloom-icon-text">
+				<button
+					type="button"
+					ref={ anchor }
+					className="affibloom-icon-text__icon"
+					aria-haspopup="dialog"
+					aria-label={ ( labels.button || '%1$s: %2$s' )
+						.replace( '%1$s', field.label )
+						.replace( '%2$s', name ) }
+					title={ name }
+					onClick={ open }
+				>
+					<span className={ glyph }>
+						{ icon && icon.src && ! icon.missing ? (
+							<img
+								src={ icon.src }
+								alt=""
+								width="16"
+								height="16"
+							/>
+						) : null }
+					</span>
+				</button>
+				<input
+					id={ id }
+					type="text"
+					className="components-text-control__input is-next-40px-default-size affibloom-icon-text__words"
+					value={ draft }
+					onChange={ ( event ) => setDraft( event.target.value ) }
+					onBlur={ () => store( text.icon, draft ) }
+					onKeyDown={ ( event ) => {
+						if ( 'Enter' === event.key ) {
+							event.preventDefault();
+							store( text.icon, draft );
+						}
+					} }
+				/>
+			</div>
+		</BaseControl>
+	);
+}
+
+/**
  * The panel for one block.
  *
  * @param {Object}                    props               The block.
@@ -131,6 +237,19 @@ export default function CustomizeDisplay( { attributes, setAttributes } ) {
 									}
 									store( field.name, stored );
 								} }
+							/>
+						);
+					}
+					// A text holding other HTML than an icon keeps the plain field (F28 D3).
+					if ( field.icon && null !== split( value ) ) {
+						return (
+							<IconTextOverride
+								key={ field.name }
+								field={ field }
+								value={ value }
+								onStore={ ( stored ) =>
+									store( field.name, stored )
+								}
 							/>
 						);
 					}

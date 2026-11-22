@@ -36,12 +36,23 @@ final class EditorAssets implements Module {
 	/**
 	 * Builds the assets.
 	 *
-	 * @param string    $plugin_url The plugin's URL, with a trailing slash.
-	 * @param string    $version    The plugin's version, for cache busting.
-	 * @param Template  $template   Prints the modal's markup.
-	 * @param BoxAssets $box        The box's stylesheets, for the canvas.
+	 * @param string        $plugin_url The plugin's URL, with a trailing slash.
+	 * @param string        $version    The plugin's version, for cache busting.
+	 * @param Template      $template   Prints the modal's markup.
+	 * @param BoxAssets     $box        The box's stylesheets, for the canvas.
+	 * @param \Closure|null $icons      The icon library as the pickers list it (IconChoices::listing; Task 24G).
+	 * @phpstan-param (\Closure(): list<array{class: string, name: string, src: string, missing: bool}>)|null $icons
 	 */
-	public function __construct( private string $plugin_url, private string $version, private Template $template, private BoxAssets $box ) {}
+	public function __construct( private string $plugin_url, private string $version, private Template $template, private BoxAssets $box, private ?\Closure $icons = null ) {}
+
+	/**
+	 * The icon library for the editors' badge and button texts (Task 24G): the block's picker, Elementor's dropdowns.
+	 *
+	 * @return list<array{class: string, name: string, src: string, missing: bool}>
+	 */
+	public function icons(): array {
+		return null === $this->icons ? array() : ( $this->icons )();
+	}
 
 	/**
 	 * Hooks into WordPress.
@@ -81,6 +92,9 @@ final class EditorAssets implements Module {
 	 */
 	public function enqueue(): void {
 		$this->enqueue_for( self::BLOCK_SCRIPT );
+		// The table builder's icon grid for the sidebar's badge and button texts (Task 24G). Without admin.js, which
+		// carries the media picker and the toasts, it offers no "Add icon"; icons are added in Settings → Display.
+		wp_enqueue_script( 'affibloom-icon-popover', $this->plugin_url . 'assets/admin/icon-popover.js', array( 'wp-api-fetch' ), $this->version, true );
 	}
 
 	/**
@@ -119,13 +133,23 @@ final class EditorAssets implements Module {
 	}
 
 	/**
-	 * `window.affibloomEditor`: the modal's address, the sidebar's fields (Task 24A), the Classic button's words (ED1) and the
-	 * Elementor widget's (ED2).
+	 * `window.affibloomEditor`: the modal's address, the sidebar's fields (Task 24A) with the icon library and the icon
+	 * picker's words (24G), the Classic button's words (ED1) and the Elementor widget's (ED2).
 	 */
 	private function config(): string {
 		$config = array(
 			'modalScript' => add_query_arg( 'ver', $this->version, $this->plugin_url . 'assets/editor/display-modal.js' ),
 			'overrides'   => OverrideTexts::catalog(),
+			'icons'       => $this->icons(),
+			// The table builder's words for its icon picker (table-inspector.php).
+			'iconLabels'  => array(
+				'dialog' => __( 'Choose an icon', 'affibloom' ),
+				'search' => __( 'Search icons', 'affibloom' ),
+				'none'   => __( 'No icon', 'affibloom' ),
+				'empty'  => __( 'No icons match.', 'affibloom' ),
+				/* translators: 1: the field's label, 2: the icon's name, "No icon" or an unknown class. */
+				'button' => __( 'Icon for %1$s: %2$s', 'affibloom' ),
+			),
 			// Lasso's button words (R61-R62), with Affibloom's name in place of Lasso's.
 			'classic'     => array(
 				'add'     => __( 'Add A Display', 'affibloom' ),

@@ -52,6 +52,8 @@ final class ElementorWidget implements Module {
 	 * @param Widgets_Manager $widgets Elementor's widgets.
 	 */
 	public function widgets( Widgets_Manager $widgets ): void {
+		// Elementor makes its own instances of the widget, so the icon library reaches its controls statically (24G).
+		ElementorDisplayWidget::use_icons( $this->assets->icons( ... ) );
 		$widgets->register( new ElementorDisplayWidget() );
 	}
 

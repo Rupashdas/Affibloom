@@ -21,7 +21,7 @@ final class OverrideTexts {
 	/**
 	 * The panel's fields per type, with their label, help text and kind, for the editor.
 	 *
-	 * @return array<string, list<array{name: string, label: string, help: string, kind: string, on: bool}>>
+	 * @return array<string, list<array{name: string, label: string, help: string, kind: string, on: bool, icon: bool}>>
 	 */
 	public static function catalog(): array {
 		$catalog = array();
@@ -34,6 +34,8 @@ final class OverrideTexts {
 					'help'  => $help,
 					'kind'  => OverrideCatalog::kind( $field ),
 					'on'    => OverrideCatalog::on_by_default( $field ),
+					// Task 24G: a badge or button text with an icon picker.
+					'icon'  => OverrideCatalog::icon_text( $type, $field ),
 				);
 			}
 		}

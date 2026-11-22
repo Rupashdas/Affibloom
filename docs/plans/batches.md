@@ -115,6 +115,7 @@ The Meadow restyle runs first (the user, 2026-11-16, deviation 142): five short 
 | 4.7 | 24C, 24D, 24E |
 | 4.8 | ED1, ED2 |
 | 4.9 | ED3, ED4, ED5 |
+| 4.10 | 24G (added 2026-11-23, deviation 158) |
 
 MCP1 is dropped (decision A10).
 

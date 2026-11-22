@@ -29,6 +29,15 @@ final class OverrideCatalog {
 		'table'   => array( 'anchor_id', 'data_nosnippet' ),
 	);
 
+	/**
+	 * The texts that take an icon in the editors (Task 24G, F28): a single box's badge and buttons, a button's text. A
+	 * grid's badge only hides (its help text), so it stays plain.
+	 */
+	private const ICON_TEXTS = array(
+		'single' => array( 'badge', 'primary_text', 'secondary_text' ),
+		'button' => array( 'primary_text' ),
+	);
+
 	/** Toggles that are on unless the value is `hide`. */
 	private const ON_UNLESS_HIDDEN = array( 'price', 'field', 'rating' );
 
@@ -66,6 +75,17 @@ final class OverrideCatalog {
 		}
 
 		return 'description' === $field ? 'textarea' : 'text';
+	}
+
+	/**
+	 * Whether a type's field is a badge or button text the editors give an icon picker (Task 24G). Its icon is stored
+	 * as `<span class='<class>'></span> <words>`: clean() keeps single quotes, and a shortcode's attribute can hold them.
+	 *
+	 * @param string $type  The block's `type`; '' is the single box.
+	 * @param string $field The shortcode attribute.
+	 */
+	public static function icon_text( string $type, string $field ): bool {
+		return in_array( $field, self::ICON_TEXTS[ '' === $type ? 'single' : $type ] ?? array(), true );
 	}
 
 	/**

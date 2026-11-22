@@ -163,6 +163,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 155. Task 24F added (the user, 2026-11-23): the Share kit's Copy block, promised for Phase 4 (F1 D4, deviation 69) but in no task; built after Phase 8's sign-off.
 - 156. Gap fixes after Phase 8 (the user, 2026-11-23): Tasks GF1-GF7 (Batches 8.G1-8.G4) and Phase M's 26Q, from the Lasso/Affibloom gap audit.
 - 157. Task GF6 (2026-11-23): a turned-back link is the column `use_original` (schema step 12), not `assigned_product_id = -1`, so untied-link queries stay as they are.
+- 158. Task 24G added (the user, 2026-11-23): an icon picker for badge and button texts in Customize Display and the Elementor widget; stored with single quotes.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3025,3 +3026,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     `assigned_product_id = 0`. A column `use_original` (schema step 12) lets a rescan store the row as an ordinary
     untied link described by its original URL (domain, Amazon IDs), so it is an opportunity again, as in Lasso after
     Unmonetize. Off is the existing DELETE route; a product assigned later clears the flag. 26Q's API is unchanged.
+
+158. **Task 24G added: icons in the editors' badge and button texts (the user, 2026-11-23: "we need a solution for
+    this", then "Go, as proposed").** Lasso's Customize Display has plain text fields; Affibloom's product page,
+    Display and table builder have F28's icon picker, the editors had none, and R40's quote rule broke a typed span.
+    The editors store `<span class='<class>'></span> <words>` (single quotes, which R40 and the shortcode keep); the
+    box prints it as before. The block reuses the table builder's icon grid; Elementor gets a dropdown per text
+    (Elementor is inactive on the site); "Add icon" stays in Settings → Display. Task in `phase-4-editor-block.md`.

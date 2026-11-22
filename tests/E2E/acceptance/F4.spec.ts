@@ -326,6 +326,35 @@ test.describe( 'F4 Displays in the editor', () => {
 		expect( await stored() ).not.toContain( '"badge"' );
 	} );
 
+	test( 'AC11b Customize Display: a badge\'s icon from the icon grid, stored in single quotes; a button text has one too', async ( { page } ) => {
+		const name = unique( 'F4 AC11b' );
+		const id = createProduct( { name } );
+		await page.goto( newPostWith( boxBlock( id, { type: 'single' } ) ).replace( /\?p=(\d+).*$/, 'wp-admin/post.php?post=$1&action=edit' ) );
+		const canvas = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		await canvas.locator( '.affibloom-block' ).first().click();
+		const panel = page.locator( '.block-editor-block-inspector' );
+		const stored = () => page.evaluate( () => ( window as unknown as { wp: { data: { select: ( store: string ) => { getEditedPostContent: () => string } } } } ).wp.data.select( 'core/editor' ).getEditedPostContent() );
+
+		await expect( panel.getByRole( 'button', { name: 'Icon for First button text: No icon' } ) ).toBeVisible();
+		await panel.getByRole( 'button', { name: 'Icon for Badge: No icon' } ).click();
+		const grid = page.getByRole( 'dialog', { name: 'Choose an icon' } );
+		await grid.getByRole( 'searchbox', { name: 'Search icons' } ).fill( 'medal' );
+		await grid.getByRole( 'option', { name: 'Medal' } ).click();
+		await expect( grid ).toBeHidden();
+		await expect( panel.getByRole( 'button', { name: 'Icon for Badge: Medal' } ) ).toBeFocused();
+
+		const badge = panel.getByLabel( 'Badge', { exact: true } );
+		await badge.fill( 'Our Pick' );
+		await badge.press( 'Enter' );
+		expect( await stored() ).toContain( '"badge":"\\u003cspan class=\'medal-icon\'\\u003e\\u003c/span\\u003e Our Pick"' );
+		await expect( canvas.locator( '.affibloom-block__preview .affibloom-badge-text span.medal-icon' ) ).toBeAttached();
+
+		// "No icon" takes the icon away and keeps the words.
+		await panel.getByRole( 'button', { name: 'Icon for Badge: Medal' } ).click();
+		await page.getByRole( 'dialog', { name: 'Choose an icon' } ).getByRole( 'option', { name: 'No icon' } ).click();
+		expect( await stored() ).toContain( '"badge":"Our Pick"' );
+	} );
+
 	test( 'AC12 Schema & Structured Data: one block per post; Review schema gives a rating-less product 3.5', async ( { page } ) => {
 		const first = createProduct( { name: unique( 'F4 AC12 a' ) } );
 		const second = createProduct( { name: unique( 'F4 AC12 b' ) } );

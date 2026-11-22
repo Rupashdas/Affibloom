@@ -60,7 +60,39 @@ final class EditorAssetsTest extends TestCase {
 		$settings = \Mockery::mock( SettingsRepository::class );
 		$box      = new BoxAssets( '/plugin/', 'https://site.test/', '0.1.0', new DisplaySettingsService( \Mockery::mock( DisplaySettingsRepository::class ), $settings ), $settings, new BoxDetector() );
 
-		return new EditorAssets( 'https://site.test/wp-content/plugins/affibloom/', '0.1.0', self::template(), $box );
+		$icons = static fn(): array => array(
+			array(
+				'class'   => 'medal-icon',
+				'name'    => 'Medal',
+				'src'     => 'https://site.test/medal.svg',
+				'missing' => false,
+			),
+		);
+
+		return new EditorAssets( 'https://site.test/wp-content/plugins/affibloom/', '0.1.0', self::template(), $box, $icons );
+	}
+
+	/** Task 24G: the sidebar's badge and button texts learn the icon library and the picker's words. */
+	public function test_the_block_learns_the_icon_library_for_its_badge_and_button_texts(): void {
+		$scripts = array();
+		Functions\when( 'wp_enqueue_script' )->alias(
+			function ( string $handle, string $src, array $deps ) use ( &$scripts ): void {
+				$scripts[ $handle ] = array( $src, $deps );
+			}
+		);
+		self::assets()->enqueue();
+
+		$code   = $this->inline[ EditorAssets::BLOCK_SCRIPT ];
+		$config = json_decode( substr( $code, strlen( 'window.affibloomEditor = ' ), -1 ), true );
+		self::assertSame( 'medal-icon', $config['icons'][0]['class'] );
+		self::assertSame( 'No icon', $config['iconLabels']['none'] );
+		self::assertSame( 'Icon for %1$s: %2$s', $config['iconLabels']['button'] );
+		$single = array_column( $config['overrides']['single'], 'icon', 'name' );
+		self::assertTrue( $single['badge'] );
+		self::assertFalse( $single['title'] );
+		// The table builder's icon grid, without admin.js: "Add icon" is not offered in the editor.
+		self::assertSame( array( 'https://site.test/wp-content/plugins/affibloom/assets/admin/icon-popover.js', array( 'wp-api-fetch' ) ), $scripts['affibloom-icon-popover'] );
+		self::assertSame( array( array( 'class' => 'medal-icon', 'name' => 'Medal', 'src' => 'https://site.test/medal.svg', 'missing' => false ) ), self::assets()->icons() );
 	}
 
 	public function test_the_modal_styles_follow_meadows_fonts_and_admin_styles(): void {

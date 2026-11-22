@@ -1,6 +1,7 @@
 /* global wp */
 /**
- * The icon picker for badge and button texts in the table builder (F28's library; deviation 151): a popover under its
+ * The icon picker for badge and button texts in the table builder (F28's library; deviation 151) and the block's
+ * Customize Display (Task 24G, with canAdd off): a popover under its
  * button with a search box and a grid of the library's icons (picture and name), "No icon" first and the current one
  * marked. Typing filters by name; the arrow keys move through the grid, Enter or a click chooses, Escape or a click
  * outside closes and gives the focus back. For those who may change settings, "Add icon" picks an SVG, PNG or WebP from
@@ -221,8 +222,15 @@
 				return;
 			}
 			var parts = build( options );
-			// Inside the admin wrapper, for its colours and fonts.
-			( options.anchor.closest( '.affibloom-admin' ) || document.body ).appendChild( parts.popover );
+			// Inside the admin wrapper, for its colours and fonts; outside one (the block editor's sidebar, Task 24G) in a
+			// wrapper of its own that carries them.
+			var host = options.anchor.closest( '.affibloom-admin' ) || document.querySelector( '.affibloom-icon-popover-host' );
+			if ( ! host ) {
+				host = document.createElement( 'div' );
+				host.className = 'affibloom-admin affibloom-icon-popover-host';
+				document.body.appendChild( host );
+			}
+			host.appendChild( parts.popover );
 			var place = function () {
 				var box = options.anchor.getBoundingClientRect();
 				var height = parts.popover.offsetHeight;

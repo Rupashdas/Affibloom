@@ -31,6 +31,24 @@ final class ElementorDisplayWidget extends Widget_Base {
 	public const TYPE = 'affibloom_type';
 
 	/**
+	 * The icon library for the badge and button texts' dropdowns (Task 24G), read when the controls are built.
+	 *
+	 * @var (\Closure(): list<array{class: string, name: string, src: string, missing: bool}>)|null
+	 */
+	private static ?\Closure $icons = null;
+
+	/**
+	 * Gives the controls the icon library. Elementor makes its own instances of the widget (from its class), so the
+	 * library cannot come through the constructor.
+	 *
+	 * @param \Closure $icons The library as the pickers list it (EditorAssets::icons).
+	 * @phpstan-param \Closure(): list<array{class: string, name: string, src: string, missing: bool}> $icons
+	 */
+	public static function use_icons( \Closure $icons ): void {
+		self::$icons = $icons;
+	}
+
+	/**
 	 * The widget's name.
 	 */
 	public function get_name(): string {
@@ -71,9 +89,15 @@ final class ElementorDisplayWidget extends Widget_Base {
 
 	/**
 	 * The shortcode's text area, the type, and every type's overrides as `<field>_<type>` (R66): a switcher for a
-	 * toggle, at its default; a line of text, or the description's text area, otherwise.
+	 * toggle, at its default; a line of text, or the description's text area, otherwise. A badge or button text has an
+	 * icon dropdown before it, `<field>_icon_<type>` (Task 24G), which elementor.js puts in front of the words.
 	 */
 	protected function register_controls(): void {
+		$icons = array( '' => __( 'No icon', 'affibloom' ) );
+		foreach ( null === self::$icons ? array() : ( self::$icons )() as $icon ) {
+			$icons[ $icon['class'] ] = $icon['name'];
+		}
+
 		$this->start_controls_section(
 			'content_section',
 			array(
@@ -104,6 +128,20 @@ final class ElementorDisplayWidget extends Widget_Base {
 		foreach ( OverrideTexts::catalog() as $type => $fields ) {
 			foreach ( $fields as $field ) {
 				$toggle = 'toggle' === $field['kind'];
+				if ( $field['icon'] ) {
+					$this->add_control(
+						$field['name'] . '_icon_' . $type,
+						array(
+							/* translators: %s: the field's label, e.g. Badge. */
+							'label'       => sprintf( __( 'Icon for %s', 'affibloom' ), $field['label'] ),
+							'type'        => Controls_Manager::SELECT,
+							'options'     => $icons,
+							'default'     => '',
+							'condition'   => array( self::TYPE => $type ),
+							'render_type' => 'none',
+						)
+					);
+				}
 				$this->add_control(
 					$field['name'] . '_' . $type,
 					array(

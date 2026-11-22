@@ -13,6 +13,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { queuePreview } from '../../blocks/product-box/preview-queue';
+import { compose, split } from '../../blocks/product-box/icon-text';
 
 const NAME = 'affibloom';
 const SHORTCODE = 'affibloom_shortcode';
@@ -85,6 +86,9 @@ function defaults( type ) {
 	( catalog[ type ] || [] ).forEach( ( field ) => {
 		settings[ `${ field.name }_${ type }` ] =
 			'toggle' === field.kind && field.on ? 'yes' : '';
+		if ( field.icon ) {
+			settings[ `${ field.name }_icon_${ type }` ] = '';
+		}
 	} );
 	return settings;
 }
@@ -343,7 +347,27 @@ function rewrite( id ) {
 			const overrides = { ...attributes.overrides };
 			( catalog[ attributes.type ] || [] ).forEach( ( field ) => {
 				const name = `${ field.name }_${ attributes.type }`;
-				if ( names.has( name ) ) {
+				const iconName = `${ field.name }_icon_${ attributes.type }`;
+				if (
+					field.icon &&
+					( names.has( name ) || names.has( iconName ) )
+				) {
+					// Task 24G: the icon dropdown's class before the words. The controls are not read back from the
+					// shortcode, so a part not edited and empty keeps what the shortcode has.
+					const kept = split( overrides[ field.name ] ) || {
+						icon: '',
+						words: '',
+					};
+					let icon = settingOf( id, iconName );
+					let text = settingOf( id, name );
+					if ( ! names.has( iconName ) && '' === icon ) {
+						icon = kept.icon;
+					}
+					if ( ! names.has( name ) && '' === text ) {
+						text = kept.words;
+					}
+					overrides[ field.name ] = compose( icon, text );
+				} else if ( names.has( name ) ) {
 					overrides[ field.name ] = override(
 						field,
 						settingOf( id, name )

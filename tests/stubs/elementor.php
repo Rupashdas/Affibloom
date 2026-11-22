@@ -17,6 +17,7 @@ class Controls_Manager {
 	const TEXTAREA    = 'textarea';
 	const SWITCHER    = 'switcher';
 	const HIDDEN      = 'hidden';
+	const SELECT      = 'select';
 }
 
 abstract class Widget_Base {

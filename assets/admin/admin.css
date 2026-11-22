@@ -3427,6 +3427,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-icon-popover__name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-icon-popover__empty { margin: 0; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); }
 .affibloom-icon-popover__add { align-self: flex-start; }
+/* Outside an admin screen (the block editor, Task 24G): the popover's wrapper carries the tokens and nothing else. */
+.affibloom-admin.affibloom-icon-popover-host { margin: 0; min-height: 0; background: none; }
 .is-previewing .affibloom-table-workspace { grid-template-columns: minmax(0, 1fr); }
 .is-previewing .affibloom-table-inspector { display: none; }
 

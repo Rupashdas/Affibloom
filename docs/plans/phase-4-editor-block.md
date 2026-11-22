@@ -71,6 +71,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24D: Edit Display
 - [x] Task 24E: Preview queue on load
 - [x] Task 24F: The Share kit's Copy block (added 2026-11-23, deviation 155)
+- [x] Task 24G: Icon picker for badge and button texts in the editors (added 2026-11-23, deviation 158)
 - [x] Task ED1: Classic editor button
 - [x] Task ED2: Elementor widget
 - [x] Task ED3: Rank Math content analysis
@@ -964,6 +965,59 @@ product.php → partials/share-kit.php (data-block) → product.js shareKit() �
 
 *Note:* Lasso's Copy block wrapped its shortcode in its own block's markup (F31 R31); Affibloom's block keeps the
 product's ID and nothing else, so the copy is exactly what the editor saves.
+
+---
+
+### Task 24G: Icon picker for badge and button texts in the editors (added 2026-11-23, deviation 158)
+
+**Feature:** F4 (R35-R42, R67), F28
+
+**Why:** the product page, Settings → Display and the table builder choose a badge's or a button's icon from F28's
+library; Customize Display (the block) and the Elementor widget offered only plain text, and R40 removes double quotes,
+so the stored `<span class="x"></span>` form could not even be typed there.
+
+**User action:** in a post, a Single box's sidebar → Customize Display: Badge, First button text and Second button
+text (and a Button's Button text) each have an icon button before the words; it opens the table builder's searchable
+icon grid ("No icon" first, the current one marked); choosing stores the override at once and the preview redraws. In
+Elementor, each of those texts has an icon dropdown of the library's icons.
+
+**Request path:**
+```
+customize.js IconTextOverride → affibloomIconPopover.open() → setAttributes( overrides ) → POST /editor/preview
+elementor.js rewrite() → compose( <field>_icon_<type>, <field>_<type> ) → POST /editor/preview → the shortcode
+```
+
+| New | Called by |
+|---|---|
+| `OverrideCatalog::icon_text()` | `OverrideTexts::catalog()` (`icon` flag) |
+| `blocks/product-box/icon-text.js` (`split`, `compose`) | `customize.js`, `assets/editor/elementor.js` |
+| `EditorAssets` config `icons`, `iconLabels` | `customize.js` |
+| `ElementorDisplayWidget::use_icons()` | `ElementorWidget::widgets()` |
+
+**Stored form:** `<span class='<class>'></span> <words>`: single quotes, because R40 drops double quotes and the
+shortcode's attribute is in double quotes; the box prints it through the icon allowlist (`span[class]`) as before. A
+text with other HTML keeps the plain field. Grid's Badge stays plain (its help: hide only). "Add icon" is left out in
+the editors (admin.js, which carries the media picker and toasts, is not loaded there); icons are added in Settings →
+Display.
+
+**Files:** `src/Domain/Display/OverrideCatalog.php`, `src/Interface/Editor/{OverrideTexts,EditorAssets,
+ElementorDisplayWidget,ElementorWidget}.php`, `src/Plugin.php`, `blocks/product-box/{icon-text,customize}.js`,
+`blocks/product-box/editor.css`, `assets/editor/elementor.js`, `assets/admin/icon-popover.js` (a host with the admin
+tokens outside an admin wrapper), `assets/admin/admin.css`; tests `tests/Unit/Domain/Display/OverrideCatalogTest.php`,
+`tests/Unit/Interface/Editor/{EditorAssetsTest,ElementorDisplayWidgetTest}.php`, F4 AC11b in
+`tests/E2E/acceptance/F4.spec.ts`.
+
+- [x] **Step 1: Test** (unit: the icon fields per type; a single-quoted span kept, double quotes still dropped; the
+  editor config's icons; the Elementor icon controls).
+- [x] **Step 2: Catalogue, config, popover host.**
+- [x] **Step 3: Block sidebar and Elementor.**
+- [x] **Step 4: Run and look** (unit, phpcs, `npm run build`; a Single block's sidebar at 1280 px).
+- [x] **Step 5: Commit** — "Choose badge and button icons in the editors (24G)".
+
+*Note:* seen in Brave at 1280 px, post 22623 (product 16925): Badge → Medal and `Our "Top" Pick` stored as
+`<span class='medal-icon'></span> Our Top Pick`; the preview and the shortcode box follow; `do_blocks` and the
+shortcode print `<span class="medal-icon">`. Elementor is inactive on Local: its dropdowns are checked by the unit
+tests and the build only. F4 AC11b written, not run. Lint, analyse, unit 1,247.
 
 ---
 
