@@ -74,7 +74,8 @@ The Dashboard lists every product: picture, name and link, Groups, Alert, Locati
 
 - **Tiles** above the list: Broken links, Out of stock and Opportunities, each a shortcut to its tab, and the
   library's counts (products, clicks in the last 30 days).
-- **Search** by name, link, ASIN or ID; the list updates as you type.
+- **Search** by name, link, ASIN or ID, then press **Enter** (as in Lasso). A product's Locations count links straight
+  to its Locations tab.
 - **Filters** narrows the list by group, link type, placements and comparison table. Changes apply as you toggle.
   **Save as** stores the current filters as a **saved view**; your views are the chips above the list (yours only).
 - **Tabs** Broken links, Out of stock and Opportunities show only those products, oldest issue first.
@@ -145,8 +146,9 @@ variant stops its address.
 
 ## 6. Placing a box in a post
 
-In the block editor, add the **Product box** block (search "affiliate" or "link"), choose the display type, then the
-product, group or table. The sidebar sets the theme and the per-box texts. In the classic editor, the **Add A Display**
+In the block editor, add the **Product box** block (type `/product box`; the site's own saved patterns with similar
+names are listed too, Affibloom's has the flower icon), click **Add a Display**, choose the display type, search with
+**Search URLs** and press Enter, then **Add** the product (or pick the group or table). The sidebar sets the theme and the per-box texts. In the classic editor, the **Add A Display**
 button does the same; in Elementor, the **Affibloom** widget. Each places the same box.
 
 **Display types:** a single product box, a button, an image, a text link, one field's value, a group as a grid, list or
@@ -233,7 +235,8 @@ from zero. **Pageview** loads Google's tag to count page views; leave it off if 
 **The link index** reads every post, page, reusable block and widget (and the post types and custom fields you choose
 under Settings → General → Custom Link Detection) and records each link, shortcode and block that belongs to a product.
 It is built after activation, kept current as posts are saved, and caught up daily. Settings → General → Link Index
-shows its progress and **Rebuild Database** starts it again. Locations, the Locations column, the placement filters and
+shows its progress; **Rebuild Database** starts it again from the support view,
+`wp-admin/admin.php?page=affibloom-settings&tab=general&support=1` (as in Lasso). Locations, the Locations column, the placement filters and
 Opportunities all read it.
 
 **Opportunities** (header tab) finds money left on the table:
@@ -260,7 +263,7 @@ Each tab saves over the page without reloading; leaving with unsaved changes ask
 - **Link Defaults:** New Window / Tab, NoFollow / NoIndex, Sponsored, Show Disclosure and Link Cloaking for new
   products; Allow duplicate destinations; Detect Opportunities; Auto-Detect Affiliate Links. **Update Link Settings**
   applies a change to existing products too.
-- **Link Index:** progress and Rebuild Database (section 10).
+- **Link Index:** progress, and Rebuild Database in the support view (section 10).
 - **Google Analytics:** Tracking ID or Property ID, Click Tracking, Pageview, IP Anonymization (section 9).
 - **Advanced Click Tracking:** Page and Link-Level Tracking, the click counter of section 9.
 - **Cloaked Link Prefix:** the folder of cloaked links; most sites leave it empty.

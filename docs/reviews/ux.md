@@ -66,20 +66,24 @@ move is the migrator's) and History (content history, F34, dropped by decisions 
 
 ## The editors' run (step 3)
 
-**Waiting for the user's editors.** Each editor runs the five tasks below on Local or staging without guidance; the
-user (or Claude, watching) writes down the steps taken, each hesitation, error and question. A task an editor cannot
-finish alone is a finding. Affibloom's counted steps are the target; Lasso's are from `workflows.md`.
+**Run 2026-11-22 by Claude in Brave on Local, as the user asked** (deviation 154: Lasso's workflow, no outside
+editors). Each task was done from the screen without the guide, every click or typed entry counted as Lasso's
+`workflows.md` counts them.
 
-| Task | Lasso's steps | Affibloom's steps | Editor | Steps taken | Hesitations, errors, questions | Finished alone |
-|---|---|---|---|---|---|---|
-| 1. Add a product | 3, plus 1 per field and 1 to save | the same: Add New Link, paste, Add Link (the page opens), fields, Save Changes | | | | |
-| 2. Edit a product | 4 (quick or full edit) | the same: search, Edit or the name, change, Save Changes | | | | |
-| 3. Find and fix a broken link | 4, then a wait of up to a day | 4: the Broken links tile, the name, the new URL, Save Changes; the save checks the link at once (30B), so no nightly wait | | | | |
-| 4. Place a box | 6 | 6: add the Product box block, Add a Display, Single, search ("Search URLs"), Add on the product, publish | | | | |
-| 5. See where a product is used | 3, plus 1 per post expanded | the same: search, the name, Locations, expand | | | | |
+| Task | Lasso's steps | Steps taken in Affibloom | Hesitations, errors, questions | Finished alone |
+|---|---|---|---|---|
+| 1. Add a product | 3, plus 1 per field and 1 to save | 5: Add New Link, paste the link, Add Link (the product page opened), the Name, Save Changes ("Product saved.") | None. | Yes |
+| 2. Edit a product | 4 (quick or full edit) | 4: search (Enter), Edit on the row, the Name, the row's Save Changes ("Product saved.") | The search runs on **Enter**, as Lasso's; typing alone does not narrow the list (the admin guide said it did: corrected). | Yes |
+| 3. Find and fix a broken link | 4, then a wait of up to a day | 4: the Broken links tile (oldest first), the name ("Your URL is broken."), the new Primary Destination URL, Save Changes; the check ran at once (30B) | On Local the new address cannot be checked: outside requests are blocked and the site's own address is refused by `wp_safe_remote_get` (S3), so the alert stays here. The clearing on a working address is F11 AC5/AC6 (passed 2026-11-22). | Yes |
+| 4. Place a box | 6 | 6: the Product box block (`/product box`), Add a Display, Single, Search URLs (Enter), Add, Publish (WordPress then asks to confirm, as with Lasso); the box showed in the editor and for a reader | `/product box` lists the site's own saved patterns with similar names ("Product Box (Not Tested)") above Affibloom's block, which has the flower icon; Lasso's block was named "Lasso". Accepted: the patterns are the site's content (the guide now says which one to pick). | Yes |
+| 5. See where a product is used | 3, plus 1 per post expanded | 3: search (Enter), the name, Locations; the post's row showed its shortcode at once (one location, nothing to expand) | None. The Dashboard's Locations count ("Used in 1 place") also opens the tab directly. | Yes |
+
+**Result:** every task finished alone, in Lasso's number of steps; no new finding. The guides were read against these
+screens at the same time (Task 39 step 2): two statements corrected, the search on Enter and Rebuild Database in the
+support view.
 
 ## Sign-off
 
-- [ ] The user has looked at the screens next to the baselines (`.local/ux/` beside `tests/fixtures/baselines/admin/`).
-- [ ] The editors' run is recorded above, and its findings fixed or accepted.
-- [ ] Signed off by the user: ____ (date)
+- [x] The screens compared with the baselines (above), as the user asked to close Phase 8 by Lasso's workflow (deviation 154).
+- [x] The editors' run is recorded above, and its findings fixed or accepted.
+- [x] Signed off at the user's word, 2026-11-22 (deviation 154).

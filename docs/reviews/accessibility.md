@@ -33,7 +33,7 @@ are checked on a real page instead.
 | A5 | The table builder's price cell (`role="button"`) had no name when empty. | 4.1.2 Name, Role, Value | **Fixed:** `aria-labelledby` = a hidden "Edit <field>" and the cell itself, so it reads "Edit Price, $99", or "Edit Price" when empty. |
 | A6 | The table page's "Saved" status was ink-500 on the page background, 4.4:1 (the design system gives ink-500 on white and subtle only). | 1.4.3 Contrast | **Fixed:** ink-600 (5.9:1 on the page, design system). |
 | A7 | A row moved with Arrow Up or Down (field order FL5, a product's buttons and fields) moved and kept focus, but said nothing; the table builder already announced its moves. | U3; 4.1.3 Status messages | **Fixed:** `drag-rows.js` says "Moved to position N of M." in one polite live region (`wp.i18n`, translated with Task 39's files). Test: "a row moved from the keyboard says where it went". |
-| A8 | **The box's buttons: white on #22BAA0 is 2.44:1** (4.5:1 needed for 14 px bold text). | 1.4.3 | **For the user:** the box's colours are the client's (Settings → Display, Lasso's same default); not changed. A darker teal such as #12806E (4.8:1) would pass. |
+| A8 | **The box's buttons: white on #22BAA0 is 2.44:1** (4.5:1 needed for 14 px bold text). | 1.4.3 | **Decided 2026-11-22 (the user, deviation 154): Lasso's colours stay.** The box's colours are the site's (Settings → Display, Lasso's default #22BAA0); the finding is accepted. A darker teal such as #12806E (4.8:1) would pass if the site wants it. |
 | A9 | WordPress's TinyMCE toolbar (description field): buttons without names, nested controls. | 4.1.2 | Stands: WordPress core's editor, not Affibloom's markup. |
 
 ## By hand (plan step 2)

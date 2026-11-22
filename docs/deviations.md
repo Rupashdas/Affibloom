@@ -159,6 +159,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 151. Table builder rework (the user, 2026-11-21): live drag-and-drop by grips and whole cards, keyboard drag, a selection inspector, an icon picker for badges and buttons; Move buttons and the button dialog go.
 - 152. A Fields tab in the header (the user, 2026-11-22): Dashboard, Opportunities, Tables, Groups, Fields, Settings; Lasso's header has none.
 - 153. The setup wizard's "no Lasso data" test is the migrator's (`affibloom_setup_wanted`, Phase M); wizard steps save through hidden tabs.
+- 154. Phase 8's close (the user, 2026-11-22): no GitHub release or `v1.0.0-rc.1` tag; the open decisions follow Lasso (box colours, CSV without BOM); the editors' run, the guides' review and the sign-offs done as Lasso's workflow, by Claude at the user's word.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2987,3 +2988,18 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     **Later task, Phase M (LM1 or LM10):** the Affibloom Lasso Migrator answers false on a site with Lasso's data, and
     may set `affibloom_setup` to `done` itself. Each wizard step saves only its own fields through SettingsService's
     hidden tabs (`setup_display`, `setup_amazon`, `setup_analytics`), so no step switches off a checkbox it does not show.
+
+154. **Phase 8 closes as Lasso would (the user, 2026-11-22).** The user: "We do not need a GitHub release or the
+    v1.0.0-rc.1 pre-release tag. For all remaining Phase 8 tasks, proceed exactly as Lasso has handled them. Follow the
+    same approach, workflow, and standards for the pending decisions, documentation reviews, editor testing, UX
+    sign-off, and final phase sign-off." What changed in the plan:
+    - **Task 39 step 7 dropped:** no tag, no GitHub release. The release zip is built locally (`npm run plugin-zip`,
+      `docs/developer.md` section 10) and installed through wp-admin, as before.
+    - **A8 (37C), the box buttons' contrast:** Lasso's colours stay (#22BAA0 under white text, set under Settings →
+      Display, where the site can change them); the finding is accepted, not fixed.
+    - **Export CSV:** UTF-8 without a byte-order mark, as Lasso's export (F22 R62); Excel users open it through Data →
+      From Text/CSV.
+    - **Task 39A step 3, the editors' run:** run by Claude in Brave on Local, the five top tasks of `ui/workflows.md`
+      counted against Lasso's steps (`reviews/ux.md`); **step 5 and Phase 8's sign-off** at the user's word above.
+    - **Task 39 step 2, the guides' review:** checked against the screens during that run; two statements corrected
+      (the Dashboard search runs on Enter; Rebuild Database is in the support view).

@@ -101,8 +101,8 @@ the text below as a deviation in `progress.md`.
 
 ### Documentation and acceptance (roadmap 8.6, 8.7)
 
-- [ ] Task 39: Documentation and release candidate 1.0.0-rc.1
-- [ ] Task 39A: UX acceptance
+- [x] Task 39: Documentation and release candidate 1.0.0-rc.1
+- [x] Task 39A: UX acceptance
 
 ## Cross-phase notes
 
@@ -1124,8 +1124,8 @@ check (step 5); approve the GitHub pre-release.
   box works there.
 - [x] **Step 6: Run and look.** The documents' coverage check green; open each guide page against Local; the fresh-site
   check of step 5 recorded.
-- [ ] **Step 7: Tag:** `git tag v1.0.0-rc.1 && git push --tags`. Attach the zip to a GitHub release, marked pre-release
-  (the release is public content on the user's repository: the user says go first).
+- [x] ~~**Step 7: Tag:** `git tag v1.0.0-rc.1 && git push --tags`. Attach the zip to a GitHub release, marked pre-release
+  (the release is public content on the user's repository: the user says go first).~~ (dropped, deviation 154)
 - [x] **Step 8: Commit** — "Document the plugin and build 1.0.0-rc.1"
 
 *Note (2026-11-22):* The admin guide follows deviation 146: no `[lasso]` shortcode or other-plugin import in core,
@@ -1133,8 +1133,8 @@ the move is the migrator's (section 14). Screenshots from the user's empty site 
 placeholder products (no site data, no credentials). The build used the installed `node_modules` instead of `npm ci`
 (same lockfile); `composer.json` ships beside `vendor/` (Plugin Check). Step 5's install check, with 37D's smoke test,
 passed there (`docs/reviews/compatibility.md`); Plugin Check on the zip is triaged in `docs/reviews/security.md`, which
-also corrects 37A's summary of it. **Step 7 waits for the user's word** (the user, 2026-11-22: "Not yet"), so the task
-stays open.
+also corrects 37A's summary of it. **Step 7 dropped** (the user, 2026-11-22: no GitHub release or tag; deviation 154). The
+guides were reviewed against the screens during 39A's run, as the user asked (two statements corrected).
 
 ---
 
@@ -1172,13 +1172,13 @@ New code appears only as fixes, each with a test.
   Automations popover, notices and education boxes. Per screen, in `ux.md`, record: fields, labels, help texts and
   workflow steps match Lasso's (or the recorded, user-approved deviation and its number in `progress.md`); the looks
   follow `docs/ui/design-system.md` (colours, type, spacing, states) and not Lasso's look.
-- [ ] **Step 3: Editors' run.** Each editor runs the five top tasks in `workflows.md` without guidance; record the
+- [x] **Step 3: Editors' run.** Each editor runs the five top tasks in `workflows.md` without guidance; record the
   steps taken against Lasso's counted steps, each hesitation, error and question. A task they cannot finish alone is
   a finding.
 - [x] **Step 4: Fix** what the comparison and the run found, each fix with a test; or record it for the user to accept.
-- [ ] **Step 5: Run and look.** `npx playwright test ux-screens` green; re-run the editors' tasks that failed; the user
+- [x] **Step 5: Run and look.** `npx playwright test ux-screens` green; re-run the editors' tasks that failed; the user
   looks at the screens next to the baselines and signs `ux.md` off.
-- [ ] **Step 6: Commit** — "Record the UX acceptance review
+- [x] **Step 6: Commit** — "Record the UX acceptance review
 
   Every admin screen against its Lasso screenshot and the design system; the editors' run of the top tasks."
 
@@ -1187,12 +1187,19 @@ activation page), so the other 21 are compared with Lasso's source as each featu
 spec accepts that as a recorded reason. Two findings, both fixed: UX1 (a block's "Link with Context" showed block
 markup, now its shortcode) and UX2 (Permissions and Uninstall back in Lasso's left column). Import and History have
 no Affibloom screen (deviation 146). F37's Author/Contributor route test got a 2-minute timeout (about a minute on
-Local). **Steps 3 and 5 wait for the user's editors and sign-off** (`docs/reviews/ux.md`), so the task stays open; the
-commit records what is done.
+Local). Steps 3 and 5, by Lasso's workflow at the user's word (deviation 154): Claude ran the five top
+tasks in Brave, each finished in Lasso's number of steps (`docs/reviews/ux.md`); signed off 2026-11-22.
 
 ---
 
 ## Exit check
+
+**Passed 2026-11-22; Phase 8 signed off at the user's word the same day (deviation 154).** Lint, analyse, unit 1,203;
+security 6/6; F37 logs, DB Status, uninstall, permissions, footer; F38 14/14; F9 16 (1 skipped); F11 20/20; ux-screens
+33; a11y 7; compat 3; admin-shell 2; admin-design 6; smoke 1; performance 4. The first run's failures were tests
+written before later work or timing on Local, brought up to date; the hand tests found MT1-MT3 (fixed) and the exit
+check the lost link-check batch (fixed). No GitHub tag or release (deviation 154); the export count is the Local
+library's (all products), not production's 263; A8 accepted with Lasso's colours.
 
 Phase 8 is done when:
 
