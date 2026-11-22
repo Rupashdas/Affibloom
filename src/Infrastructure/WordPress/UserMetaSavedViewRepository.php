@@ -12,11 +12,6 @@ namespace Affibloom\Infrastructure\WordPress;
 use Affibloom\Domain\Dashboard\SavedView;
 use Affibloom\Domain\Dashboard\SavedViewRepository;
 use Affibloom\Domain\Dashboard\SavedViews;
-use Affibloom\Domain\LinkHealth\AlertListing;
-use Affibloom\Domain\Product\LinkKind;
-use Affibloom\Domain\Product\ListOrder;
-use Affibloom\Domain\Product\Placement;
-use Affibloom\Domain\Product\TableFilter;
 
 /**
  * Saved Dashboard views in user meta, one list per editor, in Lasso's shape (`id`, `name`, `filters`). Lasso keeps
@@ -35,24 +30,10 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 		$raw   = get_user_meta( $user, self::META_KEY, true );
 		$views = array();
 		foreach ( is_array( $raw ) ? $raw : array() as $row ) {
-			if ( ! is_array( $row ) || ! isset( $row['id'], $row['name'] ) || ! is_string( $row['id'] ) || ! is_string( $row['name'] ) ) {
-				continue;
+			$view = is_array( $row ) ? SavedView::from_stored( $row ) : null;
+			if ( null !== $view ) {
+				$views[] = $view;
 			}
-			$filters = isset( $row['filters'] ) && is_array( $row['filters'] ) ? $row['filters'] : array();
-			// The alert tab (Task 31B), or the Opportunities tab (F22, Task O8).
-			$tab     = isset( $filters['filter'] ) && in_array( $filters['filter'], AlertListing::TABS, true ) ? $filters['filter'] : '';
-			$views[] = new SavedView(
-				$row['id'],
-				$row['name'],
-				isset( $filters['s'] ) && is_string( $filters['s'] ) ? $filters['s'] : '',
-				LinkKind::from_input( isset( $filters['link_type'] ) && is_string( $filters['link_type'] ) ? $filters['link_type'] : '' ),
-				isset( $filters['per_page'] ) ? absint( $filters['per_page'] ) : 0,
-				isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0,
-				$tab,
-				Placement::from_input( isset( $filters['placements'] ) && is_string( $filters['placements'] ) ? $filters['placements'] : '' ),
-				ListOrder::from_input( isset( $filters['orderby'] ) && is_string( $filters['orderby'] ) ? $filters['orderby'] : '', isset( $filters['order'] ) && is_string( $filters['order'] ) ? $filters['order'] : '' )->for_tab( $tab ),
-				TableFilter::from_input( isset( $filters['comparison_table'] ) && is_string( $filters['comparison_table'] ) ? $filters['comparison_table'] : '' )
-			);
 		}
 
 		return new SavedViews( $views );
@@ -68,24 +49,7 @@ final class UserMetaSavedViewRepository implements SavedViewRepository {
 		update_user_meta(
 			$user,
 			self::META_KEY,
-			array_map(
-				static fn( SavedView $view ): array => array(
-					'id'      => $view->id,
-					'name'    => $view->name,
-					'filters' => array(
-						's'                => $view->term,
-						'link_type'        => $view->link_kind->value,
-						'per_page'         => $view->per_page,
-						'group'            => $view->group,
-						'filter'           => $view->filter,
-						'placements'       => $view->placement->value,
-						'orderby'          => $view->order->column,
-						'order'            => $view->order->direction,
-						'comparison_table' => $view->tables->value,
-					),
-				),
-				$views->all()
-			)
+			array_map( static fn( SavedView $view ): array => $view->to_stored(), $views->all() )
 		);
 	}
 }

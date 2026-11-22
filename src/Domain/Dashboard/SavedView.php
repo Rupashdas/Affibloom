@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Affibloom\Domain\Dashboard;
 
+use Affibloom\Domain\LinkHealth\AlertListing;
 use Affibloom\Domain\Product\LinkKind;
 use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
@@ -50,6 +51,59 @@ final class SavedView {
 		public readonly ListOrder $order = new ListOrder(),
 		public readonly TableFilter $tables = TableFilter::Any,
 	) {}
+
+	/**
+	 * A view from its stored shape, `{ id, name, filters: { s, link_type, per_page, group, filter, placements, orderby,
+	 * order, comparison_table } }` (`affibloom_saved_views`); null for a row that is not a view, as Lasso's
+	 * normalize_record() skips it. Used by the repository and the extension API (Task 26M).
+	 *
+	 * @param array<mixed> $row A stored row.
+	 */
+	public static function from_stored( array $row ): ?self {
+		if ( ! isset( $row['id'], $row['name'] ) || ! is_string( $row['id'] ) || ! is_string( $row['name'] ) ) {
+			return null;
+		}
+		$filters = isset( $row['filters'] ) && is_array( $row['filters'] ) ? $row['filters'] : array();
+		$text    = static fn ( string $key ): string => isset( $filters[ $key ] ) && is_string( $filters[ $key ] ) ? $filters[ $key ] : '';
+		// The alert tab (Task 31B), or the Opportunities tab (F22, Task O8).
+		$tab = in_array( $text( 'filter' ), AlertListing::TABS, true ) ? $text( 'filter' ) : '';
+
+		return new self(
+			$row['id'],
+			$row['name'],
+			$text( 's' ),
+			LinkKind::from_input( $text( 'link_type' ) ),
+			isset( $filters['per_page'] ) && is_numeric( $filters['per_page'] ) ? abs( (int) $filters['per_page'] ) : 0,
+			isset( $filters['group'] ) && is_numeric( $filters['group'] ) ? max( -1, (int) $filters['group'] ) : 0,
+			$tab,
+			Placement::from_input( $text( 'placements' ) ),
+			ListOrder::from_input( $text( 'orderby' ), $text( 'order' ) )->for_tab( $tab ),
+			TableFilter::from_input( $text( 'comparison_table' ) )
+		);
+	}
+
+	/**
+	 * The view in its stored shape.
+	 *
+	 * @return array{id: string, name: string, filters: array<string, string|int>}
+	 */
+	public function to_stored(): array {
+		return array(
+			'id'      => $this->id,
+			'name'    => $this->name,
+			'filters' => array(
+				's'                => $this->term,
+				'link_type'        => $this->link_kind->value,
+				'per_page'         => $this->per_page,
+				'group'            => $this->group,
+				'filter'           => $this->filter,
+				'placements'       => $this->placement->value,
+				'orderby'          => $this->order->column,
+				'order'            => $this->order->direction,
+				'comparison_table' => $this->tables->value,
+			),
+		);
+	}
 
 	/**
 	 * Whether this view shows the same list as these values, so its pill can be marked as the one in use.

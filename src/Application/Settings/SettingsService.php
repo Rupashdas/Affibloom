@@ -12,6 +12,7 @@ namespace Affibloom\Application\Settings;
 use Closure;
 use InvalidArgumentException;
 use LogicException;
+use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Domain\Cloak\CloakPrefix;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Settings\CustomCss;
@@ -116,6 +117,8 @@ final class SettingsService {
 		'import'          => array(
 			'tracking_id_blacklist' => 'tracking_ids',
 			'default_thumbnail'     => 'url',
+			// The Opportunities screens' intro boxes closed for good (F22 D8; F38 ON5; Task 26M).
+			'education_hidden'      => 'boxes',
 		),
 		'setup_analytics' => array(
 			'ga_tracking_id'    => 'ga_ids',
@@ -509,6 +512,20 @@ final class SettingsService {
 	}
 
 	/**
+	 * The Opportunities intro boxes closed for good (Task 26M): a list of IntroBoxes' names, or null when one is not.
+	 *
+	 * @param mixed $raw Raw value.
+	 * @return list<string>|null
+	 */
+	private static function clean_boxes( mixed $raw ): ?array {
+		if ( ! is_array( $raw ) || array() !== array_diff( $raw, IntroBoxes::BOXES ) ) {
+			return null;
+		}
+
+		return self::sorted_set( $raw );
+	}
+
+	/**
 	 * Cleans one value. Null means the value is refused and the old one stays.
 	 *
 	 * @param string $type Field type from FIELDS.
@@ -523,6 +540,7 @@ final class SettingsService {
 			'text'       => is_string( $raw ) && strlen( trim( $raw ) ) <= 500 ? sanitize_text_field( $raw ) : null,
 			'css'        => is_string( $raw ) ? CustomCss::clean( $raw ) : null,
 			'url'        => self::clean_url( $raw ),
+			'boxes'      => self::clean_boxes( $raw ),
 			'tracking_id'  => is_string( $raw ) && ( '' === trim( $raw ) || self::is_tracking_id( trim( $raw ) ) ) ? trim( $raw ) : null,
 			'tracking_ids' => $this->clean_tracking_ids( $raw ),
 			// Lasso's number field takes 0-30 (amazon.php: min="0" max="30").

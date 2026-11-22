@@ -461,6 +461,62 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26M: Lasso's saved views (a group view, one with a filter Affibloom lacks), its tour flag and a closed
+	// education box. Local has none, so the test gives the first admin two views and closes Lasso's link box.
+	test( '@local AC20 --only=views copies the saved views, the tour flag and the closed boxes', () => {
+		const user = wp(
+			'eval',
+			'$u = get_users( array( "role" => "administrator", "number" => 1, "fields" => "ID" ) )[0]; $g = (int) get_terms( array( "taxonomy" => "lasso-cat", "hide_empty" => false, "fields" => "ids", "number" => 1 ) )[0]; update_user_meta( $u, "lasso_dashboard_saved_views", array( array( "id" => "ac20-group", "name" => "AC20 group", "filters" => array( "dashboard_group_term_id" => $g, "pageSize" => 25 ) ), array( "id" => "ac20-brand", "name" => "AC20 brand", "filters" => array( "dashboard_link_kind" => "amazon", "dashboard_brand" => "mikasa" ) ) ) ); $s = (array) get_option( "lasso_settings" ); $s["link-opportunities"] = "hide"; update_option( "lasso_settings", $s ); delete_option( "affibloom_tour_done" ); echo $u;'
+		);
+		const out = wp(
+			'affibloom-lasso',
+			'migrate',
+			'--only=groups,views',
+			'--update'
+		);
+		expect( out ).toMatch(
+			/^views\t\d+:ac20-brand\tAC20 brand\t.*filters dropped: dashboard_brand$/m
+		);
+		const stored = JSON.parse(
+			wp(
+				'user',
+				'meta',
+				'get',
+				user,
+				'affibloom_saved_views',
+				'--format=json'
+			)
+		) as Array< {
+			id: string;
+			filters: Record< string, string | number >;
+		} >;
+		const group = stored.find( ( view ) => view.id === 'ac20-group' );
+		expect( group?.filters.per_page ).toBe( 25 );
+		expect( String( group?.filters.group ) ).toBe(
+			wp(
+				'eval',
+				'$m = get_option( "affibloom_lasso_migration" ); echo reset( $m["group_map"] );'
+			)
+		);
+		expect(
+			stored.find( ( view ) => view.id === 'ac20-brand' )?.filters
+				.link_type
+		).toBe( 'amazon' );
+		expect( wp( 'option', 'get', 'affibloom_tour_done' ) ).toBe( '1' );
+		expect(
+			wp(
+				'option',
+				'pluck',
+				'affibloom_settings',
+				'education_hidden',
+				'--format=json'
+			)
+		).toContain( '"links"' );
+		expect( wp( 'affibloom-lasso', 'migrate', '--only=views' ) ).toMatch(
+			/^views: 4 items: 0 created, 0 updated, 4 unchanged, 0 skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

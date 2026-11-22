@@ -112,7 +112,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26E: Custom fields — definitions and values
 - [x] Task 26F: Groups — `wp affibloom migrate --only=groups`
 - [x] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
-- [ ] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
+- [x] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
 - [ ] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
 - [ ] Task 26H: URL variants — `wp affibloom migrate --only=variants`
 - [ ] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
@@ -665,11 +665,24 @@ unchanged (Affibloom's data newer), then 226 unchanged. AC19 passes.
 
 **Files:** the classes above; `tests/Unit/Application/ViewsMapperTest.php`, `tests/Integration/ViewsStepTest.php`; F10 spec AC20.
 
-- [ ] **Step 1: Failing tests.** AC20 (a view with a group filter; a view with an unknown filter; second run unchanged), the tour flag copied, a closed education box copied and left closed. Expected red: no `views` family.
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step.**
-- [ ] **Step 4: Run and look.** The Dashboard's saved views beside Lasso's; the tour does not start; a closed education box stays closed; the fingerprint equal.
-- [ ] **Step 5: Commit** — "Migrate saved Dashboard views".
+- [x] **Step 1: Failing tests.** AC20 (a view with a group filter; a view with an unknown filter; second run unchanged), the tour flag copied, a closed education box copied and left closed. Expected red: no `views` family.
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step.**
+- [x] **Step 4: Run and look.** The Dashboard's saved views beside Lasso's; the tour does not start; a closed education box stays closed; the fingerprint equal.
+- [x] **Step 5: Commit** — "Migrate saved Dashboard views".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=views [--update]`. Affibloom: the stored view shape moved
+from `UserMetaSavedViewRepository` into `SavedView::from_stored()`/`to_stored()` (its second use); the API gained
+`views()`, `save_view()`, `tour_done()` and `finish_tour()` (`Extension\ViewAccess`); `education_hidden` is saved
+through the hidden `import` tab (only IntroBoxes' names). Migrator: `LassoSource::views()` (`LassoViews`: each user's
+views, the site's tour flag, the boxes marked `hide`), `ViewsMapper` (group via `group_map`; Lasso's sorts to
+Affibloom's columns; an unknown filter, a group not migrated or an oldest-first sort dropped and named in the line's
+note), `ViewsStep` (26C's rule; the tour only ended, a box only closed, never reopened; Lasso's keyword box a skip line,
+no Affibloom screen). The four `*-opportunities` keys are skip lines in the settings family. Tests are unit tests
+(`ViewsMapperTest`, `ViewsStepTest`), as for the other families. Local had no Lasso views: AC20 gives the first admin
+two and closes Lasso's link box; created, then unchanged; the Dashboard lists both, the group view opens on group 569,
+the Links intro box stays closed; fingerprint equal.
 
 ---
 

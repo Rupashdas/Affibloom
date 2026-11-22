@@ -40,7 +40,7 @@ final class Api {
 	 * @param GroupAccess     $groups     What a helper may do with groups.
 	 * @param AmazonAccess    $amazon     What a helper may do with the Amazon product data.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -240,6 +240,43 @@ final class Api {
 	 */
 	public function import_amazon_product( string $asin, string $country, array $data ): void {
 		$this->amazon->import( $asin, $country, $data );
+	}
+
+	/**
+	 * A user's saved Dashboard views, each `{ id, name, filters: { s, link_type, per_page, group, filter, placements,
+	 * orderby, order, comparison_table } }` (Task 26M).
+	 *
+	 * @param int $user The user's ID.
+	 * @return list<array{id: string, name: string, filters: array<string, string|int>}>
+	 */
+	public function views( int $user ): array {
+		return $this->views->views( $user );
+	}
+
+	/**
+	 * Saves a Dashboard view for a user in the shape views() gives, replacing the one with its ID (Task 26M). A filter
+	 * value Affibloom does not know falls back to its default, as on the Dashboard.
+	 *
+	 * @param int          $user The user's ID.
+	 * @param array<mixed> $view The view.
+	 * @throws \InvalidArgumentException When it is not a view, or the name or the count is refused ("name: view_name_empty").
+	 */
+	public function save_view( int $user, array $view ): void {
+		$this->views->save( $user, $view );
+	}
+
+	/**
+	 * Whether the Dashboard's first-visit tour was ended for every user (Task 26M).
+	 */
+	public function tour_done(): bool {
+		return $this->views->tour_done();
+	}
+
+	/**
+	 * Ends the Dashboard's first-visit tour for every user, as its Skip does (Task 26M).
+	 */
+	public function finish_tour(): void {
+		$this->views->finish_tour();
 	}
 
 	/**

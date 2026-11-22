@@ -1,6 +1,11 @@
 <?php
 namespace Affibloom\Tests\Unit\Extension;
 
+use Affibloom\Application\Dashboard\SavedViewService;
+use Affibloom\Application\Shell\TourState;
+use Affibloom\Domain\Dashboard\SavedViewRepository;
+use Affibloom\Domain\Dashboard\SavedViews;
+use Affibloom\Extension\ViewAccess;
 use Affibloom\Application\Shell\NoticeBoard;
 use Affibloom\Application\Products\LinkNormaliser;
 use Affibloom\Application\Products\LinkResolver;
@@ -139,6 +144,72 @@ final class ApiTest extends TestCase {
 		$groups->create( 'Best shoes', '' );
 	}
 
+	/** View access on in-memory views and tour flag. */
+	public static function views(): ViewAccess {
+		$repository = new class() implements SavedViewRepository {
+			/** @var array<int, SavedViews> */
+			public array $stored = array();
+
+			public function for_user( int $user ): SavedViews {
+				return $this->stored[ $user ] ?? new SavedViews();
+			}
+
+			public function save( int $user, SavedViews $views ): void {
+				$this->stored[ $user ] = $views;
+			}
+		};
+		$tour       = new class() implements TourState {
+			public bool $done = false;
+
+			public function done(): bool {
+				return $this->done;
+			}
+
+			public function finish(): void {
+				$this->done = true;
+			}
+		};
+
+		return new ViewAccess( new SavedViewService( $repository ), $tour );
+	}
+
+	public function test_a_view_is_saved_in_the_shape_it_is_read_an_unknown_filter_falls_back_and_the_tour_ends(): void {
+		Functions\when( 'esc_html' )->returnArg();
+		$api  = $this->api();
+		$view = array(
+			'id'      => 'v1',
+			'name'    => 'Amazon shoes',
+			'filters' => array(
+				's'                => 'shoes',
+				'link_type'        => 'amazon',
+				'per_page'         => 25,
+				'group'            => 12,
+				'filter'           => 'no-such-tab',
+				'placements'       => '',
+				'orderby'          => '',
+				'order'            => '',
+				'comparison_table' => '',
+			),
+		);
+
+		$api->save_view( 3, $view );
+
+		$stored = $api->views( 3 );
+		self::assertCount( 1, $stored );
+		self::assertSame( 'shoes', $stored[0]['filters']['s'] );
+		self::assertSame( 'amazon', $stored[0]['filters']['link_type'] );
+		self::assertSame( 12, $stored[0]['filters']['group'] );
+		self::assertSame( '', $stored[0]['filters']['filter'] );
+		self::assertSame( array(), $api->views( 4 ) );
+
+		self::assertFalse( $api->tour_done() );
+		$api->finish_tour();
+		self::assertTrue( $api->tour_done() );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$api->save_view( 3, array( 'id' => 'v2', 'name' => '' ) );
+	}
+
 	/** Amazon access on an in-memory store. */
 	public static function amazon(): AmazonAccess {
 		return new AmazonAccess( new InMemoryAmazonProducts() );
@@ -198,7 +269,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -207,12 +278,15 @@ final class ApiTest extends TestCase {
 		self::assertSame( array( 'tracking_id' ), $api->save_settings( 'amazon', array( 'tracking_id' => 'not a tag!' ) ) );
 		self::assertSame( array(), $api->save_settings( 'import', array( 'tracking_id_blacklist' => array( 'old-20' ) ) ) );
 		self::assertSame( array( 'old-20' ), $api->settings()['tracking_id_blacklist'] );
+		self::assertSame( array( 'education_hidden' ), $api->save_settings( 'import', array( 'education_hidden' => array( 'links', 'keywords' ) ) ) );
+		self::assertSame( array(), $api->save_settings( 'import', array( 'education_hidden' => array( 'links', 'content' ) ) ) );
+		self::assertSame( array( 'content', 'links' ), $api->settings()['education_hidden'] );
 	}
 
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -232,7 +306,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 
