@@ -119,7 +119,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
 - [x] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
 - [x] Task 26O: Run from the admin page, in batches
-- [ ] Task 26P: Check the migrated products against the baselines
+- [x] Task 26P: Check the migrated products against the baselines
 
 **F10 — Lasso's content becomes Affibloom's**
 
@@ -967,10 +967,21 @@ written in `docs/parity.md`.
 
 **Files:** `tools/compare-migration.php`, `docs/parity.md`, `tools/README.md`.
 
-- [ ] **Step 1: The tool** (red: differences listed).
-- [ ] **Step 2: Fix causes, with a test each.**
-- [ ] **Step 3: Run and look.** `bash tools/local-wp.sh eval-file tools/compare-migration.php` ends `250 boxes: N equal, N different`; every difference is fixed or written in `docs/parity.md`.
-- [ ] **Step 4: Commit** — "Prove every migrated product gives Lasso's box values".
+- [x] **Step 1: The tool** (red: differences listed).
+- [x] **Step 2: Fix causes, with a test each.**
+- [x] **Step 3: Run and look.** `bash tools/local-wp.sh eval-file tools/compare-migration.php` ends `250 boxes: N equal, N different`; every difference is fixed or written in `docs/parity.md`.
+- [x] **Step 4: Commit** — "Prove every migrated product gives Lasso's box values".
+
+
+*Note (2026-11-23):* `tools/compare-migration.php [fresh]`, `docs/parity.md`, a `tools/README.md` line. The tool
+matches each baseline box to its own shortcode by guide and Lasso ID (the fixtures' orders differ) and rewrites
+`lasso-br-code` to `-br-` as LM2 will. Its `fresh` mode makes each product from the record through the products
+family's mapper and Affibloom's API, then deletes it (Local's products were adopted from the one-time import with
+their own values; production has none). One cause fixed: Prime came from the cached row, but Lasso's box shows it for
+every Amazon product while its setting is on (`LassoRecordMapper`, with a test). Result `fresh`: 250 boxes, 238 equal,
+12 explained in `parity.md` (baseline quotes, the slugs and fields families not run in that mode). 76 linked products
+in Affibloom's trash from earlier tests were put back first. Open for the user: whether `--force` should also put
+Lasso's values back on adopted products (26B's rule).
 
 ---
 
