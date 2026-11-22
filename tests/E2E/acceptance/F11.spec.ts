@@ -531,4 +531,20 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		await page.reload();
 		await expect( page.locator( `tr[data-product-id="${ id }"] .affibloom-alert--out-of-stock` ) ).toBeVisible();
 	} );
+	// Exit check finding (2026-11-22): a pass whose batch event was lost (its request died mid-batch) waited for the next
+	// day. Loading an Affibloom page now queues its next batch, as the link index's catch-up does for a rebuild.
+	test( 'a pass whose batch was lost gets one back when an Affibloom page loads', async ( { page } ) => {
+		const today = wp( 'eval', 'echo wp_date( "Y-m-d" );' ).trim();
+		wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_check_batch" );' );
+		wp( 'option', 'update', 'affibloom_link_check', JSON.stringify( { date: today, total: 2, checked: 1, queue: [ 999999999 ] } ), '--format=json' );
+		try {
+			await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+			// Queued again, or already run by the WP-Cron spawn that queuing starts (the queue then empties).
+			const state = () => wp( 'eval', '$p = get_option( "affibloom_link_check" ); echo false !== wp_next_scheduled( "affibloom_link_check_batch" ) ? "queued" : ( empty( $p["queue"] ) ? "ran" : "stuck" );' ).trim();
+			await expect.poll( state, { timeout: 30_000 } ).not.toBe( 'stuck' );
+		} finally {
+			wp( 'option', 'delete', 'affibloom_link_check' );
+			wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_check_batch" );' );
+		}
+	} );
 } );

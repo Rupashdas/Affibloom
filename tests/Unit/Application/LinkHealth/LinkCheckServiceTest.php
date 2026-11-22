@@ -135,6 +135,22 @@ final class LinkCheckServiceTest extends TestCase {
 		$this->assertTrue( $this->service()->start_pass( '2026-11-19' ) );
 	}
 
+	/**
+	 * Exit check finding (2026-11-22): a pass whose batch event was lost gets its next batch back, once.
+	 */
+	public function test_a_pass_with_work_left_and_no_batch_waiting_gets_one(): void {
+		$this->passes->save( new CheckPass( '2026-11-18', 8, 1, array( 3, 5 ) ) );
+
+		$this->assertTrue( $this->service()->resume( false ) );
+		$this->assertSame( array( 0 ), $this->dispatched );
+
+		// A batch already waiting, or nothing left to check: nothing is queued.
+		$this->assertFalse( $this->service()->resume( true ) );
+		$this->passes->save( new CheckPass( '2026-11-18', 8, 8, array() ) );
+		$this->assertFalse( $this->service()->resume( false ) );
+		$this->assertSame( array( 0 ), $this->dispatched );
+	}
+
 	public function test_the_pass_follows_the_locations_only_setting(): void {
 		$this->service()->start_pass( '2026-11-18' );
 		$this->assertTrue( $this->issues->locations_only );

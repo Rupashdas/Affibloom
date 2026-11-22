@@ -15,6 +15,7 @@ use Affibloom\Application\LinkHealth\LinkCheckService;
 use Affibloom\Application\Products\BackgroundJob;
 use Affibloom\Application\Upgrade\UpgradeLock;
 use Affibloom\Domain\LinkHealth\LinkHealthPolicy;
+use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Module;
 use DateTimeImmutable;
 
@@ -58,14 +59,29 @@ final class LinkCheckCron implements Module {
 		add_action( self::BATCH, array( $this, 'batch' ) );
 		add_action( self::PRODUCT, array( $this, 'product' ) );
 		add_action( 'init', array( $this, 'schedule_daily' ) );
+		add_action( 'admin_init', array( $this, 'catch_up' ) );
 		add_action( 'update_option_affibloom_settings', array( $this, 'interval_changed' ), 10, 2 );
 	}
 
 	/**
-	 * Starts the day's pass (site time), unless it already ran today.
+	 * Starts the day's pass (site time), unless it already ran today; a pass of today that lost its batch gets it back.
 	 */
 	public function start(): void {
-		$this->checks->start_pass( (string) wp_date( 'Y-m-d' ) );
+		if ( ! $this->checks->start_pass( (string) wp_date( 'Y-m-d' ) ) ) {
+			$this->checks->resume( false !== wp_next_scheduled( self::BATCH ) );
+		}
+	}
+
+	/**
+	 * An administrator's page load gives a pass that lost its batch its next one (exit check finding, 2026-11-22), as the
+	 * link index's catch-up does for a rebuild. Only for someone who manages products: WordPress also runs admin_init
+	 * for a visitor's admin-ajax.php and admin-post.php (37A, S4).
+	 */
+	public function catch_up(): void {
+		if ( ! current_user_can( Capabilities::PRODUCTS ) ) {
+			return;
+		}
+		$this->checks->resume( false !== wp_next_scheduled( self::BATCH ) );
 	}
 
 	/**

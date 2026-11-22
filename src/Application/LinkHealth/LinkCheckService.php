@@ -85,6 +85,23 @@ final class LinkCheckService {
 	}
 
 	/**
+	 * Gives a pass that lost its chain its next batch back. WP-Cron removes an event before running it, so a batch whose
+	 * request dies (a slow merchant, a worker killed) leaves the pass with work and nothing queued until the next day's
+	 * pass (exit check finding, 2026-11-22; the link index's catch-up does the same for a rebuild).
+	 *
+	 * @param bool $batch_waiting Whether a batch is already queued.
+	 * @return bool Whether a batch was queued.
+	 */
+	public function resume( bool $batch_waiting ): bool {
+		if ( $batch_waiting || array() === $this->passes->get()->queue ) {
+			return false;
+		}
+		$this->job->dispatch();
+
+		return true;
+	}
+
+	/**
 	 * Runs one batch: the queue first, then the second checks that are due; schedules the next batch.
 	 *
 	 * @param int   $limit  At most this many products.

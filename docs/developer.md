@@ -314,7 +314,7 @@ Every event is registered by its module's `HOOKS` constant (`Interface\Cron\Cron
 | Hook | Kind | Started by |
 |---|---|---|
 | `affibloom_daily` | daily | the link check pass, click retention (400 days) and log pruning |
-| `affibloom_link_check_batch` | single, chained | the daily pass, `POST /jobs/run-due` |
+| `affibloom_link_check_batch` | single, chained | the daily pass, `POST /jobs/run-due`; queued again by an administrator's page load or the daily event when a pass lost its chain |
 | `affibloom_link_check_product` | single | a product's save, and its recheck an hour later |
 | `affibloom_amazon_refresh` | hourly | the Amazon data refresh (only with "Update Amazon pricing daily" and credentials) |
 | `affibloom_amazon_refresh_pass` | single, chained | the hourly event |
