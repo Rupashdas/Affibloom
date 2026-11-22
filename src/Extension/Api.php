@@ -41,8 +41,9 @@ final class Api {
 	 * @param AmazonAccess    $amazon     What a helper may do with the Amazon product data.
 	 * @param ViewAccess      $views      What a helper may do with saved Dashboard views and the tour.
 	 * @param VariantAccess   $variants   What a helper may do with a product's URL variants.
+	 * @param IssueAccess     $issues     What a helper may do with link issues and their dismissals.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -393,6 +394,49 @@ final class Api {
 	 */
 	public function set_product_variants( int $id, array $rows ): void {
 		$this->variants->set( $id, $rows );
+	}
+
+	/**
+	 * A product's link-health row `{ issue_type, checked_url, detection_date, resolved, resolved_at, last_checked_at }`
+	 * (UTC, '' for none), or null when it has none (Task 26K).
+	 *
+	 * @param int $id The product.
+	 * @return array{issue_type: string, checked_url: string, detection_date: string, resolved: bool, resolved_at: string, last_checked_at: string}|null
+	 */
+	public function link_issue( int $id ): ?array {
+		return $this->issues->get( $id );
+	}
+
+	/**
+	 * Stores a published product's link-health row as link_issue() gives it (Task 26K).
+	 *
+	 * @param int                  $id  The product.
+	 * @param array<string, mixed> $row The row.
+	 * @throws \InvalidArgumentException When there is no such product, or the code or the last check is not one.
+	 */
+	public function import_link_issue( int $id, array $row ): void {
+		$this->issues->import( $id, $row );
+	}
+
+	/**
+	 * Until when a product's issue bar (`broken` or `out-of-stock`) stays closed, a Unix time; 0 when open (Task 26K).
+	 *
+	 * @param int    $id  The product.
+	 * @param string $bar The bar.
+	 */
+	public function issue_dismissed_until( int $id, string $bar ): int {
+		return $this->issues->dismissed_until( $id, $bar );
+	}
+
+	/**
+	 * Closes a product's issue bar until a Unix time (Task 26K).
+	 *
+	 * @param int    $id    The product.
+	 * @param string $bar   `broken` or `out-of-stock`.
+	 * @param int    $until The time.
+	 */
+	public function dismiss_issue( int $id, string $bar, int $until ): void {
+		$this->issues->dismiss( $id, $bar, $until );
 	}
 
 	/**

@@ -569,6 +569,24 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26K: every Lasso row of a published product is in Affibloom's table, Lasso's or a newer Affibloom check.
+	test( '@local AC18 --only=issues carries Lasso’s link alerts over', () => {
+		const out = wp(
+			'affibloom-lasso',
+			'migrate',
+			'--only=issues',
+			'--update'
+		);
+		expect( out ).toMatch( /^issues: \d+ items: .* 0 errors\.$/m );
+		const missing = sql(
+			"SELECT COUNT(*) FROM wp_lasso_url_issues l JOIN wp_postmeta m ON m.meta_key = '_affibloom_lasso_id' AND m.meta_value = l.id JOIN wp_posts p ON p.ID = m.post_id AND p.post_status = 'publish' LEFT JOIN wp_affibloom_link_issues a ON a.product_id = p.ID WHERE a.product_id IS NULL OR a.last_checked_at < COALESCE( NULLIF( l.issue_resolved_dt, '0000-00-00 00:00:00' ), l.detection_date )"
+		);
+		expect( missing ).toBe( '0' );
+		expect( wp( 'affibloom-lasso', 'migrate', '--only=issues' ) ).toMatch(
+			/^issues: \d+ items: 0 created, 0 updated, \d+ unchanged, \d+ skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

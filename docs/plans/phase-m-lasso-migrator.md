@@ -115,7 +115,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
 - [x] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
 - [x] Task 26H: URL variants — `wp affibloom migrate --only=variants`
-- [ ] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
+- [x] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
 - [ ] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
 - [ ] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
 - [ ] Task 26O: Run from the admin page, in batches
@@ -798,17 +798,28 @@ status; `000` = out of stock; `200` = fine) → `issue_type`; `issue_slug` → `
 `_affibloom_dismiss_broken`. Rows whose product is not migrated are skipped with a note. The 41 fixed texts are not
 copied (D12).
 
-- [ ] **Step 1: Failing tests.** Unit: `IssueMapperTest` over rows from the inventory fixtures (open `000`, open `404`,
+- [x] **Step 1: Failing tests.** Unit: `IssueMapperTest` over rows from the inventory fixtures (open `000`, open `404`,
   open `400`, resolved `200`). Integration: seed a Lasso data set; `--only=issues` twice (created once, `unchanged` the
   second time); the Alert state of a carried row; a dismissed notice stays dismissed. Expected red: the family reports
   "waiting".
-- [ ] **Step 2: Source and mapper** (`LassoSource::issues()`, `IssueMapper`).
-- [ ] **Step 3: The step** (`plan()`, `run()`, `--update`; writes through F11's issue repository and the product
+- [x] **Step 2: Source and mapper** (`LassoSource::issues()`, `IssueMapper`).
+- [x] **Step 3: The step** (`plan()`, `run()`, `--update`; writes through F11's issue repository and the product
   meta; "waiting for F11" when its table is absent).
-- [ ] **Step 4: Run and look.** `tools/lasso-fingerprint.sh` before and after (equal); `wp affibloom migrate
+- [x] **Step 4: Run and look.** `tools/lasso-fingerprint.sh` before and after (equal); `wp affibloom migrate
   --only=issues`; open the Dashboard: the same 109 out of stock and 3 broken as Lasso, the same dates; a product's page
   shows its bar unless it was dismissed. At 1280 and 375 px.
-- [ ] **Step 5: Commit:** "Carry Lasso's link alerts over".
+- [x] **Step 5: Commit:** "Carry Lasso's link alerts over".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=issues [--update]`. Affibloom's API gained `link_issue()`,
+`import_link_issue()`, `issue_dismissed_until()` and `dismiss_issue()` (`Extension\IssueAccess`: F11's table and
+`AlertDismissals`; times UTC). In the migrator: `LassoSource::issues()` (`LassoIssues`: the rows and the dismiss
+meta), `IssuesStep` with the mapping as `IssuesStep::mapped()` (no separate `IssueMapper`); Affibloom's row wins when
+its last check is as new or newer (26L's rule), 26C's rule for a later run; rows of products in Affibloom's trash or
+retired, and dismissals already expired in Lasso, are skip lines. F11 is part of Affibloom, so no "waiting for F11"
+case. Local: 12 rows created (Lasso's own alerts, such as Salomon Speedcross out of stock for 79 days), 165 where
+Affibloom's check is newer, 5 dismissals (all expired; the first run, before that rule, copied them, harmless), then
+unchanged. AC18 passes; fingerprint equal.
 
 ---
 
