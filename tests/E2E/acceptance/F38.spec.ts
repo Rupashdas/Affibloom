@@ -450,4 +450,64 @@ test.describe( 'F38 Admin shell', () => {
 			wp( 'option', 'update', 'affibloom_tour_done', '1' );
 		}
 	} );
+	// Task ON9: the Ctrl+Shift+L product search (R65-R72).
+	test( 'AC13 Ctrl+Shift+L opens Search links on the Dashboard and in the post editor; filters, arrows, Enter, Escape, focus back', async ( { page } ) => {
+		test.setTimeout( 180_000 );
+		const name = unique( 'F38 palette' );
+		const id = createProduct( { name, url: 'https://www.example.com/palette' } );
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await expect( page.locator( '#affibloom-search-kbd' ) ).toHaveText( 'Ctrl+Shift+L' );
+
+		// Not while typing in a field outside it.
+		await page.locator( '#affibloom-search' ).focus();
+		await page.keyboard.press( 'Control+Shift+L' );
+		const dialog = page.getByRole( 'dialog', { name: 'Search links' } );
+		await expect( dialog ).toHaveCount( 0 );
+
+		const opener = page.getByRole( 'button', { name: 'Filters' } );
+		await opener.focus();
+		await page.keyboard.press( 'Control+Shift+L' );
+		await expect( dialog ).toBeVisible();
+		const input = dialog.getByPlaceholder( 'Search by link name or URL…' );
+		await expect( input ).toBeFocused();
+		await expect( dialog.getByText( 'Shortcut: Ctrl+Shift+L. Press again to close.' ) ).toBeVisible();
+		const results = dialog.getByRole( 'listbox', { name: 'Search results' } );
+		// Ten of the most recently changed at once; the new product is the newest.
+		await expect( results.getByRole( 'option' ) ).toHaveCount( 10, { timeout: 30_000 } );
+		await expect( results.getByRole( 'option' ).first() ).toContainText( name );
+
+		// Pressing the shortcut again closes it; the focus goes back.
+		await page.keyboard.press( 'Control+Shift+L' );
+		await expect( dialog ).toBeHidden();
+		await expect( opener ).toBeFocused();
+
+		await page.keyboard.press( 'Control+Shift+L' );
+		await expect( input ).toHaveValue( '' );
+		await input.fill( 'zz-no-such-link-qq' );
+		await expect( dialog.getByText( 'No links found.' ) ).toBeVisible( { timeout: 30_000 } );
+		await input.fill( name );
+		await expect( results.getByRole( 'option' ) ).toHaveCount( 1, { timeout: 30_000 } );
+		await expect( results.getByRole( 'option' ) ).toContainText( 'https://www.example.com/palette' );
+		// ↓ to the result, ↑ back to the box, Escape closes.
+		await page.keyboard.press( 'ArrowDown' );
+		await expect( results.getByRole( 'option' ) ).toBeFocused();
+		await page.keyboard.press( 'ArrowUp' );
+		await expect( input ).toBeFocused();
+		await page.keyboard.press( 'Escape' );
+		await expect( dialog ).toBeHidden();
+		await expect( opener ).toBeFocused();
+
+		// In the post editor: Enter opens the product page.
+		await page.goto( '/wp-admin/post-new.php' );
+		await page.locator( 'body' ).click( { position: { x: 5, y: 5 } } ).catch( () => {} );
+		await page.waitForTimeout( 2_000 );
+		await page.evaluate( () => ( document.activeElement as HTMLElement | null )?.blur() );
+		await page.keyboard.press( 'Control+Shift+L' );
+		await expect( dialog ).toBeVisible( { timeout: 30_000 } );
+		await dialog.getByPlaceholder( 'Search by link name or URL…' ).fill( name );
+		await expect( dialog.getByRole( 'option' ) ).toHaveCount( 1, { timeout: 30_000 } );
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'Enter' );
+		await expect( page ).toHaveURL( new RegExp( `page=affibloom-product&id=${ id }` ), { timeout: 30_000 } );
+	} );
 } );

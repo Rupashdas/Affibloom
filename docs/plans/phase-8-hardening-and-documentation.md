@@ -97,7 +97,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task ON6: Setup wizard: first visit, Theme, Customize
 - [x] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
 - [x] Task ON8: The Dashboard tour
-- [ ] Task ON9: Command palette (Ctrl+Shift+L)
+- [x] Task ON9: Command palette (Ctrl+Shift+L)
 
 ### Documentation and acceptance (roadmap 8.6, 8.7)
 
@@ -1010,13 +1010,18 @@ shortcut.
 `tests/E2E/acceptance/F38.spec.ts` (AC13); modify `AdminAssets.php`, `templates/admin/dashboard.php`,
 `docs/spec/interface.md` (shortcut row), `docs/ui/design-system.md`.
 
-- [ ] **Step 1: Failing tests.** E2E AC13 on the Dashboard and in the block editor (opens, filters, arrows, Enter,
+- [x] **Step 1: Failing tests.** E2E AC13 on the Dashboard and in the block editor (opens, filters, arrows, Enter,
   Escape, focus returns, not while typing in a field). Expected: red.
-- [ ] **Step 2: The route, if G4 has not built it yet** (reuse it otherwise).
-- [ ] **Step 3: Script and dialog.**
-- [ ] **Step 4: Run and look.** On Local, the Dashboard, a product page, Settings and the editor of a post, with the
+- [x] **Step 2: The route, if G4 has not built it yet** (reuse it otherwise).
+- [x] **Step 3: Script and dialog.**
+- [x] **Step 4: Run and look.** On Local, the Dashboard, a product page, Settings and the editor of a post, with the
   keyboard only; Mac label by checking the localized string.
-- [ ] **Step 5: Commit** — "Add the Ctrl+Shift+L product search"
+- [x] **Step 5: Commit** — "Add the Ctrl+Shift+L product search"
+
+*Note:* `CommandPalette` (a module, not `AdminAssets`, which stops on non-Affibloom screens) loads it and prints the
+`<template>`; `palette.css` carries its own tokens and `palette.js` its own Tab trap, since the posts' screens load
+neither admin.css nor admin.js. The shortcut is heard in the capture phase and kept, so a palette still active from
+before the move does not open a second dialog. Checked by AC13 and on Settings, the Posts list (1280 px) and 375 px.
 
 ---
 

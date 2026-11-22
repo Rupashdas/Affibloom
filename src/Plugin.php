@@ -191,6 +191,7 @@ use Affibloom\Interface\Cron\AmazonBulkSyncCron;
 use Affibloom\Interface\Cron\BulkAddCron;
 use Affibloom\Interface\Cron\GeniusCleanupCron;
 use Affibloom\Interface\Admin\AdminAssets;
+use Affibloom\Interface\Admin\CommandPalette;
 use Affibloom\Interface\Admin\AdminMenu;
 use Affibloom\Interface\Admin\AdminNavigation;
 use Affibloom\Interface\Admin\AmazonNotices;
@@ -680,6 +681,8 @@ final class Plugin {
 			// F37 R3-R6 (Task TL3): the events of the index, the link check and the product save written to the logs.
 			new LogHooks( $this->file_log(), $this->file_log() ),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
+			// F38 R65-R72 (Task ON9): Ctrl+Shift+L opens "Search links" on Affibloom's screens and the posts' editors.
+			new CommandPalette( $this->template(), plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
 			new ClassicButton( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			// F22 N1-B (Task O10): "Edit in post" opens the editor with the link selected.

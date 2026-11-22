@@ -1,0 +1,110 @@
+/*
+ * "Search links" (F38 R67; Task ON9), in Meadow (docs/ui/design-system.md 0b): the palette also opens in the posts'
+ * lists and editors, which do not load admin.css, so it carries the few tokens it uses (the same values as admin.css).
+ * Above the block editor's own layers.
+ */
+
+.affibloom-palette {
+	--affibloom-brand-600: #1e6b47;
+	--affibloom-brand-50: #e3f0e7;
+	--affibloom-brand-ring: rgba(30, 107, 71, 0.2);
+	--affibloom-ink-900: #16201a;
+	--affibloom-ink-600: #55625a;
+	--affibloom-line: #e3e8e1;
+	--affibloom-control-line: #d3dbd1;
+	--affibloom-sunk: #f1f4f0;
+	--affibloom-white: #fff;
+	--affibloom-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	--affibloom-font-display: "Plus Jakarta Sans", var(--affibloom-font);
+	position: fixed;
+	inset: 0;
+	z-index: 100002;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding: 12vh 16px 16px;
+	color: var(--affibloom-ink-900);
+	font: 400 14px/20px var(--affibloom-font);
+}
+.affibloom-palette[hidden] { display: none; }
+.affibloom-palette-open { overflow: hidden; }
+.affibloom-palette__backdrop { position: absolute; inset: 0; background: rgba(22, 32, 26, 0.45); }
+.affibloom-palette__dialog {
+	position: relative;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: 560px;
+	max-height: 76vh;
+	padding: 16px;
+	border-radius: 12px;
+	background: var(--affibloom-white);
+	box-shadow: 0 18px 40px -12px rgba(22, 32, 26, 0.24), 0 2px 6px rgba(22, 32, 26, 0.06);
+}
+.affibloom-palette__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.affibloom-palette .affibloom-palette__title { margin: 0; padding: 0; color: var(--affibloom-ink-900); font: 700 17px/24px var(--affibloom-font-display); }
+.affibloom-palette__close {
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--affibloom-ink-600);
+	cursor: pointer;
+}
+.affibloom-palette__close:hover { background: var(--affibloom-sunk); color: var(--affibloom-ink-900); }
+.affibloom-palette .affibloom-palette__input {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 44px;
+	margin: 0;
+	padding: 10px 14px;
+	border: 1px solid var(--affibloom-control-line);
+	border-radius: 8px;
+	background: var(--affibloom-white);
+	box-shadow: none;
+	color: var(--affibloom-ink-900);
+	font: 400 15px/22px var(--affibloom-font);
+}
+.affibloom-palette .affibloom-palette__input:focus { border-color: var(--affibloom-brand-600); outline: 0; box-shadow: 0 0 0 3px var(--affibloom-brand-ring); }
+.affibloom-palette .affibloom-palette__hint { margin: 8px 0 0; color: var(--affibloom-ink-600); font-size: 12px; line-height: 16px; }
+.affibloom-palette .affibloom-palette__status { margin: 12px 0 0; color: var(--affibloom-ink-600); }
+.affibloom-palette .affibloom-palette__status:empty { display: none; }
+.affibloom-palette__results { flex: 1; min-height: 0; margin: 8px -8px 0; padding: 0; overflow-y: auto; list-style: none; }
+.affibloom-palette .affibloom-palette__result {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0;
+	padding: 8px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+.affibloom-palette__result:hover,
+.affibloom-palette__result[aria-selected="true"] { background: var(--affibloom-brand-50); }
+.affibloom-palette__result:focus { outline: 2px solid var(--affibloom-brand-600); outline-offset: -2px; }
+.affibloom-palette__thumb {
+	flex: none;
+	display: block;
+	width: 40px;
+	height: 40px;
+	overflow: hidden;
+	border: 1px solid var(--affibloom-line);
+	border-radius: 8px;
+	background: var(--affibloom-sunk);
+}
+.affibloom-palette__thumb img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.affibloom-palette__words { display: flex; flex-direction: column; min-width: 0; }
+.affibloom-palette__name,
+.affibloom-palette__url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.affibloom-palette__name { font-weight: 600; }
+.affibloom-palette__url { color: var(--affibloom-ink-600); font-size: 13px; line-height: 18px; }
+.affibloom-palette__close:focus-visible { outline: 2px solid var(--affibloom-brand-600); outline-offset: 2px; }
+@media (max-width: 600px) {
+	.affibloom-palette { padding-top: 16px; }
+	.affibloom-palette__dialog { max-height: calc(100vh - 32px); }
+}

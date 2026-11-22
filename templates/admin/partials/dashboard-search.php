@@ -1,7 +1,7 @@
 <?php
 /**
  * The Dashboard's search under its head (design system 0b.4; MD4 sizes it): the list's other arguments kept, and
- * Lasso's shortcut hint, which the script shows as ⌘⇧L on a Mac. Moved out of the Dashboard's band by Task MD3.
+ * Lasso's shortcut hint, which palette.js shows as ⌘⇧L on a Mac (Task ON9). Moved out of the Dashboard's band by Task MD3.
  *
  * @package Affibloom
  * @var array{args: array<string, string>, term: string, placeholder: string, placeholder_text: string} $view
@@ -24,5 +24,5 @@ defined( 'ABSPATH' ) || exit;
 		value="<?php echo esc_attr( $view['term'] ); ?>" placeholder="<?php echo esc_attr( $view['placeholder'] ); ?>"
 		data-placeholder="<?php echo esc_attr( $view['placeholder_text'] ); ?>"
 		aria-describedby="affibloom-search-kbd">
-	<kbd id="affibloom-search-kbd" class="affibloom-search-kbd">Ctrl+Shift+L</kbd>
+	<kbd id="affibloom-search-kbd" class="affibloom-search-kbd" data-affibloom-shortcut><?php esc_html_e( 'Ctrl+Shift+L', 'affibloom' ); ?></kbd>
 </form>

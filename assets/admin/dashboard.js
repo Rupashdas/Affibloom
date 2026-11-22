@@ -541,28 +541,6 @@
 		} );
 	} );
 
-	/*
-	 * Ctrl+Shift+L (Cmd+Shift+L on a Mac) goes to the search box. Lasso's shortcut opens its command palette, which
-	 * is a Phase 8 task; until then it does the part that exists. Like Lasso's, it does not fire from inside another
-	 * text field.
-	 */
-	var kbd = document.getElementById( 'affibloom-search-kbd' );
-	if ( kbd && /Mac|iPhone|iPad/.test( window.navigator.platform || '' ) ) {
-		kbd.textContent = '⌘⇧L';
-	}
-	document.addEventListener( 'keydown', function ( event ) {
-		if ( ! search || ! event.shiftKey || ! ( event.ctrlKey || event.metaKey ) || 'l' !== event.key.toLowerCase() ) {
-			return;
-		}
-		var typing = event.target.closest( 'input, textarea, select, [contenteditable]' );
-		if ( typing && typing !== search ) {
-			return;
-		}
-		event.preventDefault();
-		search.focus();
-		search.select();
-	} );
-
 	/* ---------------------------------------------------------------------------------------------------------
 	 * The filters panel and saved views (Task 13E), as Lasso's. "Filters apply as you toggle": changing one loads
 	 * the list at once.
