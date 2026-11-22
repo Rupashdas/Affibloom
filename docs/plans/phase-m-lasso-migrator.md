@@ -103,7 +103,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 - [x] Task 25A: The dry run — `wp affibloom migrate --dry-run`, products
 - [x] Task 25B: The dry run — settings
-- [ ] Task 25C: The dry run — every other family, and what is left behind
+- [x] Task 25C: The dry run — every other family, and what is left behind
 - [ ] Task 25D: The report on an admin page
 - [ ] Task 26A: Products — `wp affibloom migrate --only=products`
 - [ ] Task 26B: Products again — `--update`
@@ -323,10 +323,18 @@ inventory does not know is an error line.
 
 **Files:** the above; unit test: every table of analysis A has a family or a verdict; F10 spec AC5.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Inventory and verdicts.**
-- [ ] **Step 3: Run and look** (29 tables accounted for).
-- [ ] **Step 4: Commit** — "Account for every Lasso table and option in the dry run".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Inventory and verdicts.**
+- [x] **Step 3: Run and look** (29 tables accounted for).
+- [x] **Step 4: Commit** — "Account for every Lasso table and option in the dry run".
+
+*Note (2026-11-22):* in the migrator: `Domain\Lasso\LassoInventory` (`LassoSource::inventory()`, COUNT queries only),
+`Domain\Migration\DataItem`, `Application\{LeftBehind, WaitingStep}`, `Action::Waiting`. Each family still to come has a
+`WaitingStep` (found N; the task that moves it), which its task replaces. The closing list, printed only when every
+family is planned, gives every Lasso table and the other kinds of data (posts, old slugs, terms, user and post meta,
+option groups) a verdict: the family that moves it, or why it is left; an unknown table is an error and exit 1. Clicks
+are not a family (E1). Local: all 29 tables have a verdict; `Left behind: 18 of 39 kinds of Lasso data (16508 rows)`.
+AC5 passes.
 
 ---
 

@@ -71,6 +71,47 @@ test.describe( 'F10 Existing content', () => {
 		expect( out ).toContain( 'Nothing was written.' );
 	} );
 
+	// Task 25C: every family has its line, and every Lasso table on the site is moved by a family or left with a reason.
+	test( '@local AC5 the whole dry run covers every family and every Lasso table', () => {
+		const out = wp( 'affibloom-lasso', 'migrate', '--dry-run' );
+		for ( const family of [
+			'settings',
+			'display',
+			'fields',
+			'products',
+			'groups',
+			'slugs',
+			'variants',
+			'tables',
+			'issues',
+			'amazon',
+			'views',
+			'opportunities',
+		] ) {
+			expect( out ).toMatch( new RegExp( `^${ family }: `, 'm' ) );
+		}
+		const tables = JSON.parse(
+			wp(
+				'eval',
+				'global $wpdb; echo wp_json_encode( $wpdb->get_col( $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->esc_like( $wpdb->prefix . "lasso_" ) . "%" ) ) );'
+			)
+		) as string[];
+		expect( tables.length ).toBeGreaterThan( 0 );
+		for ( const table of tables ) {
+			const name = table.replace( /^.*?(lasso_)/, '$1' );
+			expect( out, name ).toMatch(
+				new RegExp(
+					`^${ name }\\t\\d+\\t(moved by the \\w+ family|left: .+)$`,
+					'm'
+				)
+			);
+		}
+		expect( out ).toMatch(
+			/^Left behind: \d+ of \d+ kinds of Lasso data \(\d+ rows\)\.$/m
+		);
+		expect( out ).toContain( 'Nothing was written.' );
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {
