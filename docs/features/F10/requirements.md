@@ -74,7 +74,7 @@ Task 7 turned AC1-AC3 into `tests/E2E/acceptance/F10.spec.ts`; AC4-AC32 join it 
 
 **Legacy block conversion**
 
-- **AC3** (not built: decision A1) Legacy blocks convert, and can be reverted. (28B; revert restores the stored content byte for byte.)
+- **AC3** (built by the migrator, Task LM3; decision A1 reversed, deviation 146) Lasso's blocks convert, and can be reverted. (28B; revert restores the stored content byte for byte.)
 - **AC25** (built by the migrator, Task LM2; decision A1 reversed, deviation 146) `wp affibloom-lasso convert --dry-run` lists, per post, the boxes it would convert and the boxes
   that stay as they are, each with its reason; nothing is written. (28A)
 - **AC26** (not built: decision A1) A bare `[lasso …]` shortcode (in a shortcode block, a paragraph or classic content) is converted by the
