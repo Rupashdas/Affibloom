@@ -181,6 +181,7 @@ final class SettingsRestController implements Module {
 		}
 		$keep_genius = $this->settings->current()->bool( 'keep_genius_formatting' );
 		$refused     = $this->settings->update_tab( $tab, $input );
+		$this->announce_saved( $tab );
 		// The Amazon tab and the setup wizard's Amazon step (Task ON7) also save the Product Data API card.
 		if ( 'amazon' !== $tab && 'setup_amazon' !== $tab ) {
 			return self::answer( $refused ? 'partly-saved' : 'saved', $refused );
@@ -235,8 +236,20 @@ final class SettingsRestController implements Module {
 			}
 		}
 		$refused = array_merge( $refused, $this->settings->update_tab( $tab, $flat ) );
+		$this->announce_saved( $tab );
 
 		return self::answer( $refused ? 'partly-saved' : 'saved', array_values( array_unique( $refused ) ) );
+	}
+
+	/**
+	 * Tells site code a Settings tab was saved: `affibloom_settings_saved` with the tab and every setting as stored
+	 * (Lasso's `lasso_after_saved_settings`, which gets its options; pages/settings-general/class-ajax.php 592; Task
+	 * GF5). Values a save refused are their old ones.
+	 *
+	 * @param string $tab The tab saved.
+	 */
+	private function announce_saved( string $tab ): void {
+		do_action( 'affibloom_settings_saved', $tab, $this->settings->current()->to_array() );
 	}
 
 	/**

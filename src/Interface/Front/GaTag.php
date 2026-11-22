@@ -42,7 +42,7 @@ final class GaTag implements Module {
 	 */
 	public function enqueue(): void {
 		$ga = GaSettings::of( $this->settings->get() );
-		if ( ! $ga->clicks ) {
+		if ( ! $ga->clicks || ! ClickScript::tracking_allowed() ) {
 			return;
 		}
 		wp_enqueue_script(

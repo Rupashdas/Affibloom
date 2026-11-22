@@ -97,7 +97,7 @@ final class ClickScript implements Module {
 		$site  = $this->settings->get();
 		$count = $site->bool( 'click_tracking' );
 		$ga    = GaSettings::of( $site )->clicks;
-		if ( ! $count && ! $ga ) {
+		if ( ( ! $count && ! $ga ) || ! self::tracking_allowed() ) {
 			return;
 		}
 		wp_enqueue_script( self::HANDLE, $this->url . 'assets/front/clicks.js', array(), $this->version, true );
@@ -108,5 +108,13 @@ final class ClickScript implements Module {
 			'ga'    => $ga,
 		);
 		wp_add_inline_script( self::HANDLE, 'window.affibloomClicks = ' . wp_json_encode( $settings ) . ';', 'before' );
+	}
+
+	/**
+	 * Whether site code lets the page track: `affibloom_event_tracking` (Lasso's `lasso_event_tracking`,
+	 * pages/class-hook.php 1638; Task GF5), true unless a filter says false. Read by the click script and GA's tag.
+	 */
+	public static function tracking_allowed(): bool {
+		return (bool) apply_filters( 'affibloom_event_tracking', true );
 	}
 }

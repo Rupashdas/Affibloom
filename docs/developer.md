@@ -72,6 +72,12 @@ The ADRs are in [`docs/decisions/`](decisions/). In short:
 | `affibloom_display_advanced_enabled` | filter | `bool $customised` | Whether the box uses the full display engine; return `false` to force the plain box. |
 | `affibloom_setup_wanted` | filter | `bool $wanted` | Whether the setup wizard may open by itself on a new site (deviation 153: a helper plugin returns `false` when it brings its own data). |
 | `affibloom_ready` | action | `Affibloom\Extension\Api $api` | Once, on `plugins_loaded`: the extension API for helper plugins (Task LM1). Its methods are in [`extension-api.md`](extension-api.md). |
+| `affibloom_event_tracking` | filter | `bool $allowed` | Whether a page prints the click script and GA's tag; return `false` to track nothing there (Lasso's `lasso_event_tracking`; Task GF5). |
+| `affibloom_user_ip_address` | filter | `string $address` | The reader's address the click counter's repeat guard uses (`REMOTE_ADDR`); a site behind a proxy returns the forwarded one (Lasso's `lasso_get_user_ip_address`). |
+| `affibloom_settings_saved` | action | `string $tab`, `array $settings` | A Settings tab (General, Amazon, Display, a setup step) was saved; every setting as stored (Lasso's `lasso_after_saved_settings`). |
+
+Lasso's `lasso_after_insert_post` has no Affibloom copy: a product is a post of type `affibloom_product`, so
+WordPress's own `save_post_affibloom_product` and `wp_after_insert_post` fire for it.
 
 ### Shortcode, block and editors
 

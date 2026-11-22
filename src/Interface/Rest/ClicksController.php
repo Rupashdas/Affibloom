@@ -63,10 +63,20 @@ final class ClicksController implements Module {
 	public function click( WP_REST_Request $request ): WP_REST_Response {
 		$click = ClickInput::from_body( (string) $request->get_body() );
 		if ( null !== $click ) {
-			$address = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-			$this->tracker->track( $click, time(), (string) $request->get_header( 'user_agent' ), $address );
+			$this->tracker->track( $click, time(), (string) $request->get_header( 'user_agent' ), self::reader_address() );
 		}
 
 		return new WP_REST_Response( null, 204 );
+	}
+
+	/**
+	 * The reader's address, as the repeat guard keys it: `REMOTE_ADDR`, through `affibloom_user_ip_address` so a site
+	 * behind a proxy can give the forwarded one (Lasso's `lasso_get_user_ip_address`, classes/class-helper.php 156;
+	 * Task GF5).
+	 */
+	public static function reader_address(): string {
+		$address = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+		return (string) apply_filters( 'affibloom_user_ip_address', $address );
 	}
 }

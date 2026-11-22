@@ -114,7 +114,7 @@ Phase M's Task 26Q.
 - [x] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
 - [x] Task GF3: Posts and pages keep 8 revisions, as with Lasso
 - [x] Task GF4: Kadence's FAQ schema repairs
-- [ ] Task GF5: Lasso's hooks for other code, under Affibloom's names
+- [x] Task GF5: Lasso's hooks for other code, under Affibloom's names
 - [ ] Task GF6: Turn a tied link back to its original URL (E17)
 - [ ] Task GF7: Records and leftovers
 
@@ -1316,9 +1316,13 @@ an empty `"mainEntity": []`; `kadence_blocks_print_faq_schema`, priority 5: fals
 
 **Files:** the four above; `docs/developer.md` (hooks section); unit tests for each.
 
-- [ ] **Step 1: Tests.** - [ ] **Step 2: Hooks.** - [ ] **Step 3: Run and look** (a must-use snippet returning false:
-  no click script on a post). - [ ] **Step 4: Commit** — "Give other code Lasso's hooks under Affibloom's names
+- [x] **Step 1: Tests.** - [x] **Step 2: Hooks.** - [x] **Step 3: Run and look** (a must-use snippet returning false:
+  no click script on a post). - [x] **Step 4: Commit** — "Give other code Lasso's hooks under Affibloom's names
   (GF5)".
+
+*Note:* the IP filter sits in `ClicksController::reader_address()` (unit-tested); `affibloom_settings_saved` fires from
+`SettingsRestController` after each tab save, checked by a REST save through WP-CLI (no controller unit test: it needs
+every settings service). Seen: post 2622 prints the click script 3 times, 0 with a temporary must-use filter.
 
 ### Task GF6: Turn a tied link back to its original URL (E17)
 
