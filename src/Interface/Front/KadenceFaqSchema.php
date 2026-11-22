@@ -44,10 +44,10 @@ final class KadenceFaqSchema implements Module {
 	/**
 	 * Whether Kadence prints its FAQ schema: not when the post has Yoast's FAQ block.
 	 *
-	 * @param mixed $print Kadence's answer.
+	 * @param mixed $will_print Kadence's answer.
 	 */
-	public function skip_beside_yoast( mixed $print ): bool {
-		if ( ! $print ) {
+	public function skip_beside_yoast( mixed $will_print ): bool {
+		if ( ! $will_print ) {
 			return false;
 		}
 		$post = get_post();
