@@ -614,6 +614,49 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26O: the page's run. A held lock answers "already running"; a run cut off continues where it stopped (here
+	// its last family, so the settings family, which turns Auto-Monetize Amazon on, does not run).
+	test( '@local AC22 Run migration runs from the page, one family per request, and resumes', async ( {
+		page,
+	} ) => {
+		wp(
+			'eval',
+			`add_option( 'affibloom_lasso_migration_lock', time(), '', false );`
+		);
+		try {
+			await page.goto(
+				'/wp-admin/admin.php?page=affibloom-lasso-migrator'
+			);
+			const run = page.getByRole( 'button', { name: 'Run migration' } );
+			await expect( run ).toBeDisabled();
+			await page
+				.getByLabel( 'I have a backup of this site’s database.' )
+				.check();
+			await run.click();
+			await expect(
+				page.getByText( 'A migration is already running.' )
+			).toBeVisible();
+		} finally {
+			wp( 'eval', `delete_option( 'affibloom_lasso_migration_lock' );` );
+		}
+
+		wp(
+			'eval',
+			`update_option( 'affibloom_lasso_migration_run', array( 'families' => array( 'opportunities' ), 'update' => false ), false );`
+		);
+		await page.getByRole( 'button', { name: 'Run migration' } ).click();
+		await expect
+			.poll(
+				() =>
+					wp(
+						'eval',
+						`var_export( get_option( 'affibloom_lasso_migration_run' ) );`
+					),
+				{ timeout: 30000 }
+			)
+			.toBe( 'false' );
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

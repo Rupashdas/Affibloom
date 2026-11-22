@@ -118,7 +118,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
 - [x] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
 - [x] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
-- [ ] Task 26O: Run from the admin page, in batches
+- [x] Task 26O: Run from the admin page, in batches
 - [ ] Task 26P: Check the migrated products against the baselines
 
 **F10 — Lasso's content becomes Affibloom's**
@@ -927,12 +927,23 @@ running."; a cut-off run continues on the next press; then the result and the re
 **Files:** the above; `src/Plugin.php`, `templates/admin/dashboard.php`, `Notice`; F10 spec AC22; unit tests for the
 runner's cursor and lock; the import's tests removed with it.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Runner and route.**
-- [ ] **Step 3: The page's script.**
-- [ ] **Step 4: Remove the one-time import.**
-- [ ] **Step 5: Run and look** (two tabs; kill a request mid-run).
-- [ ] **Step 6: Commit** — "Run the Lasso migration from the admin, in batches".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Runner and route.**
+- [x] **Step 3: The page's script.**
+- [x] **Step 4: Remove the one-time import.**
+- [x] **Step 5: Run and look** (two tabs; kill a request mid-run).
+- [x] **Step 6: Commit** — "Run the Lasso migration from the admin, in batches".
+
+
+*Note (2026-11-22):* Migrate from Lasso gained a "Run the migration" card: a backup tick, **Run migration**, and
+**Update from Lasso** once products have run; a progress line ("Comparison tables done: 8 of 12"). One family per
+request rather than 25 items with a cursor: the largest, 265 products, takes about 2 s on Local, and every family is
+idempotent, so one cut off runs again whole. `MigrationRunner::batch()` (lock `affibloom_lasso_migration_lock`,
+`add_option()` as the atomic take, taken over after 10 minutes; the families still to run in
+`affibloom_lasso_migration_run`), `Rest\MigrationController` `POST affibloom-lasso-migrator/v1/run` (Affibloom's
+settings capability; 409 "A migration is already running."), `assets/admin/migrate.js`. Step 4 had nothing left:
+Affibloom's one-time import (`LassoImportController` and the Dashboard card) was removed earlier. Checked in Brave:
+the held lock's message, a cut-off run resuming at Groups, the reload with the report. AC22 passes.
 
 ---
 
