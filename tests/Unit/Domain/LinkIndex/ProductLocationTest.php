@@ -37,6 +37,23 @@ final class ProductLocationTest extends TestCase {
 		self::assertFalse( ( new ProductLocation( 1, 'Text', 'https://example.com/a' ) )->is_display() );
 	}
 
+	/**
+	 * Task 39A finding UX1: a block reads as the shortcode it equals, as Lasso's context shows a display's shortcode
+	 * (F12 L7), not as the index's block markup.
+	 */
+	public function test_a_block_reads_as_the_shortcode_it_equals(): void {
+		$single = new ProductLocation( 1, 'Single', 'affibloom/product-box {"type":"","productId":20400,"groupId":0}' );
+		self::assertSame( '[affibloom id="20400"]', $single->context() );
+		self::assertTrue( $single->is_display() );
+		$button = new ProductLocation( 1, 'Button', 'affibloom/product-box {"type":"button","productId":7,"groupId":0}' );
+		self::assertSame( '[affibloom id="7" type="button"]', $button->context() );
+		$grid = new ProductLocation( 1, 'Grid', 'affibloom/product-box {"type":"grid","productId":0,"groupId":5}', null, 'group:5', 'shoes' );
+		self::assertSame( '[affibloom type="grid" group="shoes"]', $grid->context() );
+		// A group block whose group is gone keeps its markup: there is no shortcode to show.
+		$gone = new ProductLocation( 1, 'Grid', 'affibloom/product-box {"type":"grid","productId":0,"groupId":9}', null, 'group:9' );
+		self::assertSame( 'affibloom/product-box {"type":"grid","productId":0,"groupId":9}', $gone->context() );
+	}
+
 	public function test_pages_count_hosts_and_a_page_past_the_end_is_the_last(): void {
 		$page = new LocationPage( array(), 23, 9 );
 

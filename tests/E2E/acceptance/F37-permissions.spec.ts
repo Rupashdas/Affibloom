@@ -62,6 +62,8 @@ test.describe( 'F37 Permissions', () => {
 	} );
 
 	test( 'AC7 with Author chosen an Author passes the product routes, a Contributor does not', async ( { browser } ) => {
+		// Two sign-ins and two Dashboard lists take about a minute on Local (seen 2026-11-22, Task 39A).
+		test.setTimeout( 120_000 );
 		setSettings( { permission: 'author' } );
 		for ( const [ role, status ] of [ [ 'author', 200 ], [ 'contributor', 403 ] ] as const ) {
 			const user = await signIn( browser, role );

@@ -57,12 +57,9 @@ test.describe( 'F9 Link settings', () => {
 		await page.goto( GENERAL );
 		const left = page.locator( '.affibloom-columns__column' ).first();
 		const right = page.locator( '.affibloom-columns__column' ).nth( 1 );
-		for ( const title of [ 'Google Analytics', 'Cloaked Link Prefix', 'Smart CSS Loading' ] ) {
-			await expect( left.getByRole( 'heading', { name: title } ) ).toBeVisible();
-		}
-		for ( const title of [ 'Custom Link Detection', 'Performance', 'Link Defaults', 'Notifications' ] ) {
-			await expect( right.getByRole( 'heading', { name: title } ) ).toBeVisible();
-		}
+		// Lasso's columns, in Lasso's order (general.php); Permissions and Uninstall close the left one (Task 39A, UX2).
+		await expect( left.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Google Analytics', 'Advanced Click Tracking', 'Cloaked Link Prefix', 'Smart CSS Loading', 'Permissions', 'Uninstall' ] );
+		await expect( right.getByRole( 'heading', { level: 2 } ) ).toHaveText( [ 'Link Index', 'Custom Link Detection', 'Performance', 'Link Defaults', 'Notifications' ] );
 		const save = page.getByRole( 'button', { name: 'Save Changes' } );
 		await expect( save ).toBeDisabled();
 		await page.getByLabel( 'Disable Help Tooltips' ).setChecked( true );

@@ -42,6 +42,9 @@ $card_data = array(
 						$this->render( 'admin/partials/settings-general-click-tracking', $card_data );
 						$this->render( 'admin/partials/settings-general-prefix', $card_data );
 						$this->render( 'admin/partials/settings-general-smart-css', $card_data );
+						// Lasso's left column ends with Permissions and its Uninstall card (general.php; Task 39A, UX2).
+						$this->render( 'admin/partials/settings-general-permissions', $card_data );
+						$this->render( 'admin/partials/settings-general-uninstall', $card_data + array( 'uninstall' => $view['uninstall'] ) );
 						if ( $view['support'] ) {
 							$this->render( 'admin/partials/settings-general-support', $card_data );
 						}
@@ -69,8 +72,6 @@ $card_data = array(
 						$this->render( 'admin/partials/settings-general-performance', $card_data );
 						$this->render( 'admin/partials/settings-general-link-defaults', $card_data );
 						$this->render( 'admin/partials/settings-general-notifications', $card_data );
-						$this->render( 'admin/partials/settings-general-permissions', $card_data );
-						$this->render( 'admin/partials/settings-general-uninstall', $card_data + array( 'uninstall' => $view['uninstall'] ) );
 						?>
 					</div>
 				</div>

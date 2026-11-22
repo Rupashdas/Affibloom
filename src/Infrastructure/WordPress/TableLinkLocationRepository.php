@@ -310,12 +310,14 @@ KEY display_type (display_type)";
 
 		$places = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$ref                               = null === $row['display_ref'] ? null : (string) $row['display_ref'];
 			$places[ (int) $row['host_id'] ][] = new ProductLocation(
 				(int) $row['id'],
 				(string) $row['display_type'],
 				(string) $row['url'],
 				null === $row['anchor_text'] ? null : (string) $row['anchor_text'],
-				null === $row['display_ref'] ? null : (string) $row['display_ref']
+				$ref,
+				self::group_slug( $ref )
 			);
 		}
 		$items = array_map(
@@ -628,5 +630,20 @@ KEY display_type (display_type)";
 		}
 
 		return $links;
+	}
+
+	/**
+	 * A group display's group slug, so the Locations tab can show a group block as its shortcode (Task 39A, UX1).
+	 * WordPress caches the term for the request; '' when the row is no group display or its group is gone.
+	 *
+	 * @param string|null $display_ref "group:<term id>", or null.
+	 */
+	private static function group_slug( ?string $display_ref ): string {
+		if ( null === $display_ref || ! str_starts_with( $display_ref, 'group:' ) ) {
+			return '';
+		}
+		$term = get_term( (int) substr( $display_ref, 6 ), GroupTaxonomy::NAME );
+
+		return $term instanceof \WP_Term ? $term->slug : '';
 	}
 }

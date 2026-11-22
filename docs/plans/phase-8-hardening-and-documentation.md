@@ -1164,9 +1164,9 @@ New code appears only as fixes, each with a test.
 
 **Files:** create the two files; modify whatever the findings need.
 
-- [ ] **Step 1: Failing test.** `ux-screens.spec.ts` as above. Expected: red for every screen without a baseline or a
+- [x] **Step 1: Failing test.** `ux-screens.spec.ts` as above. Expected: red for every screen without a baseline or a
   recorded reason, and for any screen of the inventory that cannot be opened.
-- [ ] **Step 2: Compare every admin screen and modal with its Lasso screenshot** (`tests/fixtures/baselines/admin/`):
+- [x] **Step 2: Compare every admin screen and modal with its Lasso screenshot** (`tests/fixtures/baselines/admin/`):
   Dashboard, the Add Link modal, quick edit, the product page and its tabs, Settings General, Display and Amazon,
   Groups, Fields, Tables, Opportunities, Import, History, Logs, DB Status, the setup wizard, the tour, the palette, the
   Automations popover, notices and education boxes. Per screen, in `ux.md`, record: fields, labels, help texts and
@@ -1175,12 +1175,20 @@ New code appears only as fixes, each with a test.
 - [ ] **Step 3: Editors' run.** Each editor runs the five top tasks in `workflows.md` without guidance; record the
   steps taken against Lasso's counted steps, each hesitation, error and question. A task they cannot finish alone is
   a finding.
-- [ ] **Step 4: Fix** what the comparison and the run found, each fix with a test; or record it for the user to accept.
+- [x] **Step 4: Fix** what the comparison and the run found, each fix with a test; or record it for the user to accept.
 - [ ] **Step 5: Run and look.** `npx playwright test ux-screens` green; re-run the editors' tasks that failed; the user
   looks at the screens next to the baselines and signs `ux.md` off.
 - [ ] **Step 6: Commit** — "Record the UX acceptance review
 
   Every admin screen against its Lasso screenshot and the design system; the editors' run of the top tasks."
+
+*Note (2026-11-22):* Only eight screens have Lasso screenshots, and Lasso on Local is unlicensed (it shows only its
+activation page), so the other 21 are compared with Lasso's source as each feature's requirements record it; the
+spec accepts that as a recorded reason. Two findings, both fixed: UX1 (a block's "Link with Context" showed block
+markup, now its shortcode) and UX2 (Permissions and Uninstall back in Lasso's left column). Import and History have
+no Affibloom screen (deviation 146). F37's Author/Contributor route test got a 2-minute timeout (about a minute on
+Local). **Steps 3 and 5 wait for the user's editors and sign-off** (`docs/reviews/ux.md`), so the task stays open; the
+commit records what is done.
 
 ---
 
