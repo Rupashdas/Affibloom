@@ -35,8 +35,9 @@ final class Api {
 	 * @param ExtensionScreen $pages      The added pages.
 	 * @param ProductAccess   $products   What a helper may do with products.
 	 * @param SettingsAccess  $settings   What a helper may do with settings.
+	 * @param DisplayAccess   $display    What a helper may do with the Display settings.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -78,6 +79,29 @@ final class Api {
 	 */
 	public function save_settings( string $tab, array $values ): array {
 		return $this->settings->save( $tab, $values );
+	}
+
+	/**
+	 * Every display type's settings (Task 26D): `{ columns, single: { theme, palette, elements, density, layout },
+	 * grid: …, list: … }`, as Settings → Display shows them.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function display_settings(): array {
+		return $this->display->values();
+	}
+
+	/**
+	 * Saves one display type's settings through the Display screen's rules (Task 26D), given in the shape
+	 * display_settings() reads them; a part not given keeps its value, and `columns` is the grid's, site-wide.
+	 *
+	 * @param string               $type   `single`, `grid` or `list`.
+	 * @param array<string, mixed> $config Any of `theme`, `palette`, `elements`, `density`, `layout`, `columns`.
+	 * @return list<string> The colours and labels refused (they keep their values).
+	 * @throws \InvalidArgumentException When the type is unknown.
+	 */
+	public function save_display( string $type, array $config ): array {
+		return $this->display->save( $type, $config );
 	}
 
 	/**

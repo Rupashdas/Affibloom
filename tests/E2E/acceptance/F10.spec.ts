@@ -338,6 +338,35 @@ test.describe( 'F10 Existing content', () => {
 		}
 	} );
 
+	// Task 26D: Lasso's display settings for each type through the Display screen's rules; a second run finds them all.
+	test( '@local AC11 --only=display gives each type Lasso’s theme, colours, elements and layout, and the columns', () => {
+		const display = () =>
+			JSON.parse(
+				wp(
+					'eval',
+					'echo wp_json_encode( get_option( "affibloom_display" ) );'
+				)
+			);
+		wp( 'affibloom-lasso', 'migrate', '--only=display', '--update' );
+
+		const stored = display();
+		expect( [
+			stored.single.theme,
+			stored.grid.theme,
+			stored.list.theme,
+		] ).toEqual( [ 'Lab', 'Cutter', 'Cutter' ] );
+		expect( stored.single.palette.button ).toBe( '#5e3f8c' );
+		expect( stored.single.layout.imagePosition ).toBe( 'left' );
+		expect( stored.single.elements ).not.toHaveProperty( 'disclosure' );
+		expect( stored.columns ).toBe( 3 );
+
+		expect(
+			wp( 'affibloom-lasso', 'migrate', '--only=display', '--update' )
+		).toMatch(
+			/^display: \d+ keys: 0 imported, 16 unchanged, 0 kept, \d+ left, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

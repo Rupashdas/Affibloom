@@ -108,7 +108,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26A: Products — `wp affibloom migrate --only=products`
 - [x] Task 26B: Products again — `--update`
 - [x] Task 26C: Settings — General and Amazon
-- [ ] Task 26D: Settings — Display for Single, Grid and List
+- [x] Task 26D: Settings — Display for Single, Grid and List
 - [ ] Task 26E: Custom fields — definitions and values
 - [ ] Task 26F: Groups — `wp affibloom migrate --only=groups`
 - [ ] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
@@ -517,10 +517,19 @@ elements, layout, and the columns.
 **Files:** `DisplayStep.php`; integration test; F10 spec AC11; by hand: the three types against the production
 screenshots (`tests/fixtures/baselines/admin`).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: The step.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Import Lasso's Display settings for every display type".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: The step.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Import Lasso's Display settings for every display type".
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=display [--update]`. Affibloom's API gained
+`display_settings()` and `save_display( type, config )` (`Extension\DisplayAccess`: a type's settings in the shape they
+are read, turned into the Display form's input, saved by `DisplaySettingsService::update_type()`); the test double
+`InMemoryDisplaySettingsRepository` is shared now. The migrator's `DisplayStep` compares each type's part with
+Affibloom's (every key Lasso gives; the density by its values, as the screen names its preset) and follows 26C's rule
+(first run or `--update` writes, else kept). Local: 10 imported (themes Lab, Cutter, Cutter; Lasso's colours with its
+purple buttons; elements; Single's layout), then 16 unchanged; Settings → Display matches the production baseline
+(Lab, Spacious, side by side, image left). AC11 passes.
 
 ---
 
