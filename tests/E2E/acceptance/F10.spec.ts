@@ -188,6 +188,55 @@ test.describe( 'F10 Existing content', () => {
 		expect( tables() ).toBe( before );
 	} );
 
+	// Task 26A: the products migration. Lasso's data is only read (AC23): its fingerprint is the same after a run.
+	const fingerprint = () =>
+		wp(
+			'eval-file',
+			'../affibloom-lasso-migrator/tools/lasso-fingerprint.php'
+		);
+	const sql = ( query: string ) =>
+		wp( 'db', 'query', query, '--skip-column-names' );
+
+	test( '@local AC7 AC23 --only=products makes a product for every record with a link, once, and leaves Lasso as it was', () => {
+		const before = fingerprint();
+		wp( 'affibloom-lasso', 'migrate', '--only=products' );
+		const again = wp( 'affibloom-lasso', 'migrate', '--only=products' );
+		expect( fingerprint() ).toBe( before );
+
+		expect( again ).toMatch(
+			/products: 265 records: 0 created, 9 skipped, 0 retired, 0 in the trash, 256 unchanged \(0 adopted\), 0 errors \(263 published\)\./
+		);
+		// One product per record with a link, each with the record's ID and its dates.
+		const mapped =
+			"FROM wp_postmeta m JOIN wp_posts a ON a.ID = m.post_id JOIN wp_posts l ON l.ID = m.meta_value WHERE m.meta_key = '_affibloom_lasso_id' AND l.post_type = 'lasso-urls'";
+		expect( sql( `SELECT COUNT(DISTINCT l.ID) ${ mapped }` ) ).toBe(
+			'256'
+		);
+		expect(
+			sql( `SELECT COUNT(*) ${ mapped } AND a.post_date <> l.post_date` )
+		).toBe( '0' );
+	} );
+
+	test( '@local AC8 a retired record is a retired product pointing at its target, a trashed one is in the trash, one with no link is nothing', () => {
+		wp( 'affibloom-lasso', 'migrate', '--only=products' );
+		const product = ( lasso: number ) =>
+			sql(
+				`SELECT post_id FROM wp_postmeta WHERE meta_key = '_affibloom_lasso_id' AND meta_value = '${ lasso }' ORDER BY post_id LIMIT 1`
+			);
+
+		const retired = product( 14771 );
+		expect( wp( 'post', 'get', retired, '--field=post_status' ) ).toBe(
+			'affibloom_retired'
+		);
+		expect(
+			wp( 'post', 'meta', 'get', retired, '_affibloom_repointed_to' )
+		).toBe( product( 14770 ) );
+		expect(
+			wp( 'post', 'get', product( 15113 ), '--field=post_status' )
+		).toBe( 'trash' );
+		expect( product( 14837 ) ).toBe( '' );
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

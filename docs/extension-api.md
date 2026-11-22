@@ -28,6 +28,12 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `version(): string` | LM1 | Affibloom's version (`AFFIBLOOM_VERSION`), for `version_compare()`. |
 | `add_page( string $slug, Closure $title, Closure $subtitle, Closure $body, bool $listed = true ): void` | LM1 (`$listed` 25D) | Adds one page to Affibloom's menu, before Settings, for users who may change Affibloom's settings. See below. |
 | `capability(): string` | 25D | The capability an added page asks for, for the helper's own form or download on that page (`current_user_can()`). |
+| `import_product( array $fields, string $created = '', string $modified = '' ): int` | 26A | A new published product copied from a record: the fields as `check_product()` takes them, stored with Save Changes' rules but as given (no request, no other product reused, no tracking-ID rule, nothing fetched from Amazon); an Amazon link makes an Amazon product. Throws `InvalidArgumentException` naming the refused fields. |
+| `product_fields( int $id ): ?array` | 26A | A product's fields in the same shape, or null. |
+| `update_product( int $id, array $fields ): void` | 26B | Changes a published product's fields, as Save Changes does. |
+| `retire_product( int $id, int $to ): void` | 26A | Retires a product pointing at the product that took its place (0 for none). |
+| `trash_product( int $id ): void` | 26A | Moves a product to the trash. |
+| `date_product( int $id, string $created, string $modified ): void` | 26A | Writes a product's dates as given (after a status change, which stamps "now"). |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`

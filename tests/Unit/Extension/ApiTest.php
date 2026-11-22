@@ -2,14 +2,24 @@
 namespace Affibloom\Tests\Unit\Extension;
 
 use Affibloom\Application\Shell\NoticeBoard;
+use Affibloom\Application\Products\LinkNormaliser;
+use Affibloom\Application\Products\LinkResolver;
+use Affibloom\Application\Products\ProductInput;
+use Affibloom\Application\Products\ProductService;
 use Affibloom\Extension\Api;
+use Affibloom\Extension\ProductAccess;
 use Affibloom\Extension\ReadyAction;
 use Affibloom\Interface\Admin\AdminNavigation;
 use Affibloom\Interface\Admin\Capabilities;
 use Affibloom\Interface\Admin\ExtensionScreen;
 use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Template;
+use Affibloom\Tests\Unit\Fakes\FakePageFetcher;
+use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
+use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
+use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
 use Affibloom\Tests\Unit\TestCase;
+use Brain\Monkey\Functions;
 use Brain\Monkey\Actions;
 
 /**
@@ -25,10 +35,20 @@ final class ApiTest extends TestCase {
 		$this->navigation = new AdminNavigation();
 	}
 
+	/** Product access on Affibloom's in-memory fakes. */
+	public static function access(): ProductAccess {
+		$resolver = new LinkResolver( new FakePageFetcher() );
+		$settings = new InMemorySettingsRepository();
+		$links    = new LinkNormaliser( $resolver, $settings );
+		$products = new InMemoryProductRepository();
+
+		return new ProductAccess( new ProductService( $products, $resolver, $settings, new ProductInput( $links ), $links, InMemoryAmazonProducts::without_amazon() ), $products, static function (): void {} );
+	}
+
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), static fn ( array $fields ): array => '' === ( $fields['name'] ?? '' ) ? array( 'name' => 'required' ) : array() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -48,7 +68,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, static fn ( array $fields ): array => array() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 
@@ -58,6 +78,7 @@ final class ApiTest extends TestCase {
 	}
 
 	public function test_check_product_answers_with_affibloom_s_save_rules(): void {
+		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		self::assertSame( array( 'name' => 'required' ), $this->api()->check_product( array( 'name' => '' ) ) );
 		self::assertSame( array(), $this->api()->check_product( array( 'name' => 'Shoe' ) ) );
 	}

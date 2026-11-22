@@ -105,7 +105,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 25B: The dry run — settings
 - [x] Task 25C: The dry run — every other family, and what is left behind
 - [x] Task 25D: The report on an admin page
-- [ ] Task 26A: Products — `wp affibloom migrate --only=products`
+- [x] Task 26A: Products — `wp affibloom migrate --only=products`
 - [ ] Task 26B: Products again — `--update`
 - [ ] Task 26C: Settings — General and Amazon
 - [ ] Task 26D: Settings — Display for Single, Grid and List
@@ -399,11 +399,25 @@ hides without Lasso's data; the address says "No Lasso data found.") and `capabi
 **Files:** the above; `tests/Integration/ProductsStepTest.php` (twice; statuses; adoption; two products with one
 Lasso ID → error); F10 spec AC7, AC8, AC23.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: The fingerprint tool.**
-- [ ] **Step 3: `run()`, the log.**
-- [ ] **Step 4: Run and look** (Dashboard: 254 products in Lasso's order; a retired one opens its target; the fingerprint equal).
-- [ ] **Step 5: Commit** — "Migrate Lasso's products, once".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: The fingerprint tool.**
+- [x] **Step 3: `run()`, the log.**
+- [x] **Step 4: Run and look** (Dashboard: 254 products in Lasso's order; a retired one opens its target; the fingerprint equal).
+- [x] **Step 5: Commit** — "Migrate Lasso's products, once".
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=products` (the run is the command without `--dry-run`).
+Affibloom's API gained `import_product()` (`ProductService::import()`: Save Changes' rules, the link stored as given, no
+request, no merge, no tag rule, no Amazon fetch; an Amazon link makes an Amazon product), `product_fields()`,
+`update_product()`, `retire_product()`, `trash_product()`, `date_product()` (`Extension\ProductAccess`,
+`WpPostDates`). In the migrator: `RunStep`, `ProductsStep::run()` (one decision per record shared with the dry run;
+retired records after their targets; a trashed or retired product dated again after its status change, which stamps
+"now"), `MigrationService::run()`, `OptionMigrationLog` (`affibloom_lasso_migration`; the old `affibloom_lasso_import`
+is not read: adoption goes by `_affibloom_lasso_id`). The migrator writes only its own meta on products:
+`_affibloom_lasso_id` and `_affibloom_migrated` (the hashes of what it gave and what Affibloom stored, for 26B).
+`tools/lasso-fingerprint.php` (run with `wp eval-file`; no `.sh`). Unit tests with in-memory fakes instead of the
+integration suite (no wp-env). Local: `2 created, 9 skipped, 1 retired, 1 in the trash, 252 unchanged (252 adopted)`;
+again `0 created, 256 unchanged`; the fingerprint equal; the retired product's box shows its target. AC7, AC8, AC23
+pass.
 
 ---
 

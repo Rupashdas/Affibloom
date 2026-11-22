@@ -30,12 +30,12 @@ final class Api {
 	/**
 	 * Builds the API.
 	 *
-	 * @param string                                               $version       Affibloom's version.
-	 * @param AdminNavigation                                      $navigation    The screens, which the menu lists.
-	 * @param ExtensionScreen                                      $pages         The added pages.
-	 * @param Closure(array<string, mixed>): array<string, string> $product_check ProductService::check().
+	 * @param string          $version    Affibloom's version.
+	 * @param AdminNavigation $navigation The screens, which the menu lists.
+	 * @param ExtensionScreen $pages      The added pages.
+	 * @param ProductAccess   $products   What a helper may do with products.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private Closure $product_check ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -53,7 +53,76 @@ final class Api {
 	 * @return array<string, string> Field => reason code (`required`, `invalid_url`, …); empty when all are accepted.
 	 */
 	public function check_product( array $fields ): array {
-		return ( $this->product_check )( $fields );
+		return $this->products->check( $fields );
+	}
+
+	/**
+	 * A new published product copied from a record (Task 26A): the fields as check_product() takes them, stored with
+	 * Save Changes' rules but as given: no request, no other product reused, no tracking-ID rule, nothing fetched from
+	 * Amazon. An Amazon link makes an Amazon product.
+	 *
+	 * @param array<string, mixed> $fields   Field => value; `name` and `url` needed.
+	 * @param string               $created  Its created date, "Y-m-d H:i:s" in the site's time; '' for now.
+	 * @param string               $modified Its changed date, the same way.
+	 * @return int The product's ID.
+	 * @throws \InvalidArgumentException When a field is refused ("url: invalid_url").
+	 */
+	public function import_product( array $fields, string $created = '', string $modified = '' ): int {
+		return $this->products->import( $fields, $created, $modified );
+	}
+
+	/**
+	 * A product's fields as the product page holds them (the keys check_product() takes), or null when there is none.
+	 *
+	 * @param int $id The product.
+	 * @return array<string, mixed>|null
+	 */
+	public function product_fields( int $id ): ?array {
+		return $this->products->fields( $id );
+	}
+
+	/**
+	 * Changes a published product's fields, as the product page's Save Changes does (Task 26B).
+	 *
+	 * @param int                  $id     The product.
+	 * @param array<string, mixed> $fields Field => value; a field not sent keeps its value.
+	 * @throws \InvalidArgumentException When a field is refused or there is no such published product.
+	 */
+	public function update_product( int $id, array $fields ): void {
+		$this->products->update( $id, $fields );
+	}
+
+	/**
+	 * Retires a product, pointing at the product that took its place (0 for none), as a merge does (Task 26A).
+	 *
+	 * @param int $id The product.
+	 * @param int $to The product it points at.
+	 * @throws \InvalidArgumentException When there is no such product.
+	 */
+	public function retire_product( int $id, int $to ): void {
+		$this->products->retire( $id, $to );
+	}
+
+	/**
+	 * Writes a product's created and changed dates as given (Task 26A): a record's dates kept after its product was
+	 * retired or trashed, which stamps "now".
+	 *
+	 * @param int    $id       The product.
+	 * @param string $created  "Y-m-d H:i:s" in the site's time.
+	 * @param string $modified The same way.
+	 */
+	public function date_product( int $id, string $created, string $modified ): void {
+		$this->products->date( $id, $created, $modified );
+	}
+
+	/**
+	 * Moves a product to the trash (Task 26A).
+	 *
+	 * @param int $id The product.
+	 * @throws \InvalidArgumentException When it could not be trashed.
+	 */
+	public function trash_product( int $id ): void {
+		$this->products->trash( $id );
 	}
 
 	/**

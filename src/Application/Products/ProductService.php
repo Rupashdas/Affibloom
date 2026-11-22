@@ -164,19 +164,22 @@ final class ProductService {
 		}
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- ValidationFailed comes from validated(); the sniff counts only this method's own throws.
 	/**
 	 * Save Changes on the product page: the fields sent are cleaned by Lasso's rules (Task 15A) and a Primary URL by
 	 * the add flow's (Task 15B), then stored on the same product, all or nothing; a field not sent keeps its stored
 	 * value. Every refusal is reported together: an empty name, an empty Primary URL (Lasso's one sentence for both),
 	 * and a Primary URL that is not a link, as adding refuses it. The repository throws a RuntimeException when
 	 * WordPress refuses the post, and with_link() a DuplicateLink when the new Primary URL belongs to another product
-	 * (Task 15C): nothing is saved. A refused field throws ValidationFailed (validated()).
+	 * (Task 15C): nothing is saved.
 	 *
 	 * @param int                  $id    Product ID.
 	 * @param array<string, mixed> $input Field => value, as sent.
-	 * @throws ProductNotFound When there is no published product with that ID.
+	 * @throws ProductNotFound  When there is no published product with that ID.
+	 * @throws ValidationFailed When a field is refused (from validated()).
 	 */
 	public function update( int $id, array $input ): Product {
+		// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 		$product = $this->get( $id );
 		if ( null === $product ) {
 			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
@@ -220,6 +223,40 @@ final class ProductService {
 		}
 
 		return array();
+	}
+
+	/**
+	 * A product copied from another plugin's record (the extension API's import_product, Task 26A): the fields cleaned
+	 * by Save Changes' rules and stored as given. Unlike adding a link, nothing is requested, no other product is reused
+	 * (each record is its own product, F10 D1), the site's tag rule is not applied and nothing is fetched from Amazon:
+	 * the record brings its own values. An Amazon link makes an Amazon product with the link's ASIN and store.
+	 *
+	 * @param array<string, mixed> $input Field => value, as Save sends them; `name` and `url` needed.
+	 * @throws ValidationFailed When a field is refused or the link is missing.
+	 */
+	public function import( array $input ): Product {
+		list( $changes, $typed ) = $this->validated( $input );
+		if ( null === $typed || ! isset( $changes['name'] ) ) {
+			throw new ValidationFailed( null === $typed ? array( 'url' => 'required' ) : array( 'name' => 'required' ) );
+		}
+
+		$amazon = AmazonUrl::from( $typed );
+		$draft  = Product::draft( (string) $changes['name'], $typed, $this->settings->get() );
+		if ( null !== $amazon ) {
+			$asin  = $amazon->asin();
+			$draft = $draft->with(
+				array(
+					'type'           => ProductType::Amazon,
+					'asin'           => $asin,
+					'amazon_country' => '' === $asin ? '' : $amazon->country(),
+					'search_key'     => $amazon->search_key(),
+					// F24 R3 (Task CL4): an Amazon product's slug starts with amzn-.
+					'slug'           => ProductSlug::for_new( (string) $changes['name'], true ),
+				)
+			);
+		}
+
+		return $this->products->save( $draft->with( $changes ) );
 	}
 
 	/**
