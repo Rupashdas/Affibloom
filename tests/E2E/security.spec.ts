@@ -111,8 +111,8 @@ test.describe( 'Task 37A: security of every entry point', () => {
 
 	test( 'the inventory is the one docs/reviews/entry-points.md lists', () => {
 		// A route added or removed shows here first: entry-points.md is updated with its verdict, then this number.
-		expect( calls.length + PUBLIC.size ).toBe( 101 );
-		expect( inventory.pages.length ).toBe( 12 );
+		expect( calls.length + PUBLIC.size ).toBe( 102 );
+		expect( inventory.pages.length ).toBe( 13 );
 		// Affibloom saves through REST (deviation 143): no admin-post action and no admin-ajax action of its own.
 		// The one hook is WordPress's own for every taxonomy, and it checks the group taxonomy's capability.
 		expect( inventory.hooks ).toEqual( [ 'wp_ajax_add-affibloom_group' ] );

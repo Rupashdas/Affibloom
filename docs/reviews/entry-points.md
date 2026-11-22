@@ -9,7 +9,7 @@ added or removed, `security.spec.ts`'s first test fails until this file and its 
 TL6 makes them the Permissions setting); `edit_posts` is `INSERT_BOXES`, anyone who writes posts, to place displays
 (F4 D8). Every route with a capability also needs WordPress's REST nonce (cookie authentication).
 
-## REST routes: `/wp-json/affibloom/v1` (101 route and method pairs)
+## REST routes: `/wp-json/affibloom/v1` (102 route and method pairs)
 
 The index `/affibloom/v1` itself is WordPress's, public, and lists the routes. A method listed by two handlers of one
 route is answered by the first (WordPress's rule), so it appears once.
@@ -87,6 +87,7 @@ route is answered by the first (WordPress's rule), so it appears once.
 | `DELETE` | `/dashboard/views/(?P<id>[A-Za-z0-9_-]{1,64})` | PRODUCTS |
 | `GET` | `/dashboard/export` | PRODUCTS |
 | `GET` | `/products/export` | PRODUCTS (Task 38) |
+| `POST` | `/setup/done` | SETTINGS (Task ON7) |
 | `POST` | `/icons` | SETTINGS |
 | `DELETE` | `/icons/(?P<class>[a-z0-9_-]+)` | SETTINGS |
 | `POST` | `/fields/(?P<id>\d+)` | PRODUCTS |
@@ -133,7 +134,7 @@ and `affibloom_export`; they are `POST /settings/tabs/{tab}`, `POST /settings/tr
 `affibloom` (Dashboard), `affibloom-opportunities` (Links, Domains, Content tabs), `affibloom-tables`,
 `affibloom-groups`, `affibloom-fields`, `affibloom-settings` (General, Display, Amazon tabs), and the hidden detail
 pages `affibloom-product`, `affibloom-group`, `affibloom-field`, `affibloom-table` (each with a `guard()` for a missing
-ID), `affibloom-logs` and `affibloom-db-status` (`manage_options`, Tasks TL3, TL4). The setup wizard comes with ON6.
+ID), `affibloom-logs`, `affibloom-db-status` and `affibloom-setup` (Settings capability, Tasks TL3, TL4, ON6).
 
 ## Public entry points (readers, no sign-in)
 

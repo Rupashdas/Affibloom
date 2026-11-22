@@ -349,4 +349,46 @@ test.describe( 'F38 Admin shell', () => {
 			wp( 'option', 'update', 'affibloom_setup', 'done' );
 		}
 	} );
+	test( 'AC11 the Amazon and Analytics steps save their fields; You\'re Ready and Go to Dashboard end the wizard for good', async ( { page } ) => {
+		test.setTimeout( 180_000 );
+		const kept = JSON.parse( wp( 'eval', '$s = get_option( "affibloom_settings" ); echo wp_json_encode( array( "tracking_id" => $s["tracking_id"] ?? "", "show_prime" => ! empty( $s["show_prime"] ), "ga_tracking_id" => $s["ga_tracking_id"] ?? "", "update_pricing_daily" => ! empty( $s["update_pricing_daily"] ) ) );' ) );
+		wp( 'option', 'update', 'affibloom_setup', 'pending' );
+		try {
+			await page.goto( '/wp-admin/admin.php?page=affibloom-setup' );
+			await page.getByRole( 'button', { name: 'Cactus', exact: true } ).click();
+			await page.locator( '[data-step="customize"]' ).getByRole( 'button', { name: 'Skip →' } ).click();
+
+			const amazon = page.locator( '[data-step="amazon"]' );
+			await expect( page.getByRole( 'heading', { name: 'Amazon Associates', level: 1 } ) ).toBeFocused();
+			for ( const card of [ 'Amazon Associates Accounts', 'Auto-Monetize Amazon Links', 'Amazon Preferences' ] ) {
+				await expect( amazon.getByRole( 'heading', { name: card } ) ).toBeVisible();
+			}
+			await expect( amazon.getByLabel( 'Tracking ID for This Site' ) ).toBeVisible();
+			await expect( amazon.getByRole( 'button', { name: 'Validate' } ) ).toBeVisible();
+			await expect( amazon.getByText( 'Commission Upgrades' ) ).toHaveCount( 0 );
+			await amazon.getByLabel( 'Tracking ID for This Site' ).fill( 'wizardtest-20' );
+			await amazon.getByRole( 'switch', { name: 'Show Prime Logo In Displays' } ).setChecked( ! kept.show_prime );
+			await amazon.getByRole( 'button', { name: 'Save and Continue →' } ).click();
+			await expect( page.getByRole( 'heading', { name: 'Google Analytics', level: 1 } ) ).toBeFocused();
+			const afterAmazon = JSON.parse( wp( 'eval', '$s = get_option( "affibloom_settings" ); echo wp_json_encode( array( $s["tracking_id"], ! empty( $s["show_prime"] ), ! empty( $s["update_pricing_daily"] ) ) );' ) );
+			// Saved what the step shows, and nothing the step does not show (Update Amazon pricing daily is the Amazon tab's).
+			expect( afterAmazon ).toEqual( [ 'wizardtest-20', ! kept.show_prime, kept.update_pricing_daily ] );
+
+			const analytics = page.locator( '[data-step="analytics"]' );
+			await analytics.getByLabel( 'Tracking ID or Property ID' ).fill( 'G-WIZARD1' );
+			await analytics.getByRole( 'button', { name: 'Save and Continue →' } ).click();
+			await expect( page.getByRole( 'heading', { name: "You're Ready" } ) ).toBeFocused();
+			await expect( page.getByText( "That's it! You're now ready to add displays to your site." ) ).toBeVisible();
+			expect( wp( 'eval', 'echo get_option( "affibloom_settings" )["ga_tracking_id"];' ) ).toBe( 'G-WIZARD1' );
+
+			await page.getByRole( 'link', { name: 'Go to Dashboard' } ).click();
+			await expect( page ).toHaveURL( /page=affibloom$/ );
+			expect( wp( 'option', 'get', 'affibloom_setup' ) ).toBe( 'done' );
+			await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+			await expect( page ).toHaveURL( /page=affibloom-groups/ );
+		} finally {
+			setSettings( { tracking_id: kept.tracking_id, show_prime: kept.show_prime, ga_tracking_id: kept.ga_tracking_id } );
+			wp( 'option', 'update', 'affibloom_setup', 'done' );
+		}
+	} );
 } );

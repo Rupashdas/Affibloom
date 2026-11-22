@@ -95,7 +95,7 @@ the text below as a deviation in `progress.md`.
 
 - [x] Task ON5: Education boxes: close, remember, reset, hide with help tips
 - [x] Task ON6: Setup wizard: first visit, Theme, Customize
-- [ ] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
+- [x] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
 - [ ] Task ON8: The Dashboard tour
 - [ ] Task ON9: Command palette (Ctrl+Shift+L)
 
@@ -929,13 +929,19 @@ site." / **Go to Dashboard**; the wizard never opens by itself again.
 **Files:** the partials and the route; tests `tests/E2E/acceptance/F38.spec.ts` (AC11), a route unit test; modify
 `setup.php`, `setup.js`.
 
-- [ ] **Step 1: Failing tests.** E2E AC11 (the Amazon, Analytics and Imports steps show Lasso's fields and save as AC10;
+- [x] **Step 1: Failing tests.** E2E AC11 (the Amazon, Analytics and Imports steps show Lasso's fields and save as AC10;
   "You're Ready" then **Go to Dashboard** ends the wizard; it never opens again). Expected: red.
-- [ ] **Step 2: The three steps,** reusing the feature partials (second use: extract where the first draft copied).
-- [ ] **Step 3: Done** (`/setup/done`, `SetupState::finish()`).
-- [ ] **Step 4: Run and look.** The whole wizard on Local with the Amazon credentials left empty (the Validate button
+- [x] **Step 2: The three steps,** reusing the feature partials (second use: extract where the first draft copied).
+- [x] **Step 3: Done** (`/setup/done`, `SetupState::finish()`).
+- [x] **Step 4: Run and look.** The whole wizard on Local with the Amazon credentials left empty (the Validate button
   is dormant without credentials, C1) at 1280 and 375 px.
-- [ ] **Step 5: Commit** — "Complete the setup wizard"
+- [x] **Step 5: Commit** — "Complete the setup wizard"
+
+*Note (2026-11-22):* built in ON6's commit (one page holds every step); this commit adds AC11's test and the
+record. Amazon: the tracking-ID field and Auto-Monetize card shared with the Amazon tab, its Product Data API card, and
+Show Prime Logo and Show Discount Pricing (no Commission Upgrades, N7); it saves through `setup_amazon` with the
+credentials as the tab does (blank fields keep the stored ones). Analytics: the General tab's card through
+`setup_analytics`, the same rules. Done: `POST /setup/done`. Checked: F38 AC11, with Local's real Amazon values put back.
 
 ---
 
