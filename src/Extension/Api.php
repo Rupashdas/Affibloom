@@ -39,6 +39,7 @@ final class Api {
 	 * @param FieldAccess     $fields     What a helper may do with fields.
 	 * @param GroupAccess     $groups     What a helper may do with groups.
 	 * @param AmazonAccess    $amazon     What a helper may do with the Amazon product data.
+	 * @param ViewAccess      $views      What a helper may do with saved Dashboard views and the tour.
 	 */
 	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views ) {}
 
