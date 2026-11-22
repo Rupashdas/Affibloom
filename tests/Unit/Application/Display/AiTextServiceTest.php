@@ -27,8 +27,24 @@ final class AiTextServiceTest extends TestCase {
 				public function find( string $key ): ?string {
 					return $this->texts[ $key ] ?? null;
 				}
+
+				public function save( string $key, string $text ): void {
+					$this->texts[ $key ] = $text;
+				}
 			}
 		);
+	}
+
+	/**
+	 * Task LM5: a text kept for a prompt is found under Lasso's key; an empty one is not kept.
+	 */
+	public function test_a_stored_text_is_found_by_its_prompt(): void {
+		$service = self::service( array() );
+		$service->store( ' Best shoes? ', 'text', '<p>These.</p>' );
+		$service->store( 'Empty', '', '<p> </p>' );
+
+		self::assertSame( '<p>These.</p>', $service->find( 'Best shoes?', 'text' ) );
+		self::assertNull( $service->find( 'Empty', '' ) );
 	}
 
 	/**

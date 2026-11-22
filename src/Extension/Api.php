@@ -45,8 +45,9 @@ final class Api {
 	 * @param TableAccess       $tables     What a helper may do with comparison tables.
 	 * @param OpportunityAccess $opportunities What a helper may do with dismissed opportunities.
 	 * @param BlockAccess       $blocks     What a helper may do with the Product box block (Task LM2).
+	 * @param AiTextAccess      $ai_texts   What a helper may do with the AI text display's stored texts (Task LM5).
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables, private OpportunityAccess $opportunities, private BlockAccess $blocks ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables, private OpportunityAccess $opportunities, private BlockAccess $blocks, private AiTextAccess $ai_texts ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -499,6 +500,28 @@ final class Api {
 	 */
 	public function block_for_shortcode( array $attributes ): ?array {
 		return $this->blocks->from_shortcode( $attributes );
+	}
+
+	/**
+	 * The AI text display's stored text for a prompt and format, or null (Task LM5; F30 D14).
+	 *
+	 * @param string $prompt The shortcode's `prompt`.
+	 * @param string $format Its `format`: `html` or `text` ('' is `html`).
+	 */
+	public function ai_text( string $prompt, string $format ): ?string {
+		return $this->ai_texts->find( $prompt, $format );
+	}
+
+	/**
+	 * Keeps the AI text display's text for a prompt and format, as another plugin cached it (Task LM5); Affibloom never
+	 * asks a service for one.
+	 *
+	 * @param string $prompt The shortcode's `prompt`.
+	 * @param string $format Its `format`: `html` or `text` ('' is `html`).
+	 * @param string $text   The text.
+	 */
+	public function store_ai_text( string $prompt, string $format, string $text ): void {
+		$this->ai_texts->store( $prompt, $format, $text );
 	}
 
 	/**

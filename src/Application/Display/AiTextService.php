@@ -40,4 +40,18 @@ final class AiTextService {
 
 		return null === $text || '' === trim( strip_tags( $text ) ) ? null : $text; // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- the Application layer stays free of WordPress; only the test of emptiness.
 	}
+
+	/**
+	 * Keeps a text for a prompt and format (Lasso's cached text, brought by the migrator; Task LM5); an empty prompt
+	 * or text is not kept.
+	 *
+	 * @param string $prompt The shortcode's `prompt`.
+	 * @param string $format The shortcode's `format` ('' is `html`).
+	 * @param string $text   The text, as Lasso cached it.
+	 */
+	public function store( string $prompt, string $format, string $text ): void {
+		if ( '' !== trim( $prompt ) && '' !== trim( strip_tags( $text ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- as find().
+			$this->texts->save( AiText::key( $prompt, $format ), $text );
+		}
+	}
 }

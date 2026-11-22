@@ -33,4 +33,17 @@ final class OptionAiTextRepository implements AiTextRepository {
 
 		return is_string( $text ) ? $text : null;
 	}
+
+	/**
+	 * Stores a text under a key; the option does not autoload (only a page with an AI text box reads it).
+	 *
+	 * @param string $key  The key.
+	 * @param string $text The text.
+	 */
+	public function save( string $key, string $text ): void {
+		$texts         = get_option( self::OPTION, array() );
+		$texts         = is_array( $texts ) ? $texts : array();
+		$texts[ $key ] = $text;
+		update_option( self::OPTION, $texts, false );
+	}
 }

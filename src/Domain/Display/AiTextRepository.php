@@ -20,4 +20,12 @@ interface AiTextRepository {
 	 * @param string $key The key.
 	 */
 	public function find( string $key ): ?string;
+
+	/**
+	 * Stores a text under a key (the migrator, through the extension API; Task LM5).
+	 *
+	 * @param string $key  The key.
+	 * @param string $text The text.
+	 */
+	public function save( string $key, string $text ): void;
 }
