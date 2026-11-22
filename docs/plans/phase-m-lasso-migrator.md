@@ -109,7 +109,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26B: Products again — `--update`
 - [x] Task 26C: Settings — General and Amazon
 - [x] Task 26D: Settings — Display for Single, Grid and List
-- [ ] Task 26E: Custom fields — definitions and values
+- [x] Task 26E: Custom fields — definitions and values
 - [ ] Task 26F: Groups — `wp affibloom migrate --only=groups`
 - [ ] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
 - [ ] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
@@ -553,10 +553,20 @@ page's Fields and the box's stars match Lasso.
 
 **Files:** the above; unit and integration tests; F10 spec AC12.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Mapper, step, source.**
-- [ ] **Step 3: Run and look.**
-- [ ] **Step 4: Commit** — "Migrate Lasso's custom fields and their values".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Mapper, step, source.**
+- [x] **Step 3: Run and look.**
+- [x] **Step 4: Commit** — "Migrate Lasso's custom fields and their values".
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=fields [--update]`. Affibloom's API gained
+`field_definitions()`, `create_field()`, `rename_field()`, `product_field_rows()`, `set_product_field_rows()`
+(`Extension\FieldAccess`; a product's fields are attached first, rows not given are taken off, Primary Rating comes
+first as Lasso fixes it); `InMemoryFieldRepository` is a shared test double now. In the migrator: `LassoSource::fields()`
+(`LassoFields`), `FieldsStep` in place of the WaitingStep (one class, not a separate `FieldMapper`), the log's
+`field_map` (`MigrationLog::map()`/`remember()`). Built-in fields keep Lasso's IDs in Affibloom, so only a changed name
+is written (here none: "Primary Rating" is Affibloom's default); a custom field is created once. A product's rows
+follow 26C's rule; a product not published in Affibloom is left. Local: DETAILS created (#136), 2 products' ratings
+set, 3 skipped (their products are in Affibloom's trash from earlier tests), then 12 unchanged. AC12 passes.
 
 ---
 

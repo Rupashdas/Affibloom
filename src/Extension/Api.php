@@ -36,8 +36,9 @@ final class Api {
 	 * @param ProductAccess   $products   What a helper may do with products.
 	 * @param SettingsAccess  $settings   What a helper may do with settings.
 	 * @param DisplayAccess   $display    What a helper may do with the Display settings.
+	 * @param FieldAccess     $fields     What a helper may do with fields.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -102,6 +103,62 @@ final class Api {
 	 */
 	public function save_display( string $type, array $config ): array {
 		return $this->display->save( $type, $config );
+	}
+
+	/**
+	 * Every field (Task 26E): the built-in ones with Lasso's IDs (1-3, 99989-99994), then the created ones, each
+	 * `{ id, name, type, description, built_in }`.
+	 *
+	 * @return list<array{id: int, name: string, type: string, description: string, built_in: bool}>
+	 */
+	public function field_definitions(): array {
+		return $this->fields->definitions();
+	}
+
+	/**
+	 * Creates a field through the Fields screen's rules (Task 26E).
+	 *
+	 * @param string $name        Its name (80 characters at most).
+	 * @param string $type        Its kind, such as `text`, `textarea`, `number`, `rating` or `bulleted_list`.
+	 * @param string $description Its description.
+	 * @return int Its ID.
+	 * @throws \InvalidArgumentException When a value is refused.
+	 */
+	public function create_field( string $name, string $type, string $description = '' ): int {
+		return $this->fields->create( $name, $type, $description );
+	}
+
+	/**
+	 * Renames a field (Task 26E); a built-in field takes a name only.
+	 *
+	 * @param int    $id   The field.
+	 * @param string $name Its name.
+	 * @throws \InvalidArgumentException When there is no such field or the name is refused.
+	 */
+	public function rename_field( int $id, string $name ): void {
+		$this->fields->rename( $id, $name );
+	}
+
+	/**
+	 * A published product's field rows in display order, `{ field, value, visible, show_name }`, or null (Task 26E).
+	 *
+	 * @param int $product The product.
+	 * @return list<array{field: int, value: string, visible: bool, show_name: bool}>|null
+	 */
+	public function product_field_rows( int $product ): ?array {
+		return $this->fields->rows( $product );
+	}
+
+	/**
+	 * Sets a published product's field rows in this order, as the product page's Fields save them (Task 26E): each
+	 * field is attached, rows not given are taken off, a rating is kept to Lasso's steps.
+	 *
+	 * @param int                                                                      $product The product.
+	 * @param list<array{field: int, value: string, visible?: bool, show_name?: bool}> $rows    The rows.
+	 * @throws \InvalidArgumentException When the product is not published or a field does not exist.
+	 */
+	public function set_product_field_rows( int $product, array $rows ): void {
+		$this->fields->set_rows( $product, $rows );
 	}
 
 	/**

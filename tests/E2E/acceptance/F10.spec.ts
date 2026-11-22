@@ -367,6 +367,49 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26E: Lasso's custom fields, then each published product's values; a second run finds them all.
+	test( '@local AC12 --only=fields makes the site’s fields and gives each product its values', () => {
+		wp( 'affibloom-lasso', 'migrate', '--only=fields', '--update' );
+
+		const names = JSON.parse(
+			wp(
+				'affibloom-lasso',
+				'migrate',
+				'--dry-run',
+				'--only=fields',
+				'--format=json'
+			).split( '\n' )[ 0 ]
+		) as Array< Record< string, string > >;
+		const definitions = names.filter(
+			( line ) => 'definition' === line.type
+		);
+		expect( definitions.map( ( line ) => line.name ) ).toContain(
+			'DETAILS'
+		);
+		expect(
+			definitions.every( ( line ) => 'unchanged' === line.action )
+		).toBe( true );
+
+		// Every published product with Lasso values holds Lasso's rating, Primary Rating first.
+		const check = JSON.parse(
+			wp(
+				'eval',
+				"global $wpdb; $out = array(); foreach ( $wpdb->get_results( \"SELECT f.lasso_id, f.field_value, m.post_id FROM {$wpdb->prefix}lasso_field_mapping f JOIN {$wpdb->postmeta} m ON m.meta_key = '_affibloom_lasso_id' AND m.meta_value = f.lasso_id JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_status = 'publish' WHERE f.field_id = 1\" ) as $r ) { $rows = (array) get_post_meta( $r->post_id, '_affibloom_fields', true ); $out[] = array( $r->field_value, $rows[0]['field'] ?? null, $rows[0]['value'] ?? null ); } echo wp_json_encode( $out );"
+			)
+		) as Array< [ string, number, string ] >;
+		expect( check.length ).toBeGreaterThan( 0 );
+		for ( const [ lasso, field, value ] of check ) {
+			expect( field ).toBe( 1 );
+			expect( Number( value ) ).toBe( Number( lasso ) );
+		}
+
+		expect(
+			wp( 'affibloom-lasso', 'migrate', '--only=fields', '--update' )
+		).toMatch(
+			/^fields: \d+ items: 0 created, 0 updated, \d+ unchanged, \d+ skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

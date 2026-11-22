@@ -38,6 +38,11 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `save_settings( string $tab, array $values ): array` | 26C | Saves some settings of `general`, `display`, `amazon`, `logs` or `import` (the tracking-ID blacklist and the default picture, which no screen shows) through the screen's rules; a switch not given keeps its value. Returns the keys refused. |
 | `display_settings(): array` | 26D | Every display type's settings: `{ columns, single: { theme, palette, elements, density, layout }, grid: …, list: … }`. |
 | `save_display( string $type, array $config ): array` | 26D | Saves one type's settings through the Display screen's rules, in the shape `display_settings()` reads them; a part not given keeps its value; `columns` is the grid's. Returns the colours and labels refused. |
+| `field_definitions(): array` | 26E | Every field `{ id, name, type, description, built_in }`: the built-in ones with Lasso's IDs (1-3, 99989-99994), then the created ones. |
+| `create_field( string $name, string $type, string $description = '' ): int` | 26E | Creates a field through the Fields screen's rules; returns its ID. |
+| `rename_field( int $id, string $name ): void` | 26E | Renames a field (a built-in one takes a name only). |
+| `product_field_rows( int $product ): ?array` | 26E | A published product's field rows `{ field, value, visible, show_name }` in display order, or null. |
+| `set_product_field_rows( int $product, array $rows ): void` | 26E | Sets a published product's field rows as the product page saves them: fields attached, rows not given taken off, Primary Rating first. |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`
