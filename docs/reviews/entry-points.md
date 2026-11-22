@@ -9,7 +9,7 @@ added or removed, `security.spec.ts`'s first test fails until this file and its 
 TL6 makes them the Permissions setting); `edit_posts` is `INSERT_BOXES`, anyone who writes posts, to place displays
 (F4 D8). Every route with a capability also needs WordPress's REST nonce (cookie authentication).
 
-## REST routes: `/wp-json/affibloom/v1` (102 route and method pairs)
+## REST routes: `/wp-json/affibloom/v1` (103 route and method pairs)
 
 The index `/affibloom/v1` itself is WordPress's, public, and lists the routes. A method listed by two handlers of one
 route is answered by the first (WordPress's rule), so it appears once.
@@ -88,6 +88,7 @@ route is answered by the first (WordPress's rule), so it appears once.
 | `GET` | `/dashboard/export` | PRODUCTS |
 | `GET` | `/products/export` | PRODUCTS (Task 38) |
 | `POST` | `/setup/done` | SETTINGS (Task ON7) |
+| `POST` | `/tour/done` | PRODUCTS (Task ON8) |
 | `POST` | `/icons` | SETTINGS |
 | `DELETE` | `/icons/(?P<class>[a-z0-9_-]+)` | SETTINGS |
 | `POST` | `/fields/(?P<id>\d+)` | PRODUCTS |

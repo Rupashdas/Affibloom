@@ -3616,3 +3616,23 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 	.affibloom-setup__preview { position: static; }
 	.affibloom-setup__card { padding: 20px; }
 }
+
+/*
+ * The Dashboard tour (Task ON8; design system "Tour"): a transparent layer that takes every click over the page, a
+ * spotlight whose shadow darkens the rest (overlay 0.55, Lasso's), and a white tooltip with the step count, the text,
+ * the dots and the buttons.
+ */
+.affibloom-tour { position: fixed; inset: 0; z-index: 100000; }
+.affibloom-tour__shade { position: absolute; inset: 0; }
+.affibloom-tour__spot { position: fixed; border-radius: var(--affibloom-radius-control); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55); pointer-events: none; transition: top 0.2s ease, left 0.2s ease, width 0.2s ease, height 0.2s ease; }
+.affibloom-tour__tip { position: fixed; box-sizing: border-box; padding: 20px; border-radius: var(--affibloom-radius-card); background: var(--affibloom-white); box-shadow: var(--affibloom-shadow-toast); }
+.affibloom-tour__count { margin: 0 0 6px; color: var(--affibloom-ink-600); font: 600 12px/16px var(--affibloom-font); letter-spacing: 0.06em; text-transform: uppercase; }
+.affibloom-tour__text { margin: 0 0 14px; color: var(--affibloom-ink-900); font-size: 15px; line-height: 22px; }
+.affibloom-tour__dots { display: flex; gap: 6px; margin-bottom: 16px; }
+.affibloom-tour__dots span { width: 8px; height: 8px; border-radius: var(--affibloom-radius-full); background: var(--affibloom-line-strong); }
+.affibloom-tour__dots span.is-current { width: 20px; background: var(--affibloom-brand-600); }
+.affibloom-tour__actions { display: flex; align-items: center; gap: 8px; }
+.affibloom-tour__spacer { flex: 1; }
+@media (prefers-reduced-motion: reduce) {
+	.affibloom-tour__spot { transition: none; }
+}

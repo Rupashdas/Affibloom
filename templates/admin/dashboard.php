@@ -148,5 +148,8 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 	<?php $this->render( 'admin/partials/unsaved-modal' ); ?>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
+	<?php if ( ! empty( $view['tour'] ) ) : ?>
+		<?php $this->render( 'admin/partials/tour' ); ?>
+	<?php endif; ?>
 	<?php $this->render( 'admin/partials/footer' ); ?>
 </div>

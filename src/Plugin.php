@@ -216,6 +216,8 @@ use Affibloom\Interface\Admin\PermissionCaps;
 use Affibloom\Interface\Admin\SetupRedirect;
 use Affibloom\Interface\Admin\SetupScreen;
 use Affibloom\Interface\Rest\SetupController;
+use Affibloom\Interface\Rest\TourController;
+use Affibloom\Infrastructure\WordPress\OptionTourState;
 use Affibloom\Application\Shell\SetupState;
 use Affibloom\Infrastructure\WordPress\OptionSetupFlag;
 use Affibloom\Interface\Admin\SettingsScreen;
@@ -644,7 +646,7 @@ final class Plugin {
 			new PermissionCaps( $this->settings_repository() ),
 			new AdminMenu(
 				$this->navigation(),
-				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ), $this->opportunity_service() ),
+				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ), $this->opportunity_service(), new OptionTourState() ),
 				new ProductScreen( $this->template(), $products, $display, $choices, $settings, $fields, $notice, $groups, $data, new PublicLinks( $this->settings_repository() ), $variants, $this->link_issue_query(), $this->location_service(), $this->location_counts(), $this->opportunity_service() ),
 				new SettingsScreen(
 					$this->template(),
@@ -671,6 +673,8 @@ final class Plugin {
 			// F38 N1, D13 (Tasks ON6, ON7): the wizard opens by itself once on a new site, and Go to Dashboard ends it.
 			new SetupRedirect( new SetupState( new OptionSetupFlag() ) ),
 			new SetupController( new SetupState( new OptionSetupFlag() ) ),
+			// F38 R62 (Task ON8): Done or Skip ends the Dashboard tour for every user.
+			new TourController( new OptionTourState() ),
 			// F37 R5, R12 (Task TL4): SQL errors on Affibloom's tables logged, and the tables repaired when one is out of date.
 			new SqlErrorWatch( new TableRepair( new AffibloomTables(), new OptionRepairState(), $this->file_log(), static fn(): int => time() ) ),
 			// F37 R3-R6 (Task TL3): the events of the index, the link check and the product save written to the logs.

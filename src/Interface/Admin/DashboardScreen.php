@@ -23,6 +23,7 @@ use Affibloom\Domain\Product\ListOrder;
 use Affibloom\Domain\Product\Placement;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Interface\Template;
+use Affibloom\Application\Shell\TourState;
 
 /**
  * The Dashboard: Lasso's main list of products. The page prints the first list; Task 13D's REST route refreshes
@@ -51,6 +52,7 @@ final class DashboardScreen {
 	 * @param LocationCounts|null     $locations The Locations column (F12 L1-L3; Task 36A).
 	 * @param ClickReport|null        $clicks    The Clicks column (F12 R10, D8; Task 34A).
 	 * @param OpportunityService|null $opportunities The Alert column's lightbulb (F22 R52-R54; Task O8).
+	 * @param TourState|null          $tour          Whether the first-visit tour is still due (F38 R59; Task ON8).
 	 */
 	public function __construct(
 		private Template $template,
@@ -64,6 +66,7 @@ final class DashboardScreen {
 		private ?LocationCounts $locations = null,
 		private ?ClickReport $clicks = null,
 		private ?OpportunityService $opportunities = null,
+		private ?TourState $tour = null,
 	) {}
 
 	/**
@@ -102,6 +105,8 @@ final class DashboardScreen {
 		$this->template->render(
 			'admin/dashboard',
 			array(
+				// F38 R59 (Task ON8): the tour, until someone ends it with Done or Skip.
+				'tour'          => null !== $this->tour && ! $this->tour->done(),
 				'products'      => $products,
 				'term'          => $term->text(),
 				'link_kind'     => $link_kind,

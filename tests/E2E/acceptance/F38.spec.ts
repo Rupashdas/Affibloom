@@ -391,4 +391,63 @@ test.describe( 'F38 Admin shell', () => {
 			wp( 'option', 'update', 'affibloom_setup', 'done' );
 		}
 	} );
+	// Task ON8: the Dashboard tour (R59-R63).
+	test( 'AC12 the Dashboard tour shows its steps once; Escape and the shade end nothing; Done or Skip end it for every user', async ( { page } ) => {
+		test.setTimeout( 180_000 );
+		wp( 'option', 'delete', 'affibloom_tour_done' );
+		try {
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			const tip = page.getByRole( 'dialog', { name: /Step 1 of \d+/ } );
+			await expect( tip ).toBeVisible( { timeout: 30_000 } );
+			await expect( tip ).toContainText( 'Create your first link here.' );
+			await expect( tip.getByRole( 'button', { name: 'Back' } ) ).toBeDisabled();
+			await expect( tip.getByRole( 'button', { name: 'Next' } ) ).toBeFocused();
+
+			// Escape and a click on the shade end nothing.
+			await page.keyboard.press( 'Escape' );
+			await page.mouse.click( 5, 400 );
+			await expect( tip ).toBeVisible();
+
+			const dialog = page.locator( '[data-tour-tip]' );
+			await dialog.getByRole( 'button', { name: 'Next' } ).click();
+			await expect( dialog ).toContainText( 'Your Dashboard lists every link.' );
+			await dialog.getByRole( 'button', { name: 'Back' } ).click();
+			await expect( dialog ).toContainText( 'Create your first link here.' );
+
+			// The Filters panel is open for its two steps, and closed again after them.
+			const panel = page.locator( '#affibloom-filters-panel' );
+			while ( ! ( await dialog.textContent() )?.includes( 'Open Filters' ) ) {
+				await dialog.getByRole( 'button', { name: 'Next' } ).click();
+			}
+			await expect( panel ).toBeVisible();
+			await dialog.getByRole( 'button', { name: 'Next' } ).click();
+			await expect( dialog ).toContainText( 'Pick group, link type' );
+			await expect( panel ).toBeVisible();
+			await dialog.getByRole( 'button', { name: 'Next' } ).click();
+			await expect( panel ).toBeHidden();
+
+			// The last step's button is Done; it ends the tour for the site.
+			while ( 'Done' !== ( await dialog.getByRole( 'button', { name: /^(Next|Done)$/ } ).textContent() )?.trim() ) {
+				await dialog.getByRole( 'button', { name: 'Next' } ).click();
+			}
+			await expect( dialog ).toContainText( 'Create Groups' );
+			const done = page.waitForResponse( ( r ) => r.url().includes( 'tour' ) && r.url().includes( 'done' ) );
+			await dialog.getByRole( 'button', { name: 'Done' } ).click();
+			expect( ( await done ).ok() ).toBe( true );
+			await expect( dialog ).toBeHidden();
+			expect( wp( 'option', 'get', 'affibloom_tour_done' ) ).toBe( '1' );
+			await page.reload();
+			await expect( page.locator( '[data-tour]' ) ).toHaveCount( 0 );
+
+			// Skip ends it as well.
+			wp( 'option', 'delete', 'affibloom_tour_done' );
+			await page.reload();
+			await expect( dialog ).toBeVisible( { timeout: 30_000 } );
+			await dialog.getByRole( 'button', { name: 'Skip' } ).click();
+			await expect( dialog ).toBeHidden();
+			await expect.poll( () => wp( 'option', 'get', 'affibloom_tour_done' ) ).toBe( '1' );
+		} finally {
+			wp( 'option', 'update', 'affibloom_tour_done', '1' );
+		}
+	} );
 } );

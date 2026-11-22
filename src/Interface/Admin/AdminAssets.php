@@ -79,6 +79,8 @@ final class AdminAssets implements Module {
 		if ( 'toplevel_page_' . AdminMenu::SLUG === $hook_suffix ) {
 			wp_enqueue_media();
 			wp_enqueue_script( 'affibloom-dashboard', $this->plugin_url . 'assets/admin/dashboard.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-group-picker' ), $this->version, true );
+			// The first-visit tour (Task ON8); it acts only when the Dashboard printed it (while not done).
+			wp_enqueue_script( 'affibloom-tour', $this->plugin_url . 'assets/admin/tour.js', array( 'affibloom-dashboard', 'wp-api-fetch' ), $this->version, true );
 		}
 
 		// The group picker: the product page, the Dashboard's quick edit and bulk Add to Group (Tasks G3, G5).

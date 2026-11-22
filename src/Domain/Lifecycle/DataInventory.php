@@ -45,6 +45,7 @@ final class DataInventory {
 		'affibloom_job_slot_2',
 		'affibloom_repair',
 		'affibloom_setup',
+		'affibloom_tour_done',
 	);
 
 	/** Transients by full name (each also has its `_transient_timeout_` row). */

@@ -96,7 +96,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task ON5: Education boxes: close, remember, reset, hide with help tips
 - [x] Task ON6: Setup wizard: first visit, Theme, Customize
 - [x] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
-- [ ] Task ON8: The Dashboard tour
+- [x] Task ON8: The Dashboard tour
 - [ ] Task ON9: Command palette (Ctrl+Shift+L)
 
 ### Documentation and acceptance (roadmap 8.6, 8.7)
@@ -971,12 +971,16 @@ nothing; Done or Skip ends it for everyone. (The Help and Chat steps drop: decis
 `docs/ui/design-system.md` (tour tooltip). The migration copies `lasso_dashboard_tour_done` into `affibloom_tour_done`
 (Phase 5's Task 26M owns that copy).
 
-- [ ] **Step 1: Failing tests.** E2E AC12 (first visit shows the tour; Next/Back/Done/Skip; Filters opens; Escape does
+- [x] **Step 1: Failing tests.** E2E AC12 (first visit shows the tour; Next/Back/Done/Skip; Filters opens; Escape does
   nothing; ended for another user too); unit: `TourState`. Expected: red.
-- [ ] **Step 2: State and route** (`TourState`, `TourController`).
-- [ ] **Step 3: Script** (`tour.js`, focus kept in the tooltip).
-- [ ] **Step 4: Run and look.** Reset the tour option on Local and walk it at 1280 and 375 px, with the keyboard too.
-- [ ] **Step 5: Commit** — "Add the Dashboard tour"
+- [x] **Step 2: State and route** (`TourState`, `TourController`).
+- [x] **Step 3: Script** (`tour.js`, focus kept in the tooltip).
+- [x] **Step 4: Run and look.** Reset the tour option on Local and walk it at 1280 and 375 px, with the keyboard too.
+- [x] **Step 5: Commit** — "Add the Dashboard tour"
+
+*Note:* The tour's clicks do not bubble to the page (the Dashboard closes the Filters panel on any outside click), and a
+part too tall for the tooltip above or below (the Filters panel) gets it beside. Checked by AC12 and at 1280 and 375 px
+(4 steps there: the header tabs fold into Menu).
 
 ---
 
