@@ -81,6 +81,82 @@ final class ProductAccess {
 	}
 
 	/**
+	 * A product's cloaked address: its slug, the old slugs that still answer (F24 N1) and its cloaking switch; null
+	 * when there is no such product (Task 26G).
+	 *
+	 * @param int $id The product.
+	 * @return array{slug: string, old_slugs: list<string>, cloak: bool}|null
+	 */
+	public function address( int $id ): ?array {
+		$product = $this->products->get( $id );
+
+		return null === $product ? null : array(
+			'slug'      => $product->slug,
+			'old_slugs' => $product->old_slugs,
+			'cloak'     => $product->cloak,
+		);
+	}
+
+	/**
+	 * The product that answers at a slug, as its slug or an old one; 0 when none (Task 26G).
+	 *
+	 * @param string $slug The slug.
+	 */
+	public function holder( string $slug ): int {
+		$slug = sanitize_title( $slug );
+		if ( '' === $slug ) {
+			return 0;
+		}
+
+		return ( $this->products->find_by_slug( $slug ) ?? $this->products->find_by_old_slug( $slug ) )->id ?? 0;
+	}
+
+	/**
+	 * Sets a product's slug, its old slugs and its cloaking switch (Task 26G). Slugs are taken in WordPress's form
+	 * (sanitize_title(): another plugin's post slugs, underscores and full length kept); one another product answers
+	 * at, as its slug or an old one, is refused, so no address changes hands.
+	 *
+	 * @param int          $id        The product.
+	 * @param string       $slug      Its slug.
+	 * @param list<string> $old_slugs The old slugs that keep answering.
+	 * @param bool         $cloak     Its cloaking switch.
+	 * @throws InvalidArgumentException When there is no such product, or a slug is not one or is another product's.
+	 */
+	public function set_address( int $id, string $slug, array $old_slugs, bool $cloak ): void {
+		$product = $this->products->get( $id );
+		if ( null === $product ) {
+			throw new InvalidArgumentException( esc_html( "No product $id." ) );
+		}
+		$slug = sanitize_title( $slug );
+		if ( '' === $slug ) {
+			throw new InvalidArgumentException( 'slug: invalid' );
+		}
+		$old = array();
+		foreach ( array_merge( array( $slug ), $old_slugs ) as $index => $typed ) {
+			$clean = sanitize_title( (string) $typed );
+			$other = '' === $clean ? null : ( $this->products->find_by_slug( $clean ) ?? $this->products->find_by_old_slug( $clean ) );
+			if ( null !== $other && $other->id !== $id ) {
+				throw new InvalidArgumentException( esc_html( ( 0 === $index ? 'slug' : 'old_slugs' ) . ": taken ($clean, product {$other->id})" ) );
+			}
+			if ( 0 !== $index && '' !== $clean && $clean !== $slug ) {
+				$old[] = $clean;
+			}
+		}
+		$saved = $this->products->save(
+			$product->with(
+				array(
+					'slug'      => $slug,
+					'old_slugs' => array_values( array_unique( $old ) ),
+					'cloak'     => $cloak,
+				)
+			)
+		);
+		if ( $saved->slug !== $slug ) {
+			throw new InvalidArgumentException( esc_html( "slug: taken ($slug, saved as {$saved->slug})" ) );
+		}
+	}
+
+	/**
 	 * Changes a published product's fields, as Save Changes does.
 	 *
 	 * @param int                  $id     The product.

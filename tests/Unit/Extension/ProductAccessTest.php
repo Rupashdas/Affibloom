@@ -69,6 +69,29 @@ final class ProductAccessTest extends TestCase {
 		$this->access->import( array( 'name' => 'Shoe', 'url' => 'not a link' ), '', '' );
 	}
 
+	public function test_an_address_is_set_and_one_another_product_answers_at_is_refused(): void {
+		Functions\when( 'sanitize_title' )->alias( static fn ( string $title ): string => trim( (string) preg_replace( '/[^a-z0-9_]+/', '-', strtolower( $title ) ), '-' ) );
+		$one = $this->access->import( array( 'name' => 'One', 'url' => 'https://a.example/' ), '', '' );
+		$two = $this->access->import( array( 'name' => 'Two', 'url' => 'https://b.example/' ), '', '' );
+
+		$this->access->set_address( $one, 'amzn-one-long', array( 'one', 'Old One', 'amzn-one-long' ), false );
+
+		self::assertSame(
+			array(
+				'slug'      => 'amzn-one-long',
+				'old_slugs' => array( 'one', 'old-one' ),
+				'cloak'     => false,
+			),
+			$this->access->address( $one )
+		);
+		self::assertNull( $this->access->address( 999 ) );
+		self::assertSame( $one, $this->access->holder( 'old-one' ) );
+		self::assertSame( 0, $this->access->holder( 'nobody' ) );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->access->set_address( $two, 'two', array( 'old-one' ), true );
+	}
+
 	public function test_a_product_is_retired_pointing_at_another_or_trashed(): void {
 		$target = $this->access->import( array( 'name' => 'Target', 'url' => 'https://a.example/' ), '', '' );
 		$old    = $this->access->import( array( 'name' => 'Old', 'url' => 'https://b.example/' ), '', '' );

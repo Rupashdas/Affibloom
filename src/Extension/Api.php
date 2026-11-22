@@ -340,6 +340,38 @@ final class Api {
 	}
 
 	/**
+	 * A product's cloaked address, `{ slug, old_slugs, cloak }`, or null when there is no such product (Task 26G).
+	 *
+	 * @param int $id The product.
+	 * @return array{slug: string, old_slugs: list<string>, cloak: bool}|null
+	 */
+	public function product_address( int $id ): ?array {
+		return $this->products->address( $id );
+	}
+
+	/**
+	 * The product that answers at a slug, as its slug or an old one; 0 when none (Task 26G).
+	 *
+	 * @param string $slug The slug.
+	 */
+	public function product_at_slug( string $slug ): int {
+		return $this->products->holder( $slug );
+	}
+
+	/**
+	 * Sets a product's slug, the old slugs that keep answering and its cloaking switch (Task 26G).
+	 *
+	 * @param int          $id        The product.
+	 * @param string       $slug      Its slug.
+	 * @param list<string> $old_slugs Its old slugs.
+	 * @param bool         $cloak     Its cloaking switch.
+	 * @throws \InvalidArgumentException When a slug is not one or another product answers at it ("slug: taken (…)").
+	 */
+	public function set_product_address( int $id, string $slug, array $old_slugs, bool $cloak ): void {
+		$this->products->set_address( $id, $slug, $old_slugs, $cloak );
+	}
+
+	/**
 	 * Moves a product to the trash (Task 26A).
 	 *
 	 * @param int $id The product.

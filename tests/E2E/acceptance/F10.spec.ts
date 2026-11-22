@@ -517,6 +517,31 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26G: the cloaked links in posts 5428, 4436 and 4375 answer from the product their Lasso record became.
+	test( '@local AC14 --only=slugs keeps the cloaked addresses in posts answering', () => {
+		// Local has collisions (error lines), so the command exits 1: its report is read all the same.
+		const migrate = ( ...args: string[] ): string => {
+			try {
+				return wp( 'affibloom-lasso', 'migrate', ...args );
+			} catch ( failed ) {
+				return String( ( failed as { stdout?: Buffer } ).stdout ?? '' );
+			}
+		};
+		migrate( '--only=slugs', '--update' );
+		const check = wp(
+			'eval',
+			`global $wpdb; $r = new \\Affibloom\\Infrastructure\\WordPress\\PostTypeProductRepository(); $names = $wpdb->get_results( $wpdb->prepare( 'SELECT ID, post_name FROM ' . $wpdb->posts . ' WHERE post_type = %s AND post_status = %s', 'lasso-urls', 'publish' ) ); $lasso_of = array_column( $names, 'ID', 'post_name' ); $out = array(); foreach ( array( 5428, 4436, 4375 ) as $id ) { preg_match_all( '~href=.https?://[^/]+/([a-z0-9_-]+)/.~i', get_post_field( 'post_content', $id ), $m ); foreach ( array_unique( $m[1] ) as $slug ) { if ( ! isset( $lasso_of[ $slug ] ) ) { continue; } $p = $r->find_by_slug( $slug ) ?? $r->find_by_old_slug( $slug ); $want = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT post_id FROM ' . $wpdb->postmeta . ' WHERE meta_key = %s AND meta_value = %d', '_affibloom_lasso_id', $lasso_of[ $slug ] ) ); $out[ $slug ] = $p && $p->id === $want ? 'ok' : 'wrong'; } } echo wp_json_encode( $out );`
+		);
+		const results = JSON.parse( check ) as Record< string, string >;
+		expect( Object.keys( results ).length ).toBeGreaterThanOrEqual( 3 );
+		expect( Object.values( results ).every( ( r ) => r === 'ok' ) ).toBe(
+			true
+		);
+		expect( migrate( '--only=slugs' ) ).toMatch(
+			/^slugs: \d+ items: 0 created, 0 updated, \d+ unchanged, \d+ skipped, \d+ errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

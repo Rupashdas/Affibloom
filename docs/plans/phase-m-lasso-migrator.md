@@ -113,7 +113,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26F: Groups — `wp affibloom migrate --only=groups`
 - [x] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
 - [x] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
-- [ ] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
+- [x] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
 - [ ] Task 26H: URL variants — `wp affibloom migrate --only=variants`
 - [ ] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
 - [ ] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
@@ -705,11 +705,25 @@ the Links intro box stays closed; fingerprint equal.
 
 **Files:** the classes above; `tests/Unit/Application/SlugsMapperTest.php`, `tests/Integration/SlugsStepTest.php`; F10 spec AC14; F24 AC7 (old slug) and AC14 rerun.
 
-- [ ] **Step 1: Failing tests.** AC14 (the seven links answer after the step; collisions reported; second run unchanged). Expected red: no `slugs` family.
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step, through `CloakHandOver`.**
-- [ ] **Step 4: Run and look.** `curl -I` on the seven addresses; the fingerprint equal.
-- [ ] **Step 5: Commit** — "Keep Lasso's cloaked addresses working".
+- [x] **Step 1: Failing tests.** AC14 (the seven links answer after the step; collisions reported; second run unchanged). Expected red: no `slugs` family.
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step, through `CloakHandOver`.**
+- [x] **Step 4: Run and look.** `curl -I` on the seven addresses; the fingerprint equal.
+- [x] **Step 5: Commit** — "Keep Lasso's cloaked addresses working".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=slugs [--update]`. Affibloom has no `CloakHandOver`; its API
+gained `product_address()`, `product_at_slug()` and `set_product_address()` (`ProductAccess`: slugs in WordPress's
+form, `sanitize_title()`, so Lasso's underscores and full length stay; a slug another product answers at is refused).
+The prefix and its restriction already move with the settings (26C). In the migrator: `LassoSource::slugs()`
+(`LassoAddress`; `__trashed` marks left out), `SlugsStep` (no separate mapper): Lasso's slug becomes the product's,
+Affibloom's own stays as an old slug unless it is another record's Lasso address; a product holding another record's
+slug moves to `affibloom-tmp-<id>` first and takes its own in the same run (swaps), and gets its address back if it
+cannot; Lasso's old slugs another product holds stay with it, named; a retired or trashed product is skipped (saving
+would republish it). Local: the one-time import had given 252 products new slugs; 83 linked products were in
+Affibloom's trash from earlier tests, three of them the posts' cloaked links (aircat, total-attack, under-armour-…-2),
+put back. Result: 171 addresses unchanged after the run, 3 collisions reported (two Affibloom-only `amzn-amazon-*`
+products, one retired product holding a record's slug). AC14 passes; fingerprint equal.
 
 ---
 

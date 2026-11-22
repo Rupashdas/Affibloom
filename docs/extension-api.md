@@ -54,6 +54,9 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `save_view( int $user, array $view ): void` | 26M | Saves a view in the shape `views()` gives, replacing the one with its ID; a filter value Affibloom does not know falls back to its default. Throws `InvalidArgumentException` when the name or the count (30) is refused. |
 | `tour_done(): bool` | 26M | Whether the Dashboard's first-visit tour was ended for every user. |
 | `finish_tour(): void` | 26M | Ends the Dashboard's first-visit tour for every user, as its Skip does. |
+| `product_address( int $id ): ?array` | 26G | A product's cloaked address `{ slug, old_slugs, cloak }`, or null. |
+| `product_at_slug( string $slug ): int` | 26G | The product that answers at a slug, as its slug or an old one; 0 when none. |
+| `set_product_address( int $id, string $slug, array $old_slugs, bool $cloak ): void` | 26G | Sets a product's slug, the old slugs that keep answering and its cloaking switch. A slug another product answers at, as its slug or an old one, is refused (`InvalidArgumentException`, "slug: taken (…)"). |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`

@@ -16,6 +16,7 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 - The extension API's group access: `groups()`, `create_group()`, `update_group()`, `group_members()`, `set_group_members()`.
 - The extension API's `amazon_product()` and `import_amazon_product()`: a cached Amazon product read, or stored marked imported.
 - Extension API: `views()`, `save_view()`, `tour_done()` and `finish_tour()`; `save_settings( 'import' )` takes `education_hidden` (Task 26M).
+- Extension API: `product_address()`, `product_at_slug()` and `set_product_address()` (Task 26G).
 
 ## [1.0.0-rc.1] - 2026-11-22
 
