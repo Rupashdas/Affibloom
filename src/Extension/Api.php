@@ -37,8 +37,9 @@ final class Api {
 	 * @param SettingsAccess  $settings   What a helper may do with settings.
 	 * @param DisplayAccess   $display    What a helper may do with the Display settings.
 	 * @param FieldAccess     $fields     What a helper may do with fields.
+	 * @param GroupAccess     $groups     What a helper may do with groups.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -159,6 +160,60 @@ final class Api {
 	 */
 	public function set_product_field_rows( int $product, array $rows ): void {
 		$this->fields->set_rows( $product, $rows );
+	}
+
+	/**
+	 * Every group, `{ id, name, slug, description }` (Task 26F).
+	 *
+	 * @return list<array{id: int, name: string, slug: string, description: string}>
+	 */
+	public function groups(): array {
+		return $this->groups->all();
+	}
+
+	/**
+	 * Creates a group through the Groups screen's rules (Task 26F); its slug comes from its name.
+	 *
+	 * @param string $name        Its name (it may not repeat).
+	 * @param string $description Its description.
+	 * @return int Its ID.
+	 * @throws \InvalidArgumentException When the name is refused.
+	 */
+	public function create_group( string $name, string $description = '' ): int {
+		return $this->groups->create( $name, $description );
+	}
+
+	/**
+	 * Changes a group's name and description; its slug is kept (Task 26F).
+	 *
+	 * @param int    $id          The group.
+	 * @param string $name        Its name.
+	 * @param string $description Its description.
+	 * @throws \InvalidArgumentException When there is no such group or the name is refused.
+	 */
+	public function update_group( int $id, string $name, string $description ): void {
+		$this->groups->update( $id, $name, $description );
+	}
+
+	/**
+	 * A group's published products, in its order (Task 26F).
+	 *
+	 * @param int $id The group.
+	 * @return list<int>
+	 */
+	public function group_members( int $id ): array {
+		return $this->groups->members( $id );
+	}
+
+	/**
+	 * Makes a group's products these published ones, in this order (Task 26F): missing ones are added, others taken out.
+	 *
+	 * @param int       $id       The group.
+	 * @param list<int> $products Product IDs, in order.
+	 * @throws \InvalidArgumentException When there is no such group or a product is not published.
+	 */
+	public function set_group_members( int $id, array $products ): void {
+		$this->groups->set_members( $id, $products );
 	}
 
 	/**

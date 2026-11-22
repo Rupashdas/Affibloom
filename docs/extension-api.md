@@ -43,6 +43,11 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `rename_field( int $id, string $name ): void` | 26E | Renames a field (a built-in one takes a name only). |
 | `product_field_rows( int $product ): ?array` | 26E | A published product's field rows `{ field, value, visible, show_name }` in display order, or null. |
 | `set_product_field_rows( int $product, array $rows ): void` | 26E | Sets a published product's field rows as the product page saves them: fields attached, rows not given taken off, Primary Rating first. |
+| `groups(): array` | 26F | Every group `{ id, name, slug, description }`. |
+| `create_group( string $name, string $description = '' ): int` | 26F | Creates a group through the Groups screen's rules; its slug comes from its name. |
+| `update_group( int $id, string $name, string $description ): void` | 26F | Changes a group's name and description; the slug is kept. |
+| `group_members( int $id ): array` | 26F | A group's published products, in its order. |
+| `set_group_members( int $id, array $products ): void` | 26F | Makes a group's products these published ones, in this order. |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`

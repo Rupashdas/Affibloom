@@ -410,6 +410,37 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26F: each Lasso group is a group with its name, slug and description, its published products in Lasso's order.
+	test( '@local AC13 --only=groups makes every Lasso group a group, with its products in Lasso’s order', () => {
+		wp( 'affibloom-lasso', 'migrate', '--only=groups', '--update' );
+		const groups = JSON.parse(
+			wp(
+				'eval',
+				'$out = array(); $map = get_option( "affibloom_lasso_migration" )["group_map"] ?? array(); foreach ( get_terms( array( "taxonomy" => "lasso-cat", "hide_empty" => false ) ) as $t ) { $g = isset( $map[ $t->term_id ] ) ? get_term( (int) $map[ $t->term_id ], "affibloom_group" ) : null; $out[] = array( $t->name, $t->slug, $t->description, $g ? $g->name : null, $g ? $g->slug : null, $g ? $g->description : null ); } echo wp_json_encode( $out );'
+			)
+		) as string[][];
+		expect( groups.length ).toBeGreaterThan( 0 );
+		for ( const [
+			name,
+			slug,
+			description,
+			ourName,
+			ourSlug,
+			ourDescription,
+		] of groups ) {
+			expect( [ ourName, ourSlug, ourDescription ] ).toEqual( [
+				name,
+				slug,
+				description,
+			] );
+		}
+		expect(
+			wp( 'affibloom-lasso', 'migrate', '--only=groups', '--update' )
+		).toMatch(
+			/^groups: \d+ items: 0 created, 0 updated, \d+ unchanged, 0 skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

@@ -110,7 +110,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26C: Settings — General and Amazon
 - [x] Task 26D: Settings — Display for Single, Grid and List
 - [x] Task 26E: Custom fields — definitions and values
-- [ ] Task 26F: Groups — `wp affibloom migrate --only=groups`
+- [x] Task 26F: Groups — `wp affibloom migrate --only=groups`
 - [ ] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
 - [ ] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
 - [ ] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
@@ -589,11 +589,20 @@ set, 3 skipped (their products are in Affibloom's trash from earlier tests), the
 
 **Files:** the classes above; `tests/Unit/Application/GroupMapperTest.php`, `tests/Integration/GroupsStepTest.php`; F10 spec AC13.
 
-- [ ] **Step 1: Failing tests.** AC13 (twice: second run unchanged; the order; `group_map`). Expected red: no `groups` family.
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step.**
-- [ ] **Step 4: Run and look.** The Groups list and one group against Lasso's; the fingerprint equal.
-- [ ] **Step 5: Commit** — "Migrate Lasso's groups and their order".
+- [x] **Step 1: Failing tests.** AC13 (twice: second run unchanged; the order; `group_map`). Expected red: no `groups` family.
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step.**
+- [x] **Step 4: Run and look.** The Groups list and one group against Lasso's; the fingerprint equal.
+- [x] **Step 5: Commit** — "Migrate Lasso's groups and their order".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=groups [--update]`. Affibloom's API gained `groups()`,
+`create_group()`, `update_group()`, `group_members()`, `set_group_members()` (`Extension\GroupAccess`: the members made
+exactly the list given, in its order, through `GroupService`). In the migrator: `LassoSource::groups()` (`LassoGroup`:
+the term, its records ordered by `lasso_category_order`, then the rest oldest first), `GroupsStep` in place of the
+WaitingStep (one class, no separate `GroupMapper`), `group_map` in the log; a group of the same name in Affibloom is
+adopted; only published products join; 26C's first-run and `--update` rule. Unit tests with fakes. Local: the one group
+("best volyball shoe", no members) created with Lasso's slug, then unchanged; the Groups list shows it. AC13 passes.
 
 ---
 

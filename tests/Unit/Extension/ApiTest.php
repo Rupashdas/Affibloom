@@ -12,7 +12,9 @@ use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Extension\Api;
+use Affibloom\Application\Groups\GroupService;
 use Affibloom\Extension\FieldAccess;
+use Affibloom\Extension\GroupAccess;
 use Affibloom\Extension\DisplayAccess;
 use Affibloom\Application\Settings\SettingsService;
 use Affibloom\Extension\ProductAccess;
@@ -28,6 +30,7 @@ use Affibloom\Tests\Unit\Fakes\InMemoryAmazonProducts;
 use Affibloom\Tests\Unit\Fakes\InMemoryDisplaySettingsRepository;
 use Affibloom\Tests\Unit\Fakes\InMemoryFieldRepository;
 use Affibloom\Tests\Unit\Fakes\InMemoryFieldUsage;
+use Affibloom\Tests\Unit\Fakes\InMemoryGroupRepository;
 use Affibloom\Tests\Unit\Fakes\InMemoryProductRepository;
 use Affibloom\Tests\Unit\Fakes\InMemorySettingsRepository;
 use Affibloom\Tests\Unit\TestCase;
@@ -107,6 +110,34 @@ final class ApiTest extends TestCase {
 		$fields->set_rows( $product, array( array( 'field' => 4242, 'value' => 'x' ) ) );
 	}
 
+	/** Group access on in-memory stores. */
+	public static function groups( ?InMemoryProductRepository $products = null ): GroupAccess {
+		$products ??= new InMemoryProductRepository();
+
+		return new GroupAccess( new GroupService( new InMemoryGroupRepository(), $products ) );
+	}
+
+	public function test_a_group_is_created_and_its_products_set_in_order(): void {
+		Functions\when( 'esc_html' )->returnArg();
+		$products = new InMemoryProductRepository();
+		$draft    = static fn ( string $name ): int => (int) $products->save( Product::draft( $name, AffiliateUrl::from_string( 'https://www.example.com/' . $name ), Settings::from_array( array() ) ) )->id;
+		$a        = $draft( 'a' );
+		$b        = $draft( 'b' );
+		$c        = $draft( 'c' );
+		$groups   = self::groups( $products );
+
+		$id = $groups->create( 'Best shoes', 'Our picks' );
+		$groups->set_members( $id, array( $b, $a ) );
+		self::assertSame( array( $b, $a ), $groups->members( $id ) );
+
+		$groups->set_members( $id, array( $c, $b ) );
+		self::assertSame( array( $c, $b ), $groups->members( $id ), 'Added, taken out and ordered as given.' );
+		self::assertSame( 'Best shoes', $groups->all()[0]['name'] );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$groups->create( 'Best shoes', '' );
+	}
+
 	public function test_a_display_type_is_saved_in_the_shape_it_is_read_and_a_bad_colour_is_refused(): void {
 		$api = $this->api();
 
@@ -136,7 +167,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -150,7 +181,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -170,7 +201,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 
