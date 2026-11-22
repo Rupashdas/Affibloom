@@ -102,7 +102,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 **F10 — Lasso's data**
 
 - [x] Task 25A: The dry run — `wp affibloom migrate --dry-run`, products
-- [ ] Task 25B: The dry run — settings
+- [x] Task 25B: The dry run — settings
 - [ ] Task 25C: The dry run — every other family, and what is left behind
 - [ ] Task 25D: The report on an admin page
 - [ ] Task 26A: Products — `wp affibloom migrate --only=products`
@@ -280,11 +280,23 @@ the tracking-ID blacklist: key, Lasso's value, the Affibloom setting and value, 
 `tests/fixtures/inventory/settings.json`: every key has a target or a verdict; the flat-colour fallback; the
 "custom" preset rule); F10 spec AC4.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: `LassoSettings` and the source.**
-- [ ] **Step 3: The mappers and steps.**
-- [ ] **Step 4: Run and look** (no secret value in the output or the CSV).
-- [ ] **Step 5: Commit** — "Report where every Lasso setting goes".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: `LassoSettings` and the source.**
+- [x] **Step 3: The mappers and steps.**
+- [x] **Step 4: Run and look** (no secret value in the output or the CSV).
+- [x] **Step 5: Commit** — "Report where every Lasso setting goes".
+
+*Note (2026-11-22):* in the migrator: `Domain\Lasso\LassoSettings` (Lasso's defaults and R20's fallbacks),
+`Application\{SettingsMapper, DisplayMapper, SettingsStep, ValueText}`, `LassoSource::settings()`; one `SettingsStep` class
+serves both families. Targets are Affibloom's setting names (F9 analysis); the verdicts of analysis table F are brought up
+to date now every feature is built: nothing is "waiting". Left with a reason: the 7 secrets (their values dropped as the
+option is read, D10), brag mode (deviation 95), `enable_history` (F34 N1), `enable_nofollow2`/`open_new_tab2` (no
+Affibloom setting), cloud, screen-state and unused keys. An empty or unknown `lasso_permission` reads as administrators
+only, as Lasso fails closed. Display: one line per type and field, the columns, and the flat keys and upgrade flag left
+with why. A summary per family. Local: `settings: 86 keys: 58 to import, 28 left, 0 errors`, `display: 28 keys: 16 to
+import, 12 left` (102 stored keys and the blacklist, which is flagged for listing the site's own tracking ID). The
+migrator's tests carry Lasso's key names only, no site values (its repository is public). Found and fixed: JSON output
+ran into the summary line. AC4 passes.
 
 ---
 
