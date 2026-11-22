@@ -42,7 +42,7 @@
 	cursor: pointer;
 	transition: border-color var(--affibloom-ease), background-color var(--affibloom-ease), box-shadow var(--affibloom-ease);
 }
-.affibloom-admin .affibloom-type-tile:hover:not([aria-disabled="true"]) {
+.affibloom-admin .affibloom-type-tile:hover {
 	border-color: var(--affibloom-brand-600);
 	background: var(--affibloom-brand-25);
 	box-shadow: var(--affibloom-shadow-card);
@@ -51,9 +51,6 @@
 .affibloom-type-tile__chip { width: 44px; height: 44px; }
 .affibloom-type-tile__chip .affibloom-icon { width: 22px; height: 22px; }
 /* A type whose area comes later: readable, not a button that works, with its "Soon" chip in the corner. */
-.affibloom-admin .affibloom-type-tile[aria-disabled="true"] { background: var(--affibloom-subtle); color: var(--affibloom-ink-500); cursor: default; }
-.affibloom-type-tile[aria-disabled="true"] .affibloom-type-tile__chip { background: var(--affibloom-sunk); color: var(--affibloom-ink-400); }
-.affibloom-type-tile .affibloom-soon { position: absolute; top: 8px; right: 8px; }
 
 /* "Choose a Link" (Task 23B): the search across the step, then rows with a 44px picture, the name over its link and
    Add; page buttons under them (the pager's). */

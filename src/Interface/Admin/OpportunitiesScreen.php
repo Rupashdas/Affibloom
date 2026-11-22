@@ -199,10 +199,10 @@ final class OpportunitiesScreen {
 	}
 
 	/**
-	 * The sub-tabs (D2): Links, Domains, Content; a tab without its screen yet says "Soon".
+	 * The sub-tabs (D2): Links, Domains, Content.
 	 *
 	 * @param string $current The tab shown.
-	 * @return array{label: string, items: list<array{label: string, url?: string, current?: bool}>}
+	 * @return array{label: string, items: list<array{label: string, url: string, current?: bool}>}
 	 */
 	public static function tabs( string $current ): array {
 		return array(

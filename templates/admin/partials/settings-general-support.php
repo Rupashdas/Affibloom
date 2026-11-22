@@ -3,7 +3,7 @@
  * Settings → General, the support view's cards (`&support=1`; F9 R55-R62, Task 9L): Keep Original URL, Cron, Cronjob
  * Manually and Optional Settings. They are maintenance settings that other features read (F18/F1, F11, F24, F28, C1);
  * the page marks that it showed them (`_support`) so a save from the ordinary view never switches them off. Segment
- * Analytics is Lasso's own cloud and is not built. The Rebuild Database button waits for Task 35G's rebuild route.
+ * Analytics is Lasso's own cloud and is not built. Rebuild Database is in the Link Index card's support view (Task 35G).
  *
  * @package Affibloom
  * @var array{settings: \Affibloom\Domain\Settings\Settings} $view

@@ -20,14 +20,14 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
 
 - **No SSH on staging is known** (the user, 2026-11-13; memory "staging site"). Every step uses an **admin entry
   point**: the migration screen (F10 25D, 26O), Settings → General
-  "Link Index" rebuild (F21 35G / F9 9J), the link check from the Dashboard (F11 32A's admin twin, 31A), the import
-  screen (F33). WP-CLI (`wp affibloom …`) is used only where the host gives shell access; ask the user before Task 40
+  "Link Index" rebuild (F21 35G / F9 9J), the link check from the Dashboard (F11 32A's admin twin, 31A), the
+  migrator's conversion page (LM8). WP-CLI (`wp affibloom …`) is used only where the host gives shell access; ask the user before Task 40
   whether production has it.
-- **Decided (the user, 2026-11-14) — legacy blocks (A1):** Affibloom registers `affiliate-plugin/lasso` itself
-  (Task ED6) and `[lasso]` keeps rendering (Task 27A); the 248 blocks are not converted and no post content is edited.
-  Tasks 28A-28E are dropped (`archive/phase-5-superseded.md`).
-- **Decided (the user, 2026-11-14) — `data-lasso-*` attributes (A2):** kept. Nothing strips them; Task 42's old step 4
-  and F34 H3-H4 are dropped.
+- **Legacy blocks and shortcodes (A1, reversed 2026-11-17, deviation 146):** the migrator converts Lasso's 248 blocks
+  and every `[lasso]` to Affibloom's block and shortcode, keeping a copy to revert (Phase M, LM2-LM9). Affibloom itself
+  registers no Lasso block and renders no `[lasso]`; Tasks ED6 and 27A are dropped.
+- **`data-lasso-*` attributes (A2, reversed 2026-11-17, deviation 146):** the migrator removes Lasso's stamps from
+  content (LM6); F34 stays dropped.
 - **Decided (the user, 2026-11-14) — click figures (E1, revised): start from zero.** No click figures are imported from
   Lasso (Task 26J is dropped). The Dashboard's Clicks count and Google Analytics both start from zero at cutover; there
   is no dependency on Lasso's historical analytics.
@@ -41,8 +41,9 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
   completely and replaced; no Lasso licence date or Lasso "Brag" mark matters to this plan (decisions F4, B9).
 - **Cloaked links are a cutover blocker** (F24, F10): 7 cloaked links to 4 addresses in 3 posts must keep answering;
   CL1 and CL10 must be done and checked (Task 40 step 6).
-- **ThirstyAffiliates `/recommends/` links** (post 3297 and six drafts, F33 N6): imported on staging through F33 IM2
-  with the client's approval; this replaces the old "content fix" step.
+- **ThirstyAffiliates `/recommends/` links** (post 3297 and six drafts, F33 N6): imports from other plugins are dropped
+  (deviation 146), so the old `/recommends/…` address gets a Rank Math redirect to the matching product, with the
+  client's approval (Task 40 step 4).
 - **Production's Additional CSS** carries `.lasso-*` rules (33, F5 N1) and needs the two icon links and the SVG
   (deviation 71a, F28 D4). ADR-6 stands (the user, 2026-11-14): the box keeps Affibloom's own class names and stylesheet, so the cutover
   translates those 33 `.lasso-*` rules to Affibloom's classes (Task 41 step 5; the list is prepared in Task 40 step 2)

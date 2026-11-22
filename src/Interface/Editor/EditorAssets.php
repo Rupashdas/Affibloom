@@ -26,14 +26,6 @@ final class EditorAssets implements Module {
 	public const BLOCK_SCRIPT = 'affibloom-product-box-editor-script';
 
 	/**
-	 * The modal's steps that exist; a type whose step is missing is shown "Soon" in the chooser. Each insert task adds its
-	 * step (23B links, 23D groups, F25 tables).
-	 *
-	 * @var list<string>
-	 */
-	public const STEPS = array( 'links', 'groups', 'tables' );
-
-	/**
 	 * Builds the assets.
 	 *
 	 * @param string        $plugin_url The plugin's URL, with a trailing slash.
@@ -185,7 +177,6 @@ final class EditorAssets implements Module {
 		$this->template->render(
 			'editor/display-modal',
 			array(
-				'steps'      => self::STEPS,
 				// Create Group and Add to Group need PRODUCTS (F4 D8); without it they are not printed.
 				'can_manage' => current_user_can( Capabilities::PRODUCTS ),
 			)

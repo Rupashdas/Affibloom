@@ -116,7 +116,7 @@ Phase M's Task 26Q.
 - [x] Task GF4: Kadence's FAQ schema repairs
 - [x] Task GF5: Lasso's hooks for other code, under Affibloom's names
 - [x] Task GF6: Turn a tied link back to its original URL (E17)
-- [ ] Task GF7: Records and leftovers
+- [x] Task GF7: Records and leftovers
 
 ## Cross-phase notes
 
@@ -1384,8 +1384,15 @@ written, not run; no integration test (that suite has never run, deviation 10).
 - Restrict Prefix (support view): record in F24 that it changes nothing (the product type is always private and
   `CloakPath` matches only `/<prefix>/<slug>/`), as B4 records Lasso's three no-op Amazon switches.
 
-- [ ] **Step 1: Records.** - [ ] **Step 2: Comments and fallbacks** (unit, phpcs, analyse; Dashboard, a product,
-  Opportunities at 1280 px). - [ ] **Step 3: Commit** — "Bring records and leftovers up to date (GF7)".
+- [x] **Step 1: Records.** - [x] **Step 2: Comments and fallbacks** (unit, phpcs, analyse; Dashboard, a product,
+  Opportunities at 1280 px). - [x] **Step 3: Commit** — "Bring records and leftovers up to date (GF7)".
+
+*Note:* the "Soon" fallbacks were reachable only through services that `Plugin.php` always gives, so `DashboardScreen`,
+`DashboardController` and `ProductScreen` now require them (their null branches went), and with the last "Soon" gone
+the `soon` partial, the hidden "Coming soon" notes, its CSS, the editor modal's `STEPS` and Dashboard's
+`aria-disabled` click guard went too (the "No groups" dash keeps `.affibloom-soon-cell`). Restrict Prefix is F24 D21.
+Seen: Dashboard (tiles, Locations, Clicks), product 22092's four tabs, Opportunities' tabs, the editor's seven
+display tiles, the Groups, Fields and Tables add buttons; no "Soon" left, no PHP notice.
 
 ---
 

@@ -4,7 +4,7 @@
  * the stat cards right of the title) and the search; then the table card holding the toolbar, Lasso's selection bar
  * and the list region (Meadow, Task MD4). The arrangement is Lasso's (the user's gate 4 answer for F19, 2026-11-13);
  * the look is Meadow's. Every Lasso column and control is present (the user, 2026-11-13: "Complete
- * the entire Dashboard UI first"), with placeholders for what later tasks bring (Task 13C).
+ * the entire Dashboard UI first"); Task 13C's placeholders were replaced as each column's task was built.
  *
  * @package Affibloom
  * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, link_kind: \Affibloom\Domain\Product\LinkKind, views: \Affibloom\Domain\Dashboard\SavedViews, url: string, args: array<string, string>, library: int, notice: string, group: int, group_list: list<\Affibloom\Domain\Group\Group>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>} $view
@@ -32,7 +32,7 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 				'meta_args'    => array(
 					'part'    => 'summary',
 					'library' => $view['library'],
-					'clicks'  => $view['clicks_30'] ?? null,
+					'clicks'  => $view['clicks_30'],
 				),
 				'actions'      => 'admin/partials/dashboard-tiles',
 				'actions_args' => array(
@@ -107,9 +107,9 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 							'alerts_of'     => $view['alerts_of'] ?? array(),
 							'listing'       => $view['listing'] ?? null,
 							'order'         => $view['order'] ?? new \Affibloom\Domain\Product\ListOrder(),
-							'locations'     => $view['locations'] ?? null,
-							'known'         => $view['known'] ?? true,
-							'clicks'        => $view['clicks'] ?? null,
+							'locations'     => $view['locations'],
+							'known'         => $view['known'],
+							'clicks'        => $view['clicks'],
 							'opportunities' => $view['opportunities'] ?? null,
 						)
 					);
@@ -120,7 +120,6 @@ $placeholder      = sprintf( $placeholder_text, number_format_i18n( $view['libra
 			<?php // Every group picker on the page (the quick edit's, the bulk Add to Group's) reads the site's groups from here (Task G3). ?>
 			<?php $this->render( 'admin/partials/group-choices', array( 'groups' => $view['group_list'] ) ); ?>
 
-			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 			<p id="affibloom-list-status" class="screen-reader-text" role="status" aria-live="polite"></p>
 			<template id="affibloom-list-error">
 				<div class="affibloom-card affibloom-empty affibloom-list-error">

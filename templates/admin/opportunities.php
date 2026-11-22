@@ -134,7 +134,6 @@ if ( null !== $list_back ) {
 			</template>
 		</div>
 	</div>
-	<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 	<?php $this->render( 'admin/partials/location-preview-modal' ); ?>
 	<?php
 	$this->render(

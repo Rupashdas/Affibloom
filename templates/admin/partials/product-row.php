@@ -16,7 +16,7 @@
  * of this one and back.
  *
  * @package Affibloom
- * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations?: int|null, known?: bool, clicks?: int|null, opportunities?: int} $view
+ * @var array{product: \Affibloom\Domain\Product\Product, groups: list<\Affibloom\Domain\Group\Group>, link?: string, alert?: \Affibloom\Domain\LinkHealth\AlertState|null, locations: int, known: bool, clicks: int, opportunities?: int} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -80,9 +80,7 @@ $public_link  = $view['link'] ?? $product->url->value();
 		?>
 	</td>
 	<td class="affibloom-col-locations">
-		<?php if ( ! isset( $view['locations'] ) ) : ?>
-			<?php $this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) ); ?>
-		<?php elseif ( 0 === $view['locations'] && ! ( $view['known'] ?? true ) ) : ?>
+		<?php if ( 0 === $view['locations'] && ! $view['known'] ) : ?>
 			<?php $location_tip = __( 'Processing. Please check back in 24 hours.', 'affibloom' ); ?>
 			<span class="affibloom-alert affibloom-alert--pending" tabindex="0" data-tip="<?php echo esc_attr( $location_tip ); ?>">
 				<?php $this->render( 'admin/partials/icon', array( 'name' => 'clock' ) ); ?>
@@ -94,13 +92,7 @@ $public_link  = $view['link'] ?? $product->url->value();
 		<?php endif; ?>
 	</td>
 	<td class="affibloom-col-clicks">
-		<?php
-		if ( isset( $view['clicks'] ) ) {
-			echo esc_html( number_format_i18n( $view['clicks'] ) );
-		} else {
-			$this->render( 'admin/partials/soon', array( 'variant' => 'cell' ) );
-		}
-		?>
+		<?php echo esc_html( number_format_i18n( $view['clicks'] ) ); ?>
 	</td>
 	<td class="affibloom-col-actions">
 		<span class="affibloom-row__actions">

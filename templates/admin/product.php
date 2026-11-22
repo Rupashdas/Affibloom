@@ -328,7 +328,6 @@ $destination = $product->url->value();
 					<?php esc_html_e( 'Save Changes', 'affibloom' ); ?>
 				</button>
 			</div>
-			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 		</div>
 	</div>
 	<?php $this->render( 'admin/partials/field-modal', array( 'types' => $view['types'] ) ); ?>

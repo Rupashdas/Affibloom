@@ -134,13 +134,6 @@
 	} );
 	bar.querySelector( '[data-clear-selection]' ).addEventListener( 'click', clear );
 
-	// Buttons whose action comes later stay focusable (so "Coming soon" is announced) but do nothing.
-	document.addEventListener( 'click', function ( event ) {
-		if ( event.target.closest( '.affibloom-dashboard [aria-disabled="true"]' ) ) {
-			event.preventDefault();
-		}
-	} );
-
 	sync();
 
 	/* ---------------------------------------------------------------------------------------------------------

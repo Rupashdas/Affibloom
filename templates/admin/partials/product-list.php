@@ -4,7 +4,7 @@
  * renders this same partial for the REST response, so the page and the reload-free list share one template.
  *
  * @package Affibloom
- * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, order?: \Affibloom\Domain\Product\ListOrder, locations?: array<int, int>|null, known?: bool, clicks?: array<int, int>|null, opportunities?: array<int, int>|null} $view
+ * @var array{products: \Affibloom\Domain\Product\ProductPage, term: string, url: string, args: array<string, string>, groups_of: array<int, list<\Affibloom\Domain\Group\Group>>, links_of?: array<int, string>, alerts_of?: array<int, \Affibloom\Domain\LinkHealth\AlertState>, listing?: \Affibloom\Domain\LinkHealth\AlertListing|null, order?: \Affibloom\Domain\Product\ListOrder, locations: array<int, int>, known: bool, clicks: array<int, int>, opportunities?: array<int, int>|null} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -132,9 +132,9 @@ $export_tab = isset( $view['listing'] ) ? $view['listing']->tab : '';
 							'groups'        => $view['groups_of'][ (int) $product->id ] ?? array(),
 							'link'          => $view['links_of'][ (int) $product->id ] ?? $product->url->value(),
 							'alert'         => $view['alerts_of'][ (int) $product->id ] ?? null,
-							'locations'     => isset( $view['locations'] ) ? ( $view['locations'][ (int) $product->id ] ?? 0 ) : null,
-							'known'         => $view['known'] ?? true,
-							'clicks'        => isset( $view['clicks'] ) ? ( $view['clicks'][ (int) $product->id ] ?? 0 ) : null,
+							'locations'     => $view['locations'][ (int) $product->id ] ?? 0,
+							'known'         => $view['known'],
+							'clicks'        => $view['clicks'][ (int) $product->id ] ?? 0,
 							'opportunities' => $view['opportunities'][ (int) $product->id ] ?? 0,
 						)
 					);

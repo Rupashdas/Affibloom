@@ -134,7 +134,6 @@ $is_amazon = VariantKind::AmazonTag === $view['kind'];
 					</td>
 				</tr>
 			</template>
-			<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 		</div>
 	</div>
 	<?php

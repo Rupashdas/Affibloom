@@ -24,9 +24,6 @@
 }
 .affibloom-type-icon .affibloom-icon { width: 18px; height: 18px; }
 
-/* A button that is not ready yet keeps its place and says so (design system, "Soon"). */
-.affibloom-admin .affibloom-button--soon { cursor: default; opacity: 0.85; }
-.affibloom-button--soon .affibloom-soon { margin-left: 4px; }
 
 /* "Manage Fields" in the Add Field dialog: a link that opens the Fields list in a new tab. */
 .affibloom-admin .affibloom-field-modal__manage { color: var(--affibloom-brand-600); font-weight: 600; text-decoration: none; }

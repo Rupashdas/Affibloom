@@ -6,9 +6,8 @@
  * removed. Meadow (Task MD5) prints it in two parts: `preview`, the frame for the sticky aside, and `fields`, the rest
  * as two cards, *Display content* and *Disclosure & link attributes*, in the same order.
  *
- * Placeholders until their tasks: the live preview (14E, Phase 3); Detect Opportunities is live (F22 D9, Task O5),
- * and the Amazon price shown from Amazon's data (C1F). Lasso's Commission Upgrades is its
- * cloud's and is left out (deviation 52). Nothing here is stored until Save Changes (Task 15, D2), except Refresh's
+ * The live preview draws the real box (Task 14E), Detect Opportunities is live (F22 D9, Task O5), and the Amazon price
+ * is shown from Amazon's data (C1F). Lasso's Commission Upgrades is its cloud's and is left out (deviation 52). Nothing here is stored until Save Changes (Task 15, D2), except Refresh's
  * answer (C1D), which Lasso stores at once.
  *
  * @package Affibloom
@@ -56,10 +55,7 @@ $editor = static fn( int $height ): array => array(
 			<?php $this->render( 'admin/partials/icon', array( 'name' => 'image' ) ); ?>
 			<span><?php esc_html_e( 'Update Image', 'affibloom' ); ?></span>
 		</button>
-		<p class="affibloom-image-frame__note">
-			<?php $this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) ); ?>
-			<?php esc_html_e( 'The box preview appears here.', 'affibloom' ); ?>
-		</p>
+		<p class="affibloom-image-frame__note"><?php esc_html_e( 'The box preview appears here.', 'affibloom' ); ?></p>
 	</div>
 </section>
 	<?php
@@ -305,18 +301,18 @@ endif;
 	<div class="affibloom-product__switches">
 		<?php
 		$switches = array(
-			array( 'affibloom-sponsored', 'sponsored', __( 'Sponsored', 'affibloom' ), $product->sponsored, __( 'When enabled, this link will be set to sponsored.', 'affibloom' ), false ),
-			array( 'affibloom-show-disclosure', 'show_disclosure', __( 'Show Disclosure', 'affibloom' ), $product->show_disclosure, __( 'Turn this on to show the disclosure in displays for this link.', 'affibloom' ), false ),
-			array( 'affibloom-opportunities', 'is_opportunity', __( 'Detect Opportunities', 'affibloom' ), $product->detect_opportunities, __( 'When disabled, Link Opportunities will not show for this product.', 'affibloom' ), false ),
+			array( 'affibloom-sponsored', 'sponsored', __( 'Sponsored', 'affibloom' ), $product->sponsored, __( 'When enabled, this link will be set to sponsored.', 'affibloom' ) ),
+			array( 'affibloom-show-disclosure', 'show_disclosure', __( 'Show Disclosure', 'affibloom' ), $product->show_disclosure, __( 'Turn this on to show the disclosure in displays for this link.', 'affibloom' ) ),
+			array( 'affibloom-opportunities', 'is_opportunity', __( 'Detect Opportunities', 'affibloom' ), $product->detect_opportunities, __( 'When disabled, Link Opportunities will not show for this product.', 'affibloom' ) ),
 		);
 		if ( ! $is_amazon ) {
 			// Lasso hides Link Cloaking for Amazon links (url-details.php 491).
-			$switches[] = array( 'affibloom-cloaking', 'link_cloaking', __( 'Link Cloaking', 'affibloom' ), $product->cloak, __( 'The destination of this URL will be redirected from a pretty url on your domain. All non-Amazon Affiliate links should have this enabled.', 'affibloom' ), false );
+			$switches[] = array( 'affibloom-cloaking', 'link_cloaking', __( 'Link Cloaking', 'affibloom' ), $product->cloak, __( 'The destination of this URL will be redirected from a pretty url on your domain. All non-Amazon Affiliate links should have this enabled.', 'affibloom' ) );
 		} else {
 			// Not on Lasso's page (its Amazon data sets it); kept so the editor can set it until C1 (interface spec, D7).
-			$switches[] = array( 'affibloom-prime', 'prime', __( 'Show Prime Logo', 'affibloom' ), $product->prime, __( 'Show the blue Prime logo for this Amazon product.', 'affibloom' ), false );
+			$switches[] = array( 'affibloom-prime', 'prime', __( 'Show Prime Logo', 'affibloom' ), $product->prime, __( 'Show the blue Prime logo for this Amazon product.', 'affibloom' ) );
 		}
-		foreach ( $switches as [ $switch_id, $switch_name, $switch_label, $switch_on, $switch_help, $switch_soon ] ) {
+		foreach ( $switches as [ $switch_id, $switch_name, $switch_label, $switch_on, $switch_help ] ) {
 			$this->render(
 				'admin/partials/switch-row',
 				array(
@@ -325,7 +321,6 @@ endif;
 					'label'   => $switch_label,
 					'checked' => $switch_on,
 					'help'    => $switch_help,
-					'soon'    => $switch_soon,
 				)
 			);
 		}

@@ -9,13 +9,13 @@
  * @package Affibloom
  * The steps' Create buttons and the dialogs they open (Task 23E) are printed only for those who may manage products (F4 D8).
  *
- * @var array{steps: list<string>, can_manage: bool} $view
+ * @var array{can_manage: bool} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $display_types = array(
-	// [ type, label, icon, the step it opens or '' while its area is not built ].
+	// [ type, label, icon, the step it opens ].
 	array( 'single', __( 'Single', 'affibloom' ), 'box', 'links' ),
 	array( 'grid', __( 'Grid', 'affibloom' ), 'grid', 'groups' ),
 	array( 'list', __( 'List', 'affibloom' ), 'list', 'groups' ),
@@ -39,22 +39,14 @@ $display_types = array(
 			<div class="affibloom-modal__body">
 				<ul class="affibloom-type-tiles">
 					<?php foreach ( $display_types as [ $display_type, $label, $icon, $step ] ) : ?>
-						<?php $ready = '' !== $step && in_array( $step, $view['steps'], true ); ?>
 						<li>
-							<button type="button" class="affibloom-type-tile" data-type="<?php echo esc_attr( $display_type ); ?>" data-opens="<?php echo esc_attr( $step ); ?>"
-								<?php echo $ready ? '' : 'aria-disabled="true" aria-describedby="affibloom-display-soon"'; ?>>
+							<button type="button" class="affibloom-type-tile" data-type="<?php echo esc_attr( $display_type ); ?>" data-opens="<?php echo esc_attr( $step ); ?>">
 								<span class="affibloom-chip affibloom-type-tile__chip"><?php $this->render( 'admin/partials/icon', array( 'name' => $icon ) ); ?></span>
 								<span class="affibloom-type-tile__name"><?php echo esc_html( $label ); ?></span>
-								<?php
-								if ( ! $ready ) {
-									$this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) );
-								}
-								?>
 							</button>
 						</li>
 					<?php endforeach; ?>
 				</ul>
-				<span id="affibloom-display-soon" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 			</div>
 		</section>
 

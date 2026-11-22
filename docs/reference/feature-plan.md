@@ -39,7 +39,7 @@ The full-scope rule (the user, 2026-11-13) replaced the first scope, the 12 feat
 | F30 | Display types (Grid, List, Gallery, Button, Image, SiteStripe, AI Text) | `docs/features/F30/` | 3 | planned |
 | F31 | Shortcodes (`[affibloom]`; `[lasso]` is converted by the migrator, competitors' dropped, deviation 146) | `docs/features/F31/` | 3 | `[affibloom]` built |
 | F33 | Import from other plugins | `docs/features/F33/` | — | dropped 2026-11-17 (deviation 146) |
-| F34 | Content changes, history and repair tools | `docs/features/F34/` | 5 | planned |
+| F34 | Content changes, history and repair tools | `docs/features/F34/` | — | dropped (H1-H4, decision A1; overview, REST table) |
 | F35 | Auto-monetization | `docs/features/F35/` | 7 | planned |
 | F37 | Tools and diagnostics | `docs/features/F37/` | 2, 8 | planned |
 | F38 | Admin shell (navigation, notices, wizard, tour, palette) | `docs/features/F38/` | 2, 5, 8 | partly built (Task 8's shell) |

@@ -26,7 +26,7 @@ use WP_Post;
  * Product box block with `schemaReview` or `schemaProsCons` on or an `[affibloom id]` with `schema_review="enable"` or
  * `schema_pros_cons="enable"` (Task 18S14), prints one `<script type="application/ld+json">`, once per post. Lasso
  * reads the product's stored name, picture, price, Primary Rating and Pros / Cons, not the box's overrides; the price
- * and currency attributes replace the price and currency. `[lasso]` joins when Affibloom draws it (Task 27A).
+ * and currency attributes replace the price and currency.
  */
 final class SchemaMarkup implements Module {
 
@@ -36,7 +36,7 @@ final class SchemaMarkup implements Module {
 	private const BLOCK = 'affibloom/product-box';
 
 	/**
-	 * The shortcodes read (Task 27A adds `lasso` once Affibloom draws it).
+	 * The shortcodes read: Affibloom's only; the migrator converts `[lasso]` to `[affibloom]` (deviation 146).
 	 */
 	private const SHORTCODES = array( 'affibloom' );
 

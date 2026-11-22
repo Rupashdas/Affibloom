@@ -1196,9 +1196,6 @@
 .affibloom-tile__number { color: var(--affibloom-ink-900); font: 800 26px/1 var(--affibloom-font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .affibloom-tile__label { margin-top: 5px; overflow: hidden; color: var(--affibloom-ink-600); font-size: 13px; font-weight: 500; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
 .affibloom-tile__note { color: var(--affibloom-brand-600); font-size: 11px; font-weight: 600; line-height: 16px; white-space: nowrap; }
-/* A tile whose number comes later: the chip and the dash step back, the label stays readable. */
-.affibloom-tile--soon .affibloom-chip { background: var(--affibloom-sunk); color: var(--affibloom-ink-400); }
-.affibloom-tile--soon .affibloom-tile__number { color: var(--affibloom-ink-400); }
 /* The summary line under the subtitle: "Products 263 · Clicks (30 days) —", quiet, the numbers in ink. */
 .affibloom-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px 0 0; color: var(--affibloom-ink-600); font-size: 14px; line-height: 20px; }
 .affibloom-tile--line { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
@@ -1262,7 +1259,7 @@
 /*
  * Below the width where eight columns fit, the table scrolls inside its card; the page itself never does. It is
  * positioned so the cells' screen-reader text (position: absolute in wp-admin) stays inside it: without that the
- * hidden "Coming soon" spans escaped the scrolling box and widened the whole page on a phone.
+ * hidden texts escaped the scrolling box and widened the whole page on a phone.
  */
 .affibloom-table-scroll { position: relative; overflow-x: auto; }
 /*
@@ -1584,17 +1581,7 @@
 	.affibloom-quick__actions .affibloom-button { width: 100%; }
 }
 
-/* Placeholders (Task 13C): a "Soon" chip by a column's name, a muted dash in its cells. */
-.affibloom-soon {
-	display: inline-block;
-	padding: 1px 6px;
-	border-radius: var(--affibloom-radius-full);
-	background: var(--affibloom-brand-50);
-	color: var(--affibloom-brand-600);
-	font: 600 10px/14px var(--affibloom-font);
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-}
+/* A muted dash in a cell with nothing to show (a product in no group). */
 .affibloom-soon-cell { color: var(--affibloom-ink-400); font-size: 14px; cursor: default; }
 
 /*
@@ -1906,15 +1893,6 @@
 }
 .affibloom-product-url:hover,
 .affibloom-product-url:focus { color: var(--affibloom-brand-700); text-decoration: underline; text-underline-offset: 3px; }
-/* A tab whose section comes later: readable, not a link, with its "Soon" chip. */
-.affibloom-tabs__tab.is-disabled {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	color: var(--affibloom-ink-500);
-	cursor: default;
-}
-.affibloom-tabs__tab.is-disabled:hover { color: var(--affibloom-ink-500); }
 /*
  * MD5: two columns, 58% / 42%. The left holds the form's cards (Lasso's left column, then its right one) and the Amazon
  * data; the right is sticky under the WordPress toolbar and the header (32 + 64 + 16px), scrolling inside itself when

@@ -80,7 +80,6 @@ $list_args = (string) wp_json_encode(
 			</template>
 		</div>
 	</div>
-	<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 	<?php $this->render( 'admin/partials/location-preview-modal' ); ?>
 	<?php
 	$this->render(

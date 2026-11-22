@@ -7,7 +7,7 @@
  * (partials/toggle.php) is gone (Task MD6).
  *
  * @package Affibloom
- * @var array{id: string, name: string, label: string, checked: bool, help?: string, note?: string, soon?: bool, disabled?: bool, data?: array<string, string>} $view
+ * @var array{id: string, name: string, label: string, checked: bool, help?: string, note?: string, disabled?: bool, data?: array<string, string>} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,11 +18,9 @@ $help_id = $view['id'] . '-help';
 $note      = $view['note'] ?? '';
 $note_id   = $view['id'] . '-note';
 $described = trim( ( '' === $help ? '' : $help_id ) . ( '' === $note ? '' : ' ' . $note_id ) );
-// A switch whose behaviour comes later: disabled, with the "Soon" chip by its label (the product page, Task 14B).
-$soon = $view['soon'] ?? false;
 // A switch that cannot be changed for now (Google Analytics' switches while there is no Tracking ID, Task 9F), and any
 // data attributes a page script reads (the link defaults' "Update Link Settings" dialog, Task 9D).
-$disabled = $soon || ( $view['disabled'] ?? false );
+$disabled = $view['disabled'] ?? false;
 $data     = '';
 foreach ( $view['data'] ?? array() as $attribute => $value ) {
 	$data .= ' data-' . esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
@@ -46,9 +44,6 @@ foreach ( $view['data'] ?? array() as $attribute => $value ) {
 				'label' => $view['label'],
 			)
 		);
-	}
-	if ( $soon ) {
-		$this->render( 'admin/partials/soon', array( 'variant' => 'chip' ) );
 	}
 	?>
 </div>

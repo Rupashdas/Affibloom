@@ -50,22 +50,22 @@ final class ProductScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template                $template Template renderer.
-	 * @param ProductService          $products The product library.
-	 * @param DisplaySettingsService  $display  The Display settings: the button texts an empty field falls back to.
-	 * @param IconChoices             $icons    The button icons, for the button text pickers (F28, Task 14G).
-	 * @param SettingsService         $settings The site's settings: the disclosure text and Show Price a product falls
-	 *                                          back to (Task 14B).
-	 * @param FieldsService           $fields   The product's custom fields and the field library (Task 14C).
-	 * @param Notice                  $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
-	 * @param GroupService            $groups   The product's groups and the site's, for the group picker (Task G3).
-	 * @param AmazonDataService       $amazon   Whether Refresh can ask Amazon (C1D).
-	 * @param PublicLinks|null        $links    The public link and the cloaked address's start (F24, Task CL3).
-	 * @param VariantService|null     $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
-	 * @param LinkIssueQuery|null     $alerts   The page's issue bars (F11, Task 31C).
-	 * @param LocationService|null    $locations The Locations tab (F12, Task 36B).
-	 * @param LocationCounts|null     $counts    The Locations tab's count, on every tab (F12 L4).
-	 * @param OpportunityService|null $opportunities The Opportunities tab and its count (F22 R34-R36, Task O5).
+	 * @param Template               $template Template renderer.
+	 * @param ProductService         $products The product library.
+	 * @param DisplaySettingsService $display  The Display settings: the button texts an empty field falls back to.
+	 * @param IconChoices            $icons    The button icons, for the button text pickers (F28, Task 14G).
+	 * @param SettingsService        $settings The site's settings: the disclosure text and Show Price a product falls
+	 *                                         back to (Task 14B).
+	 * @param FieldsService          $fields   The product's custom fields and the field library (Task 14C).
+	 * @param Notice                 $notice   The toast after a redirect, e.g. "Tracking ID Saved!" (Task 14D).
+	 * @param GroupService           $groups   The product's groups and the site's, for the group picker (Task G3).
+	 * @param AmazonDataService      $amazon   Whether Refresh can ask Amazon (C1D).
+	 * @param PublicLinks            $links    The public link and the cloaked address's start (F24, Task CL3).
+	 * @param VariantService         $variants The product's URL variants: the Variants tab and its count (F27, Task V1).
+	 * @param LinkIssueQuery         $alerts   The page's issue bars (F11, Task 31C).
+	 * @param LocationService        $locations The Locations tab (F12, Task 36B).
+	 * @param LocationCounts         $counts    The Locations tab's count, on every tab (F12 L4).
+	 * @param OpportunityService     $opportunities The Opportunities tab and its count (F22 R34-R36, Task O5).
 	 */
 	public function __construct(
 		private Template $template,
@@ -77,12 +77,12 @@ final class ProductScreen {
 		private Notice $notice,
 		private GroupService $groups,
 		private AmazonDataService $amazon,
-		private ?PublicLinks $links = null,
-		private ?VariantService $variants = null,
-		private ?LinkIssueQuery $alerts = null,
-		private ?LocationService $locations = null,
-		private ?LocationCounts $counts = null,
-		private ?OpportunityService $opportunities = null,
+		private PublicLinks $links,
+		private VariantService $variants,
+		private LinkIssueQuery $alerts,
+		private LocationService $locations,
+		private LocationCounts $counts,
+		private OpportunityService $opportunities,
 	) {}
 
 	/**
@@ -210,16 +210,16 @@ final class ProductScreen {
 			return;
 		}
 		$id          = (int) $this->product->id;
-		$variants    = null === $this->variants ? array() : $this->variants->list( $this->product );
-		$public_link = null === $this->links ? $this->product->url->value() : $this->links->for( $this->product );
-		$used        = null === $this->counts ? null : ( $this->counts->of( array( $id ) )[ $id ] ?? 0 );
+		$variants    = $this->variants->list( $this->product );
+		$public_link = $this->links->for( $this->product );
+		$used        = $this->counts->of( array( $id ) )[ $id ] ?? 0;
 		// The Opportunities tab's badge on every tab: Link Opportunities' rows for the product (F22 R34; Task O5).
-		$found = null === $this->opportunities ? null : $this->opportunities->links( new OpportunityQuery( '', '', '', 1, $id ) )->total;
+		$found = $this->opportunities->links( new OpportunityQuery( '', '', '', 1, $id ) )->total;
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which tab and list to show, no action behind it.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 		// F22 R34-R36 (Task O5): Opportunities is a tab of this page (`&tab=opportunities`), Link Opportunities' list for
 		// the product, redrawn in place through GET /opportunities/links?product=&context=product.
-		if ( 'opportunities' === $tab && null !== $this->opportunities ) {
+		if ( 'opportunities' === $tab ) {
 			$query = new OpportunityQuery(
 				isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '',
 				isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '',
@@ -241,7 +241,7 @@ final class ProductScreen {
 			return;
 		}
 		// F12 D22 (Task 36B): Locations is a tab of this page (`&tab=locations`), its list redrawn in place.
-		if ( 'locations' === $tab && null !== $this->locations ) {
+		if ( 'locations' === $tab ) {
 			$term      = isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '';
 			$order     = isset( $_GET['order'] ) && in_array( $_GET['order'], array( 'asc', 'desc' ), true ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : '';
 			$paged     = isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : 1;
@@ -292,14 +292,14 @@ final class ProductScreen {
 			array(
 				'product'      => $this->product,
 				// F11 R29 (Task 31C): the broken and out-of-stock bars, and D7's line for an unchecked Amazon product.
-				'issues'       => null === $this->alerts ? null : $this->alerts->notices( (int) $this->product->id, ProductType::Amazon === $this->product->type ),
+				'issues'       => $this->alerts->notices( (int) $this->product->id, ProductType::Amazon === $this->product->type ),
 				// F24 (Task CL3): the link under the heading, and the cloaked address's start for the Permalink's live line.
 				'public_link'  => $public_link,
 				'tabs'         => self::tabs( $id, 'details', count( $variants ), $used, $found ),
 				// Task 36E (F12 L15, D26): a product in use opens "Hold Up" with its posts instead of the delete question.
-				'in_use'       => null !== $this->locations && ( $used ?? 0 ) > 0 ? $this->locations->page( $id, '', 'asc', 1 ) : null,
+				'in_use'       => $used > 0 ? $this->locations->page( $id, '', 'asc', 1 ) : null,
 				'in_use_url'   => self::locations_url( $id ),
-				'cloak_base'   => null === $this->links ? '' : $this->links->base(),
+				'cloak_base'   => $this->links->base(),
 				// Lasso's placeholders are the site's button texts (get_lasso_url: *_button_text_default).
 				'button_text'  => $palette->value( 'primary_button_text' ),
 				'button_text2' => $palette->value( 'secondary_button_text' ),
@@ -334,17 +334,17 @@ final class ProductScreen {
 	}
 
 	/**
-	 * Lasso's four tabs under the product's name (header.php 245-297): Details, Locations with its count (F12 L4; Task
-	 * 36B) and Variants with its count on every tab (F27 R4); Opportunities comes with its area.
+	 * Lasso's four tabs under the product's name (header.php 245-297): Details, Locations (F12 L4; Task 36B),
+	 * Opportunities (F22 R34; Task O5) and Variants (F27 R4), each with its count on every tab.
 	 *
-	 * @param int      $id        The product's ID.
-	 * @param string   $current   The tab shown: 'details', 'locations' or 'variants'.
-	 * @param int      $variants  How many variants the product has.
-	 * @param int|null $locations How many places use it; null while the Locations tab is not wired (a "Soon" tab).
-	 * @param int|null $opportunities Its Link Opportunities; null while that tab is not wired (Task O5).
-	 * @return array{label: string, items: list<array{label: string, url?: string, current?: bool, count?: int, show_zero?: bool, key?: string}>}
+	 * @param int    $id            The product's ID.
+	 * @param string $current       The tab shown: 'details', 'locations', 'opportunities' or 'variants'.
+	 * @param int    $variants      How many variants the product has.
+	 * @param int    $locations     How many places use it.
+	 * @param int    $opportunities Its Link Opportunities.
+	 * @return array{label: string, items: list<array{label: string, url: string, current?: bool, count?: int, show_zero?: bool, key?: string}>}
 	 */
-	private static function tabs( int $id, string $current, int $variants, ?int $locations = null, ?int $opportunities = null ): array {
+	private static function tabs( int $id, string $current, int $variants, int $locations, int $opportunities ): array {
 		return array(
 			'label' => __( 'Product sections', 'affibloom' ),
 			'items' => array(
@@ -353,14 +353,14 @@ final class ProductScreen {
 					'url'     => self::url( $id ),
 					'current' => 'details' === $current,
 				),
-				null === $locations ? array( 'label' => __( 'Locations', 'affibloom' ) ) : array(
+				array(
 					'label'     => __( 'Locations', 'affibloom' ),
 					'url'       => self::locations_url( $id ),
 					'current'   => 'locations' === $current,
 					'count'     => $locations,
 					'show_zero' => true,
 				),
-				null === $opportunities ? array( 'label' => __( 'Opportunities', 'affibloom' ) ) : array(
+				array(
 					'label'     => __( 'Opportunities', 'affibloom' ),
 					'url'       => add_query_arg( 'tab', 'opportunities', self::url( $id ) ),
 					'current'   => 'opportunities' === $current,

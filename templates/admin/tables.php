@@ -64,7 +64,6 @@ $search_label = sprintf( __( 'Search All %s Tables', 'affibloom' ), number_forma
 			</template>
 		</div>
 	</div>
-	<span id="affibloom-soon-note" hidden><?php esc_html_e( 'Coming soon', 'affibloom' ); ?></span>
 	<?php $this->render( 'admin/partials/toast', array( 'message' => $view['notice'] ?? '' ) ); ?>
 	<?php $this->render( 'admin/partials/toast-template' ); ?>
 	<?php $this->render( 'admin/partials/table-create-modal' ); ?>

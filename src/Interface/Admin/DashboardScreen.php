@@ -41,18 +41,18 @@ final class DashboardScreen {
 	/**
 	 * Builds the screen.
 	 *
-	 * @param Template                $template Template renderer.
-	 * @param ProductService          $products The product library.
-	 * @param PerPage                 $per_page How many products this editor sees at a time.
-	 * @param SavedViewService        $views    This editor's saved views (Task 13E).
-	 * @param Notice                  $notice   The toast after a redirect: "Product deleted." (Task 17A).
-	 * @param GroupService            $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
-	 * @param PublicLinks|null        $links    The rows' public links (F24 R14; Task CL7).
-	 * @param LinkIssueQuery|null     $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
-	 * @param LocationCounts|null     $locations The Locations column (F12 L1-L3; Task 36A).
-	 * @param ClickReport|null        $clicks    The Clicks column (F12 R10, D8; Task 34A).
-	 * @param OpportunityService|null $opportunities The Alert column's lightbulb (F22 R52-R54; Task O8).
-	 * @param TourState|null          $tour          Whether the first-visit tour is still due (F38 R59; Task ON8).
+	 * @param Template           $template Template renderer.
+	 * @param ProductService     $products The product library.
+	 * @param PerPage            $per_page How many products this editor sees at a time.
+	 * @param SavedViewService   $views    This editor's saved views (Task 13E).
+	 * @param Notice             $notice   The toast after a redirect: "Product deleted." (Task 17A).
+	 * @param GroupService       $groups   The Groups column, the Group filter and the pickers (Tasks G3, G5).
+	 * @param PublicLinks        $links    The rows' public links (F24 R14; Task CL7).
+	 * @param LinkIssueQuery     $alerts The Alert column, its sort and the alert tabs (F11, Tasks 31A, 31B).
+	 * @param LocationCounts     $locations The Locations column (F12 L1-L3; Task 36A).
+	 * @param ClickReport        $clicks    The Clicks column (F12 R10, D8; Task 34A).
+	 * @param OpportunityService $opportunities The Alert column's lightbulb (F22 R52-R54; Task O8).
+	 * @param TourState|null     $tour          Whether the first-visit tour is still due (F38 R59; Task ON8).
 	 */
 	public function __construct(
 		private Template $template,
@@ -61,11 +61,11 @@ final class DashboardScreen {
 		private SavedViewService $views,
 		private Notice $notice,
 		private GroupService $groups,
-		private ?PublicLinks $links = null,
-		private ?LinkIssueQuery $alerts = null,
-		private ?LocationCounts $locations = null,
-		private ?ClickReport $clicks = null,
-		private ?OpportunityService $opportunities = null,
+		private PublicLinks $links,
+		private LinkIssueQuery $alerts,
+		private LocationCounts $locations,
+		private ClickReport $clicks,
+		private OpportunityService $opportunities,
 		private ?TourState $tour = null,
 	) {}
 
@@ -96,7 +96,7 @@ final class DashboardScreen {
 		$asked = ListOrder::from_input( $sort, $dir );
 		// F19 R5 (Task O8): the opportunity count sorts the Opportunities tab only; elsewhere the default, said so.
 		$order     = $asked->for_tab( $tab );
-		$alerts    = $this->alerts?->listing( $order->direction_of( ListOrder::ALERT ), $tab );
+		$alerts    = $this->alerts->listing( $order->direction_of( ListOrder::ALERT ), $tab );
 		$placement = Placement::from_input( $place );
 		$tables    = TableFilter::from_input( $in );
 		$products  = $this->products->list( $term, $link_kind, $page, $per_page, $group, $one, $alerts, $placement, $order, $tables );
@@ -116,21 +116,21 @@ final class DashboardScreen {
 				'order'         => $order,
 				'group_list'    => $this->groups->all(),
 				'groups_of'     => $this->groups->for_products( $ids ),
-				'links_of'      => null === $this->links ? array() : $this->links->of( $products->items ),
+				'links_of'      => $this->links->of( $products->items ),
 				'views'         => $this->views->list( get_current_user_id() ),
 				'url'           => DashboardUrl::to( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order, $tables ),
 				// Every list argument but the page, for the GET forms' hidden inputs (Task 13F).
 				'args'          => DashboardUrl::args( $term->text(), $link_kind, 1, $per_page, $group, $one, $alerts, $placement, $order, $tables ),
-				'alerts_of'     => null === $this->alerts ? array() : $this->alerts->for_products( $ids ),
+				'alerts_of'     => $this->alerts->for_products( $ids ),
 				'listing'       => $alerts,
 				// The Locations column (Task 36A): each row's count, and whether a 0 is known yet (the clock).
-				'locations'     => $this->locations?->of( $ids ),
-				'known'         => $this->locations?->known() ?? true,
-				'clicks'        => $this->clicks?->totals_for( $ids, time() ),
+				'locations'     => $this->locations->of( $ids ),
+				'known'         => $this->locations->known(),
+				'clicks'        => $this->clicks->totals_for( $ids, time() ),
 				// The Alert column's lightbulb (F22 R52-R54; Task O8): posts on the Opportunities tab, rows elsewhere.
-				'opportunities' => $this->opportunities?->per_product( $ids, 'opportunities' === $alerts?->tab ),
-				'clicks_30'     => $this->clicks?->total( time() ),
-				'counts'        => null === $this->alerts ? null : $this->alerts->counts( $term, $link_kind, $group, $one, $placement, $tables ),
+				'opportunities' => $this->opportunities->per_product( $ids, 'opportunities' === $alerts->tab ),
+				'clicks_30'     => $this->clicks->total( time() ),
+				'counts'        => $this->alerts->counts( $term, $link_kind, $group, $one, $placement, $tables ),
 				'library'       => $this->products->count(),
 				'notice'        => $asked === $order ? $this->notice->message() : self::opportunity_sort_notice(),
 			)

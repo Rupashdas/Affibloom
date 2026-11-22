@@ -113,7 +113,7 @@
 			return;
 		}
 		const tile = event.target.closest( '.affibloom-type-tile' );
-		if ( ! tile || 'true' === tile.getAttribute( 'aria-disabled' ) ) {
+		if ( ! tile ) {
 			return;
 		}
 		context.type = tile.getAttribute( 'data-type' );

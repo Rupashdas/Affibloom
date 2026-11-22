@@ -189,6 +189,10 @@ Settled from Lasso and the records:
   Amazon `1`s included; missing → 0), `rewrite_slug` → `cloak_prefix`, `link_cloaking`, `restrict_prefix`, and the
   real `lasso_old_slug` values (≠ current) → `_affibloom_old_slugs`. **It never turns a flag on.**
 - **D20 lasso.to:** a stored lasso.to URL never gets the flag (R11, R33); the short-link service itself is Lasso's cloud.
+- **D21 Restrict Prefix (support view) is stored and changes nothing** (Task GF7, 2026-11-23), as B4 records for
+  Lasso's three no-op Amazon switches. In Lasso it only makes the post type non-public (R2); Affibloom's product type
+  is always private, and a cloaked address answers only as `/<prefix>/<slug>/` when a prefix is set (`CloakPath`), so
+  its help text ("cloaked links can only be reached through their prefix") already holds with the switch off or on.
 
 **Needs the user:**
 

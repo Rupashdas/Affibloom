@@ -2,8 +2,8 @@
 /**
  * Lasso's selection bar (dashboard.php, links-selected-wrapper): it appears with the first ticked row and offers
  * Select All, Clear Selection, Delete and Add to Group, with Lasso's labels. The selection is the page's (F1 D36):
- * Select All ticks the page's rows. Delete moves the ticked rows to the trash (Task 17B); Add to Group waits for the
- * Groups area. The words the script needs are here, so they are translated with the rest.
+ * Select All ticks the page's rows. Delete moves the ticked rows to the trash (Task 17B); Add to Group opens the group
+ * picker (Task G5). The words the script needs are here, so they are translated with the rest.
  *
  * @package Affibloom
  */
