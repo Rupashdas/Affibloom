@@ -170,12 +170,11 @@ final class ProductService {
 	 * value. Every refusal is reported together: an empty name, an empty Primary URL (Lasso's one sentence for both),
 	 * and a Primary URL that is not a link, as adding refuses it. The repository throws a RuntimeException when
 	 * WordPress refuses the post, and with_link() a DuplicateLink when the new Primary URL belongs to another product
-	 * (Task 15C): nothing is saved.
+	 * (Task 15C): nothing is saved. A refused field throws ValidationFailed (validated()).
 	 *
 	 * @param int                  $id    Product ID.
 	 * @param array<string, mixed> $input Field => value, as sent.
-	 * @throws ProductNotFound  When there is no published product with that ID.
-	 * @throws ValidationFailed When a field is refused.
+	 * @throws ProductNotFound When there is no published product with that ID.
 	 */
 	public function update( int $id, array $input ): Product {
 		$product = $this->get( $id );
@@ -183,25 +182,7 @@ final class ProductService {
 			throw new ProductNotFound( (string) $id ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an ID, never shown.
 		}
 
-		$errors  = array();
-		$changes = array();
-		try {
-			$changes = $this->input->changes( $input );
-		} catch ( ValidationFailed $refused ) {
-			$errors = $refused->errors;
-		}
-		$typed = null;
-		if ( array_key_exists( 'url', $input ) ) {
-			try {
-				$typed = $this->rules->typed( is_string( $input['url'] ) ? $input['url'] : '' );
-			} catch ( InvalidField $refused ) {
-				// "Name and Primary Destination URL are required." covers an empty link (S2).
-				$errors['url'] = 'empty' === $refused->reason ? 'required' : $refused->reason;
-			}
-		}
-		if ( array() !== $errors ) {
-			throw new ValidationFailed( $errors );
-		}
+		list( $changes, $typed ) = $this->validated( $input );
 
 		$changed = $product->with( $changes );
 		if ( null !== $typed ) {
@@ -222,6 +203,56 @@ final class ProductService {
 		}
 
 		return $saved;
+	}
+
+	/**
+	 * What Save Changes would refuse in these fields, nothing stored (the extension API's check_product, Task 25A):
+	 * field => reason code, empty when every field is accepted.
+	 *
+	 * @param array<string, mixed> $input Field => value, as Save sends them.
+	 * @return array<string, string>
+	 */
+	public function check( array $input ): array {
+		try {
+			$this->validated( $input );
+		} catch ( ValidationFailed $refused ) {
+			return $refused->errors;
+		}
+
+		return array();
+	}
+
+	/**
+	 * The fields cleaned by Lasso's rules (Task 15A) and the Primary URL by the add flow's (Task 15B), with every
+	 * refusal reported together: an empty name, an empty Primary URL (Lasso's one sentence for both), and a Primary URL
+	 * that is not a link.
+	 *
+	 * @param array<string, mixed> $input Field => value, as sent.
+	 * @return array{0: array<string, mixed>, 1: AffiliateUrl|null} The changes, and the typed link when one was sent.
+	 * @throws ValidationFailed When a field is refused.
+	 */
+	private function validated( array $input ): array {
+		$errors  = array();
+		$changes = array();
+		try {
+			$changes = $this->input->changes( $input );
+		} catch ( ValidationFailed $refused ) {
+			$errors = $refused->errors;
+		}
+		$typed = null;
+		if ( array_key_exists( 'url', $input ) ) {
+			try {
+				$typed = $this->rules->typed( is_string( $input['url'] ) ? $input['url'] : '' );
+			} catch ( InvalidField $refused ) {
+				// "Name and Primary Destination URL are required." covers an empty link (S2).
+				$errors['url'] = 'empty' === $refused->reason ? 'required' : $refused->reason;
+			}
+		}
+		if ( array() !== $errors ) {
+			throw new ValidationFailed( $errors );
+		}
+
+		return array( $changes, $typed );
 	}
 
 	/**

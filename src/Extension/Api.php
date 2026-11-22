@@ -30,17 +30,30 @@ final class Api {
 	/**
 	 * Builds the API.
 	 *
-	 * @param string          $version    Affibloom's version (AFFIBLOOM_VERSION).
-	 * @param AdminNavigation $navigation The screens in Lasso's order, which the menu lists.
-	 * @param ExtensionScreen $pages      The added pages, printed in Affibloom's design.
+	 * @param string                                               $version       Affibloom's version.
+	 * @param AdminNavigation                                      $navigation    The screens, which the menu lists.
+	 * @param ExtensionScreen                                      $pages         The added pages.
+	 * @param Closure(array<string, mixed>): array<string, string> $product_check ProductService::check().
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private Closure $product_check ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
 	 */
 	public function version(): string {
 		return $this->version;
+	}
+
+	/**
+	 * What Affibloom would refuse in a product's fields, nothing stored (Task 25A): the product page's Save Changes
+	 * rules, so a helper can report a value Affibloom will not take before it writes anything. Fields are the product
+	 * page's (`name`, `url`, `description`, `buttons`, …; `docs/extension-api.md`); a field not sent is not checked.
+	 *
+	 * @param array<string, mixed> $fields Field => value.
+	 * @return array<string, string> Field => reason code (`required`, `invalid_url`, …); empty when all are accepted.
+	 */
+	public function check_product( array $fields ): array {
+		return ( $this->product_check )( $fields );
 	}
 
 	/**

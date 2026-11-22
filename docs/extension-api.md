@@ -27,6 +27,7 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 |---|---|---|
 | `version(): string` | LM1 | Affibloom's version (`AFFIBLOOM_VERSION`), for `version_compare()`. |
 | `add_page( string $slug, Closure $title, Closure $subtitle, Closure $body ): void` | LM1 | Adds one page to Affibloom's menu, before Settings, for users who may change Affibloom's settings. See below. |
+| `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`
 

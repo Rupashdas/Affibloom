@@ -28,7 +28,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ) );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), static fn ( array $fields ): array => '' === ( $fields['name'] ?? '' ) ? array( 'name' => 'required' ) : array() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -43,6 +43,11 @@ final class ApiTest extends TestCase {
 
 	public function test_the_api_tells_affibloom_s_version(): void {
 		self::assertSame( '1.2.3', $this->api()->version() );
+	}
+
+	public function test_check_product_answers_with_affibloom_s_save_rules(): void {
+		self::assertSame( array( 'name' => 'required' ), $this->api()->check_product( array( 'name' => '' ) ) );
+		self::assertSame( array(), $this->api()->check_product( array( 'name' => 'Shoe' ) ) );
 	}
 
 	public function test_an_added_page_is_listed_before_settings_for_those_who_may_change_settings(): void {

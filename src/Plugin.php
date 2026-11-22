@@ -679,7 +679,7 @@ final class Plugin {
 				$extensions
 			),
 			// Task LM1: helper plugins get the extension API on plugins_loaded.
-			new ReadyAction( new Api( AFFIBLOOM_VERSION, $this->navigation(), $extensions ) ),
+			new ReadyAction( new Api( AFFIBLOOM_VERSION, $this->navigation(), $extensions, $products->check( ... ) ) ),
 			// F38 N1, D13 (Tasks ON6, ON7): the wizard opens by itself once on a new site, and Go to Dashboard ends it.
 			new SetupRedirect( new SetupState( new OptionSetupFlag() ) ),
 			new SetupController( new SetupState( new OptionSetupFlag() ) ),

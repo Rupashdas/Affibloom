@@ -101,7 +101,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 **F10 — Lasso's data**
 
-- [ ] Task 25A: The dry run — `wp affibloom migrate --dry-run`, products
+- [x] Task 25A: The dry run — `wp affibloom migrate --dry-run`, products
 - [ ] Task 25B: The dry run — settings
 - [ ] Task 25C: The dry run — every other family, and what is left behind
 - [ ] Task 25D: The report on an admin page
@@ -236,11 +236,23 @@ other families print "not built yet". With no Lasso data: "No Lasso data found."
 `phpstan.neon.dist`, `tests/Unit/Application/LassoRecordMapperTest.php`, `tests/E2E/acceptance/F10.spec.ts` (AC1 as
 corrected).
 
-- [ ] **Step 1: Failing tests.** AC1 (the command's summary names 263 and 265 and the four actions). Unit: mapper rows of R9-R10 not yet covered; a report's sums; statuses. Expected red: no `affibloom` command.
-- [ ] **Step 2: The command and the report.**
-- [ ] **Step 3: `ProductsStep::plan()`, the ID map, the source's statuses.**
-- [ ] **Step 4: Run and look.** The summary above on Local; the CSV opens; `git status` of the database: nothing written (row counts before and after).
-- [ ] **Step 5: Commit** — "Report what the Lasso migration will do to every record".
+- [x] **Step 1: Failing tests.** AC1 (the command's summary names 263 and 265 and the four actions). Unit: mapper rows of R9-R10 not yet covered; a report's sums; statuses. Expected red: no `affibloom` command.
+- [x] **Step 2: The command and the report.**
+- [x] **Step 3: `ProductsStep::plan()`, the ID map, the source's statuses.**
+- [x] **Step 4: Run and look.** The summary above on Local; the CSV opens; `git status` of the database: nothing written (row counts before and after).
+- [x] **Step 5: Commit** — "Report what the Lasso migration will do to every record".
+
+*Note (2026-11-22):* built in the migrator as `wp affibloom-lasso migrate --dry-run [--only] [--report=<csv>]`:
+`Domain\Lasso\{LassoRecord, LassoSource}`, `Domain\Migration\{Family, Action, MigrationLine, MigrationReport,
+MigratedProducts, ProductRules}`, `Application\{Step, ProductsStep, MigrationService, LassoRecordMapper}`,
+`Infrastructure\Lasso\{WpLassoSource, LassoIdMap, LassoInstall}`, `Infrastructure\Affibloom\ApiProductRules`; the command
+registers itself (no `CliCommands` for one command). Errors (D19) come from Affibloom's own Save rules through the new
+`Api::check_product()` (`ProductService::check()`, sharing `update()`'s checks). An empty title takes the link's host;
+Lasso's AAWP feature descriptions are not used. `php-stubs/wp-cli-stubs` does not install beside WordPress 7's stubs,
+so PHPStan reads `tests/stubs/wp-cli.php`, as Affibloom does. Local: `265 records: 2 to create, 9 skipped, 1 to retire,
+1 to trash, 252 already migrated, 0 errors (263 published)`; the 252 are the one-time import's products (169 published,
+83 in the trash, D7); the plan's "254 to create" is a site without that import. Row counts and checksums of
+`wp_posts`/`wp_postmeta` unchanged; the CSV has 265 lines. AC1 asserts the totals, not the create count.
 
 ---
 
