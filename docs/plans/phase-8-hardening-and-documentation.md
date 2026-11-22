@@ -1194,7 +1194,7 @@ tasks in Brave, each finished in Lasso's number of steps (`docs/reviews/ux.md`);
 
 ## Exit check
 
-**Passed 2026-11-22; Phase 8 signed off at the user's word the same day (deviation 154).** Lint, analyse, unit 1,203;
+**Passed 2026-11-22; Phase 8 signed off by the user the same day ("sign off phase 8"; deviation 154).** Lint, analyse, unit 1,203;
 security 6/6; F37 logs, DB Status, uninstall, permissions, footer; F38 14/14; F9 16 (1 skipped); F11 20/20; ux-screens
 33; a11y 7; compat 3; admin-shell 2; admin-design 6; smoke 1; performance 4. The first run's failures were tests
 written before later work or timing on Local, brought up to date; the hand tests found MT1-MT3 (fixed) and the exit

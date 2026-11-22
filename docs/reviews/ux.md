@@ -86,4 +86,4 @@ support view.
 
 - [x] The screens compared with the baselines (above), as the user asked to close Phase 8 by Lasso's workflow (deviation 154).
 - [x] The editors' run is recorded above, and its findings fixed or accepted.
-- [x] Signed off at the user's word, 2026-11-22 (deviation 154).
+- [x] Signed off by the user, 2026-11-22 ("sign off phase 8"; deviation 154).
