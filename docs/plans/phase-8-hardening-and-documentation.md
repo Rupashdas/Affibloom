@@ -112,7 +112,7 @@ Phase M's Task 26Q.
 
 - [x] Task GF1: Keep Original URL keeps a listed domain's link as typed
 - [x] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
-- [ ] Task GF3: Posts and pages keep 8 revisions, as with Lasso
+- [x] Task GF3: Posts and pages keep 8 revisions, as with Lasso
 - [ ] Task GF4: Kadence's FAQ schema repairs
 - [ ] Task GF5: Lasso's hooks for other code, under Affibloom's names
 - [ ] Task GF6: Turn a tied link back to its original URL (E17)
@@ -1275,9 +1275,12 @@ WordPress would keep every revision again and the posts table would grow. Same b
 types Affibloom scans, Settings' `scan_post_types`, else post and page; other types unchanged); register in
 `src/Plugin.php`; test `tests/Unit/Infrastructure/WordPress/RevisionLimitTest.php`.
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: Module.** - [ ] **Step 3: Run and look** (`wp eval
-  'echo wp_revisions_to_keep( get_post( <a post> ) );'` → 8; a product → unchanged). - [ ] **Step 4: Commit** —
+- [x] **Step 1: Test.** - [x] **Step 2: Module.** - [x] **Step 3: Run and look** (`wp eval
+  'echo wp_revisions_to_keep( get_post( <a post> ) );'` → 8; a product → unchanged). - [x] **Step 4: Commit** —
   "Keep eight revisions of scanned posts, as Lasso did (GF3)".
+
+*Note:* seen with WP-CLI on post 22093: -1 with no filter, 8 with `RevisionLimit` alone (Lasso's own filter is not hooked
+there); a product stays 0 (its type has no revisions).
 
 ### Task GF4: Kadence's FAQ schema repairs
 

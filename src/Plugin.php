@@ -136,6 +136,7 @@ use Affibloom\Infrastructure\WordPress\PostTypeProductRepository;
 use Affibloom\Infrastructure\WordPress\ProductPostType;
 use Affibloom\Infrastructure\WordPress\SiteCssIcons;
 use Affibloom\Infrastructure\WordPress\HostQuery;
+use Affibloom\Infrastructure\WordPress\RevisionLimit;
 use Affibloom\Infrastructure\WordPress\PostContentSource;
 use Affibloom\Infrastructure\WordPress\TableAmazonProductRepository;
 use Affibloom\Infrastructure\WordPress\TableLinkLocationRepository;
@@ -657,6 +658,7 @@ final class Plugin {
 			$shortcode,
 			new DisplayPreloadFilter( new DisplayPreload( new PostTypeProductRepository(), new TableAmazonProductRepository() ) ),
 			new WidgetShortcodes(),
+			new RevisionLimit( $this->settings_repository() ),
 			$cloaked,
 			new LinkAttributesFilter( $rendered, new PublicLinks( $this->settings_repository() ) ),
 			new DisplayRenderFilter( $rendered, $this->settings_repository() ),
