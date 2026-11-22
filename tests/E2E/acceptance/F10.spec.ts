@@ -296,6 +296,48 @@ test.describe( 'F10 Existing content', () => {
 		expect( badge() ).toBe( original );
 	} );
 
+	// Task 26C: Lasso's General and Amazon values through the Settings screens' rules; a second run imports nothing.
+	// Local holds real Amazon credentials, so the test leaves the Amazon auto-import off afterwards.
+	test( '@local AC10 --only=settings imports Lasso’s values and a second run reports them unchanged', () => {
+		const setting = ( key: string ) =>
+			wp(
+				'eval',
+				`echo wp_json_encode( get_option( "affibloom_settings" )["${ key }"] ?? null );`
+			);
+		try {
+			wp( 'affibloom-lasso', 'migrate', '--only=settings', '--update' );
+			expect( setting( 'sponsored' ) ).toBe( 'false' );
+			expect( setting( 'show_price' ) ).toBe( 'false' );
+			expect( setting( 'tracking_id' ) ).toBe( '"vbvault-20"' );
+			expect(
+				JSON.parse( setting( 'tracking_id_whitelist' ) )
+			).toContain( 'vbvault-20' );
+			expect( setting( 'update_pricing_daily' ) ).toBe( 'false' );
+			expect( setting( 'auto_monetize_amazon' ) ).toBe( 'true' );
+
+			expect(
+				wp(
+					'affibloom-lasso',
+					'migrate',
+					'--only=settings',
+					'--update'
+				)
+			).toMatch(
+				/^settings: \d+ keys: 0 imported, \d+ unchanged, 0 kept, \d+ left, 0 errors\.$/m
+			);
+		} finally {
+			wp(
+				'option',
+				'patch',
+				'update',
+				'affibloom_settings',
+				'auto_monetize_amazon',
+				'false',
+				'--format=json'
+			);
+		}
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

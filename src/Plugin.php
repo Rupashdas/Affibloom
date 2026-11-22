@@ -25,6 +25,7 @@ use Affibloom\Application\Tables\TableValues;
 use Affibloom\Domain\Monetize\NetworkRegistry;
 use Affibloom\Extension\Api;
 use Affibloom\Extension\ProductAccess;
+use Affibloom\Extension\SettingsAccess;
 use Affibloom\Extension\ReadyAction;
 use Affibloom\Infrastructure\WordPress\AmazonImportSchedule;
 use Affibloom\Infrastructure\WordPress\WpPostDates;
@@ -681,7 +682,7 @@ final class Plugin {
 				$extensions
 			),
 			// Task LM1: helper plugins get the extension API on plugins_loaded.
-			new ReadyAction( new Api( AFFIBLOOM_VERSION, $this->navigation(), $extensions, new ProductAccess( $products, new PostTypeProductRepository(), ( new WpPostDates() )->set( ... ) ) ) ),
+			new ReadyAction( new Api( AFFIBLOOM_VERSION, $this->navigation(), $extensions, new ProductAccess( $products, new PostTypeProductRepository(), ( new WpPostDates() )->set( ... ) ), new SettingsAccess( $settings ) ) ),
 			// F38 N1, D13 (Tasks ON6, ON7): the wizard opens by itself once on a new site, and Go to Dashboard ends it.
 			new SetupRedirect( new SetupState( new OptionSetupFlag() ) ),
 			new SetupController( new SetupState( new OptionSetupFlag() ) ),

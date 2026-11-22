@@ -107,7 +107,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 25D: The report on an admin page
 - [x] Task 26A: Products — `wp affibloom migrate --only=products`
 - [x] Task 26B: Products again — `--update`
-- [ ] Task 26C: Settings — General and Amazon
+- [x] Task 26C: Settings — General and Amazon
 - [ ] Task 26D: Settings — Display for Single, Grid and List
 - [ ] Task 26E: Custom fields — definitions and values
 - [ ] Task 26F: Groups — `wp affibloom migrate --only=groups`
@@ -479,10 +479,21 @@ already made = 256).
 
 **Files:** `SettingsStep.php`; integration test (Lasso's real booleans; second run; `--update`); F10 spec AC10.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: The step.**
-- [ ] **Step 3: Run and look** (the two tabs).
-- [ ] **Step 4: Commit** — "Import Lasso's General and Amazon settings".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: The step.**
+- [x] **Step 3: Run and look** (the two tabs).
+- [x] **Step 4: Commit** — "Import Lasso's General and Amazon settings".
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=settings [--update]`. Affibloom's API gained `settings()` and
+`save_settings( tab, values )` (`Extension\SettingsAccess`, `SettingsService::import()`: the values given and every
+switch of the tab at its current value, so nothing is turned off by being left out; a hidden `import` tab saves the
+tracking-ID blacklist and the default picture, which no screen shows). The migrator's `SettingsStep` (settings only now;
+`DisplayStep` is display's) compares each mapped value with Affibloom's: the same is unchanged; a different one is
+written on the first run (D9) or with `--update`, else kept and reported; a refused value is an error line. Lasso's
+`cpt_support` maps without `post`, `page`, `wp_block`, which Affibloom always scans; `enable_logs` goes through the Logs
+tab. Local: 9, then 2 imported (Sponsored off, Show Price off, GA on with its ID, CPU 80, the blacklist), then 58
+unchanged. Lasso has Auto-Monetize Amazon on, so the import turns Affibloom's on; on Local, where real Amazon
+credentials are kept, it is switched off again after each run and by AC10. AC10 passes.
 
 ---
 

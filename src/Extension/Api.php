@@ -34,8 +34,9 @@ final class Api {
 	 * @param AdminNavigation $navigation The screens, which the menu lists.
 	 * @param ExtensionScreen $pages      The added pages.
 	 * @param ProductAccess   $products   What a helper may do with products.
+	 * @param SettingsAccess  $settings   What a helper may do with settings.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -54,6 +55,29 @@ final class Api {
 	 */
 	public function check_product( array $fields ): array {
 		return $this->products->check( $fields );
+	}
+
+	/**
+	 * Every setting's current value (Task 26C), by the keys `docs/developer.md` lists for `affibloom_settings`.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function settings(): array {
+		return $this->settings->values();
+	}
+
+	/**
+	 * Saves some settings of one Settings tab through the screen's own rules (Task 26C): `general`, `display`,
+	 * `amazon`, or `import` (the tracking-ID blacklist and the default picture, which no screen shows). A switch not given keeps its
+	 * value; a value the screen would refuse is not saved and its key is returned.
+	 *
+	 * @param string               $tab    The tab.
+	 * @param array<string, mixed> $values Setting => value.
+	 * @return list<string> The settings refused.
+	 * @throws \InvalidArgumentException When the tab is unknown.
+	 */
+	public function save_settings( string $tab, array $values ): array {
+		return $this->settings->save( $tab, $values );
 	}
 
 	/**

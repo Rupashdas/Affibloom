@@ -34,6 +34,8 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `retire_product( int $id, int $to ): void` | 26A | Retires a product pointing at the product that took its place (0 for none). |
 | `trash_product( int $id ): void` | 26A | Moves a product to the trash. |
 | `date_product( int $id, string $created, string $modified ): void` | 26A | Writes a product's dates as given (after a status change, which stamps "now"). |
+| `settings(): array` | 26C | Every setting's current value (`affibloom_settings`' keys, `developer.md` section 8). |
+| `save_settings( string $tab, array $values ): array` | 26C | Saves some settings of `general`, `display`, `amazon`, `logs` or `import` (the tracking-ID blacklist and the default picture, which no screen shows) through the screen's rules; a switch not given keeps its value. Returns the keys refused. |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`

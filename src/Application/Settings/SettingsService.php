@@ -110,6 +110,13 @@ final class SettingsService {
 			'show_prime'            => 'bool',
 			'show_discount_pricing' => 'bool',
 		),
+		// Another plugin's settings that no screen shows (Task 26C, through the extension API's save_settings): the
+		// tracking-ID blacklist, which Affibloom keeps from the IDs taken off the whitelist, and the box's picture for a
+		// product without one.
+		'import'          => array(
+			'tracking_id_blacklist' => 'tracking_ids',
+			'default_thumbnail'     => 'url',
+		),
 		'setup_analytics' => array(
 			'ga_tracking_id'    => 'ga_ids',
 			'ga_click_tracking' => 'bool',
@@ -119,7 +126,7 @@ final class SettingsService {
 	);
 
 	/** The tabs that save but are not shown in the Settings band: hidden pages of their own. */
-	private const HIDDEN_TABS = array( 'logs', 'setup_display', 'setup_amazon', 'setup_analytics' );
+	private const HIDDEN_TABS = array( 'logs', 'setup_display', 'setup_amazon', 'setup_analytics', 'import' );
 
 	/**
 	 * The General fields that exist only in the support view. A checkbox there says "off" by being absent, which on
@@ -183,6 +190,45 @@ final class SettingsService {
 	 * @throws InvalidArgumentException For an unknown tab.
 	 */
 	public function update_tab( string $tab, array $input ): array {
+		return $this->save_tab( $tab, $input );
+	}
+
+	/**
+	 * A tab saved from another plugin's values (the extension API's save_settings, Task 26C): the values given, and
+	 * every switch of the tab not given at its current value, so a switch is never turned off by being left out; the
+	 * support view's fields count as shown. A field that is not a switch and not given keeps its value.
+	 *
+	 * @param string               $tab    A tab key, such as "general".
+	 * @param array<string, mixed> $values Setting => value.
+	 * @return list<string> The keys refused; the rest are saved.
+	 * @throws InvalidArgumentException When the tab is unknown.
+	 */
+	public function import( string $tab, array $values ): array {
+		if ( ! isset( self::FIELDS[ $tab ] ) ) {
+			throw new InvalidArgumentException( 'Unknown settings tab.' );
+		}
+		$current = $this->repository->get();
+		$input   = array( self::SUPPORT_MARKER => '1' );
+		foreach ( self::FIELDS[ $tab ] as $key => $type ) {
+			if ( array_key_exists( $key, $values ) ) {
+				$input[ $key ] = $values[ $key ];
+			} elseif ( 'bool' === $type ) {
+				$input[ $key ] = $current->bool( $key );
+			}
+		}
+
+		return $this->save_tab( $tab, $input );
+	}
+
+	/**
+	 * Saves a tab's fields as posted.
+	 *
+	 * @param string               $tab   A tab key.
+	 * @param array<string, mixed> $input Field => value, as posted.
+	 * @return list<string> The keys refused.
+	 * @throws InvalidArgumentException When the tab is unknown.
+	 */
+	private function save_tab( string $tab, array $input ): array {
 		if ( ! isset( self::FIELDS[ $tab ] ) ) {
 			throw new InvalidArgumentException( 'Unknown settings tab.' );
 		}
@@ -290,6 +336,20 @@ final class SettingsService {
 				'ga_anonymize_ip'   => $click && $settings->bool( 'ga_anonymize_ip' ),
 			)
 		);
+	}
+
+	/**
+	 * A link, or '' for none (Task 26C: the box's default picture).
+	 *
+	 * @param mixed $raw As posted.
+	 */
+	private static function clean_url( mixed $raw ): ?string {
+		if ( ! is_string( $raw ) ) {
+			return null;
+		}
+		$url = trim( $raw );
+
+		return '' === $url || false !== filter_var( $url, FILTER_VALIDATE_URL ) ? $url : null;
 	}
 
 	/**
@@ -462,6 +522,7 @@ final class SettingsService {
 			'bool'       => in_array( $raw, array( true, 1, '1', 'on', 'true', 'yes' ), true ),
 			'text'       => is_string( $raw ) && strlen( trim( $raw ) ) <= 500 ? sanitize_text_field( $raw ) : null,
 			'css'        => is_string( $raw ) ? CustomCss::clean( $raw ) : null,
+			'url'        => self::clean_url( $raw ),
 			'tracking_id'  => is_string( $raw ) && ( '' === trim( $raw ) || self::is_tracking_id( trim( $raw ) ) ) ? trim( $raw ) : null,
 			'tracking_ids' => $this->clean_tracking_ids( $raw ),
 			// Lasso's number field takes 0-30 (amazon.php: min="0" max="30").
