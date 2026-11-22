@@ -208,6 +208,9 @@ test.describe( 'F11 Link health', () => {
 		test.setTimeout( 120000 );
 		// The Local copy sets DISABLE_WP_CRON, so the spawn test fails there (WpCronHealth); its answer is cached for an hour.
 		wp( 'transient', 'delete', 'affibloom_cron_health' );
+		// The screen runs at most "Maximum cronjobs" due jobs; Affibloom's other overdue events (daily ones fall due on Local,
+		// whose WP-Cron is off) move an hour out, so only this test's batch is due.
+		wp( 'eval', 'foreach ( (array) _get_cron_array() as $at => $hooks ) { foreach ( (array) $hooks as $hook => $events ) { if ( $at > time() || ! str_starts_with( $hook, "affibloom_" ) ) { continue; } foreach ( $events as $event ) { wp_unschedule_event( $at, $hook, $event["args"] ); if ( empty( $event["schedule"] ) ) { wp_schedule_single_event( time() + HOUR_IN_SECONDS, $hook, $event["args"] ); } else { wp_schedule_event( time() + HOUR_IN_SECONDS, $event["schedule"], $hook, $event["args"] ); } } } }' );
 		wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_check_batch" ); wp_schedule_single_event( time() - 5, "affibloom_link_check_batch" );' );
 		await page.addInitScript( () => window.localStorage.removeItem( 'affibloom_cron_time' ) );
 		const answer = page.waitForResponse( ( response ) => decodeURIComponent( response.url() ).includes( 'affibloom/v1/jobs/run-due' ), { timeout: 60000 } ); // It runs the due batch first: up to its 10 s budget and one request.
@@ -283,6 +286,7 @@ test.describe( 'F11 Link health', () => {
 test.describe( 'F11 Link health: Amazon products', () => {
 	let saved: string | null = null;
 	let locationsOnly: unknown;
+	let pricingDaily: unknown;
 
 	/** Stores the suite's test credentials (null removes them). */
 	const credentials = ( on: boolean ) => {
@@ -306,7 +310,10 @@ test.describe( 'F11 Link health: Amazon products', () => {
 		}
 		const settings = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
 		locationsOnly = settings.pricing_locations_only;
-		wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); $s["pricing_locations_only"] = false; update_option( "affibloom_settings", $s );' );
+		pricingDaily = settings.update_pricing_daily;
+		// With "Update Amazon pricing daily" on, the pass leaves Amazon products to the hourly refresh (C1E, R5); these
+		// tests are about the pass asking the product API itself.
+		wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); $s["pricing_locations_only"] = false; $s["update_pricing_daily"] = false; update_option( "affibloom_settings", $s );' );
 		wp( 'option', 'update', 'affibloom_test_amazon_stub', 'ok' );
 		wp( 'option', 'update', 'affibloom_test_amazon_requests', '0' );
 	} );
@@ -318,7 +325,8 @@ test.describe( 'F11 Link health: Amazon products', () => {
 			wp( 'option', 'add', 'affibloom_amazon_credentials', saved, '--format=json', '--autoload=no' );
 		}
 		const value = undefined === locationsOnly ? 'unset( $s["pricing_locations_only"] );' : `$s["pricing_locations_only"] = ${ locationsOnly ? 'true' : 'false' };`;
-		wp( 'eval', `$s = (array) get_option( "affibloom_settings", array() ); ${ value } update_option( "affibloom_settings", $s );` );
+		const daily = undefined === pricingDaily ? 'unset( $s["update_pricing_daily"] );' : `$s["update_pricing_daily"] = ${ pricingDaily ? 'true' : 'false' };`;
+		wp( 'eval', `$s = (array) get_option( "affibloom_settings", array() ); ${ value } ${ daily } update_option( "affibloom_settings", $s );` );
 	} );
 
 	test( 'AC7 the product API decides: not found is broken, no stock is out of stock, back in stock is cleared', () => {
@@ -484,7 +492,9 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		const id = createProduct( { name, url: 'https://shop.example/m', badge: '=HYPERLINK("x")' } );
 		setIssue( id, '404', true, 1 );
 		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
-		await expect( page.locator( '[data-export-csv]' ) ).toHaveCount( 0 );
+		// Off the issue tabs the tab's export is absent; the whole-library export (Task 38) takes its place.
+		await expect( page.locator( '[data-export-csv]:not([data-export-path])' ) ).toHaveCount( 0 );
+		await expect( page.locator( '[data-export-csv][data-export-path="/affibloom/v1/products/export"]' ) ).toHaveCount( 1 );
 
 		await page.locator( 'a.affibloom-filter-broken' ).click();
 		const button = page.getByRole( 'button', { name: 'Export CSV' } );
@@ -525,7 +535,8 @@ test.describe( 'F11 Link health: the Dashboard', () => {
 		setIssue( id, '000', true, 2 );
 		graceDays( 3 );
 		await page.goto( `/wp-admin/admin.php?page=affibloom&s=${ encodeURIComponent( name ) }` );
-		await expect( page.locator( `tr[data-product-id="${ id }"] .affibloom-alert` ) ).toHaveCount( 0 );
+		// No out-of-stock alert; the cell may show the grey "Processing" clock of a product added today (31A, AC8).
+		await expect( page.locator( `tr[data-product-id="${ id }"] .affibloom-alert--out-of-stock` ) ).toHaveCount( 0 );
 
 		graceDays( 2 );
 		await page.reload();
