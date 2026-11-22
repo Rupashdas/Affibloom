@@ -1346,6 +1346,9 @@
 .affibloom-card--list .affibloom-table td .affibloom-soon-cell { font: 400 14px/20px var(--affibloom-font); }
 .affibloom-card--list .affibloom-thumb { width: 52px; height: 52px; }
 .affibloom-card--list .affibloom-list.is-loading tbody .affibloom-col-image::after { width: 52px; height: 52px; margin-top: -26px; }
+/* The counts' colour above outranks the loading rule's transparent text: a bare Clicks number would show through its bar. */
+.affibloom-card--list .affibloom-list.is-loading tbody td.affibloom-col-locations,
+.affibloom-card--list .affibloom-list.is-loading tbody td.affibloom-col-clicks { color: transparent; }
 .affibloom-admin .affibloom-card--list .affibloom-row__name { text-decoration: none; }
 .affibloom-admin .affibloom-card--list .affibloom-row__name:hover { color: var(--affibloom-brand-600); text-decoration: underline; text-underline-offset: 3px; }
 .affibloom-admin .affibloom-card--list .affibloom-row__url { color: var(--affibloom-ink-500); }
