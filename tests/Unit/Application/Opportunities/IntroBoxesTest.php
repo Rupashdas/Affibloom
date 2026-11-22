@@ -25,4 +25,18 @@ final class IntroBoxesTest extends TestCase {
 		$off = new IntroBoxes( new InMemorySettingsRepository( array( 'disable_help_tips' => true ) ) );
 		self::assertFalse( $off->shows( 'content' ) );
 	}
+
+	/**
+	 * F38 R35, AC9 (Task ON5): `&reseteducation=1` on an opportunities page brings every closed box back.
+	 */
+	public function test_reset_brings_every_closed_box_back(): void {
+		$settings = new InMemorySettingsRepository( array( 'education_hidden' => array( 'links', 'content' ) ) );
+		$boxes    = new IntroBoxes( $settings );
+
+		$boxes->reset();
+
+		self::assertTrue( $boxes->shows( 'links' ) );
+		self::assertTrue( $boxes->shows( 'content' ) );
+		self::assertSame( array(), $settings->get()->list( 'education_hidden' ) );
+	}
 }

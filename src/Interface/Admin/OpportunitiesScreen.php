@@ -141,6 +141,10 @@ final class OpportunitiesScreen {
 	 */
 	public function render(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- a read-only list, with no action behind it.
+		// F38 R35 (Task ON5): Lasso's `?reseteducation` brings the closed intro boxes back; a display preference only.
+		if ( isset( $_GET['reseteducation'] ) ) {
+			$this->intros->reset();
+		}
 		$tab    = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : OpportunityQuery::LINKS;
 		$domain = isset( $_GET['domain'] ) ? strtolower( sanitize_text_field( wp_unslash( $_GET['domain'] ) ) ) : '';
 		$post   = isset( $_GET['post'] ) ? absint( wp_unslash( $_GET['post'] ) ) : 0;

@@ -54,4 +54,14 @@ final class IntroBoxes {
 			$this->settings->save( $site->with( array( 'education_hidden' => array_merge( $hidden, array( $box ) ) ) ) );
 		}
 	}
+
+	/**
+	 * Brings every closed box back (F38 R35; Task ON5): Lasso's `?reseteducation` on an opportunities page.
+	 */
+	public function reset(): void {
+		$site = $this->settings->get();
+		if ( array() !== $site->list( 'education_hidden' ) ) {
+			$this->settings->save( $site->with( array( 'education_hidden' => array() ) ) );
+		}
+	}
 }

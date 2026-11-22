@@ -1,7 +1,7 @@
 import { copyFileSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, createProduct, unique, wp } from '../utils';
+import { blockTrackers, createProduct, setSettings, unique, wp } from '../utils';
 
 // F38 Admin shell (docs/features/F38/requirements.md). Task ON1 owns AC1-AC3 (header, WordPress menu, titles, footer);
 // ON2 adds AC4-AC6. Lasso's rules: the header lists Dashboard, Opportunities, Tables, Groups (each once its screen
@@ -278,5 +278,29 @@ test.describe( 'F38 Admin shell', () => {
 
 		await page.goto( DASHBOARD );
 		await expect( page.locator( '#affibloom-notices .affibloom-notice--update:not(.affibloom-bulk-sync)' ) ).toHaveCount( 0 );
+	} );
+
+	// Task ON5: Lasso's education boxes (R33-R36).
+	test( 'AC9 an education box closes for good, comes back with &reseteducation=1, and hides with Disable Help Tooltips', async ( { page } ) => {
+		setSettings( { disable_help_tips: false, education_hidden: [] } );
+		const url = '/wp-admin/admin.php?page=affibloom-opportunities&tab=content';
+		await page.goto( url );
+		const box = page.locator( '[data-intro="content"]' );
+		await expect( box ).toBeVisible();
+		const saved = page.waitForResponse( ( r ) => r.url().includes( '/opportunities/intros/content' ) );
+		await box.getByRole( 'button', { name: 'Close this box for good' } ).click();
+		expect( ( await saved ).ok() ).toBe( true );
+		await expect( box ).toBeHidden();
+
+		await page.reload();
+		await expect( box ).toHaveCount( 0 );
+
+		await page.goto( url + '&reseteducation=1' );
+		await expect( box ).toBeVisible();
+
+		setSettings( { disable_help_tips: true } );
+		await page.goto( url );
+		await expect( box ).toHaveCount( 0 );
+		setSettings( { disable_help_tips: false } );
 	} );
 } );

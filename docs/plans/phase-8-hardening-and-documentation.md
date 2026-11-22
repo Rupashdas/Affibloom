@@ -93,7 +93,7 @@ the text below as a deviation in `progress.md`.
 
 ### F38 Admin shell
 
-- [ ] Task ON5: Education boxes: close, remember, reset, hide with help tips
+- [x] Task ON5: Education boxes: close, remember, reset, hide with help tips
 - [ ] Task ON6: Setup wizard: first visit, Theme, Customize
 - [ ] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
 - [ ] Task ON8: The Dashboard tour
@@ -842,12 +842,18 @@ on, no box. The empty-state screens of Groups, Locations, Tables and the opportu
 `tests/E2E/acceptance/F38.spec.ts` (AC9); modify F22's screen template, `assets/admin/admin.js`,
 `docs/ui/design-system.md`.
 
-- [ ] **Step 1: Failing tests.** E2E AC9 (close, reload, `&reseteducation=1`, tooltips off); unit: visible, hide,
+- [x] **Step 1: Failing tests.** E2E AC9 (close, reload, `&reseteducation=1`, tooltips off); unit: visible, hide,
   reset, an unknown key refused. Expected: red, no box.
-- [ ] **Step 2: Service and key** (`EducationBoxes`, `EducationKey`).
-- [ ] **Step 3: Route, partial, script.**
-- [ ] **Step 4: Run and look.** The three opportunities screens on Local at 1280 and 375 px; close one, reload.
-- [ ] **Step 5: Commit** — "Let editors close education boxes, as in Lasso"
+- [x] **Step 2: Service and key** (`EducationBoxes`, `EducationKey`).
+- [x] **Step 3: Route, partial, script.**
+- [x] **Step 4: Run and look.** The three opportunities screens on Local at 1280 and 375 px; close one, reload.
+- [x] **Step 5: Commit** — "Let editors close education boxes, as in Lasso"
+
+*Note (2026-11-22):* O1 (Phase 7) had built the box, its close route (`POST /opportunities/intros/{box}`, kept, not
+renamed to `/education/{key}/hide`), `IntroBoxes` with the `education_hidden` key and the Disable Help Tooltips
+rule; ON5 adds `IntroBoxes::reset()` behind `&reseteducation=1` on the Opportunities pages (R35) and AC9's test. The
+empty screens of Groups, Tables and Locations already show Lasso's education heading and text without × (G1, T1,
+36B), so no shared partial was extracted.
 
 ---
 
