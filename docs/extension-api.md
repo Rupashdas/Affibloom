@@ -57,6 +57,8 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `product_address( int $id ): ?array` | 26G | A product's cloaked address `{ slug, old_slugs, cloak }`, or null. |
 | `product_at_slug( string $slug ): int` | 26G | The product that answers at a slug, as its slug or an old one; 0 when none. |
 | `set_product_address( int $id, string $slug, array $old_slugs, bool $cloak ): void` | 26G | Sets a product's slug, the old slugs that keep answering and its cloaking switch. A slug another product answers at, as its slug or an old one, is refused (`InvalidArgumentException`, "slug: taken (…)"). |
+| `product_variants( int $id ): ?array` | 26H | A published product's URL variants, each `{ name, key, kind }` (`permalink` or `amazon_tag`), or null. |
+| `set_product_variants( int $id, array $rows ): void` | 26H | Makes a product's variants this list of `{ name, key }` through the Variants tab's rules; every row takes the product's kind. Throws `InvalidArgumentException` at the first row refused ("0.key: taken_by_post"). |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`

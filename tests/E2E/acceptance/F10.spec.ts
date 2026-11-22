@@ -542,6 +542,33 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26H: Local's Lasso has no variants, so the test gives record 10001 (/aircat/) two.
+	test( '@local AC15 --only=variants gives a product its Lasso variants in order', () => {
+		wp(
+			'eval',
+			`global $wpdb; $t = $wpdb->prefix . 'lasso_url_variants'; $wpdb->delete( $t, array( 'parent_lasso_id' => 10001 ) ); foreach ( array( 'blue', 'red' ) as $c ) { $wpdb->insert( $t, array( 'parent_lasso_id' => 10001, 'name' => 'AC15 ' . $c, 'variant_key' => 'aircat-ac15-' . $c, 'variant_kind' => 'permalink', 'created_at' => current_time( 'mysql' ), 'updated_at' => current_time( 'mysql' ) ) ); }`
+		);
+		const out = wp(
+			'affibloom-lasso',
+			'migrate',
+			'--only=variants',
+			'--update'
+		);
+		expect( out ).toMatch( /^variants\t10001\t2 variants\t/m );
+		const product = wp(
+			'eval',
+			`global $wpdb; echo (int) $wpdb->get_var( $wpdb->prepare( 'SELECT post_id FROM ' . $wpdb->postmeta . ' WHERE meta_key = %s AND meta_value = %d', '_affibloom_lasso_id', 10001 ) );`
+		);
+		const keys = wp(
+			'eval',
+			`global $wpdb; echo implode( ',', $wpdb->get_col( $wpdb->prepare( 'SELECT variant_key FROM ' . $wpdb->prefix . 'affibloom_url_variants WHERE parent_id = %d ORDER BY id', ${ product } ) ) );`
+		);
+		expect( keys ).toBe( 'aircat-ac15-blue,aircat-ac15-red' );
+		expect( wp( 'affibloom-lasso', 'migrate', '--only=variants' ) ).toMatch(
+			/^variants: \d+ items: 0 created, 0 updated, \d+ unchanged, 0 skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

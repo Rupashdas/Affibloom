@@ -114,7 +114,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
 - [x] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
 - [x] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
-- [ ] Task 26H: URL variants — `wp affibloom migrate --only=variants`
+- [x] Task 26H: URL variants — `wp affibloom migrate --only=variants`
 - [ ] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
 - [ ] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
 - [ ] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
@@ -746,11 +746,20 @@ products, one retired product holding a record's slug). AC14 passes; fingerprint
 
 **Files:** the classes above; `tests/Unit/Application/VariantsMapperTest.php`, `tests/Integration/VariantsStepTest.php`; F10 spec AC15.
 
-- [ ] **Step 1: Failing tests.** AC15 (variants created; second run unchanged). Expected red: no `variants` family.
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step.**
-- [ ] **Step 4: Run and look.** A product's Variants tab against Lasso's; the fingerprint equal.
-- [ ] **Step 5: Commit** — "Migrate Lasso's URL variants".
+- [x] **Step 1: Failing tests.** AC15 (variants created; second run unchanged). Expected red: no `variants` family.
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step.**
+- [x] **Step 4: Run and look.** A product's Variants tab against Lasso's; the fingerprint equal.
+- [x] **Step 5: Commit** — "Migrate Lasso's URL variants".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=variants [--update]`. Affibloom's API gained
+`product_variants()` and `set_product_variants()` (`Extension\VariantAccess`: the Variants tab's normalising and
+`VariantService::replace()`). In the migrator: `LassoSource::variants()` (`lasso_url_variants` in stored order),
+`VariantsStep` (no separate mapper: the rows keep name and key, the kind follows the product as in Lasso, R23): a
+product's list is replaced as a whole, 26C's rule for a later run, a refused row an error line. Tests are unit tests.
+Local's Lasso had no variants: AC15 gives record 10001 (`/aircat/`) two; created, then unchanged; the Variants tab
+shows both in order; fingerprint equal around the run.
 
 ---
 

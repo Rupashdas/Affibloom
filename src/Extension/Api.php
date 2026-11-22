@@ -40,8 +40,9 @@ final class Api {
 	 * @param GroupAccess     $groups     What a helper may do with groups.
 	 * @param AmazonAccess    $amazon     What a helper may do with the Amazon product data.
 	 * @param ViewAccess      $views      What a helper may do with saved Dashboard views and the tour.
+	 * @param VariantAccess   $variants   What a helper may do with a product's URL variants.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -369,6 +370,29 @@ final class Api {
 	 */
 	public function set_product_address( int $id, string $slug, array $old_slugs, bool $cloak ): void {
 		$this->products->set_address( $id, $slug, $old_slugs, $cloak );
+	}
+
+	/**
+	 * A published product's URL variants, each `{ name, key, kind }` (`permalink` or `amazon_tag`), or null when there
+	 * is no such product (Task 26H).
+	 *
+	 * @param int $id The product.
+	 * @return list<array{name: string, key: string, kind: string}>|null
+	 */
+	public function product_variants( int $id ): ?array {
+		return $this->variants->all( $id );
+	}
+
+	/**
+	 * Makes a product's URL variants this list of `{ name, key }`, through the Variants tab's rules; every row takes the
+	 * product's kind (Task 26H).
+	 *
+	 * @param int                                      $id   The product.
+	 * @param list<array{name?: string, key?: string}> $rows The rows.
+	 * @throws \InvalidArgumentException When a row is refused ("0.key: taken_by_post").
+	 */
+	public function set_product_variants( int $id, array $rows ): void {
+		$this->variants->set( $id, $rows );
 	}
 
 	/**

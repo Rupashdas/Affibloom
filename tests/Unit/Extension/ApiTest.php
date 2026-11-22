@@ -1,6 +1,10 @@
 <?php
 namespace Affibloom\Tests\Unit\Extension;
 
+use Affibloom\Application\Variants\VariantService;
+use Affibloom\Domain\Variant\SlugTaken;
+use Affibloom\Extension\VariantAccess;
+use Affibloom\Tests\Unit\Fakes\InMemoryVariantRepository;
 use Affibloom\Application\Dashboard\SavedViewService;
 use Affibloom\Application\Shell\TourState;
 use Affibloom\Domain\Dashboard\SavedViewRepository;
@@ -144,6 +148,39 @@ final class ApiTest extends TestCase {
 		$groups->create( 'Best shoes', '' );
 	}
 
+	/** Variant access on in-memory variants, nothing else answering at a key. */
+	public static function variants( ?InMemoryProductRepository $products = null ): VariantAccess {
+		$taken = new class() implements SlugTaken {
+			public function by_other_variant( string $key, int $product_id ): bool {
+				return false;
+			}
+			public function by_post( string $key ): bool {
+				return 'about' === $key;
+			}
+			public function by_other_product( string $key, int $product_id ): bool {
+				return false;
+			}
+		};
+
+		return new VariantAccess( new VariantService( new InMemoryVariantRepository(), $taken ), $products ?? new InMemoryProductRepository() );
+	}
+
+	public function test_a_product_s_variants_are_set_and_read_and_a_key_a_post_has_is_refused(): void {
+		Functions\when( 'wp_kses_post' )->returnArg();
+		Functions\when( 'sanitize_title' )->alias( 'strtolower' );
+		Functions\when( 'esc_html' )->returnArg();
+		$products = new InMemoryProductRepository();
+		$id       = (int) $products->save( Product::draft( 'Ball', AffiliateUrl::from_string( 'https://shop.example/ball' ), Settings::from_array( array() ) ) )->id;
+		$variants = self::variants( $products );
+
+		$variants->set( $id, array( array( 'name' => 'Blue', 'key' => 'Ball-Blue' ) ) );
+
+		self::assertSame( array( array( 'name' => 'Blue', 'key' => 'ball-blue', 'kind' => 'permalink' ) ), $variants->all( $id ) );
+		self::assertNull( $variants->all( 999 ) );
+		$this->expectException( \InvalidArgumentException::class );
+		$variants->set( $id, array( array( 'name' => 'About', 'key' => 'about' ) ) );
+	}
+
 	/** View access on in-memory views and tour flag. */
 	public static function views(): ViewAccess {
 		$repository = new class() implements SavedViewRepository {
@@ -269,7 +306,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -286,7 +323,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -306,7 +343,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 
