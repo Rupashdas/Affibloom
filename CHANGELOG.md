@@ -8,6 +8,7 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 - An extension API for helper plugins: the action `affibloom_ready` with `Affibloom\Extension\Api` (Affibloom's version and one page in Affibloom's menu); `docs/extension-api.md`.
 - The extension API's `check_product()`: what the product page's Save Changes would refuse, nothing stored.
+- The extension API's `add_page()` takes `$listed` (a page reached by its address only), and `capability()` names the capability its pages ask for.
 
 ## [1.0.0-rc.1] - 2026-11-22
 

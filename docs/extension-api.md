@@ -26,7 +26,8 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | Method | Since | What it does |
 |---|---|---|
 | `version(): string` | LM1 | Affibloom's version (`AFFIBLOOM_VERSION`), for `version_compare()`. |
-| `add_page( string $slug, Closure $title, Closure $subtitle, Closure $body ): void` | LM1 | Adds one page to Affibloom's menu, before Settings, for users who may change Affibloom's settings. See below. |
+| `add_page( string $slug, Closure $title, Closure $subtitle, Closure $body, bool $listed = true ): void` | LM1 (`$listed` 25D) | Adds one page to Affibloom's menu, before Settings, for users who may change Affibloom's settings. See below. |
+| `capability(): string` | 25D | The capability an added page asks for, for the helper's own form or download on that page (`current_user_can()`). |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`
@@ -41,6 +42,8 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
   `docs/ui/design-system.md`) so the page looks like Affibloom's other pages.
 - There is one page per site: a second call takes the first one's place, in the menu where Lasso lists Import. The page
   is in the WordPress menu only, not in the header's tabs.
+- `$listed = false` keeps the page reachable by its address, capability-checked, without a menu entry (as Affibloom's
+  detail pages).
 
 ## Filters a helper may answer
 

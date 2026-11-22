@@ -104,7 +104,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 25A: The dry run — `wp affibloom migrate --dry-run`, products
 - [x] Task 25B: The dry run — settings
 - [x] Task 25C: The dry run — every other family, and what is left behind
-- [ ] Task 25D: The report on an admin page
+- [x] Task 25D: The report on an admin page
 - [ ] Task 26A: Products — `wp affibloom migrate --only=products`
 - [ ] Task 26B: Products again — `--update`
 - [ ] Task 26C: Settings — General and Amazon
@@ -360,11 +360,20 @@ data: the entry is hidden and the page says "No Lasso data found."
 
 **Files:** the above; F10 spec AC6; by hand at 1280 and 375 px.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Screen and template.**
-- [ ] **Step 3: The download.**
-- [ ] **Step 4: Run and look.**
-- [ ] **Step 5: Commit** — "Show the migration report in the admin".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Screen and template.**
+- [x] **Step 3: The download.**
+- [x] **Step 4: Run and look.**
+- [x] **Step 5: Commit** — "Show the migration report in the admin".
+
+*Note (2026-11-22):* the page is the migrator's (`admin.php?page=affibloom-lasso-migrator`, LM1), not a submenu in
+Affibloom's `AdminMenu`: `MigrationScreen` prints `templates/admin/migrate.php` with `assets/admin/migrate.css` on
+Affibloom's tokens (a brand-25 summary card with Download report (CSV), a card per family with its numbers or "Comes
+with Task 26X" and what the site holds, error lines when any, then Lasso's data with its verdict pills; stacked rows on
+a phone). The download is admin-post `affibloom_lasso_migration_report` (`ReportDownload`, nonce, the page's
+capability), sharing `Interface\ReportCsv` with `--report`. Affibloom's API gained `add_page( …, $listed )` (the entry
+hides without Lasso's data; the address says "No Lasso data found.") and `capability()`. Checked at 1280 px in Brave and
+375 px headless (no sideways scroll); the CSV has 427 rows; a forged nonce gets 403. AC6 and LM1's E2E pass.
 
 ---
 

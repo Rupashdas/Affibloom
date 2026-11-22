@@ -22,7 +22,7 @@ function active(): boolean {
 }
 
 test.describe( 'Phase M Affibloom Lasso Migrator', () => {
-	test( "LM1 activated beside Affibloom, the menu gains Migrate from Lasso, an empty page in Affibloom's design", async ( {
+	test( "LM1 activated beside Affibloom, the menu gains Migrate from Lasso, the report page in Affibloom's design", async ( {
 		page,
 	} ) => {
 		test.skip(
@@ -60,7 +60,7 @@ test.describe( 'Phase M Affibloom Lasso Migrator', () => {
 			).toBeVisible();
 			await expect(
 				page.locator( '.affibloom-page__body' )
-			).toContainText( 'Run the dry run first.' );
+			).toContainText( 'Dry run: nothing has been changed' );
 			await expect( page.locator( '.affibloom-footer' ) ).toBeVisible();
 		} finally {
 			if ( ! was ) {

@@ -45,6 +45,18 @@ final class ApiTest extends TestCase {
 		self::assertSame( '1.2.3', $this->api()->version() );
 	}
 
+	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
+		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
+		$pages    = new ExtensionScreen( $template );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, static fn ( array $fields ): array => array() );
+
+		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
+
+		self::assertSame( array( 'affibloom-helper' ), $pages->unlisted() );
+		self::assertNotNull( $this->navigation->current( 'affibloom-helper' ) );
+		self::assertSame( Capabilities::SETTINGS, $api->capability() );
+	}
+
 	public function test_check_product_answers_with_affibloom_s_save_rules(): void {
 		self::assertSame( array( 'name' => 'required' ), $this->api()->check_product( array( 'name' => '' ) ) );
 		self::assertSame( array(), $this->api()->check_product( array( 'name' => 'Shoe' ) ) );

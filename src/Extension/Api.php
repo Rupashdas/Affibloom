@@ -60,15 +60,24 @@ final class Api {
 	 * Adds a page to Affibloom's menu, before Settings, for those who may change settings. Affibloom prints its header,
 	 * the page head with the title and subtitle, and its footer; the body prints the rest inside the page body. One
 	 * page: a second call takes the first one's place. The texts are closures because this runs on plugins_loaded,
-	 * before translations load.
+	 * before translations load. An unlisted page (Task 25D) is reached by its address only, as a detail page.
 	 *
 	 * @param string            $slug     The admin page slug, starting with "affibloom-".
 	 * @param Closure(): string $title    The menu label and the page title, translated when called.
 	 * @param Closure(): string $subtitle The line under the title, translated when called.
 	 * @param Closure(): void   $body     Prints the page's content, escaped.
+	 * @param bool              $listed   Whether the menu lists it.
 	 */
-	public function add_page( string $slug, Closure $title, Closure $subtitle, Closure $body ): void {
-		$this->pages->add( $slug, $title, $subtitle, $body );
+	public function add_page( string $slug, Closure $title, Closure $subtitle, Closure $body, bool $listed = true ): void {
+		$this->pages->add( $slug, $title, $subtitle, $body, $listed );
 		$this->navigation->register( new NavItem( self::PAGE_PLACE, $slug, $title, '', Capabilities::SETTINGS ) );
+	}
+
+	/**
+	 * The capability an added page asks for (who may change Affibloom's settings), for a helper's own form or download
+	 * on that page (Task 25D).
+	 */
+	public function capability(): string {
+		return Capabilities::SETTINGS;
 	}
 }

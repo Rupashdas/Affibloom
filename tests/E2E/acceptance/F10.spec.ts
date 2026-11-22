@@ -112,6 +112,82 @@ test.describe( 'F10 Existing content', () => {
 		expect( out ).toContain( 'Nothing was written.' );
 	} );
 
+	// Task 25D: the report on Affibloom → Migrate from Lasso, the CSV download, and nothing written by opening it.
+	test( '@local AC6 Migrate from Lasso shows the report as cards with its CSV, and opening it writes nothing', async ( {
+		page,
+	} ) => {
+		const tables = () =>
+			wp(
+				'db',
+				'query',
+				'CHECKSUM TABLE wp_posts, wp_postmeta',
+				'--skip-column-names'
+			);
+		const before = tables();
+
+		await page.goto( '/wp-admin/admin.php?page=affibloom' );
+		await page
+			.locator( '#toplevel_page_affibloom .wp-submenu' )
+			.getByRole( 'link', { name: 'Migrate from Lasso' } )
+			.click();
+		await expect(
+			page.getByRole( 'heading', {
+				level: 1,
+				name: 'Migrate from Lasso',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Dry run: nothing has been changed' )
+		).toBeVisible();
+		for ( const family of [
+			'Settings',
+			'Display',
+			'Fields',
+			'Products',
+			'Groups',
+			'Cloaked addresses',
+			'URL variants',
+			'Comparison tables',
+			'Link alerts',
+			'Amazon',
+			'Saved views',
+			'Opportunities',
+		] ) {
+			await expect(
+				page.getByRole( 'heading', {
+					level: 2,
+					name: family,
+					exact: true,
+				} )
+			).toBeVisible();
+		}
+		const products = page.locator( 'section', {
+			has: page.getByRole( 'heading', { name: 'Products', exact: true } ),
+		} );
+		await expect( products ).toContainText( 'Records' );
+		await expect( products ).toContainText( '265' );
+		await expect(
+			page.getByRole( 'heading', {
+				name: "Lasso's data, and where it goes",
+			} )
+		).toBeVisible();
+
+		const download = page.getByRole( 'link', {
+			name: 'Download report (CSV)',
+		} );
+		const csv = await (
+			await page.request.get(
+				( await download.getAttribute( 'href' ) ) ?? ''
+			)
+		).text();
+		expect( csv.split( '\n' )[ 0 ] ).toBe(
+			'family,lasso_id,name,type,status,value,action,target,note'
+		);
+		expect( csv ).toContain( 'products,' );
+
+		expect( tables() ).toBe( before );
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

@@ -152,6 +152,9 @@ final class AdminMenu implements Module {
 		remove_submenu_page( self::SLUG, LogsScreen::SLUG );
 		remove_submenu_page( self::SLUG, DbStatusScreen::SLUG );
 		remove_submenu_page( self::SLUG, SetupScreen::SLUG );
+		foreach ( null === $this->extensions ? array() : $this->extensions->unlisted() as $slug ) {
+			remove_submenu_page( self::SLUG, $slug );
+		}
 	}
 
 	/**

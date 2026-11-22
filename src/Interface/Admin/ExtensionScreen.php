@@ -21,7 +21,7 @@ final class ExtensionScreen {
 	/**
 	 * The added pages by slug.
 	 *
-	 * @var array<string, array{title: Closure(): string, subtitle: Closure(): string, body: Closure(): void}>
+	 * @var array<string, array{title: Closure(): string, subtitle: Closure(): string, body: Closure(): void, listed: bool}>
 	 */
 	private array $pages = array();
 
@@ -39,13 +39,24 @@ final class ExtensionScreen {
 	 * @param Closure(): string $title    The page title.
 	 * @param Closure(): string $subtitle The line under the title.
 	 * @param Closure(): void   $body     Prints the page's content.
+	 * @param bool              $listed   Whether the menu lists it.
 	 */
-	public function add( string $slug, Closure $title, Closure $subtitle, Closure $body ): void {
+	public function add( string $slug, Closure $title, Closure $subtitle, Closure $body, bool $listed = true ): void {
 		$this->pages[ $slug ] = array(
 			'title'    => $title,
 			'subtitle' => $subtitle,
 			'body'     => $body,
+			'listed'   => $listed,
 		);
+	}
+
+	/**
+	 * The added pages the menu does not list, reached by their address only.
+	 *
+	 * @return list<string>
+	 */
+	public function unlisted(): array {
+		return array_keys( array_filter( $this->pages, static fn ( array $page ): bool => ! $page['listed'] ) );
 	}
 
 	/**
