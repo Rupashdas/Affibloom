@@ -71,4 +71,24 @@ final class ShortcodeFormatTest extends TestCase {
 		self::assertSame( array( 'table', 7, 0 ), array( $table['type'] ?? null, $table['table'] ?? null, $table['product'] ?? null ) );
 		self::assertNull( ShortcodeFormat::read( array( 'type' => 'table' ) ) );
 	}
+
+	/**
+	 * Task LM2 (F10 D16): what a block would lose of a shortcode's attributes, and its schema panel's values.
+	 */
+	public function test_a_block_names_what_it_cannot_hold(): void {
+		$single = array(
+			'id'               => '7',
+			'badge'            => 'Best',
+			'price'            => 'show',
+			'rating'           => '4.5',
+			'pros'             => 'Light',
+			'schema_review'    => 'enable',
+			'schema_price'     => '59',
+			'schema_pros_cons' => 'disable',
+		);
+		self::assertSame( array( 'rating', 'pros' ), ShortcodeFormat::lost( 'single', $single ) );
+		self::assertSame( array( 'schemaReview' => true, 'schemaPrice' => '59' ), ShortcodeFormat::schema( $single ) );
+		self::assertSame( array(), ShortcodeFormat::lost( 'grid', array( 'type' => 'grid', 'category' => 'shoes', 'limit' => '3' ) ) );
+		self::assertSame( array( 'anchor_id' ), ShortcodeFormat::lost( 'table', array( 'type' => 'table', 'id' => '7', 'anchor_id' => 'x' ) ) );
+	}
 }

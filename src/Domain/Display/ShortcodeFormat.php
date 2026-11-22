@@ -21,6 +21,20 @@ final class ShortcodeFormat {
 	/** The types that show a group. */
 	private const GROUP_TYPES = array( 'grid', 'list', 'gallery' );
 
+	/** The names read() takes as the display's target. */
+	private const TARGET = array( 'id', 'type', 'group', 'category', 'categories' );
+
+	/** The schema panel's attributes (F4 R46; Task 24B): shortcode name => the block's attribute. */
+	private const SCHEMA = array(
+		'schema_review'         => 'schemaReview',
+		'schema_pros_cons'      => 'schemaProsCons',
+		'schema_price'          => 'schemaPrice',
+		'schema_price_currency' => 'schemaPriceCurrency',
+	);
+
+	/** A toggle's values that a block keeps, or that mean its default (OverrideCatalog::overrides()). */
+	private const TOGGLE_VALUES = array( '', 'hide', 'show', 'enable', 'disable' );
+
 	/**
 	 * The display as shortcode text; '' when it names nothing.
 	 *
@@ -108,5 +122,51 @@ final class ShortcodeFormat {
 			'table'     => 0,
 			'overrides' => OverrideCatalog::overrides( $type, $attributes ),
 		);
+	}
+
+	/**
+	 * The attributes a block of this type would lose (the separate migrator's conversion, F10 D16; Task LM2): a name
+	 * that is not its target, one of its overrides or the schema panel's, and a toggle with a value it does not keep
+	 * (`rating="4.5"`, `price="From $59"`; the block keeps only `hide` or `enable`). A table keeps its ID only.
+	 *
+	 * @param string                $type       The display's type (read()'s).
+	 * @param array<string, string> $attributes The repaired attributes.
+	 * @return list<string>
+	 */
+	public static function lost( string $type, array $attributes ): array {
+		$fields = 'table' === $type ? array() : OverrideCatalog::fields( $type );
+		$held   = 'table' === $type ? array( 'id', 'type' ) : array_merge( self::TARGET, array_keys( self::SCHEMA ), $fields );
+		$lost   = array();
+		foreach ( $attributes as $name => $value ) {
+			$toggle = in_array( $name, $fields, true ) && 'toggle' === OverrideCatalog::kind( $name );
+			if ( ! in_array( $name, $held, true ) || ( $toggle && ! in_array( strtolower( trim( $value ) ), self::TOGGLE_VALUES, true ) ) ) {
+				$lost[] = $name;
+			}
+		}
+
+		return $lost;
+	}
+
+	/**
+	 * The schema panel's values as the block stores them (Task 24B): `enable` turns a switch on, a price and currency
+	 * are kept as typed; nothing for what is off or empty.
+	 *
+	 * @param array<string, string> $attributes The repaired attributes.
+	 * @return array<string, bool|string>
+	 */
+	public static function schema( array $attributes ): array {
+		$block = array();
+		foreach ( self::SCHEMA as $name => $attribute ) {
+			$value = trim( $attributes[ $name ] ?? '' );
+			if ( in_array( $name, array( 'schema_review', 'schema_pros_cons' ), true ) ) {
+				if ( 'enable' === strtolower( $value ) ) {
+					$block[ $attribute ] = true;
+				}
+			} elseif ( '' !== $value ) {
+				$block[ $attribute ] = $value;
+			}
+		}
+
+		return $block;
 	}
 }

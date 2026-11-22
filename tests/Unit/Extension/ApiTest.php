@@ -165,6 +165,29 @@ final class ApiTest extends TestCase {
 		return new OpportunityAccess( $locations ?? new InMemoryLinkLocations() );
 	}
 
+	/** Block access on in-memory groups. */
+	public static function blocks(): \Affibloom\Extension\BlockAccess {
+		return new \Affibloom\Extension\BlockAccess( new GroupService( new InMemoryGroupRepository(), new InMemoryProductRepository() ) );
+	}
+
+	/**
+	 * Task LM2: `[affibloom]`'s attributes as the block's, with what it would lose; a group by its ID.
+	 */
+	public function test_a_shortcode_becomes_the_block_s_attributes(): void {
+		$service = new GroupService( new InMemoryGroupRepository(), new InMemoryProductRepository() );
+		$groups  = new GroupAccess( $service );
+		$id      = $groups->create( 'Best shoes', '' );
+		$access  = new \Affibloom\Extension\BlockAccess( $service );
+
+		$single = $access->from_shortcode( array( 'id' => '7', 'badge' => 'Best', 'rating' => '4.5', 'schema_review' => 'enable' ) );
+		self::assertSame( array( 'type' => 'single', 'productId' => 7, 'groupId' => 0, 'tableId' => 0, 'overrides' => array( 'badge' => 'Best' ), 'schemaReview' => true ), $single['attributes'] ?? null );
+		self::assertSame( array( 'rating' ), $single['lost'] ?? null );
+		$slug = $groups->all()[0]['slug'];
+		self::assertSame( $id, $access->from_shortcode( array( 'type' => 'grid', 'group' => $slug ) )['attributes']['groupId'] ?? null );
+		self::assertNull( $access->from_shortcode( array( 'type' => 'grid', 'group' => 'no-such-group' ) ) );
+		self::assertNull( $access->from_shortcode( array( 'badge' => 'x' ) ) );
+	}
+
 	/**
 	 * Task 26Q's write (GF6): a post's link gets the URL it had before, once; an empty original changes nothing.
 	 */
@@ -464,7 +487,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities(), self::blocks() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -481,7 +504,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities(), self::blocks() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -501,7 +524,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities(), self::blocks() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 

@@ -44,8 +44,9 @@ final class Api {
 	 * @param IssueAccess       $issues     What a helper may do with link issues and their dismissals.
 	 * @param TableAccess       $tables     What a helper may do with comparison tables.
 	 * @param OpportunityAccess $opportunities What a helper may do with dismissed opportunities.
+	 * @param BlockAccess       $blocks     What a helper may do with the Product box block (Task LM2).
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables, private OpportunityAccess $opportunities ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables, private OpportunityAccess $opportunities, private BlockAccess $blocks ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -486,6 +487,18 @@ final class Api {
 	 */
 	public function dismiss_opportunity( int $post, string $url ): int {
 		return $this->opportunities->dismiss( $post, $url );
+	}
+
+	/**
+	 * The Product box block's attributes for a display named by `[affibloom …]`'s attributes (`type`, `productId`,
+	 * `groupId`, `tableId`, `overrides`, and the schema panel's), with the attribute names the block would lose; null for
+	 * attributes that name no product, group or table (Task LM2; F10 D16).
+	 *
+	 * @param array<int|string, mixed> $attributes The shortcode's attributes, as WordPress parses them.
+	 * @return array{attributes: array<string, mixed>, lost: list<string>}|null
+	 */
+	public function block_for_shortcode( array $attributes ): ?array {
+		return $this->blocks->from_shortcode( $attributes );
 	}
 
 	/**
