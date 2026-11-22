@@ -86,6 +86,15 @@ final class LinkNormaliserTest extends TestCase {
 		self::assertFalse( $this->links()->follows( $genius, $settings( array( 'geni.us' ) ) ) );
 	}
 
+	/**
+	 * A bare ASIN goes to the Default Tracking ID country's store (Lasso's get_default_product_domain; Task GF2);
+	 * an unknown country to amazon.com.
+	 */
+	public function test_a_bare_asin_goes_to_the_default_countrys_store(): void {
+		self::assertSame( 'https://www.amazon.co.uk/dp/B0C1234567', $this->links( array( 'default_country' => 'gb' ) )->typed( 'B0C1234567' )->value() );
+		self::assertSame( 'https://www.amazon.com/dp/B0C1234567', $this->links( array( 'default_country' => 'zz' ) )->typed( 'B0C1234567' )->value() );
+	}
+
 	public function test_something_that_is_not_a_link_is_cleaned_not_refused(): void {
 		self::assertSame( 'http://notalink', $this->links()->button( 'not a link' ) );
 	}

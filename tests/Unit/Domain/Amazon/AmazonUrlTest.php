@@ -291,7 +291,14 @@ final class AmazonUrlTest extends TestCase {
 	 * @dataProvider bare_asins
 	 */
 	public function test_a_bare_asin_becomes_the_store_link( string $input, string $link ): void {
-		self::assertSame( $link, AmazonUrl::from_bare_asin( $input )?->value() );
+		self::assertSame( $link, AmazonUrl::from_bare_asin( $input, 'www.amazon.com' )?->value() );
+	}
+
+	/**
+	 * The store is the one given (the Default Tracking ID country's, Task GF2).
+	 */
+	public function test_a_bare_asin_goes_to_the_store_given(): void {
+		self::assertSame( 'https://www.amazon.co.uk/dp/B0C1234567', AmazonUrl::from_bare_asin( 'b0c1234567', 'www.amazon.co.uk' )?->value() );
 	}
 
 	/**
@@ -311,7 +318,7 @@ final class AmazonUrlTest extends TestCase {
 	 * @dataProvider not_bare_asins
 	 */
 	public function test_other_input_is_not_a_bare_asin( string $input ): void {
-		self::assertNull( AmazonUrl::from_bare_asin( $input ) );
+		self::assertNull( AmazonUrl::from_bare_asin( $input, 'www.amazon.com' ) );
 	}
 
 	/**

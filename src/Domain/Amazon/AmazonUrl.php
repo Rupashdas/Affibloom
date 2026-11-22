@@ -63,12 +63,6 @@ final class AmazonUrl {
 	 */
 	private const BARE_ASIN = '/^(?:B0[A-Z0-9]{8}|\d{9}[\dX])$/i';
 
-	/**
-	 * Lasso_Amazon_Api::get_default_product_domain() with the site's default tracking country, "us". Its control is
-	 * in the Product Data API card (C1); until then a bare ASIN goes to www.amazon.com.
-	 */
-	private const DEFAULT_STORE_PRODUCT = 'https://www.amazon.com/dp/';
-
 	/** Lasso_Amazon_Api::is_amazon_shortened_url(): Amazon's short-link hosts. */
 	private const SHORT_LINK_HOSTS = array( 'amzn.to', 'amzn.com', 'amzlink.to' );
 
@@ -90,13 +84,15 @@ final class AmazonUrl {
 
 	/**
 	 * A bare ASIN as the default store's product link (upper case, as Amazon writes ASINs), or null for anything else.
-	 * Lasso refuses a bare ASIN ("This is not a valid link."); F2 requirements, section 8.
+	 * Lasso refuses a bare ASIN ("This is not a valid link."); F2 requirements, section 8. The store is the Default
+	 * Tracking ID country's, as Lasso_Amazon_Api::get_default_product_domain() builds a link with no host (Task GF2).
 	 *
 	 * @param string $input What was pasted.
+	 * @param string $host  The default store's host (Marketplace::host()), such as www.amazon.co.uk.
 	 */
-	public static function from_bare_asin( string $input ): ?AffiliateUrl {
+	public static function from_bare_asin( string $input, string $host ): ?AffiliateUrl {
 		$asin = strtoupper( trim( $input ) );
-		return 1 === preg_match( self::BARE_ASIN, $asin ) ? AffiliateUrl::from_string( self::DEFAULT_STORE_PRODUCT . $asin ) : null;
+		return 1 === preg_match( self::BARE_ASIN, $asin ) ? AffiliateUrl::from_string( 'https://' . $host . '/dp/' . $asin ) : null;
 	}
 
 	/**

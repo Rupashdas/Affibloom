@@ -111,7 +111,7 @@ the plan promised and no task built, and Lasso behaviours with no record. Batche
 Phase M's Task 26Q.
 
 - [x] Task GF1: Keep Original URL keeps a listed domain's link as typed
-- [ ] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
+- [x] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
 - [ ] Task GF3: Posts and pages keep 8 revisions, as with Lasso
 - [ ] Task GF4: Kadence's FAQ schema repairs
 - [ ] Task GF5: Lasso's hooks for other code, under Affibloom's names
@@ -1256,8 +1256,12 @@ link is `https://www.amazon.co.uk/dp/B0XXXXXXXX` (with the site's tag rule). Set
 `src/Interface/Rest/AmazonController.php:216` (an item with no URL: the same host); tests `AmazonUrlTest`,
 `LinkNormaliserTest`.
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: Host from the setting.** - [ ] **Step 3: Run and look.** - [ ] **Step 4:
+- [x] **Step 1: Test.** - [x] **Step 2: Host from the setting.** - [x] **Step 3: Run and look.** - [x] **Step 4:
   Commit** — "Build a bare ASIN's link in the default country's store (GF2)".
+
+*Note:* the search route's fallback takes the searched store from `AmazonSearchService::country()` (made public). Seen
+with `default_country` gb (set by WP-CLI, settings backed up to `.local/` and restored): Add New Link `B0GF2TEST1` →
+`https://www.amazon.co.uk/dp/B0GF2TEST1?tag=vbvault-20` (product 22621).
 
 ### Task GF3: Posts and pages keep 8 revisions, as with Lasso
 

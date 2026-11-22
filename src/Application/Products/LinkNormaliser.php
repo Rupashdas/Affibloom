@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Affibloom\Application\Products;
 
 use Affibloom\Domain\Amazon\AmazonUrl;
+use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Amazon\TrackingIds;
 use Affibloom\Domain\InvalidField;
 use Affibloom\Domain\Product\AffiliateUrl;
@@ -45,14 +46,17 @@ final class LinkNormaliser {
 	}
 
 	/**
-	 * A link as typed: a bare ASIN becomes the default store's product link (Task 12E), anything else a link with
-	 * `https://` added where it has no scheme (Lasso's add_https).
+	 * A link as typed: a bare ASIN becomes the product link in the Default Tracking ID country's store (Tasks 12E,
+	 * GF2), anything else a link with `https://` added where it has no scheme (Lasso's add_https).
 	 *
 	 * @param string $input What was typed or pasted.
 	 * @throws InvalidField When it is empty, or neither a link nor a bare ASIN.
 	 */
 	public function typed( string $input ): AffiliateUrl {
-		return AmazonUrl::from_bare_asin( $input ) ?? AffiliateUrl::from_string( $input );
+		$country = $this->settings->get()->string( 'default_country' );
+		$store   = Marketplace::host( Marketplace::is_country( $country ) ? $country : Marketplace::DEFAULT_COUNTRY );
+
+		return AmazonUrl::from_bare_asin( $input, $store ) ?? AffiliateUrl::from_string( $input );
 	}
 
 	/**

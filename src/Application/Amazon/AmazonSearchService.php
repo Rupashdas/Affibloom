@@ -99,7 +99,7 @@ final class AmazonSearchService {
 	/**
 	 * The store searched: the Default Tracking ID's (Lasso's get_country_for_creators_api), else `us`.
 	 */
-	private function country(): string {
+	public function country(): string {
 		$country = $this->settings->get()->string( 'default_country' );
 
 		return Marketplace::is_country( $country ) ? $country : Marketplace::DEFAULT_COUNTRY;

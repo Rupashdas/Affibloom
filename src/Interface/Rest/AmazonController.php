@@ -190,7 +190,7 @@ final class AmazonController implements Module {
 		return new WP_REST_Response(
 			array(
 				'data' => array(
-					'items'    => array_map( array( self::class, 'search_item' ), $found->items ),
+					'items'    => array_map( fn( CatalogItem $item ): array => self::search_item( $item, Marketplace::host( $this->search->country() ) ), $found->items ),
 					'page'     => $found->page,
 					'has_more' => $found->has_more(),
 				),
@@ -202,10 +202,11 @@ final class AmazonController implements Module {
 	 * A search result as the tab draws it. The image and the product page are kept only when they are https links
 	 * (Lasso's tab shows no other); the product page falls back to the ASIN's page on amazon.com, as Lasso's.
 	 *
-	 * @param CatalogItem $item The result.
+	 * @param CatalogItem $item  The result.
+	 * @param string      $store The searched store's host, for an item without its page (Task GF2).
 	 * @return array{asin: string, title: string, image: string, price: string, url: string}
 	 */
-	private static function search_item( CatalogItem $item ): array {
+	private static function search_item( CatalogItem $item, string $store ): array {
 		$asin = strtoupper( $item->asin );
 
 		return array(
@@ -213,7 +214,7 @@ final class AmazonController implements Module {
 			'title' => '' === $item->title ? $asin : $item->title,
 			'image' => str_starts_with( $item->image, 'https://' ) ? $item->image : '',
 			'price' => $item->price,
-			'url'   => str_starts_with( $item->url, 'https://' ) ? $item->url : 'https://' . Marketplace::host( Marketplace::DEFAULT_COUNTRY ) . '/dp/' . $asin,
+			'url'   => str_starts_with( $item->url, 'https://' ) ? $item->url : 'https://' . $store . '/dp/' . $asin,
 		);
 	}
 
