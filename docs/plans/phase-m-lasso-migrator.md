@@ -120,7 +120,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
 - [x] Task 26O: Run from the admin page, in batches
 - [x] Task 26P: Check the migrated products against the baselines
-- [ ] Task 26Q: Lasso's original links — `--only=locations` (added 2026-11-23, deviation 156; after GF6)
+- [x] Task 26Q: Lasso's original links — `--only=locations` (added 2026-11-23, deviation 156; after GF6)
 
 **F10 — Lasso's content becomes Affibloom's**
 
@@ -1007,9 +1007,16 @@ twice sets nothing new (GF6's API leaves a row whose `original_url` was already 
 **Files:** in the migrator repository: the family class, its dry-run reader, the CLI `--only` value, the report row;
 unit tests with a fake API; Local run.
 
-- [ ] **Step 1: Tests.** - [ ] **Step 2: Family, dry run and run.** - [ ] **Step 3: Run and look** (Local: dry run,
-  run, a second run sets 0; a post's links at 1280 px). - [ ] **Step 4: Commit** (migrator) — "Carry Lasso's original
+- [x] **Step 1: Tests.** - [x] **Step 2: Family, dry run and run.** - [x] **Step 3: Run and look** (Local: dry run,
+  run, a second run sets 0; a post's links at 1280 px). - [x] **Step 4: Commit** (migrator) — "Carry Lasso's original
   links into Affibloom's index (26Q)".
+
+*Note:* Affibloom gained `Api::original_link()` for the dry run (`7cc8373`). Lasso's `post_id` is the record, so the post
+is `detection_id` (F21 R1); 26N read dismissals from `post_id` and was fixed (migrator `7e8f95b`). Affibloom keys a link
+by post and URL, so where Lasso rewrote one link of a post from several originals every place takes the first (a skip
+line for the others, in the dry run too). Local: 413 lines; 179 given (5-place links counted once), 178 Lasso display
+rows whose original is a shortcode, 52 second originals, 4 posts not indexed yet; a second run 179 unchanged; Migrate
+from Lasso lists "Original links"; post 2900's rewritten links have an enabled switch.
 
 ---
 
