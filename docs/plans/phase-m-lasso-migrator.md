@@ -193,7 +193,8 @@ nothing in Affibloom names Lasso or the migrator.
 - [x] **Step 5: Commit** — Affibloom: "Open an extension API for helper plugins (LM1)"; the migrator: "Start the
   Affibloom Lasso Migrator plugin".
 
-*Note (2026-11-22):* the user's repository is `Rupashdas/lasso-to-affibloom`, cloned into the planned folder
+*Note (2026-11-22):* the user's repository is `Rupashdas/lasso-to-affibloom`, **public** at the user's word (the plan
+said private), cloned into the planned folder
 `affibloom-lasso-migrator`. `affibloom_ready` is fired by its own module, `Extension\ReadyAction`; `Api::add_page()` lists
 the page at Lasso's Import place (before Settings) for `Capabilities::SETTINGS`, printed by `Interface\Admin\ExtensionScreen`
 (`templates/admin/extension.php`). The migrator needs Affibloom 1.0.0-rc.1 or later and answers `affibloom_setup_wanted`
