@@ -90,12 +90,12 @@ test.describe( 'F38 Admin shell', () => {
 			const order = await page.locator( '#adminmenu > li' ).evaluateAll( ( items ) => items.map( ( li ) => li.id ) );
 			expect( order.indexOf( 'toplevel_page_affibloom' ) ).toBe( order.indexOf( 'menu-pages' ) + 1 );
 
-			await expect( submenu( page ) ).toHaveText( [ 'Dashboard', 'Groups', 'Fields', 'Settings' ] );
+			await expect( submenu( page ) ).toHaveText( [ 'Dashboard', 'Opportunities', 'Tables', 'Groups', 'Fields', 'Settings' ] );
 			await expect( page ).toHaveTitle( /^Dashboard ‹ / );
 
 			// A product page is reachable, not listed, and highlights Dashboard; its title is Lasso's "Link Details".
 			await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ product }` );
-			await expect( submenu( page ) ).toHaveText( [ 'Dashboard', 'Groups', 'Fields', 'Settings' ] );
+			await expect( submenu( page ) ).toHaveText( [ 'Dashboard', 'Opportunities', 'Tables', 'Groups', 'Fields', 'Settings' ] );
 			await expect( page.locator( '#toplevel_page_affibloom' ) ).toHaveClass( /wp-has-current-submenu/ );
 			await expect( page.locator( '#toplevel_page_affibloom .wp-submenu li.current a' ) ).toHaveText( 'Dashboard' );
 			await expect( page ).toHaveTitle( /^Link Details ‹ / );
@@ -125,8 +125,9 @@ test.describe( 'F38 Admin shell', () => {
 			// WordPress's own version line is blanked on Affibloom's pages only (N6).
 			await expect( page.locator( '#footer-upgrade' ), url ).toHaveText( '' );
 		}
-		await page.goto( '/wp-admin/index.php' );
-		await expect( page.locator( '#footer-upgrade' ) ).not.toHaveText( '' );
+		// Elsewhere Affibloom leaves WordPress's line alone. This site blanks it everywhere with another plugin, so the
+		// filter chain is asked directly, as wp-admin runs it off an Affibloom page (as F37-footer.spec.ts does).
+		expect( wp( 'eval', 'wp_set_current_user( 1 ); require_once ABSPATH . "wp-admin/includes/admin.php"; unset( $_GET["page"] ); echo apply_filters( "update_footer", "" );' ).trim() ).toMatch( /^Version \d/ );
 	} );
 
 	test( 'AC4 other plugins\' notices are not shown on Affibloom\'s pages, and are on WordPress\'s', async ( { page } ) => {
@@ -164,6 +165,8 @@ test.describe( 'F38 Admin shell', () => {
 		const button = page.getByRole( 'button', { name: /Automations/ } );
 		wp( 'option', 'delete', 'affibloom_link_index_state' );
 		wp( 'option', 'delete', 'affibloom_bulk_add' );
+		// A link check pass left without its event by an earlier run would count too.
+		wp( 'option', 'delete', 'affibloom_link_check' );
 		await page.goto( DASHBOARD );
 		await page.evaluate( () => window.localStorage.clear() );
 		await button.click();
@@ -193,9 +196,10 @@ test.describe( 'F38 Admin shell', () => {
 	test( 'AC5 a script adds notices to one region under the header, newest last', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
 		const region = page.locator( '#affibloom-notices' );
-		// The Bulk Amazon sync banner (C1I) may show on any Affibloom page while Amazon products are pending; it is not
-		// one of the script's notices.
-		const notices = region.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' );
+		// The server's own notices (the Bulk Amazon sync banner C1I, the broken-links notice 32B) may already be there;
+		// they are marked first, so only the script's notices are counted.
+		await region.locator( '.affibloom-notice' ).evaluateAll( ( found ) => found.forEach( ( notice ) => notice.setAttribute( 'data-server', '' ) ) );
+		const notices = region.locator( '.affibloom-notice:not([data-server])' );
 		await expect( notices ).toHaveCount( 0 );
 
 		await page.evaluate( () => {
@@ -227,6 +231,8 @@ test.describe( 'F38 Admin shell', () => {
 	} );
 
 	test( 'AC8 while the link index is being built, every Affibloom page says so and links to its progress', async ( { page } ) => {
+		// Several Affibloom pages in turn; about a minute on a busy Local (seen at the Phase 8 exit check).
+		test.setTimeout( 180_000 );
 		const notice = page.locator( '.affibloom-notices' ).getByText( "We're rounding up a list of your links." );
 		wp( 'option', 'delete', 'affibloom_link_index_state' );
 		await page.goto( DASHBOARD );

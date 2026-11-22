@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith, unique, wp } from './utils';
+import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, unique, wp } from './utils';
 
 /**
  * Task 37D (roadmap 8.4): Affibloom with the plugins the site runs. LiteSpeed Cache with production's settings (Local's
@@ -37,6 +37,8 @@ test.describe( 'Task 37D: compatibility', () => {
 	} );
 
 	test( 'with scripts delayed, a guide draws its box on two loads and the first click is counted', async ( { page } ) => {
+		// clicks.js is printed only while clicks are counted; an earlier spec may have switched counting off.
+		setSettings( { click_tracking: true } );
 		const id = createProduct( { name: unique( 'Compat delay' ), url: `https://www.example.com/${ unique( 'compat' ) }` } );
 		const path = newPostWith( boxBlock( id ) );
 		await page.goto( path );

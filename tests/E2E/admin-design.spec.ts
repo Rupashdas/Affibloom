@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { createProduct, unique } from './utils';
 
 // The Affibloom design system, checked by computed style. Meadow replaces Aurora screen part by screen part (Tasks
 // MD1-MD6, docs/ui/design-system.md section 0b): MD1 brought Meadow's colours and fonts, MD2 the white header and the
@@ -29,7 +30,8 @@ const box = async ( locator: Locator ) => {
 // Tabs from the page title until the given control has focus, as a keyboard user would.
 async function tabTo( page: Page, target: Locator ) {
 	await page.locator( '.affibloom-page__title' ).click();
-	for ( let i = 0; i < 40; i++ ) {
+	// Settings → General's left column holds the Uninstall card's post links before Link Defaults (Lasso's order).
+	for ( let i = 0; i < 120; i++ ) {
 		await page.keyboard.press( 'Tab' );
 		if ( await target.evaluate( ( el ) => el === document.activeElement ) ) {
 			return;
@@ -174,7 +176,8 @@ test( 'the Dashboard has its counts beside the title and Meadow list', async ( {
 	const th = listCard.locator( 'th.affibloom-col-name' );
 	expect( await css( th, 'text-transform' ) ).toBe( 'none' );
 	expect( await css( th, 'font-weight' ) ).toBe( '600' );
-	const row = listCard.locator( 'tbody tr[data-product-id]' ).first();
+	// A product used in posts cannot be deleted (36E), so its box is disabled: the first row that can be selected.
+	const row = listCard.locator( 'tbody tr[data-product-id]', { has: page.locator( '.affibloom-check:not([disabled])' ) } ).first();
 	expect( Math.round( ( await box( row ) ).height ) ).toBe( 80 );
 	const thumb = row.locator( '.affibloom-thumb' );
 	expect( await css( thumb, 'width' ) ).toBe( '52px' );
@@ -264,8 +267,9 @@ test( 'the product page has a sticky preview and a save bar', async ( { page } )
 } );
 
 test( 'dialogs and the toast use the design system', async ( { page } ) => {
-	await page.goto( '/wp-admin/admin.php?page=affibloom' );
-	await page.locator( '.affibloom-card--list .affibloom-row__name' ).first().click();
+	// A product of its own: one used in posts refuses Delete This Link before any dialog (36E).
+	const own = createProduct( { name: unique( 'MD6 dialog' ) } );
+	await page.goto( `/wp-admin/admin.php?page=affibloom-product&id=${ own }` );
 	await expect( page.locator( '#affibloom-product-form' ) ).toBeVisible();
 
 	// MD6 (0b.4): 28px padding, a 44px icon chip (danger tint for a delete), a 22px title, a dark green-grey backdrop.
@@ -385,7 +389,8 @@ test( 'the Display and Amazon tabs use the design system', async ( { page } ) =>
 	expect( await css( primary, 'border-radius' ) ).toBe( '8px' );
 	expect( await css( primary, 'border-top-color' ) ).toBe( CONTROL_LINE );
 	await primary.click(); // a click, not focus(): :focus needs the window itself to be focused
-	expect( await css( primary, 'border-top-color' ) ).toBe( BRAND_600 );
+	// The border fades to the focus colour (the design system's ease), so it is read once the fade is over.
+	await expect.poll( () => css( primary, 'border-top-color' ) ).toBe( BRAND_600 );
 
 	// A colour keeps its stored value as text, with a colour picker beside it showing that colour. The text
 	// field is what gets saved, so a CSS keyword such as "black" is never rewritten to hex behind the editor.

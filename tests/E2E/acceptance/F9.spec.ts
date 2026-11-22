@@ -220,8 +220,12 @@ test.describe( 'F9 Link settings', () => {
 	} );
 
 	test( 'AC13 the Link Index card shows the last build, the progress of a running one, and Rebuild Database in the support view', async ( { page } ) => {
+		// A whole rebuild of Local's ~1,700 posts takes a few minutes (seen at the Phase 8 exit check).
+		test.setTimeout( 600_000 );
 		const card = page.locator( '#affibloom-card-link-index' );
+		// No rebuild left by an earlier test: its state and its queued batch both go.
 		wp( 'option', 'delete', 'affibloom_link_index_state' );
+		wp( 'eval', 'wp_clear_scheduled_hook( "affibloom_link_index_batch" );' );
 		await page.goto( GENERAL );
 		await expect( card.getByRole( 'heading', { name: 'Link Index' } ) ).toBeVisible();
 		await expect( card.getByText( 'Affibloom tracks every link on your site.' ) ).toBeVisible();
@@ -240,7 +244,7 @@ test.describe( 'F9 Link settings', () => {
 		await expect( card.getByText( "We're indexing your links in the background, feel free to do something else." ) ).toBeVisible();
 
 		// Finished: the card goes back to its figures.
-		for ( let run = 0; run < 20 && wp( 'option', 'get', 'affibloom_link_index_state', '--format=json' ).includes( '"running"' ); run++ ) {
+		for ( let run = 0; run < 80 && wp( 'option', 'get', 'affibloom_link_index_state', '--format=json' ).includes( '"running"' ); run++ ) {
 			wp( 'eval', 'do_action( "affibloom_link_index_batch" );' );
 		}
 		await expect( card.getByText( 'Links Indexed' ) ).toBeVisible( { timeout: 10_000 } );

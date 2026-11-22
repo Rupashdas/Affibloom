@@ -14,7 +14,9 @@ async function snapshot( page: Page ) {
 	return {
 		text: ( await article.innerText() ).replace( /\s+/g, ' ' ),
 		boxes: await page.locator( '.lasso-container' ).count(),
-		links: await article.locator( 'a' ).evaluateAll( ( links ) => links.map( ( a ) => a.getAttribute( 'href' ) ) ),
+		// A link tied to an Affibloom product prints the product's own address at render time (F21, decision A6): the
+		// same item and tag, written without the slash before "?" (/dp/X/?tag= becomes /dp/X?tag=). Compared as targets.
+		links: await article.locator( 'a' ).evaluateAll( ( links ) => links.map( ( a ) => ( a.getAttribute( 'href' ) ?? '' ).replace( /\/\?/, '?' ) ) ),
 	};
 }
 
