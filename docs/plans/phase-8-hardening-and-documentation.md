@@ -89,7 +89,7 @@ the text below as a deviation in `progress.md`.
 - [x] Task TL3: Logs
 - [x] Task TL4: DB Status and self-repair
 - [x] Task TL6: Permissions
-- [ ] Task TL7: Version in the admin footer
+- [x] Task TL7: Version in the admin footer
 
 ### F38 Admin shell
 
@@ -803,12 +803,17 @@ footer version text does not show on Affibloom pages (the rest of wp-admin is un
 
 **Files:** modify `AdminMenu.php` or `AdminAssets.php`; test `tests/E2E/acceptance/F37-footer.spec.ts`. No new class.
 
-- [ ] **Step 1: Failing test.** E2E AC9 on every Affibloom screen (including the hidden Logs and DB Status): the footer
+- [x] **Step 1: Failing test.** E2E AC9 on every Affibloom screen (including the hidden Logs and DB Status): the footer
   reads "Version <x.y.z>" and WordPress's version text is absent; on Posts it is still shown. If ON1's test already
   passes for the version, only the WordPress-text part is red; say so in the task summary.
-- [ ] **Step 2: The filters.**
-- [ ] **Step 3: Run and look.** Open three screens and Posts.
-- [ ] **Step 4: Commit** — "Show the plugin version in the admin footer"
+- [x] **Step 2: The filters.**
+- [x] **Step 3: Run and look.** Open three screens and Posts.
+- [x] **Step 4: Commit** — "Show the plugin version in the admin footer"
+
+*Note (2026-11-22):* ON1 had built both the footer and the N6 filter, so TL7 is their test only (the plan's
+shrunk case); the filter needed no change: the hidden Logs and DB Status pages belong to the Settings menu item
+(TL3, TL4). This site blanks WordPress's footer line on every screen through another plugin (seen with Affibloom
+off), so the test asks the filter chain directly for a non-Affibloom page.
 
 ---
 ### Task ON5: Education boxes: close, remember, reset, hide with help tips
