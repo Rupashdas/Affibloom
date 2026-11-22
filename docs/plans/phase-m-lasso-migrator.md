@@ -124,7 +124,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 **F10 — Lasso's content becomes Affibloom's**
 
-- [ ] Task LM2: The conversion's dry run — every Lasso item in content
+- [x] Task LM2: The conversion's dry run — every Lasso item in content
 - [ ] Task LM3: Convert Lasso's blocks, keep a copy, revert
 - [ ] Task LM4: Bare shortcodes, widgets and Elementor data
 - [ ] Task LM5: The other display types, groups and tables
@@ -1054,11 +1054,19 @@ in 34 blocks, 2 bare shortcodes, and the draft 9492's tables.
 **Files:** the above; unit tests per attribute family (fixtures from Affibloom's `tests/fixtures/inventory/boxes.json`:
 the 11 attributes in use and their 44 values with `'`); F10 AC25.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: The domain mapping.**
-- [ ] **Step 3: The converter's plan and the command.**
-- [ ] **Step 4: Run and look.** The 34 posts: every item to convert, or blocked with a reason that can be acted on.
-- [ ] **Step 5: Commit** — "Report how each Lasso box becomes Affibloom's".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: The domain mapping.**
+- [x] **Step 3: The converter's plan and the command.**
+- [x] **Step 4: Run and look.** The 34 posts: every item to convert, or blocked with a reason that can be acted on.
+- [x] **Step 5: Commit** — "Report how each Lasso box becomes Affibloom's".
+
+*Note:* what Affibloom's block holds is Affibloom's: `Api::block_for_shortcode()` (`2afe4df`, defaults left out
+`57265a5`) gives the block's attributes and the names it would lose (an unknown name, or a toggle with a value it does
+not keep, e.g. `rating="4.5"`); the migrator maps Lasso's names, IDs, groups and tables (95fd697). A Lasso block is read
+from its `short_code` plus its schema settings; `schema_review_author`/`schema_rating` are dropped as unread (A52).
+`[lasso-attr]` is left to LM4 (none here). Local (59 posts, 12 of them test drafts): 335 items, 332 to convert (304
+blocks, 28 bare), 3 blocked: an empty Lasso block (draft 19835), `category=""` (19885), `category="pair-grid"`, which
+Lasso does not have (18462). A converted block drew its product. The fixture's 250 boxes are all Single.
 
 ---
 
