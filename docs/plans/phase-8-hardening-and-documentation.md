@@ -113,7 +113,7 @@ Phase M's Task 26Q.
 - [x] Task GF1: Keep Original URL keeps a listed domain's link as typed
 - [x] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
 - [x] Task GF3: Posts and pages keep 8 revisions, as with Lasso
-- [ ] Task GF4: Kadence's FAQ schema repairs
+- [x] Task GF4: Kadence's FAQ schema repairs
 - [ ] Task GF5: Lasso's hooks for other code, under Affibloom's names
 - [ ] Task GF6: Turn a tied link back to its original URL (E17)
 - [ ] Task GF7: Records and leftovers
@@ -1294,8 +1294,10 @@ back after the cutover. Nothing changes on this site (no Kadence blocks).
 an empty `"mainEntity": []`; `kadence_blocks_print_faq_schema`, priority 5: false when the post `has_block(
 'yoast/faq-block' )`); register in `src/Plugin.php`; test `tests/Unit/Interface/Front/KadenceFaqSchemaTest.php`.
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: Filters.** - [ ] **Step 3: Run** (unit only; no Kadence on Local). -
-  [ ] **Step 4: Commit** — "Repair Kadence's FAQ schema as Lasso did (GF4)".
+- [x] **Step 1: Test.** - [x] **Step 2: Filters.** - [x] **Step 3: Run** (unit only; no Kadence on Local). -
+  [x] **Step 4: Commit** — "Repair Kadence's FAQ schema as Lasso did (GF4)".
+
+*Note:* the unit test borrows `LinkIndexHooksTest`'s `WP_Post` stand-in; on Local `has_filter( 'kadence_blocks_faq_schema' )` is set.
 
 ### Task GF5: Lasso's hooks for other code, under Affibloom's names
 

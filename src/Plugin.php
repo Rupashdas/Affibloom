@@ -161,6 +161,7 @@ use Affibloom\Interface\Admin\BrokenLinksNotice;
 use Affibloom\Interface\Cron\AutoDetectCron;
 use Affibloom\Interface\Front\ClickScript;
 use Affibloom\Interface\Front\GaTag;
+use Affibloom\Interface\Front\KadenceFaqSchema;
 use Affibloom\Interface\Cron\ClickRetentionCron;
 use Affibloom\Interface\Hooks\TableProductHooks;
 use Affibloom\Interface\Hooks\AutoDetectHooks;
@@ -659,6 +660,7 @@ final class Plugin {
 			new DisplayPreloadFilter( new DisplayPreload( new PostTypeProductRepository(), new TableAmazonProductRepository() ) ),
 			new WidgetShortcodes(),
 			new RevisionLimit( $this->settings_repository() ),
+			new KadenceFaqSchema(),
 			$cloaked,
 			new LinkAttributesFilter( $rendered, new PublicLinks( $this->settings_repository() ) ),
 			new DisplayRenderFilter( $rendered, $this->settings_repository() ),
