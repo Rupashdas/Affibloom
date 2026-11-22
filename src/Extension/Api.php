@@ -489,6 +489,19 @@ final class Api {
 	}
 
 	/**
+	 * Gives a post's link the URL it had before another plugin rewrote it, so Monetize's switch can turn it back to that
+	 * URL at render time (Tasks 26Q, GF6; F22 N3, E17). A place given one before keeps it, so a second run changes nothing.
+	 *
+	 * @param int    $post     The post.
+	 * @param string $url      The link as the content has it now.
+	 * @param string $original The link before it was rewritten.
+	 * @return int How many places were given it; 0 when the link index has none.
+	 */
+	public function set_original_link( int $post, string $url, string $original ): int {
+		return $this->opportunities->set_original_url( $post, $url, $original );
+	}
+
+	/**
 	 * Moves a product to the trash (Task 26A).
 	 *
 	 * @param int $id The product.

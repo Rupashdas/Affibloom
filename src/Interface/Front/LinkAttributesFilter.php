@@ -129,6 +129,10 @@ final class LinkAttributesFilter implements Module {
 				$target  = $tags->get_attribute( 'target' );
 				$rel     = $tags->get_attribute( 'rel' );
 				$changes = RenderedAttributes::untied( is_string( $target ) ? $target : '', is_string( $rel ) ? $rel : '' );
+				// Turned back to its original URL (F22 N3, E17; Task GF6): readers get that URL; the post is unchanged.
+				if ( null !== $link && '' !== $link['original'] ) {
+					$changes['href'] = $link['original'];
+				}
 			} else {
 				$product = $link['product'];
 				$changes = RenderedAttributes::tied( $href, $this->public_links->for( $product ), $product->new_tab, $product->nofollow, $product->sponsored, (int) $product->id, $link['id'] );

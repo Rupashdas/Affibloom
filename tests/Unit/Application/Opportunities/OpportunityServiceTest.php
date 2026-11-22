@@ -84,9 +84,38 @@ final class OpportunityServiceTest extends TestCase {
 			}
 		);
 
-		self::assertTrue( $service->unassign( 1 ) );
+		self::assertSame( '', $service->unassign( 1 ) );
 		self::assertSame( array( 1 => 0 ), $this->locations->assigned );
 		self::assertSame( array( 42 ), $indexed );
-		self::assertFalse( $service->unassign( 9 ) );
+		self::assertSame( 'gone', $service->unassign( 9 ) );
+	}
+
+	/**
+	 * Unmonetize of a link tied by its own address (F22 N3, E17; Task GF6): with an original URL that differs, it is
+	 * turned back to that URL and its post indexed again; without one it stays the post's to change.
+	 */
+	public function test_unassign_turns_a_link_tied_by_its_address_back_to_its_original(): void {
+		$cloaked                   = 'https://site.example/go/shoe/';
+		$this->locations->rows[43] = array(
+			new LinkLocation( 43, 'https://site.example/b/', 'content', 1, 9, 'product', 'Text', $cloaked, md5( $cloaked ), original_url: 'https://shop.example/shoe' ),
+			new LinkLocation( 43, 'https://site.example/b/', 'content', 1, 9, 'product', 'Text', 'https://site.example/go/hat/', md5( 'hat' ), original_url: 'https://site.example/go/hat/' ),
+		);
+		$indexed = array();
+		$service = new OpportunityService(
+			$this->createStub( OpportunityRepository::class ),
+			$this->locations,
+			null,
+			static function ( int $host ) use ( &$indexed ): ?array {
+				$indexed[] = $host;
+				return null;
+			}
+		);
+
+		self::assertSame( '', $service->unassign( 2 ) );
+		self::assertSame( array( 2 ), $this->locations->originals );
+		self::assertSame( array( 43 ), $indexed );
+		self::assertSame( array(), $this->locations->assigned );
+		self::assertSame( 'in_content', $service->unassign( 3 ) );
+		self::assertSame( 'gone', $service->unassign( 9 ) );
 	}
 }

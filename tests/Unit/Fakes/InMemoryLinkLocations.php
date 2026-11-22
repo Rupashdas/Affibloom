@@ -51,8 +51,9 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		foreach ( $this->rows[ $host_id ] ?? array() as $index => $row ) {
 			$product = $row->assigned_product_id > 0 ? $row->assigned_product_id : $row->product_id;
 			$links[ $row->key() ] = array(
-				'id'      => $index + 1,
-				'product' => $product,
+				'id'       => $index + 1,
+				'product'  => $row->use_original ? 0 : $product,
+				'original' => $row->use_original ? $row->original_url : '',
 			);
 		}
 		return $links;
@@ -126,6 +127,33 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 		}
 		$this->assigned[ $id ] = $product_id;
 		return true;
+	}
+
+	/** @var list<int> set_original()'s rows, in order. */
+	public array $originals = array();
+
+	public function set_original( int $id ): bool {
+		$row = $this->find( $id );
+		if ( null === $row || $row->assigned_product_id > 0 || $row->original_url === $row->url ) {
+			return false;
+		}
+		$this->originals[] = $id;
+		return true;
+	}
+
+	/** @var list<array{int, string, string}> set_original_url()'s writes, in order. */
+	public array $original_urls = array();
+
+	public function set_original_url( int $host_id, string $url, string $original ): int {
+		$changed = 0;
+		foreach ( $this->rows[ $host_id ] ?? array() as $index => $row ) {
+			if ( $row->url_md5 === \Affibloom\Domain\LinkIndex\LocationKey::md5( $url ) && $row->original_url === $row->url ) {
+				$this->rows[ $host_id ][ $index ] = $row->keeping( $original, $row->is_ignored, $row->assigned_product_id );
+				++$changed;
+			}
+		}
+		$this->original_urls[] = array( $host_id, $url, $original );
+		return $changed;
 	}
 
 	public function counts_for( array $product_ids ): array {

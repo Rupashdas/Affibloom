@@ -57,4 +57,30 @@ final class LinkAttributesFilterTest extends TestCase {
 		self::assertStringContainsString( '<a href="' . $url . '">In text</a>', $html );
 		self::assertMatchesRegularExpression( '#<a [^>]*data-affibloom-id="' . $shoe->id . '"[^>]*href="https://site.test/shoe/"[^>]*>In recipe</a>#', $html );
 	}
+
+	/**
+	 * A link turned back to its original URL (F22 N3, E17; Task GF6) prints that URL and none of the product's marks.
+	 */
+	public function test_a_link_turned_back_prints_its_original_url(): void {
+		Functions\when( 'get_the_ID' )->justReturn( 5 );
+		Functions\when( 'home_url' )->justReturn( 'https://site.test' );
+		Functions\when( 'wp_has_noncharacters' )->justReturn( false );
+		Functions\when( 'esc_attr' )->alias( 'htmlspecialchars' );
+		Functions\when( 'wp_kses_uri_attributes' )->justReturn( array( 'href', 'src' ) );
+		Functions\when( 'esc_url' )->returnArg();
+		$products = new InMemoryProductRepository();
+		$shoe     = $products->save( Product::draft( 'Shoe', AffiliateUrl::from_string( 'https://www.example.com/shoe' ), Settings::from_array( array() ) ) );
+		$cloaked  = 'https://site.test/go/shoe/';
+		$rows     = new InMemoryLinkLocations();
+		$turned   = new LinkLocation( host_id: 5, host_url: '', source: 'content', occurrence: 1, product_id: 0, link_type: 'external', display_type: 'Text', url: $cloaked, url_md5: LocationKey::md5( $cloaked ), original_url: 'https://www.amazon.com/dp/B0F21TEST1', assigned_product_id: 0, use_original: true );
+		$rows->replace_host( 5, array( $turned ) );
+		$filter = new LinkAttributesFilter( new RenderedLinks( $rows, $products ), new PublicLinks( new InMemorySettingsRepository() ) );
+
+		$html = $filter->content( '<p><a href="' . $cloaked . '" target="_blank">Shoe</a></p>' );
+
+		self::assertStringContainsString( 'href="https://www.amazon.com/dp/B0F21TEST1"', $html );
+		self::assertStringNotContainsString( 'data-affibloom-id', $html );
+		self::assertStringContainsString( 'rel="noopener"', $html );
+		unset( $shoe );
+	}
 }

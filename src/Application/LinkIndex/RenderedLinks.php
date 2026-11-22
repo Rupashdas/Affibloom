@@ -14,16 +14,17 @@ use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Product\ProductRepository;
 
 /**
- * A host's links by their key (host, source, URL, occurrence; D4), each with its row and its published product (null
- * when it is tied to none, or to one that is not published), read once per host and request (F21 D13; Tasks 35H, 35E).
- * The untied ones are kept too: render time counts every link of a place to find the tied ones.
+ * A host's links by their key (host, source, URL, occurrence; D4), each with its row, its published product (null
+ * when it is tied to none, or to one that is not published) and the original URL it prints instead when it was turned
+ * back (F22 N3, E17; Task GF6; '' otherwise), read once per host and request (F21 D13; Tasks 35H, 35E). The untied
+ * ones are kept too: render time counts every link of a place to find the tied ones.
  */
 final class RenderedLinks {
 
 	/**
 	 * The request's hosts already read.
 	 *
-	 * @var array<int, array<string, array{id: int, product: Product|null}>>
+	 * @var array<int, array<string, array{id: int, product: Product|null, original: string}>>
 	 */
 	private array $hosts = array();
 
@@ -46,7 +47,7 @@ final class RenderedLinks {
 	 * A host's links.
 	 *
 	 * @param int $host_id The post.
-	 * @return array<string, array{id: int, product: Product|null}>
+	 * @return array<string, array{id: int, product: Product|null, original: string}>
 	 */
 	public function for_host( int $host_id ): array {
 		if ( ! isset( $this->hosts[ $host_id ] ) ) {
@@ -56,8 +57,9 @@ final class RenderedLinks {
 					$this->products_read[ $row['product'] ] = $this->products->get( $row['product'] );
 				}
 				$links[ $key ] = array(
-					'id'      => $row['id'],
-					'product' => $row['product'] > 0 ? $this->products_read[ $row['product'] ] : null,
+					'id'       => $row['id'],
+					'product'  => $row['product'] > 0 ? $this->products_read[ $row['product'] ] : null,
+					'original' => $row['original'],
 				);
 			}
 			$this->hosts[ $host_id ] = $links;

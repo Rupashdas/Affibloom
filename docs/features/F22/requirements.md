@@ -51,7 +51,9 @@ for the user's answer to N1.
 - **AC11** (Form set by N1.) The **Monetize** switch on an untied row opens **Monetize** ("Search URLs", six products a
   page, **Create a Link**); choosing a product makes readers see that product's link, `target` and `rel` on that anchor,
   while the post's stored content is byte-identical; the row turns green and leaves the opportunity lists; switching it
-  off brings the original link back for readers. (O10, R64-R73, N1-N3)
+  off brings the original link back for readers. A link tied by its own address is on; with an original URL that
+  differs (Lasso's `original_link_slug`, brought by Task 26Q) switching it off makes readers see that URL, the row shows
+  it and becomes an untied link again; without one the switch is disabled with the tooltip. (O10, GF6, R64-R73, N1-N3)
 - **AC12** **Content › <post>** lists that post's text and image links, product links first: URL (hover Filter by
   URL), Link (opens the preview), Type, Monetize (on for tied links); search by URL or anchor text; a title with a back
   arrow to Content. (O4, R29-R31)

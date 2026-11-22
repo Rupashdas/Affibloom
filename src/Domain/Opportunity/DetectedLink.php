@@ -29,6 +29,8 @@ final class DetectedLink {
 	 * @param int             $assigned   The product Monetize tied it to at render time (Task O10); 0 when none, and
 	 *                                    when $tied is true with 0 the link is tied by its own address.
 	 * @param string          $assigned_name That product's name.
+	 * @param bool            $restorable    Tied by its own address with an original URL that differs, so Unmonetize
+	 *                                       turns it back to that URL (F22 N3, E17; Task GF6).
 	 */
 	public function __construct(
 		public readonly ProductLocation $place,
@@ -39,5 +41,6 @@ final class DetectedLink {
 		public readonly string $domain = '',
 		public readonly int $assigned = 0,
 		public readonly string $assigned_name = '',
+		public readonly bool $restorable = false,
 	) {}
 }

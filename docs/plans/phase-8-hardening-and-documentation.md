@@ -115,7 +115,7 @@ Phase M's Task 26Q.
 - [x] Task GF3: Posts and pages keep 8 revisions, as with Lasso
 - [x] Task GF4: Kadence's FAQ schema repairs
 - [x] Task GF5: Lasso's hooks for other code, under Affibloom's names
-- [ ] Task GF6: Turn a tied link back to its original URL (E17)
+- [x] Task GF6: Turn a tied link back to its original URL (E17)
 - [ ] Task GF7: Records and leftovers
 
 ## Cross-phase notes
@@ -1353,11 +1353,19 @@ else as now) → `OpportunityService::unassign()` → `set_assigned( row, -1 )` 
 `assets/admin/opportunities.js`; `src/Extension/Api.php` (`set_original_link( int $host, string $url, string $original ): int`, the rows of that post with that URL whose `original_url` is still their own URL; for Task 26Q); tests: unit
 for the service, the carry-over and the render; integration `AssignmentTest.php`; F22 AC (N3) in `F22.spec.ts`.
 
-- [ ] **Step 1: Tests** (a seeded row with an original URL: off prints it, byte-identical `post_content`, a rescan
+- [x] **Step 1: Tests** (a seeded row with an original URL: off prints it, byte-identical `post_content`, a rescan
   keeps it, on restores the tie).
-- [ ] **Step 2: Storage and carry-over.** - [ ] **Step 3: Render.** - [ ] **Step 4: Route, switch, row.**
-- [ ] **Step 5: Run and look** (seed one row's `original_url` on Local; Opportunities at 1280 px; the post's front end).
-- [ ] **Step 6: Commit** — "Turn a tied link back to its original URL at render time (GF6)".
+- [x] **Step 2: Storage and carry-over.** - [x] **Step 3: Render.** - [x] **Step 4: Route, switch, row.**
+- [x] **Step 5: Run and look** (seed one row's `original_url` on Local; Opportunities at 1280 px; the post's front end).
+- [x] **Step 6: Commit** — "Turn a tied link back to its original URL at render time (GF6)".
+
+*Note:* deviation 157: a column `use_original` (schema step 12) instead of `assigned_product_id = -1`, so a rescan
+stores a turned-back row as an ordinary untied link and the 26 `assigned_product_id = 0` checks stay as they are. Off
+is the existing DELETE route (`unassign()` now answers '', 'gone' or 'in_content': 409 for a tie with no original);
+on is Monetize, as for any untied link. `Api::set_original_link()` is ready for 26Q. Seen on post 2622 (original
+seeded through `OpportunityAccess`, 5 places): off → an untied `example.com` row showing the original, the front end
+printing it; assign → the product's link; off → tied again; `post_content`'s md5 unchanged throughout. F22 AC11 (N3)
+written, not run; no integration test (that suite has never run, deviation 10).
 
 ### Task GF7: Records and leftovers
 

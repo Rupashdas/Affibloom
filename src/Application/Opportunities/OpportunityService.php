@@ -62,21 +62,27 @@ final class OpportunityService {
 
 	/**
 	 * Unmonetize (R72, N1-A; Task O10): the assignment is cleared, so readers see the stored link again; the post is
-	 * indexed again, so the link is tied by its own address if it has one.
+	 * indexed again, so the link is tied by its own address if it has one. A link tied by its own address is turned
+	 * back to the URL it had before another plugin rewrote it (Lasso's original_link_slug; F22 N3, E17; Task GF6), at
+	 * render time; without an original that differs it stays the post's to change.
 	 *
 	 * @param int $row The row's ID.
-	 * @return bool False when the row is gone.
+	 * @return string '' when done; 'gone' or 'in_content' otherwise.
 	 */
-	public function unassign( int $row ): bool {
+	public function unassign( int $row ): string {
 		$place = $this->locations->find( $row );
-		if ( null === $place || ! $this->locations->set_assigned( $row, 0 ) ) {
-			return false;
+		if ( null === $place ) {
+			return 'gone';
+		}
+		$own_tie = $place->product_id > 0 && 0 === $place->assigned_product_id;
+		if ( $own_tie ? ! $this->locations->set_original( $row ) : ! $this->locations->set_assigned( $row, 0 ) ) {
+			return $own_tie ? 'in_content' : 'gone';
 		}
 		if ( null !== $this->reindex ) {
 			( $this->reindex )( $place->host_id );
 		}
 
-		return true;
+		return '';
 	}
 
 	/**

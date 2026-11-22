@@ -165,6 +165,21 @@ final class ApiTest extends TestCase {
 		return new OpportunityAccess( $locations ?? new InMemoryLinkLocations() );
 	}
 
+	/**
+	 * Task 26Q's write (GF6): a post's link gets the URL it had before, once; an empty original changes nothing.
+	 */
+	public function test_a_post_s_link_gets_its_original_url_once(): void {
+		$locations = new InMemoryLinkLocations();
+		$url       = 'https://site.example/go/shoe/';
+		$locations->replace_host( 7, array( new LinkLocation( 7, 'https://site.example/p/', 'content', 1, 4, 'product', 'Text', $url, LocationKey::md5( $url ), original_url: $url ) ) );
+		$access = self::opportunities( $locations );
+
+		self::assertSame( 0, $access->set_original_url( 7, $url, '  ' ) );
+		self::assertSame( 1, $access->set_original_url( 7, $url, 'https://www.amazon.com/dp/B0TEST0001' ) );
+		self::assertSame( 'https://www.amazon.com/dp/B0TEST0001', $locations->rows[7][0]->original_url );
+		self::assertSame( 0, $access->set_original_url( 7, $url, 'https://other.example/' ) );
+	}
+
 	public function test_a_post_s_link_is_dismissed_by_its_url(): void {
 		$locations = new InMemoryLinkLocations();
 		$url       = 'https://www.amazon.com/dp/B0TEST0001';

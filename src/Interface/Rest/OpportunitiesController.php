@@ -203,15 +203,21 @@ final class OpportunitiesController implements Module {
 	}
 
 	/**
-	 * DELETE /opportunities/locations/{row}/assignment (R72, N1-A; Task O10): readers see the stored link again.
+	 * DELETE /opportunities/locations/{row}/assignment (R72, N1-A; Task O10): readers see the stored link again, or, for
+	 * a link tied by its own address, the URL it had before (N3, E17; Task GF6). 404 for a row that is gone, 409 for a
+	 * link tied by its own address with no other original.
 	 *
 	 * @param WP_REST_Request $request Request with the row.
 	 * @phpstan-param WP_REST_Request<array{row: int}> $request
 	 */
 	public function unassign( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$row = (int) $request['row'];
-		if ( ! $this->opportunities->unassign( $row ) ) {
+		$row    = (int) $request['row'];
+		$result = $this->opportunities->unassign( $row );
+		if ( 'gone' === $result ) {
 			return new WP_Error( 'affibloom_location_gone', __( 'This link is no longer on the page.', 'affibloom' ), array( 'status' => 404 ) );
+		}
+		if ( 'in_content' === $result ) {
+			return new WP_Error( 'affibloom_tied_in_content', __( "This link is in the post's content; edit the post to change it.", 'affibloom' ), array( 'status' => 409 ) );
 		}
 
 		return new WP_REST_Response(

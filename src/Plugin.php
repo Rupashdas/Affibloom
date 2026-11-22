@@ -491,6 +491,10 @@ final class Plugin {
 			11 => static function (): void {
 				ProductDomainBackfill::run();
 			},
+			// Task GF6 (F22 N3, E17): the link index's `use_original`, a link turned back to its original URL.
+			12 => static function (): void {
+				( new Table( TableLinkLocationRepository::TABLE, TableLinkLocationRepository::COLUMNS ) )->create();
+			},
 		);
 	}
 

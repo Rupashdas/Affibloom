@@ -76,13 +76,14 @@ $columns = array(
 							<td class="affibloom-col-type"><?php $this->render( 'admin/partials/location-type', array( 'place' => $place ) ); ?></td>
 							<td class="affibloom-col-monetize">
 								<?php
-								// On for a tied link (R30); Monetize and Unmonetize (Task O10).
+								// On for a tied link (R30); Monetize and Unmonetize (Task O10). A link tied by its own
+								// address can be turned off when it has an original URL to go back to (N3, E17; GF6).
 								$this->render(
 									'admin/partials/monetize-switch',
 									array(
 										'row'    => $place->id,
 										'url'    => $place->url,
-										'state'  => $detected->assigned > 0 ? 'on' : ( $detected->tied ? 'content' : 'off' ),
+										'state'  => $detected->assigned > 0 || $detected->restorable ? 'on' : ( $detected->tied ? 'content' : 'off' ),
 										'amazon' => AmazonDomains::in_url( $place->url ),
 									)
 								);

@@ -52,6 +52,7 @@ country char(2) NOT NULL DEFAULT 'us',
 no_follow tinyint(1) NOT NULL DEFAULT 0,
 new_window tinyint(1) NOT NULL DEFAULT 0,
 is_ignored tinyint(1) NOT NULL DEFAULT 0,
+use_original tinyint(1) NOT NULL DEFAULT 0,
 affiliate_platform varchar(64) DEFAULT NULL,
 detected_at datetime NOT NULL,
 PRIMARY KEY  (id),
@@ -76,7 +77,7 @@ KEY display_type (display_type)";
 		$table = $wpdb->prefix . self::TABLE;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, written once per indexed post.
 		$wpdb->query( 'START TRANSACTION' );
-		$stored = $wpdb->get_results( $wpdb->prepare( 'SELECT source, url_md5, occurrence, original_url, is_ignored, assigned_product_id FROM %i WHERE host_id = %d', $table, $host_id ), ARRAY_A );
+		$stored = $wpdb->get_results( $wpdb->prepare( 'SELECT source, url_md5, occurrence, original_url, is_ignored, assigned_product_id, use_original FROM %i WHERE host_id = %d', $table, $host_id ), ARRAY_A );
 		$kept   = array();
 		foreach ( is_array( $stored ) ? $stored : array() as $row ) {
 			$kept[ LocationKey::of( $host_id, (string) $row['source'], (string) $row['url_md5'], (int) $row['occurrence'] ) ] = $row;
@@ -89,7 +90,7 @@ KEY display_type (display_type)";
 			}
 			$old = $kept[ $row->key() ] ?? null;
 			if ( null !== $old ) {
-				$row = $row->keeping( (string) $old['original_url'], '1' === (string) $old['is_ignored'], (int) $old['assigned_product_id'] );
+				$row = $row->keeping( (string) $old['original_url'], '1' === (string) $old['is_ignored'], (int) $old['assigned_product_id'], '1' === (string) $old['use_original'] );
 			}
 			$ok = false !== $wpdb->insert( $table, self::values( $row ), self::FORMATS );
 		}
@@ -504,11 +505,46 @@ KEY display_type (display_type)";
 			return false;
 		}
 		$product_id = max( 0, $product_id );
-		// product_id first: MySQL sets the columns in order, so the test reads the old assignment.
-		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET product_id = IF( assigned_product_id > 0 AND product_id = assigned_product_id, %d, product_id ), assigned_product_id = %d WHERE id = %d', $table, $product_id, $product_id, $id ) );
+		// product_id first: MySQL sets the columns in order, so the test reads the old assignment. A product chosen
+		// for a link turned back to its original URL replaces that (Task GF6).
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET product_id = IF( assigned_product_id > 0 AND product_id = assigned_product_id, %d, product_id ), assigned_product_id = %d, use_original = IF( %d > 0, 0, use_original ) WHERE id = %d', $table, $product_id, $product_id, $product_id, $id ) );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return true;
+	}
+
+	/**
+	 * Turns a link tied by its own address back to its original URL (F22 N3, E17; Task GF6): readers get the original,
+	 * and the row is untied at once; the next rescan describes it by the original (LinkLocation::keeping()).
+	 *
+	 * @param int $id The row's ID.
+	 * @return bool False when the row is gone, has no original that differs, or is assigned.
+	 */
+	public function set_original( int $id ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one row.
+		$changed = $wpdb->query( $wpdb->prepare( 'UPDATE %i SET use_original = 1, product_id = 0 WHERE id = %d AND assigned_product_id = 0 AND original_url <> url', $wpdb->prefix . self::TABLE, $id ) );
+
+		return is_int( $changed ) && $changed > 0;
+	}
+
+	/**
+	 * Gives a post's rows with a URL the original URL they had before another plugin rewrote them (Task 26Q, through
+	 * Extension\Api; F22 N3): only rows whose original is still their own URL, so a second run changes nothing.
+	 *
+	 * @param int    $host_id  The post.
+	 * @param string $url      The link as the content has it now.
+	 * @param string $original The link before it was rewritten.
+	 * @return int The rows changed.
+	 */
+	public function set_original_url( int $host_id, string $url, string $original ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, one post's rows.
+		$changed = $wpdb->query( $wpdb->prepare( 'UPDATE %i SET original_url = %s WHERE host_id = %d AND url_md5 = %s AND original_url = url', $wpdb->prefix . self::TABLE, $original, $host_id, LocationKey::md5( $url ) ) );
+
+		return is_int( $changed ) ? $changed : 0;
 	}
 
 	/**
@@ -549,6 +585,7 @@ KEY display_type (display_type)";
 			original_url: (string) $row['original_url'],
 			is_ignored: '1' === (string) $row['is_ignored'],
 			assigned_product_id: (int) $row['assigned_product_id'],
+			use_original: isset( $row['use_original'] ) && '1' === (string) $row['use_original'],
 		);
 	}
 
@@ -574,7 +611,7 @@ KEY display_type (display_type)";
 	}
 
 	/** The insert's formats, in values()' order. */
-	private const FORMATS = array( '%d', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s' );
+	private const FORMATS = array( '%d', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%d' );
 
 	/**
 	 * A row as the table's columns.
@@ -606,6 +643,7 @@ KEY display_type (display_type)";
 			'is_ignored'          => (int) $row->is_ignored,
 			'affiliate_platform'  => $row->affiliate_platform,
 			'detected_at'         => $row->detected_at,
+			'use_original'        => (int) $row->use_original,
 		);
 	}
 
@@ -614,18 +652,20 @@ KEY display_type (display_type)";
 	 * Tasks 35H, 35E).
 	 *
 	 * @param int $host_id The post.
-	 * @return array<string, array{id: int, product: int}>
+	 * @return array<string, array{id: int, product: int, original: string}>
 	 */
 	public function host_links( int $host_id ): array {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Affibloom's own table, once per printed post (RenderedLinks keeps it for the request).
-		$found = $wpdb->get_results( $wpdb->prepare( 'SELECT id, source, url_md5, occurrence, product_id, assigned_product_id FROM %i WHERE host_id = %d', $wpdb->prefix . self::TABLE, $host_id ), ARRAY_A );
+		$found = $wpdb->get_results( $wpdb->prepare( 'SELECT id, source, url_md5, occurrence, product_id, assigned_product_id, use_original, original_url FROM %i WHERE host_id = %d', $wpdb->prefix . self::TABLE, $host_id ), ARRAY_A );
 		$links = array();
 		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			$original = '1' === (string) $row['use_original'];
 			$links[ LocationKey::of( $host_id, (string) $row['source'], (string) $row['url_md5'], (int) $row['occurrence'] ) ] = array(
-				'id'      => (int) $row['id'],
-				'product' => (int) $row['assigned_product_id'] > 0 ? (int) $row['assigned_product_id'] : (int) $row['product_id'],
+				'id'       => (int) $row['id'],
+				'product'  => $original ? 0 : ( (int) $row['assigned_product_id'] > 0 ? (int) $row['assigned_product_id'] : (int) $row['product_id'] ),
+				'original' => $original ? (string) $row['original_url'] : '',
 			);
 		}
 

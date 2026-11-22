@@ -85,7 +85,7 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		$shell = new OpportunityPage( array(), $total, $query->page );
 		$rows  = 0 === $total ? array() : $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT l.id, l.url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, p.ID AS product_id, p.post_title AS product_name
+				"SELECT l.id, IF( l.use_original = 1, l.original_url, l.url ) AS url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, p.ID AS product_id, p.post_title AS product_name
 				{$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d",
 				...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) )
 			),
@@ -431,7 +431,7 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Affibloom's own table; the ID list holds only placeholders.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT l.id, l.host_id, l.anchor_text, l.url, l.domain, l.link_type, l.display_type, l.source, l.occurrence FROM %i AS l
+				'SELECT l.id, l.host_id, l.anchor_text, IF( l.use_original = 1, l.original_url, l.url ) AS url, l.domain, l.link_type, l.display_type, l.source, l.occurrence FROM %i AS l
 				WHERE l.host_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ") AND l.product_id = 0 AND l.assigned_product_id = 0
 					AND l.display_type IN ('Text', 'Image-only anchor text')
 				ORDER BY l.host_id, l.id",
@@ -643,14 +643,14 @@ final class TableOpportunityRepository implements OpportunityRepository {
 		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) {$from} WHERE {$where}", ...$args ) );
 		$shell = new OpportunityPage( array(), $total, $page );
 		$rows  = 0 === $total ? array() : $wpdb->get_results(
-			$wpdb->prepare( "SELECT l.id, l.url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, ( l.product_id > 0 OR l.assigned_product_id > 0 ) AS tied, l.assigned_product_id AS assigned, ap.post_title AS assigned_name {$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ),
+			$wpdb->prepare( "SELECT l.id, IF( l.use_original = 1, l.original_url, l.url ) AS url, l.domain, l.display_type, l.anchor_text, l.display_ref, l.host_id, l.host_url, h.post_title AS host_title, ( l.product_id > 0 OR l.assigned_product_id > 0 ) AS tied, ( l.product_id > 0 AND l.assigned_product_id = 0 AND l.original_url <> l.url ) AS restorable, l.assigned_product_id AS assigned, ap.post_title AS assigned_name {$from} WHERE {$where} ORDER BY {$order} LIMIT %d OFFSET %d", ...array_merge( $args, array( OpportunityPage::PER_PAGE, $shell->offset() ) ) ),
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		$items = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$items[] = new DetectedLink( self::place( $row ), (int) $row['host_id'], (string) $row['host_title'], (string) $row['host_url'], '1' === (string) $row['tied'], (string) $row['domain'], (int) $row['assigned'], (string) $row['assigned_name'] );
+			$items[] = new DetectedLink( self::place( $row ), (int) $row['host_id'], (string) $row['host_title'], (string) $row['host_url'], '1' === (string) $row['tied'], (string) $row['domain'], (int) $row['assigned'], (string) $row['assigned_name'], '1' === (string) $row['restorable'] );
 		}
 
 		return new OpportunityPage( $items, $total, $shell->current() );

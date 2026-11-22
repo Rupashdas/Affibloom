@@ -1,8 +1,9 @@
 <?php
 /**
  * A row's Monetize switch (F22 R64, R72, N1-A, N3; Task O10): off for an untied link (on opens "Monetize"); on for a
- * link monetized here (off clears it); on and disabled for a link tied by its own address, which only the post can
- * change. "Edit in post" (N1-B) sits in the row's actions, not here.
+ * link monetized here (off clears it), and for a link tied by its own address with an original URL to go back to (off
+ * turns it back at render time; N3, E17, Task GF6); on and disabled for any other link tied by its own address, which
+ * only the post can change. "Edit in post" (N1-B) sits in the row's actions, not here.
  *
  * @package Affibloom
  * @var array{row: int, url: string, state: string, amazon?: bool} $view state: 'off', 'on' or 'content'.

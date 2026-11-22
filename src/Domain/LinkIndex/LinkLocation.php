@@ -42,6 +42,7 @@ final class LinkLocation {
 	 * @param string      $original_url        The URL the first time this location was indexed.
 	 * @param bool        $is_ignored          Dismissed on the Opportunities screens (F22).
 	 * @param int         $assigned_product_id The product an editor tied the link to (F22 N1-A), 0 when none.
+	 * @param bool        $use_original        Readers get `original_url` instead of the link (F22 N3, E17; Task GF6).
 	 */
 	public function __construct(
 		public readonly int $host_id,
@@ -66,6 +67,7 @@ final class LinkLocation {
 		public readonly string $original_url = '',
 		public readonly bool $is_ignored = false,
 		public readonly int $assigned_product_id = 0,
+		public readonly bool $use_original = false,
 	) {}
 
 	/**
@@ -76,22 +78,32 @@ final class LinkLocation {
 	}
 
 	/**
-	 * The same row with what a rescan keeps from the stored one (D10): the first URL, a dismissal, an assignment. An
-	 * assignment ties the row to its product whatever the link resolves to (F22 N1-A; Task 35I's pinned rows).
+	 * The same row with what a rescan keeps from the stored one (D10): the first URL, a dismissal, an assignment, the
+	 * original URL turned back. An assignment ties the row to its product whatever the link resolves to (F22 N1-A; Task
+	 * 35I's pinned rows). A link turned back to its original URL (F22 N3, E17; Task GF6) is an untied link to that URL
+	 * everywhere the index is read: no product, the original's domain and Amazon IDs; only an original that differs
+	 * from the link, and no assignment, keeps the flag.
 	 *
 	 * @param string $original_url        The stored row's first URL.
 	 * @param bool   $is_ignored          Whether it was dismissed.
 	 * @param int    $assigned_product_id The product an editor tied it to.
+	 * @param bool   $use_original        Whether it was turned back to its original URL.
 	 */
-	public function keeping( string $original_url, bool $is_ignored, int $assigned_product_id ): self {
+	public function keeping( string $original_url, bool $is_ignored, int $assigned_product_id, bool $use_original = false ): self {
 		$values                        = get_object_vars( $this );
 		$values['original_url']        = '' !== $original_url ? $original_url : $this->url;
 		$values['is_ignored']          = $is_ignored;
 		$values['assigned_product_id'] = $assigned_product_id;
+		$values['use_original']        = $use_original && 0 === $assigned_product_id && LocationKey::md5( $values['original_url'] ) !== $this->url_md5;
 		if ( $assigned_product_id > 0 ) {
 			$values['product_id'] = $assigned_product_id;
 			$values['link_type']  = LinkType::Product->value;
 			$values['domain']     = null;
+		} elseif ( $values['use_original'] ) {
+			$values['product_id'] = 0;
+			$values['link_type']  = LinkType::External->value;
+			$values['domain']     = LinkClassifier::domain( $values['original_url'] );
+			$values               = array_merge( $values, LinkClassifier::describe( $values['original_url'] ), array( 'affiliate_platform' => AffiliatePlatform::of( $values['original_url'] ) ) );
 		}
 
 		return new self( ...$values );

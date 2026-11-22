@@ -60,10 +60,11 @@ interface LinkLocationRepository {
 
 	/**
 	 * A host's links by their key (LocationKey::of()), with the row's ID and the product it is tied to (an editor's
-	 * assignment first; 0 when none): render time counts every link of a place, tied or not (F21 D13; Tasks 35H, 35E).
+	 * assignment first; 0 when none), and the original URL a link turned back prints ('' for none; Task GF6): render time
+	 * counts every link of a place, tied or not (F21 D13; Tasks 35H, 35E).
 	 *
 	 * @param int $host_id The post.
-	 * @return array<string, array{id: int, product: int}>
+	 * @return array<string, array{id: int, product: int, original: string}>
 	 */
 	public function host_links( int $host_id ): array;
 
@@ -115,6 +116,26 @@ interface LinkLocationRepository {
 	 * @return bool False when the row is gone.
 	 */
 	public function set_assigned( int $id, int $product_id ): bool;
+
+	/**
+	 * Turns a link tied by its own address back to its original URL at render time (F22 N3, E17; Task GF6); a product
+	 * assigned later (set_assigned()) replaces it.
+	 *
+	 * @param int $id The row's ID.
+	 * @return bool False when the row is gone, has no original that differs, or is assigned.
+	 */
+	public function set_original( int $id ): bool;
+
+	/**
+	 * Gives a post's rows with a URL the original URL they had before another plugin rewrote them (Task 26Q, through
+	 * the extension API): only rows whose original is still their own URL, so a second run changes nothing.
+	 *
+	 * @param int    $host_id  The post.
+	 * @param string $url      The link as the content has it now.
+	 * @param string $original The link before it was rewritten.
+	 * @return int The rows changed.
+	 */
+	public function set_original_url( int $host_id, string $url, string $original ): int;
 
 	/**
 	 * The Amazon import's queue (F35 R24, D11; Task AM1): untied text and image links with an ASIN, one per ASIN and store,

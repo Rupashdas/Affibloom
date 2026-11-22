@@ -68,6 +68,14 @@ final class LinkIndexHooksTest extends TestCase {
 				return false;
 			}
 
+			public function set_original( int $id ): bool {
+				return false;
+			}
+
+			public function set_original_url( int $host_id, string $url, string $original ): int {
+				return 0;
+			}
+
 			public function untied_amazon( int $limit ): array {
 				return array();
 			}

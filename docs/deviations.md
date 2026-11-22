@@ -162,6 +162,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 154. Phase 8's close (the user, 2026-11-22): no GitHub release or `v1.0.0-rc.1` tag; the open decisions follow Lasso (box colours, CSV without BOM); the editors' run, the guides' review and the sign-offs done as Lasso's workflow, by Claude at the user's word.
 - 155. Task 24F added (the user, 2026-11-23): the Share kit's Copy block, promised for Phase 4 (F1 D4, deviation 69) but in no task; built after Phase 8's sign-off.
 - 156. Gap fixes after Phase 8 (the user, 2026-11-23): Tasks GF1-GF7 (Batches 8.G1-8.G4) and Phase M's 26Q, from the Lasso/Affibloom gap audit.
+- 157. Task GF6 (2026-11-23): a turned-back link is the column `use_original` (schema step 12), not `assigned_product_id = -1`, so untied-link queries stay as they are.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3018,3 +3019,9 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     Batches 8.G1-8.G4) and Phase M's Task 26Q (Lasso's original links into the index, which GF6 needs; Batch M.10a).
     Phase 8 stays signed off; the gap batches run before Phase M's remaining batches, each at the user's word
     (phase order, `batches.md` rule 7, bent for core fixes the migrator does not depend on, except 26Q after GF6).
+
+157. **Task GF6 (2026-11-23): a link turned back to its original URL is a column, not `assigned_product_id = -1`.**
+    The plan's -1 would have hidden the row from the 26 queries that read an untied link as
+    `assigned_product_id = 0`. A column `use_original` (schema step 12) lets a rescan store the row as an ordinary
+    untied link described by its original URL (domain, Amazon IDs), so it is an opportunity again, as in Lasso after
+    Unmonetize. Off is the existing DELETE route; a product assigned later clears the flag. 26Q's API is unchanged.

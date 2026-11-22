@@ -43,9 +43,9 @@ final class LinkClassifier {
 	 * @param string        $detected_at Now, UTC.
 	 */
 	public function classify( LinkCandidate $link, int $product_id, int $host_id, string $host_url, string $source, int $occurrence, string $detected_at ): LinkLocation {
-		$type   = $link->is_sitestripe() ? LinkType::SiteStripe : ( LinkType::of_source( $source ) ?? $this->type( $link->href, $product_id ) );
-		$amazon = self::amazon( $link->product_url() );
-		$text   = trim( (string) preg_replace( '/\s+/u', ' ', $link->text ) );
+		$type  = $link->is_sitestripe() ? LinkType::SiteStripe : ( LinkType::of_source( $source ) ?? $this->type( $link->href, $product_id ) );
+		$about = self::describe( $link->product_url() );
+		$text  = trim( (string) preg_replace( '/\s+/u', ' ', $link->text ) );
 
 		return new LinkLocation(
 			host_id: $host_id,
@@ -59,9 +59,9 @@ final class LinkClassifier {
 			url_md5: LocationKey::md5( $link->href ),
 			anchor_text: '' === $text ? null : mb_strcut( $text, 0, self::TEXT_BYTES, 'UTF-8' ),
 			domain: LinkType::External === $type ? self::domain( $link->href ) : null,
-			asin: null !== $amazon && '' !== $amazon->asin() ? $amazon->asin() : null,
-			tracking_id: null !== $amazon && '' !== $amazon->tag() ? $amazon->tag() : null,
-			country: null !== $amazon ? $amazon->country() : 'us',
+			asin: $about['asin'],
+			tracking_id: $about['tracking_id'],
+			country: $about['country'],
 			no_follow: 'nofollow' === $link->rel,
 			new_window: '_blank' === $link->target,
 			affiliate_platform: AffiliatePlatform::of( $link->href ),
@@ -135,6 +135,23 @@ final class LinkClassifier {
 	}
 
 	/**
+	 * What an address says about itself: an Amazon link's ASIN, tag and store. Shared by classify() and a row turned
+	 * back to its original URL, which is described by that URL (LinkLocation::keeping(); Task GF6).
+	 *
+	 * @param string $url The link.
+	 * @return array{asin: string|null, tracking_id: string|null, country: string}
+	 */
+	public static function describe( string $url ): array {
+		$amazon = self::amazon( $url );
+
+		return array(
+			'asin'        => null !== $amazon && '' !== $amazon->asin() ? $amazon->asin() : null,
+			'tracking_id' => null !== $amazon && '' !== $amazon->tag() ? $amazon->tag() : null,
+			'country'     => null !== $amazon ? $amazon->country() : 'us',
+		);
+	}
+
+	/**
 	 * The link as an Amazon link, or null.
 	 *
 	 * @param string $url The link.
@@ -148,11 +165,12 @@ final class LinkClassifier {
 	}
 
 	/**
-	 * The host without "www.", or null when there is none.
+	 * The host without "www.", or null when there is none. Public on its second use: a row turned back to its original
+	 * URL takes that URL's domain (Task GF6).
 	 *
 	 * @param string $url The link.
 	 */
-	private static function domain( string $url ): ?string {
+	public static function domain( string $url ): ?string {
 		$host = strtolower( (string) parse_url( $url, PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Domain code does not call WordPress.
 		$host = str_starts_with( $host, 'www.' ) ? substr( $host, 4 ) : $host;
 

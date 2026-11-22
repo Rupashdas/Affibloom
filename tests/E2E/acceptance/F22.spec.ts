@@ -316,6 +316,31 @@ test.describe( 'F22 Opportunities', () => {
 		await expect( page.locator( 'tbody tr .affibloom-toggle' ).first() ).toHaveAttribute( 'title', "This link is in the post's content; edit the post to change it." );
 	} );
 
+	// AC11, N3 (E17; Task GF6): a link tied by its own address with an original URL (Lasso's original_link_slug, which
+	// Task 26Q brings) is turned back to that URL at render time; the stored post never changes.
+	test( 'AC11 a link tied by its own address with an original URL is turned back to it', async ( { page } ) => {
+		const url = `https://www.example.com/${ unique( 'f22-n3' ) }`;
+		const original = `https://shop.example/${ unique( 'f22-n3-original' ) }`;
+		createProduct( { name: unique( 'F22 N3' ), url } );
+		const title = unique( 'F22 N3 post' );
+		newPostWith( `<p>Get <a href="${ url }">the shoe</a>.</p>`, title );
+		const host = Number( wp( 'post', 'list', '--post_type=post', `--title=${ title }`, '--field=ID' ) );
+		const stored = wp( 'post', 'get', String( host ), '--field=post_content' );
+		expect( wp( 'eval', `echo ( new Affibloom\\Extension\\OpportunityAccess( new Affibloom\\Infrastructure\\WordPress\\TableLinkLocationRepository() ) )->set_original_url( ${ host }, '${ url }', '${ original }' );` ) ).toBe( '1' );
+
+		await page.goto( `/wp-admin/admin.php?page=affibloom-opportunities&tab=post&post=${ host }` );
+		const toggle = page.locator( 'tbody tr' ).first().getByRole( 'switch' );
+		await expect( toggle ).toBeChecked();
+		await expect( toggle ).toBeEnabled();
+		await page.locator( 'tbody tr .affibloom-toggle' ).first().click();
+		await expect( page.locator( 'tbody tr .affibloom-opportunity__main' ).first() ).toHaveText( original );
+		await expect( page.locator( 'tbody tr' ).first().getByRole( 'switch' ) ).not.toBeChecked();
+
+		await page.goto( `/?p=${ host }` );
+		await expect( page.getByRole( 'link', { name: 'the shoe' } ) ).toHaveAttribute( 'href', original );
+		expect( wp( 'post', 'get', String( host ), '--field=post_content' ) ).toBe( stored );
+	} );
+
 	// AC12 (O4; R29-R31).
 	test( "AC12 Content › post: the post's text links, product links first with Monetize on", async ( { page } ) => {
 		const url = `https://www.example.com/${ unique( 'f22-ac12' ) }`;

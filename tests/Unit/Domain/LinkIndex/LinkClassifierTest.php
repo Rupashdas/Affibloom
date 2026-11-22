@@ -82,6 +82,29 @@ final class LinkClassifierTest extends TestCase {
 		self::assertSame( array( 'sitestripe', 'Product Box', 'B0F21TEST1', 'site-20', null ), array( $row->link_type, $row->display_type, $row->asin, $row->tracking_id, $row->domain ) );
 	}
 
+	/**
+	 * Turned back to its original URL (F22 N3, E17; Task GF6): untied, described by the original link, the flag kept.
+	 */
+	public function test_a_link_turned_back_is_untied_and_described_by_its_original_on_a_rescan(): void {
+		$tied = self::row( new LinkCandidate( 'https://site.test/go/shoe/' ), 7 );
+		$kept = $tied->keeping( 'https://www.amazon.com/dp/B0F21TEST1?tag=old-20', false, 0, true );
+
+		self::assertSame(
+			array( 0, 'external', 'amazon.com', 'B0F21TEST1', 'old-20', true, 'https://site.test/go/shoe/' ),
+			array( $kept->product_id, $kept->link_type, $kept->domain, $kept->asin, $kept->tracking_id, $kept->use_original, $kept->url )
+		);
+	}
+
+	/**
+	 * The flag means nothing without an original that differs, or beside an assignment.
+	 */
+	public function test_a_link_with_no_other_original_stays_tied(): void {
+		$tied = self::row( new LinkCandidate( 'https://site.test/go/shoe/' ), 7 );
+
+		self::assertSame( array( 7, false ), array( $tied->keeping( 'https://site.test/go/shoe/', false, 0, true )->product_id, $tied->keeping( 'https://site.test/go/shoe/', false, 0, true )->use_original ) );
+		self::assertSame( array( 9, false ), array( $tied->keeping( 'https://a.test/x', false, 9, true )->product_id, $tied->keeping( 'https://a.test/x', false, 9, true )->use_original ) );
+	}
+
 	public function test_an_assignment_ties_the_row_to_its_product_on_a_rescan(): void {
 		$kept = self::row( new LinkCandidate( 'https://old.test/link' ) )->keeping( 'https://old.test/link', false, 12 );
 
