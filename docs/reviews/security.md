@@ -32,8 +32,27 @@ Run on the working folder, so it also read `.local/`, `tests/`, `tools/` and the
 | `missing_direct_file_access_protection` | `resources/networks.php` | False positive: its guard is `defined( 'ABSPATH' ) \|\| defined( 'AFFIBLOOM_VERSION' ) \|\| exit;` (the unit tests load the file without WordPress), a form the check does not recognise. |
 | `library_core_files` | `assets/front/copy-clipboard.js` | False positive: Affibloom's own 1.3 KB script (F5 R36, Task 21C), matched by its name against core's `clipboard.js`. |
 
-No escaping, SQL, nonce or capability finding in the shipped code (those 300-odd were all in `.local/` scratch files).
-Re-run on the release zip's contents in Task 39 and 37D's staging smoke.
+~~No escaping, SQL, nonce or capability finding in the shipped code.~~ **Corrected 2026-11-22 (Task 39):** that line was
+wrong. The run did report code-sniff findings in shipped files too; they are the same as the release's below and are
+triaged there.
+
+### Re-run on the release, 1.0.0-rc.1 (Task 39, 2026-11-22)
+
+Plugin Check 2.2.0 on the installed zip on the empty test site (only what ships). `no_plugin_readme`,
+`plugin_header_nonexistent_domain_path` and `missing_composer_json_file` are fixed (`readme.txt`, `languages/`, and
+`composer.json` now ships beside `vendor/`). What remains, with the verdict:
+
+| Finding | Count | Where | Verdict |
+|---|---|---|---|
+| `NonPrefixedVariableFound` (warning) | 672 | `templates/` | False positive: templates are included inside `Template::render()`, so their variables are local to that method, not globals. |
+| `ExceptionNotEscaped` (error) | 34 | domain and application exceptions (`AffiliateUrl`, `Palette`, `AmazonDataService`, …) | False positive: an exception's message is never echoed raw; the REST controllers return it as JSON in a `WP_Error`, and screens escape it. |
+| `UnescapedDBParameter` (warning) | 26 | the custom-table repositories (`TableOpportunityRepository`, `TableLinkIssueRepository`, `TableLinkLocationRepository`, `TermGroupRepository`, `IndexPostsUsingAffibloom`, `PostMetaDueAmazonData`, `PostMetaPendingAmazonSync`) | Checked line by line: each interpolated fragment (`$where`, `$from`, `$group`, `$uses`, `covered()`, `per_product_sql()`) is fixed SQL built in code with `%s`/`%d`/`%i` placeholders, its values passed to `prepare()`; sorting comes from a whitelist (`SORT`, `match`). Each carries a `phpcs:disable` with that reason. |
+| `SuppressFilters_suppress_filters` (error) | 8 | `PostTypeProductRepository`, the slug guards | Deliberate: Affibloom's own post types read without other plugins' query filters. |
+| `PostNotIn_exclude` (warning) | 1 | `FieldsController` | Deliberate: excludes the products already shown, a short list. |
+| `load_plugin_textdomainFound` (warning) | 1 | `Plugin.php` | Needed: Affibloom is not on WordPress.org, so WordPress does not load its translations by itself. |
+| `missing_direct_file_access_protection`, `library_core_files` | 1 each | as above | False positives, as above. |
+
+No nonce or capability finding. Plugin Check was installed for the run and deleted after.
 
 ## By hand, per item of the plan's step 4
 

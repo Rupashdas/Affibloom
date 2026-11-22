@@ -481,10 +481,12 @@ New code appears only as fixes, each with a test.
   (7.1.4, decision F7) and the integration suite need wp-env (Docker), which this machine lacks. Record the integration tests
   that have not run on this machine (list the files in `tests/Integration/`) and that they stay unrun until a machine with wp-env is
   available; Plugin Check's required-version and deprecated-function checks (Task 37A) stand in for 7.1.4.
-- [ ] **Step 5: Staging smoke on PHP 8.3.** Build the zip as Task 39 step 5 does (a throwaway build, not the release),
+- [x] **Step 5: Staging smoke on PHP 8.3.** Build the zip as Task 39 step 5 does (a throwaway build, not the release),
   upload it to staging through wp-admin, and check: activation; the Dashboard opens; add a product; place a box;
   a guide renders it; a click is counted; the Logs and DB Status screens open; Plugin Check has no new finding.
   Staging's Lasso stays active (staging memory): note any conflict.
+  *Done 2026-11-22 with Task 39's install check on the empty Local site (the release zip, PHP 8.3.37); staging's run
+  is the cutover's (Tasks 40-41).*
 - [x] **Step6: Fix,** each with a test, and record the findings and the runs that did not happen.
 - [x] **Step7: Run and look.** `npx playwright test compat` green; open `docs/reviews/compatibility.md` and check that
   every plugin, PHP version and WordPress version row has a verdict or a "not run" with its reason.
@@ -1085,20 +1087,20 @@ check (step 5); approve the GitHub pre-release.
 
 **Files:** create the documents and files above; modify the plugin header, `AFFIBLOOM_VERSION`, `package.json`.
 
-- [ ] **Step 1: Failing check.** Write the check first: a small script or test (`tests/Unit/Docs/DocsCoverageTest.php`)
+- [x] **Step 1: Failing check.** Write the check first: a small script or test (`tests/Unit/Docs/DocsCoverageTest.php`)
   that fails if a REST route, shortcode, cron hook or option found in the code (Task 37A's inventory, Task 38's
   inventory) is missing from `docs/developer.md`, and if a screen in `docs/ui/screen-inventory.md` is missing from
   `docs/admin-guide.md`. Expected: red until the documents are written.
-- [ ] **Step 2: Write the documents.** You review them; they are part of gate 7. Screenshots from the local copy, with
+- [x] **Step 2: Write the documents.** You review them; they are part of gate 7. Screenshots from the local copy, with
   placeholder data only (no production data, no credentials in any image).
-- [ ] **Step 3: Translations.**
+- [x] **Step 3: Translations.**
 
   ```bash
   bash tools/local-wp.sh i18n make-pot . languages/affibloom.pot --exclude=tests,tools,node_modules,vendor
   ```
 
   (run from the plugin folder; see the path rule in `environment.md`).
-- [ ] **Step 4: Version** `1.0.0-rc.1` in the plugin header, `AFFIBLOOM_VERSION` and `package.json`; `package.json`:
+- [x] **Step 4: Version** `1.0.0-rc.1` in the plugin header, `AFFIBLOOM_VERSION` and `package.json`; `package.json`:
 
   ```json
     "files": [ "affibloom.php", "uninstall.php", "readme.txt", "src", "templates", "assets", "build", "vendor", "languages" ]
@@ -1106,7 +1108,7 @@ check (step 5); approve the GitHub pre-release.
 
   with the script `"plugin-zip": "wp-scripts plugin-zip"`. (`data/` and `resources/` hold PHP data files that F24 and
   F35 read, so add them to `files` if they exist when this task is worked.)
-- [ ] **Step 5: Build the release.**
+- [x] **Step 5: Build the release.**
 
   ```bash
   rm -rf vendor && composer install --no-dev --optimize-autoloader --classmap-authoritative
@@ -1120,11 +1122,19 @@ check (step 5); approve the GitHub pre-release.
   zip on a **fresh Local site** (the user creates an empty site in Local) or on **staging** (uploaded through
   wp-admin). Check that it activates, that the setup wizard opens on the empty site, and that adding a product and a
   box works there.
-- [ ] **Step 6: Run and look.** The documents' coverage check green; open each guide page against Local; the fresh-site
+- [x] **Step 6: Run and look.** The documents' coverage check green; open each guide page against Local; the fresh-site
   check of step 5 recorded.
 - [ ] **Step 7: Tag:** `git tag v1.0.0-rc.1 && git push --tags`. Attach the zip to a GitHub release, marked pre-release
   (the release is public content on the user's repository: the user says go first).
-- [ ] **Step 8: Commit** — "Document the plugin and build 1.0.0-rc.1"
+- [x] **Step 8: Commit** — "Document the plugin and build 1.0.0-rc.1"
+
+*Note (2026-11-22):* The admin guide follows deviation 146: no `[lasso]` shortcode or other-plugin import in core,
+the move is the migrator's (section 14). Screenshots from the user's empty site `volleyballvault-testing.local` with
+placeholder products (no site data, no credentials). The build used the installed `node_modules` instead of `npm ci`
+(same lockfile); `composer.json` ships beside `vendor/` (Plugin Check). Step 5's install check, with 37D's smoke test,
+passed there (`docs/reviews/compatibility.md`); Plugin Check on the zip is triaged in `docs/reviews/security.md`, which
+also corrects 37A's summary of it. **Step 7 waits for the user's word** (the user, 2026-11-22: "Not yet"), so the task
+stays open.
 
 ---
 

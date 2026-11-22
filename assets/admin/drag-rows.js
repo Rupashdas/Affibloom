@@ -212,9 +212,10 @@
 			} );
 			grip.focus(); // Moving the row in the page can drop the focus.
 			var moved = options.movable();
+			/* translators: 1: the row's new position, 2: the number of rows. */
+			var said = window.wp.i18n.__( 'Moved to position %1$d of %2$d.', 'affibloom' );
 			announce( window.wp.i18n.sprintf(
-				/* translators: 1: the row's new position, 2: the number of rows. */
-				window.wp.i18n.__( 'Moved to position %1$d of %2$d.', 'affibloom' ),
+				said,
 				moved.indexOf( row ) + 1,
 				moved.length
 			) );

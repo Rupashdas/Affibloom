@@ -22,7 +22,7 @@ Task 41's cutover runbook.
 |---|---|---|
 | 8.3.37 | Local's site (production runs 8.3) | All E2E runs of 37A-37D green; `composer analyse` (PHPStan, `phpVersion` 80300) no errors. |
 | 8.5.1 | the machine's CLI | `composer lint` clean; the unit suite (1,164 tests) green with `error_reporting=-1`; all 669 PHP files of `src/`, `templates/` and `affibloom.php` compile with no deprecation (8.4/8.5 deprecations such as implicit nullable parameters show at compile time). |
-| 8.3 on staging | the smoke test | **Not run yet** (below). |
+| 8.3.37 | the empty test site, the release zip | The smoke test below: green. Staging's run is the cutover's. |
 | 8.2 | — | Below the minimum (`Requires PHP: 8.3`, decision F7): WordPress refuses to activate the plugin. |
 
 ## WordPress
@@ -36,8 +36,19 @@ deprecated-function checks (Task 37A) found nothing.
 
 ## The smoke test on a fresh site (plan step 5)
 
-**Not run yet.** No SSH reaches staging (an upload through wp-admin is the user's); the user's fresh Local site
-`volleyballvault-testing.local` was on PHP 8.2.29 and still answered 502 after the switch to 8.3 was asked for. It runs
-with Task 39's install check (same site, the release zip): activation, the Dashboard, add a product, place a box, a
-guide draws it, a click is counted, Logs and DB Status open, Plugin Check on the zip. Staging's run (with Lasso active
-there, and LiteSpeed's page cache, C2) is the cutover's (Tasks 40-41).
+**Run 2026-11-22 with Task 39's install check**, on the user's empty Local site `volleyballvault-testing.local`
+(WordPress 7.1.5, PHP 8.3.37, no other plugin), with the release zip `affibloom.zip` (1.0.0-rc.1):
+
+| Check | Result |
+|---|---|
+| Install and activate the zip (`wp plugin install … --activate`) | Activated; `affibloom_version` 1.0.0-rc.1, schema 11, all seven tables, the four daily or hourly events, the wizard due (`affibloom_setup` pending). |
+| The wizard on the first Affibloom page | Opened by itself on `page=affibloom-groups`; Theme, Customize, Amazon, Analytics; **Go to Dashboard** ended it. |
+| The Dashboard and the tour | The Dashboard opened with the tour; Skip ended it. |
+| Add a product | Five through `POST /products` (Add A New Link's route) and named through `PATCH /products/{id}`: 201 and 200. |
+| Place a box; a guide draws it | A post with the block and `[affibloom id]`: both boxes drawn for a visitor; the cloaked link answers 302 to the destination with `X-Robots-Tag: noindex, nofollow`. |
+| A click is counted | A visitor's click on the box title: `POST /clicks` 204, one row (product 5, post 10, `title`). With headless Chromium's own user agent the click is dropped as a bot, as designed. |
+| Logs and DB Status open | Both open; DB Status lists the seven tables. |
+| Plugin Check on the zip | No new finding; the release's run is triaged in `security.md`. |
+
+PHP 8.3 is covered by this run and by every run on Local. **Staging's run** (Lasso active there, LiteSpeed's page
+cache, C2) is the cutover's (Tasks 40-41).

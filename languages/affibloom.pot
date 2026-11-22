@@ -1,0 +1,5880 @@
+# Copyright (C) 2026 Devrupash
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Affibloom 1.0.0-rc.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/affibloom\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-22T01:55:05+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: affibloom\n"
+
+#. Plugin Name of the plugin
+#: affibloom.php
+#: src/Interface/Admin/AdminMenu.php:107
+#: src/Interface/Admin/AdminMenu.php:108
+#: src/Interface/Editor/ElementorDisplayWidget.php:44
+#: templates/admin/partials/header.php:26
+#: templates/admin/partials/header.php:32
+#: templates/admin/setup.php:33
+msgid "Affibloom"
+msgstr ""
+
+#. Description of the plugin
+#: affibloom.php
+msgid "Affiliate product library and product boxes for VolleyballVault."
+msgstr ""
+
+#. Author of the plugin
+#: affibloom.php
+msgid "Devrupash"
+msgstr ""
+
+#. Author URI of the plugin
+#: affibloom.php
+msgid "https://devrupash.com"
+msgstr ""
+
+#: affibloom.php:36
+msgid "Affibloom needs PHP 8.3 and WordPress 7.1.4 or newer. It has not started."
+msgstr ""
+
+#: src/Infrastructure/WordPress/AmazonImportSchedule.php:35
+msgid "Every five minutes"
+msgstr ""
+
+#: src/Infrastructure/WordPress/GroupTaxonomy.php:38
+#: src/Plugin.php:1030
+#: templates/admin/groups.php:23
+#: templates/admin/partials/groups-list.php:76
+#: templates/admin/partials/product-list.php:37
+#: templates/admin/partials/product-row.php:149
+#: templates/admin/partials/selection-bar.php:46
+#: templates/admin/product.php:225
+#: templates/admin/product.php:232
+msgid "Groups"
+msgstr ""
+
+#: src/Infrastructure/WordPress/ProductPostType.php:52
+msgctxt "post status"
+msgid "Retired"
+msgstr ""
+
+#: src/Infrastructure/WordPress/ProductPostType.php:69
+#: templates/admin/partials/dashboard-tiles.php:22
+#: templates/admin/partials/field-links.php:67
+#: templates/admin/partials/pager.php:73
+#: templates/admin/partials/tables-list.php:31
+msgid "Products"
+msgstr ""
+
+#: src/Infrastructure/WordPress/TablePostType.php:47
+#: src/Plugin.php:1029
+#: templates/admin/partials/tables-list.php:99
+#: templates/admin/tables.php:26
+msgid "Tables"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:121
+msgid "Link Details"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:122
+#: templates/admin/partials/filters-panel.php:80
+msgid "Group"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:123
+#: templates/admin/partials/table-builder.php:164
+msgid "Field"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:125
+#: templates/editor/display-modal.php:22
+msgid "Table"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:129
+#: templates/admin/logs.php:33
+msgid "Logs"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:132
+msgid "Setup"
+msgstr ""
+
+#: src/Interface/Admin/AdminMenu.php:135
+#: templates/admin/db-status.php:23
+msgid "DB Status"
+msgstr ""
+
+#: src/Interface/Admin/ClassicLinkSearch.php:63
+#: src/Interface/Rest/ProductSearchHandler.php:93
+msgid "Product"
+msgstr ""
+
+#: src/Interface/Admin/DashboardScreen.php:38
+msgid "Sorting by Opportunities is only available on the Opportunities tab. Showing All Links sorted by Last Updated instead."
+msgstr ""
+
+#: src/Interface/Admin/DbStatusScreen.php:45
+msgid "Table already exists."
+msgstr ""
+
+#. translators: 1: posts indexed so far, 2: posts in the rebuild.
+#: src/Interface/Admin/LinkIndexText.php:27
+#, php-format
+msgid "%1$s completed of %2$s total"
+msgstr ""
+
+#: src/Interface/Admin/LinkIndexText.php:32
+msgid "Calculating…"
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:35
+msgid "Settings saved."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:36
+msgid "Some values were not valid and kept their previous setting. Everything else was saved."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:37
+msgid "Display settings were reset to their defaults."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:38
+msgid "Icon added."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:39
+msgid "Icon removed."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:40
+msgid "The icon was not added. Give it a name of 1 to 40 characters and choose an SVG, PNG or WebP image."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:41
+msgid "That icon comes from your site's CSS, so it stays."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:43
+msgid "Tracking ID Saved!"
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:44
+msgid "That was not a valid Tracking ID, so it was not saved."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:46
+#: templates/admin/dashboard.php:95
+#: templates/admin/product.php:90
+msgid "Product saved."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:48
+msgid "Success! Locations now show this link."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:50
+msgid "Product deleted."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:52
+msgid "Group saved."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:54
+msgid "Successfully deleted the Group."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:56
+#: templates/admin/partials/field-form.php:33
+msgid "Field saved."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:58
+msgid "Successfully deleted the Field."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:60
+#: src/Interface/Admin/Notice.php:61
+msgid "Settings were saved, but Creators API credentials could not be validated."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:60
+msgid "Your saved credentials were kept; try again when the service is available."
+msgstr ""
+
+#: src/Interface/Admin/Notice.php:61
+msgid "They were kept and marked refused; check them and Validate again."
+msgstr ""
+
+#: src/Interface/Admin/OpportunitiesScreen.php:209
+msgid "Opportunity lists"
+msgstr ""
+
+#: src/Interface/Admin/OpportunitiesScreen.php:212
+#: templates/admin/field.php:39
+#: templates/admin/partials/groups-list.php:51
+#: templates/admin/partials/opportunity-content-list.php:23
+#: templates/admin/partials/opportunity-domains-list.php:21
+#: templates/admin/partials/opportunity-post-links-list.php:102
+msgid "Links"
+msgstr ""
+
+#: src/Interface/Admin/OpportunitiesScreen.php:217
+#: templates/admin/partials/opportunity-domains-list.php:75
+#: templates/admin/partials/settings-general-support.php:31
+msgid "Domains"
+msgstr ""
+
+#: src/Interface/Admin/OpportunitiesScreen.php:222
+#: templates/admin/partials/locations-list.php:64
+#: templates/admin/partials/locations-list.php:75
+#: templates/admin/partials/opportunity-content-list.php:21
+#: templates/admin/partials/opportunity-content-list.php:78
+#: templates/admin/partials/opportunity-domain-links-list.php:18
+#: templates/admin/partials/opportunity-links-list.php:18
+#: templates/admin/partials/table-locations-modal.php:31
+#: templates/admin/partials/table-locations-modal.php:38
+msgid "Content"
+msgstr ""
+
+#: src/Interface/Admin/ProductScreen.php:349
+msgid "Product sections"
+msgstr ""
+
+#: src/Interface/Admin/ProductScreen.php:352
+#: templates/admin/field.php:45
+#: templates/admin/group.php:44
+msgid "Details"
+msgstr ""
+
+#: src/Interface/Admin/ProductScreen.php:356
+#: src/Interface/Admin/ProductScreen.php:357
+#: templates/admin/partials/locations-list.php:158
+#: templates/admin/partials/product-list.php:40
+#: templates/admin/partials/tables-list.php:34
+msgid "Locations"
+msgstr ""
+
+#: src/Interface/Admin/ProductScreen.php:363
+#: src/Interface/Admin/ProductScreen.php:364
+#: src/Plugin.php:1028
+#: templates/admin/partials/dashboard-tiles.php:57
+#: templates/admin/partials/opportunity-links-list.php:72
+msgid "Opportunities"
+msgstr ""
+
+#: src/Interface/Admin/ProductScreen.php:372
+msgid "Variants"
+msgstr ""
+
+#: src/Interface/Admin/RichEditorSettings.php:81
+msgid "Enter a description"
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:131
+msgid "Add A Display"
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:132
+msgid "Loading Display..."
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:133
+msgid "Retry Add A Display"
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:137
+#: templates/admin/partials/palette.php:14
+#: blocks/product-box/edit.js:137
+msgid "Loading…"
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:138
+#: blocks/product-box/edit.js:143
+msgid "Retry Add a Display"
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:139
+#: blocks/product-box/edit.js:195
+msgid "This display has nothing to show: its product is gone or not published."
+msgstr ""
+
+#: src/Interface/Editor/EditorAssets.php:140
+#: blocks/product-box/edit.js:203
+msgid "The preview could not be loaded."
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:80
+msgid "Affibloom Shortcode"
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:88
+msgid "Enter your shortcode"
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:150
+#: blocks/product-box/edit.js:140
+msgid "Select a New Display"
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:150
+#: blocks/product-box/edit.js:141
+msgid "Add a Display"
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:156
+#: blocks/product-box/edit.js:217
+msgid "Choose a Link to display."
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:160
+#: blocks/product-box/edit.js:241
+msgid "Update Display"
+msgstr ""
+
+#: src/Interface/Editor/ElementorDisplayWidget.php:161
+#: blocks/product-box/edit.js:251
+msgid "Edit Display"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:53
+msgid "Override the theme. Supported theme values are: <i>Cactus, Cutter, Lab, Llama, Money, Splash</i>"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:56
+msgid "Product title"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:56
+msgid "Hide the product title by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:56
+msgid "Override the product title.<br/>Hide the product title by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:57
+msgid "Title url"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:57
+msgid "Customize the title link destination. Leave blank for the default.<br/>Example: https://example.com"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:58
+msgid "Title tag"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:58
+msgid "Set the title tag. Common values are: <i>H1, H2, H3, H4</i>"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:59
+msgid "Product description"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:59
+msgid "Hide the product description by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:59
+msgid "Override the product description<br/>Hide the product description by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:60
+#: templates/admin/partials/display-colors-accordion.php:14
+#: templates/admin/partials/display-layout-panel.php:34
+#: templates/admin/partials/table-builder.php:132
+#: templates/admin/partials/table-inspector.php:44
+#: templates/admin/partials/table-inspector.php:75
+#: templates/admin/partials/table-inspector.php:76
+msgid "Badge"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:60
+msgid "Hide the badge by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:60
+msgid "Override the display badge.<br/>Hide the badge by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:61
+msgid "Brag"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:61
+msgid "Show the brag line on your display by <code>true</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:62
+msgid "Show/Hide the price"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:63
+msgid "Show/Hide all Fields"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:64
+msgid "Show/Hide the Primary Rating"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:65
+#: templates/admin/partials/display-theme-row.php:14
+#: templates/admin/partials/display-theme-row.php:21
+#: templates/admin/partials/tables-list.php:32
+#: templates/admin/setup.php:18
+#: templates/admin/table.php:110
+msgid "Theme"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:67
+msgid "Button url"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:67
+msgid "Override the button url.<br/>Example: https://example.com"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:68
+msgid "First button url"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:68
+msgid "Override the first button url.<br/>Example: https://example.com"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:70
+msgid "Button text"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:70
+msgid "Override the button text."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:71
+msgid "First button text"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:71
+msgid "Override the first button text."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:72
+msgid "Second button url"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:72
+msgid "Override the second button url."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:73
+msgid "Second button text"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:73
+msgid "Override the second button text."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:74
+msgid "Image url"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:74
+msgid "Override the image url.<br/>Example: https://example.com/image.png"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:75
+#: templates/admin/partials/display-behaviour-accordions.php:33
+#: templates/admin/partials/display-behaviour-accordions.php:40
+#: templates/admin/setup.php:107
+msgid "Disclosure text"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:75
+msgid "Override the disclosure text."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:76
+msgid "Anchor id"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:76
+msgid "Override the anchor id.<br/>Example: the-anchor-link-id"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:77
+msgid "Button type"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:77
+msgid "Set this value to show either the Secondary(secondary) or Primary(primary) button. This defaults to \"primary\"."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:79
+#: templates/admin/partials/display-layout-accordion.php:124
+msgid "Columns"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:81
+msgid "Sets the Gallery to display five products per row. Ideal for wide layouts. This can also be set 2, 3, 4, and 5."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:82
+msgid "Sets the Grid to display three products per row. Ideal for wide layouts. This can also be set to 1 for a single display per-row and the limit can be set is 5."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:84
+#: templates/admin/partials/display-layout-panel.php:29
+msgid "Compact"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:84
+msgid "This will hide the description and all fields giving you a much more compact display by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:85
+msgid "Limit"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:85
+msgid "Show just the top X products in a group."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:86
+msgid "Bullet"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:86
+msgid "Override the bullet type. To hide the bullet use <code>hide</code>. All supported values are: <i>decimal, alpha, roman, square, circle, hide</i>"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:87
+msgid "Show/Hide the Disclosure"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:88
+msgid "data-nosnippet HTML attribute"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:88
+msgid "Keeps the display out of search result snippets."
+msgstr ""
+
+#: src/Interface/Messages.php:25
+msgid "URL is incorrect."
+msgstr ""
+
+#: src/Interface/Messages.php:27
+msgid "Name and Primary Destination URL are required."
+msgstr ""
+
+#: src/Interface/Messages.php:29
+msgid "Invalid link IDs for repoint."
+msgstr ""
+
+#: src/Interface/Messages.php:30
+msgid "Source link is no longer active."
+msgstr ""
+
+#: src/Interface/Messages.php:31
+msgid "Target link must be published. Refresh and pick an active link."
+msgstr ""
+
+#: src/Interface/Messages.php:32
+msgid "Target URL is required."
+msgstr ""
+
+#: src/Interface/Messages.php:33
+msgid "That URL no longer matches the selected link. Refresh and try again."
+msgstr ""
+
+#: src/Interface/Messages.php:34
+msgid "This is not a valid link."
+msgstr ""
+
+#: src/Interface/Messages.php:37
+msgid "This link already exists. Please try again with a different URL."
+msgstr ""
+
+#: src/Interface/Messages.php:39
+msgid "Your bulk add is still processing. Try again in a few minutes."
+msgstr ""
+
+#: src/Interface/Messages.php:41
+msgid "Invalid view name."
+msgstr ""
+
+#: src/Interface/Messages.php:42
+msgid "Saved view limit reached."
+msgstr ""
+
+#: src/Interface/Messages.php:43
+msgid "Saved view not found."
+msgstr ""
+
+#: src/Interface/Messages.php:45
+msgid "Give the field a title of 1 to 80 characters."
+msgstr ""
+
+#: src/Interface/Messages.php:46
+msgid "Choose a field type."
+msgstr ""
+
+#: src/Interface/Messages.php:47
+#: src/Interface/Rest/FieldsController.php:308
+#: src/Interface/Rest/TablesController.php:697
+msgid "That field does not exist."
+msgstr ""
+
+#: src/Interface/Messages.php:50
+#: templates/admin/partials/field-form.php:30
+msgid "Title is required."
+msgstr ""
+
+#: src/Interface/Messages.php:51
+msgid "Keep the description under 1,000 characters."
+msgstr ""
+
+#: src/Interface/Messages.php:53
+msgid "Keep this value under 1,000 characters."
+msgstr ""
+
+#: src/Interface/Messages.php:56
+#: templates/admin/group.php:63
+#: templates/editor/display-modal.php:200
+msgid "Name is required."
+msgstr ""
+
+#: src/Interface/Messages.php:58
+#: templates/admin/partials/table-create-modal.php:22
+msgid "Please fill out \"Table Name\" field"
+msgstr ""
+
+#: src/Interface/Messages.php:60
+msgid "Please input table name"
+msgstr ""
+
+#: src/Interface/Messages.php:62
+msgid "Missing the \"Button Text\" information"
+msgstr ""
+
+#: src/Interface/Messages.php:63
+msgid "Missing the \"Button URL\" information"
+msgstr ""
+
+#: src/Interface/Messages.php:64
+msgid "A group with this name already exists."
+msgstr ""
+
+#: src/Interface/Messages.php:66
+msgid "Amazon Creators API credentials verified successfully."
+msgstr ""
+
+#: src/Interface/Messages.php:67
+msgid "Invalid Amazon Creators API credentials."
+msgstr ""
+
+#: src/Interface/Messages.php:68
+msgid "Service temporarily unavailable."
+msgstr ""
+
+#: src/Interface/Messages.php:70
+msgid "Permalink and Tracking ID cannot be empty."
+msgstr ""
+
+#: src/Interface/Messages.php:71
+msgid "Duplicate variant slug or tracking ID in the same list."
+msgstr ""
+
+#: src/Interface/Messages.php:72
+msgid "Variant permalink cannot match this link’s primary permalink."
+msgstr ""
+
+#: src/Interface/Messages.php:73
+msgid "That permalink is already used by another link’s variant."
+msgstr ""
+
+#: src/Interface/Messages.php:74
+msgid "That slug is already used by another page or link."
+msgstr ""
+
+#: src/Interface/Messages.php:75
+msgid "That slug is already a product's link."
+msgstr ""
+
+#: src/Interface/Messages.php:76
+msgid "This value is not valid."
+msgstr ""
+
+#. translators: 1: a product's slug, 2: a post type's name.
+#: src/Interface/Messages.php:88
+#, php-format
+msgid "Permalink %1$s is being used by %2$s. This product's link will not open until you change it."
+msgstr ""
+
+#. translators: %s: the "Update now" link.
+#: src/Interface/NoticeText.php:31
+#, php-format
+msgid "There's a new version available. %s."
+msgstr ""
+
+#: src/Interface/NoticeText.php:32
+msgid "Update now"
+msgstr ""
+
+#. translators: 1: step number, 2: the error.
+#: src/Interface/NoticeText.php:38
+#, php-format
+msgid "Affibloom could not finish updating its data (step %1$d: %2$s). It will try again on the next admin page."
+msgstr ""
+
+#. translators: %s: the "Turn on Auto Amazon" link.
+#: src/Interface/NoticeText.php:47
+#, php-format
+msgid "Migrating from Amazon SiteStripe? %s to auto-migrate all your SiteStripe links within 24-48 hours!"
+msgstr ""
+
+#: src/Interface/NoticeText.php:48
+msgid "Turn on Auto Amazon"
+msgstr ""
+
+#. translators: %s: the "See the progress" link.
+#: src/Interface/NoticeText.php:53
+#, php-format
+msgid "We're rounding up a list of your links. %s."
+msgstr ""
+
+#: src/Interface/NoticeText.php:54
+msgid "See the progress"
+msgstr ""
+
+#: src/Interface/NoticeText.php:63
+#: templates/admin/partials/dashboard-tiles.php:55
+msgid "See broken URLs"
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:183
+#: src/Interface/Rest/AmazonController.php:238
+#: src/Interface/Rest/AmazonController.php:342
+#: templates/admin/partials/amazon-bulk-sync.php:35
+#: templates/admin/partials/product-display-card.php:121
+#: templates/admin/partials/product-display-card.php:122
+msgid "Needs the Amazon API"
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:184
+msgid "Amazon product search is temporarily unavailable."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:185
+#: templates/admin/partials/add-modal.php:47
+msgid "Amazon search failed. Try again."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:236
+msgid "Bulk Amazon sync is already running."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:237
+msgid "No Amazon links need syncing."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:280
+msgid "Invalid product ID."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:281
+msgid "Could not resolve Amazon ASIN."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:282
+msgid "Amazon product not found."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:283
+msgid "Amazon sync returned incomplete product data."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:284
+msgid "Amazon sync failed to verify persisted product data."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:285
+msgid "Amazon sync failed."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:340
+msgid "This product no longer exists."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:341
+msgid "Refresh is for Amazon products with an ASIN."
+msgstr ""
+
+#. translators: %s: Amazon's error code, such as NotFound.
+#: src/Interface/Rest/AmazonController.php:344
+#, php-format
+msgid "Amazon fetch failed (%s)."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:345
+#: templates/admin/partials/product-display-card.php:118
+msgid "Could not fetch Amazon product image."
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:392
+#: templates/admin/partials/amazon-api-card.php:76
+msgid "Credential ID"
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:393
+#: templates/admin/partials/amazon-api-card.php:85
+msgid "Secret"
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:394
+#: templates/admin/partials/amazon-api-card.php:99
+msgid "Version"
+msgstr ""
+
+#: src/Interface/Rest/AmazonController.php:395
+#: templates/admin/partials/amazon-api-card.php:95
+msgid "Partner tag"
+msgstr ""
+
+#. translators: %s: the empty fields' names, separated by commas.
+#: src/Interface/Rest/AmazonController.php:402
+#, php-format
+msgid "Missing required fields: %s"
+msgstr ""
+
+#: src/Interface/Rest/CsvResponse.php:37
+msgid "Could not open export stream."
+msgstr ""
+
+#: src/Interface/Rest/DashboardExportController.php:116
+msgid "Export is only available on broken-links and out-of-stock views."
+msgstr ""
+
+#: src/Interface/Rest/EditorController.php:153
+#: src/Interface/Rest/EditorController.php:187
+#: src/Interface/Rest/LocationsController.php:92
+#: src/Interface/Rest/ProductFieldsController.php:207
+#: src/Interface/Rest/ProductPreviewController.php:100
+#: src/Interface/Rest/ProductsController.php:251
+#: src/Interface/Rest/ProductsController.php:357
+#: src/Interface/Rest/VariantsController.php:108
+msgid "This product does not exist."
+msgstr ""
+
+#: src/Interface/Rest/EditorController.php:204
+#: src/Interface/Rest/EditorController.php:237
+msgid "This display cannot be drawn."
+msgstr ""
+
+#: src/Interface/Rest/FieldsController.php:296
+msgid "This is a built-in field, so it can't be deleted."
+msgstr ""
+
+#: src/Interface/Rest/FieldsController.php:298
+#: templates/admin/field.php:97
+msgid "You can't delete a Field if there are Links using it. Remove all Links using this Field first."
+msgstr ""
+
+#: src/Interface/Rest/GroupsController.php:299
+#: templates/admin/partials/group-holdup-modal.php:21
+msgid "You can't delete a Group if it has associated Links. Remove all Links using this Group first."
+msgstr ""
+
+#: src/Interface/Rest/GroupsController.php:325
+#: templates/admin/partials/add-to-group-modal.php:15
+msgid "Link already exists."
+msgstr ""
+
+#: src/Interface/Rest/GroupsController.php:412
+msgid "This group does not exist."
+msgstr ""
+
+#: src/Interface/Rest/LinkIndexController.php:86
+msgid "A rebuild is already running."
+msgstr ""
+
+#: src/Interface/Rest/LinkIndexController.php:91
+msgid "Rebuild started."
+msgstr ""
+
+#: src/Interface/Rest/LocationPreviewController.php:105
+msgid "This location is no longer in the index. Reload the page."
+msgstr ""
+
+#: src/Interface/Rest/OpportunitiesController.php:165
+#: src/Interface/Rest/OpportunitiesController.php:191
+#: src/Interface/Rest/OpportunitiesController.php:214
+msgid "This link is no longer on the page."
+msgstr ""
+
+#: src/Interface/Rest/OpportunitiesController.php:192
+#: templates/admin/partials/monetize-switch.php:16
+msgid "This link is in the post's content; edit the post to change it."
+msgstr ""
+
+#: src/Interface/Rest/OpportunitiesController.php:193
+msgid "Choose a published product."
+msgstr ""
+
+#: src/Interface/Rest/ProductAlertsController.php:77
+#: src/Interface/Rest/ProductAlertsController.php:81
+msgid "Invalid post_id or type"
+msgstr ""
+
+#: src/Interface/Rest/ProductsController.php:257
+#: templates/admin/partials/save-modal.php:33
+msgid "This Product Already Exists"
+msgstr ""
+
+#: src/Interface/Rest/ProductsController.php:359
+#: templates/admin/partials/delete-modal.php:26
+msgid "Could not delete. Please try again."
+msgstr ""
+
+#: src/Interface/Rest/ProductsController.php:399
+#: templates/admin/product.php:347
+msgid "You can't delete a URL if it has active links or displays."
+msgstr ""
+
+#: src/Interface/Rest/ProductsController.php:501
+msgid "Invalid selection. Search again and select the product."
+msgstr ""
+
+#: src/Interface/Rest/SettingsRestController.php:169
+msgid "Unknown settings tab."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:356
+#: src/Interface/Rest/TablesController.php:673
+msgid "This table was changed in another window. Reload to see the latest version."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:361
+#: src/Interface/Rest/TablesController.php:568
+#: src/Interface/Rest/TablesController.php:678
+msgid "That table does not exist."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:572
+#: templates/admin/partials/holdup-modal.php:31
+#: templates/admin/partials/location-host.php:15
+#: templates/admin/partials/opportunity-content-list.php:61
+#: templates/admin/partials/opportunity-detected-row.php:21
+#: templates/admin/partials/opportunity-link-row.php:21
+#: templates/admin/partials/settings-general-uninstall.php:42
+msgid "(no title)"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:617
+#: templates/admin/table.php:201
+msgid "You can't delete a Table if it is in use on your site. Remove this Table from your content first."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:630
+msgid "Table is not found"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:691
+msgid "This product already exists, please select another product"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:692
+msgid "That product does not exist."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:693
+msgid "That group does not exist."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:694
+msgid "Please add a Product before adding a field"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:695
+msgid "Please add a Field to the empty column before adding another"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:696
+msgid "This field already exists, please select another field"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:698
+msgid "That field is no longer in this table. Reload to see the latest version."
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:699
+msgid "Unexpected error. Please contact your developer"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:700
+msgid "Invalid data"
+msgstr ""
+
+#: src/Interface/Rest/TablesController.php:701
+msgid "That product is no longer in this table. Reload to see the latest version."
+msgstr ""
+
+#: src/Interface/Rest/VariantsController.php:125
+#: templates/admin/product-variants.php:50
+#: templates/admin/product-variants.php:151
+msgid "Could not save variants."
+msgstr ""
+
+#: src/Plugin.php:1027
+#: templates/admin/dashboard.php:29
+#: templates/admin/product-locations.php:30
+#: templates/admin/product-opportunities.php:38
+#: templates/admin/product-variants.php:34
+#: templates/admin/product.php:47
+msgid "Dashboard"
+msgstr ""
+
+#: src/Plugin.php:1032
+#: templates/admin/fields.php:24
+#: templates/admin/partials/fields-list.php:73
+msgid "Fields"
+msgstr ""
+
+#: src/Plugin.php:1033
+#: templates/admin/partials/settings-band.php:32
+msgid "Settings"
+msgstr ""
+
+#. translators: %s: how many products the library holds.
+#: templates/admin/dashboard.php:17
+#, php-format
+msgid "Search all %s links…"
+msgstr ""
+
+#: templates/admin/dashboard.php:30
+msgid "Your affiliate products, their links and where they are used."
+msgstr ""
+
+#: templates/admin/dashboard.php:96
+#: templates/admin/product.php:91
+msgid "Try again. For some reason your product didn't save."
+msgstr ""
+
+#: templates/admin/dashboard.php:123
+#: templates/admin/opportunities.php:137
+#: templates/admin/partials/list-head-actions.php:25
+#: templates/admin/partials/soon.php:18
+#: templates/admin/partials/soon.php:20
+#: templates/admin/partials/soon.php:22
+#: templates/admin/product-opportunities.php:83
+#: templates/admin/product-variants.php:137
+#: templates/admin/product.php:325
+#: templates/admin/tables.php:67
+#: templates/editor/display-modal.php:57
+msgid "Coming soon"
+msgstr ""
+
+#: templates/admin/dashboard.php:128
+#: templates/admin/groups.php:56
+#: templates/admin/partials/field-modal.php:108
+#: templates/admin/partials/palette.php:15
+#: templates/admin/tables.php:61
+msgid "The list could not be loaded."
+msgstr ""
+
+#: templates/admin/dashboard.php:129
+#: templates/admin/fields.php:58
+#: templates/admin/groups.php:57
+#: templates/admin/opportunities.php:132
+#: templates/admin/product-locations.php:67
+#: templates/admin/product-opportunities.php:78
+#: templates/admin/tables.php:62
+msgid "Try again"
+msgstr ""
+
+#: templates/admin/dashboard.php:141
+msgid "Delete the selected links?"
+msgstr ""
+
+#: templates/admin/dashboard.php:142
+msgid "If deleted, you won't be able to get them back."
+msgstr ""
+
+#: templates/admin/db-status.php:24
+msgid "Affibloom's tables, checked and brought up to date as this page loads."
+msgstr ""
+
+#: templates/admin/db-status.php:34
+#: templates/admin/partials/table-create-modal.php:31
+#: templates/admin/partials/table-create-modal.php:32
+msgid "Table Name"
+msgstr ""
+
+#: templates/admin/db-status.php:35
+msgid "Output"
+msgstr ""
+
+#: templates/admin/field.php:19
+msgid "Add a New Field"
+msgstr ""
+
+#: templates/admin/field.php:36
+msgid "Field sections"
+msgstr ""
+
+#: templates/admin/field.php:87
+msgid "Delete This Field?"
+msgstr ""
+
+#: templates/admin/field.php:88
+#: templates/admin/group.php:153
+#: templates/admin/product.php:337
+msgid "If deleted, you won't be able to get it back."
+msgstr ""
+
+#: templates/admin/field.php:90
+msgid "Could not delete the field. Please try again."
+msgstr ""
+
+#: templates/admin/fields.php:25
+msgid "The details a product can carry, like size, weight, pros and cons, and where each one is used."
+msgstr ""
+
+#: templates/admin/fields.php:30
+msgid "Search Fields"
+msgstr ""
+
+#: templates/admin/fields.php:33
+msgid "Add New Field"
+msgstr ""
+
+#: templates/admin/fields.php:57
+#: templates/admin/opportunities.php:131
+#: templates/admin/product-locations.php:66
+#: templates/admin/product-opportunities.php:77
+msgid "Failed to load data."
+msgstr ""
+
+#: templates/admin/group.php:20
+#: templates/editor/display-modal.php:208
+msgid "Add a New Group"
+msgstr ""
+
+#: templates/admin/group.php:35
+msgid "Group sections"
+msgstr ""
+
+#. translators: %s: how many products are in the group.
+#: templates/admin/group.php:39
+#, php-format
+msgid "Links %s"
+msgstr ""
+
+#: templates/admin/group.php:64
+msgid "Updating Group"
+msgstr ""
+
+#: templates/admin/group.php:65
+#: templates/admin/partials/field-form.php:32
+msgid "Saving your changes now."
+msgstr ""
+
+#: templates/admin/group.php:66
+msgid "Try again. For some reason your group didn't save."
+msgstr ""
+
+#: templates/admin/group.php:70
+#: templates/admin/partials/fields-list.php:38
+#: templates/admin/partials/groups-list.php:49
+#: templates/admin/partials/product-row.php:138
+#: templates/admin/partials/tables-list.php:30
+#: templates/admin/product-variants.php:57
+#: templates/admin/product-variants.php:64
+#: templates/admin/product-variants.php:121
+#: templates/admin/product.php:101
+#: templates/admin/table.php:69
+#: templates/editor/display-modal.php:212
+msgid "Name"
+msgstr ""
+
+#: templates/admin/group.php:73
+#: templates/editor/display-modal.php:213
+msgid "Group Name Goes Here"
+msgstr ""
+
+#: templates/admin/group.php:80
+msgid "Slug"
+msgstr ""
+
+#: templates/admin/group.php:88
+#: templates/admin/partials/display-layout-panel.php:39
+#: templates/admin/partials/field-form.php:80
+#: templates/admin/partials/field-form.php:87
+#: templates/admin/partials/field-modal.php:81
+#: templates/admin/partials/field-modal.php:88
+#: templates/admin/partials/groups-list.php:50
+#: templates/admin/partials/product-display-card.php:195
+#: templates/admin/partials/product-display-card.php:202
+#: templates/editor/display-modal.php:217
+msgid "Description"
+msgstr ""
+
+#: templates/admin/group.php:95
+#: templates/admin/logs.php:76
+#: templates/admin/partials/field-form.php:110
+#: templates/admin/partials/product-row.php:197
+#: templates/admin/partials/selection-bar.php:57
+#: templates/admin/partials/unsaved-modal.php:28
+#: templates/admin/product.php:322
+#: templates/admin/settings-amazon.php:161
+#: templates/admin/settings-display.php:190
+#: templates/admin/settings.php:79
+#: templates/editor/display-modal.php:223
+msgid "Save Changes"
+msgstr ""
+
+#. translators: %s: how many links are selected (one).
+#. translators: %s: how many links are selected (several).
+#: templates/admin/group.php:101
+#: templates/admin/group.php:103
+#: templates/admin/partials/selection-bar.php:14
+#: templates/admin/partials/selection-bar.php:16
+#, php-format
+msgid "%s link selected"
+msgid_plural "%s links selected"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/group.php:106
+msgid "Could not remove links from this group."
+msgstr ""
+
+#: templates/admin/group.php:107
+msgid "Could not save the order. Please try again."
+msgstr ""
+
+#: templates/admin/group.php:108
+#: templates/admin/group.php:121
+msgid "No links in this group yet."
+msgstr ""
+
+#: templates/admin/group.php:112
+#: templates/admin/partials/selection-bar.php:27
+msgid "Select All"
+msgstr ""
+
+#: templates/admin/group.php:113
+#: templates/admin/partials/selection-bar.php:30
+msgid "Clear Selection"
+msgstr ""
+
+#. translators: %d: the bullet's place in the list, from 1.
+#. translators: %s: icon name.
+#: templates/admin/group.php:116
+#: templates/admin/group.php:164
+#: templates/admin/group.php:175
+#: templates/admin/partials/feature-row.php:23
+#: templates/admin/partials/field-modal.php:143
+#: templates/admin/partials/group-member-row.php:46
+#: templates/admin/partials/icon-set-item.php:35
+#: templates/admin/partials/product-button.php:66
+#: templates/admin/partials/table-inspector.php:118
+#: templates/admin/partials/variant-rows.php:40
+#: templates/admin/product-variants.php:148
+#: templates/admin/product.php:363
+#: templates/admin/table.php:223
+#: templates/admin/table.php:240
+msgid "Remove"
+msgstr ""
+
+#: templates/admin/group.php:122
+msgid "Links in this group, in display order"
+msgstr ""
+
+#: templates/admin/group.php:137
+msgid "Delete This Group"
+msgstr ""
+
+#: templates/admin/group.php:152
+msgid "Delete This Group?"
+msgstr ""
+
+#: templates/admin/group.php:162
+msgid "Remove This Link From Group?"
+msgstr ""
+
+#: templates/admin/group.php:163
+msgid "This will remove the link from this group, but the link will remain in Affibloom and in other Groups (if applicable)."
+msgstr ""
+
+#: templates/admin/group.php:166
+#: templates/admin/group.php:177
+#: templates/admin/product-variants.php:150
+#: templates/admin/product.php:365
+#: templates/admin/table.php:225
+#: templates/admin/table.php:242
+#: templates/admin/table.php:259
+msgid "Removing…"
+msgstr ""
+
+#: templates/admin/group.php:173
+msgid "Remove Selected Links From Group?"
+msgstr ""
+
+#: templates/admin/group.php:174
+msgid "This will remove the selected links from this group, but the links will remain in Affibloom and other Groups (if applicable)."
+msgstr ""
+
+#: templates/admin/groups.php:24
+msgid "Keep related products together and show them as a list, grid or gallery."
+msgstr ""
+
+#: templates/admin/groups.php:29
+#: templates/admin/partials/table-group-picker.php:30
+#: templates/admin/partials/table-group-picker.php:31
+msgid "Search Groups"
+msgstr ""
+
+#: templates/admin/groups.php:32
+msgid "Add New Group"
+msgstr ""
+
+#: templates/admin/logs.php:15
+msgid "Link Discovery"
+msgstr ""
+
+#: templates/admin/logs.php:15
+msgid "Every time a new link on your site is discovered and stored."
+msgstr ""
+
+#: templates/admin/logs.php:16
+msgid "Amazon Processing"
+msgstr ""
+
+#: templates/admin/logs.php:16
+msgid "Each time your Amazon links are updated."
+msgstr ""
+
+#: templates/admin/logs.php:17
+msgid "Amazon Product API Errors"
+msgstr ""
+
+#: templates/admin/logs.php:17
+msgid "Any errors that occur when trying to hit the Amazon Product API."
+msgstr ""
+
+#: templates/admin/logs.php:18
+msgid "Link Alerts"
+msgstr ""
+
+#: templates/admin/logs.php:18
+msgid "Every time a health check finds a problem with a URL."
+msgstr ""
+
+#: templates/admin/logs.php:19
+msgid "Duplicate Slug Changes"
+msgstr ""
+
+#: templates/admin/logs.php:19
+msgid "Any slug conflicts we detect when changing a permalink."
+msgstr ""
+
+#: templates/admin/logs.php:20
+msgid "SQL Errors"
+msgstr ""
+
+#: templates/admin/logs.php:20
+msgid "Any database errors that occur."
+msgstr ""
+
+#: templates/admin/logs.php:34
+msgid "What Affibloom did in the background, newest file of each kind."
+msgstr ""
+
+#: templates/admin/logs.php:41
+#: templates/admin/settings-amazon.php:54
+#: templates/admin/settings-display.php:75
+#: templates/admin/settings.php:36
+#: templates/admin/setup.php:30
+msgid "Try again. For some reason your settings didn't save."
+msgstr ""
+
+#: templates/admin/logs.php:50
+msgid "Enable Logs"
+msgstr ""
+
+#: templates/admin/logs.php:52
+msgid "Off, only database errors and table repairs are written. Logs are kept for 14 days."
+msgstr ""
+
+#: templates/admin/logs.php:69
+msgid "Nothing logged yet."
+msgstr ""
+
+#: templates/admin/opportunities.php:21
+msgid "Turn Any Existing Link Into a Product Link"
+msgstr ""
+
+#: templates/admin/opportunities.php:22
+msgid "These are all of your external links that point to the same domain as an existing product you created. Choose to monetize the link with a product or dismiss the Suggestion."
+msgstr ""
+
+#: templates/admin/opportunities.php:25
+msgid "Identify And Fix Your Under-Monetized Content"
+msgstr ""
+
+#: templates/admin/opportunities.php:26
+msgid "Publishing a post that gets traffic just isn’t enough. They need to drive income. Find out which posts are under-monetized and increase your monthly revenue."
+msgstr ""
+
+#: templates/admin/opportunities.php:29
+msgid "Find Site-Wide Monetization Opportunities"
+msgstr ""
+
+#: templates/admin/opportunities.php:30
+msgid "You’ll be shocked how many times you linked to a domain you didn’t know had an affiliate program. Sign up for that program, add your new affiliate URL to Affibloom, and instantly monetize all those links."
+msgstr ""
+
+#. translators: %s: product name.
+#: templates/admin/opportunities.php:37
+#: templates/admin/opportunities.php:38
+msgid "Link Opportunities"
+msgstr ""
+
+#. translators: %s: product name.
+#: templates/admin/opportunities.php:37
+#, php-format
+msgid "Link › %s"
+msgstr ""
+
+#: templates/admin/opportunities.php:43
+#: templates/admin/opportunities.php:47
+msgid "Domain Opportunities"
+msgstr ""
+
+#. translators: %s: a domain.
+#: templates/admin/opportunities.php:46
+#, php-format
+msgid "Detected Links › %s"
+msgstr ""
+
+#: templates/admin/opportunities.php:52
+#: templates/admin/opportunities.php:56
+msgid "Content Opportunities"
+msgstr ""
+
+#. translators: %s: a post's title.
+#: templates/admin/opportunities.php:55
+#, php-format
+msgid "Content › %s"
+msgstr ""
+
+#. translators: %s: a post's title.
+#: templates/admin/opportunities.php:55
+#: templates/admin/partials/opportunity-content-filters.php:27
+msgid "All content"
+msgstr ""
+
+#: templates/admin/opportunities.php:144
+#: templates/admin/product-opportunities.php:90
+msgid "Dismiss This Opportunity"
+msgstr ""
+
+#: templates/admin/opportunities.php:145
+#: templates/admin/product-opportunities.php:91
+msgid "If you dismiss this, it will no longer appear as an opportunity."
+msgstr ""
+
+#: templates/admin/opportunities.php:146
+#: templates/admin/partials/amazon-bulk-sync.php:43
+#: templates/admin/partials/amazon-import-notice.php:23
+#: templates/admin/partials/opportunity-link-row.php:76
+#: templates/admin/partials/opportunity-links-list.php:23
+#: templates/admin/product-opportunities.php:92
+msgid "Dismiss"
+msgstr ""
+
+#: templates/admin/opportunities.php:148
+#: templates/admin/product-opportunities.php:94
+msgid "Dismissing…"
+msgstr ""
+
+#: templates/admin/opportunities.php:149
+#: templates/admin/product-opportunities.php:95
+msgid "Dismiss failed."
+msgstr ""
+
+#: templates/admin/opportunities.php:152
+#: templates/admin/product-opportunities.php:98
+msgid "Opportunity dismissed."
+msgstr ""
+
+#: templates/admin/opportunities.php:153
+#: templates/admin/product-opportunities.php:99
+msgid "Undo"
+msgstr ""
+
+#: templates/admin/opportunities.php:154
+#: templates/admin/product-opportunities.php:100
+msgid "Could not undo. Please try again."
+msgstr ""
+
+#. translators: %d: how many more links fit in this bulk add.
+#: templates/admin/partials/add-modal.php:21
+#, php-format
+msgid "Remaining links: %d"
+msgstr ""
+
+#. translators: %d: how many Amazon products are selected for the bulk add.
+#: templates/admin/partials/add-modal.php:23
+#, php-format
+msgid "Add %d Links"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:30
+msgid "The link could not be added. Please try again."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:32
+msgid "Adding…"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:33
+msgid "Continue Anyway"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:34
+#: templates/admin/partials/add-modal.php:56
+#: templates/editor/display-modal.php:295
+msgid "Add A New Link"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:35
+msgid "Bulk Add Links"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:36
+msgid "Search Amazon"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:37
+#: templates/admin/partials/add-modal.php:57
+msgid "Enter the affiliate link you would like to track."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:38
+msgid "Enter one URL per line (up to 10). Links are created in the background—you can leave this page while they process."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:39
+msgid "Search Amazon, select a product, then click Add Link."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:40
+msgid "Search Amazon, select up to 10 products, then click Add Link."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:41
+msgid "Add these links in the background? You can stay on the dashboard while they are created."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:44
+msgid "Type at least 2 characters to search."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:45
+msgid "Searching…"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:46
+msgid "No products found."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:48
+msgid "Select an Amazon product."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:49
+msgid "You can select up to 10 products."
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:50
+#: templates/admin/partials/add-modal.php:111
+#: templates/editor/display-modal.php:307
+msgid "Add Link"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:51
+#: templates/admin/partials/add-to-group-modal.php:17
+#: templates/admin/partials/field-links.php:24
+#: templates/admin/partials/fields-list.php:22
+#: templates/admin/partials/groups-list.php:26
+#: templates/admin/partials/list-pager.php:22
+#: templates/admin/partials/locations-list.php:34
+#: templates/admin/partials/monetize-modal.php:20
+#: templates/admin/partials/pager.php:26
+#: templates/admin/partials/table-group-picker.php:20
+#: templates/admin/partials/table-locations-modal.php:17
+#: templates/admin/partials/table-product-picker.php:19
+#: templates/admin/partials/tables-list.php:24
+#: templates/editor/display-modal.php:84
+#: templates/editor/display-modal.php:132
+#: templates/editor/display-modal.php:176
+#: templates/editor/display-modal.php:260
+msgid "Previous page"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:52
+#: templates/admin/partials/add-to-group-modal.php:17
+#: templates/admin/partials/field-links.php:25
+#: templates/admin/partials/fields-list.php:23
+#: templates/admin/partials/groups-list.php:27
+#: templates/admin/partials/list-pager.php:23
+#: templates/admin/partials/locations-list.php:35
+#: templates/admin/partials/monetize-modal.php:20
+#: templates/admin/partials/pager.php:27
+#: templates/admin/partials/table-group-picker.php:20
+#: templates/admin/partials/table-locations-modal.php:17
+#: templates/admin/partials/table-product-picker.php:19
+#: templates/admin/partials/tables-list.php:25
+#: templates/editor/display-modal.php:84
+#: templates/editor/display-modal.php:132
+#: templates/editor/display-modal.php:176
+#: templates/editor/display-modal.php:260
+msgid "Next page"
+msgstr ""
+
+#. translators: %s: a field's name.
+#: templates/admin/partials/add-modal.php:58
+#: templates/admin/partials/add-to-group-modal.php:22
+#: templates/admin/partials/amazon-enable-dialog.php:18
+#: templates/admin/partials/delete-modal.php:40
+#: templates/admin/partials/field-modal.php:28
+#: templates/admin/partials/field-modal.php:131
+#: templates/admin/partials/ga-pageview-modal.php:16
+#: templates/admin/partials/group-holdup-modal.php:16
+#: templates/admin/partials/holdup-modal.php:21
+#: templates/admin/partials/location-preview-modal.php:20
+#: templates/admin/partials/monetize-modal.php:25
+#: templates/admin/partials/palette.php:21
+#: templates/admin/partials/rebuild-modal.php:17
+#: templates/admin/partials/table-clone-modal.php:20
+#: templates/admin/partials/table-create-modal.php:26
+#: templates/admin/partials/table-description-modal.php:35
+#: templates/admin/partials/table-group-picker.php:25
+#: templates/admin/partials/table-locations-modal.php:22
+#: templates/admin/partials/table-product-picker.php:24
+#: templates/admin/partials/unsaved-modal.php:19
+#: templates/admin/partials/update-link-settings-modal.php:18
+#: templates/admin/partials/view-delete-modal.php:17
+#: templates/editor/display-modal.php:31
+#: templates/editor/display-modal.php:204
+#: templates/editor/display-modal.php:238
+#: templates/editor/display-modal.php:291
+#: templates/editor/display-modal.php:323
+msgid "Close"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:63
+msgid "How to add"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:64
+#: templates/admin/partials/add-modal.php:69
+#: templates/admin/partials/opportunity-domain-links-list.php:17
+#: templates/admin/partials/opportunity-links-list.php:17
+#: templates/admin/partials/opportunity-post-links-list.php:21
+msgid "URL"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:65
+#: templates/admin/partials/filters-panel.php:23
+#: templates/admin/partials/header.php:78
+#: templates/admin/partials/settings-band.php:17
+#: templates/admin/setup.php:20
+msgid "Amazon"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:73
+msgid "Links, one per line"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:79
+msgid "Edit the links"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:85
+msgid "Adding links"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:88
+msgid "Enter each new link on a separate line (Shift + Enter)"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:93
+msgid "Search Amazon products"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:94
+msgid "Search Amazon products…"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:95
+#: templates/admin/partials/dashboard-search.php:22
+#: templates/admin/partials/locations-actions.php:24
+#: templates/admin/partials/opportunities-actions.php:32
+#: templates/admin/partials/variants-actions.php:15
+msgid "Search"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:99
+msgid "Search result pages"
+msgstr ""
+
+#: templates/admin/partials/add-modal.php:107
+#: templates/admin/table.php:34
+msgid "Reload"
+msgstr ""
+
+#. translators: %s: a field's name.
+#: templates/admin/partials/add-to-group-modal.php:14
+#: templates/admin/partials/field-modal.php:106
+#: templates/editor/display-modal.php:98
+#: templates/editor/display-modal.php:148
+#: templates/editor/display-modal.php:186
+#: templates/editor/display-modal.php:335
+msgid "Add"
+msgstr ""
+
+#. translators: %s: a field's name.
+#: templates/admin/partials/add-to-group-modal.php:14
+#: templates/admin/partials/field-modal.php:106
+#: templates/admin/partials/table-group-picker.php:19
+#: templates/admin/partials/table-product-picker.php:18
+#: templates/editor/display-modal.php:234
+msgid "Added"
+msgstr ""
+
+#: templates/admin/partials/add-to-group-modal.php:15
+#: templates/admin/partials/palette.php:14
+#: templates/editor/display-modal.php:66
+#: templates/editor/display-modal.php:232
+msgid "No links found."
+msgstr ""
+
+#: templates/admin/partials/add-to-group-modal.php:16
+#: templates/editor/display-modal.php:288
+msgid "Could not add the link. Please try again."
+msgstr ""
+
+#: templates/admin/partials/add-to-group-modal.php:21
+#: templates/admin/partials/selection-bar.php:39
+#: templates/editor/display-modal.php:242
+msgid "Add to Group"
+msgstr ""
+
+#: templates/admin/partials/add-to-group-modal.php:27
+#: templates/admin/partials/add-to-group-modal.php:28
+#: templates/admin/partials/monetize-modal.php:31
+#: templates/admin/partials/monetize-modal.php:32
+#: templates/admin/partials/table-product-picker.php:29
+#: templates/admin/partials/table-product-picker.php:30
+#: templates/editor/display-modal.php:79
+#: templates/editor/display-modal.php:80
+#: templates/editor/display-modal.php:254
+#: templates/editor/display-modal.php:255
+msgid "Search URLs"
+msgstr ""
+
+#: templates/admin/partials/add-to-group-modal.php:34
+#: templates/admin/partials/tour.php:36
+#: templates/admin/setup.php:22
+#: templates/editor/display-modal.php:263
+msgid "Done"
+msgstr ""
+
+#. translators: %d: days since the issue was found, the first day counting as 1.
+#: templates/admin/partials/alert-cell.php:21
+#, php-format
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: date, e.g. "Nov 16, 2026".
+#: templates/admin/partials/alert-cell.php:33
+#, php-format
+msgid "Broken since %s"
+msgstr ""
+
+#. translators: %s: date, e.g. "Nov 16, 2026".
+#: templates/admin/partials/alert-cell.php:35
+#, php-format
+msgid "Out of stock since %s"
+msgstr ""
+
+#: templates/admin/partials/alert-cell.php:47
+msgid "Link status checked. No alert issues detected."
+msgstr ""
+
+#: templates/admin/partials/alert-cell.php:57
+#: templates/admin/partials/product-row.php:86
+msgid "Processing. Please check back in 24 hours."
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:18
+msgid "Not set up"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:19
+msgid "Saved, not validated"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:20
+msgid "Validated"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:21
+msgid "Refused by Amazon"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:23
+msgid "Saved — leave blank to keep"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:26
+msgid "Validating…"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:27
+msgid "Unable to verify Creators API credentials."
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:30
+msgid "Amazon Product Data API"
+msgstr ""
+
+#. translators: 1: date and time, "2026-11-15 07:46 UTC"; 2: Amazon's answer, "HTTP 401, invalid_client".
+#: templates/admin/partials/amazon-api-card.php:38
+#, php-format
+msgid "Amazon refused these credentials on %1$s (%2$s). Check them and Validate again."
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:46
+#: templates/admin/partials/amazon-api-card.php:53
+msgid "Default Tracking ID"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:52
+msgid "Select your Amazon Associates locale."
+msgstr ""
+
+#. translators: %s: a link to Amazon's Associates Central, "Creators API credentials from Amazon".
+#: templates/admin/partials/amazon-api-card.php:69
+#, php-format
+msgid "If you want to use the Amazon Creators API for product data, here's how to get your %s."
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:70
+msgid "Creators API credentials from Amazon"
+msgstr ""
+
+#: templates/admin/partials/amazon-api-card.php:106
+msgid "Validate"
+msgstr ""
+
+#: templates/admin/partials/amazon-auto-monetize-card.php:17
+msgid "Auto-Monetize Amazon Links"
+msgstr ""
+
+#: templates/admin/partials/amazon-auto-monetize-card.php:18
+msgid "Automatically monetize all current and future Amazon links with your Tracking ID, migrate your SiteStripe displays, and add them to your affiliate dashboard."
+msgstr ""
+
+#: templates/admin/partials/amazon-auto-monetize-card.php:27
+msgid "Enable Amazon Auto-Monetization"
+msgstr ""
+
+#: templates/admin/partials/amazon-auto-monetize-card.php:34
+msgid "Tracking ID must be set to use Auto-Amazon."
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:17
+msgid "Starting…"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:18
+msgid "Syncing…"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:19
+#: templates/admin/partials/amazon-bulk-sync.php:42
+msgid "Sync Amazon data"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:20
+msgid "Sync complete."
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:21
+msgid "Succeeded:"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:22
+msgid "Skipped:"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:23
+msgid "Failed:"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:24
+msgid "Failures:"
+msgstr ""
+
+#: templates/admin/partials/amazon-bulk-sync.php:27
+msgid "Bulk Amazon sync"
+msgstr ""
+
+#. translators: %d: how many Amazon products have no Amazon data yet.
+#: templates/admin/partials/amazon-bulk-sync.php:31
+#, php-format
+msgid "%d Amazon link is ready to sync product data."
+msgid_plural "%d Amazon links are ready to sync product data."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/amazon-data-card.php:18
+msgid "Amazon Data"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:19
+msgid "What Affibloom stores from Amazon for this product, kept current every hour. Read-only."
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:23
+msgid "No Amazon data yet. Refresh, or Sync Amazon data, fetches it."
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:27
+msgid "Amazon image"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:30
+msgid "Amazon title"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:32
+#: templates/admin/partials/display-layout-panel.php:37
+#: templates/admin/partials/product-display-card.php:149
+#: templates/admin/partials/product-display-card.php:156
+#: blocks/product-box/schema.js:180
+msgid "Price"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:34
+msgid "List price"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:36
+msgid "Saving"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:38
+msgid "Currency"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:40
+msgid "Availability"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:41
+#: templates/admin/partials/dashboard-tiles.php:56
+msgid "Out of stock"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:41
+msgid "In stock"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:42
+#: templates/admin/partials/product-display-card.php:216
+#: templates/admin/partials/product-display-card.php:223
+msgid "Features"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:44
+msgid "Source"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:45
+msgid "Imported"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:45
+msgid "Creators API"
+msgstr ""
+
+#: templates/admin/partials/amazon-data-card.php:46
+msgid "Last updated"
+msgstr ""
+
+#: templates/admin/partials/amazon-enable-dialog.php:17
+msgid "Enable Auto-Amazon"
+msgstr ""
+
+#: templates/admin/partials/amazon-enable-dialog.php:23
+msgid "We recommend creating a backup first. This will allow you to undo this action quickly and ensure everything runs exactly as you hoped."
+msgstr ""
+
+#: templates/admin/partials/amazon-enable-dialog.php:26
+msgid "Create a Backup First"
+msgstr ""
+
+#: templates/admin/partials/amazon-enable-dialog.php:27
+#: templates/admin/partials/ga-pageview-modal.php:25
+msgid "Enable"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-card.php:13
+msgid "Amazon import status"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-general-stats.php:18
+msgid "Complete"
+msgstr ""
+
+#. translators: %s: Dashboard link count.
+#: templates/admin/partials/amazon-import-general-stats.php:20
+#, php-format
+msgid "%s in Dashboard"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-general-stats.php:22
+#: templates/admin/partials/amazon-import-notice.php:18
+msgid "Amazon import"
+msgstr ""
+
+#. translators: 1: Dashboard link count, 2: queued product count.
+#: templates/admin/partials/amazon-import-general-stats.php:24
+#, php-format
+msgid "%1$s in Dashboard · ~%2$s queued"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-general-stats.php:26
+msgid "Link Index vs Dashboard"
+msgstr ""
+
+#. translators: 1: indexed placements, 2: Dashboard links.
+#: templates/admin/partials/amazon-import-general-stats.php:28
+#, php-format
+msgid "%1$s indexed placements · %2$s Dashboard links"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-general-stats.php:30
+#: templates/admin/partials/amazon-import-status.php:46
+msgid "Link Index counts every placement on your site. Dashboard lists unique managed links (Amazon products are deduped by ASIN + country)."
+msgstr ""
+
+#: templates/admin/partials/amazon-import-status.php:16
+msgid "Amazon import complete"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-status.php:16
+msgid "Amazon import in progress"
+msgstr ""
+
+#. translators: %s: how many Amazon products the Dashboard lists.
+#: templates/admin/partials/amazon-import-status.php:22
+#, php-format
+msgid "%s unique Amazon links in Dashboard"
+msgstr ""
+
+#. translators: 1: Amazon products in the Dashboard, 2: unique Amazon products still queued.
+#: templates/admin/partials/amazon-import-status.php:25
+#, php-format
+msgid "%1$s in Dashboard · ~%2$s unique Amazon products still queued"
+msgstr ""
+
+#. translators: 1: links handled in the current batch, 2: the batch's size.
+#: templates/admin/partials/amazon-import-status.php:33
+#, php-format
+msgid "Current batch: %1$s / %2$s"
+msgstr ""
+
+#. translators: %s: placements in the link index.
+#: templates/admin/partials/amazon-import-status.php:41
+#, php-format
+msgid "%s placements indexed"
+msgstr ""
+
+#: templates/admin/partials/amazon-import-status.php:47
+#: templates/admin/partials/filters-panel.php:100
+msgid "Placements"
+msgstr ""
+
+#: templates/admin/partials/amazon-tracking-id-field.php:16
+msgid "Tracking ID for This Site"
+msgstr ""
+
+#: templates/admin/partials/amazon-tracking-id-field.php:21
+#: templates/admin/partials/amazon-tracking-id-field.php:23
+#: templates/admin/settings-amazon.php:89
+#: templates/admin/settings-amazon.php:91
+msgid "This is an invalid Tracking ID"
+msgstr ""
+
+#: templates/admin/partials/amazon-tracking-id-field.php:22
+msgid "That was not a valid Tracking ID, so the previous one was kept."
+msgstr ""
+
+#: templates/admin/partials/dashboard-search.php:27
+#: templates/admin/partials/palette.php:13
+msgid "Ctrl+Shift+L"
+msgstr ""
+
+#: templates/admin/partials/dashboard-tiles.php:29
+#: templates/admin/partials/dashboard-tiles.php:34
+msgid "Clicks (30 days)"
+msgstr ""
+
+#: templates/admin/partials/dashboard-tiles.php:55
+msgid "Broken links"
+msgstr ""
+
+#: templates/admin/partials/dashboard-tiles.php:56
+msgid "See out-of-stock products"
+msgstr ""
+
+#: templates/admin/partials/dashboard-tiles.php:57
+msgid "See opportunities"
+msgstr ""
+
+#: templates/admin/partials/dashboard-tiles.php:65
+msgid "Totals may update for up to 24 hours while links are checked."
+msgstr ""
+
+#: templates/admin/partials/dashboard-tiles.php:66
+#: templates/admin/partials/issue-notice.php:35
+msgid "Amazon products are checked through the Amazon API, which is not connected (Settings → Amazon)."
+msgstr ""
+
+#: templates/admin/partials/delete-modal.php:23
+#: templates/admin/partials/selection-bar.php:34
+msgid "Delete"
+msgstr ""
+
+#: templates/admin/partials/delete-modal.php:25
+msgid "Deleting…"
+msgstr ""
+
+#: templates/admin/partials/delete-modal.php:48
+#: templates/admin/partials/field-modal.php:142
+#: templates/admin/partials/ga-pageview-modal.php:24
+#: templates/admin/partials/product-row.php:198
+#: templates/admin/partials/rebuild-modal.php:25
+#: templates/admin/partials/save-modal.php:60
+#: templates/admin/partials/table-clone-modal.php:25
+#: templates/admin/partials/table-description-modal.php:57
+#: templates/admin/partials/view-delete-modal.php:29
+#: templates/admin/product-variants.php:132
+#: templates/editor/display-modal.php:332
+msgid "Cancel"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:17
+msgid "Turn this on to show the disclosure in Displays by default. You can override this per display."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:19
+#: templates/admin/partials/product-display-card.php:167
+#: templates/admin/setup.php:90
+msgid "Show Price"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:19
+#: templates/admin/setup.php:92
+msgid "Turn this on to show the price in Displays by default. You can override this per display."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:20
+msgid "Disclosure in Single Display"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:21
+msgid "Disclosure in Grids"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:23
+msgid "Disclosure in Lists & Tables"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:23
+msgid "Turn this on to show the disclosure in List and Table displays by default. You can override this per display."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:24
+msgid "Link from Display Title"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:24
+msgid "When enabled, your Display titles will be your clickable link. Toggle this off to have Display titles only appear as text."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:25
+msgid "Keep Site Stripe UI"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:25
+msgid "When enabled, Amazon SiteStripe-style displays use the SiteStripe iframe layout on the front end."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:29
+msgid "Disclosure & behavior"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:39
+#: templates/admin/setup.php:110
+msgid "This is the default disclosure text used with your displays."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:68
+#: templates/admin/partials/display-behaviour-accordions.php:72
+msgid "Custom CSS"
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:71
+msgid "Use this to add CSS to further customize your displays."
+msgstr ""
+
+#: templates/admin/partials/display-behaviour-accordions.php:74
+msgid "Enter CSS code here"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:14
+msgid "This is the color of your badge background."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:15
+#: templates/admin/partials/display-layout-panel.php:36
+msgid "Title"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:15
+msgid "This is the color of the title text of your display."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:16
+msgid "Background"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:16
+msgid "This is the color of the inside of your display."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:17
+msgid "Button + Badge Text"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:17
+msgid "This is text color for your badges and buttons."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:18
+#: blocks/product-box/schema.js:209
+msgid "Pros"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:18
+msgid "This is the main color of the Pros Field."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:19
+#: blocks/product-box/schema.js:216
+msgid "Cons"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:19
+msgid "This is the main color of the Cons Field."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:20
+msgid "Primary button text"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:20
+msgid "If you leave your display button text blank, this is what it will default to."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:21
+msgid "Primary button color"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:21
+msgid "This is the color of your display's main CTA button."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:22
+msgid "Secondary button text"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:22
+msgid "If you set a secondary button for your display and leave it blank, this is what it will default to."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:23
+msgid "Secondary button color"
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:23
+msgid "This is the color of your display's secondary CTA button."
+msgstr ""
+
+#: templates/admin/partials/display-colors-accordion.php:27
+#: templates/admin/settings-display.php:22
+msgid "Colors & labels"
+msgstr ""
+
+#. translators: %s: the colour field's label.
+#: templates/admin/partials/display-colors-accordion.php:34
+#, php-format
+msgid "Pick a colour for %s"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:27
+msgid "Card layout"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:29
+msgid "Stacked"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:30
+msgid "Side by side"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:34
+msgid "Image position"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:36
+#: templates/admin/partials/display-layout-accordion.php:45
+#: templates/admin/partials/display-layout-accordion.php:54
+msgid "Left"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:37
+#: templates/admin/partials/display-layout-accordion.php:47
+#: templates/admin/partials/display-layout-accordion.php:56
+msgid "Right"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:38
+msgid "Top"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:39
+msgid "Bottom"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:43
+msgid "Text alignment"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:46
+#: templates/admin/partials/display-layout-accordion.php:55
+msgid "Center"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:51
+msgid "Button alignment"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:53
+msgid "Spread"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:60
+msgid "Button width"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:62
+msgid "Hug"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:63
+msgid "Full width"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:67
+msgid "Mobile overflow"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:69
+msgid "Stack"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:70
+msgid "Swipe row"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:74
+msgid "Image fit"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:76
+msgid "Contain"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:77
+msgid "Fill"
+msgstr ""
+
+#. translators: %d: grid columns.
+#: templates/admin/partials/display-layout-accordion.php:83
+#: templates/admin/partials/display-layout-accordion.php:92
+#, php-format
+msgid "%d col"
+msgstr ""
+
+#. translators: %d: grid columns.
+#: templates/admin/partials/display-layout-accordion.php:84
+#: templates/admin/partials/display-layout-accordion.php:93
+msgid "side by side"
+msgstr ""
+
+#. translators: %d: grid columns.
+#: templates/admin/partials/display-layout-accordion.php:84
+#: templates/admin/partials/display-layout-accordion.php:93
+msgid "stacked"
+msgstr ""
+
+#. translators: %s: image position (left, right, top or bottom).
+#. translators: %s: image position.
+#: templates/admin/partials/display-layout-accordion.php:86
+#: templates/admin/partials/display-layout-accordion.php:94
+#, php-format
+msgid "image %s"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:90
+msgid "Layout"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:102
+msgid "Same as desktop"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:102
+msgid "Custom mobile layout"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:108
+msgid "Changes here apply to phones only and desktop edits won't change them. Settings you haven't changed here follow desktop."
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:109
+msgid "Mobile layout"
+msgstr ""
+
+#: templates/admin/partials/display-layout-accordion.php:113
+msgid "Use desktop layout"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:23
+msgid "Tighter card spacing."
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:24
+msgid "Balanced is the default spacing preset."
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:25
+msgid "More open card spacing."
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:26
+msgid "Custom spacing — stepper edits will keep this preset."
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:30
+#: templates/admin/partials/settings-general-performance.php:19
+msgid "Balanced"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:31
+msgid "Spacious"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:35
+#: templates/admin/partials/display-layout-panel.php:76
+#: templates/admin/partials/field-links.php:40
+#: templates/admin/partials/product-list.php:35
+#: templates/admin/partials/product-row.php:175
+#: templates/editor/display-modal.php:24
+msgid "Image"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:38
+msgid "Prime badge"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:40
+msgid "Pros & cons"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:41
+msgid "Primary button"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:42
+msgid "Secondary button"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:43
+msgid "Timestamp"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:47
+msgid "Spacing"
+msgstr ""
+
+#. translators: 1: gap between cards, 2: card padding, both in pixels.
+#: templates/admin/partials/display-layout-panel.php:49
+#: templates/admin/partials/display-layout-panel.php:51
+#, php-format
+msgid "%1$d / %2$d px"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:54
+msgid "Gap between cards"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:55
+msgid "Card padding"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:56
+msgid "Space between elements"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:60
+msgid "Typography"
+msgstr ""
+
+#. translators: %d: title size in pixels.
+#: templates/admin/partials/display-layout-panel.php:62
+#: templates/admin/partials/display-layout-panel.php:64
+#, php-format
+msgid "%d px title"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:67
+msgid "Title size"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:68
+msgid "Title lines"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:69
+msgid "Description size"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:70
+msgid "Description lines"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:71
+msgid "Price size"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:72
+msgid "Button size"
+msgstr ""
+
+#. translators: %d: image height in pixels.
+#: templates/admin/partials/display-layout-panel.php:78
+#: templates/admin/partials/display-layout-panel.php:80
+#, php-format
+msgid "%d px"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:83
+msgid "Image height"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:90
+msgid "Density"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:91
+msgid "Spacing presets apply to the selected display type (Single, Grid, or List)."
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:107
+msgid "Elements"
+msgstr ""
+
+#. translators: 1: visible element count, 2: total element count.
+#: templates/admin/partials/display-layout-panel.php:110
+#: templates/admin/partials/display-layout-panel.php:113
+#, php-format
+msgid "%1$d of %2$d visible"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:133
+#: templates/admin/partials/product-display-card.php:289
+#: templates/admin/partials/product-display-card.php:296
+msgid "Disclosure"
+msgstr ""
+
+#: templates/admin/partials/display-layout-panel.php:181
+msgid "All"
+msgstr ""
+
+#. translators: %s: control label.
+#: templates/admin/partials/display-layout-panel.php:193
+#, php-format
+msgid "Decrease %s"
+msgstr ""
+
+#. translators: %s: control label.
+#: templates/admin/partials/display-layout-panel.php:196
+#, php-format
+msgid "Increase %s"
+msgstr ""
+
+#: templates/admin/partials/display-theme-row.php:20
+msgid "Applies to the selected display type (Single, Grid, or List)."
+msgstr ""
+
+#. translators: %d: the bullet's place in the list, from 1.
+#. translators: %d: a bullet's place in the list, from 1.
+#: templates/admin/partials/feature-row.php:17
+#: templates/admin/partials/product-display-card.php:247
+#, php-format
+msgid "Reorder Feature %d"
+msgstr ""
+
+#. translators: %d: the bullet's place in the list, from 1.
+#. translators: %s: a field's name.
+#: templates/admin/partials/feature-row.php:17
+#: templates/admin/partials/field-row.php:35
+#: templates/admin/partials/product-button.php:56
+msgid "Drag to reorder, or press Arrow Up or Arrow Down"
+msgstr ""
+
+#. translators: %d: the bullet's place in the list, from 1.
+#. translators: %d: a bullet's place in the list, from 1.
+#: templates/admin/partials/feature-row.php:21
+#: templates/admin/partials/product-display-card.php:245
+#, php-format
+msgid "Feature %d"
+msgstr ""
+
+#. translators: %d: the bullet's place in the list, from 1.
+#. translators: %d: a bullet's place in the list, from 1.
+#: templates/admin/partials/feature-row.php:23
+#: templates/admin/partials/product-display-card.php:249
+#, php-format
+msgid "Remove Feature %d"
+msgstr ""
+
+#: templates/admin/partials/field-form.php:22
+#: templates/admin/partials/field-modal.php:17
+msgid "Ideal title for use in things like a comparison table header."
+msgstr ""
+
+#: templates/admin/partials/field-form.php:31
+msgid "Updating Field"
+msgstr ""
+
+#: templates/admin/partials/field-form.php:34
+msgid "Try again. For some reason your field didn't save."
+msgstr ""
+
+#: templates/admin/partials/field-form.php:35
+msgid "Deleting Field"
+msgstr ""
+
+#: templates/admin/partials/field-form.php:36
+msgid "Deleting your field now."
+msgstr ""
+
+#: templates/admin/partials/field-form.php:41
+#: templates/admin/partials/field-form.php:48
+#: templates/admin/partials/field-modal.php:42
+#: templates/admin/partials/field-modal.php:49
+msgid "Field Title"
+msgstr ""
+
+#: templates/admin/partials/field-form.php:54
+#: templates/admin/partials/field-modal.php:54
+msgid "Size, Weight, Year, etc..."
+msgstr ""
+
+#: templates/admin/partials/field-form.php:58
+#: templates/admin/partials/field-form.php:65
+#: templates/admin/partials/field-modal.php:60
+#: templates/admin/partials/field-modal.php:67
+msgid "Field Type"
+msgstr ""
+
+#: templates/admin/partials/field-form.php:86
+#: templates/admin/partials/field-form.php:93
+#: templates/admin/partials/field-modal.php:87
+#: templates/admin/partials/field-modal.php:93
+msgid "Describe how you use this field."
+msgstr ""
+
+#: templates/admin/partials/field-form.php:97
+msgid "Note: This is a built-in field and only the title is editable."
+msgstr ""
+
+#: templates/admin/partials/field-form.php:107
+msgid "Delete This Field"
+msgstr ""
+
+#: templates/admin/partials/field-links.php:32
+#: templates/admin/partials/field-modal.php:107
+#: templates/admin/partials/fields-list.php:30
+#: templates/admin/partials/opportunity-content-list.php:36
+msgid "Looks like we're coming up empty."
+msgstr ""
+
+#: templates/admin/partials/field-links.php:41
+#: templates/admin/partials/product-list.php:36
+msgid "Link Name"
+msgstr ""
+
+#: templates/admin/partials/field-links.php:42
+#: templates/admin/partials/opportunity-content-list.php:22
+#: templates/admin/product-variants.php:70
+#: templates/admin/product-variants.php:77
+#: templates/admin/product-variants.php:125
+#: templates/admin/product.php:114
+msgid "Permalink"
+msgstr ""
+
+#. translators: 1: first product shown, 2: last product shown, 3: products that have the field.
+#. translators: 1: first field shown, 2: last field shown, 3: fields in the whole list.
+#. translators: 1: first group shown, 2: last group shown, 3: groups in the whole list.
+#. translators: 1: first row shown, 2: last row shown, 3: rows in the whole list.
+#. translators: 1: first post shown, 2: last post shown, 3: posts in the whole list.
+#. translators: 1: first product shown, 2: last product shown, 3: products in the whole list.
+#. translators: 1: first table shown, 2: last table shown, 3: tables in the whole list.
+#: templates/admin/partials/field-links.php:58
+#: templates/admin/partials/fields-list.php:64
+#: templates/admin/partials/groups-list.php:67
+#: templates/admin/partials/list-pager.php:33
+#: templates/admin/partials/locations-list.php:149
+#: templates/admin/partials/pager.php:63
+#: templates/admin/partials/tables-list.php:90
+#, php-format
+msgid "%1$s-%2$s of %3$s"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:23
+#: templates/admin/partials/field-modal.php:33
+msgid "Add Field"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:25
+#: templates/admin/partials/table-description-modal.php:32
+msgid "Manage Fields"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:34
+msgid "Create new"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:35
+msgid "Add from library"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:97
+msgid "Create Field"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:102
+msgid "Find a field"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:103
+msgid "Find a field by searching here"
+msgstr ""
+
+#. translators: %s: a field's name.
+#: templates/admin/partials/field-modal.php:105
+#, php-format
+msgid "Add %s"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:110
+msgid "Previous"
+msgstr ""
+
+#. translators: 1: this page, 2: how many pages.
+#: templates/admin/partials/field-modal.php:111
+#, php-format
+msgid "Page %1$s of %2$s"
+msgstr ""
+
+#. translators: 1: this page, 2: how many pages.
+#: templates/admin/partials/field-modal.php:112
+#: templates/admin/partials/tour.php:36
+msgid "Next"
+msgstr ""
+
+#. translators: %s: a field's name.
+#. translators: %s: the field's name.
+#. translators: %s: the product's name.
+#: templates/admin/partials/field-modal.php:130
+#: templates/admin/table.php:228
+#: templates/admin/table.php:262
+#, php-format
+msgid "Remove \"%s\"?"
+msgstr ""
+
+#. translators: %s: a field's name.
+#: templates/admin/partials/field-modal.php:130
+msgid "Remove this field?"
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:136
+msgid "If removed, you won't be able to get its value back."
+msgstr ""
+
+#: templates/admin/partials/field-modal.php:139
+#: templates/admin/table.php:226
+msgid "Could not remove the field. Please try again."
+msgstr ""
+
+#: templates/admin/partials/field-product-row.php:22
+#: templates/admin/partials/group-member-row.php:38
+#: templates/admin/partials/product-row.php:48
+#: templates/admin/partials/product-row.php:183
+msgid "No image"
+msgstr ""
+
+#. translators: %s: a field's name.
+#. translators: %s: group name.
+#. translators: %s: icon name.
+#. translators: %s: the row or column.
+#. translators: %s: the field's name.
+#. translators: %s: a variant's name.
+#. translators: %s: a button's name, e.g. Button 2.
+#. translators: %s: a tracking ID.
+#: templates/admin/partials/field-row.php:29
+#: templates/admin/partials/group-picker.php:20
+#: templates/admin/partials/group-picker.php:27
+#: templates/admin/partials/icon-set-item.php:34
+#: templates/admin/partials/table-builder.php:90
+#: templates/admin/partials/table-cell.php:45
+#: templates/admin/partials/variant-rows.php:38
+#: templates/admin/product.php:171
+#: templates/admin/settings-amazon.php:85
+#, php-format
+msgid "Remove %s"
+msgstr ""
+
+#. translators: %s: a field's name.
+#. translators: %s: a button's name, e.g. Button 2.
+#: templates/admin/partials/field-row.php:35
+#: templates/admin/product.php:170
+#, php-format
+msgid "Reorder %s"
+msgstr ""
+
+#: templates/admin/partials/field-row.php:54
+#: templates/admin/partials/field-row.php:56
+msgid "Show field name in your display."
+msgstr ""
+
+#: templates/admin/partials/field-row.php:60
+#: templates/admin/partials/field-row.php:62
+msgid "Show this field in your display by default."
+msgstr ""
+
+#: templates/admin/partials/fields-list.php:39
+#: templates/admin/partials/locations-list.php:40
+#: templates/admin/partials/opportunity-domain-links-list.php:20
+#: templates/admin/partials/opportunity-links-list.php:20
+#: templates/admin/partials/opportunity-post-links-list.php:23
+msgid "Type"
+msgstr ""
+
+#: templates/admin/partials/fields-list.php:40
+msgid "Usage"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:22
+#: templates/admin/partials/opportunity-content-filters.php:34
+msgid "All types"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:24
+msgid "Non-Amazon"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:27
+msgid "Any placement"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:28
+msgid "In content"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:29
+msgid "Not in content"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:34
+msgid "Any"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:35
+msgid "In a comparison table"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:36
+msgid "Not in any table"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:44
+#: templates/admin/partials/filters-panel.php:57
+msgid "Filters"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:46
+msgid "Active filters"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:51
+msgid "View saved."
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:52
+msgid "View deleted."
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:53
+msgid "Name your view first."
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:54
+msgid "Could not save."
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:55
+msgid "Could not delete."
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:58
+msgid "Close filters"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:82
+msgid "All groups"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:83
+msgid "Not in Groups"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:91
+msgid "Link type"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:109
+msgid "Comparison table"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:116
+#: templates/admin/partials/opportunity-content-filters.php:52
+#: templates/admin/partials/pager.php:51
+#: templates/admin/partials/product-display-card.php:114
+msgid "Apply"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:121
+#: templates/admin/partials/filters-panel.php:127
+msgid "Save as"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:128
+msgid "Saves your search, filters, sort, page size, and alert tab under this name. Click the saved view pill to restore it."
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:135
+msgid "Name this view"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:136
+#: templates/admin/partials/table-description-modal.php:58
+#: templates/admin/product-variants.php:131
+msgid "Save"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:144
+msgid "Reset search, filters, sort, page size, and alert tab"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:144
+msgid "Reset filters"
+msgstr ""
+
+#: templates/admin/partials/filters-panel.php:145
+msgid "Filters apply as you toggle"
+msgstr ""
+
+#. translators: %s: the plugin's version, such as 1.2.0.
+#: templates/admin/partials/footer.php:14
+#, php-format
+msgid "Version %s"
+msgstr ""
+
+#: templates/admin/partials/ga-pageview-modal.php:15
+msgid "Enable Pageview"
+msgstr ""
+
+#: templates/admin/partials/ga-pageview-modal.php:21
+msgid "If you want Affibloom to report pageviews to Google Analytics, click Enable. If you have Google Analytics installed outside of Affibloom, keep this disabled."
+msgstr ""
+
+#: templates/admin/partials/group-head-actions.php:16
+#: templates/admin/partials/product-list.php:88
+msgid "Add a Link"
+msgstr ""
+
+#: templates/admin/partials/group-head-actions.php:20
+#: templates/admin/partials/table-head-actions.php:14
+msgid "Copy this Display to your clipboard."
+msgstr ""
+
+#: templates/admin/partials/group-head-actions.php:20
+#: templates/admin/partials/share-kit.php:24
+#: templates/admin/partials/table-head-actions.php:14
+#: templates/admin/partials/variant-rows.php:25
+msgid "Copied!"
+msgstr ""
+
+#: templates/admin/partials/group-head-actions.php:21
+#: templates/admin/partials/product-row.php:114
+msgid "Could not copy shortcode."
+msgstr ""
+
+#: templates/admin/partials/group-head-actions.php:23
+#: templates/admin/partials/table-head-actions.php:17
+msgid "Copy Shortcode"
+msgstr ""
+
+#: templates/admin/partials/group-holdup-modal.php:15
+#: templates/admin/partials/holdup-modal.php:20
+msgid "Hold Up"
+msgstr ""
+
+#: templates/admin/partials/group-holdup-modal.php:24
+#: templates/admin/partials/holdup-modal.php:48
+msgid "Ok"
+msgstr ""
+
+#. translators: %s: product name.
+#: templates/admin/partials/group-member-row.php:19
+#: templates/admin/partials/product-row.php:27
+#, php-format
+msgid "Select %s"
+msgstr ""
+
+#: templates/admin/partials/group-member-row.php:22
+msgid "Drag to reorder"
+msgstr ""
+
+#: templates/admin/partials/group-member-row.php:27
+msgid "Move up"
+msgstr ""
+
+#: templates/admin/partials/group-member-row.php:30
+msgid "Move down"
+msgstr ""
+
+#: templates/admin/partials/group-member-row.php:44
+msgid "(blank)"
+msgstr ""
+
+#. translators: %s: the group name typed.
+#: templates/admin/partials/group-picker.php:21
+#, php-format
+msgid "Create “%s”"
+msgstr ""
+
+#. translators: %s: the group name typed.
+#: templates/admin/partials/group-picker.php:22
+#: templates/admin/partials/group-picker.php:36
+msgid "Select a group"
+msgstr ""
+
+#: templates/admin/partials/groups-list.php:37
+msgid "No groups match your search."
+msgstr ""
+
+#: templates/admin/partials/groups-list.php:39
+msgid "Create Multi-Product Displays & Organize Your Links"
+msgstr ""
+
+#: templates/admin/partials/groups-list.php:40
+msgid "When you add links into groups, you can display them across your site as Lists, Grids, or Galleries. You can also use groups to categorize similar links making them easier to find."
+msgstr ""
+
+#: templates/admin/partials/header.php:30
+msgid "Menu"
+msgstr ""
+
+#: templates/admin/partials/header.php:46
+#: templates/admin/partials/header.php:51
+msgid "Automations"
+msgstr ""
+
+#: templates/admin/partials/header.php:53
+msgid "Silence is a source of great strength - Lao Tzu"
+msgstr ""
+
+#: templates/admin/partials/header.php:60
+msgid "Add New Link"
+msgstr ""
+
+#: templates/admin/partials/header.php:63
+msgid "More ways to add links"
+msgstr ""
+
+#: templates/admin/partials/header.php:70
+msgid "Bulk add links"
+msgstr ""
+
+#: templates/admin/partials/header.php:71
+msgid "Import many URLs at once"
+msgstr ""
+
+#: templates/admin/partials/header.php:79
+msgid "Discover products to add as links"
+msgstr ""
+
+#. translators: %s: the field's label.
+#: templates/admin/partials/help.php:19
+#, php-format
+msgid "Help for %s"
+msgstr ""
+
+#. translators: %s: how many more posts use the product.
+#: templates/admin/partials/holdup-modal.php:40
+#, php-format
+msgid "and %s more on the Locations tab"
+msgstr ""
+
+#: templates/admin/partials/icon-menu-item.php:20
+#: templates/admin/partials/icon-picture.php:15
+msgid "Image missing"
+msgstr ""
+
+#. translators: %s: the image's link, e.g. /wp-content/uploads/2023/04/youtube-icon.svg.
+#: templates/admin/partials/icon-set-item.php:24
+#, php-format
+msgid "Image missing: %s"
+msgstr ""
+
+#: templates/admin/partials/icon-set-item.php:30
+msgid "From your site's CSS"
+msgstr ""
+
+#. translators: %s: icon name.
+#: templates/admin/partials/icon-set-item.php:33
+#, php-format
+msgid "Remove %s? Texts that use it will show no icon until another is chosen."
+msgstr ""
+
+#: templates/admin/partials/icon-set.php:17
+#: templates/admin/partials/tracking-id-notice.php:29
+msgid "That did not work. Try again."
+msgstr ""
+
+#: templates/admin/partials/icon-set.php:19
+msgid "Button icons"
+msgstr ""
+
+#: templates/admin/partials/icon-set.php:20
+msgid "Icons you can put in front of a button or badge text. Icons from your site's CSS are drawn by your theme's Additional CSS; icons you add here need no CSS."
+msgstr ""
+
+#: templates/admin/partials/icon-set.php:31
+#: templates/admin/partials/icon-set.php:33
+msgid "Icon name"
+msgstr ""
+
+#: templates/admin/partials/icon-set.php:35
+msgid "Choose image"
+msgstr ""
+
+#: templates/admin/partials/icon-set.php:36
+#: templates/admin/partials/table-inspector.php:36
+msgid "Add icon"
+msgstr ""
+
+#. translators: %s: a class no icon in the set has, e.g. madel-icon.
+#. translators: %s: an icon class the library does not have.
+#: templates/admin/partials/icon-text-field.php:22
+#: templates/admin/partials/table-icon-text.php:21
+#, php-format
+msgid "Unknown icon: %s"
+msgstr ""
+
+#: templates/admin/partials/icon-text-field.php:24
+#: templates/admin/partials/icon-text-field.php:45
+#: templates/admin/partials/table-inspector.php:34
+msgid "No icon"
+msgstr ""
+
+#. translators: 1: the field's label, 2: the icon's name, "No icon" or "Unknown icon: …".
+#: templates/admin/partials/icon-text-field.php:27
+#, php-format
+msgid "Icon for %1$s: %2$s"
+msgstr ""
+
+#. translators: %s: the field's label.
+#: templates/admin/partials/icon-text-field.php:42
+#, php-format
+msgid "Icons for %s"
+msgstr ""
+
+#: templates/admin/partials/issue-notice.php:15
+msgid "Your URL is broken."
+msgstr ""
+
+#: templates/admin/partials/issue-notice.php:16
+msgid "This product may be out of stock."
+msgstr ""
+
+#: templates/admin/partials/issue-notice.php:29
+msgid "Hide for 7 days"
+msgstr ""
+
+#: templates/admin/partials/location-group-row.php:15
+msgid "Expand to view each location"
+msgstr ""
+
+#: templates/admin/partials/location-group-row.php:20
+msgid "Toggle locations for this post"
+msgstr ""
+
+#. translators: %s: how many places in this post use the product.
+#: templates/admin/partials/location-host.php:31
+#, php-format
+msgid "(%s location)"
+msgid_plural "(%s locations)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/location-preview-modal.php:12
+msgid "Could not load the preview."
+msgstr ""
+
+#: templates/admin/partials/location-preview-modal.php:17
+#: templates/admin/partials/locations-list.php:39
+msgid "Link with Context"
+msgstr ""
+
+#: templates/admin/partials/location-type.php:17
+msgid "This is a text link."
+msgstr ""
+
+#: templates/admin/partials/location-type.php:18
+msgid "This is an image link."
+msgstr ""
+
+#: templates/admin/partials/location-type.php:19
+msgid "This is a single link display."
+msgstr ""
+
+#: templates/admin/partials/location-type.php:20
+#: templates/admin/partials/location-type.php:21
+#: templates/admin/partials/location-type.php:22
+msgid "This is a group of links display."
+msgstr ""
+
+#: templates/admin/partials/locations-actions.php:22
+msgid "Search Locations"
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:39
+#: templates/admin/partials/opportunity-domain-links-list.php:19
+#: templates/admin/partials/opportunity-links-list.php:20
+#: templates/admin/partials/opportunity-post-links-list.php:22
+msgid "Click to see a snippet of this link as it appears on your site."
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:41
+#: templates/admin/partials/product-list.php:41
+msgid "Clicks"
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:41
+msgid "Total clicks in the last 30 days."
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:50
+msgid "No locations match your search."
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:52
+msgid "Add This Link Anywhere On Your Website"
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:53
+msgid "You can see where this link appears on your website. Affibloom will track every location right here so you know where your links are."
+msgstr ""
+
+#: templates/admin/partials/locations-list.php:74
+msgid "This is the post or page this link was found in."
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:14
+#: templates/admin/partials/monetize-modal.php:24
+#: templates/admin/partials/opportunity-domain-links-list.php:21
+#: templates/admin/partials/opportunity-links-list.php:21
+#: templates/admin/partials/opportunity-post-links-list.php:24
+msgid "Monetize"
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:14
+#: templates/admin/partials/table-group-picker.php:13
+#: templates/admin/partials/table-product-picker.php:14
+msgid "Looks like we're coming up empty, partner."
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:15
+msgid "Could not monetize the link. Please try again."
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:16
+msgid "Could not turn monetizing off. Please try again."
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:17
+msgid "Link monetized."
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:17
+msgid "Link unmonetized."
+msgstr ""
+
+#. translators: %s: how many products the library holds.
+#: templates/admin/partials/monetize-modal.php:19
+#: templates/admin/partials/table-product-picker.php:17
+#, php-format
+msgid "Search %s URLs"
+msgstr ""
+
+#: templates/admin/partials/monetize-modal.php:35
+#: templates/editor/display-modal.php:74
+#: templates/editor/display-modal.php:249
+msgid "Create a Link"
+msgstr ""
+
+#. translators: %s: the link's address.
+#: templates/admin/partials/monetize-switch.php:14
+#, php-format
+msgid "Monetize %s"
+msgstr ""
+
+#: templates/admin/partials/notices.php:29
+msgid "An unexpected error has occurred please try again later."
+msgstr ""
+
+#: templates/admin/partials/notices.php:37
+#: templates/admin/partials/shell-notice.php:37
+msgid "Dismiss this notice"
+msgstr ""
+
+#: templates/admin/partials/opportunities-actions.php:30
+#: templates/admin/product-opportunities.php:49
+msgid "Search Opportunities"
+msgstr ""
+
+#. translators: %d: how many opportunities the product has.
+#: templates/admin/partials/opportunity-bulb.php:17
+#, php-format
+msgid "This URL has %d possible opportunity."
+msgid_plural "This URL has %d possible opportunities."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/opportunity-content-filters.php:25
+msgid "Show"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:28
+msgid "Has unmonetized links"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:32
+msgid "Post type"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:35
+msgid "Posts"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:36
+msgid "Pages"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:40
+msgid "Category"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:42
+msgid "All categories"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:49
+msgid "Min link clicks"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:55
+msgid "Export unmonetized anchors to CSV"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:56
+msgid "No content opportunities to export for the current filters."
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:60
+#: templates/admin/partials/product-list.php:53
+#: templates/admin/partials/product-list.php:66
+msgid "Exporting"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:60
+#: templates/admin/partials/product-list.php:53
+#: templates/admin/partials/product-list.php:66
+msgid "Export failed."
+msgstr ""
+
+#. translators: %s: number of anchors.
+#: templates/admin/partials/opportunity-content-filters.php:62
+msgid "Exported 1 anchor."
+msgstr ""
+
+#. translators: %s: number of anchors.
+#: templates/admin/partials/opportunity-content-filters.php:62
+#, php-format
+msgid "Exported %s anchors."
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-filters.php:65
+#: templates/admin/partials/product-list.php:59
+#: templates/admin/partials/product-list.php:71
+msgid "Export CSV"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-list.php:20
+#: templates/admin/partials/settings-general-link-index.php:31
+msgid "Last Updated"
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-list.php:21
+msgid "Where we found these links. Click name to view its links."
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-list.php:22
+msgid "The slug for this piece of content. Click to view it on your site."
+msgstr ""
+
+#: templates/admin/partials/opportunity-content-list.php:23
+msgid "Number of links discovered in this piece of content."
+msgstr ""
+
+#. translators: %s: how many posts the list holds.
+#. translators: %s: how many links the list holds.
+#. translators: %s: how many domains the list holds.
+#. translators: %s: how many opportunities the list holds.
+#: templates/admin/partials/opportunity-content-list.php:30
+#: templates/admin/partials/opportunity-domain-links-list.php:27
+#: templates/admin/partials/opportunity-domains-list.php:28
+#: templates/admin/partials/opportunity-links-list.php:29
+#: templates/admin/partials/opportunity-post-links-list.php:30
+#, php-format
+msgid "%s Found"
+msgstr ""
+
+#. translators: %s: the product's name.
+#: templates/admin/partials/opportunity-detected-row.php:28
+#: templates/admin/partials/opportunity-post-links-list.php:69
+#, php-format
+msgid "Monetized with %s"
+msgstr ""
+
+#: templates/admin/partials/opportunity-detected-row.php:38
+#: templates/admin/partials/opportunity-link-row.php:43
+msgid "Filter by Content"
+msgstr ""
+
+#: templates/admin/partials/opportunity-detected-row.php:39
+#: templates/admin/partials/opportunity-link-row.php:32
+#: templates/admin/partials/opportunity-link-row.php:45
+#: templates/admin/partials/opportunity-post-links-list.php:61
+msgid "Open in New Window"
+msgstr ""
+
+#: templates/admin/partials/opportunity-detected-row.php:42
+#: templates/admin/partials/opportunity-link-row.php:48
+#: templates/admin/partials/opportunity-post-links-list.php:64
+msgid "Edit in post"
+msgstr ""
+
+#: templates/admin/partials/opportunity-domain-links-list.php:17
+#: templates/admin/partials/opportunity-links-list.php:17
+#: templates/admin/partials/opportunity-post-links-list.php:21
+msgid "This is a URL found on your site that may be able to be monetized."
+msgstr ""
+
+#: templates/admin/partials/opportunity-domain-links-list.php:18
+#: templates/admin/partials/opportunity-links-list.php:18
+msgid "Where we found this URL. Click link to edit."
+msgstr ""
+
+#: templates/admin/partials/opportunity-domain-links-list.php:19
+#: templates/admin/partials/opportunity-post-links-list.php:22
+msgid "Link"
+msgstr ""
+
+#: templates/admin/partials/opportunity-domain-links-list.php:33
+#: templates/admin/partials/opportunity-domains-list.php:34
+#: templates/admin/partials/opportunity-links-list.php:35
+#: templates/admin/partials/opportunity-post-links-list.php:36
+msgid "No opportunities found."
+msgstr ""
+
+#: templates/admin/partials/opportunity-domain-links-list.php:61
+msgid "Detected Links"
+msgstr ""
+
+#: templates/admin/partials/opportunity-domains-list.php:19
+msgid "Domain"
+msgstr ""
+
+#: templates/admin/partials/opportunity-domains-list.php:20
+msgid "Possible opportunities"
+msgstr ""
+
+#: templates/admin/partials/opportunity-domains-list.php:23
+msgid "This domain has possible opportunities"
+msgstr ""
+
+#: templates/admin/partials/opportunity-intro.php:18
+msgid "Close this box for good"
+msgstr ""
+
+#. translators: %s: the link's address.
+#: templates/admin/partials/opportunity-link-row.php:23
+#, php-format
+msgid "Dismiss %s"
+msgstr ""
+
+#: templates/admin/partials/opportunity-link-row.php:30
+#: templates/admin/partials/opportunity-post-links-list.php:59
+msgid "Filter by URL"
+msgstr ""
+
+#: templates/admin/partials/opportunity-link-row.php:56
+msgid "Filter by Link"
+msgstr ""
+
+#: templates/admin/partials/opportunity-links-list.php:19
+msgid "Suggestion"
+msgstr ""
+
+#: templates/admin/partials/opportunity-links-list.php:19
+msgid "The name of a product with the same domain as this URL. Click link to edit."
+msgstr ""
+
+#: templates/admin/partials/pager.php:42
+msgid "Links per page"
+msgstr ""
+
+#: templates/admin/partials/pager.php:53
+msgid "per page"
+msgstr ""
+
+#. translators: %s: the number of products, which is 0.
+#: templates/admin/partials/pager.php:60
+#, php-format
+msgid "%s of 0"
+msgstr ""
+
+#: templates/admin/partials/palette.php:13
+msgid "⌘⇧L"
+msgstr ""
+
+#: templates/admin/partials/palette.php:20
+msgid "Search links"
+msgstr ""
+
+#: templates/admin/partials/palette.php:25
+#: templates/admin/partials/palette.php:27
+msgid "Search by link name or URL…"
+msgstr ""
+
+#. translators: %s: the keyboard shortcut, as Ctrl+Shift+L or ⌘⇧L.
+#: templates/admin/partials/palette.php:29
+#, php-format
+msgid "Shortcut: %s. Press again to close."
+msgstr ""
+
+#: templates/admin/partials/palette.php:31
+msgid "Search results"
+msgstr ""
+
+#. translators: %s: the button's place in the box, e.g. 2.
+#. translators: %s: a button's place in the box, e.g. 2.
+#: templates/admin/partials/product-button.php:25
+#: templates/admin/product.php:169
+#, php-format
+msgid "Button %s"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:30
+#: templates/admin/partials/product-row.php:143
+msgid "Primary Destination URL"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:30
+msgid "Additional Destination URL"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:33
+msgid "The actual URL you want people to go to when they click a link"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:34
+msgid "Another URL you want people to go to when they click an extra button in displays"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:40
+#: templates/admin/partials/table-inspector.php:93
+#: templates/admin/partials/table-inspector.php:94
+msgid "Button Text"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:43
+msgid "This text will appear in the primary button"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:44
+msgid "This text will appear in this extra button"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:50
+#: templates/admin/partials/settings-general-link-defaults.php:18
+msgid "New Window / Tab"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:50
+#: templates/admin/partials/settings-general-link-defaults.php:18
+msgid "When enabled, users who click this link will have it loaded in a new tab."
+msgstr ""
+
+#: templates/admin/partials/product-button.php:51
+#: templates/admin/partials/settings-general-link-defaults.php:19
+msgid "NoFollow / NoIndex"
+msgstr ""
+
+#: templates/admin/partials/product-button.php:51
+#: templates/admin/partials/settings-general-link-defaults.php:19
+msgid "When enabled, this link will be set to nofollow. This indicates to Google that it's an affiliate link."
+msgstr ""
+
+#: templates/admin/partials/product-button.php:62
+msgid "This button's link is the product's main link. The first button in the list is the box's primary button."
+msgstr ""
+
+#: templates/admin/partials/product-button.php:62
+msgid "Main link"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:29
+msgid "Amazon Image"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:29
+msgid "Product Image"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:30
+msgid "Paste an image URL and click Apply, or click the preview image to choose from your Media Library."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:33
+msgid "Click Refresh to grab an updated image from Amazon, or paste an image link and click Apply, or click the preview image to choose from your Media Library."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:34
+msgid "Paste the image link from Amazon and click Apply, or click the preview image to choose from your Media Library. Refresh needs the Amazon API."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:46
+#: templates/admin/product.php:300
+msgid "Live preview"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:48
+msgid "Product box preview"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:55
+#: templates/admin/partials/product-row.php:179
+#: templates/admin/table.php:44
+msgid "Select an Image"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:55
+#: templates/admin/partials/product-row.php:179
+#: templates/admin/table.php:44
+msgid "Select Image"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:57
+#: templates/admin/partials/product-row.php:187
+#: templates/admin/partials/table-cell.php:67
+msgid "Update Image"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:61
+#: templates/admin/settings-display.php:114
+msgid "The box preview appears here."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:70
+msgid "Display content"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:74
+#: templates/admin/partials/product-display-card.php:81
+msgid "Display Theme"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:80
+msgid "Choose the default display theme for this link."
+msgstr ""
+
+#. translators: %s: the Single display type's theme, e.g. Lab.
+#: templates/admin/partials/product-display-card.php:88
+#, php-format
+msgid "Default (%s)"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:114
+msgid "Image URL is required."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:114
+msgid "Invalid image url."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:118
+#: templates/admin/partials/product-display-card.php:121
+msgid "Refresh"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:139
+msgid "Badge Text"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:141
+msgid "This text will appear as a badge in displays for this URL."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:142
+msgid "Our Pick"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:155
+msgid "This price can be any text or amount that'll only be shown in displays. Prices automatically update every 24 hours with integrations like Amazon."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:169
+msgid "Turn this on to show the price in this display."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:181
+msgid "Amazon prices updated via"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:182
+msgid "Amazon API settings"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:201
+msgid "Share more details about the product or service you're linking to. A short paragraph of 1-4 sentences typically performs best."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:222
+msgid "The product's key points, one per line. Amazon products get Amazon's bullet points when they are added or refreshed."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:234
+msgid "Show Features"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:236
+msgid "Turn this on to show the features under the description in displays for this link."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:280
+msgid "Add Feature"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:286
+msgid "Disclosure & link attributes"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:295
+msgid "This disclosure will only be shown in displays"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:308
+#: templates/admin/partials/settings-general-link-defaults.php:20
+msgid "Sponsored"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:308
+#: templates/admin/partials/settings-general-link-defaults.php:20
+msgid "When enabled, this link will be set to sponsored."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:309
+#: templates/admin/partials/settings-general-link-defaults.php:21
+#: templates/admin/setup.php:100
+msgid "Show Disclosure"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:309
+msgid "Turn this on to show the disclosure in displays for this link."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:310
+#: templates/admin/partials/settings-general-link-defaults.php:24
+msgid "Detect Opportunities"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:310
+msgid "When disabled, Link Opportunities will not show for this product."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:314
+#: templates/admin/partials/settings-general-link-defaults.php:23
+msgid "Link Cloaking"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:314
+msgid "The destination of this URL will be redirected from a pretty url on your domain. All non-Amazon Affiliate links should have this enabled."
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:317
+msgid "Show Prime Logo"
+msgstr ""
+
+#: templates/admin/partials/product-display-card.php:317
+msgid "Show the blue Prime logo for this Amazon product."
+msgstr ""
+
+#: templates/admin/partials/product-list.php:39
+msgid "Alert"
+msgstr ""
+
+#: templates/admin/partials/product-list.php:42
+#: templates/admin/product-variants.php:95
+msgid "Actions"
+msgstr ""
+
+#. translators: %s: number of links.
+#: templates/admin/partials/product-list.php:55
+msgid "Exported 1 link."
+msgstr ""
+
+#. translators: %s: number of links.
+#: templates/admin/partials/product-list.php:55
+#, php-format
+msgid "Exported %s links."
+msgstr ""
+
+#: templates/admin/partials/product-list.php:56
+msgid "No links to export for the current filters."
+msgstr ""
+
+#: templates/admin/partials/product-list.php:56
+msgid "Export all filtered links to WP All Import CSV"
+msgstr ""
+
+#. translators: %s: number of products.
+#: templates/admin/partials/product-list.php:68
+msgid "Exported 1 product."
+msgstr ""
+
+#. translators: %s: number of products.
+#: templates/admin/partials/product-list.php:68
+#, php-format
+msgid "Exported %s products."
+msgstr ""
+
+#: templates/admin/partials/product-list.php:69
+msgid "Export every product with every field to CSV"
+msgstr ""
+
+#: templates/admin/partials/product-list.php:81
+msgid "No products match your search."
+msgstr ""
+
+#: templates/admin/partials/product-list.php:84
+msgid "Get Started by Adding a Link"
+msgstr ""
+
+#: templates/admin/partials/product-list.php:85
+msgid "Manage all of your affiliate links here, and see where they're located across your site. Get alerts when a link has new opportunities, is broken, or out of stock."
+msgstr ""
+
+#: templates/admin/partials/product-list.php:99
+msgid "Select all on this page"
+msgstr ""
+
+#: templates/admin/partials/product-list.php:110
+msgid "Sort by the date the issue was found"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:39
+msgid "You can't delete a URL if it has active links or displays"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:63
+msgid "No groups"
+msgstr ""
+
+#. translators: %d: how many places the product is used in.
+#: templates/admin/partials/product-row.php:93
+#, php-format
+msgid "Used in %d place"
+msgid_plural "Used in %d places"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/product-row.php:108
+msgid "Quick Edit"
+msgstr ""
+
+#. translators: %s: the field's name.
+#: templates/admin/partials/product-row.php:110
+#: templates/admin/partials/table-cell.php:86
+#: templates/admin/partials/variant-rows.php:35
+msgid "Edit"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:113
+msgid "Copied"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:115
+msgid "Shortcode unavailable for this link"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:115
+#: templates/admin/partials/share-kit.php:19
+msgid "Copy shortcode"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:117
+#: blocks/product-box/shortcode-box.js:63
+msgid "Shortcode"
+msgstr ""
+
+#. translators: %s: product name.
+#: templates/admin/partials/product-row.php:129
+#, php-format
+msgid "Quick Edit: %s"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:140
+#: templates/admin/product-locations.php:25
+#: templates/admin/product-opportunities.php:33
+#: templates/admin/product-variants.php:29
+#: templates/admin/product.php:41
+#: templates/admin/product.php:92
+msgid "Enter a URL Name"
+msgstr ""
+
+#: templates/admin/partials/product-row.php:190
+msgid "Click to choose from your Media Library."
+msgstr ""
+
+#: templates/admin/partials/rebuild-modal.php:12
+msgid "The rebuild could not be started."
+msgstr ""
+
+#: templates/admin/partials/rebuild-modal.php:16
+msgid "Ready to rebuild?"
+msgstr ""
+
+#: templates/admin/partials/rebuild-modal.php:22
+msgid "By rebuilding your link index, you'll start with a clean slate."
+msgstr ""
+
+#: templates/admin/partials/rebuild-modal.php:26
+#: templates/admin/partials/save-modal.php:61
+msgid "Confirm"
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:19
+msgid "Just saving your URL changes"
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:20
+msgid "Saving your changes."
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:24
+msgid "Updating Your Site"
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:35
+msgid "You already use that link on your site."
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:36
+msgid "Do you want to change all Locations to that link?"
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:40
+msgid "Current Link"
+msgstr ""
+
+#: templates/admin/partials/save-modal.php:41
+msgid "Existing Link"
+msgstr ""
+
+#. translators: %s: Current Link or Existing Link.
+#. translators: %s: the post's title.
+#: templates/admin/partials/save-modal.php:52
+#: templates/admin/partials/table-locations-modal.php:16
+#, php-format
+msgid "View %s"
+msgstr ""
+
+#. translators: %s: Current Link or Existing Link.
+#: templates/admin/partials/save-modal.php:52
+msgid "View"
+msgstr ""
+
+#: templates/admin/partials/saved-views.php:36
+msgid "Saved view"
+msgstr ""
+
+#: templates/admin/partials/saved-views.php:41
+msgid "All links"
+msgstr ""
+
+#. translators: %s: the saved view's name.
+#: templates/admin/partials/saved-views.php:46
+#, php-format
+msgid "Delete saved view %s"
+msgstr ""
+
+#. translators: %s: how many products were moved to the trash (one).
+#. translators: %s: how many products were moved to the trash (several).
+#: templates/admin/partials/selection-bar.php:18
+#: templates/admin/partials/selection-bar.php:20
+#, php-format
+msgid "%s product deleted."
+msgid_plural "%s products deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/selection-bar.php:42
+msgid "Select at least one group."
+msgstr ""
+
+#: templates/admin/partials/selection-bar.php:43
+msgid "Could not add links to groups. Please try again."
+msgstr ""
+
+#. translators: %s: how many products were added to groups.
+#: templates/admin/partials/selection-bar.php:44
+#: templates/admin/partials/selection-bar.php:45
+#, php-format
+msgid "%s product added to groups."
+msgid_plural "%s products added to groups."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/settings-band.php:15
+msgid "General"
+msgstr ""
+
+#: templates/admin/partials/settings-band.php:16
+msgid "Display"
+msgstr ""
+
+#: templates/admin/partials/settings-band.php:33
+msgid "Defaults for new links, the product box and Amazon."
+msgstr ""
+
+#: templates/admin/partials/settings-band.php:35
+msgid "Settings sections"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:20
+#: templates/admin/setup.php:183
+msgid "Google Analytics"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:21
+msgid "Send click tracking data to Google Analytics."
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:26
+#: templates/admin/partials/settings-general-analytics.php:33
+#: templates/admin/partials/settings-general-analytics.php:39
+msgid "Tracking ID or Property ID"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:32
+msgid "Enter a Tracking ID (UA-) or a Product ID (G-). Or, enter them both and separate them with a comma. You can find them in Google Analytics > Admin > Property Settings."
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:41
+msgid "Please Enter GA Tracking ID Before Enable Click Tracking"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:46
+msgid "Click Tracking"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:46
+msgid "Enable to begin tracking product clicks in Google Analytics."
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:47
+msgid "Pageview"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:47
+msgid "If you have Google Analytics installed outside of Affibloom, keep this disabled."
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:48
+msgid "IP Anonymization"
+msgstr ""
+
+#: templates/admin/partials/settings-general-analytics.php:48
+msgid "When enabled, we won't report visitors' IP addresses for GDPR compliance."
+msgstr ""
+
+#: templates/admin/partials/settings-general-click-tracking.php:15
+msgid "Advanced Click Tracking"
+msgstr ""
+
+#: templates/admin/partials/settings-general-click-tracking.php:16
+msgid "Count clicks on product links and boxes, shown on the Dashboard and each product's Locations tab."
+msgstr ""
+
+#: templates/admin/partials/settings-general-click-tracking.php:25
+msgid "Page and Link-Level Tracking"
+msgstr ""
+
+#: templates/admin/partials/settings-general-click-tracking.php:27
+msgid "When enabled, you can see which pages and links your readers click."
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:16
+msgid "Custom Post Types:"
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:16
+msgid "No custom post types on this site."
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:19
+msgid "Custom Fields (ACF):"
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:19
+msgid "No ACF fields on this site."
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:24
+msgid "Custom Link Detection"
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:25
+msgid "Scan for links and shortcodes in custom locations."
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:41
+msgid "Additional locations where Affibloom will discover links."
+msgstr ""
+
+#: templates/admin/partials/settings-general-detection.php:63
+msgid "One of those is not available on this site, so the previous choice was kept."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:21
+msgid "When enabled, this link will show the disclosure."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:22
+msgid "Allow duplicate destinations"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:22
+msgid "Allows you to have links from different networks to the same product."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:23
+msgid "Toggle on to brand your link with your domain. Toggle off to show readers your Primary Destination URL."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:24
+msgid "When off, Link Opportunities won’t show for affected links. Doesn’t change how Affibloom finds opportunities in the background."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:25
+msgid "Auto-Detect Affiliate Links"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:25
+msgid "Add all detected affiliate links to your dashboard as individual products."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:30
+msgid "Link Defaults"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-defaults.php:31
+msgid "Set the default attributes for new links."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:19
+msgid "Link Index"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:20
+msgid "Affibloom tracks every link on your site."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:24
+msgid "Build Progress"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:26
+msgid "ETA"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:29
+msgid "We're indexing your links in the background, feel free to do something else."
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:33
+msgid "Links Indexed"
+msgstr ""
+
+#: templates/admin/partials/settings-general-link-index.php:41
+msgid "Rebuild Database"
+msgstr ""
+
+#: templates/admin/partials/settings-general-notifications.php:13
+msgid "Disable Configure Amazon Notification"
+msgstr ""
+
+#: templates/admin/partials/settings-general-notifications.php:14
+msgid "Disable Help Tooltips"
+msgstr ""
+
+#: templates/admin/partials/settings-general-notifications.php:15
+msgid "Disable Import Notifications"
+msgstr ""
+
+#: templates/admin/partials/settings-general-notifications.php:20
+msgid "Notifications"
+msgstr ""
+
+#: templates/admin/partials/settings-general-notifications.php:21
+msgid "Toggle which notifications you want enabled."
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:18
+msgid "Power"
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:20
+msgid "Light"
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:21
+msgid "Custom"
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:26
+msgid "Performance"
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:27
+msgid "Set the maximum CPU level that Affibloom will run at."
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:32
+msgid "Performance Mode:"
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:38
+msgid "Affibloom will wait until your CPU drops below this level to continue with its updates."
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:39
+msgid "Performance Mode"
+msgstr ""
+
+#: templates/admin/partials/settings-general-performance.php:56
+msgid "CPU level"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:17
+msgid "Administrator"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:18
+msgid "Editor"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:19
+msgid "Author"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:20
+msgid "Contributor"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:21
+msgid "Subscriber"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:28
+msgid "Permissions"
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:32
+msgid "Select the minimum user role that can access Affibloom."
+msgstr ""
+
+#: templates/admin/partials/settings-general-permissions.php:40
+msgid "Only administrators can change this."
+msgstr ""
+
+#: templates/admin/partials/settings-general-prefix.php:17
+msgid "Cloaked Link Prefix"
+msgstr ""
+
+#: templates/admin/partials/settings-general-prefix.php:18
+msgid "Add subdirectory to cloaked links. Most leave this empty."
+msgstr ""
+
+#: templates/admin/partials/settings-general-prefix.php:23
+#: templates/admin/partials/settings-general-prefix.php:30
+msgid "Prefix"
+msgstr ""
+
+#: templates/admin/partials/settings-general-prefix.php:29
+msgid "For no prefix leave this field empty."
+msgstr ""
+
+#. translators: %s: an example link address.
+#: templates/admin/partials/settings-general-prefix.php:40
+#, php-format
+msgid "Example: %s"
+msgstr ""
+
+#: templates/admin/partials/settings-general-smart-css.php:13
+msgid "Smart CSS Loading"
+msgstr ""
+
+#: templates/admin/partials/settings-general-smart-css.php:14
+msgid "Skip display CSS on pages without Affibloom displays or tables to improve page speed. Purge page cache after enabling."
+msgstr ""
+
+#: templates/admin/partials/settings-general-smart-css.php:23
+msgid "Enable Smart CSS Loading"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:16
+msgid "Restrict Prefix"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:16
+msgid "When enabled, cloaked links can only be reached through their prefix."
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:17
+msgid "Processes Execute Limit"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:17
+msgid "When enabled, a background job waits in the queue while too many are running."
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:18
+msgid "Font Awesome JS Render SVG"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:18
+msgid "Render Font Awesome icons as SVG on the front end."
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:19
+msgid "Disable AAWP Description"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:19
+msgid "Don't use an Amazon product's feature list as an empty description."
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:26
+msgid "Keep Original URL"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:27
+msgid "We don't convert the affiliate URLs to destination URLs"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:34
+msgid "One domain a line. Example: domain.com, not https://domain.com/"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:41
+msgid "Cron"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:45
+msgid "Time interval (hours)"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:54
+msgid "Cronjob Manually"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:55
+msgid "Maximum Affibloom cronjob at a time."
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:60
+#: templates/admin/partials/settings-general-support.php:67
+msgid "Maximum cronjobs"
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:66
+msgid "This feature runs only when the system's cronjob does not work."
+msgstr ""
+
+#: templates/admin/partials/settings-general-support.php:80
+msgid "Optional Settings"
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:18
+msgid "Uninstall"
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:19
+msgid "Deactivating Affibloom keeps everything. Deleting it keeps everything too, unless you turn this on."
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:28
+msgid "Delete all Affibloom data when the plugin is deleted"
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:30
+msgid "Products, click counts and link checks are removed for good. Export them first."
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:35
+msgid "Posts that still use Affibloom"
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:37
+msgid "No post uses Affibloom."
+msgstr ""
+
+#: templates/admin/partials/settings-general-uninstall.php:39
+msgid "Their boxes and links stop showing once the data is removed. Nothing changes the posts themselves."
+msgstr ""
+
+#. translators: %s: number of further posts.
+#: templates/admin/partials/settings-general-uninstall.php:47
+#, php-format
+msgid "And %s more post."
+msgid_plural "And %s more posts."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/partials/share-kit.php:16
+msgid "Copy shareable URL"
+msgstr ""
+
+#: templates/admin/partials/share-kit.php:17
+msgid "Copy destination URL"
+msgstr ""
+
+#: templates/admin/partials/share-kit.php:18
+msgid "Copy disclosure"
+msgstr ""
+
+#: templates/admin/partials/share-kit.php:20
+msgid "Copy block"
+msgstr ""
+
+#: templates/admin/partials/share-kit.php:25
+msgid "Share kit"
+msgstr ""
+
+#: templates/admin/partials/share-kit.php:26
+msgid "Copy snippets for posts, email, and social."
+msgstr ""
+
+#: templates/admin/partials/soon.php:18
+msgid "Soon"
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:53
+msgid "Add a Product or Group to get started."
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:58
+#: templates/admin/partials/table-product-picker.php:14
+#: templates/admin/table.php:130
+msgid "Add Product"
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:62
+#: templates/admin/partials/table-group-picker.php:13
+#: templates/admin/table.php:134
+#: templates/editor/display-modal.php:245
+msgid "Add Group"
+msgstr ""
+
+#. translators: %s: the fields of the row or column, e.g. "Product name, Price".
+#: templates/admin/partials/table-builder.php:77
+#, php-format
+msgid "Column: %s"
+msgstr ""
+
+#. translators: %s: the fields of the row or column, e.g. "Product name, Price".
+#: templates/admin/partials/table-builder.php:77
+#, php-format
+msgid "Row: %s"
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:78
+msgid "empty"
+msgstr ""
+
+#. translators: %s: the row or column, e.g. "Row: Price".
+#. translators: %s: the product's name.
+#. translators: %s: the field's name.
+#: templates/admin/partials/table-builder.php:85
+#: templates/admin/partials/table-builder.php:113
+#: templates/admin/partials/table-cell.php:38
+#, php-format
+msgid "Move %s"
+msgstr ""
+
+#. translators: %s: the row or column.
+#: templates/admin/partials/table-builder.php:90
+msgid "Remove this column"
+msgstr ""
+
+#. translators: %s: the row or column.
+#: templates/admin/partials/table-builder.php:90
+msgid "Remove this row"
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:117
+msgid "Add field"
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:120
+msgid "Remove this product"
+msgstr ""
+
+#. translators: %s: the product's name.
+#: templates/admin/partials/table-builder.php:122
+#, php-format
+msgid "Remove \"%s\""
+msgstr ""
+
+#. translators: %s: the product's name.
+#: templates/admin/partials/table-builder.php:129
+#, php-format
+msgid "Badge of %s"
+msgstr ""
+
+#: templates/admin/partials/table-builder.php:156
+msgid "Click to add a Field"
+msgstr ""
+
+#. translators: %s: the field's name.
+#: templates/admin/partials/table-cell.php:45
+#: templates/admin/partials/table-inspector.php:109
+msgid "Remove from every product"
+msgstr ""
+
+#: templates/admin/partials/table-cell.php:72
+msgid "Amazon prices are updated automatically"
+msgstr ""
+
+#. translators: %s: the field's name.
+#. translators: %s: a variant's name.
+#: templates/admin/partials/table-cell.php:77
+#: templates/admin/partials/table-cell.php:86
+#: templates/admin/partials/table-cell.php:100
+#: templates/admin/partials/variant-rows.php:33
+#, php-format
+msgid "Edit %s"
+msgstr ""
+
+#: templates/admin/partials/table-cell.php:81
+#: templates/admin/table.php:45
+#: templates/front/partials/table-field.php:128
+msgid "N/A"
+msgstr ""
+
+#: templates/admin/partials/table-cell.php:114
+msgid "No Secondary Button URL set."
+msgstr ""
+
+#. translators: %s: the table's name.
+#: templates/admin/partials/table-clone-modal.php:13
+#, php-format
+msgid "Do you want to clone %s"
+msgstr ""
+
+#: templates/admin/partials/table-clone-modal.php:14
+msgid "Could not clone the table. Please try again."
+msgstr ""
+
+#: templates/admin/partials/table-clone-modal.php:26
+msgid "Cloning…"
+msgstr ""
+
+#: templates/admin/partials/table-clone-modal.php:26
+#: templates/admin/table.php:192
+#: templates/admin/table.php:257
+msgid "OK"
+msgstr ""
+
+#: templates/admin/partials/table-create-modal.php:15
+#: templates/admin/partials/table-row.php:38
+#: templates/admin/table.php:106
+msgid "Vertical"
+msgstr ""
+
+#: templates/admin/partials/table-create-modal.php:16
+#: templates/admin/partials/table-row.php:38
+#: templates/admin/table.php:105
+msgid "Horizontal"
+msgstr ""
+
+#: templates/admin/partials/table-create-modal.php:22
+msgid "The table could not be created. Please try again."
+msgstr ""
+
+#: templates/admin/partials/table-create-modal.php:25
+#: templates/admin/partials/table-create-modal.php:48
+#: templates/admin/partials/table-head-actions.php:21
+#: templates/admin/tables.php:36
+#: templates/editor/display-modal.php:166
+msgid "Create Table"
+msgstr ""
+
+#: templates/admin/partials/table-create-modal.php:36
+#: templates/admin/partials/tables-list.php:33
+#: templates/admin/table.php:103
+msgid "Style"
+msgstr ""
+
+#: templates/admin/partials/table-create-modal.php:48
+msgid "Creating…"
+msgstr ""
+
+#: templates/admin/partials/table-description-modal.php:19
+#: templates/admin/partials/table-description-modal.php:26
+msgid "Description Editor"
+msgstr ""
+
+#: templates/admin/partials/table-description-modal.php:25
+msgid "Add rich text to describe a product."
+msgstr ""
+
+#: templates/admin/partials/table-description-modal.php:58
+#: templates/admin/partials/table-inspector.php:104
+#: templates/admin/product-variants.php:131
+#: templates/admin/table.php:33
+msgid "Saving…"
+msgstr ""
+
+#: templates/admin/partials/table-group-picker.php:14
+msgid "Could not add the group. Please try again."
+msgstr ""
+
+#. translators: %s: how many groups there are.
+#: templates/admin/partials/table-group-picker.php:16
+#, php-format
+msgid "Search %s Groups"
+msgstr ""
+
+#. translators: %s: how many links the group holds.
+#: templates/admin/partials/table-group-picker.php:18
+#, php-format
+msgid "%s link(s)"
+msgstr ""
+
+#: templates/admin/partials/table-group-picker.php:24
+msgid "Add group to Table"
+msgstr ""
+
+#: templates/admin/partials/table-head-actions.php:12
+#: templates/admin/table.php:33
+msgid "Saved"
+msgstr ""
+
+#: templates/admin/partials/table-head-actions.php:15
+msgid "Could not copy the shortcode."
+msgstr ""
+
+#. translators: 1: what the icon is for (Badge, Button Text), 2: the icon's name or "No icon".
+#: templates/admin/partials/table-inspector.php:24
+#, php-format
+msgid "%1$s icon: %2$s"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:35
+msgid "Choose an icon"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:35
+msgid "Search icons"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:36
+msgid "No icons match."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:37
+msgid "Select an icon"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:37
+msgid "Use this icon"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:38
+msgid "Could not add the icon. Please try again."
+msgstr ""
+
+#. translators: %s: the product's name.
+#: templates/admin/partials/table-inspector.php:40
+#, php-format
+msgid "For %s. Each product has its own button text and address."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:41
+msgid "Button saved."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:50
+#: templates/admin/setup.php:19
+msgid "Customize"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:51
+msgid "Clear the selection"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:57
+msgid "Select a product, a field or a row to customize it."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:59
+msgid "Drag a product, a row or a field by its grip to move it; the others make room."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:60
+msgid "Drop a field in another row to move it there for every product."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:61
+msgid "Click a badge or a button to give it an icon."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:62
+msgid "With the keyboard: focus a grip, press Space, move with the arrow keys, press Space again."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:70
+msgid "Edit product"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:76
+msgid "Best Overall"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:77
+msgid "Shown above the product. Saved as you leave the box or choose an icon."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:81
+msgid "Remove from table"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:94
+msgid "Buy Now"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:98
+msgid "Button URL"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:100
+msgid "The Primary Button goes to the product's link."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:104
+msgid "Save button"
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:106
+msgid "A field is the same for every product: moving or removing it changes them all."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:115
+msgid "Drag its grip to move it. Its fields keep their values if it is removed."
+msgstr ""
+
+#: templates/admin/partials/table-inspector.php:123
+msgid "Manage icons"
+msgstr ""
+
+#: templates/admin/partials/table-locations-modal.php:14
+msgid "The locations could not be loaded."
+msgstr ""
+
+#: templates/admin/partials/table-locations-modal.php:21
+msgid "Table Locations"
+msgstr ""
+
+#: templates/admin/partials/table-locations-modal.php:37
+msgid "This is the post or page this table was found in."
+msgstr ""
+
+#: templates/admin/partials/table-locations-modal.php:43
+msgid "Action"
+msgstr ""
+
+#: templates/admin/partials/table-product-picker.php:15
+msgid "Could not add the product. Please try again."
+msgstr ""
+
+#: templates/admin/partials/table-product-picker.php:23
+msgid "Add Product to Table"
+msgstr ""
+
+#. translators: %s: the table's name.
+#: templates/admin/partials/table-row.php:20
+#, php-format
+msgid "Clone %s"
+msgstr ""
+
+#: templates/admin/partials/table-row.php:28
+msgid "Click the table to add a product"
+msgstr ""
+
+#: templates/admin/partials/table-row.php:28
+msgid "No products in this table yet."
+msgstr ""
+
+#. translators: %s: the table's name.
+#: templates/admin/partials/table-row.php:43
+#, php-format
+msgid "Locations of %s"
+msgstr ""
+
+#: templates/admin/partials/table-row.php:50
+#: templates/admin/partials/tables-list.php:35
+msgid "Clone"
+msgstr ""
+
+#: templates/admin/partials/tables-list.php:31
+msgid "These are the products used in the table."
+msgstr ""
+
+#: templates/admin/partials/tables-list.php:33
+msgid "Is your product data displayed across rows or in columns."
+msgstr ""
+
+#: templates/admin/partials/tables-list.php:34
+msgid "Where this table is used on your site."
+msgstr ""
+
+#: templates/admin/partials/tables-list.php:35
+msgid "Make a copy of this table."
+msgstr ""
+
+#: templates/admin/partials/tables-list.php:41
+msgid "Create Beautiful Comparison Tables"
+msgstr ""
+
+#: templates/admin/partials/tables-list.php:42
+msgid "Compare similar products and share alternatives. These tables are great way to drive conversions across multiple products and views of related reviews."
+msgstr ""
+
+#: templates/admin/partials/tour.php:14
+msgid "Create your first link here. Paste any URL to start customizing and sharing it."
+msgstr ""
+
+#: templates/admin/partials/tour.php:15
+msgid "Your Dashboard lists every link. Filter, search, and open any link to edit it."
+msgstr ""
+
+#: templates/admin/partials/tour.php:16
+msgid "Search by link name or URL. Use the keyboard shortcut shown next to the box for a faster jump."
+msgstr ""
+
+#: templates/admin/partials/tour.php:17
+msgid "Open Filters to narrow links by group, type, placements, and comparison tables. Changes apply as you toggle."
+msgstr ""
+
+#: templates/admin/partials/tour.php:18
+msgid "Pick group, link type, placements, or a comparison table here. Save a view when you find a filter set you reuse."
+msgstr ""
+
+#: templates/admin/partials/tour.php:19
+msgid "Opportunities identify links that aren't monetized yet or could be earning higher commissions."
+msgstr ""
+
+#: templates/admin/partials/tour.php:20
+msgid "Tables are comparison layouts you can embed on posts. Build once, reuse across your site."
+msgstr ""
+
+#: templates/admin/partials/tour.php:21
+msgid "Create Groups to organize related links so you can manage and display them together."
+msgstr ""
+
+#. translators: 1: the step's number, 2: the number of steps.
+#: templates/admin/partials/tour.php:29
+#, php-format
+msgid "Step %1$d of %2$d"
+msgstr ""
+
+#: templates/admin/partials/tour.php:33
+msgid "Skip"
+msgstr ""
+
+#: templates/admin/partials/tour.php:35
+msgid "Back"
+msgstr ""
+
+#: templates/admin/partials/tracking-id-notice.php:18
+msgid "Affibloom doesn't have your Amazon Tracking ID saved."
+msgstr ""
+
+#: templates/admin/partials/tracking-id-notice.php:20
+msgid "Would you like to set"
+msgstr ""
+
+#: templates/admin/partials/tracking-id-notice.php:22
+msgid "as your primary tracking ID?"
+msgstr ""
+
+#: templates/admin/partials/tracking-id-notice.php:29
+msgid "Yes"
+msgstr ""
+
+#: templates/admin/partials/tracking-id-notice.php:30
+msgid "No"
+msgstr ""
+
+#: templates/admin/partials/tracking-id-notice.php:32
+msgid "Set Amazon Tracking ID"
+msgstr ""
+
+#: templates/admin/partials/unsaved-modal.php:18
+msgid "Unsaved Changes"
+msgstr ""
+
+#: templates/admin/partials/unsaved-modal.php:24
+msgid "You have unsaved changes that will be lost if you leave this page. What would you like to do?"
+msgstr ""
+
+#: templates/admin/partials/unsaved-modal.php:27
+msgid "Leave Without Saving"
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:13
+msgid "All products updated."
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:13
+msgid "The products could not be updated."
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:17
+msgid "Update Link Settings"
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:25
+msgid "Affibloom will enable the option"
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:25
+msgid "Affibloom will disable the option"
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:28
+msgid "Only New Links"
+msgstr ""
+
+#: templates/admin/partials/update-link-settings-modal.php:29
+msgid "Override All Links"
+msgstr ""
+
+#: templates/admin/partials/variant-rows.php:25
+msgid "Could not copy the URL."
+msgstr ""
+
+#: templates/admin/partials/variant-rows.php:27
+#: templates/admin/product-variants.php:83
+#: templates/admin/product-variants.php:90
+msgid "Copy"
+msgstr ""
+
+#: templates/admin/partials/variants-actions.php:13
+msgid "Search variants"
+msgstr ""
+
+#: templates/admin/partials/variants-actions.php:19
+#: templates/admin/product-variants.php:113
+msgid "Add Variant"
+msgstr ""
+
+#: templates/admin/partials/view-delete-modal.php:16
+msgid "Delete saved view?"
+msgstr ""
+
+#: templates/admin/partials/view-delete-modal.php:23
+msgid "This will permanently delete the saved filter"
+msgstr ""
+
+#: templates/admin/partials/view-delete-modal.php:25
+msgid "Your links are not affected."
+msgstr ""
+
+#: templates/admin/partials/view-delete-modal.php:30
+msgid "Delete filter"
+msgstr ""
+
+#: templates/admin/product-variants.php:47
+msgid "Amazon variant"
+msgstr ""
+
+#: templates/admin/product-variants.php:47
+msgid "New variant"
+msgstr ""
+
+#: templates/admin/product-variants.php:63
+msgid "Label for this variant; the shareable URL appears under the title."
+msgstr ""
+
+#: templates/admin/product-variants.php:70
+#: templates/admin/product-variants.php:77
+#: templates/admin/product-variants.php:125
+msgid "Tracking ID"
+msgstr ""
+
+#: templates/admin/product-variants.php:76
+msgid "Amazon associate tag for this variant."
+msgstr ""
+
+#: templates/admin/product-variants.php:76
+msgid "Slug segment for this variant’s cloaked URL."
+msgstr ""
+
+#: templates/admin/product-variants.php:89
+msgid "Copy the full variant URL to your clipboard."
+msgstr ""
+
+#: templates/admin/product-variants.php:103
+msgid "No variants match your search."
+msgstr ""
+
+#: templates/admin/product-variants.php:109
+msgid "No variants yet"
+msgstr ""
+
+#: templates/admin/product-variants.php:110
+msgid "Create a variant to get a separate permalink or Amazon tracking ID that still points to this link’s primary destination."
+msgstr ""
+
+#: templates/admin/product-variants.php:146
+msgid "Remove this variant?"
+msgstr ""
+
+#: templates/admin/product-variants.php:147
+msgid "Its cloaked URL or tracking branch will stop working. This cannot be undone."
+msgstr ""
+
+#: templates/admin/product.php:74
+msgid "This product already exists. Please update the Primary URL or add a new link."
+msgstr ""
+
+#: templates/admin/product.php:94
+msgid "Links & buttons"
+msgstr ""
+
+#: templates/admin/product.php:103
+msgid "This title will only be shown in displays"
+msgstr ""
+
+#: templates/admin/product.php:104
+msgid "URL Name Goes Here"
+msgstr ""
+
+#: templates/admin/product.php:116
+msgid "This slug will be used to cloak the original target URL"
+msgstr ""
+
+#: templates/admin/product.php:214
+msgid "Add Another Button"
+msgstr ""
+
+#: templates/admin/product.php:221
+msgid "Organize"
+msgstr ""
+
+#: templates/admin/product.php:231
+msgid "Group this URL for better organization and to use in group displays"
+msgstr ""
+
+#: templates/admin/product.php:253
+msgid "Could not save the field. Please try again."
+msgstr ""
+
+#: templates/admin/product.php:254
+msgid "Could not add the field. Please try again."
+msgstr ""
+
+#: templates/admin/product.php:269
+msgid "Add Custom Field"
+msgstr ""
+
+#: templates/admin/product.php:314
+msgid "Delete This Link"
+msgstr ""
+
+#: templates/admin/product.php:318
+msgid "Unsaved changes"
+msgstr ""
+
+#: templates/admin/product.php:336
+msgid "Delete This Link?"
+msgstr ""
+
+#: templates/admin/product.php:350
+msgid "Keep This Link"
+msgstr ""
+
+#: templates/admin/product.php:361
+msgid "Remove this button?"
+msgstr ""
+
+#: templates/admin/product.php:362
+msgid "Its link and text are gone once you save."
+msgstr ""
+
+#: templates/admin/product.php:366
+msgid "Could not remove the button. Please try again."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:19
+#: templates/admin/setup.php:155
+msgid "Show Prime Logo In Displays"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:19
+#: templates/admin/setup.php:155
+msgid "Show the blue Prime logo beside the price for all eligible Amazon products in your Displays."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:20
+#: templates/admin/setup.php:156
+msgid "Show Discount Pricing"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:20
+#: templates/admin/setup.php:156
+msgid "Show the base Amazon price as strikethrough text, followed by the discounted price in bold."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:21
+msgid "Commission Upgrades"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:21
+msgid "Site-wide: when a brand raises commission on products you already link to, clicks are routed to the higher payout at click time."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:22
+msgid "Update Amazon pricing daily"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:22
+msgid "Scan and update all of your Amazon links for the latest price."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:23
+msgid "Only update products with Locations"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:23
+msgid "When enabled, Amazon pricing and link status checks only run for links that appear in Locations. Turn off to include your full catalog."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:24
+msgid "Force changes from link details"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:24
+msgid "When enabled, the tracking ID in posts is updated to the ID from the product's link details page."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:25
+msgid "Keep Title When URL Is Replaced"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:25
+msgid "When enabled, replacing the Primary Destination URL will keep the current title. Disable to automatically update the title based on the new destination."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:26
+msgid "Shorten Amazon affiliate links"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:26
+msgid "Remove unnecessary attributes from long Amazon affiliate links for a cleaner reader experience."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:27
+msgid "Mobile Deep Linking"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:27
+msgid "Open clicks in the Amazon app."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:28
+msgid "Send Readers to Their Local Store"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:28
+msgid "Readers will be redirected to the Amazon store closest to their detected country."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:29
+msgid "Keep Geni.us Formatting"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:29
+msgid "Turn this off to remove geni.us cloaking from all links."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:30
+msgid "Scan SiteStripe in post content"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:30
+msgid "When enabled, post content is scanned for SiteStripe images, iframes, and page-builder data during link detection. Disable for faster scans if you do not use SiteStripe embeds."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:35
+msgid "This worked only through an outside cloud service and has no effect in Affibloom. Your choice is kept."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:60
+#: templates/admin/setup.php:132
+msgid "Amazon Associates Accounts"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:61
+msgid "Enter your primary tracking ID and make sure your international accounts are connected with OneLink. It'll automatically send visitors to their local store."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:72
+msgid "Allow Multiple Tracking IDs"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:79
+msgid "Tracking ID Whitelist"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:83
+msgid "Select Tracking IDs"
+msgstr ""
+
+#. translators: %s: a tracking ID.
+#: templates/admin/settings-amazon.php:85
+msgid "Remove all tracking IDs"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:88
+msgid "Separate tracking IDs with spaces."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:90
+msgid "One of those was not a valid Tracking ID, so the previous list was kept."
+msgstr ""
+
+#: templates/admin/settings-amazon.php:121
+#: templates/admin/setup.php:150
+msgid "Amazon Preferences"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:143
+#: templates/admin/settings-amazon.php:150
+msgid "Days before out of stock alerts"
+msgstr ""
+
+#: templates/admin/settings-amazon.php:149
+msgid "Only see out-of-stock alerts after this many days have passed."
+msgstr ""
+
+#: templates/admin/settings-display.php:21
+msgid "Layout & spacing"
+msgstr ""
+
+#: templates/admin/settings-display.php:26
+#: templates/editor/display-modal.php:19
+msgid "Single"
+msgstr ""
+
+#: templates/admin/settings-display.php:27
+#: templates/editor/display-modal.php:20
+msgid "Grid"
+msgstr ""
+
+#: templates/admin/settings-display.php:28
+#: templates/editor/display-modal.php:21
+msgid "List"
+msgstr ""
+
+#: templates/admin/settings-display.php:82
+msgid "Display type"
+msgstr ""
+
+#: templates/admin/settings-display.php:93
+msgid "Preview device width"
+msgstr ""
+
+#: templates/admin/settings-display.php:94
+#: templates/admin/settings-display.php:96
+msgid "Desktop (1280px)"
+msgstr ""
+
+#: templates/admin/settings-display.php:98
+#: templates/admin/settings-display.php:100
+msgid "Mobile (390px)"
+msgstr ""
+
+#: templates/admin/settings-display.php:109
+#: templates/admin/setup.php:114
+msgid "Display preview"
+msgstr ""
+
+#: templates/admin/settings-display.php:110
+#: templates/admin/setup.php:115
+msgid "The preview could not be drawn. Try again."
+msgstr ""
+
+#: templates/admin/settings-display.php:135
+msgid "Display settings"
+msgstr ""
+
+#: templates/admin/settings-display.php:168
+msgid "Colors and button labels apply to the selected display type (Single, Grid, or List)."
+msgstr ""
+
+#: templates/admin/settings-display.php:188
+msgid "Reset Settings"
+msgstr ""
+
+#: templates/admin/settings-display.php:200
+msgid "Reset all display settings to factory defaults? This cannot be undone."
+msgstr ""
+
+#: templates/admin/settings-display.php:201
+msgid "Resetting Display Settings"
+msgstr ""
+
+#: templates/admin/settings-display.php:202
+msgid "Error resetting display settings."
+msgstr ""
+
+#: templates/admin/setup.php:21
+msgid "Analytics"
+msgstr ""
+
+#: templates/admin/setup.php:36
+msgid "Setup steps"
+msgstr ""
+
+#: templates/admin/setup.php:53
+msgid "Choose a Default Display Box Theme"
+msgstr ""
+
+#: templates/admin/setup.php:54
+msgid "This is an example of how a product will look on your site."
+msgstr ""
+
+#: templates/admin/setup.php:55
+msgid "Themes"
+msgstr ""
+
+#: templates/admin/setup.php:68
+msgid "Customize Your Displays"
+msgstr ""
+
+#: templates/admin/setup.php:69
+msgid "Don't worry, you can easily change all of these settings later."
+msgstr ""
+
+#: templates/admin/setup.php:102
+msgid "Turn this on to show the disclosure in single displays by default. You can override this per display."
+msgstr ""
+
+#: templates/admin/setup.php:118
+msgid "← Change Themes"
+msgstr ""
+
+#: templates/admin/setup.php:120
+#: templates/admin/setup.php:175
+#: templates/admin/setup.php:189
+msgid "Skip →"
+msgstr ""
+
+#: templates/admin/setup.php:121
+#: templates/admin/setup.php:176
+#: templates/admin/setup.php:190
+msgid "Save and Continue →"
+msgstr ""
+
+#: templates/admin/setup.php:128
+msgid "Amazon Associates"
+msgstr ""
+
+#: templates/admin/setup.php:184
+msgid "Clicks are sent to Google Analytics as affibloom_primary_click, affibloom_secondary_click and affibloom_link_click, counted from today."
+msgstr ""
+
+#: templates/admin/setup.php:198
+msgid "You're Ready"
+msgstr ""
+
+#: templates/admin/setup.php:199
+msgid "That's it! You're now ready to add displays to your site."
+msgstr ""
+
+#: templates/admin/setup.php:200
+msgid "Go to Dashboard"
+msgstr ""
+
+#. translators: %s: how many tables there are.
+#: templates/admin/table.php:26
+#, php-format
+msgid "All Tables %s"
+msgstr ""
+
+#: templates/admin/table.php:33
+msgid "Not saved"
+msgstr ""
+
+#: templates/admin/table.php:34
+msgid "Could not save. Please try again."
+msgstr ""
+
+#. translators: 1: what is moved, 2: its place, 3: how many places.
+#: templates/admin/table.php:37
+#, php-format
+msgid "Picked up %1$s, place %2$s of %3$s. Move with the arrow keys, drop with Space."
+msgstr ""
+
+#. translators: 1: what is moved, 2: its place, 3: how many places.
+#: templates/admin/table.php:39
+#, php-format
+msgid "%1$s, place %2$s of %3$s."
+msgstr ""
+
+#. translators: 1: what was moved, 2: its place, 3: how many places.
+#: templates/admin/table.php:41
+#, php-format
+msgid "Dropped %1$s at place %2$s of %3$s."
+msgstr ""
+
+#. translators: %1$s: what was being moved.
+#: templates/admin/table.php:43
+#, php-format
+msgid "Put %1$s back."
+msgstr ""
+
+#: templates/admin/table.php:71
+msgid "Use this to identify your tables"
+msgstr ""
+
+#: templates/admin/table.php:74
+msgid "Options"
+msgstr ""
+
+#: templates/admin/table.php:81
+msgid "Show Field Name"
+msgstr ""
+
+#: templates/admin/table.php:83
+msgid "Show field name in a Table"
+msgstr ""
+
+#: templates/admin/table.php:94
+msgid "Show Headers"
+msgstr ""
+
+#: templates/admin/table.php:96
+msgid "Hide the column header in a Horizontal Table"
+msgstr ""
+
+#: templates/admin/table.php:104
+msgid "This changes the orientation of your table"
+msgstr ""
+
+#: templates/admin/table.php:111
+msgid "Change the look and feel of your table"
+msgstr ""
+
+#: templates/admin/table.php:119
+msgid "Name the table to create it; Theme and the options follow once it exists."
+msgstr ""
+
+#: templates/admin/table.php:127
+msgid "Table tools"
+msgstr ""
+
+#: templates/admin/table.php:138
+msgid "Add Row"
+msgstr ""
+
+#: templates/admin/table.php:138
+msgid "Add Column"
+msgstr ""
+
+#: templates/admin/table.php:142
+#: templates/admin/table.php:144
+msgid "Preview Table"
+msgstr ""
+
+#: templates/admin/table.php:142
+msgid "Edit Table"
+msgstr ""
+
+#: templates/admin/table.php:155
+msgid "Table preview"
+msgstr ""
+
+#: templates/admin/table.php:170
+msgid "Press Space or Enter to pick it up, the arrow keys to move it, Space or Enter to drop it, Escape to put it back."
+msgstr ""
+
+#: templates/admin/table.php:175
+msgid "Delete This Table"
+msgstr ""
+
+#. translators: %s: the table's name.
+#: templates/admin/table.php:190
+#, php-format
+msgid "Delete \"%s\""
+msgstr ""
+
+#: templates/admin/table.php:191
+msgid "If deleted, you won't be able to get its back."
+msgstr ""
+
+#: templates/admin/table.php:194
+msgid "Could not delete the table. Please try again."
+msgstr ""
+
+#: templates/admin/table.php:202
+msgid "Got It"
+msgstr ""
+
+#: templates/admin/table.php:222
+msgid "No data is deleted and the Field can always be added back."
+msgstr ""
+
+#: templates/admin/table.php:238
+#: templates/admin/table.php:246
+msgid "Remove this column?"
+msgstr ""
+
+#: templates/admin/table.php:238
+#: templates/admin/table.php:245
+msgid "Remove this row?"
+msgstr ""
+
+#: templates/admin/table.php:239
+msgid "Its fields leave every product. Their values are kept, so adding a field back brings them back."
+msgstr ""
+
+#: templates/admin/table.php:243
+msgid "Could not remove it. Please try again."
+msgstr ""
+
+#: templates/admin/table.php:256
+msgid "If removed, you won't be able to get its back."
+msgstr ""
+
+#: templates/admin/table.php:260
+msgid "Could not remove the product. Please try again."
+msgstr ""
+
+#. translators: %s: how many tables there are.
+#: templates/admin/tables.php:16
+#, php-format
+msgid "Search All %s Tables"
+msgstr ""
+
+#: templates/admin/tables.php:27
+msgid "Compare similar products side by side."
+msgstr ""
+
+#: templates/editor/display-modal.php:23
+msgid "Button"
+msgstr ""
+
+#: templates/editor/display-modal.php:25
+msgid "Gallery"
+msgstr ""
+
+#: templates/editor/display-modal.php:37
+msgid "Choose a Display Type"
+msgstr ""
+
+#: templates/editor/display-modal.php:67
+msgid "Could not load links. Please try again."
+msgstr ""
+
+#. translators: %d: a page number.
+#: templates/editor/display-modal.php:68
+#: templates/editor/display-modal.php:115
+#: templates/editor/display-modal.php:160
+#: templates/editor/display-modal.php:235
+#, php-format
+msgid "Page %d"
+msgstr ""
+
+#: templates/editor/display-modal.php:70
+msgid "Choose a Link"
+msgstr ""
+
+#: templates/editor/display-modal.php:83
+#: templates/editor/display-modal.php:259
+msgid "Link pages"
+msgstr ""
+
+#. translators: %s: how many links a group holds (one).
+#. translators: %s: how many links a group holds (several).
+#: templates/editor/display-modal.php:108
+#: templates/editor/display-modal.php:110
+#, php-format
+msgid "%s link"
+msgid_plural "%s links"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/editor/display-modal.php:113
+msgid "No groups found."
+msgstr ""
+
+#: templates/editor/display-modal.php:114
+msgid "Could not load groups. Please try again."
+msgstr ""
+
+#: templates/editor/display-modal.php:118
+msgid "Choose a Group"
+msgstr ""
+
+#: templates/editor/display-modal.php:122
+msgid "Create Group"
+msgstr ""
+
+#: templates/editor/display-modal.php:127
+#: templates/editor/display-modal.php:128
+msgid "Search groups"
+msgstr ""
+
+#: templates/editor/display-modal.php:131
+msgid "Group pages"
+msgstr ""
+
+#: templates/editor/display-modal.php:158
+msgid "No tables found."
+msgstr ""
+
+#: templates/editor/display-modal.php:159
+msgid "Could not load tables. Please try again."
+msgstr ""
+
+#: templates/editor/display-modal.php:162
+msgid "Choose a Table"
+msgstr ""
+
+#: templates/editor/display-modal.php:171
+#: templates/editor/display-modal.php:172
+msgid "Search tables"
+msgstr ""
+
+#: templates/editor/display-modal.php:175
+msgid "Table pages"
+msgstr ""
+
+#: templates/editor/display-modal.php:201
+msgid "Could not create the group. Please try again."
+msgstr ""
+
+#: templates/editor/display-modal.php:233
+msgid "Could not add link to this group. Please try again."
+msgstr ""
+
+#: templates/editor/display-modal.php:277
+msgid "Select"
+msgstr ""
+
+#: templates/editor/display-modal.php:296
+msgid "Enter the destination URL your Affibloom link will redirect to."
+msgstr ""
+
+#: templates/editor/display-modal.php:300
+msgid "Destination URL"
+msgstr ""
+
+#: templates/editor/display-modal.php:319
+msgid "The new product"
+msgstr ""
+
+#: templates/editor/display-modal.php:320
+msgid "The link was saved but could not be added to the group. Please try again."
+msgstr ""
+
+#: templates/editor/display-modal.php:327
+msgid "Quick Detail"
+msgstr ""
+
+#: templates/front/partials/date.php:14
+msgid "Price and availability are accurate as of the date and time indicated and are subject to change."
+msgstr ""
+
+#: templates/front/partials/fields.php:63
+#: templates/front/partials/table-field.php:119
+msgid "Copy to clipboard"
+msgstr ""
+
+#. translators: 1: the row's new position, 2: the number of rows.
+#: assets/admin/drag-rows.js:216
+#, js-format
+msgid "Moved to position %1$d of %2$d."
+msgstr ""
+
+#: blocks/product-box/customize.js:112
+msgid "Customize Display"
+msgstr ""
+
+#: blocks/product-box/schema.js:138
+msgid "Schema & Structured Data"
+msgstr ""
+
+#: blocks/product-box/schema.js:142
+msgid "Adds Google's product structured data for this display. Only allow one shortcode set of Review and Pro/Con schema per post and just supports for Single Displays."
+msgstr ""
+
+#: blocks/product-box/schema.js:149
+msgid "Another display in this post already uses schema."
+msgstr ""
+
+#: blocks/product-box/schema.js:158
+msgid "Review author"
+msgstr ""
+
+#: blocks/product-box/schema.js:165
+msgid "Review schema"
+msgstr ""
+
+#: blocks/product-box/schema.js:171
+msgid "Price currency"
+msgstr ""
+
+#: blocks/product-box/schema.js:191
+msgid "Rating value"
+msgstr ""
+
+#: blocks/product-box/schema.js:200
+msgid "Pro/Con schema"
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block title"
+msgid "Product box"
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block description"
+msgid "Shows a product, a group or a table as a display in your post."
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block keyword"
+msgid "link"
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block keyword"
+msgid "affiliate"
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block keyword"
+msgid "product"
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block keyword"
+msgid "display"
+msgstr ""
