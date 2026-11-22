@@ -164,6 +164,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 156. Gap fixes after Phase 8 (the user, 2026-11-23): Tasks GF1-GF7 (Batches 8.G1-8.G4) and Phase M's 26Q, from the Lasso/Affibloom gap audit.
 - 157. Task GF6 (2026-11-23): a turned-back link is the column `use_original` (schema step 12), not `assigned_product_id = -1`, so untied-link queries stay as they are.
 - 158. Task 24G added (the user, 2026-11-23): an icon picker for badge and button texts in Customize Display and the Elementor widget; stored with single quotes.
+- 159. A Lasso box Affibloom's block cannot hold becomes [affibloom] in a Shortcode block (the user, 2026-11-23); F10 D16 changed.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3033,3 +3034,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     The editors store `<span class='<class>'></span> <words>` (single quotes, which R40 and the shortcode keep); the
     box prints it as before. The block reuses the table builder's icon grid; Elementor gets a dropdown per text
     (Elementor is inactive on the site); "Add icon" stays in Settings → Display. Task in `phase-4-editor-block.md`.
+
+159. **A Lasso box Affibloom's block cannot hold becomes `[affibloom …]` in a Shortcode block (the user, 2026-11-23:
+    "Yes, as a shortcode").** F10 D16 kept such a box as Lasso's while Affibloom still drew `[lasso]` (Task 27,
+    dropped by deviation 146); after the cutover it would draw nothing. The converter (LM2's dry run, LM3's run) now
+    writes a Lasso block whose box the Product box block cannot draw, or could not hold whole (`rating="4.5"`, `pros`, a
+    `type="link"`), as `<!-- wp:shortcode -->[affibloom …]<!-- /wp:shortcode -->`, which reads every attribute. Only an
+    unknown product, group or table, or an empty box, still blocks. Migrator `5c7e187`.

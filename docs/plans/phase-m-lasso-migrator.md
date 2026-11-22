@@ -1108,8 +1108,9 @@ Local: post 2900, 10 blocks, editor 10 valid Affibloom blocks, no warning; front
 Lasso's card shadow, which comes from the site's `.lasso-container` Additional CSS (LM7 translates it). Whole site:
 304 blocks in 44 posts, a second run writes nothing, an edited post refused then `--force`d, `--revert` of all: 59 posts
 byte-equal to before. **For the cutover:** Lasso's licensed `save_post` hook rescans a post in the background; run the
-conversion with Lasso off (Local's is unlicensed, so the hook never ran here). D16's "a box the block cannot hold
-stays as Lasso's" (none here) waits for the user: after the cutover `[lasso]` draws nothing.
+conversion with Lasso off (Local's is unlicensed, so the hook never ran here). A box the block cannot hold whole
+becomes `[affibloom …]` in a Shortcode block (the user, deviation 159; migrator `5c7e187`): a test draft with
+`rating="4.5"` converted so, drew Affibloom's box with the rating, reverted, and was deleted.
 
 ---
 

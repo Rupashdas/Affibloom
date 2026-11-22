@@ -203,7 +203,8 @@ Settled by Claude from Lasso and the records (none drops anything Lasso does or 
   rewrites nothing. They stay in Lasso's table, which rollback and F34's gate can still read.
 - **D15 Derived data is rebuilt, not copied**: the link index, content counts, duplicate keys, short-link cache. The
   `data-lasso-id` stamps stay in the content, unread; `data-lasso-lid` is read through the ID map.
-- **D16 A box converts only when nothing is lost.** The converter maps each display type to its Affibloom block; a
+- **D16 (changed 2026-11-23, deviation 159: a box the block cannot hold becomes `[affibloom …]` in a Shortcode block, so it loses nothing; only an unknown product, group or table blocks it)** — was:
+  - **D16 A box converts only when nothing is lost.** The converter maps each display type to its Affibloom block; a
   box with an attribute the block cannot hold, or whose product is unknown, stays exactly as it is (it still renders
   through Task 27) and is reported with the reason. The original content is stored once per post
   (`_affibloom_pre_conversion`), the save makes a revision, and revert refuses a post that was edited after its
