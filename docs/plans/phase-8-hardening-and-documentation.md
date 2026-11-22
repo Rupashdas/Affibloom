@@ -110,7 +110,7 @@ A read of Lasso's code against Affibloom's after Phase 8's sign-off (admin scree
 the plan promised and no task built, and Lasso behaviours with no record. Batches 8.G1-8.G4; E17's migrator half is
 Phase M's Task 26Q.
 
-- [ ] Task GF1: Keep Original URL keeps a listed domain's link as typed
+- [x] Task GF1: Keep Original URL keeps a listed domain's link as typed
 - [ ] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
 - [ ] Task GF3: Posts and pages keep 8 revisions, as with Lasso
 - [ ] Task GF4: Kadence's FAQ schema repairs
@@ -1233,8 +1233,12 @@ in `keep_original_domains`); `src/Domain/Cloak/PublicLink.php` (correct the docb
 `tests/Unit/Application/Products/LinkNormaliserTest.php` (listed `amzn.to` not followed; unlisted followed; listed
 `www.` host matches), F24 AC (Keep Original URL) in `tests/E2E/acceptance/F24.spec.ts`.
 
-- [ ] **Step 1: Test.** - [ ] **Step 2: `follows()` reads the list.** - [ ] **Step 3: Run and look** (Add New Link,
-  1280 px). - [ ] **Step 4: Commit** — "Keep a listed domain's link as typed (GF1)".
+- [x] **Step 1: Test.** - [x] **Step 2: `follows()` reads the list.** - [x] **Step 3: Run and look** (Add New Link,
+  1280 px). - [x] **Step 4: Commit** — "Keep a listed domain's link as typed (GF1)".
+
+*Note:* the test sits in `tests/Unit/Application/LinkNormaliserTest.php` (the plan said `Products/`); `PublicLink`'s docblock was
+already right once the list is read. Seen: `amzn.to` saved in the support view, Add New Link `https://amzn.to/gf1check23`
+stored as typed (product 22620); F24 AC16 written, not run.
 
 ### Task GF2: A bare ASIN goes to the Default Tracking ID country's store
 

@@ -191,4 +191,21 @@ test.describe( 'F24 Link cloaking', () => {
 		await expect( page ).toHaveURL( new RegExp( `id=${ product }&is_duplicate=1` ) );
 		await expect( page.getByText( 'This product already exists.' ) ).toBeVisible();
 	} );
+
+	// Task GF1 (D9): Keep Original URL stores a listed domain's link as typed; amzn.to is otherwise followed.
+	test( 'AC16 Add Link keeps a link of a Keep Original URL domain as typed', async ( { page } ) => {
+		const stored = wp( 'option', 'get', 'affibloom_settings', '--format=json' );
+		try {
+			setSettings( { keep_original_domains: [ 'amzn.to' ] } );
+			const link = `https://amzn.to/${ unique( 'gf1' ).replace( /[^a-z0-9]/gi, '' ) }`;
+			await page.goto( '/wp-admin/admin.php?page=affibloom' );
+			await page.getByRole( 'button', { name: 'Add New Link' } ).click();
+			await page.getByRole( 'dialog', { name: 'Add A New Link' } ).getByRole( 'textbox' ).fill( link );
+			await page.getByRole( 'button', { name: 'Add Link', exact: true } ).click();
+			await expect( page ).toHaveURL( /page=affibloom-product&id=\d+/ );
+			await expect( page.locator( '#affibloom-url' ) ).toHaveValue( link );
+		} finally {
+			wp( 'option', 'update', 'affibloom_settings', stored, '--format=json' );
+		}
+	} );
 } );

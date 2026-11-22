@@ -63,7 +63,30 @@ final class LinkNormaliser {
 	 * @param Settings     $settings The site's settings.
 	 */
 	public function follows( AffiliateUrl $url, Settings $settings ): bool {
+		if ( $this->kept_original( $url, $settings ) ) {
+			return false;
+		}
+
 		return AmazonUrl::is_short( $url ) || ( $url->is_geni_us() && ! $settings->bool( 'keep_genius_formatting' ) );
+	}
+
+	/**
+	 * Keep Original URL (Settings → General, support view; Lasso's keep_affiliate_url, F24 D9, Task GF1): the link's
+	 * domain is listed, so it is stored as typed. A line is compared by its host, lower case and without "www.", as
+	 * Lasso's get_base_domain() reads the link.
+	 *
+	 * @param AffiliateUrl $url      The link as typed.
+	 * @param Settings     $settings The site's settings.
+	 */
+	private function kept_original( AffiliateUrl $url, Settings $settings ): bool {
+		foreach ( $settings->list( 'keep_original_domains' ) as $line ) {
+			$host = strtolower( (string) parse_url( 'https://' . preg_replace( '#^https?://#i', '', (string) $line ), PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Application code does not call WordPress.
+			if ( '' !== $host && ( str_starts_with( $host, 'www.' ) ? substr( $host, 4 ) : $host ) === $url->host() ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

@@ -53,6 +53,8 @@ Status: gates 1-2 written 2026-11-14 from a sweep of Lasso 369 (area 7 of
   destination Lasso gave it: the four above in posts 5428, 4436 and 4375 (seven links). (CL10, R6, D19)
 - **AC15** Pasting the site's own cloaked URL (`https://<site>/aircat/`) into **Add Link** finds that product (the
   duplicate rule) instead of creating one. (CL11, R36)
+- **AC16** With `amzn.to` under Keep Original URL, **Add Link** with an `amzn.to` link stores it as typed (it is not
+  followed to Amazon). (GF1, D9)
 
 ## 2. Evidence
 

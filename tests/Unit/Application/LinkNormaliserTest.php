@@ -70,6 +70,22 @@ final class LinkNormaliserTest extends TestCase {
 		self::assertSame( 'https://www.amazon.com/dp/B0C7654321?tag=vbvault-20', $this->links( array( 'keep_genius_formatting' => false ) )->button( 'https://geni.us/amz' ) );
 	}
 
+	/**
+	 * Keep Original URL (Lasso's keep_affiliate_url; F24 D9, Task GF1): a link whose domain is listed is stored as typed,
+	 * however the list writes it; an unlisted one is still followed.
+	 */
+	public function test_a_listed_domain_is_not_followed(): void {
+		$settings = static fn( array $listed ) => ( new InMemorySettingsRepository( array( 'keep_original_domains' => $listed ) ) )->get();
+		$short    = \Affibloom\Domain\Product\AffiliateUrl::from_string( 'https://amzn.to/3abcDEF' );
+		$genius   = \Affibloom\Domain\Product\AffiliateUrl::from_string( 'https://geni.us/abc' );
+
+		self::assertTrue( $this->links()->follows( $short, $settings( array() ) ) );
+		self::assertFalse( $this->links()->follows( $short, $settings( array( 'amzn.to' ) ) ) );
+		self::assertFalse( $this->links()->follows( $short, $settings( array( 'www.AMZN.to/any/path' ) ) ) );
+		self::assertTrue( $this->links()->follows( $short, $settings( array( 'example.com' ) ) ) );
+		self::assertFalse( $this->links()->follows( $genius, $settings( array( 'geni.us' ) ) ) );
+	}
+
 	public function test_something_that_is_not_a_link_is_cleaned_not_refused(): void {
 		self::assertSame( 'http://notalink', $this->links()->button( 'not a link' ) );
 	}
