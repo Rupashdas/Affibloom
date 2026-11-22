@@ -117,7 +117,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26H: URL variants — `wp affibloom migrate --only=variants`
 - [x] Task 26K: Link issues and dismissals — `wp affibloom migrate --only=issues` (from Phase 6)
 - [x] Task 26I: Comparison tables — `wp affibloom migrate --only=tables` (from Phase 7)
-- [ ] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
+- [x] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
 - [ ] Task 26O: Run from the admin page, in batches
 - [ ] Task 26P: Check the migrated products against the baselines
 
@@ -881,11 +881,24 @@ their products were in Affibloom's trash from earlier tests and were put back. T
 
 **Files:** create the mapper and step; modify `LassoSource.php`, `WpLassoSource.php`; tests `tests/Unit/Application/OpportunityMapperTest.php`, `tests/Integration/OpportunitiesStepTest.php`, `tests/E2E/acceptance/F10.spec.ts` (AC21).
 
-- [ ] **Step 1: Failing tests.** AC21: each product's switch, every dismissed opportunity, the replacements and the listed settings keys carried over; a second run changes nothing; Lasso's fingerprint equal (AC23). Expected red: "waiting for F22".
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step** (the switch and the dismissals after O5-O7 exist; the settings keys as their features exist).
-- [ ] **Step 4: Run and look.** On Local: the command; the Dashboard's opportunities tile; Settings → General; a dismissed row stays dismissed after a rebuild of its host.
-- [ ] **Step 5: Commit** — "Migrate Lasso's opportunity switches, dismissals and scan settings".
+- [x] **Step 1: Failing tests.** AC21: each product's switch, every dismissed opportunity, the replacements and the listed settings keys carried over; a second run changes nothing; Lasso's fingerprint equal (AC23). Expected red: "waiting for F22".
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step** (the switch and the dismissals after O5-O7 exist; the settings keys as their features exist).
+- [x] **Step 4: Run and look.** On Local: the command; the Dashboard's opportunities tile; Settings → General; a dismissed row stays dismissed after a rebuild of its host.
+- [x] **Step 5: Commit** — "Migrate Lasso's opportunity switches, dismissals and scan settings".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=opportunities [--update]`. Affibloom's API gained
+`opportunity_dismissed()` and `dismiss_opportunity()` (`Extension\OpportunityAccess`: a post's link found in the index
+by `LocationKey::md5()`; dismissed as Dismiss does). In the migrator: `LassoSource::opportunities()`
+(`LassoOpportunities`: `lasso_url_details.is_opportunity`, `lasso_link_locations.is_ignored`, `lasso_link_updates`),
+`OpportunitiesStep` (no separate mapper): the switch through `update_product( is_opportunity )` with 26C's rule; a
+dismissed link dismissed (never brought back; one not indexed yet is a skip line); a retired-ASIN replacement with no
+replacement product is a skip line (Lasso resolves nothing either), one with a product an error line to do by hand
+(Affibloom has no such table). The scan, opportunity, auto-detect and Analytics keys already move with 26C, which
+reports none waiting. With every family built, the empty waiting list left `Plugin.php`. Local: 2 switches off in
+Lasso (one product in Affibloom's trash), 1 updated; no dismissed links; 3 replacements, none with a product; then
+unchanged. AC21 passes; fingerprint equal.
 
 ---
 

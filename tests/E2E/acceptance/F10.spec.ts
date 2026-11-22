@@ -600,6 +600,20 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26N: every published product's Detect Opportunities switch is Lasso's; a second run changes nothing.
+	test( '@local AC21 --only=opportunities carries the switches over', () => {
+		wp( 'affibloom-lasso', 'migrate', '--only=opportunities', '--update' );
+		const differ = sql(
+			"SELECT COUNT(*) FROM wp_lasso_url_details d JOIN wp_postmeta m ON m.meta_key = '_affibloom_lasso_id' AND m.meta_value = d.lasso_id JOIN wp_posts p ON p.ID = m.post_id AND p.post_status = 'publish' LEFT JOIN wp_postmeta o ON o.post_id = p.ID AND o.meta_key = '_affibloom_detect_opportunities' WHERE ( d.is_opportunity = 0 ) <> ( IFNULL( o.meta_value, '1' ) = '0' )"
+		);
+		expect( differ ).toBe( '0' );
+		expect(
+			wp( 'affibloom-lasso', 'migrate', '--only=opportunities' )
+		).toMatch(
+			/^opportunities: \d+ items: 0 created, 0 updated, \d+ unchanged, \d+ skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

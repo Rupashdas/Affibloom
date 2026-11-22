@@ -30,21 +30,22 @@ final class Api {
 	/**
 	 * Builds the API.
 	 *
-	 * @param string          $version    Affibloom's version.
-	 * @param AdminNavigation $navigation The screens, which the menu lists.
-	 * @param ExtensionScreen $pages      The added pages.
-	 * @param ProductAccess   $products   What a helper may do with products.
-	 * @param SettingsAccess  $settings   What a helper may do with settings.
-	 * @param DisplayAccess   $display    What a helper may do with the Display settings.
-	 * @param FieldAccess     $fields     What a helper may do with fields.
-	 * @param GroupAccess     $groups     What a helper may do with groups.
-	 * @param AmazonAccess    $amazon     What a helper may do with the Amazon product data.
-	 * @param ViewAccess      $views      What a helper may do with saved Dashboard views and the tour.
-	 * @param VariantAccess   $variants   What a helper may do with a product's URL variants.
-	 * @param IssueAccess     $issues     What a helper may do with link issues and their dismissals.
-	 * @param TableAccess     $tables     What a helper may do with comparison tables.
+	 * @param string            $version    Affibloom's version.
+	 * @param AdminNavigation   $navigation The screens, which the menu lists.
+	 * @param ExtensionScreen   $pages      The added pages.
+	 * @param ProductAccess     $products   What a helper may do with products.
+	 * @param SettingsAccess    $settings   What a helper may do with settings.
+	 * @param DisplayAccess     $display    What a helper may do with the Display settings.
+	 * @param FieldAccess       $fields     What a helper may do with fields.
+	 * @param GroupAccess       $groups     What a helper may do with groups.
+	 * @param AmazonAccess      $amazon     What a helper may do with the Amazon product data.
+	 * @param ViewAccess        $views      What a helper may do with saved Dashboard views and the tour.
+	 * @param VariantAccess     $variants   What a helper may do with a product's URL variants.
+	 * @param IssueAccess       $issues     What a helper may do with link issues and their dismissals.
+	 * @param TableAccess       $tables     What a helper may do with comparison tables.
+	 * @param OpportunityAccess $opportunities What a helper may do with dismissed opportunities.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon, private ViewAccess $views, private VariantAccess $variants, private IssueAccess $issues, private TableAccess $tables, private OpportunityAccess $opportunities ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -462,6 +463,29 @@ final class Api {
 	 */
 	public function put_table( int $id, array $data ): int {
 		return $this->tables->put( $id, $data );
+	}
+
+	/**
+	 * Whether every place a post holds a link is dismissed on the Opportunities screens; null when the link index has
+	 * none (Task 26N).
+	 *
+	 * @param int    $post The post.
+	 * @param string $url  The link.
+	 */
+	public function opportunity_dismissed( int $post, string $url ): ?bool {
+		return $this->opportunities->dismissed( $post, $url );
+	}
+
+	/**
+	 * Dismisses every place a post holds a link on the Opportunities screens, as Dismiss does; it stays dismissed across
+	 * rescans (Task 26N).
+	 *
+	 * @param int    $post The post.
+	 * @param string $url  The link.
+	 * @return int How many places were dismissed; 0 when the link index has none.
+	 */
+	public function dismiss_opportunity( int $post, string $url ): int {
+		return $this->opportunities->dismiss( $post, $url );
 	}
 
 	/**

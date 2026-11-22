@@ -20,6 +20,7 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 - Extension API: `product_variants()` and `set_product_variants()` (Task 26H).
 - Extension API: `link_issue()`, `import_link_issue()`, `issue_dismissed_until()` and `dismiss_issue()` (Task 26K).
 - Extension API: `table()` and `put_table()` (Task 26I).
+- Extension API: `opportunity_dismissed()` and `dismiss_opportunity()` (Task 26N).
 
 ## [1.0.0-rc.1] - 2026-11-22
 

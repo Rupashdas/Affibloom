@@ -1,6 +1,10 @@
 <?php
 namespace Affibloom\Tests\Unit\Extension;
 
+use Affibloom\Domain\LinkIndex\LinkLocation;
+use Affibloom\Domain\LinkIndex\LocationKey;
+use Affibloom\Extension\OpportunityAccess;
+use Affibloom\Tests\Unit\Fakes\InMemoryLinkLocations;
 use Affibloom\Domain\Product\SearchTerm;
 use Affibloom\Domain\Table\TablePage;
 use Affibloom\Domain\Table\Table;
@@ -154,6 +158,24 @@ final class ApiTest extends TestCase {
 
 		$this->expectException( \InvalidArgumentException::class );
 		$groups->create( 'Best shoes', '' );
+	}
+
+	/** Opportunity access on an in-memory link index. */
+	public static function opportunities( ?InMemoryLinkLocations $locations = null ): OpportunityAccess {
+		return new OpportunityAccess( $locations ?? new InMemoryLinkLocations() );
+	}
+
+	public function test_a_post_s_link_is_dismissed_by_its_url(): void {
+		$locations = new InMemoryLinkLocations();
+		$url       = 'https://www.amazon.com/dp/B0TEST0001';
+		$locations->replace_host( 7, array( new LinkLocation( 7, 'https://site.example/p/', 'content', 1, 0, 'external', 'Text', $url, LocationKey::md5( $url ) ) ) );
+		$access = self::opportunities( $locations );
+
+		self::assertFalse( $access->dismissed( 7, $url ) );
+		self::assertNull( $access->dismissed( 7, 'https://other.example/' ) );
+		self::assertSame( 1, $access->dismiss( 7, $url . '/' ) );
+		self::assertSame( array( 1 => true ), $locations->ignored );
+		self::assertSame( 0, $access->dismiss( 8, $url ) );
 	}
 
 	/** Table access on an in-memory store; fields up to 99999 exist. */
@@ -424,7 +446,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -441,7 +463,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -461,7 +483,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon(), self::views(), self::variants(), self::issues(), self::tables(), self::opportunities() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 

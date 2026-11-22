@@ -65,6 +65,8 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `dismiss_issue( int $id, string $bar, int $until ): void` | 26K | Closes a product's issue bar until that Unix time. |
 | `table( int $id ): ?array` | 26I | A comparison table whole: `{ name, style, theme, show_headers, show_field_name, products: [{ id, badge }], groups: [{ id, fields }], values: { product: { field: value } } }`, or null. |
 | `put_table( int $id, array $data ): int` | 26I | Stores a table whole in `table()`'s shape: new when `$id` is 0, else in place of that table. A button cell is its JSON, as the builder stores it. Throws `InvalidArgumentException` when the name is blank or a product or field does not exist. |
+| `opportunity_dismissed( int $post, string $url ): ?bool` | 26N | Whether every place a post holds a link is dismissed on the Opportunities screens; null when the link index has none. |
+| `dismiss_opportunity( int $post, string $url ): int` | 26N | Dismisses every place a post holds a link, as Dismiss does (it stays dismissed across rescans); returns how many. |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`
