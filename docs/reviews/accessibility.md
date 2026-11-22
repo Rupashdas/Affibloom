@@ -49,7 +49,8 @@ are checked on a real page instead.
 - **Help text (U3):** every help tip is a button with `aria-describedby`, shown on keyboard focus and hover, closed by
   Escape.
 - **Focus:** 43 `:focus-visible` rules in `admin.css`; the brand-600 ring on every control checked.
-- **Wizard, tour, palette, education boxes:** with ON5-ON9.
+- **Wizard, tour, palette:** checked 2026-11-22 after ON6-ON9 (`a11y.spec.ts`, "the setup wizard, the Dashboard
+  tour and Search links"): no violation. The education boxes (ON5) are part of the screens the first test reads.
 
 ## Contrast and reflow (plan step 3)
 

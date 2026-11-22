@@ -6,8 +6,8 @@ import { boxBlock, createProduct, newPostWith, unique, wp } from './utils';
 /**
  * Task 37C (roadmap 8.3): axe finds no WCAG 2.0 A/AA, 2.1 AA or 2.2 AA violation on Affibloom's screens, their open
  * panels and modals, and a guide's box. Only Affibloom's part of a page is checked (`#wpbody-content`, and any dialog
- * Affibloom opens): WordPress's admin menu and bar are WordPress's. The setup wizard, the tour, the command palette and
- * the education boxes come with ON5-ON9 and are added here when they land (docs/reviews/accessibility.md).
+ * Affibloom opens): WordPress's admin menu and bar are WordPress's. The setup wizard, the tour and Search links (ON6-ON9)
+ * have their own test; the education boxes are the screens' own (docs/reviews/accessibility.md).
  */
 
 const TAGS = [ 'wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa' ];
@@ -89,6 +89,37 @@ test.describe( 'Task 37C: accessibility of every screen', () => {
 		await page.getByRole( 'button', { name: 'Add New Link' } ).click();
 		await expect( page.getByRole( 'dialog' ) ).toBeVisible();
 		await check( 'add modal', '[role="dialog"]' );
+		expect( found ).toEqual( [] );
+	} );
+
+	test( 'the setup wizard, the Dashboard tour and Search links have no axe violation (ON6-ON9)', async ( { page } ) => {
+		const found: string[] = [];
+		const check = async ( state: string, part: string ) => {
+			const result = await new AxeBuilder( { page } ).withTags( TAGS ).include( part ).analyze();
+			for ( const v of result.violations ) {
+				found.push( `${ state } → ${ v.id }: ${ v.nodes.slice( 0, 3 ).map( ( n ) => n.target.join( ' ' ) ).join( ' | ' ) }` );
+			}
+		};
+		wp( 'option', 'update', 'affibloom_setup', 'pending' );
+		wp( 'option', 'delete', 'affibloom_tour_done' );
+		try {
+			await open( page, '/wp-admin/admin.php?page=affibloom-setup' );
+			await check( 'setup: theme', '#wpbody-content' );
+			wp( 'option', 'update', 'affibloom_setup', 'done' );
+
+			await open( page, '/wp-admin/admin.php?page=affibloom' );
+			await expect( page.locator( '[data-tour-tip]' ) ).toBeVisible( SLOW );
+			await check( 'tour', '[data-tour-tip]' );
+			await page.locator( '[data-tour-tip]' ).getByRole( 'button', { name: 'Skip' } ).click();
+
+			await page.evaluate( () => ( document.activeElement as HTMLElement | null )?.blur() );
+			await page.keyboard.press( 'Control+Shift+L' );
+			await expect( page.locator( '.affibloom-palette__result' ).first() ).toBeVisible( SLOW );
+			await check( 'Search links', '.affibloom-palette__dialog' );
+		} finally {
+			wp( 'option', 'update', 'affibloom_setup', 'done' );
+			wp( 'option', 'update', 'affibloom_tour_done', '1' );
+		}
 		expect( found ).toEqual( [] );
 	} );
 
