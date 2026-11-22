@@ -205,6 +205,10 @@ Rewritten 2026-11-17 (deviation 146): core tasks only; the Lasso tasks are in Ph
 | 8.10 | ON8, ON9 |
 | 8.11 | 39 |
 | 8.12 | 39A |
+| 8.G1 | GF1, GF2 (gap fixes, deviation 156: link rules) |
+| 8.G2 | GF3, GF4, GF5 (WordPress side effects and hooks) |
+| 8.G3 | GF6 (alone: E17, many files) |
+| 8.G4 | GF7 (records and leftovers) |
 
 ## Phase M (the Affibloom Lasso Migrator plugin; after Phase 8, before Phase 9; deviation 146)
 
@@ -223,6 +227,7 @@ same rules apply; checks run in the migrator's folder.
 | M.8 | 26K, 26I, 26N |
 | M.9 | 26O |
 | M.10 | 26P |
+| M.10a | 26Q (after 8.G3; deviation 156) |
 | M.11 | LM2 |
 | M.12 | LM3 |
 | M.13 | LM4, LM5 |

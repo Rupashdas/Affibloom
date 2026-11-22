@@ -161,6 +161,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 153. The setup wizard's "no Lasso data" test is the migrator's (`affibloom_setup_wanted`, Phase M); wizard steps save through hidden tabs.
 - 154. Phase 8's close (the user, 2026-11-22): no GitHub release or `v1.0.0-rc.1` tag; the open decisions follow Lasso (box colours, CSV without BOM); the editors' run, the guides' review and the sign-offs done as Lasso's workflow, by Claude at the user's word.
 - 155. Task 24F added (the user, 2026-11-23): the Share kit's Copy block, promised for Phase 4 (F1 D4, deviation 69) but in no task; built after Phase 8's sign-off.
+- 156. Gap fixes after Phase 8 (the user, 2026-11-23): Tasks GF1-GF7 (Batches 8.G1-8.G4) and Phase M's 26Q, from the Lasso/Affibloom gap audit.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3004,3 +3005,16 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
       counted against Lasso's steps (`reviews/ux.md`); **step 5 and Phase 8's sign-off** at the user's word above.
     - **Task 39 step 2, the guides' review:** checked against the screens during that run; two statements corrected
       (the Dashboard search runs on Enter; Rebuild Database is in the support view).
+
+155. **Task 24F added: the Share kit's Copy block (the user, 2026-11-23).** F1 D4 and Task 14D (deviation 69) left
+    Copy block "Coming soon" until the editor block existed, in Phase 4; no Phase 4 task took it, so it stayed disabled
+    after Phases 4-8 were signed off. Built as Task 24F (`phase-4-editor-block.md`): it copies the block the editor
+    saves for a Single, `<!-- wp:affibloom/product-box {"type":"single","productId":<id>} /-->`.
+
+156. **Gap fixes after Phase 8 (the user, 2026-11-23: "Yes, plan the batch").** A read of Lasso's code against
+    Affibloom's found three items the records promised and no task built (E17's original-URL override, Keep Original
+    URL's reader, a bare ASIN's store) and four Lasso behaviours with no record (8 revisions, Kadence's FAQ schema
+    repairs, four hooks, Restrict Prefix's no-op). They are Tasks GF1-GF7 (`phase-8-hardening-and-documentation.md`,
+    Batches 8.G1-8.G4) and Phase M's Task 26Q (Lasso's original links into the index, which GF6 needs; Batch M.10a).
+    Phase 8 stays signed off; the gap batches run before Phase M's remaining batches, each at the user's word
+    (phase order, `batches.md` rule 7, bent for core fixes the migrator does not depend on, except 26Q after GF6).

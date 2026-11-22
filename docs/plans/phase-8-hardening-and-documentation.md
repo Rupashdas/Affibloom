@@ -104,6 +104,20 @@ the text below as a deviation in `progress.md`.
 - [x] Task 39: Documentation and release candidate 1.0.0-rc.1
 - [x] Task 39A: UX acceptance
 
+### Gap fixes (added 2026-11-23, deviation 156)
+
+A read of Lasso's code against Affibloom's after Phase 8's sign-off (admin screens, front end, engine) found what
+the plan promised and no task built, and Lasso behaviours with no record. Batches 8.G1-8.G4; E17's migrator half is
+Phase M's Task 26Q.
+
+- [ ] Task GF1: Keep Original URL keeps a listed domain's link as typed
+- [ ] Task GF2: A bare ASIN goes to the Default Tracking ID country's store
+- [ ] Task GF3: Posts and pages keep 8 revisions, as with Lasso
+- [ ] Task GF4: Kadence's FAQ schema repairs
+- [ ] Task GF5: Lasso's hooks for other code, under Affibloom's names
+- [ ] Task GF6: Turn a tied link back to its original URL (E17)
+- [ ] Task GF7: Records and leftovers
+
 ## Cross-phase notes
 
 **Earlier phases (what this phase needs, by name):**
@@ -1189,6 +1203,164 @@ markup, now its shortcode) and UX2 (Permissions and Uninstall back in Lasso's le
 no Affibloom screen (deviation 146). F37's Author/Contributor route test got a 2-minute timeout (about a minute on
 Local). Steps 3 and 5, by Lasso's workflow at the user's word (deviation 154): Claude ran the five top
 tasks in Brave, each finished in Lasso's number of steps (`docs/reviews/ux.md`); signed off 2026-11-22.
+
+---
+
+## Gap fixes (added 2026-11-23, deviation 156)
+
+Found by the gap audit of 2026-11-23 (two read-only passes over `D:\lasso\lasso` and Affibloom, each claim checked
+in both codebases). Each task names the Lasso lines it copies. Left as recorded, not tasks: the two content repairs
+dropped with 27G (`href=""` → `#`, Shopify CDATA; deviation 146), Lasso's cloud features (B1-B6), keyword
+opportunities (F22 D15), post history (F34).
+
+### Task GF1: Keep Original URL keeps a listed domain's link as typed
+
+**Feature:** F9 R56, F24 D9 · **Lasso:** `classes/class-lasso-affiliate-link.php` 1659-1680, 1905-1918
+(`keep_affiliate_url`); `classes/class-setting-enum.php` 111 (`geni.us`, `primalvid.io` built in)
+
+**Why:** Settings → General (support view) saves `keep_original_domains`, but nothing reads it. In Lasso a typed
+link whose domain is listed is stored as typed instead of as where it leads. Affibloom follows only Amazon short
+links and geni.us (`LinkNormaliser::follows()`), so that is where the list applies: a listed domain is not followed.
+geni.us stays under "Keep geni.us formatting" (F2), as now.
+
+**User action:** add `amzn.to` to Keep Original URL, save; add a product with an `amzn.to` link: its Primary URL stays
+the `amzn.to` link (before: the Amazon product link it leads to).
+
+**Request path:** `POST /products` → `ProductService` → `LinkNormaliser::primary()` → `follows()`.
+
+**Files:** `src/Application/Products/LinkNormaliser.php` (`follows()`: false when the link's host, without `www.`, is
+in `keep_original_domains`); `src/Domain/Cloak/PublicLink.php` (correct the docblock); tests
+`tests/Unit/Application/Products/LinkNormaliserTest.php` (listed `amzn.to` not followed; unlisted followed; listed
+`www.` host matches), F24 AC (Keep Original URL) in `tests/E2E/acceptance/F24.spec.ts`.
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: `follows()` reads the list.** - [ ] **Step 3: Run and look** (Add New Link,
+  1280 px). - [ ] **Step 4: Commit** — "Keep a listed domain's link as typed (GF1)".
+
+### Task GF2: A bare ASIN goes to the Default Tracking ID country's store
+
+**Feature:** F2 section 8 (Task 12E) · **Lasso:** `classes/class-lasso-amazon-api.php` 1332-1336, 2604-2610
+
+**Why:** `AmazonUrl::from_bare_asin()` always builds `www.amazon.com/dp/<ASIN>`; its docblock waits for "C1's locale
+control", which exists (`default_country`, Settings → Amazon). Lasso builds a product link without a host from that
+country's store.
+
+**User action:** set the Default Tracking ID country to United Kingdom; Add New Link with `B0XXXXXXXX`: the product's
+link is `https://www.amazon.co.uk/dp/B0XXXXXXXX` (with the site's tag rule). Set it back.
+
+**Files:** `src/Domain/Amazon/AmazonUrl.php` (`from_bare_asin( string $input, string $host )`, the constant goes);
+`src/Application/Products/LinkNormaliser.php` (`typed()` passes `Marketplace::host( default_country )`);
+`src/Interface/Rest/AmazonController.php:216` (an item with no URL: the same host); tests `AmazonUrlTest`,
+`LinkNormaliserTest`.
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: Host from the setting.** - [ ] **Step 3: Run and look.** - [ ] **Step 4:
+  Commit** — "Build a bare ASIN's link in the default country's store (GF2)".
+
+### Task GF3: Posts and pages keep 8 revisions, as with Lasso
+
+**Feature:** none (a site-wide side effect of Lasso, like E14) · **Lasso:** `pages/class-hook.php` 68, 322-330;
+`admin/lasso-constant.php` 105
+
+**Why:** Lasso caps revisions at 8 for the post types it scans (`cpt_support`, post and page here). After the cutover
+WordPress would keep every revision again and the posts table would grow. Same behaviour, so no visible change.
+
+**Files:** create `src/Infrastructure/WordPress/RevisionLimit.php` (a Module: `wp_revisions_to_keep` → 8 for the post
+types Affibloom scans, Settings' `scan_post_types`, else post and page; other types unchanged); register in
+`src/Plugin.php`; test `tests/Unit/Infrastructure/WordPress/RevisionLimitTest.php`.
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: Module.** - [ ] **Step 3: Run and look** (`wp eval
+  'echo wp_revisions_to_keep( get_post( <a post> ) );'` → 8; a product → unchanged). - [ ] **Step 4: Commit** —
+  "Keep eight revisions of scanned posts, as Lasso did (GF3)".
+
+### Task GF4: Kadence's FAQ schema repairs
+
+**Feature:** F5 (front end) · **Lasso:** `pages/class-hook-frontend.php` 60-64, 70-106
+
+**Why:** Lasso removes Kadence's FAQPage JSON-LD when its `mainEntity` is empty (invalid schema) and when the post
+has a Yoast FAQ block (two FAQ graphs). Kadence is kept (35J); without this a Kadence site gets the invalid graph
+back after the cutover. Nothing changes on this site (no Kadence blocks).
+
+**Files:** create `src/Interface/Front/KadenceFaqSchema.php` (filters `kadence_blocks_faq_schema`, priority 5: '' for
+an empty `"mainEntity": []`; `kadence_blocks_print_faq_schema`, priority 5: false when the post `has_block(
+'yoast/faq-block' )`); register in `src/Plugin.php`; test `tests/Unit/Interface/Front/KadenceFaqSchemaTest.php`.
+
+- [ ] **Step 1: Test.** - [ ] **Step 2: Filters.** - [ ] **Step 3: Run** (unit only; no Kadence on Local). -
+  [ ] **Step 4: Commit** — "Repair Kadence's FAQ schema as Lasso did (GF4)".
+
+### Task GF5: Lasso's hooks for other code, under Affibloom's names
+
+**Feature:** F37 (developer docs) · **Lasso:** `pages/class-hook.php` 1638 (`lasso_event_tracking`),
+`classes/class-helper.php` 156 (`lasso_get_user_ip_address`), `classes/class-setting-enum.php` 103
+(`lasso_after_saved_settings`), `classes/class-lasso-affiliate-link.php` 3429 (`lasso_after_insert_post`)
+
+**Why:** site code that used Lasso's hooks needs a counterpart (no Lasso names, LC1).
+
+| Lasso | Affibloom | Where |
+|---|---|---|
+| `lasso_event_tracking` (bool) | `affibloom_event_tracking` (bool, default true): false prints no click script and no GA events | `Interface/Front/ClickScript.php`, `GaTag.php` |
+| `lasso_get_user_ip_address` | `affibloom_user_ip_address` (string): the address the click counter sees | `Interface/Rest/ClicksController.php:66` |
+| `lasso_after_saved_settings` | `affibloom_settings_saved` (action: tab, settings) | `Application/Settings/SettingsService::update_tab()` (an Interface caller fires it if Application must stay WordPress-free) |
+| `lasso_after_insert_post` | none: WordPress's own `save_post_affibloom_product` / `wp_after_insert_post` | documented only |
+
+**Files:** the four above; `docs/developer.md` (hooks section); unit tests for each.
+
+- [ ] **Step 1: Tests.** - [ ] **Step 2: Hooks.** - [ ] **Step 3: Run and look** (a must-use snippet returning false:
+  no click script on a post). - [ ] **Step 4: Commit** — "Give other code Lasso's hooks under Affibloom's names
+  (GF5)".
+
+### Task GF6: Turn a tied link back to its original URL (E17)
+
+**Feature:** F22 N3 (E17, "Yes"), R72 · **Lasso:** `pages/class-ajax.php` 1074-1107 (`lasso_unmonetized_link`)
+
+**Why:** Lasso's scan rewrote links in posts (450 rows here, F21: `link_slug` ≠ `original_link_slug`); Unmonetize
+wrote the original back. O10 left it out ("the user is asked at Phase 7's end"; never asked): a tied row's switch is
+on and disabled. E17 decided: offer it at render time only, for a row whose `original_url` differs from its URL.
+
+**Design (N3's recommendation, made concrete):** `assigned_product_id = -1` means "print the original URL".
+`set_assigned()` accepts -1; `LinkLocation::keeping()` copies it as it copies an assignment, and a rescan then
+stores `product_id = 0` for the row, so every tied check (~34, all on `product_id`) sees an untied link with no
+change. `RenderedLinks` / `host_links()` return the row's `original_url` for -1, and the render filter prints it as
+the `href` (no `target`/`rel` change, as Lasso's R67). The post content never changes.
+
+**User action:** Opportunities → a post's links: a tied row with an original URL has its switch enabled; off →
+"Original link restored", the front end prints the original URL, the row shows it, the product's Locations count
+drops by one; on → the tie comes back (the row is cleared to 0 and the post re-indexed). Rows without an original
+URL keep the disabled switch and its tip.
+
+**Request path:** `DELETE /opportunities/locations/{row}/assignment` (a tied row with an original URL: sets -1;
+else as now) → `OpportunityService::unassign()` → `set_assigned( row, -1 )` → re-index.
+
+**Files:** `src/Domain/LinkIndex/LinkLocation.php`, `LinkLocationRepository.php`,
+`src/Infrastructure/WordPress/TableLinkLocationRepository.php` (`set_assigned`, `host_links`, `keeping` carry-over),
+`src/Application/LinkIndex/RenderedLinks.php`, the render filter, `src/Application/Opportunities/OpportunityService.php`,
+`src/Interface/Rest/OpportunitiesController.php`, `templates/admin/partials/monetize-switch.php`,
+`assets/admin/opportunities.js`; `src/Extension/Api.php` (`set_original_link( int $host, string $url, string $original ): int`, the rows of that post with that URL whose `original_url` is still their own URL; for Task 26Q); tests: unit
+for the service, the carry-over and the render; integration `AssignmentTest.php`; F22 AC (N3) in `F22.spec.ts`.
+
+- [ ] **Step 1: Tests** (a seeded row with an original URL: off prints it, byte-identical `post_content`, a rescan
+  keeps it, on restores the tie).
+- [ ] **Step 2: Storage and carry-over.** - [ ] **Step 3: Render.** - [ ] **Step 4: Route, switch, row.**
+- [ ] **Step 5: Run and look** (seed one row's `original_url` on Local; Opportunities at 1280 px; the post's front end).
+- [ ] **Step 6: Commit** — "Turn a tied link back to its original URL at render time (GF6)".
+
+### Task GF7: Records and leftovers
+
+**Why:** the audit found records that contradict later decisions, comments that call built features "waiting", and
+"Coming soon" fallbacks no screen can reach any more.
+
+- `plans/phase-9-staging-rollout-and-cutover.md` 26-28, 44-46: ED6, 27A and IM2 → the migrator's tasks (deviation 146),
+  as its Task 40 text already says.
+- `reference/feature-plan.md:42`: F34 dropped (overview line 646), not "planned, Phase 5".
+- Docblocks: `src/Interface/Front/SchemaMarkup.php` 18, 28 (27A); `settings-general-support.php:6`,
+  `selection-bar.php:5`, `product-display-card.php:9`, `dashboard.php:7`, `ProductScreen.php` 337-344,
+  `OpportunitiesScreen.php:202`.
+- The `soon` fallbacks that only a missing service reaches (`section-tabs.php:24`, `product-row.php` 84 and 101,
+  `dashboard-tiles.php` 32-36, `list-head-actions.php:24`, the `soon` flags of `field-text.php` and `switch-row.php`):
+  remove each where `Plugin.php` always wires the service, with its now-dead parameter.
+- Restrict Prefix (support view): record in F24 that it changes nothing (the product type is always private and
+  `CloakPath` matches only `/<prefix>/<slug>/`), as B4 records Lasso's three no-op Amazon switches.
+
+- [ ] **Step 1: Records.** - [ ] **Step 2: Comments and fallbacks** (unit, phpcs, analyse; Dashboard, a product,
+  Opportunities at 1280 px). - [ ] **Step 3: Commit** — "Bring records and leftovers up to date (GF7)".
 
 ---
 

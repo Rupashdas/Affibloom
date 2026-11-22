@@ -120,6 +120,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26N: Opportunity switches, dismissals and the new features' settings — `--only=opportunities` (from Phase 7)
 - [x] Task 26O: Run from the admin page, in batches
 - [x] Task 26P: Check the migrated products against the baselines
+- [ ] Task 26Q: Lasso's original links — `--only=locations` (added 2026-11-23, deviation 156; after GF6)
 
 **F10 — Lasso's content becomes Affibloom's**
 
@@ -982,6 +983,33 @@ every Amazon product while its setting is on (`LassoRecordMapper`, with a test).
 12 explained in `parity.md` (baseline quotes, the slugs and fields families not run in that mode). 76 linked products
 in Affibloom's trash from earlier tests were put back first. Open for the user: whether `--force` should also put
 Lasso's values back on adopted products (26B's rule).
+
+---
+
+### Task 26Q: Lasso's original links — `--only=locations` (added 2026-11-23, deviation 156)
+
+**Feature:** F22 N3 (E17), F21 R1 · **Depends on:** Affibloom's Task GF6 (`Api::set_original_link()`), 26A (the ID
+map is not needed: rows are matched by post and URL).
+
+**Why:** Lasso's scan rewrote links in posts and kept what was there before in `lasso_link_locations.original_link_slug`
+(450 rows here, F21). Affibloom's index starts from the content as it is now, so its `original_url` is the rewritten
+link and GF6's "turn back to the original URL" has nothing to offer until the migrator carries Lasso's.
+
+**User action:** `wp affibloom-lasso migrate --only=locations [--dry-run]`, and the same family on Migrate from Lasso:
+"450 original links found, N set, M not in Affibloom's index (post changed or not scanned yet)". Opportunities → a
+post's links then shows those tied rows with an enabled switch (GF6).
+
+**Code:** a `locations` family: read `detection_id`, `link_slug`, `original_link_slug` where they differ (trailing
+slash ignored) and `original_link_slug` is a link; per row `Api::set_original_link( host, link_slug, original )`;
+count set, missing and skipped; the report and CSV as the other families (25D). Read only on Lasso's side; running it
+twice sets nothing new (GF6's API leaves a row whose `original_url` was already changed).
+
+**Files:** in the migrator repository: the family class, its dry-run reader, the CLI `--only` value, the report row;
+unit tests with a fake API; Local run.
+
+- [ ] **Step 1: Tests.** - [ ] **Step 2: Family, dry run and run.** - [ ] **Step 3: Run and look** (Local: dry run,
+  run, a second run sets 0; a post's links at 1280 px). - [ ] **Step 4: Commit** (migrator) — "Carry Lasso's original
+  links into Affibloom's index (26Q)".
 
 ---
 
