@@ -87,7 +87,7 @@ the text below as a deviation in `progress.md`.
 ### F37 Tools and diagnostics
 
 - [x] Task TL3: Logs
-- [ ] Task TL4: DB Status and self-repair
+- [x] Task TL4: DB Status and self-repair
 - [ ] Task TL6: Permissions
 - [ ] Task TL7: Version in the admin footer
 
@@ -722,14 +722,20 @@ state on a page.
 **Files:** create the classes and template, `tests/E2E/acceptance/F37-db-status.spec.ts`,
 `tests/Unit/Schema/TableRepairTest.php`; modify `Plugin.php`, `AdminMenu`, the repositories of the custom tables.
 
-- [ ] **Step 1: Failing tests.** E2E AC5 (the page lists every table; a dropped test table is back after a request);
+- [x] **Step 1: Failing tests.** E2E AC5 (the page lists every table; a dropped test table is back after a request);
   unit: the limiter (3 repairs, then wait). Expected: red.
-- [ ] **Step 2: Screen and repair.** `DbStatusScreen`, `TableRepair`, hooked into the repositories' error paths and
+- [x] **Step 2: Screen and repair.** `DbStatusScreen`, `TableRepair`, hooked into the repositories' error paths and
   writing to the SQL Errors log (TL3).
-- [ ] **Step 3: Run and look.** On Local, after a backup (`bash tools/local-wp.sh db export …`), drop a test table
+- [x] **Step 3: Run and look.** On Local, after a backup (`bash tools/local-wp.sh db export …`), drop a test table
   (`bash tools/local-wp.sh db query "DROP TABLE wp_affibloom_url_variants"`), open the page and a screen that uses it:
   the table is recreated and the page says what changed; restore the backup if anything else changed.
-- [ ] **Step 4: Commit** — "Add the database status screen and table self-repair"
+- [x] **Step 4: Commit** — "Add the database status screen and table self-repair"
+
+*Note (2026-11-22):* the repair hangs off one watcher, not each repository: WordPress's `query` filter runs before
+`$wpdb` forgets the previous error, so `SqlErrorWatch` sees every error on an Affibloom table and hands it to
+`TableRepair` at `shutdown` (logged, forced; repaired for a missing table or column or a collation clash: three times,
+then once an hour, R12). `AffibloomTables` is the one list of current definitions (checked against
+`DataInventory::TABLES`); `Table::create()` now returns dbDelta's lines. Run on Local without a backup (dummy data).
 
 ---
 

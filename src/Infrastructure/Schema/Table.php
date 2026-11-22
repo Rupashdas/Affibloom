@@ -28,22 +28,33 @@ final class Table {
 	public function __construct( private string $name, private string $columns ) {}
 
 	/**
-	 * Creates the table, or adds what its definition has and the table lacks.
+	 * Its name without the site's prefix.
+	 */
+	public function name(): string {
+		return $this->name;
+	}
+
+	/**
+	 * Creates the table, or adds what its definition has and the table lacks, and says what changed: dbDelta's lines,
+	 * none when the table was already as defined (the DB Status page, Task TL4).
 	 *
+	 * @return list<string>
 	 * @throws RuntimeException When the table is still missing afterwards, so the Migrator step fails and is retried.
 	 */
-	public function create(): void {
+	public function create(): array {
 		global $wpdb;
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		$table = $wpdb->prefix . $this->name;
-		dbDelta( "CREATE TABLE {$table} (\n{$this->columns}\n) {$this->collation()};" );
+		$table   = $wpdb->prefix . $this->name;
+		$changes = dbDelta( "CREATE TABLE {$table} (\n{$this->columns}\n) {$this->collation()};" );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- a schema check, once per step.
 		if ( $table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) {
 			throw new RuntimeException( "The table {$table} could not be created: {$wpdb->last_error}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where it is printed (UpgradeHooks).
 		}
+
+		return array_values( array_map( 'strval', $changes ) );
 	}
 
 	/**

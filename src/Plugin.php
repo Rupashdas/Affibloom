@@ -34,6 +34,9 @@ use Affibloom\Infrastructure\WordPress\IndexTableLocations;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
 use Affibloom\Application\Logs\LoggedCatalog;
+use Affibloom\Application\Schema\TableRepair;
+use Affibloom\Infrastructure\Schema\AffibloomTables;
+use Affibloom\Infrastructure\WordPress\OptionRepairState;
 use Affibloom\Domain\Lifecycle\DataInventory;
 use Affibloom\Infrastructure\WordPress\PostTypeTableRepository;
 use Affibloom\Infrastructure\WordPress\TableAmazonShortLinkRepository;
@@ -147,6 +150,7 @@ use Affibloom\Interface\Cron\ClickRetentionCron;
 use Affibloom\Interface\Hooks\TableProductHooks;
 use Affibloom\Interface\Hooks\AutoDetectHooks;
 use Affibloom\Interface\Hooks\LogHooks;
+use Affibloom\Interface\Hooks\SqlErrorWatch;
 use Affibloom\Interface\Hooks\TrackingIdHooks;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
@@ -206,6 +210,7 @@ use Affibloom\Interface\Admin\HelpTips;
 use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
+use Affibloom\Interface\Admin\DbStatusScreen;
 use Affibloom\Interface\Admin\LogsScreen;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
@@ -649,8 +654,11 @@ final class Plugin {
 				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() ),
 				new TablesScreen( $this->template(), $this->table_service(), $notice ),
 				new TableScreen( $this->template(), $this->table_service(), $choices ),
-				new LogsScreen( $this->template(), $settings, $this->file_log(), $notice )
+				new LogsScreen( $this->template(), $settings, $this->file_log(), $notice ),
+				new DbStatusScreen( $this->template(), $settings )
 			),
+			// F37 R5, R12 (Task TL4): SQL errors on Affibloom's tables logged, and the tables repaired when one is out of date.
+			new SqlErrorWatch( new TableRepair( new AffibloomTables(), new OptionRepairState(), $this->file_log(), static fn(): int => time() ) ),
 			// F37 R3-R6 (Task TL3): the events of the index, the link check and the product save written to the logs.
 			new LogHooks( $this->file_log(), $this->file_log() ),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
@@ -1001,7 +1009,7 @@ final class Plugin {
 			$this->navigation->register( new NavItem( 'groups', GroupsScreen::SLUG, static fn (): string => __( 'Groups', 'affibloom' ), 'layers', Capabilities::PRODUCTS, array( GroupScreen::SLUG ) ) );
 			// A menu item only: Lasso's header has no Fields tab (F26 D13).
 			$this->navigation->register( new NavItem( 'fields', FieldsScreen::SLUG, static fn (): string => __( 'Fields', 'affibloom' ), 'list', Capabilities::PRODUCTS, array( FieldScreen::SLUG ) ) );
-			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS, array( LogsScreen::SLUG ) ) );
+			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS, array( LogsScreen::SLUG, DbStatusScreen::SLUG ) ) );
 		}
 
 		return $this->navigation;

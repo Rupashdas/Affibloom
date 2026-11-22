@@ -3541,3 +3541,7 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-logs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 24px; margin-top: 24px; }
 .affibloom-admin .affibloom-logs > .affibloom-card { margin: 0; }
 .affibloom-admin .affibloom-log__text { width: 100%; min-height: 180px; font: 12px/18px ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre; background: var(--affibloom-subtle); resize: vertical; }
+
+/* DB Status (Task TL4): the table names in code type, the output lines under each other. */
+.affibloom-db-status__name code { padding: 0; background: none; color: var(--affibloom-ink-900); font-size: 13px; }
+.affibloom-db-status__output { color: var(--affibloom-ink-600); font-size: 13px; }

@@ -2,6 +2,8 @@
 namespace Affibloom\Tests\Unit\Domain\Lifecycle;
 
 use Affibloom\Domain\Lifecycle\DataInventory;
+use Affibloom\Infrastructure\Schema\AffibloomTables;
+use Affibloom\Infrastructure\Schema\Table;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -38,6 +40,15 @@ final class DataInventoryTest extends TestCase {
 		foreach ( $names as $name ) {
 			self::assertMatchesRegularExpression( $pattern, $name );
 		}
+	}
+
+	public function test_the_tables_the_repair_creates_are_the_tables_the_removal_drops(): void {
+		$names = array_map( static fn( Table $table ): string => $table->name(), AffibloomTables::all() );
+		sort( $names );
+		$listed = DataInventory::TABLES;
+		sort( $listed );
+
+		self::assertSame( $listed, $names );
 	}
 
 	public function test_post_meta_and_the_log_folder_are_affibloom_s(): void {

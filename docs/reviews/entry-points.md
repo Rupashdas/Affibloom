@@ -133,7 +133,7 @@ and `affibloom_export`; they are `POST /settings/tabs/{tab}`, `POST /settings/tr
 `affibloom` (Dashboard), `affibloom-opportunities` (Links, Domains, Content tabs), `affibloom-tables`,
 `affibloom-groups`, `affibloom-fields`, `affibloom-settings` (General, Display, Amazon tabs), and the hidden detail
 pages `affibloom-product`, `affibloom-group`, `affibloom-field`, `affibloom-table` (each with a `guard()` for a missing
-ID), and `affibloom-logs` (`manage_options`, Task TL3). DB Status and the setup wizard come with TL4 and ON6.
+ID), `affibloom-logs` and `affibloom-db-status` (`manage_options`, Tasks TL3, TL4). The setup wizard comes with ON6.
 
 ## Public entry points (readers, no sign-in)
 

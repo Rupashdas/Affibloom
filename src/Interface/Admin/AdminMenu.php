@@ -46,6 +46,7 @@ final class AdminMenu implements Module {
 	 * @param TablesScreen|null        $tables     The Tables list (F25, Task T1).
 	 * @param TableScreen|null         $table      A table's builder (F25, Task T3).
 	 * @param LogsScreen|null          $logs       The hidden Logs page (F37, Task TL3).
+	 * @param DbStatusScreen|null      $db_status  The hidden DB Status page (F37, Task TL4).
 	 */
 	public function __construct(
 		private AdminNavigation $navigation,
@@ -60,6 +61,7 @@ final class AdminMenu implements Module {
 		?TablesScreen $tables = null,
 		private ?TableScreen $table = null,
 		private ?LogsScreen $logs = null,
+		private ?DbStatusScreen $db_status = null,
 	) {
 		$this->screens = array(
 			self::SLUG           => array( $dashboard, 'render' ),
@@ -124,6 +126,9 @@ final class AdminMenu implements Module {
 		if ( null !== $this->logs ) {
 			$this->add_detail_page( __( 'Logs', 'affibloom' ), LogsScreen::SLUG, array( $this->logs, 'render' ), static function (): void {}, Capabilities::SETTINGS );
 		}
+		if ( null !== $this->db_status ) {
+			$this->add_detail_page( __( 'DB Status', 'affibloom' ), DbStatusScreen::SLUG, array( $this->db_status, 'render' ), static function (): void {}, Capabilities::SETTINGS );
+		}
 	}
 
 	/**
@@ -136,6 +141,7 @@ final class AdminMenu implements Module {
 		remove_submenu_page( self::SLUG, FieldScreen::SLUG );
 		remove_submenu_page( self::SLUG, TablesScreen::TABLE_SLUG );
 		remove_submenu_page( self::SLUG, LogsScreen::SLUG );
+		remove_submenu_page( self::SLUG, DbStatusScreen::SLUG );
 	}
 
 	/**
