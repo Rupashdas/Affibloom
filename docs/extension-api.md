@@ -48,6 +48,8 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `update_group( int $id, string $name, string $description ): void` | 26F | Changes a group's name and description; the slug is kept. |
 | `group_members( int $id ): array` | 26F | A group's published products, in its order. |
 | `set_group_members( int $id, array $products ): void` | 26F | Makes a group's products these published ones, in this order. |
+| `amazon_product( string $asin, string $country ): ?array` | 26L | A cached Amazon product `{ name, price, currency, base_url, monetized_url, image, out_of_stock, savings_amount, savings_percent, savings_basis, features, is_prime, last_updated, source }`, or null. |
+| `import_amazon_product( string $asin, string $country, array $data ): void` | 26L | Stores a cached Amazon product another plugin had, marked `imported`, until Affibloom's own refresh replaces it. |
 | `check_product( array $fields ): array` | 25A | What the product page's Save Changes would refuse in these fields, nothing stored: field => reason code (`required`, `invalid_url`), empty when all are accepted. Fields are the product page's: `name`, `url`, `new_tab`, `nofollow`, `sponsored`, `show_disclosure`, `button_text`, `badge`, `buttons` (a list of `url`, `text`, `new_tab`, `nofollow`), `theme`, `image_url`, `image_id`, `price`, `show_price`, `description`, `disclosure`, `prime`. A field not sent is not checked. |
 
 ### `add_page()`

@@ -441,6 +441,26 @@ test.describe( 'F10 Existing content', () => {
 		);
 	} );
 
+	// Task 26L: every cached Amazon row a record uses is in Affibloom's store, Lasso's or Affibloom's newer one.
+	test( '@local AC19 --only=amazon puts each product’s cached Amazon data in Affibloom’s store', () => {
+		const out = wp(
+			'affibloom-lasso',
+			'migrate',
+			'--only=amazon',
+			'--update'
+		);
+		expect( out ).not.toContain( '(secret' );
+		const missing = sql(
+			"SELECT COUNT(*) FROM ( SELECT DISTINCT a.amazon_id, a.country, a.last_updated FROM wp_lasso_amazon_products a JOIN wp_lasso_url_details d ON d.product_type = 'amazon' AND d.product_id = a.amazon_id AND d.country = a.country ) l LEFT JOIN wp_affibloom_amazon_products o ON o.asin = l.amazon_id AND o.country = l.country WHERE o.asin IS NULL OR o.last_updated < l.last_updated"
+		);
+		expect( missing ).toBe( '0' );
+		expect(
+			wp( 'affibloom-lasso', 'migrate', '--only=amazon', '--update' )
+		).toMatch(
+			/^amazon: \d+ items: 0 created, 0 updated, \d+ unchanged, \d+ skipped, 0 errors\.$/m
+		);
+	} );
+
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

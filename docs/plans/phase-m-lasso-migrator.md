@@ -111,7 +111,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 26D: Settings — Display for Single, Grid and List
 - [x] Task 26E: Custom fields — definitions and values
 - [x] Task 26F: Groups — `wp affibloom migrate --only=groups`
-- [ ] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
+- [x] Task 26L: Amazon — `wp affibloom migrate --only=amazon`
 - [ ] Task 26M: Saved Dashboard views — `wp affibloom migrate --only=views`
 - [ ] Task 26G: Cloaked addresses — `wp affibloom migrate --only=slugs`
 - [ ] Task 26H: URL variants — `wp affibloom migrate --only=variants`
@@ -625,11 +625,23 @@ adopted; only published products join; 26C's first-run and `--update` rule. Unit
 
 **Files:** the classes above; `tests/Unit/Application/AmazonMapperTest.php`, `tests/Integration/AmazonStepTest.php`; F10 spec AC19.
 
-- [ ] **Step 1: Failing tests.** AC19 (tracking IDs per country; cached rows; no secret read; second run unchanged). Expected red: no `amazon` family.
-- [ ] **Step 2: Source and mapper.**
-- [ ] **Step 3: The step.**
-- [ ] **Step 4: Run and look.** Settings → Amazon; no secret in the output or the CSV; the fingerprint equal.
-- [ ] **Step 5: Commit** — "Migrate Lasso's Amazon tracking IDs and product data".
+- [x] **Step 1: Failing tests.** AC19 (tracking IDs per country; cached rows; no secret read; second run unchanged). Expected red: no `amazon` family.
+- [x] **Step 2: Source and mapper.**
+- [x] **Step 3: The step.**
+- [x] **Step 4: Run and look.** Settings → Amazon; no secret in the output or the CSV; the fingerprint equal.
+- [x] **Step 5: Commit** — "Migrate Lasso's Amazon tracking IDs and product data".
+
+
+*Note (2026-11-22):* `wp affibloom-lasso migrate --only=amazon [--update]`. Affibloom's API gained `amazon_product()`
+and `import_amazon_product()` (`Extension\AmazonAccess`: a cached product stored marked `imported` through the store's
+`save()`). In the migrator: `LassoSource::amazon()` (`LassoAmazon`: the cached rows a record's url details names, the
+counts, and whether Creators credentials are set, a yes or no only), `AmazonStep` in place of the WaitingStep (no
+separate `AmazonMapper`). A Lasso row goes to Affibloom's store unless Affibloom's is as new or newer (its refresh wins);
+26C's rule for a newer Lasso row on a later run. Not copied, each with a line: per-country tracking IDs (Lasso never
+writes them, C1 R58; an error if one ever has a value), other-store rows (no store in Affibloom; their prices came with
+the products in 26A), and Creators credentials (none here; on a site that has them, an error line asks for them to be
+entered by hand, so no secret passes through the migrator, a narrower reading of N3). Local: 226 rows, 25 created, 201
+unchanged (Affibloom's data newer), then 226 unchanged. AC19 passes.
 
 ---
 

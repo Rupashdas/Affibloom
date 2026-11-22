@@ -14,6 +14,7 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 - The extension API's field access: `field_definitions()`, `create_field()`, `rename_field()`, `product_field_rows()`, `set_product_field_rows()`.
 - The extension API's product writes: `import_product()` (a product copied as given), `product_fields()`, `update_product()`, `retire_product()`, `trash_product()`, `date_product()`; `update_product()` reports a link that is another product's as a refusal.
 - The extension API's group access: `groups()`, `create_group()`, `update_group()`, `group_members()`, `set_group_members()`.
+- The extension API's `amazon_product()` and `import_amazon_product()`: a cached Amazon product read, or stored marked imported.
 
 ## [1.0.0-rc.1] - 2026-11-22
 

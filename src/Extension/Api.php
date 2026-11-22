@@ -38,8 +38,9 @@ final class Api {
 	 * @param DisplayAccess   $display    What a helper may do with the Display settings.
 	 * @param FieldAccess     $fields     What a helper may do with fields.
 	 * @param GroupAccess     $groups     What a helper may do with groups.
+	 * @param AmazonAccess    $amazon     What a helper may do with the Amazon product data.
 	 */
-	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups ) {}
+	public function __construct( private string $version, private AdminNavigation $navigation, private ExtensionScreen $pages, private ProductAccess $products, private SettingsAccess $settings, private DisplayAccess $display, private FieldAccess $fields, private GroupAccess $groups, private AmazonAccess $amazon ) {}
 
 	/**
 	 * Affibloom's version, for a helper that needs a newer one.
@@ -214,6 +215,31 @@ final class Api {
 	 */
 	public function set_group_members( int $id, array $products ): void {
 		$this->groups->set_members( $id, $products );
+	}
+
+	/**
+	 * A cached Amazon product, `{ name, price, currency, base_url, monetized_url, image, out_of_stock, savings_amount,
+	 * savings_percent, savings_basis, features, is_prime, last_updated, source }`, or null (Task 26L).
+	 *
+	 * @param string $asin    The ASIN.
+	 * @param string $country The store, such as "us".
+	 * @return array<string, mixed>|null
+	 */
+	public function amazon_product( string $asin, string $country ): ?array {
+		return $this->amazon->product( $asin, $country );
+	}
+
+	/**
+	 * Stores a cached Amazon product another plugin had, marked `imported` (Task 26L): the box shows it until
+	 * Affibloom's own refresh replaces it.
+	 *
+	 * @param string               $asin    The ASIN.
+	 * @param string               $country The store.
+	 * @param array<string, mixed> $data    The fields amazon_product() gives, `source` aside.
+	 * @throws \InvalidArgumentException When the ASIN or the store is not one.
+	 */
+	public function import_amazon_product( string $asin, string $country, array $data ): void {
+		$this->amazon->import( $asin, $country, $data );
 	}
 
 	/**

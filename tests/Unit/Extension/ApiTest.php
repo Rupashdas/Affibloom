@@ -11,6 +11,7 @@ use Affibloom\Application\Fields\FieldsService;
 use Affibloom\Domain\Product\AffiliateUrl;
 use Affibloom\Domain\Product\Product;
 use Affibloom\Domain\Settings\Settings;
+use Affibloom\Extension\AmazonAccess;
 use Affibloom\Extension\Api;
 use Affibloom\Application\Groups\GroupService;
 use Affibloom\Extension\FieldAccess;
@@ -138,6 +139,36 @@ final class ApiTest extends TestCase {
 		$groups->create( 'Best shoes', '' );
 	}
 
+	/** Amazon access on an in-memory store. */
+	public static function amazon(): AmazonAccess {
+		return new AmazonAccess( new InMemoryAmazonProducts() );
+	}
+
+	public function test_a_cached_amazon_product_is_imported_marked_imported(): void {
+		Functions\when( 'esc_html' )->returnArg();
+		$amazon = self::amazon();
+		self::assertNull( $amazon->product( 'B0TEST0001', 'us' ) );
+
+		$amazon->import(
+			'B0TEST0001',
+			'us',
+			array(
+				'name'         => 'Shoe',
+				'price'        => '$89.99',
+				'is_prime'     => true,
+				'last_updated' => '2026-10-01 10:00:00',
+			)
+		);
+
+		$stored = $amazon->product( 'B0TEST0001', 'us' );
+		self::assertSame( 'Shoe', $stored['name'] );
+		self::assertSame( 'imported', $stored['source'] );
+		self::assertTrue( $stored['is_prime'] );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$amazon->import( 'nope', 'us', array() );
+	}
+
 	public function test_a_display_type_is_saved_in_the_shape_it_is_read_and_a_bad_colour_is_refused(): void {
 		$api = $this->api();
 
@@ -167,7 +198,7 @@ final class ApiTest extends TestCase {
 	public function test_saved_settings_keep_the_switches_not_given_and_refuse_a_bad_value(): void {
 		Functions\when( 'sanitize_text_field' )->alias( 'trim' );
 		$store = new InMemorySettingsRepository( array( 'nofollow' => true, 'sponsored' => true ) );
-		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups() );
+		$api   = new Api( '1.2.3', $this->navigation, new ExtensionScreen( new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) ) ), self::access(), self::settings( $store ), self::display(), self::fields(), self::groups(), self::amazon() );
 
 		self::assertSame( array(), $api->save_settings( 'general', array( 'sponsored' => false ) ) );
 		self::assertTrue( $api->settings()['nofollow'], 'A switch not given keeps its value.' );
@@ -181,7 +212,7 @@ final class ApiTest extends TestCase {
 	private function api(): Api {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 
-		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups() );
+		return new Api( '1.2.3', $this->navigation, new ExtensionScreen( $template ), self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon() );
 	}
 
 	public function test_affibloom_ready_fires_once_on_plugins_loaded_with_the_api(): void {
@@ -201,7 +232,7 @@ final class ApiTest extends TestCase {
 	public function test_an_unlisted_page_is_registered_but_hidden_and_its_capability_is_the_settings_one(): void {
 		$template = new Template( __DIR__, $this->navigation, new NoticeBoard( array(), static function (): void {} ) );
 		$pages    = new ExtensionScreen( $template );
-		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups() );
+		$api      = new Api( '1.2.3', $this->navigation, $pages, self::access(), self::settings(), self::display(), self::fields(), self::groups(), self::amazon() );
 
 		$api->add_page( 'affibloom-helper', static fn (): string => 'Helper', static fn (): string => '', static function (): void {}, false );
 
