@@ -2,7 +2,7 @@
 /**
  * Settings → Amazon, left column under Amazon Associates Accounts: Lasso's "Amazon Product Data API" card (C1 R17-R18,
  * D2-D4, D16), in Affibloom's look. The state chip says what the stored credentials are; the Credential ID and Secret
- * are never printed (a blank field keeps the stored value); Validate checks the typed values (amazon-settings.js) and
+ * are never printed (a stored one shows a fixed mask placeholder; a blank field keeps the stored value); Validate checks the typed values (amazon-settings.js) and
  * Save Changes saves them with the tab. Lasso's "Learn" links go to its own help site and are left out (no Lasso
  * branding); the intro links to Amazon's Associates Central instead.
  *
@@ -20,7 +20,10 @@ $states  = array(
 	'validated'  => __( 'Validated', 'affibloom' ),
 	'refused'    => __( 'Refused by Amazon', 'affibloom' ),
 );
-$kept    = __( 'Saved — leave blank to keep', 'affibloom' );
+$kept    = __( 'Saved. Type a new value to replace it.', 'affibloom' );
+// A stored Credential ID or Secret shows as this fixed mask, as the placeholder: the field's value stays empty, so the
+// stored value (not even its length) never reaches the browser, and an untouched field posts blank, which keeps it.
+$mask = str_repeat( "\u{2022}", 12 );
 ?>
 <section class="affibloom-card affibloom-api-card" aria-labelledby="affibloom-api-card-title" data-amazon-api
 	data-validating-text="<?php esc_attr_e( 'Validating…', 'affibloom' ); ?>"
@@ -74,8 +77,13 @@ $kept    = __( 'Saved — leave blank to keep', 'affibloom' );
 
 		<div class="affibloom-field">
 			<label class="affibloom-label" for="affibloom-api-credential_id"><?php esc_html_e( 'Credential ID', 'affibloom' ); ?></label>
-			<input type="password" class="affibloom-input" id="affibloom-api-credential_id" name="amazon_api[credential_id]" value="" autocomplete="off"
-				placeholder="amzn1.application-oa2-client.xxxxx" <?php echo $api['has_credential_id'] ? 'aria-describedby="affibloom-api-credential_id-kept"' : ''; ?>>
+			<?php
+			// new-password, not off: browsers ignore "off" on password fields. With the password managers' ignore hints, no
+			// saved login password is filled in, which Save Changes would store over the credential.
+			?>
+			<input type="password" class="affibloom-input<?php echo $api['has_credential_id'] ? ' affibloom-input--kept' : ''; ?>" id="affibloom-api-credential_id" name="amazon_api[credential_id]" value="" autocomplete="new-password"
+				data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"
+				placeholder="<?php echo esc_attr( $api['has_credential_id'] ? $mask : 'amzn1.application-oa2-client.xxxxx' ); ?>" <?php echo $api['has_credential_id'] ? 'aria-describedby="affibloom-api-credential_id-kept"' : ''; ?>>
 			<?php if ( $api['has_credential_id'] ) : ?>
 				<p class="affibloom-field__hint" id="affibloom-api-credential_id-kept"><?php echo esc_html( $kept ); ?></p>
 			<?php endif; ?>
@@ -83,8 +91,9 @@ $kept    = __( 'Saved — leave blank to keep', 'affibloom' );
 
 		<div class="affibloom-field">
 			<label class="affibloom-label" for="affibloom-api-secret"><?php esc_html_e( 'Secret', 'affibloom' ); ?></label>
-			<input type="password" class="affibloom-input" id="affibloom-api-secret" name="amazon_api[secret]" value="" autocomplete="new-password"
-				placeholder="client-secret" <?php echo $api['has_secret'] ? 'aria-describedby="affibloom-api-secret-kept"' : ''; ?>>
+			<input type="password" class="affibloom-input<?php echo $api['has_secret'] ? ' affibloom-input--kept' : ''; ?>" id="affibloom-api-secret" name="amazon_api[secret]" value="" autocomplete="new-password"
+				data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"
+				placeholder="<?php echo esc_attr( $api['has_secret'] ? $mask : 'client-secret' ); ?>" <?php echo $api['has_secret'] ? 'aria-describedby="affibloom-api-secret-kept"' : ''; ?>>
 			<?php if ( $api['has_secret'] ) : ?>
 				<p class="affibloom-field__hint" id="affibloom-api-secret-kept"><?php echo esc_html( $kept ); ?></p>
 			<?php endif; ?>

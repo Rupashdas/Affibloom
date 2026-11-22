@@ -325,7 +325,10 @@ test.describe( 'C1 Amazon product data', () => {
 		await expect( card.getByLabel( 'Secret' ) ).toBeVisible(); // the field exists, so the checks below mean something
 		await expect( card.getByLabel( 'Secret' ) ).toHaveValue( '' );
 		await expect( card.getByLabel( 'Credential ID' ) ).toHaveValue( '' );
-		await expect( card.getByText( 'Saved — leave blank to keep' ) ).toHaveCount( 2 );
+		await expect( card.getByText( 'Saved. Type a new value to replace it.' ) ).toHaveCount( 2 );
+		// Stored values show as a fixed mask placeholder, never their own characters or length.
+		await expect( card.getByLabel( 'Secret' ) ).toHaveAttribute( 'placeholder', '•'.repeat( 12 ) );
+		await expect( card.getByLabel( 'Credential ID' ) ).toHaveAttribute( 'placeholder', '•'.repeat( 12 ) );
 		const source = await page.content();
 		expect( source ).not.toContain( 'ACCEPTANCE-SECRET-C1' );
 		expect( source ).not.toContain( 'ACCEPTANCE-ID-C1' );

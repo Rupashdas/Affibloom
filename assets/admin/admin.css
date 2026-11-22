@@ -2946,6 +2946,8 @@ body.affibloom-has-modal { overflow: hidden; }
 .affibloom-api-card .affibloom-card__body--fields { display: flex; flex-direction: column; gap: 20px; }
 .affibloom-api-card__intro { margin: -4px 0 0; color: var(--affibloom-ink-700); font-size: 13px; line-height: 20px; }
 .affibloom-api-card__intro a { color: var(--affibloom-brand-600); font-weight: 600; }
+/* A stored Credential ID or Secret: its mask placeholder reads as a filled field, not a hint. */
+.affibloom-admin .affibloom-input--kept::placeholder { color: var(--affibloom-ink-900); letter-spacing: 2px; }
 .affibloom-api-card__pair { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
 .affibloom-api-card__actions { display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
 .affibloom-api-card__message { flex: 1 1 auto; min-height: 20px; margin: 0; color: var(--affibloom-ink-600); font-size: 13px; line-height: 20px; }

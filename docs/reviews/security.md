@@ -90,7 +90,8 @@ No nonce or capability finding. Plugin Check was installed for the run and delet
    `templates` and `assets` finds nothing.
 8. **Secrets.** The Creators API credentials are their own option, `affibloom_amazon_credentials`, stored with
    autoload off (`update_option( …, false )`); the Settings screen gets only `has_secret` (the field is always empty,
-   `autocomplete="new-password"`); no REST response, log line or export carries them. There is no AI key (F30 asks no
+   `autocomplete="new-password"` with password managers' ignore hints; a stored value shows as a fixed 12-dot mask
+   placeholder, not its length; 2026-11-22); no REST response, log line or export carries them. There is no AI key (F30 asks no
    service). Logs come with TL3 and Task 38's export with its own check.
 9. **Cron jobs.** No hook is started by a visitor (S4 closed the one path); `POST /jobs/run-due` needs `PRODUCTS`;
    batches hold locks (`UpgradeLock`, `JobSlots`, the CPU guard); the `init` handlers only add a missing event.
