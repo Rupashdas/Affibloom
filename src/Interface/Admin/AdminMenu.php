@@ -48,6 +48,7 @@ final class AdminMenu implements Module {
 	 * @param LogsScreen|null          $logs       The hidden Logs page (F37, Task TL3).
 	 * @param DbStatusScreen|null      $db_status  The hidden DB Status page (F37, Task TL4).
 	 * @param SetupScreen|null         $setup      The setup wizard (F38, Task ON6).
+	 * @param ExtensionScreen|null     $extensions Pages helper plugins add through the extension API (Task LM1).
 	 */
 	public function __construct(
 		private AdminNavigation $navigation,
@@ -64,6 +65,7 @@ final class AdminMenu implements Module {
 		private ?LogsScreen $logs = null,
 		private ?DbStatusScreen $db_status = null,
 		private ?SetupScreen $setup = null,
+		private ?ExtensionScreen $extensions = null,
 	) {
 		$this->screens = array(
 			self::SLUG           => array( $dashboard, 'render' ),
@@ -112,8 +114,10 @@ final class AdminMenu implements Module {
 			'dashicons-cart',
 			self::POSITION
 		);
+		// A helper's page (Task LM1) joins on plugins_loaded, after this menu was built.
+		$screens = $this->screens + ( null === $this->extensions ? array() : $this->extensions->screens() );
 		foreach ( $this->navigation->menu() as $item ) {
-			add_submenu_page( self::SLUG, $item->label(), $item->label(), $item->capability, $item->slug, $this->screens[ $item->slug ] );
+			add_submenu_page( self::SLUG, $item->label(), $item->label(), $item->capability, $item->slug, $screens[ $item->slug ] );
 		}
 
 		// Lasso's title for a product page (R13, D6); its guard runs on the load hook, before any output, so a missing

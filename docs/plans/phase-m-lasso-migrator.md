@@ -97,7 +97,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 **The plugin**
 
-- [ ] Task LM1: The plugin, and Affibloom's extension API
+- [x] Task LM1: The plugin, and Affibloom's extension API
 
 **F10 — Lasso's data**
 
@@ -186,12 +186,20 @@ nothing in Affibloom names Lasso or the migrator.
 **Files:** the above; tests: Affibloom `tests/Unit/Extension/ApiTest.php` (fires once, version); the migrator's
 `tests/Unit/PluginTest.php` (refuses an old version); E2E (activate, the menu item, the empty page).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Affibloom's Api, the action and the submenu hook.**
-- [ ] **Step 3: The migrator's scaffold, its repository and its checks** (`composer lint`, `analyse`, `test:unit`).
-- [ ] **Step 4: Run and look.** The Plugins list; the empty page at 1280 px in Affibloom's design.
-- [ ] **Step 5: Commit** — Affibloom: "Open an extension API for helper plugins (LM1)"; the migrator: "Start the
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Affibloom's Api, the action and the submenu hook.**
+- [x] **Step 3: The migrator's scaffold, its repository and its checks** (`composer lint`, `analyse`, `test:unit`).
+- [x] **Step 4: Run and look.** The Plugins list; the empty page at 1280 px in Affibloom's design.
+- [x] **Step 5: Commit** — Affibloom: "Open an extension API for helper plugins (LM1)"; the migrator: "Start the
   Affibloom Lasso Migrator plugin".
+
+*Note (2026-11-22):* the user's repository is `Rupashdas/lasso-to-affibloom`, cloned into the planned folder
+`affibloom-lasso-migrator`. `affibloom_ready` is fired by its own module, `Extension\ReadyAction`; `Api::add_page()` lists
+the page at Lasso's Import place (before Settings) for `Capabilities::SETTINGS`, printed by `Interface\Admin\ExtensionScreen`
+(`templates/admin/extension.php`). The migrator needs Affibloom 1.0.0-rc.1 or later and answers `affibloom_setup_wanted`
+with false while `lasso_version` exists; its unit tests and PHPStan read the Api from `../affibloom`. E2E:
+`tests/E2E/acceptance/LM.spec.ts`. Checked: unit tests (Affibloom 1,207, migrator 6), lint, analyse, the page and the
+Plugins list at 1280 px.
 
 ---
 

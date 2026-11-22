@@ -4,6 +4,10 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+### Added
+
+- An extension API for helper plugins: the action `affibloom_ready` with `Affibloom\Extension\Api` (Affibloom's version and one page in Affibloom's menu); `docs/extension-api.md`.
+
 ## [1.0.0-rc.1] - 2026-11-22
 
 The first release candidate: every feature of the plan through Phase 8.

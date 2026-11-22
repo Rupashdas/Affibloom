@@ -24,6 +24,13 @@ final class PluginTest extends TestCase {
 		self::assertSame( 99999, has_action( 'admin_head', 'Affibloom\Interface\Admin\ForeignNotices->remove()' ) );
 	}
 
+	/** Task LM1: helper plugins get the extension API on plugins_loaded. */
+	public function test_boot_hands_helpers_the_extension_api_on_plugins_loaded(): void {
+		Plugin::boot( '/plugins/affibloom/affibloom.php' );
+
+		self::assertNotFalse( has_action( 'plugins_loaded', 'Affibloom\Extension\ReadyAction->fire()' ) );
+	}
+
 	public function test_boot_loads_translations_on_init(): void {
 		Plugin::boot( '/plugins/affibloom/affibloom.php' );
 

@@ -71,9 +71,7 @@ The ADRs are in [`docs/decisions/`](decisions/). In short:
 | `affibloom_slug_conflict` | action | `int $product_id`, `string $slug`, `string $post_type` | A product's slug is taken by a post or page, which keeps the address (logged under Duplicate Slug Changes). |
 | `affibloom_display_advanced_enabled` | filter | `bool $customised` | Whether the box uses the full display engine; return `false` to force the plain box. |
 | `affibloom_setup_wanted` | filter | `bool $wanted` | Whether the setup wizard may open by itself on a new site (deviation 153: a helper plugin returns `false` when it brings its own data). |
-
-The migrator's extension API, the action `affibloom_ready` with `Affibloom\Extension\Api`, is built with the
-migrator (Phase M, Task LM1) and documented here then.
+| `affibloom_ready` | action | `Affibloom\Extension\Api $api` | Once, on `plugins_loaded`: the extension API for helper plugins (Task LM1). Its methods are in [`extension-api.md`](extension-api.md). |
 
 ### Shortcode, block and editors
 

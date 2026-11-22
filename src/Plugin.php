@@ -23,6 +23,8 @@ use Affibloom\Application\Opportunities\OpportunityService;
 use Affibloom\Application\Tables\TableService;
 use Affibloom\Application\Tables\TableValues;
 use Affibloom\Domain\Monetize\NetworkRegistry;
+use Affibloom\Extension\Api;
+use Affibloom\Extension\ReadyAction;
 use Affibloom\Infrastructure\WordPress\AmazonImportSchedule;
 use Affibloom\Infrastructure\WordPress\Builders\BuilderSource;
 use Affibloom\Infrastructure\WordPress\Builders\MvCreateSource;
@@ -212,6 +214,7 @@ use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\DbStatusScreen;
+use Affibloom\Interface\Admin\ExtensionScreen;
 use Affibloom\Interface\Admin\LogsScreen;
 use Affibloom\Interface\Admin\PermissionCaps;
 use Affibloom\Interface\Admin\SetupRedirect;
@@ -598,6 +601,9 @@ final class Plugin {
 		// The display modal's assets: the block editor's, the Classic editor's and Elementor's (ED2) share them.
 		$editor_assets = new EditorAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION, $this->template(), $box_assets );
 
+		// The pages helper plugins add (Task LM1), shared by the menu and the extension API.
+		$extensions = new ExtensionScreen( $this->template() );
+
 		$public_links = new PublicLinks( $this->settings_repository() );
 		$box_builder  = new BoxBuilder( plugin_dir_url( $this->file ) . 'assets/front/images/no-thumbnail.webp', static fn( string $url ): int => url_to_postid( $url ), null, $public_links->for( ... ), new TableVariantRepository() );
 		$box_html     = new BoxHtml( dirname( $this->file ) . '/templates/front', $box_assets );
@@ -669,8 +675,11 @@ final class Plugin {
 				new TableScreen( $this->template(), $this->table_service(), $choices ),
 				new LogsScreen( $this->template(), $settings, $this->file_log(), $notice ),
 				new DbStatusScreen( $this->template(), $settings ),
-				new SetupScreen( $this->template(), $settings, $display, $choices, $amazon )
+				new SetupScreen( $this->template(), $settings, $display, $choices, $amazon ),
+				$extensions
 			),
+			// Task LM1: helper plugins get the extension API on plugins_loaded.
+			new ReadyAction( new Api( AFFIBLOOM_VERSION, $this->navigation(), $extensions ) ),
 			// F38 N1, D13 (Tasks ON6, ON7): the wizard opens by itself once on a new site, and Go to Dashboard ends it.
 			new SetupRedirect( new SetupState( new OptionSetupFlag() ) ),
 			new SetupController( new SetupState( new OptionSetupFlag() ) ),
