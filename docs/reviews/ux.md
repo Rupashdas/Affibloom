@@ -60,6 +60,9 @@ move is the migrator's) and History (content history, F34, dropped by decisions 
 |---|---|---|---|---|
 | UX1 | Product page, Locations | A block's "Link with Context" showed the index's block markup (`affibloom/product-box {"type":"",…}`) where Lasso shows a display's shortcode (F12 L7). | The row shows the shortcode the block equals (`[affibloom id="…"]`, a group block with its group's slug); a block whose group is gone keeps its markup. The index is unchanged. | `ProductLocationTest`; `ux-screens.spec.ts` UX1 |
 | UX2 | Settings → General | Permissions and Uninstall stood at the end of the right column; Lasso has them at the end of the left (general.php; TL6's plan said the left column). | Moved to the left column, after Smart CSS Loading. | F9 AC4 checks both columns' cards in Lasso's order |
+| MT1 | Every help "?" (seen in a table header) | Hand test 2026-11-22: focused from the keyboard, the ring was drawn around the 24px target (37C) plus its offset and ran into the label ("Conten(t)"). | The ring hugs the 18px circle (`outline-offset: -3px`). | `ux-screens.spec.ts` MT1 |
+| MT2 | DB Status at 375px | Hand test: the two-column table kept the list tables' 990px minimum, so the page scrolled sideways. | No minimum for this table; long table names wrap. | `ux-screens.spec.ts` MT2 MT3 |
+| MT3 | Setup wizard, Customize, at 375px | Hand test: the colour fields ran 18px past the card (a `1fr` column cannot shrink below its widest row; each control was a fixed 164px). | `minmax(0, 1fr)`; the control gives way down to 120px; its input's side padding is 8px so "#22baa0" still shows. | `ux-screens.spec.ts` MT2 MT3 |
 
 ## The editors' run (step 3)
 

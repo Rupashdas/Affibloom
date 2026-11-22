@@ -162,6 +162,46 @@ test.describe( 'Task 39A: every admin screen against Lasso', () => {
 		await expect( contexts ).toHaveText( [ `[affibloom id="${ product }"]`, `[affibloom type="grid" group="${ slug }"]` ], { useInnerText: true } );
 	} );
 
+	// Hand test MT1 (2026-11-22): a help "?" focused from the keyboard drew its ring around the 24px target, into its label.
+	test( 'MT1 a focused help "?" rings its circle and keeps clear of its label', async ( { page } ) => {
+		test.setTimeout( 120_000 );
+		await open( page, '/wp-admin/admin.php?page=affibloom-opportunities&tab=content' );
+		const sort = page.locator( 'thead .affibloom-sort', { hasText: 'Content' } );
+		await sort.focus();
+		await page.keyboard.press( 'Tab' );
+		const help = page.locator( 'thead .affibloom-help__button' ).first();
+		await expect( help ).toBeFocused();
+		const ring = await help.evaluate( ( button ) => {
+			const style = getComputedStyle( button );
+			const box = button.getBoundingClientRect();
+			const reach = parseFloat( style.outlineWidth ) + parseFloat( style.outlineOffset );
+			const label = document.createRange();
+			label.selectNodeContents( button.closest( 'th' )!.querySelector( '.affibloom-sort' )! );
+			return { left: box.left - reach, labelRight: label.getBoundingClientRect().right };
+		} );
+		expect( ring.left ).toBeGreaterThanOrEqual( ring.labelRight );
+	} );
+
+	// Hand tests MT2, MT3 (2026-11-22): at 375px DB Status widened the page; the wizard's colour fields left their card.
+	test( 'MT2 MT3 at 375px DB Status keeps to the page and the wizard\'s fields keep to their card', async ( { page } ) => {
+		test.setTimeout( 180_000 );
+		await page.setViewportSize( { width: 375, height: 812 } );
+		await open( page, '/wp-admin/admin.php?page=affibloom-db-status' );
+		expect( await page.evaluate( () => document.documentElement.scrollWidth ) ).toBeLessThanOrEqual( 375 );
+
+		await open( page, '/wp-admin/admin.php?page=affibloom-setup' );
+		await page.getByRole( 'button', { name: 'Flow', exact: true } ).click();
+		await expect( page.getByRole( 'heading', { name: 'Customize Your Displays' } ) ).toBeFocused();
+		const outside = await page.evaluate( () => {
+			const card = document.querySelector( '.affibloom-setup__card' ) as HTMLElement;
+			const edge = card.getBoundingClientRect().right - parseFloat( getComputedStyle( card ).paddingRight );
+			return [ ...card.querySelectorAll( '[data-step="customize"] input:not([type=hidden]), [data-step="customize"] textarea' ) ]
+				.filter( ( field ) => field.getBoundingClientRect().width > 0 && field.getBoundingClientRect().right > edge + 1 )
+				.map( ( field ) => field.id || field.getAttribute( 'name' ) );
+		} );
+		expect( outside ).toEqual( [] );
+	} );
+
 	for ( const screen of SCREENS ) {
 		test( `${ screen.key } opens`, async ( { page } ) => {
 			test.setTimeout( 180_000 );

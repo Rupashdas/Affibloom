@@ -35,6 +35,8 @@ test.describe( 'F37 Permissions', () => {
 	} );
 
 	test( 'AC7 with Editor chosen an Editor sees the menu and the Dashboard; with Administrator they do not; they cannot change it', async ( { browser } ) => {
+		// A sign-in and four screens take close to a minute on Local (seen 2026-11-22, the hand tests).
+		test.setTimeout( 120_000 );
 		const editor = await signIn( browser, 'editor' );
 		try {
 			const page = await editor.context.newPage();

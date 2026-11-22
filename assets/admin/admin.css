@@ -978,8 +978,9 @@
 	margin-bottom: 8px;
 }
 .affibloom-row__label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.affibloom-row__control { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 164px; }
-.affibloom-row__control .affibloom-input { flex: 1; min-width: 0; height: 34px; min-height: 34px; }
+/* 164px, giving way to 120px (a swatch and "#000000") in a narrow rail, such as the wizard on a phone (hand test MT3). */
+.affibloom-row__control { display: inline-flex; align-items: center; gap: 8px; flex: 0 1 164px; min-width: 120px; }
+.affibloom-row__control .affibloom-input { flex: 1; min-width: 0; height: 34px; min-height: 34px; padding-right: 8px; padding-left: 8px; }
 /* Reset and Save at the foot of the rail, as Lasso has them (Reset left, Save right) */
 .affibloom-rail-save {
 	display: flex;
@@ -1134,6 +1135,8 @@
 	background: var(--affibloom-white);
 	transition: border-color var(--affibloom-ease);
 }
+/* The keyboard ring hugs the 18px circle, not the 24px target, so it never runs into the label (hand test MT1). */
+.affibloom-admin .affibloom-help__button:focus-visible { outline-offset: -3px; }
 .affibloom-help__button:hover,
 .affibloom-help.is-open .affibloom-help__button {
 	color: var(--affibloom-brand-600);
@@ -3543,7 +3546,9 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-admin .affibloom-log__text { width: 100%; min-height: 180px; font: 12px/18px ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre; background: var(--affibloom-subtle); resize: vertical; }
 
 /* DB Status (Task TL4): the table names in code type, the output lines under each other. */
-.affibloom-db-status__name code { padding: 0; background: none; color: var(--affibloom-ink-900); font-size: 13px; }
+.affibloom-db-status__name code { padding: 0; background: none; color: var(--affibloom-ink-900); font-size: 13px; overflow-wrap: anywhere; }
+/* Two short columns: no list-table minimum, so the page keeps to a phone's width (hand test MT2). */
+.affibloom-card--list .affibloom-table.affibloom-db-status { min-width: 0; }
 .affibloom-db-status__output { color: var(--affibloom-ink-600); font-size: 13px; }
 
 /*
@@ -3612,7 +3617,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-setup__done { text-align: center; padding: 32px 0; }
 .affibloom-setup__done .affibloom-chip { margin: 0 auto 16px; }
 @media (max-width: 960px) {
-	.affibloom-setup__split { grid-template-columns: 1fr; }
+	/* minmax(0, 1fr): the column follows the card, not its widest row (hand test MT3). */
+	.affibloom-setup__split { grid-template-columns: minmax(0, 1fr); }
 	.affibloom-setup__preview { position: static; }
 	.affibloom-setup__card { padding: 20px; }
 }
