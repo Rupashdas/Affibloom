@@ -79,7 +79,13 @@ $destination = $product->url->value();
 				$this->render( 'admin/partials/tracking-id-notice', $view['tracking'] );
 			}
 			// Lasso 370 opens its page with the Share kit (Task 14D).
-			$this->render( 'admin/partials/share-kit', array( 'shortcode' => \Affibloom\Interface\ShortcodeText::product( (int) $product->id ) ) );
+			$this->render(
+				'admin/partials/share-kit',
+				array(
+					'shortcode' => \Affibloom\Interface\ShortcodeText::product( (int) $product->id ),
+					'block'     => \Affibloom\Interface\ShortcodeText::block( (int) $product->id ),
+				)
+			);
 			?>
 
 			<?php // MD5: two columns, the form and the Amazon data on the left, the sticky live preview on the right. ?>

@@ -1,6 +1,6 @@
 <?php
 /**
- * The shortcodes the admin screens copy.
+ * The shortcodes and the block the admin screens copy.
  *
  * @package Affibloom
  */
@@ -22,6 +22,17 @@ final class ShortcodeText {
 	 */
 	public static function product( int $id ): string {
 		return $id > 0 ? '[affibloom id="' . $id . '"]' : '';
+	}
+
+	/**
+	 * A product's block, as the editor saves a Single chosen in "Choose a Link" (F4; F1 R B9's Copy block, Task 24F):
+	 * `<!-- wp:affibloom/product-box {"type":"single","productId":<id>} /-->`; '' for an unsaved product. Lasso's
+	 * Copy block wrapped its shortcode in its block; Affibloom's block keeps the product's ID and nothing else.
+	 *
+	 * @param int $id The product's ID.
+	 */
+	public static function block( int $id ): string {
+		return $id > 0 ? '<!-- wp:affibloom/product-box {"type":"single","productId":' . $id . '} /-->' : '';
 	}
 
 	/**

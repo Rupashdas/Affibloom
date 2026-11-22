@@ -25,8 +25,8 @@
 			if ( 'destination' === target ) {
 				return destination ? destination.value.trim() : '';
 			}
-			if ( 'shortcode' === target ) {
-				return kit.dataset.shortcode || '';
+			if ( 'shortcode' === target || 'block' === target ) {
+				return kit.dataset[ target ] || '';
 			}
 			if ( 'disclosure' === target && disclosure ) {
 				return '' !== disclosure.value.trim() ? disclosure.value.trim() : disclosure.getAttribute( 'placeholder' ) || '';

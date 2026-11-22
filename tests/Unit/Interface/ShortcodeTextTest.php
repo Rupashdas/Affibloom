@@ -18,6 +18,14 @@ final class ShortcodeTextTest extends TestCase {
 	}
 
 	/**
+	 * A saved product's block as the editor saves a Single (Task 24F); nothing for an unsaved one.
+	 */
+	public function test_a_products_block(): void {
+		self::assertSame( '<!-- wp:affibloom/product-box {"type":"single","productId":42} /-->', ShortcodeText::block( 42 ) );
+		self::assertSame( '', ShortcodeText::block( 0 ) );
+	}
+
+	/**
 	 * A group's grid by its slug (F31 R32, D9; Task 18S12); nothing without a slug.
 	 */
 	public function test_a_groups_shortcode(): void {

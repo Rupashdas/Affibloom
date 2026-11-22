@@ -737,7 +737,7 @@ test.describe( 'F1 Product library', () => {
 	} );
 
 	// Task 14D: Lasso's Share kit. The shareable URL is the destination until link cloaking exists (D5); the disclosure
-	// is the field's, else the site's text; the shortcode is F31 AC11's (Task 18S11); the block waits for Phase 4.
+	// is the field's, else the site's text; the shortcode is F31 AC11's (Task 18S11); the block is the editor's (24F).
 	test( 'AC11 the Share kit copies the destination and the disclosure', async ( { page } ) => {
 		// The Local site is plain http, where browsers give pages no clipboard API, so the page copies with the
 		// selection fallback (product.js). Record what either way copies.
@@ -776,7 +776,9 @@ test.describe( 'F1 Product library', () => {
 		expect( await clipboard() ).toBe( await page.locator( '#affibloom-disclosure' ).getAttribute( 'placeholder' ) );
 
 		await expect( kit.getByRole( 'button', { name: 'Copy shortcode' } ) ).toBeEnabled();
-		await expect( kit.getByRole( 'button', { name: 'Copy block' } ) ).toBeDisabled();
+		await kit.getByRole( 'button', { name: 'Copy block' } ).click();
+		await expect( kit.getByRole( 'button', { name: 'Copy block' } ) ).toContainText( 'Copied!' );
+		expect( await clipboard() ).toBe( `<!-- wp:affibloom/product-box {"type":"single","productId":${ id }} /-->` );
 	} );
 
 	// Task 14D: Lasso's amazon-url-detected notice, on an Amazon product when the site has no tracking ID.

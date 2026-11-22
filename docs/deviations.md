@@ -160,6 +160,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 152. A Fields tab in the header (the user, 2026-11-22): Dashboard, Opportunities, Tables, Groups, Fields, Settings; Lasso's header has none.
 - 153. The setup wizard's "no Lasso data" test is the migrator's (`affibloom_setup_wanted`, Phase M); wizard steps save through hidden tabs.
 - 154. Phase 8's close (the user, 2026-11-22): no GitHub release or `v1.0.0-rc.1` tag; the open decisions follow Lasso (box colours, CSV without BOM); the editors' run, the guides' review and the sign-offs done as Lasso's workflow, by Claude at the user's word.
+- 155. Task 24F added (the user, 2026-11-23): the Share kit's Copy block, promised for Phase 4 (F1 D4, deviation 69) but in no task; built after Phase 8's sign-off.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 

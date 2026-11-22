@@ -70,6 +70,7 @@ them when the task is worked, and record any code that differs from the text bel
 - [x] Task 24C: Shortcode box and Update Display
 - [x] Task 24D: Edit Display
 - [x] Task 24E: Preview queue on load
+- [x] Task 24F: The Share kit's Copy block (added 2026-11-23, deviation 155)
 - [x] Task ED1: Classic editor button
 - [x] Task ED2: Elementor widget
 - [x] Task ED3: Rank Math content analysis
@@ -929,6 +930,40 @@ edit.js → previewQueue (3 at once, per-block token) → POST /editor/preview �
 request is replaced by its newer one (its own `current` flag already drops a late answer). R53's polling for the title
 is not needed: a block asks once it is drawn. No `preview-queue.test.js` (Jest is not installed, as in 24A). Seen:
 twelve displays in a new post, twelve requests, three at most in flight.
+
+---
+
+### Task 24F: The Share kit's Copy block (added 2026-11-23, deviation 155)
+
+**Feature:** F1 (B9, D4; AC11), F4
+
+**Why:** F1 D4 and Task 14D left Copy block "Coming soon" until the editor block existed (Phase 4), but no Phase 4
+task took it, so the product page still showed it disabled after the phase was signed off.
+
+**User action:** on a saved product's page, **Copy block** in the Share kit copies the block the editor saves for a
+Single chosen in "Choose a Link", `<!-- wp:affibloom/product-box {"type":"single","productId":<id>} /-->`, and reads
+"Copied!" for 1.5 s; pasted into the code editor it is that product's box. Disabled for a product not yet saved.
+
+**Request path:**
+```
+product.php → partials/share-kit.php (data-block) → product.js shareKit() → affibloomCopy()
+```
+
+| New | Called by |
+|---|---|
+| `ShortcodeText::block()` | `templates/admin/product.php` |
+
+**Files:** `src/Interface/ShortcodeText.php`, `templates/admin/product.php`, `templates/admin/partials/share-kit.php`,
+`assets/admin/product.js`; tests `tests/Unit/Interface/ShortcodeTextTest.php`, `tests/E2E/acceptance/F1.spec.ts` (AC11).
+
+- [x] **Step 1: Test** (unit: the markup, '' for ID 0; F1 AC11 now copies the block).
+- [x] **Step 2: Markup, button, copy.** The Share kit's last "Soon" chip and its flag went.
+- [x] **Step 3: Run and look.** Unit 4/4, phpcs clean; Brave, product 22092: a real click copies the markup and the
+  label reads "Copied!", then "Copy block".
+- [x] **Step 4: Commit** — "Copy a product's block from its Share kit".
+
+*Note:* Lasso's Copy block wrapped its shortcode in its own block's markup (F31 R31); Affibloom's block keeps the
+product's ID and nothing else, so the copy is exactly what the editor saves.
 
 ---
 

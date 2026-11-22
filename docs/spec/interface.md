@@ -62,7 +62,7 @@ wording differed from Lasso's, Lasso's wording is used here and the change is ma
 | Element | Lasso shows | Label | id / selector | Note |
 |---|---|---|---|---|
 | Heading | product name, then its URL as a link | same | `h1`, `.affibloom-product-url` | |
-| Share kit | five Copy buttons (Lasso 370) | `Share kit`, `Copy shareable URL`, `Copy destination URL`, `Copy disclosure`, `Copy shortcode`, `Copy block` | `.affibloom-share-kit button` | **Changed** (F1 sweep, 14D): built; shortcode and block "Coming soon" until Task 18S and Phase 4. |
+| Share kit | five Copy buttons (Lasso 370) | `Share kit`, `Copy shareable URL`, `Copy destination URL`, `Copy disclosure`, `Copy shortcode`, `Copy block` | `.affibloom-share-kit button` | **Changed** (F1 sweep, 14D): built; shortcode in Task 18S11, block in Task 24F (2026-11-23, deviation 155). |
 | Tabs | `Details`, `Locations <n>`, `Opportunities <n>`, `Variants <n>` | same | `.affibloom-tabs a` | **Changed** (14A): all four; Locations, Opportunities and Variants "Coming soon" until their areas. |
 | Name | `Name` | `Name` | `#affibloom-name` | |
 | Permalink | `Permalink` (not for Amazon) | same | `#affibloom-permalink` | **Added** (14A): a placeholder until link cloaking (area 7). |

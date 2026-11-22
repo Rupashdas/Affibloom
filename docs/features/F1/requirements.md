@@ -34,7 +34,8 @@ Lasso's delete paths; D33 and D34 are the user's answers. **Gate 4 given by the 
 - **AC9** The Dashboard row's name and image open the product's page. (14A)
 - **AC10** "Add Custom Field" → "Add from library" → Primary Rating adds the rating row; a value typed there and the
   row's toggles are still there after a reload; removing the row asks first. (14C)
-- **AC11** The Share kit copies the destination URL and the disclosure, and shows "Copied!". (14D)
+- **AC11** The Share kit copies the destination URL, the disclosure and the product's block, and shows "Copied!".
+  (14D, 24F)
 - **AC12** On an Amazon product's page, when the site has no tracking ID, the link's tag is offered as the site's
   tracking ID (Yes saves it by the Amazon tab's rule and shows "Tracking ID Saved!"); a link without a tag offers
   "Set Amazon Tracking ID" instead; other products show nothing. (14D, B10)
@@ -181,8 +182,8 @@ Settled from Lasso and the records (none drops anything Lasso does or reverses a
   before Task 15.
 - **D4 Placeholders, never borrowed data** (deviation 53): Groups (the Groups area), Permalink and Link Cloaking
   (link cloaking, area 7 of the completion plan), Detect Opportunities and the Opportunities tab (area 3), the
-  Locations tab (area 2), the Variants tab (a new area, section 7), Copy shortcode (Task 18S) and Copy block (Phase 4)
-  show "Coming soon"; Refresh and the Amazon price say "Needs the Amazon API" (C1).
+  Locations tab (area 2), the Variants tab (a new area, section 7), Copy shortcode (Task 18S11) and Copy block (Task
+  24F, added 2026-11-23: no Phase 4 task had taken it, deviation 155) show "Coming soon"; Refresh and the Amazon price say "Needs the Amazon API" (C1).
 - **D5 The public link** is the destination until link cloaking exists (Lasso's own rule when cloaking is off), so
   neither the heading's link nor "Copy shareable URL" offers an address that would not answer.
 - **D6 Amazon Image stays editable with Apply** (the user's decision 11, 2026-11-12); Refresh waits for C1.
