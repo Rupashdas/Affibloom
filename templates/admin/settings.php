@@ -69,6 +69,7 @@ $card_data = array(
 						$this->render( 'admin/partials/settings-general-performance', $card_data );
 						$this->render( 'admin/partials/settings-general-link-defaults', $card_data );
 						$this->render( 'admin/partials/settings-general-notifications', $card_data );
+						$this->render( 'admin/partials/settings-general-permissions', $card_data );
 						$this->render( 'admin/partials/settings-general-uninstall', $card_data + array( 'uninstall' => $view['uninstall'] ) );
 						?>
 					</div>

@@ -16,6 +16,7 @@ use Affibloom\Domain\Cloak\CloakPrefix;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Settings\CustomCss;
 use Affibloom\Domain\Settings\PerformanceMode;
+use Affibloom\Domain\Settings\Permission;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
 
@@ -43,6 +44,7 @@ final class SettingsService {
 			'link_prefix'              => 'slug',
 			'smart_css'                => 'bool',
 			'performance_mode'         => 'performance_mode',
+			'permission'               => 'permission',
 			'cpu_threshold'            => 'percent',
 			'scan_post_types'          => 'post_types',
 			'scan_custom_fields'       => 'custom_fields',
@@ -445,6 +447,7 @@ final class SettingsService {
 			'ga_ids'           => is_string( $raw ) && strlen( $raw ) <= 200 ? trim( sanitize_text_field( $raw ) ) : null,
 			'slug'             => self::clean_slug( $raw ),
 			'performance_mode' => is_string( $raw ) && PerformanceMode::is_mode( $raw ) ? $raw : null,
+			'permission'       => is_string( $raw ) && null !== Permission::tryFrom( $raw ) ? $raw : null,
 			// Lasso stores anything and reads abs( int ); a whole number from 1 to 100 is the only sensible CPU level (edge case 2).
 			'percent'          => self::clean_range( $raw, 1, 100 ),
 			'cron_interval'    => self::clean_range( $raw, 0, 3 ),

@@ -42,6 +42,8 @@ final class Settings {
 		'smart_css'                       => true,
 		// General: Performance (Task 9H). Lasso's default mode is Balanced, whose CPU level is 65.
 		'performance_mode'                => 'balanced',
+		// General → Permissions (F37 R31-R35; Task TL6): the lowest role that may use Affibloom; administrators by default.
+		'permission'                      => 'administrator',
 		'cpu_threshold'                   => 65,
 		// General: Custom Link Detection (Task 9I). Empty = the defaults (F9 R27).
 		'scan_post_types'                 => array(),

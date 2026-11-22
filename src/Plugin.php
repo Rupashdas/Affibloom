@@ -212,6 +212,7 @@ use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\DbStatusScreen;
 use Affibloom\Interface\Admin\LogsScreen;
+use Affibloom\Interface\Admin\PermissionCaps;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Editor\ClassicButton;
@@ -632,6 +633,8 @@ final class Plugin {
 			new LinkAttributesFilter( $rendered, new PublicLinks( $this->settings_repository() ) ),
 			new DisplayRenderFilter( $rendered, $this->settings_repository() ),
 			new SchemaMarkup( new RepointResolver( new PostTypeProductRepository() ), new PostTypeProductRepository(), new TableAmazonProductRepository(), $this->settings_repository(), $box_builder ),
+			// F37 R31-R35 (Task TL6): Affibloom's capabilities for the roles the Permissions setting allows.
+			new PermissionCaps( $this->settings_repository() ),
 			new AdminMenu(
 				$this->navigation(),
 				new DashboardScreen( $this->template(), $products, $per_page, $views, $notice, $groups, new PublicLinks( $this->settings_repository() ), $this->link_issue_query(), $this->location_counts(), new ClickReport( new TableClickStore() ), $this->opportunity_service() ),

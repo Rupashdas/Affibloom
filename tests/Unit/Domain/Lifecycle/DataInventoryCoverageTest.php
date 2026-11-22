@@ -40,6 +40,8 @@ final class DataInventoryCoverageTest extends TestCase {
 		// The Elementor widget's control names, kept in Elementor's own data.
 		'affibloom_shortcode',
 		'affibloom_type',
+		// Affibloom's capability (Task TL6), granted per request, never stored.
+		'affibloom_products',
 		// WP-Cron's five-minute schedule name, not an event.
 		'affibloom_five_minutes',
 		// The products' retired post status: its posts are products, removed with their post type.

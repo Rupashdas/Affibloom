@@ -14,7 +14,7 @@ use ReflectionClass;
 final class LinkIndexCronTest extends TestCase {
 
 	public function test_a_request_without_the_capability_runs_no_batch(): void {
-		Functions\expect( 'current_user_can' )->once()->with( 'manage_options' )->andReturn( false );
+		Functions\expect( 'current_user_can' )->once()->with( 'affibloom_products' )->andReturn( false );
 		Functions\expect( 'wp_next_scheduled' )->never();
 		// Built without its parts: any use of one (the state, the job, the settings) would fail the test.
 		$cron = ( new ReflectionClass( LinkIndexCron::class ) )->newInstanceWithoutConstructor();

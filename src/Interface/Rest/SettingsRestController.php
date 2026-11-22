@@ -170,7 +170,15 @@ final class SettingsRestController implements Module {
 		}
 
 		// Each field is sanitised and validated by type in SettingsService.
-		$input       = self::posted( $request, 'settings' );
+		$input = self::posted( $request, 'settings' );
+		// F37 R34 (Task TL6): who may use Affibloom, and whether deleting it removes its data, are the administrators'
+		// to change; anyone else's save keeps them as stored, as Lasso drops them silently (a checkbox left out would be
+		// saved as off, so the stored values are put in, not the fields taken out).
+		if ( ! current_user_can( Capabilities::PERMISSION ) ) {
+			$stored                            = $this->settings->current();
+			$input['permission']               = $stored->string( 'permission' );
+			$input['delete_data_on_uninstall'] = $stored->bool( 'delete_data_on_uninstall' ) ? '1' : '';
+		}
 		$keep_genius = $this->settings->current()->bool( 'keep_genius_formatting' );
 		$refused     = $this->settings->update_tab( $tab, $input );
 		if ( 'amazon' !== $tab ) {

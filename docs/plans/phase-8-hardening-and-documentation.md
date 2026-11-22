@@ -88,7 +88,7 @@ the text below as a deviation in `progress.md`.
 
 - [x] Task TL3: Logs
 - [x] Task TL4: DB Status and self-repair
-- [ ] Task TL6: Permissions
+- [x] Task TL6: Permissions
 - [ ] Task TL7: Version in the admin footer
 
 ### F38 Admin shell
@@ -764,16 +764,23 @@ changes nothing for non-administrators.
 modify `Capabilities.php`, `AdminMenu.php`, every controller and REST route that used `Capabilities::PRODUCTS` or
 `SETTINGS`, the General template, `SettingsService`.
 
-- [ ] **Step 1: Failing tests.** Unit: the mapping, and that an unknown value fails closed. E2E (AC7) with an Editor
+- [x] **Step 1: Failing tests.** Unit: the mapping, and that an unknown value fails closed. E2E (AC7) with an Editor
   user created in the test and removed after: with Editor chosen the Editor sees the menu and the Dashboard; with
   Administrator chosen they do not; an Editor cannot change the select. Task 37A's `security.spec.ts` is re-run with
   the role at Author. Expected: red.
-- [ ] **Step 2: `Permission` and `Capabilities`;** swap every use of `Capabilities::PRODUCTS` / `SETTINGS` (grep for
+- [x] **Step 2: `Permission` and `Capabilities`;** swap every use of `Capabilities::PRODUCTS` / `SETTINGS` (grep for
   them; the list goes in the commit body).
-- [ ] **Step 3: The card.**
-- [ ] **Step 4: Run and look.** Log in as an Editor in a second browser profile; set the role; reload; the menu
+- [x] **Step 3: The card.**
+- [x] **Step 4: Run and look.** Log in as an Editor in a second browser profile; set the role; reload; the menu
   appears and disappears as chosen; set it back to Administrator.
-- [ ] **Step 5: Commit** — "Let the owner choose which role can use Affibloom"
+- [x] **Step 5: Commit** — "Let the owner choose which role can use Affibloom"
+
+*Note (2026-11-22):* no call site was swapped: `Capabilities::PRODUCTS` and `SETTINGS` became Affibloom's own
+capabilities (`affibloom_products`, `affibloom_settings`), which `PermissionCaps` grants per request (`user_has_cap`)
+to users with the chosen role's capability, so every screen, route, the post types (37A S1) and the catch-up (S4)
+follow the setting with no role written. `Capabilities::PERMISSION` (`manage_options`) guards the setting itself; a
+save from anyone else keeps the stored Permission and Uninstall values. Checked with an Editor, an Author and a
+Contributor (`F37-permissions.spec.ts`) and the security spec's Author walk.
 
 ---
 
