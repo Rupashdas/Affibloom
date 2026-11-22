@@ -51,6 +51,8 @@ final class Settings {
 		'disable_help_tips'               => false,
 		// General → Uninstall (Task 38): deleting the plugin removes its data only when this is on.
 		'delete_data_on_uninstall'        => false,
+		// The Logs page's Enable Logs (F37 R2; Task TL3): off, only forced lines are written.
+		'enable_logs'                     => false,
 		'disable_import_notice'           => false,
 		// The intro boxes closed for good (F22 D8; F38 ON5 reuses the key): their names. Kept by the save, not a field.
 		'education_hidden'                => array(),

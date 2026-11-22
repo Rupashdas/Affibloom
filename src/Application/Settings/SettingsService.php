@@ -91,7 +91,14 @@ final class SettingsService {
 			// The Product Data API card's Default Tracking ID (C1 R17, D2).
 			'default_country'                 => 'country',
 		),
+		// The hidden Logs page's one switch (F37 R2; Task TL3): saved through the same route, not a Settings tab.
+		'logs'    => array(
+			'enable_logs' => 'bool',
+		),
 	);
+
+	/** The tabs that save but are not shown in the Settings band: hidden pages of their own. */
+	private const HIDDEN_TABS = array( 'logs' );
 
 	/**
 	 * The General fields that exist only in the support view. A checkbox there says "off" by being absent, which on
@@ -134,7 +141,16 @@ final class SettingsService {
 	 * @return list<string>
 	 */
 	public function tabs(): array {
-		return array_keys( self::FIELDS );
+		return array_values( array_diff( array_keys( self::FIELDS ), self::HIDDEN_TABS ) );
+	}
+
+	/**
+	 * Whether the settings REST route saves this tab: the shown tabs and the hidden pages' (Logs, Task TL3).
+	 *
+	 * @param string $tab Tab key.
+	 */
+	public function saves( string $tab ): bool {
+		return isset( self::FIELDS[ $tab ] );
 	}
 
 	/**

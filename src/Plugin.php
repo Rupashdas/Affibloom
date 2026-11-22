@@ -33,6 +33,8 @@ use Affibloom\Infrastructure\WordPress\IndexPostsUsingAffibloom;
 use Affibloom\Infrastructure\WordPress\IndexTableLocations;
 use Affibloom\Infrastructure\WordPress\OptionRequestLedger;
 use Affibloom\Application\Amazon\GuardedCatalog;
+use Affibloom\Application\Logs\LoggedCatalog;
+use Affibloom\Domain\Lifecycle\DataInventory;
 use Affibloom\Infrastructure\WordPress\PostTypeTableRepository;
 use Affibloom\Infrastructure\WordPress\TableAmazonShortLinkRepository;
 use Affibloom\Infrastructure\WordPress\TableClickStore;
@@ -92,6 +94,7 @@ use Affibloom\Application\Shell\UpdateAvailableNotice;
 use Affibloom\Application\Upgrade\Upgrader;
 use Affibloom\Infrastructure\Http\CreatorsApiCatalog;
 use Affibloom\Infrastructure\Http\WpPageFetcher;
+use Affibloom\Infrastructure\Logs\FileLog;
 use Affibloom\Infrastructure\Data\FileNetworkSubIds;
 use Affibloom\Infrastructure\Html\WpLinkScanner;
 use Affibloom\Infrastructure\Schema\Migrator;
@@ -143,6 +146,7 @@ use Affibloom\Interface\Front\GaTag;
 use Affibloom\Interface\Cron\ClickRetentionCron;
 use Affibloom\Interface\Hooks\TableProductHooks;
 use Affibloom\Interface\Hooks\AutoDetectHooks;
+use Affibloom\Interface\Hooks\LogHooks;
 use Affibloom\Interface\Hooks\TrackingIdHooks;
 use Affibloom\Interface\PublicLinks;
 use Affibloom\Infrastructure\WordPress\WpSlugConflicts;
@@ -202,6 +206,7 @@ use Affibloom\Interface\Admin\HelpTips;
 use Affibloom\Interface\Admin\IconChoices;
 use Affibloom\Interface\Admin\NavItem;
 use Affibloom\Interface\Admin\Notice;
+use Affibloom\Interface\Admin\LogsScreen;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Editor\ClassicButton;
@@ -309,6 +314,13 @@ final class Plugin {
 	 * @var GuardedCatalog|null
 	 */
 	private ?GuardedCatalog $catalog = null;
+
+	/**
+	 * The logs (Task TL3), one for the request.
+	 *
+	 * @var FileLog|null
+	 */
+	private ?FileLog $file_log = null;
 
 	/**
 	 * The affiliate-network registry, once read (Task C2A).
@@ -467,10 +479,24 @@ final class Plugin {
 	}
 
 	/**
+	 * Affibloom's logs, in uploads (F37 D3; Task TL3).
+	 */
+	private function file_log(): FileLog {
+		$this->file_log ??= new FileLog(
+			static fn(): string => trailingslashit( (string) wp_upload_dir( null, false )['basedir'] ) . DataInventory::LOG_FOLDER,
+			fn(): bool => $this->settings_repository()->get()->bool( 'enable_logs' ),
+			static fn(): int => time()
+		);
+
+		return $this->file_log;
+	}
+
+	/**
 	 * The Creators API inside Amazon's limits (C1Q6a): one guard and one record for every caller.
 	 */
 	private function catalog(): GuardedCatalog {
-		$this->catalog ??= new GuardedCatalog( new CreatorsApiCatalog(), new OptionRequestLedger() );
+		// Amazon's answers are logged (Task TL3) inside the quota guard, so its own stops are not logged as Amazon's errors.
+		$this->catalog ??= new GuardedCatalog( new LoggedCatalog( new CreatorsApiCatalog(), $this->file_log() ), new OptionRequestLedger() );
 		return $this->catalog;
 	}
 
@@ -622,8 +648,11 @@ final class Plugin {
 				new FieldScreen( $this->template(), $fields, $notice ),
 				new OpportunitiesScreen( $this->template(), $this->opportunity_service(), $this->intro_boxes(), $products, $this->content_export() ),
 				new TablesScreen( $this->template(), $this->table_service(), $notice ),
-				new TableScreen( $this->template(), $this->table_service(), $choices )
+				new TableScreen( $this->template(), $this->table_service(), $choices ),
+				new LogsScreen( $this->template(), $settings, $this->file_log(), $notice )
 			),
+			// F37 R3-R6 (Task TL3): the events of the index, the link check and the product save written to the logs.
+			new LogHooks( $this->file_log(), $this->file_log() ),
 			new AdminAssets( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
 			$editor_assets,
 			new ClassicButton( plugin_dir_url( $this->file ), AFFIBLOOM_VERSION ),
@@ -972,7 +1001,7 @@ final class Plugin {
 			$this->navigation->register( new NavItem( 'groups', GroupsScreen::SLUG, static fn (): string => __( 'Groups', 'affibloom' ), 'layers', Capabilities::PRODUCTS, array( GroupScreen::SLUG ) ) );
 			// A menu item only: Lasso's header has no Fields tab (F26 D13).
 			$this->navigation->register( new NavItem( 'fields', FieldsScreen::SLUG, static fn (): string => __( 'Fields', 'affibloom' ), 'list', Capabilities::PRODUCTS, array( FieldScreen::SLUG ) ) );
-			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS ) );
+			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS, array( LogsScreen::SLUG ) ) );
 		}
 
 		return $this->navigation;

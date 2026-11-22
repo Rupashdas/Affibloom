@@ -290,6 +290,8 @@ final class ProductsController implements Module {
 		// F24 R5, N7 (Task CL3): a post or page with the slug takes its address; the save stands, the editor is told.
 		$conflict = ProductType::Amazon === $product->type || null === $this->conflicts ? null : $this->conflicts->used_by( $product->slug );
 		if ( null !== $conflict ) {
+			// Logged under Duplicate Slug Changes (F37 R3; Task TL3, LogHooks).
+			do_action( 'affibloom_slug_conflict', (int) $product->id, $product->slug, $conflict['type'] );
 			$answer['warnings'] = array(
 				array(
 					'text' => Messages::slug_in_use( $product->slug, $conflict['type'] ),

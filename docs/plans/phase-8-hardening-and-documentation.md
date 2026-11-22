@@ -86,7 +86,7 @@ the text below as a deviation in `progress.md`.
 
 ### F37 Tools and diagnostics
 
-- [ ] Task TL3: Logs
+- [x] Task TL3: Logs
 - [ ] Task TL4: DB Status and self-repair
 - [ ] Task TL6: Permissions
 - [ ] Task TL7: Version in the admin footer
@@ -683,14 +683,21 @@ Product API Errors, Link Alerts, Duplicate Slug Changes, SQL Errors; Save Change
 **Files:** create the classes and template, `tests/E2E/acceptance/F37-logs.spec.ts`, `tests/Unit/Logs/*Test.php`;
 modify `Plugin.php`, `AdminMenu`, `Settings.php`, and each job named above for its log call.
 
-- [ ] **Step 1: Failing tests.** E2E AC3 (the page, the switch, the seven boxes), AC4 (a log file is not reachable
+- [x] **Step 1: Failing tests.** E2E AC3 (the page, the switch, the seven boxes), AC4 (a log file is not reachable
   from the web: a request for it is refused). Unit: newest per type, exact type match, forced write when the switch is
   off, pruning after 14 days. Expected: red, no page.
-- [ ] **Step 2: Classes and the screen.** `FileLogger`, `LogService`, `FileLogReader`, `LogsScreen`, the setting.
-- [ ] **Step 3: Wire the callers** (the jobs listed under Depends on) and the pruner.
-- [ ] **Step 4: Run and look.** Open the page on Local; trigger a log entry (a failing import row, or a SQL error on a
+- [x] **Step 2: Classes and the screen.** `FileLogger`, `LogService`, `FileLogReader`, `LogsScreen`, the setting.
+- [x] **Step 3: Wire the callers** (the jobs listed under Depends on) and the pruner.
+- [x] **Step 4: Run and look.** Open the page on Local; trigger a log entry (a failing import row, or a SQL error on a
   test table); read it on the page; check the folder's `index.php` and `.htaccess`; at 1280 and 375 px.
-- [ ] **Step 5: Commit** — "Add the Logs screen"
+- [x] **Step 5: Commit** — "Add the Logs screen"
+
+*Note (2026-11-22):* six boxes (no Import Log, deviation 146). The files are `<Y_m_d>_<type>.log.php` opening with
+`<?php exit; ?>`, so a request prints nothing on nginx too (it ignores `.htaccess`, which the folder still has).
+The features log through events (`LogHooks`: the index's written post, a link check's problem, the new
+`affibloom_slug_conflict`) and a catalogue decorator (`LoggedCatalog`, inside the quota guard), not a logger each;
+Link Alerts logs the problems a check finds (the event there is), its help text says so. One `FileLog` is both
+writer and reader; pruning rides on `affibloom_daily`.
 
 ---
 

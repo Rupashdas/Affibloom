@@ -52,12 +52,12 @@ final class PluginTest extends TestCase {
 	 * handled the same way, and so is a field's (Task FL2). The lists are listed in Lasso's order, Fields included
 	 * (Task ON1, F38 R11).
 	 */
-	public function test_the_product_page_is_registered_hidden_and_guarded(): void {
+	public function test_the_product_page_and_the_logs_page_are_registered_hidden(): void {
 		Functions\when( '__' )->returnArg();
 		Functions\when( 'add_menu_page' )->justReturn( 'toplevel_page_affibloom' );
 		$slugs = array();
 		Functions\expect( 'add_submenu_page' )
-			->times( 10 )
+			->times( 11 )
 			->andReturnUsing(
 				static function ( string $parent, string $title, string $menu, string $cap, string $slug ) use ( &$slugs ): string {
 					$slugs[] = $slug;
@@ -68,6 +68,7 @@ final class PluginTest extends TestCase {
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-group' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-field' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-table' );
+		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-logs' );
 		// Brain Monkey records hooks without running them: run these two callbacks as WordPress would.
 		$run = static function ( callable $callback ): void {
 			$callback();
@@ -78,7 +79,7 @@ final class PluginTest extends TestCase {
 		Plugin::boot( '/plugins/affibloom/affibloom.php' );
 
 		self::assertSame(
-			array( 'affibloom', 'affibloom-opportunities', 'affibloom-tables', 'affibloom-groups', 'affibloom-fields', 'affibloom-settings', 'affibloom-product', 'affibloom-group', 'affibloom-field', 'affibloom-table' ),
+			array( 'affibloom', 'affibloom-opportunities', 'affibloom-tables', 'affibloom-groups', 'affibloom-fields', 'affibloom-settings', 'affibloom-product', 'affibloom-group', 'affibloom-field', 'affibloom-table', 'affibloom-logs' ),
 			$slugs
 		);
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-product', 'Affibloom\Interface\Admin\ProductScreen->guard()' ) );

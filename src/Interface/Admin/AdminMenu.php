@@ -45,6 +45,7 @@ final class AdminMenu implements Module {
 	 * @param OpportunitiesScreen|null $opportunities Opportunities (F22, Task O1).
 	 * @param TablesScreen|null        $tables     The Tables list (F25, Task T1).
 	 * @param TableScreen|null         $table      A table's builder (F25, Task T3).
+	 * @param LogsScreen|null          $logs       The hidden Logs page (F37, Task TL3).
 	 */
 	public function __construct(
 		private AdminNavigation $navigation,
@@ -58,6 +59,7 @@ final class AdminMenu implements Module {
 		?OpportunitiesScreen $opportunities = null,
 		?TablesScreen $tables = null,
 		private ?TableScreen $table = null,
+		private ?LogsScreen $logs = null,
 	) {
 		$this->screens = array(
 			self::SLUG           => array( $dashboard, 'render' ),
@@ -118,6 +120,10 @@ final class AdminMenu implements Module {
 		if ( null !== $this->table ) {
 			$this->add_detail_page( __( 'Table', 'affibloom' ), TablesScreen::TABLE_SLUG, array( $this->table, 'render' ), array( $this->table, 'guard' ) );
 		}
+		// Lasso's hidden Settings pages, reached by their address (F37 R1, R9).
+		if ( null !== $this->logs ) {
+			$this->add_detail_page( __( 'Logs', 'affibloom' ), LogsScreen::SLUG, array( $this->logs, 'render' ), static function (): void {}, Capabilities::SETTINGS );
+		}
 	}
 
 	/**
@@ -129,6 +135,7 @@ final class AdminMenu implements Module {
 		remove_submenu_page( self::SLUG, GroupScreen::SLUG );
 		remove_submenu_page( self::SLUG, FieldScreen::SLUG );
 		remove_submenu_page( self::SLUG, TablesScreen::TABLE_SLUG );
+		remove_submenu_page( self::SLUG, LogsScreen::SLUG );
 	}
 
 	/**
@@ -165,9 +172,10 @@ final class AdminMenu implements Module {
 	 * @param string   $slug   The page slug.
 	 * @param callable $render What the page prints.
 	 * @param callable $guard  Runs before any output.
+	 * @param string   $capability Who may open it.
 	 */
-	private function add_detail_page( string $title, string $slug, callable $render, callable $guard ): void {
-		$hook = add_submenu_page( self::SLUG, $title, $title, Capabilities::PRODUCTS, $slug, $render );
+	private function add_detail_page( string $title, string $slug, callable $render, callable $guard, string $capability = Capabilities::PRODUCTS ): void {
+		$hook = add_submenu_page( self::SLUG, $title, $title, $capability, $slug, $render );
 		if ( false !== $hook ) {
 			add_action( 'load-' . $hook, $guard );
 		}

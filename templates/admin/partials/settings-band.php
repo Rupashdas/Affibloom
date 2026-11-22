@@ -6,7 +6,7 @@
  * Shared by the Settings tabs and the Display screen (extracted on its second use).
  *
  * @package Affibloom
- * @var array{tab: string, tabs: list<string>} $view
+ * @var array{tab: string, tabs: list<string>, title?: string, subtitle?: string} $view
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,8 +28,9 @@ foreach ( $view['tabs'] as $tab_key ) {
 $this->render(
 	'admin/partials/page-head',
 	array(
-		'title'    => __( 'Settings', 'affibloom' ),
-		'subtitle' => __( 'Defaults for new links, the product box and Amazon.', 'affibloom' ),
+		// A hidden Settings page (Logs, DB Status: F37 R1, R9) gives its own title and subtitle, with no tab current.
+		'title'    => $view['title'] ?? __( 'Settings', 'affibloom' ),
+		'subtitle' => $view['subtitle'] ?? __( 'Defaults for new links, the product box and Amazon.', 'affibloom' ),
 		'tabs'     => array(
 			'label' => __( 'Settings sections', 'affibloom' ),
 			'items' => $items,

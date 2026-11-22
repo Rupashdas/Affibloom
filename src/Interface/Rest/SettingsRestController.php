@@ -165,7 +165,7 @@ final class SettingsRestController implements Module {
 	public function save_tab( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$tab = sanitize_key( (string) $request->get_param( 'tab' ) );
 		// Display has its own route: its form edits two stores.
-		if ( 'display' === $tab || ! in_array( $tab, $this->settings->tabs(), true ) ) {
+		if ( 'display' === $tab || ! $this->settings->saves( $tab ) ) {
 			return new WP_Error( 'affibloom_unknown_tab', __( 'Unknown settings tab.', 'affibloom' ), array( 'status' => 404 ) );
 		}
 
