@@ -45,14 +45,20 @@ final class BlockAccess {
 			return null;
 		}
 
-		return array(
-			'attributes' => array(
+		// The block saves only what differs from its defaults (block.json: IDs 0, no overrides), as the editor does.
+		$block = array_filter(
+			array(
 				'type'      => $display['type'],
 				'productId' => $display['product'],
 				'groupId'   => $group,
 				'tableId'   => $display['table'],
 				'overrides' => $display['overrides'],
-			) + ShortcodeFormat::schema( $repaired ),
+			),
+			static fn ( mixed $value ): bool => 0 !== $value && array() !== $value
+		);
+
+		return array(
+			'attributes' => $block + ShortcodeFormat::schema( $repaired ),
 			'lost'       => ShortcodeFormat::lost( $display['type'], $repaired ),
 		);
 	}

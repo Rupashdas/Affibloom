@@ -180,7 +180,9 @@ final class ApiTest extends TestCase {
 		$access  = new \Affibloom\Extension\BlockAccess( $service );
 
 		$single = $access->from_shortcode( array( 'id' => '7', 'badge' => 'Best', 'rating' => '4.5', 'schema_review' => 'enable' ) );
-		self::assertSame( array( 'type' => 'single', 'productId' => 7, 'groupId' => 0, 'tableId' => 0, 'overrides' => array( 'badge' => 'Best' ), 'schemaReview' => true ), $single['attributes'] ?? null );
+		self::assertSame( array( 'type' => 'single', 'productId' => 7, 'overrides' => array( 'badge' => 'Best' ), 'schemaReview' => true ), $single['attributes'] ?? null );
+		// What equals the block's defaults is left out, as the editor saves it (no empty "overrides": Phase 4's 52eafdc).
+		self::assertSame( array( 'type' => 'table', 'tableId' => 9 ), $access->from_shortcode( array( 'type' => 'table', 'id' => '9' ) )['attributes'] ?? null );
 		self::assertSame( array( 'rating' ), $single['lost'] ?? null );
 		$slug = $groups->all()[0]['slug'];
 		self::assertSame( $id, $access->from_shortcode( array( 'type' => 'grid', 'group' => $slug ) )['attributes']['groupId'] ?? null );
