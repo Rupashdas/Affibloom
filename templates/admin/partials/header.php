@@ -22,18 +22,7 @@ $header_can_add = current_user_can( Capabilities::PRODUCTS );
 ?>
 <header class="affibloom-header">
 	<a class="affibloom-header__brand" href="<?php echo esc_url( admin_url( 'admin.php?page=' . AdminMenu::SLUG ) ); ?>">
-		<?php // Meadow's flower: five petals around a white centre with a dot; the colours come from the tokens (admin.css). ?>
-		<svg class="affibloom-header__logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-			<g class="affibloom-header__logo-petals" transform="translate(16 16)">
-				<ellipse cy="-7.4" rx="4.7" ry="7.4"/>
-				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(72)"/>
-				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(144)"/>
-				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(216)"/>
-				<ellipse cy="-7.4" rx="4.7" ry="7.4" transform="rotate(288)"/>
-			</g>
-			<circle class="affibloom-header__logo-ring" cx="16" cy="16" r="3.6"/>
-			<circle class="affibloom-header__logo-dot" cx="16" cy="16" r="1.5"/>
-		</svg>
+		<?php $this->render( 'admin/partials/logo' ); ?>
 		<span class="affibloom-header__name"><?php esc_html_e( 'Affibloom', 'affibloom' ); ?></span>
 	</a>
 	<button type="button" class="affibloom-header__menu-button" aria-expanded="false" aria-controls="affibloom-header-nav" data-affibloom-nav-toggle>

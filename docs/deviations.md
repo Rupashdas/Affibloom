@@ -158,6 +158,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 150. The user (2026-11-20): Show Features on the product page draws its bullets in the box's description block; the preview frames load the site's icon CSS.
 - 151. Table builder rework (the user, 2026-11-21): live drag-and-drop by grips and whole cards, keyboard drag, a selection inspector, an icon picker for badges and buttons; Move buttons and the button dialog go.
 - 152. A Fields tab in the header (the user, 2026-11-22): Dashboard, Opportunities, Tables, Groups, Fields, Settings; Lasso's header has none.
+- 153. The setup wizard's "no Lasso data" test is the migrator's (`affibloom_setup_wanted`, Phase M); wizard steps save through hidden tabs.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -2978,3 +2979,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     tab). The user chose a Fields tab between Groups and Settings, current on the list and on a field
     (`AdminNavigation::TABS`). F38 AC1 and its acceptance test say so; the WordPress menu is unchanged. The reader's
     comparison table was reviewed at the same time and stays as Lasso's (25px names, labels on empty values).
+
+153. **The setup wizard's "no Lasso data" test is the migrator's (Task ON6, 2026-11-22).** D13 opens the wizard once
+    after the first activation on a site with no Affibloom settings and no Lasso data. Core may not read Lasso's data
+    (deviation 146, `NoLassoInCoreTest`), so activation marks the wizard due (`affibloom_setup` = pending) only when
+    `affibloom_settings` is missing, and the first-visit redirect asks `apply_filters( 'affibloom_setup_wanted', true )`.
+    **Later task, Phase M (LM1 or LM10):** the Affibloom Lasso Migrator answers false on a site with Lasso's data, and
+    may set `affibloom_setup` to `done` itself. Each wizard step saves only its own fields through SettingsService's
+    hidden tabs (`setup_display`, `setup_amazon`, `setup_analytics`), so no step switches off a checkbox it does not show.

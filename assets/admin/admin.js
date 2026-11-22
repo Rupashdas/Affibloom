@@ -1233,6 +1233,65 @@
 	};
 
 	/**
+	 * The hex form of any CSS colour the browser understands, or null when it understands none.
+	 *
+	 * @param {string} value A CSS colour, such as "black", "#fff" or "rgb(0 0 0)".
+	 * @return {?string} "#rrggbb", or null.
+	 */
+	function toHex( value ) {
+		var probe = document.createElement( 'span' );
+		probe.style.display = 'none';
+		probe.style.color = String( value || '' ).trim();
+		if ( '' === probe.style.color ) {
+			return null;
+		}
+
+		document.body.appendChild( probe );
+		var computed = window.getComputedStyle( probe ).color;
+		probe.remove();
+
+		var parts = computed.match( /\d+(\.\d+)?/g );
+		if ( ! parts || parts.length < 3 ) {
+			return null;
+		}
+
+		return (
+			'#' +
+			parts
+				.slice( 0, 3 )
+				.map( function ( part ) {
+					return ( '0' + Math.round( parseFloat( part ) ).toString( 16 ) ).slice( -2 );
+				} )
+				.join( '' )
+		);
+	}
+
+	/**
+	 * Keeps one colour picker and its text field in step; shared by the Display screen and the setup wizard (Task ON6).
+	 *
+	 * @param {HTMLInputElement} picker The colour input.
+	 */
+	function connect( picker ) {
+		var field = document.getElementById( picker.dataset.affibloomSwatch );
+		if ( ! field ) {
+			return;
+		}
+
+		var show = function () {
+			var hex = toHex( field.value );
+			if ( hex ) {
+				picker.value = hex;
+			}
+		};
+
+		show();
+		field.addEventListener( 'input', show );
+		picker.addEventListener( 'input', function () {
+			field.value = picker.value;
+		} );
+	}
+
+	/**
 	 * A box preview's frame (Tasks 10D, 14E): writes a preview route's answer (the box's HTML, its stylesheets, the
 	 * `:root` block and the phone script) into an iframe in `container`, so the box's CSS cannot reach the screen and its
 	 * phone rules follow the frame's width. Links lose `href`; a click on the box's picture calls `onImage` when given.
@@ -1397,6 +1456,7 @@
 	window.affibloomFormFields = formFields;
 	window.affibloomCopy = copy;
 	window.affibloomBoxFrame = boxFrame;
+	window.affibloomSwatch = connect;
 	window.affibloomSaveDialog = saveDialog;
 	window.affibloomFieldErrors = fieldErrors;
 	window.affibloomMedia = media;

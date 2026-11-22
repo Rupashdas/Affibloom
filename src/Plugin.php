@@ -213,6 +213,11 @@ use Affibloom\Interface\Admin\Notice;
 use Affibloom\Interface\Admin\DbStatusScreen;
 use Affibloom\Interface\Admin\LogsScreen;
 use Affibloom\Interface\Admin\PermissionCaps;
+use Affibloom\Interface\Admin\SetupRedirect;
+use Affibloom\Interface\Admin\SetupScreen;
+use Affibloom\Interface\Rest\SetupController;
+use Affibloom\Application\Shell\SetupState;
+use Affibloom\Infrastructure\WordPress\OptionSetupFlag;
 use Affibloom\Interface\Admin\SettingsScreen;
 use Affibloom\Interface\Block\ProductBoxBlock;
 use Affibloom\Interface\Editor\ClassicButton;
@@ -371,6 +376,8 @@ final class Plugin {
 	 * Activation hook (register_activation_hook in affibloom.php).
 	 */
 	public static function activate(): void {
+		// F38 N1, D13 (Task ON6): on a site with no Affibloom settings yet, the first Affibloom page opens the wizard.
+		( new SetupState( new OptionSetupFlag() ) )->on_activation( false !== get_option( 'affibloom_settings' ) );
 		self::lifecycle( self::upgrader() )->activate();
 	}
 
@@ -658,8 +665,12 @@ final class Plugin {
 				new TablesScreen( $this->template(), $this->table_service(), $notice ),
 				new TableScreen( $this->template(), $this->table_service(), $choices ),
 				new LogsScreen( $this->template(), $settings, $this->file_log(), $notice ),
-				new DbStatusScreen( $this->template(), $settings )
+				new DbStatusScreen( $this->template(), $settings ),
+				new SetupScreen( $this->template(), $settings, $display, $choices, $amazon )
 			),
+			// F38 N1, D13 (Tasks ON6, ON7): the wizard opens by itself once on a new site, and Go to Dashboard ends it.
+			new SetupRedirect( new SetupState( new OptionSetupFlag() ) ),
+			new SetupController( new SetupState( new OptionSetupFlag() ) ),
 			// F37 R5, R12 (Task TL4): SQL errors on Affibloom's tables logged, and the tables repaired when one is out of date.
 			new SqlErrorWatch( new TableRepair( new AffibloomTables(), new OptionRepairState(), $this->file_log(), static fn(): int => time() ) ),
 			// F37 R3-R6 (Task TL3): the events of the index, the link check and the product save written to the logs.
@@ -1012,7 +1023,7 @@ final class Plugin {
 			$this->navigation->register( new NavItem( 'groups', GroupsScreen::SLUG, static fn (): string => __( 'Groups', 'affibloom' ), 'layers', Capabilities::PRODUCTS, array( GroupScreen::SLUG ) ) );
 			// A menu item only: Lasso's header has no Fields tab (F26 D13).
 			$this->navigation->register( new NavItem( 'fields', FieldsScreen::SLUG, static fn (): string => __( 'Fields', 'affibloom' ), 'list', Capabilities::PRODUCTS, array( FieldScreen::SLUG ) ) );
-			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS, array( LogsScreen::SLUG, DbStatusScreen::SLUG ) ) );
+			$this->navigation->register( new NavItem( 'settings', SettingsScreen::SLUG, static fn (): string => __( 'Settings', 'affibloom' ), 'settings', Capabilities::SETTINGS, array( LogsScreen::SLUG, DbStatusScreen::SLUG, SetupScreen::SLUG ) ) );
 		}
 
 		return $this->navigation;

@@ -303,4 +303,50 @@ test.describe( 'F38 Admin shell', () => {
 		await expect( box ).toHaveCount( 0 );
 		setSettings( { disable_help_tips: false } );
 	} );
+	// Tasks ON6, ON7: the setup wizard (R47-R56).
+	test( 'AC10 a new site\'s first Affibloom page opens the wizard once; Theme and Customize, Skip, Back and the step bar', async ( { page } ) => {
+		test.setTimeout( 180_000 );
+		const before = wp( 'eval', 'echo wp_json_encode( get_option( "affibloom_display" ) );' );
+		const grid = wp( 'eval', 'echo (int) get_option( "affibloom_settings" )["show_disclosure_grid"];' );
+		wp( 'option', 'update', 'affibloom_setup', 'pending' );
+		try {
+			await page.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+			await expect( page ).toHaveURL( /page=affibloom-setup/ );
+			const bar = page.getByRole( 'navigation', { name: 'Setup steps' } );
+			await expect( bar.getByRole( 'button', { name: /Theme/ } ) ).toHaveAttribute( 'aria-current', 'step' );
+			await expect( page.getByRole( 'heading', { name: 'Choose a Default Display Box Theme' } ) ).toBeVisible();
+			for ( const theme of [ 'Cactus', 'Flow', 'Lab', 'Money', 'Cutter', 'Geek', 'Llama', 'Splash' ] ) {
+				await expect( page.getByRole( 'button', { name: theme, exact: true } ) ).toBeVisible();
+			}
+			// Opened by itself once: the next Affibloom page is that page.
+			const again = await page.context().newPage();
+			await again.goto( '/wp-admin/admin.php?page=affibloom-groups' );
+			await expect( again ).toHaveURL( /page=affibloom-groups/ );
+			await again.close();
+
+			await page.getByRole( 'button', { name: 'Geek', exact: true } ).click();
+			await expect( page.getByRole( 'heading', { name: 'Customize Your Displays' } ) ).toBeFocused();
+			await expect( bar.getByRole( 'button', { name: /Customize/ } ) ).toHaveAttribute( 'aria-current', 'step' );
+			await expect( page.locator( '[data-setup-preview] iframe' ) ).toBeAttached( { timeout: 30_000 } );
+			await page.getByRole( 'button', { name: '← Change Themes' } ).click();
+			await expect( page.getByRole( 'heading', { name: 'Choose a Default Display Box Theme' } ) ).toBeFocused();
+			await bar.getByRole( 'button', { name: /Customize/ } ).click();
+			await expect( page.getByRole( 'heading', { name: 'Customize Your Displays' } ) ).toBeVisible();
+
+			await page.locator( '#affibloom-display-button' ).fill( '#123456' );
+			await page.getByRole( 'button', { name: 'Save and Continue →' } ).first().click();
+			await expect( page.getByRole( 'heading', { name: 'Amazon Associates', level: 1 } ) ).toBeFocused();
+			const saved = wp( 'eval', 'echo wp_json_encode( get_option( "affibloom_display" ) );' );
+			expect( saved ).toContain( '"Geek"' );
+			expect( saved.toLowerCase() ).toContain( '#123456' );
+			// The step saves only its own fields: the Display screen's other switches are as they were.
+			expect( wp( 'eval', 'echo (int) get_option( "affibloom_settings" )["show_disclosure_grid"];' ) ).toBe( grid );
+
+			await page.locator( '[data-step="amazon"]' ).getByRole( 'button', { name: 'Skip →' } ).click();
+			await expect( page.getByRole( 'heading', { name: 'Google Analytics', level: 1 } ) ).toBeFocused();
+		} finally {
+			wp( 'option', 'update', 'affibloom_display', before, '--format=json' );
+			wp( 'option', 'update', 'affibloom_setup', 'done' );
+		}
+	} );
 } );

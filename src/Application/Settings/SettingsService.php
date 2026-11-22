@@ -27,7 +27,7 @@ final class SettingsService {
 
 	/** The fields each tab owns, with the type that decides how a value is cleaned. */
 	private const FIELDS = array(
-		'general' => array(
+		'general'         => array(
 			'new_tab'                  => 'bool',
 			'nofollow'                 => 'bool',
 			'sponsored'                => 'bool',
@@ -61,7 +61,7 @@ final class SettingsService {
 			'fontawesome_svg'          => 'bool',
 			'no_feature_description'   => 'bool',
 		),
-		'display' => array(
+		'display'         => array(
 			'disclosure_text'         => 'text',
 			'show_price'              => 'bool',
 			'show_disclosure'         => 'bool',
@@ -72,7 +72,7 @@ final class SettingsService {
 			'keep_site_stripe_ui'     => 'bool',
 			'custom_css'              => 'css',
 		),
-		'amazon'  => array(
+		'amazon'          => array(
 			'tracking_id'                     => 'tracking_id',
 			'multiple_tracking_ids'           => 'bool',
 			'tracking_id_whitelist'           => 'tracking_ids',
@@ -94,13 +94,32 @@ final class SettingsService {
 			'default_country'                 => 'country',
 		),
 		// The hidden Logs page's one switch (F37 R2; Task TL3): saved through the same route, not a Settings tab.
-		'logs'    => array(
+		'logs'            => array(
 			'enable_logs' => 'bool',
+		),
+		// The setup wizard's steps (F38 R50-R54; Tasks ON6, ON7): each saves only the fields it shows, so a step never
+		// switches off a checkbox of its full tab that it does not hold.
+		'setup_display'   => array(
+			'disclosure_text' => 'text',
+			'show_price'      => 'bool',
+			'show_disclosure' => 'bool',
+		),
+		'setup_amazon'    => array(
+			'tracking_id'           => 'tracking_id',
+			'auto_monetize_amazon'  => 'bool',
+			'show_prime'            => 'bool',
+			'show_discount_pricing' => 'bool',
+		),
+		'setup_analytics' => array(
+			'ga_tracking_id'    => 'ga_ids',
+			'ga_click_tracking' => 'bool',
+			'ga_pageview'       => 'bool',
+			'ga_anonymize_ip'   => 'bool',
 		),
 	);
 
 	/** The tabs that save but are not shown in the Settings band: hidden pages of their own. */
-	private const HIDDEN_TABS = array( 'logs' );
+	private const HIDDEN_TABS = array( 'logs', 'setup_display', 'setup_amazon', 'setup_analytics' );
 
 	/**
 	 * The General fields that exist only in the support view. A checkbox there says "off" by being absent, which on
@@ -191,6 +210,10 @@ final class SettingsService {
 		$before = $this->repository->get();
 		$after  = $before->with( $changes );
 
+		// The wizard's Analytics step keeps the same rules as General (Task ON7).
+		if ( 'setup_analytics' === $tab ) {
+			$after = self::analytics_rules( $after );
+		}
 		if ( 'general' === $tab ) {
 			$after = self::analytics_rules( $after );
 			// F24 N2 (Task CL5): the addresses under the old prefix keep answering.

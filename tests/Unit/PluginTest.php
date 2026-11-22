@@ -57,7 +57,7 @@ final class PluginTest extends TestCase {
 		Functions\when( 'add_menu_page' )->justReturn( 'toplevel_page_affibloom' );
 		$slugs = array();
 		Functions\expect( 'add_submenu_page' )
-			->times( 12 )
+			->times( 13 )
 			->andReturnUsing(
 				static function ( string $parent, string $title, string $menu, string $cap, string $slug ) use ( &$slugs ): string {
 					$slugs[] = $slug;
@@ -70,6 +70,7 @@ final class PluginTest extends TestCase {
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-table' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-logs' );
 		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-db-status' );
+		Functions\expect( 'remove_submenu_page' )->once()->with( 'affibloom', 'affibloom-setup' );
 		// Brain Monkey records hooks without running them: run these two callbacks as WordPress would.
 		$run = static function ( callable $callback ): void {
 			$callback();
@@ -80,7 +81,7 @@ final class PluginTest extends TestCase {
 		Plugin::boot( '/plugins/affibloom/affibloom.php' );
 
 		self::assertSame(
-			array( 'affibloom', 'affibloom-opportunities', 'affibloom-tables', 'affibloom-groups', 'affibloom-fields', 'affibloom-settings', 'affibloom-product', 'affibloom-group', 'affibloom-field', 'affibloom-table', 'affibloom-logs', 'affibloom-db-status' ),
+			array( 'affibloom', 'affibloom-opportunities', 'affibloom-tables', 'affibloom-groups', 'affibloom-fields', 'affibloom-settings', 'affibloom-product', 'affibloom-group', 'affibloom-field', 'affibloom-table', 'affibloom-logs', 'affibloom-setup', 'affibloom-db-status' ),
 			$slugs
 		);
 		self::assertNotFalse( has_action( 'load-affibloom_page_affibloom-product', 'Affibloom\Interface\Admin\ProductScreen->guard()' ) );

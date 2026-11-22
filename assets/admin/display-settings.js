@@ -19,64 +19,7 @@
 ( function () {
 	'use strict';
 
-	/**
-	 * The hex form of any CSS colour the browser understands, or null when it understands none.
-	 *
-	 * @param {string} value A CSS colour, such as "black", "#fff" or "rgb(0 0 0)".
-	 * @return {?string} "#rrggbb", or null.
-	 */
-	function toHex( value ) {
-		var probe = document.createElement( 'span' );
-		probe.style.display = 'none';
-		probe.style.color = String( value || '' ).trim();
-		if ( '' === probe.style.color ) {
-			return null;
-		}
 
-		document.body.appendChild( probe );
-		var computed = window.getComputedStyle( probe ).color;
-		probe.remove();
-
-		var parts = computed.match( /\d+(\.\d+)?/g );
-		if ( ! parts || parts.length < 3 ) {
-			return null;
-		}
-
-		return (
-			'#' +
-			parts
-				.slice( 0, 3 )
-				.map( function ( part ) {
-					return ( '0' + Math.round( parseFloat( part ) ).toString( 16 ) ).slice( -2 );
-				} )
-				.join( '' )
-		);
-	}
-
-	/**
-	 * Keeps one colour picker and its text field in step.
-	 *
-	 * @param {HTMLInputElement} picker The colour input.
-	 */
-	function connect( picker ) {
-		var field = document.getElementById( picker.dataset.affibloomSwatch );
-		if ( ! field ) {
-			return;
-		}
-
-		var show = function () {
-			var hex = toHex( field.value );
-			if ( hex ) {
-				picker.value = hex;
-			}
-		};
-
-		show();
-		field.addEventListener( 'input', show );
-		picker.addEventListener( 'input', function () {
-			field.value = picker.value;
-		} );
-	}
 
 	/**
 	 * Fills a "%1$d of %2$d" style format with numbers.
@@ -682,7 +625,7 @@
 	 * @param {?HTMLElement} toggle The toolbar's device toggle.
 	 */
 	function setUpRegion( region, toggle ) {
-		Array.prototype.forEach.call( region.querySelectorAll( '[data-affibloom-swatch]' ), connect );
+		Array.prototype.forEach.call( region.querySelectorAll( '[data-affibloom-swatch]' ), window.affibloomSwatch );
 		Array.prototype.forEach.call( region.querySelectorAll( '[data-mirror]' ), mirror );
 		if ( 'layout' === region.dataset.typeRegion ) {
 			density( region );
@@ -847,7 +790,7 @@
 		var resetForm = document.querySelector( '[data-reset-form]' );
 
 		// The shared rows (Disclosure & behavior) and the type shown; the other types are set up when first shown.
-		Array.prototype.forEach.call( document.querySelectorAll( '[data-affibloom-swatch]' ), connect );
+		Array.prototype.forEach.call( document.querySelectorAll( '[data-affibloom-swatch]' ), window.affibloomSwatch );
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-mirror]' ), mirror );
 		if ( resetForm ) {
 			resetSettings( resetForm );

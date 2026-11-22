@@ -128,9 +128,17 @@ final class AdminAssets implements Module {
 				wp_enqueue_script( 'affibloom-amazon-auto-monetize', $this->plugin_url . 'assets/admin/amazon-auto-monetize.js', array( 'affibloom-admin' ), $this->version, true );
 			}
 		}
-		// The icon picker on button texts: Settings → Display and the product page (F28, Task 14G).
-		if ( 'display' === $tab || str_contains( $hook_suffix, ProductScreen::SLUG ) ) {
+		// The icon picker on button texts: Settings → Display, the product page (F28, Task 14G) and the setup wizard.
+		if ( 'display' === $tab || str_contains( $hook_suffix, ProductScreen::SLUG ) || str_contains( $hook_suffix, SetupScreen::SLUG ) ) {
 			wp_enqueue_script( 'affibloom-icon-picker', $this->plugin_url . 'assets/admin/icon-picker.js', array( 'affibloom-admin' ), $this->version, true );
+		}
+		// The setup wizard (Tasks ON6, ON7) uses the General tab's analytics rules and the Amazon tab's Validate and
+		// Auto-Monetization checks; each of those scripts acts only on the parts it finds.
+		if ( str_contains( $hook_suffix, SetupScreen::SLUG ) ) {
+			wp_enqueue_script( 'affibloom-general-settings', $this->plugin_url . 'assets/admin/general-settings.js', array( 'affibloom-admin', 'wp-api-fetch' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-amazon-settings', $this->plugin_url . 'assets/admin/amazon-settings.js', array( 'affibloom-admin' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-amazon-auto-monetize', $this->plugin_url . 'assets/admin/amazon-auto-monetize.js', array( 'affibloom-admin' ), $this->version, true );
+			wp_enqueue_script( 'affibloom-setup', $this->plugin_url . 'assets/admin/setup.js', array( 'affibloom-admin', 'wp-api-fetch', 'affibloom-icon-picker' ), $this->version, true );
 		}
 
 		// The product page's additional buttons: add, drag, remove (F29, Task 14H); its image from the media library or a

@@ -94,7 +94,7 @@ the text below as a deviation in `progress.md`.
 ### F38 Admin shell
 
 - [x] Task ON5: Education boxes: close, remember, reset, hide with help tips
-- [ ] Task ON6: Setup wizard: first visit, Theme, Customize
+- [x] Task ON6: Setup wizard: first visit, Theme, Customize
 - [ ] Task ON7: Setup wizard: Amazon, Analytics, Done (Imports step dropped, deviation 146)
 - [ ] Task ON8: The Dashboard tour
 - [ ] Task ON9: Command palette (Ctrl+Shift+L)
@@ -885,15 +885,23 @@ moves on, **← Change Themes** goes back, a done step in the bar returns to it.
 integration test (wp-env only), `tests/E2E/acceptance/F38.spec.ts` (AC10); modify `affibloom.php`, `Plugin.php`,
 `AdminAssets.php`, `docs/ui/design-system.md` (step bar).
 
-- [ ] **Step 1: Failing tests.** E2E AC10 (on a fresh state the first visit opens Setup; the Theme and Customize steps
+- [x] **Step 1: Failing tests.** E2E AC10 (on a fresh state the first visit opens Setup; the Theme and Customize steps
   work; Skip and Back; the step bar); unit: `SetupState` (pending only without settings and without Lasso data; once).
   Expected: red.
-- [ ] **Step 2: State and redirect** (`SetupState`, `OptionSetupState`, `ActivationRedirect`).
-- [ ] **Step 3: Screen, two steps, saves through F16's route** (`SetupScreen`, templates, `setup.js`).
-- [ ] **Step 4: Run and look.** Reset the Setup option on Local (`bash tools/local-wp.sh option delete affibloom_setup`,
+- [x] **Step 2: State and redirect** (`SetupState`, `OptionSetupState`, `ActivationRedirect`).
+- [x] **Step 3: Screen, two steps, saves through F16's route** (`SetupScreen`, templates, `setup.js`).
+- [x] **Step 4: Run and look.** Reset the Setup option on Local (`bash tools/local-wp.sh option delete affibloom_setup`,
   after a backup of the options) and walk the first two steps at 1280 and 375 px; the Lasso screenshots are the
   reference for fields and words, the design system for looks.
-- [ ] **Step 5: Commit** — "Add the setup wizard's theme and display steps"
+- [x] **Step 5: Commit** — "Add the setup wizard's theme and display steps"
+
+*Note (2026-11-22):* deviation 153: core cannot read Lasso's data, so activation marks the wizard due when
+`affibloom_settings` is missing and the redirect asks `affibloom_setup_wanted` (the migrator's, Phase M). Each step saves
+only its own fields through SettingsService's hidden `setup_*` tabs (a Settings tab would switch off the checkboxes a
+step does not show); Customize reuses the Display screen's "Colors & labels" partial and preview route, and the theme
+cards draw each theme's own box (Affibloom has no theme pictures). Shared on their second use: `affibloomSwatch`
+(admin.js), the logo partial, the Amazon tracking-ID field and Auto-Monetize card. One page holds every step, so
+ON7's steps were built here too; ON7's commit adds their test and record. Checked: F38 AC10.
 
 ---
 

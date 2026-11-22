@@ -38,8 +38,13 @@ final class LifecycleHooksTest extends TestCase {
 		Functions\expect( 'wp_schedule_single_event' )->once()->with( \Mockery::type( 'int' ), 'affibloom_link_index_start' );
 		// A site whose schema steps are all done (step 1 is Task 13G's), so activation runs none; the steps are
 		// UpgraderTest's and MigratorTest's.
+		// A site that has its settings already, so the setup wizard is not made due (SetupStateTest covers that rule).
 		Functions\when( 'get_option' )->alias(
-			static fn( string $name, mixed $fallback = false ): mixed => 'affibloom_db_version' === $name ? PHP_INT_MAX : $fallback
+			static fn( string $name, mixed $fallback = false ): mixed => match ( $name ) {
+				'affibloom_db_version' => PHP_INT_MAX,
+				'affibloom_settings'   => array(),
+				default                => $fallback,
+			}
 		);
 
 		$before = time();

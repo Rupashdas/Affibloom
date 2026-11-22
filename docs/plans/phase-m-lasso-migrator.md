@@ -158,6 +158,10 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 **Feature:** Phase M (deviation 146)
 
+**Added by deviation 153 (Task ON6, 2026-11-22):** on a site with Lasso's data the migrator answers
+`affibloom_setup_wanted` with false (and may set `affibloom_setup` to `done`), so Affibloom's setup wizard does not open by
+itself there (F38 D13).
+
 **Why:** the migration lives outside Affibloom, so it needs its own plugin and one supported way into Affibloom's
 services, instead of reaching into Affibloom's classes or tables.
 

@@ -181,7 +181,8 @@ final class SettingsRestController implements Module {
 		}
 		$keep_genius = $this->settings->current()->bool( 'keep_genius_formatting' );
 		$refused     = $this->settings->update_tab( $tab, $input );
-		if ( 'amazon' !== $tab ) {
+		// The Amazon tab and the setup wizard's Amazon step (Task ON7) also save the Product Data API card.
+		if ( 'amazon' !== $tab && 'setup_amazon' !== $tab ) {
 			return self::answer( $refused ? 'partly-saved' : 'saved', $refused );
 		}
 
@@ -216,8 +217,13 @@ final class SettingsRestController implements Module {
 	 */
 	public function save_display( WP_REST_Request $request ): WP_REST_Response {
 		$flat = self::posted( $request, 'settings' );
-		// Lasso's one "Disclosure in Lists & Tables" toggle writes both keys (display.php 676-677).
-		$flat['show_disclosure_table'] = $flat['show_disclosure_list'] ?? null;
+		// The setup wizard's Customize step (Task ON6) sends only its own switches, saved through its own tab so the
+		// Display screen's other switches are not turned off.
+		$tab = 'setup_display' === $request->get_param( 'tab' ) ? 'setup_display' : 'display';
+		if ( 'display' === $tab ) {
+			// Lasso's one "Disclosure in Lists & Tables" toggle writes both keys (display.php 676-677).
+			$flat['show_disclosure_table'] = $flat['show_disclosure_list'] ?? null;
+		}
 
 		// The screen holds every type and sends those it showed (`display[<type>][…]`), as Lasso saves them all at
 		// once (deviation 144). Each value is cleaned by type in DisplaySettingsService and SettingsService.
@@ -228,7 +234,7 @@ final class SettingsRestController implements Module {
 				$refused = array_merge( $refused, $this->display->update_type( $type, $display[ $type->key() ] ) );
 			}
 		}
-		$refused = array_merge( $refused, $this->settings->update_tab( 'display', $flat ) );
+		$refused = array_merge( $refused, $this->settings->update_tab( $tab, $flat ) );
 
 		return self::answer( $refused ? 'partly-saved' : 'saved', array_values( array_unique( $refused ) ) );
 	}
