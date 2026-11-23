@@ -129,7 +129,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task LM4: Bare shortcodes, widgets and Elementor data
 - [x] Task LM5: The other display types, groups and tables
 - [x] Task LM6: Lasso's stamps in content
-- [ ] Task LM6A: The blocks Lasso's scan rewrote (deviation 160)
+- [x] Task LM6A: The blocks Lasso's scan rewrote (deviation 160)
 - [ ] Task LM7: The site's Lasso CSS rules
 - [ ] Task LM8: The conversion from the admin page
 - [ ] Task LM9: Nothing of Lasso is left
@@ -1245,7 +1245,7 @@ stamps are gone (Lasso's rewritten `rel`): Task LM6A, deviation 160. No integrat
 
 ---
 
-### Task LM6A: The blocks Lasso's scan rewrote
+### Task LM6A: The blocks Lasso's scan rewrote ✅
 
 **Feature:** F34 AC6 (the editor without notices); deviation 160
 
@@ -1263,11 +1263,23 @@ differs; copy and revert as LM3. Afterwards the guides open in the editor withou
 **Open before it starts:** each block's save rule (GenerateBlocks' `rel` from its attributes, the image `src`
 cases), read from the blocks' own source; whether the editor's validator is run in the browser for the dry run.
 
-- [ ] **Step 1: The rules, from each block's source.**
-- [ ] **Step 2: Failing tests, then the repair.**
-- [ ] **Step 3: Run and look.** The 92 posts' blocks valid in the editor's check (`wp.blocks.parse`), the front end
+- [x] **Step 1: The rules, from each block's source.**
+- [x] **Step 2: Failing tests, then the repair.**
+- [x] **Step 3: Run and look.** The 92 posts' blocks valid in the editor's check (`wp.blocks.parse`), the front end
   unchanged, revert byte-equal.
-- [ ] **Step 4: Commit** — "Repair the blocks Lasso's scan rewrote".
+- [x] **Step 4: Commit** — "Repair the blocks Lasso's scan rewrote".
+
+*Note:* migrator `8aa6680` (and `5bdb8f4`, LM6's JSON fixture, whose escapes had been lost). Measured with Lasso off,
+as at the cutover: Lasso's editor script reads a GenerateBlocks button's `target` and `rel` from its HTML, so saves
+under Lasso dropped `"target":true`, and its scan rewrote `rel`. The settings now follow the HTML (`target`,
+`relNoFollow`, `relSponsored`) and `rel` is GenerateBlocks 2.5's (`nofollow`, `noopener noreferrer`, `sponsored`),
+so readers keep what Lasso gave them; a button whose settings would not re-encode exactly is reported, none on Local.
+Local: 1,011 buttons in 93 posts repaired; the editor's check (`wp.blocks.parse`) then flags none of 1,038 buttons
+but 7 pasted inside a `<p>`; the guides' front end unchanged (tied links print Affibloom's rel), Home's "/about/"
+button lost a stray `rel`; reverted byte-equal (`_affibloom_lasso_pre_blocks`). Not Lasso's and left to the editor's
+recovery: 33 images with their size in `style`, 17 Rank Math FAQ and 4 GenerateBlocks headline blocks. The revert
+report is shared by convert, stamps and blocks (`InterfaceCliRevertReport`). Cutover order: Lasso off, convert,
+stamps, blocks.
 
 ---
 

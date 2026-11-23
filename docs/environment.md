@@ -84,7 +84,7 @@
   arrives as `x  y`); keep test data free of them, or pass them another way.
 - Mail: PHP sends to `localhost:10001`, which is Local's **Mailpit**, and no SMTP plugin is active, so
   `wp_mail` does not reach real people (checked 2026-11-12).
-- **Lasso v369 is installed and inactive on this copy** (deactivated 2026-11-14 at the user's request, after the backup
+- **Lasso is installed on this copy** (v370, active on 2026-11-23; LM6A switched it off for its editor check and back on; deactivated 2026-11-14 at the user's request, after the backup
   `app/affibloom-backup-2026-11-14-before-lasso-deactivate.sql`); its data is present (265 `lasso-urls` posts, its 29
   tables). The parity tasks switch it on and off themselves; the safety constants (Task 2) are in place.
 - Active plugins (2026-11-12; Lasso inactive since 2026-11-14; EWWW is inactive) include Affibloom, Rank Math, GeneratePress/GP Premium, GenerateBlocks, LiteSpeed Cache,

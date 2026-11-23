@@ -38,7 +38,7 @@ if the user wants that clean-up (N3).
   (clean-up after conversion) says "Revert the later change of this post first.". (H2, D10)
 - **AC5** (not built: decision A1) History reads only Affibloom's records: Lasso's 18 `lasso_post_content_history` rows are not listed and the
   table is not touched (fingerprint unchanged). (H1, D3, N2)
-- **AC6** (built by Task LM6 as `wp affibloom-lasso stamps`, deviation 146; the editor without notices is LM6A, deviation 160) `wp affibloom lasso-attributes strip --dry-run` lists, per post, how many `data-lasso-id`,
+- **AC6** (built by Task LM6 as `wp affibloom-lasso stamps`, deviation 146; the editor without notices by Task LM6A as `wp affibloom-lasso blocks`, deviation 160) `wp affibloom lasso-attributes strip --dry-run` lists, per post, how many `data-lasso-id`,
   `data-lasso-name` and `data-lasso-lid` attributes it would remove (and the posts it skips, with the reason); without
   `--dry-run` it removes exactly those attributes and nothing else (every other byte equal), keeps a stored copy and a
   revision per post, records the change for History, and refuses to run before the Lasso migration has finished;
