@@ -316,7 +316,7 @@ a.affibloom-button-2:hover {
 	margin: 0 0 10px 0;
 }
 .affibloom-stars::before {
-	content: '★★★★★';
+	content: '\2605\2605\2605\2605\2605';
 	font-family: Times;
 	letter-spacing: 1px;
 	background: linear-gradient(90deg,#fc0 var(--percent),#e2e2e2 var(--percent));
