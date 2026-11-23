@@ -89,6 +89,71 @@ final class OpportunityAccess {
 	}
 
 	/**
+	 * Each place a post holds a link (Task LM6): the product its own address ties it to (0 for none), the product an
+	 * editor assigned it (0 for none) and whether it is turned back to its original URL; empty when the index has none.
+	 *
+	 * @param int    $post The post.
+	 * @param string $url  The link.
+	 * @return list<array{product: int, assigned: int, original: bool}>
+	 */
+	public function ties( int $post, string $url ): array {
+		$ties = array();
+		foreach ( $this->rows( $post, $url ) as $row ) {
+			$found = $this->locations->find( $row );
+			if ( null !== $found ) {
+				$ties[] = array(
+					'product'  => $found->product_id,
+					'assigned' => $found->assigned_product_id,
+					'original' => $found->use_original,
+				);
+			}
+		}
+
+		return $ties;
+	}
+
+	/**
+	 * Ties to a product every place a post holds a link that its own address ties to another product or to none, as
+	 * Opportunities' Assign does (F22 N1-A; Task LM6: the product Lasso's stamp named). A place an editor assigned, or
+	 * turned back to its original URL, keeps that. The assignment is kept across a rescan.
+	 *
+	 * @param int    $post    The post.
+	 * @param string $url     The link.
+	 * @param int    $product The product.
+	 * @return int How many places were tied.
+	 */
+	public function tie( int $post, string $url, int $product ): int {
+		$count = 0;
+		foreach ( $this->rows( $post, $url ) as $row ) {
+			$found = $this->locations->find( $row );
+			if ( $product > 0 && null !== $found && 0 === $found->assigned_product_id && ! $found->use_original && $product !== $found->product_id ) {
+				$count += $this->locations->set_assigned( $row, $product ) ? 1 : 0;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Clears the assignment of every place a post holds a link that is assigned to a product (Task LM6's revert).
+	 *
+	 * @param int    $post    The post.
+	 * @param string $url     The link.
+	 * @param int    $product The product.
+	 * @return int How many places were cleared.
+	 */
+	public function untie( int $post, string $url, int $product ): int {
+		$count = 0;
+		foreach ( $this->rows( $post, $url ) as $row ) {
+			if ( $product > 0 && ( $this->locations->find( $row )->assigned_product_id ?? 0 ) === $product ) {
+				$count += $this->locations->set_assigned( $row, 0 ) ? 1 : 0;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * The index rows of a post's link.
 	 *
 	 * @param int    $post The post.

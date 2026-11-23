@@ -549,6 +549,45 @@ final class Api {
 	}
 
 	/**
+	 * Each place a post holds a link in the link index (Task LM6): `product`, the product its own address ties it to (0
+	 * for none); `assigned`, the product an editor assigned it (0 for none); `original`, whether it is turned back to its
+	 * original URL.
+	 *
+	 * @param int    $post The post.
+	 * @param string $url  The link.
+	 * @return list<array{product: int, assigned: int, original: bool}> Empty when the link index has none.
+	 */
+	public function link_ties( int $post, string $url ): array {
+		return $this->opportunities->ties( $post, $url );
+	}
+
+	/**
+	 * Ties a post's link to a product (Task LM6; as Opportunities' Assign, F22 N1-A): every place its own address ties
+	 * to another product or to none. A place an editor assigned, or turned back to its original URL, keeps that; the
+	 * assignment is kept across a rescan.
+	 *
+	 * @param int    $post    The post.
+	 * @param string $url     The link.
+	 * @param int    $product The product.
+	 * @return int How many places were tied.
+	 */
+	public function tie_link( int $post, string $url, int $product ): int {
+		return $this->opportunities->tie( $post, $url, $product );
+	}
+
+	/**
+	 * Clears a post's link's assignment to a product, where it has one (Task LM6's revert).
+	 *
+	 * @param int    $post    The post.
+	 * @param string $url     The link.
+	 * @param int    $product The product.
+	 * @return int How many places were cleared.
+	 */
+	public function untie_link( int $post, string $url, int $product ): int {
+		return $this->opportunities->untie( $post, $url, $product );
+	}
+
+	/**
 	 * Moves a product to the trash (Task 26A).
 	 *
 	 * @param int $id The product.

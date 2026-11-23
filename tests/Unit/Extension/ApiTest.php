@@ -236,6 +236,34 @@ final class ApiTest extends TestCase {
 		self::assertSame( 0, $access->set_original_url( 7, $url, 'https://other.example/' ) );
 	}
 
+	/**
+	 * Task LM6: a post's link is tied to the product Lasso's stamp named where its own address ties it to another or
+	 * none; an editor's assignment and a link turned back keep theirs; untie clears only that product's assignment.
+	 */
+	public function test_a_post_s_link_is_tied_to_a_product_and_untied(): void {
+		$locations = new InMemoryLinkLocations();
+		$url       = 'https://www.amazon.com/dp/B0TEST0001';
+		$row       = static fn ( int $occurrence, int $product, int $assigned = 0, bool $original = false ): LinkLocation => ( new LinkLocation( 7, 'https://site.example/p/', 'content', $occurrence, $product, 'product', 'Text', $url, LocationKey::md5( $url ), original_url: $url ) )->keeping( $original ? 'https://www.amazon.com/dp/B0ORIGINAL' : $url, false, $assigned, $original );
+		$locations->replace_host( 7, array( $row( 1, 4 ), $row( 2, 0 ), $row( 3, 4, 9 ), $row( 4, 0, 0, true ), $row( 5, 5 ) ) );
+		$access = self::opportunities( $locations );
+
+		self::assertSame( array(), $access->ties( 7, 'https://other.example/' ) );
+		self::assertSame( 2, $access->tie( 7, $url, 5 ) );
+		self::assertSame(
+			array(
+				array( 'product' => 5, 'assigned' => 5, 'original' => false ),
+				array( 'product' => 5, 'assigned' => 5, 'original' => false ),
+				array( 'product' => 9, 'assigned' => 9, 'original' => false ),
+				array( 'product' => 0, 'assigned' => 0, 'original' => true ),
+				array( 'product' => 5, 'assigned' => 0, 'original' => false ),
+			),
+			$access->ties( 7, $url )
+		);
+		self::assertSame( 0, $access->tie( 7, $url, 5 ) );
+		self::assertSame( 2, $access->untie( 7, $url, 5 ) );
+		self::assertSame( array( 0, 0, 9, 0, 0 ), array_column( $access->ties( 7, $url ), 'assigned' ) );
+	}
+
 	public function test_a_post_s_link_is_dismissed_by_its_url(): void {
 		$locations = new InMemoryLinkLocations();
 		$url       = 'https://www.amazon.com/dp/B0TEST0001';

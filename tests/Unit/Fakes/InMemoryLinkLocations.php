@@ -126,6 +126,15 @@ final class InMemoryLinkLocations implements LinkLocationRepository {
 			return false;
 		}
 		$this->assigned[ $id ] = $product_id;
+		// The row keeps it, as the table does (a product chosen replaces a turn back to the original, Task GF6).
+		$number = 0;
+		foreach ( $this->rows as $host => $rows ) {
+			foreach ( $rows as $index => $row ) {
+				if ( ++$number === $id ) {
+					$this->rows[ $host ][ $index ] = $row->keeping( $row->original_url, $row->is_ignored, $product_id, $row->use_original && 0 === $product_id );
+				}
+			}
+		}
 		return true;
 	}
 
