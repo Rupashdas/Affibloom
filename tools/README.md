@@ -9,6 +9,8 @@ Developer scripts. They run against the Local copy of the site and are never shi
 | `local-deactivate.txt` | Plugins `reset-local.sh` switches off after an import |
 | `local-icon-links.php` | Repoints the two button icon links the snapshot's CSS breaks (Full review, YouTube; F28 D4), with `youtube-icon.svg`; `reset-local.sh` runs it after each reset, and it does nothing once the links are right |
 | `compare-migration.php` | Compares each migrated product's box with Lasso's 250 baselines: `bash tools/local-wp.sh eval-file tools/compare-migration.php [fresh]`; `fresh` makes each product from its record as a migration would, then deletes it; results in `docs/parity.md` (Task 26P) |
+| `content-fingerprint.php` | An md5 of every post's content, Elementor data, widgets and the Additional CSS: before a migration and after its rollback they must be equal (Task 29E) |
+| `rollback-drill.sh` | The rollback drill on Local: fingerprints, migrate and convert, revert, Affibloom off, Lasso on, fingerprints again; fails on a difference (Task 29E, `docs/cutover/rollback.md`) |
 | `inventory.php` | Read-only inventory of the site's Lasso usage → `tests/fixtures/inventory/*.json` (Task 4) |
 | `baselines.config.ts`, `baselines.spec.ts` | Captures how Lasso's boxes look and what they contain → `tests/fixtures/baselines/` (Task 5) |
 | `baselines-themes.spec.ts`, `baselines-themes-matrix.ts`, `lasso-capture.php` | Captures Lasso's Single box for every theme and state on Local (Lasso 370) → `tests/fixtures/baselines/themes/`, and the seven `variants/` PNGs again (Task 18D) |

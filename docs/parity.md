@@ -112,3 +112,18 @@ the boxes, the 68 pages and the 2,302 links, with only the differences above (`c
   `reverted`). Affibloom now asks the filter `affibloom_leave_link` about each link (it names no plugin); the migrator
   answers yes for a link carrying `data-lasso-box-trackable`, so Lasso's boxes are left as Lasso draws them and are not
   counted against the text's links.
+
+## Task 29E: rollback drill (2026-11-23)
+
+`tools/rollback-drill.sh` takes Lasso's fingerprint and the content's, migrates and converts, goes back as
+`docs/cutover/rollback.md` says (revert everything, Affibloom and the migrator off, Lasso on) and takes both again.
+**Both are equal** (2 min 54 s). Then `PARITY_MODE=lasso` checks the guides with Lasso alone: the boxes and the 68 pages
+pass; the links pass with two answers that are Lasso's own, where the links baseline (taken with Affibloom on) holds
+Affibloom's:
+
+| Where | Lasso alone | Affibloom |
+|---|---|---|
+| best-shoes-for-grass-volleyball, link 67 | prints the text link's href as written, a space before `?tag=` (`%20`) | the tied product's link, no space |
+| `/mizuno-neo-jump-unisex-volleyball-shoe-for-sale/` | a product Lasso deleted and repointed: 302 to the home page | 302 to the product it was repointed to |
+
+Both are Lasso's data as it was (the fingerprint is unchanged); the spec names them (`LASSO_ALONE`) for `lasso` mode.

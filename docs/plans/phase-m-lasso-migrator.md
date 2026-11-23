@@ -140,7 +140,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 29B: Parity — whole pages
 - [x] Task 29C: Parity — every link, and no call to Lasso (from Phase 7)
 - [x] Task 29D: Parity — converted, and reverted
-- [ ] Task 29E: Rollback drill
+- [x] Task 29E: Rollback drill
 - [ ] Task LM10: Finish the migration and remove the plugin
 
 ## Cross-phase notes
@@ -1546,7 +1546,7 @@ links baseline captured again. Both modes pass; `lasso` mode added for 29E (`doc
 
 ---
 
-### Task 29E: Rollback drill
+### Task 29E: Rollback drill ✅
 
 > **Changed 2026-11-17 (deviation 146):** going back now has two steps: revert the content (LM8's Revert All, or
 > `wp affibloom-lasso convert --revert`), then switch Affibloom off and Lasso on. The drill checks both: after the
@@ -1569,10 +1569,14 @@ links baseline captured again. Both modes pass; `lasso` mode added for 29E (`doc
 
 **Files:** `docs/cutover/rollback.md`; `tools/lasso-fingerprint.sh` (26A) is used, not changed.
 
-- [ ] **Step 1: The drill, written as a checklist that fails on a differing fingerprint.**
-- [ ] **Step 2: Run it on Local; fix causes.**
-- [ ] **Step 3: Run and look.** The guides against the baselines with Lasso back on; the two fingerprints equal.
-- [ ] **Step 4: Commit** — "Rehearse going back to Lasso".
+- [x] **Step 1: The drill, written as a checklist that fails on a differing fingerprint.**
+- [x] **Step 2: Run it on Local; fix causes.**
+- [x] **Step 3: Run and look.** The guides against the baselines with Lasso back on; the two fingerprints equal.
+- [x] **Step 4: Commit** — "Rehearse going back to Lasso".
+
+*Note:* the checklist is `tools/rollback-drill.sh` (+ `tools/content-fingerprint.php` for the content). Both fingerprints
+equal; `lasso` mode passes once two answers the links baseline took from Affibloom are named as Lasso's own
+(`LASSO_ALONE`, `docs/parity.md`, 29E). Local put back afterwards (4,895 places unchanged).
 
 ---
 

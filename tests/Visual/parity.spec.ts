@@ -97,6 +97,28 @@ const EXPLAINED: Record< string, string > = {
 	'best-weighted-volleyballs#3 title_link.text': DROPPED_QUOTES,
 };
 
+/**
+ * Task 29E: the links baseline was taken with Affibloom on beside Lasso (29C), and in two places Affibloom answered, not
+ * Lasso. Lasso alone (`lasso` mode, rolled back) gives its own answer there, by "guide link n" or redirected address
+ * (docs/parity.md, 29E): it prints a text link's href as written, space and all, and sends the slug of a product it
+ * deleted and repointed to the home page.
+ */
+const LASSO_ALONE: Record< string, string > = {
+	'best-shoes-for-grass-volleyball link 67':
+		'https://www.amazon.com/dp/B0DPLMZ1G1%20?tag=vbvault-20',
+	'http://volleyballvault.local/mizuno-neo-jump-unisex-volleyball-shoe-for-sale/':
+		'302 http://volleyballvault.local',
+};
+
+/**
+ * What a link or redirect should be in this mode: the baseline's, or Lasso's own answer when Lasso is alone.
+ * @param key "guide link n", or the redirected address.
+ * @param was The baseline's value.
+ */
+function expected( key: string, was: string ): string {
+	return 'lasso' === MODE ? ( LASSO_ALONE[ key ] ?? was ) : was;
+}
+
 /** The two widths each guide is compared at, as tools/baselines.spec.ts captured them. */
 const WIDTHS = [
 	[ 'desktop', 1280 ],
@@ -512,7 +534,11 @@ test.describe( `Tasks 29A-29D parity, ${ MODE }`, () => {
 				const ours = await articleLinks( page );
 				const want = baseline.links[ guide ] ?? [];
 				const found: string[] = [];
-				want.forEach( ( href, index ) => {
+				want.forEach( ( was, index ) => {
+					const href = expected(
+						`${ guide } link ${ index + 1 }`,
+						was
+					);
 					const mine = ours[ index ] ?? '(none)';
 					if ( href === mine ) {
 						return;
@@ -538,7 +564,10 @@ test.describe( `Tasks 29A-29D parity, ${ MODE }`, () => {
 		}
 		await test.step( 'own-site addresses redirect as before', async () => {
 			const found: string[] = [];
-			for ( const [ url, was ] of Object.entries( baseline.redirects ) ) {
+			for ( const [ url, stored ] of Object.entries(
+				baseline.redirects
+			) ) {
+				const was = expected( url, stored );
 				const now = await redirect( page, url );
 				if ( now !== was ) {
 					found.push(
