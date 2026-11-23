@@ -165,6 +165,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 157. Task GF6 (2026-11-23): a turned-back link is the column `use_original` (schema step 12), not `assigned_product_id = -1`, so untied-link queries stay as they are.
 - 158. Task 24G added (the user, 2026-11-23): an icon picker for badge and button texts in Customize Display and the Elementor widget; stored with single quotes.
 - 159. A Lasso box Affibloom's block cannot hold becomes [affibloom] in a Shortcode block (the user, 2026-11-23); F10 D16 changed.
+- 160. Task LM6A added (the user, 2026-11-23): the blocks Lasso's scan rewrote (GenerateBlocks `rel`, some images) fail the editor's check once LM6 removes the stamps; repaired apart from LM6.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3041,3 +3042,12 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     writes a Lasso block whose box the Product box block cannot draw, or could not hold whole (`rating="4.5"`, `pros`, a
     `type="link"`), as `<!-- wp:shortcode -->[affibloom …]<!-- /wp:shortcode -->`, which reads every attribute. Only an
     unknown product, group or table, or an empty box, still blocks. Migrator `5c7e187`.
+
+160. **Task LM6A added: the blocks Lasso's scan rewrote (the user, 2026-11-23: "I agree with your recommendation").**
+    LM6 removes the stamps as planned, but its promise that the cleaned posts open without "This block contains
+    unexpected or invalid content" does not hold: on Local 969 GenerateBlocks buttons in 92 posts (and about 30 image,
+    headline and FAQ blocks) fail the editor's check once their stamps are gone. Lasso's scan rewrote `rel` on links
+    opening in a new tab (dropping `noreferrer`, `class-lasso-cron.php` "fix tabnabbing"), and Lasso's editor script
+    makes a stamped block save as stored, so the mismatch shows only without stamps; with Lasso off it shows either
+    way. The repair changes bytes beyond the stamps and needs each block's save rules, so it is its own task (LM6A,
+    Batch M.14a); LM6 keeps "every other byte unchanged". Migrator `60ddcf4`.

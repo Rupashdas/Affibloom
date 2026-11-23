@@ -128,7 +128,8 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task LM3: Convert Lasso's blocks, keep a copy, revert
 - [x] Task LM4: Bare shortcodes, widgets and Elementor data
 - [x] Task LM5: The other display types, groups and tables
-- [ ] Task LM6: Lasso's stamps in content
+- [x] Task LM6: Lasso's stamps in content
+- [ ] Task LM6A: The blocks Lasso's scan rewrote (deviation 160)
 - [ ] Task LM7: The site's Lasso CSS rules
 - [ ] Task LM8: The conversion from the admin page
 - [ ] Task LM9: Nothing of Lasso is left
@@ -1194,7 +1195,7 @@ tables (22101, 22102) and box drew at 1280 px; reverted byte-equal.
 
 ---
 
-### Task LM6: Lasso's stamps in content
+### Task LM6: Lasso's stamps in content ✅
 
 **Feature:** F34 (R18 in part, D2, D4, D14; AC6); F21 (R3, R37)
 
@@ -1227,12 +1228,46 @@ class Affibloom's scanner skips (35A/LC2), so the links an editor kept out of La
 inline SVG); integration; F34 AC6; the former F4 AC20 as this task's E2E (a cleaned guide opens without an
 invalid-block notice).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Domain, cleaner, ties.**
-- [ ] **Step 3: The command.**
-- [ ] **Step 4: Run and look.** Three guides: the front end unchanged, the editor without notices, the index's tied
-  count unchanged.
-- [ ] **Step 5: Commit** — "Remove Lasso's stamps from content, keeping its ties".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Domain, cleaner, ties.**
+- [x] **Step 3: The command.**
+- [x] **Step 4: Run and look.** Three guides: the front end unchanged, the editor without notices, the index's tied
+  count unchanged. *(The editor's notices moved to LM6A, deviation 160.)*
+- [x] **Step 5: Commit** — "Remove Lasso's stamps from content, keeping its ties".
+
+*Note:* migrator `60ddcf4`, Affibloom `0370193` (`Api::link_ties/tie_link/untie_link`). Local: 419 posts (4,100
+`data-lasso-id`, one inside a Rank Math FAQ's JSON), all cleaned; of 340 tied links the index agreed on 326, the other
+14 (a second product of one ASIN, cloaked addresses with no product) were assigned Lasso's; after the run all 340
+resolve to Lasso's product. Revert byte-equal for all 419, ties cleared (untie before the revert's save, so the
+rescan reads each link by its address). Own copy `_affibloom_lasso_pre_stamps`, so convert and stamps revert apart.
+Front end unchanged but for the retied links' product. The editor still flags GenerateBlocks buttons once their
+stamps are gone (Lasso's rewritten `rel`): Task LM6A, deviation 160. No integration test (deviation 10).
+
+---
+
+### Task LM6A: The blocks Lasso's scan rewrote
+
+**Feature:** F34 AC6 (the editor without notices); deviation 160
+
+**Why:** Lasso's scan rewrote `rel` on links opening in a new tab (`noopener`, `noreferrer` dropped) and its editor
+script makes a stamped block save as stored. With the stamps gone (LM6), or Lasso off, the editor flags those blocks:
+on Local 969 `generateblocks/button` (`rel`) in 92 posts, 19 `core/image` (`src`), 4 `generateblocks/headline`, 2
+`rank-math/faq-block`, 8 other GenerateBlocks buttons.
+
+**Depends on:** LM6.
+
+**User action:** `wp affibloom-lasso blocks --dry-run` lists, per post, each block the editor would flag and what
+would change; without `--dry-run` it rewrites each such block's HTML as the block saves it, only the attribute that
+differs; copy and revert as LM3. Afterwards the guides open in the editor without notices.
+
+**Open before it starts:** each block's save rule (GenerateBlocks' `rel` from its attributes, the image `src`
+cases), read from the blocks' own source; whether the editor's validator is run in the browser for the dry run.
+
+- [ ] **Step 1: The rules, from each block's source.**
+- [ ] **Step 2: Failing tests, then the repair.**
+- [ ] **Step 3: Run and look.** The 92 posts' blocks valid in the editor's check (`wp.blocks.parse`), the front end
+  unchanged, revert byte-equal.
+- [ ] **Step 4: Commit** — "Repair the blocks Lasso's scan rewrote".
 
 ---
 

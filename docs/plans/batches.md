@@ -233,6 +233,7 @@ same rules apply; checks run in the migrator's folder.
 | M.12 | LM3 |
 | M.13 | LM4, LM5 |
 | M.14 | LM6 |
+| M.14a | LM6A (deviation 160) |
 | M.15 | LM7, LM8 |
 | M.16 | LM9 |
 | M.17 | 29A |
