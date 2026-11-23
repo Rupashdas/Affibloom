@@ -130,8 +130,8 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task LM5: The other display types, groups and tables
 - [x] Task LM6: Lasso's stamps in content
 - [x] Task LM6A: The blocks Lasso's scan rewrote (deviation 160)
-- [ ] Task LM7: The site's Lasso CSS rules
-- [ ] Task LM8: The conversion from the admin page
+- [x] Task LM7: The site's Lasso CSS rules
+- [x] Task LM8: The conversion from the admin page
 - [ ] Task LM9: Nothing of Lasso is left
 
 **F10 — parity, the rollback drill and removal**
@@ -1283,7 +1283,7 @@ stamps, blocks.
 
 ---
 
-### Task LM7: The site's Lasso CSS rules
+### Task LM7: The site's Lasso CSS rules ✅
 
 **Feature:** ADR-6 (C1, 2026-11-14: the site's `.lasso-*` Additional CSS rules translated at cutover)
 
@@ -1304,15 +1304,22 @@ translated CSS (a copy of the old CSS kept; `--revert`). The guides look the sam
 
 **Files:** the above; unit tests (every one of the 33 rules); integration (the `custom_css` post).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Map and translator.**
-- [ ] **Step 3: The command.**
-- [ ] **Step 4: Run and look** (a guide whose box the CSS changes, at 1280 and 375 px).
-- [ ] **Step 5: Commit** — "Translate the site's Lasso CSS rules to Affibloom's classes".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Map and translator.**
+- [x] **Step 3: The command.**
+- [x] **Step 4: Run and look** (a guide whose box the CSS changes, at 1280 and 375 px).
+- [x] **Step 5: Commit** — "Translate the site's Lasso CSS rules to Affibloom's classes".
+
+*Note:* migrator `8307d26` (and `9219702`: a full revert deletes the copy's options). The map is `docs/ui/tokens.md`'s table (`lasso-X` is `affibloom-X` where Affibloom prints
+that name, with its renames, the URL/anchor/field families, `--lasso-*` and `data-lasso-*`); an unknown name is left and
+reported. The site has 32 rules (several inside `@media`; a 33rd is commented out), all translated, every other byte
+kept; the store is the theme's `custom_css` post, its copy in `affibloom_lasso_pre_css`. Looked at on the hitters guide,
+converted (LM3) with the CSS translated: Affibloom's box gets the site's shadow and badge as production's Lasso box does
+(both use the Lab theme; the Cutter rules style no box on production), at 1280 and 375 px; reverted byte-equal.
 
 ---
 
-### Task LM8: The conversion from the admin page
+### Task LM8: The conversion from the admin page ✅
 
 **Feature:** F10 (AC28); F34 (AC7)
 
@@ -1334,11 +1341,20 @@ all behind the migration lock ("Another migration or conversion is running.").
 
 **Files:** the above; F10 AC28, F34 AC7.
 
-- [ ] **Step 1: Failing test.**
-- [ ] **Step 2: Routes and batches.**
-- [ ] **Step 3: Card, list and run.**
-- [ ] **Step 4: Run and look** (1280 and 375 px; a reload mid-run resumes).
-- [ ] **Step 5: Commit** — "Convert and revert Lasso content from the admin".
+- [x] **Step 1: Failing test.**
+- [x] **Step 2: Routes and batches.**
+- [x] **Step 3: Card, list and run.**
+- [x] **Step 4: Run and look** (1280 and 375 px; a reload mid-run resumes).
+- [x] **Step 5: Commit** — "Convert and revert Lasso content from the admin".
+
+*Note:* migrator `dde475c`. A place is `site` (widgets and the Additional CSS) or `post:<id>` (its boxes and
+Elementor data, stamps and buttons: LM3-LM6A in one request); the places are listed when a run starts and kept in
+`affibloom_lasso_content_run`, so a reload continues ("A conversion stopped at 24 of 432 places"). The routes are
+`affibloom-lasso-migrator/v1/convert` (`backup_confirmed`) and `/convert/revert` (`place`), under 26O's lock and each
+step's own lock: 409 beside a migration, a conversion or a command, 400 without the tick. Revert per place keeps a place
+changed since (the command's `--force` takes it). Local, Lasso off: 432 places converted from the page at about one a
+second, everything but the 3 blocked boxes; one post and then Revert All brought every place back byte-equal. The card
+costs the page about 1.4 s warm (3.2 s against 1.7 s). No Playwright spec run (deviation 131).
 
 ---
 

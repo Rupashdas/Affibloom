@@ -43,7 +43,7 @@ if the user wants that clean-up (N3).
   `--dry-run` it removes exactly those attributes and nothing else (every other byte equal), keeps a stored copy and a
   revision per post, records the change for History, and refuses to run before the Lasso migration has finished;
   `--revert` puts each post back byte for byte. (H3, R18, D14)
-- **AC7** (not built: decision A2) Affibloom → History → **Remove Lasso attributes** card: the dry-run figures, a backup tick
+- **AC7** (built by Task LM8 on Migrate from Lasso → Content, with the conversion, not under History; deviation 146) Affibloom → History → **Remove Lasso attributes** card: the dry-run figures, a backup tick
   ("I have a database backup from today"), **Remove** one post per request with progress, behind the migration lock;
   the cleaned posts appear in the History list as "Lasso attributes removed". (H4, R18, D14)
 - **AC8** (not built: decision A1) No other Affibloom code path writes `post_content`: a check over `src/` finds `wp_update_post` /

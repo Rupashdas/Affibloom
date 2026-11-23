@@ -81,7 +81,7 @@ Task 7 turned AC1-AC3 into `tests/E2E/acceptance/F10.spec.ts`; AC4-AC32 join it 
   same rules, or reported. (28C)
 - **AC27** (built by the migrator, Task LM5; decision A1 reversed, deviation 146) Boxes of the other display types (button, image, grid, list, gallery, table) convert to their Affibloom
   blocks, or stay and are reported while that block does not exist. (28D)
-- **AC28** (not built: decision A1) The admin page converts and reverts, one post per request, behind the same lock and a backup tick. (28E)
+- **AC28** (built by Task LM8: Migrate from Lasso → Content, one place per request; decision A1 reversed by deviation 146) The admin page converts and reverts, one post per request, behind the same lock and a backup tick. (28E)
 
 **Parity and rollback**
 
