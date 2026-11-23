@@ -1653,6 +1653,8 @@ the phase off. Phase 9 does not start before that.
 - **Local's data:** tonight's export restored first; the user's bulk delete of ~500 products kept, the 26 the guides
   show republished at the user's word; the 841 test posts deleted again.
 
+**Signed off by the user 2026-11-24** ("Sign off Phase M").
+
 ## Coverage
 
 "(Phase n)" marks an Affibloom feature outside this phase.
