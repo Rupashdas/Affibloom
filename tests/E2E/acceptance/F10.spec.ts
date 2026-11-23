@@ -123,11 +123,13 @@ test.describe( 'F10 Existing content', () => {
 	test( '@local AC6 Migrate from Lasso shows the report as cards with its CSV, and opening it writes nothing', async ( {
 		page,
 	} ) => {
+		// Posts and their meta, but core's enclosure and ping markers: WordPress's pings job deletes them while the page
+		// is open (the due-jobs fallback runs it), which is no write of the migrator's.
 		const tables = () =>
 			wp(
 				'db',
 				'query',
-				'CHECKSUM TABLE wp_posts, wp_postmeta',
+				"SELECT ( SELECT BIT_XOR( CRC32( CONCAT_WS( '|', ID, post_status, post_modified_gmt, MD5( post_content ) ) ) ) FROM wp_posts ), ( SELECT BIT_XOR( CRC32( CONCAT_WS( '|', meta_id, post_id, meta_key, MD5( meta_value ) ) ) ) FROM wp_postmeta WHERE meta_key NOT IN ( '_encloseme', '_pingme' ) )",
 				'--skip-column-names'
 			);
 		const before = tables();
@@ -136,7 +138,8 @@ test.describe( 'F10 Existing content', () => {
 		await page
 			.locator( '#toplevel_page_affibloom .wp-submenu' )
 			.getByRole( 'link', { name: 'Migrate from Lasso' } )
-			.click();
+			// The page reads the dry run, the conversion plan and LM9's check when it opens: ~6 s on Local.
+			.click( { timeout: 60_000 } );
 		await expect(
 			page.getByRole( 'heading', {
 				level: 1,
@@ -512,8 +515,9 @@ test.describe( 'F10 Existing content', () => {
 				'--format=json'
 			)
 		).toContain( '"links"' );
+		// A second run changes nothing, however many admins hold views (an earlier run may have given another its own).
 		expect( wp( 'affibloom-lasso', 'migrate', '--only=views' ) ).toMatch(
-			/^views: 4 items: 0 created, 0 updated, 4 unchanged, 0 skipped, 0 errors\.$/m
+			/^views: (\d+) items: 0 created, 0 updated, \1 unchanged, 0 skipped, 0 errors\.$/m
 		);
 	} );
 
@@ -659,6 +663,7 @@ test.describe( 'F10 Existing content', () => {
 
 	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
 
+	// Deviation 146: the conversion is the migrator's (LM3), not Affibloom's.
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {
 		const post = String(
 			boxes.find( ( b ) => b.source === 'block' )?.post_id
@@ -666,17 +671,12 @@ test.describe( 'F10 Existing content', () => {
 		const before = wp( 'post', 'get', post, '--field=post_content' );
 		expect( before ).toContain( 'wp:affiliate-plugin/lasso' );
 
-		wp( 'affibloom', 'convert-legacy-blocks', `--post=${ post }` );
+		wp( 'affibloom-lasso', 'convert', `--post=${ post }` );
 		const converted = wp( 'post', 'get', post, '--field=post_content' );
 		expect( converted ).toContain( 'wp:affibloom/product-box' );
 		expect( converted ).not.toContain( 'wp:affiliate-plugin/lasso' );
 
-		wp(
-			'affibloom',
-			'convert-legacy-blocks',
-			'--revert',
-			`--post=${ post }`
-		);
+		wp( 'affibloom-lasso', 'convert', '--revert', `--post=${ post }` );
 		expect( wp( 'post', 'get', post, '--field=post_content' ) ).toBe(
 			before
 		);
