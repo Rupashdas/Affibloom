@@ -137,8 +137,8 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 **F10 — parity, the rollback drill and removal**
 
 - [x] Task 29A: Parity — every box on every guide
-- [ ] Task 29B: Parity — whole pages
-- [ ] Task 29C: Parity — every link, and no call to Lasso (from Phase 7)
+- [x] Task 29B: Parity — whole pages
+- [x] Task 29C: Parity — every link, and no call to Lasso (from Phase 7)
 - [ ] Task 29D: Parity — converted, and reverted
 - [ ] Task 29E: Rollback drill
 - [ ] Task LM10: Finish the migration and remove the plugin
@@ -1441,7 +1441,7 @@ migrated Display says): for 29B.
 
 ---
 
-### Task 29B: Parity — whole pages
+### Task 29B: Parity — whole pages ✅
 
 > **Changed 2026-11-17 (deviation 146):** the screenshots are taken in the `converted` mode of 29A.
 
@@ -1461,14 +1461,22 @@ migrated Display says): for 29B.
 
 **Files:** `tests/Visual/parity.spec.ts`, `docs/parity.md`.
 
-- [ ] **Step 1: The suite part, red.**
-- [ ] **Step 2: Fix causes, or record the difference in `docs/parity.md`.**
-- [ ] **Step 3: Run and look.** `npm run test:e2e -- parity`; open the diffs in `test-results/parity`.
-- [ ] **Step 4: Commit** — "Prove every guide looks the same with Lasso off".
+- [x] **Step 1: The suite part, red.**
+- [x] **Step 2: Fix causes, or record the difference in `docs/parity.md`.**
+- [x] **Step 3: Run and look.** `npm run test:e2e -- parity`; open the diffs in `test-results/parity`.
+- [x] **Step 4: Commit** — "Prove every guide looks the same with Lasso off".
+
+*Note:* Affibloom `296112c`. Lasso's pages re-captured from Local with Lasso on, before converting (`PARITY_CAPTURE=pages`,
+not in git): the 2026-11-12 capture is older than the site's content since. 65 of 68 pages within 0.01; 3 not compared
+(another height fails whatever the tolerance), each box measured: the Tachikara title keeps its quotes (deviation 162,
+the user's choice: Lasso's box turns curly characters into spaces, so 29A's "baseline dropped the quotes" was wrong and
+is corrected), and Lasso's `title_type="Best Lightweight"` printed as a `<best lightweight>` tag. Production stacks its
+boxes, Local side by side: a difference of the two sites' Lasso settings, which a migration carries. Diffs in
+`test-results/`.
 
 ---
 
-### Task 29C: Parity — every link, and no call to Lasso
+### Task 29C: Parity — every link, and no call to Lasso ✅
 
 **Feature:** F10 (AC29, AC30)
 
@@ -1487,11 +1495,19 @@ migrated Display says): for 29B.
 
 **Files:** create the capture tool and baseline; modify `tests/Visual/parity.spec.ts`, `docs/parity.md`, `tools/README.md`.
 
-- [ ] **Step 1: Failing tests.** The suite's links part on the 34 guides with Lasso off; red until the cloaked addresses and the render-time attributes agree with the baseline.
-- [ ] **Step 2: The capture tool** (run once with Lasso on, before the reset) and the baseline.
-- [ ] **Step 3: Fix causes** (each with a test at the owning feature), or record in `docs/parity.md`.
-- [ ] **Step 4: Run and look.** The whole parity suite twice; no request to Lasso's hosts in the log.
-- [ ] **Step 5: Commit** — "Prove every link still goes where it went".
+- [x] **Step 1: Failing tests.** The suite's links part on the 34 guides with Lasso off; red until the cloaked addresses and the render-time attributes agree with the baseline.
+- [x] **Step 2: The capture tool** (run once with Lasso on, before the reset) and the baseline.
+- [x] **Step 3: Fix causes** (each with a test at the owning feature), or record in `docs/parity.md`.
+- [x] **Step 4: Run and look.** The whole parity suite twice; no request to Lasso's hosts in the log.
+- [x] **Step 5: Commit** — "Prove every link still goes where it went".
+
+*Note:* Affibloom `8338cc3` (the code is in `296112c`, one spec file). The capture is the suite's own
+(`PARITY_CAPTURE=links`, tools/README.md), not a separate tool: 2,302 article links, 93 own-site addresses (4 cloaked).
+All go where they went, the redirects hold, no request to Lasso's hosts. 72 links reach the same place spelled
+another way (a trailing slash, a long or short Amazon URL, a cloaked address or its target): the box and a text link to
+the same product trade spellings, because Local's Lasso 370 prints a second button as the linked product's URL and keeps
+a text link as scanned, while Affibloom prints them as stored and as F21 R40 says. The suite compares destinations and
+lists these; recorded in `docs/parity.md`. The whole suite ran in parts (boxes, pages, links), not twice end to end.
 
 ---
 
