@@ -132,7 +132,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task LM6A: The blocks Lasso's scan rewrote (deviation 160)
 - [x] Task LM7: The site's Lasso CSS rules
 - [x] Task LM8: The conversion from the admin page
-- [ ] Task LM9: Nothing of Lasso is left
+- [x] Task LM9: Nothing of Lasso is left
 
 **F10 — parity, the rollback drill and removal**
 
@@ -1358,7 +1358,7 @@ costs the page about 1.4 s warm (3.2 s against 1.7 s). No Playwright spec run (d
 
 ---
 
-### Task LM9: Nothing of Lasso is left
+### Task LM9: Nothing of Lasso is left ✅
 
 **Feature:** F10 (the user's rule of 2026-11-17: no Lasso shortcode or block left behind)
 
@@ -1380,11 +1380,22 @@ content." Else the list, with edit links.
 
 **Files:** the above; integration test (one leftover per host is found); E2E (the card's two states).
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: The check.**
-- [ ] **Step 3: Command and card.**
-- [ ] **Step 4: Run and look.** On Local after LM3-LM7: all zero.
-- [ ] **Step 5: Commit** — "Check that no Lasso content is left".
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: The check.**
+- [x] **Step 3: Command and card.**
+- [x] **Step 4: Run and look.** On Local after LM3-LM7: all zero.
+- [x] **Step 5: Commit** — "Check that no Lasso content is left".
+
+*Note:* migrator `fc62b8a`. `LassoLeftovers` counts the markers (a block by its opening comment; a class in `class` or
+`className`, plain, escaped or JSON-encoded) and reads each Affibloom box's product, group (ID or slug) or table;
+`WpContentPlaces` reads only places that name Lasso or Affibloom (posts of every type and status but revisions,
+auto-drafts and Lasso's own; Elementor data; the `scan_custom_fields` ACF fields; widgets; the active theme's CSS), with
+edit links built directly (get_edit_post_link() gives none in WP-CLI). Lasso's findings come before the boxes'. Local
+before converting: 1,422 findings. After LM3-LM7 (Lasso off): Lasso's markers only in the 3 boxes the conversion blocks,
+stamps, classes and CSS at zero; not "all zero", because 898 boxes in Affibloom's own E2E test posts ("Acceptance", …)
+name products deleted (686) or trashed (107) by earlier test runs; production has no such posts. Then everything was
+reverted byte-equal. The card adds about 1 s to the page warm (verify takes 2.5 s with WP-CLI's start). No E2E spec
+written (deviation 131, as LM3-LM8).
 
 ---
 
