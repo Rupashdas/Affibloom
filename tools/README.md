@@ -116,6 +116,20 @@ licence key in its field. So the admin screens in `tests/fixtures/baselines/admi
 "Choose a Display Type" and product search, the save toast, and "This Product Already Exists". Their wording is
 taken from Lasso's source and recorded in `docs/ui/screen-inventory.md`.
 
+## Parity baselines (Tasks 29B, 29C)
+
+The parity suite captures Lasso's side itself, from this same site with Lasso on, before it converts anything:
+
+```powershell
+$env:PARITY_CAPTURE = '1'; npx.cmd playwright test tests/Visual/parity.spec.ts --config=.local/no-login.config.ts
+```
+
+`PARITY_CAPTURE=pages` re-captures `tests/fixtures/baselines/guides/<slug>-{desktop,mobile}.png` (34 guides at 1280 and
+390 px, signed out, lazy images loaded; not in git, about 290 MB); `links` writes `tests/fixtures/baselines/links-all.json`
+(every `<a href>` of each article, and each own-site address's redirect, unfollowed); `1` does both. Without it the suite
+only compares. The 2026-11-12 capture above is older than the site's content since, so the suite's own capture is the
+one to compare with.
+
 ## Theme baselines (Task 18D)
 
 Lasso's look for the seven themes the site does not use, and for every layout, density, element, classic and

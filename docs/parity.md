@@ -23,7 +23,7 @@ difference is fixed at its cause or written here.
 
 | Difference (`fresh`) | Boxes | Why |
 |---|---|---|
-| Title: Lasso "Asics Sky Elite FF Men s Volleyball Shoes", ours "Men’s"; "Tachikara TB-18 The Setter", ours "“The Setter”" | 5 | The baseline capture dropped curly quotes and apostrophes; the stored names have them, and so does Lasso's box on the live page |
+| Title: Lasso "Asics Sky Elite FF Men s Volleyball Shoes", ours "Men’s"; "Tachikara TB-18 The Setter", ours "“The Setter”" | 5 | Lasso's box replaces every character outside plain ASCII punctuation with a space (`remove_unexpected_characters_from_post_title()`), so readers see "Men s"; Affibloom prints the stored title. Kept on purpose: the user, 2026-11-23, deviation 162 |
 | Link href: `/aircat/` against `/aircat-volleyball-serving-machine/` and three more | 4 | A product made fresh gets its name's slug; the slugs family (26G), which runs after products, gives it Lasso's address. In the default mode, after 26G, these links match |
 | Rating: Lasso 4.5 or 3.5, ours none | 3 | The Primary Rating is a custom field value, moved by the fields family (26E) after products; `fresh` does not run it |
 
@@ -53,7 +53,7 @@ site back (every conversion reverted, Lasso on).
 | Run | Differences |
 |---|---|
 | First, Local's products as adopted | 973: 728 New Window (`target`), 182 quotes and dashes, 27 `rel`, 21 links, 6 Prime and rating, 9 titles |
-| After the fix below and the restore (deviation 161) | 7, all the titles above whose quotes the baseline dropped (listed in the spec's `EXPLAINED`) |
+| After the fix below and the restore (deviation 161) | 7, the titles above, then the ratings below (listed in the spec's `EXPLAINED`) |
 
 ### Fixed at the cause
 
@@ -68,4 +68,38 @@ site back (every conversion reverted, Lasso on).
 | `rel="nofollow sponsored noopener"` on two boxes | Rank Math's link attributes (the_content 11, on `wp`) add `noopener` to an external link without it: with the adopted New Window off the box printed `nofollow sponsored`; with Lasso's New Window on it prints `nofollow noopener sponsored` and Rank Math leaves it |
 | Rating 4.5 missing on ASICS Sky Elite FF 3 (two guides) | Local only: the product had no field values while Lasso's record has a Primary Rating of 4.5; the fields family keeps Affibloom's differing values without `--update` (26E). `migrate --only=fields --update` gave it and two other products theirs |
 | Rating 3.5 on adidas Court Stabil (two guides), Lasso none | Local only: the product has a rating Lasso's record does not have, set on this copy; a migration gives a product only Lasso's field values. In the spec's `EXPLAINED` |
-| Titles: "Men’s", "“The Setter”" (5 boxes, title and link text) | The baseline's capture dropped curly quotes (above). In the spec's `EXPLAINED` |
+| Titles: "Men’s", "“The Setter”" (5 boxes, title and link text) | Lasso's box turns curly quotes and apostrophes into spaces (above); Affibloom prints the title as stored (deviation 162). In the spec's `EXPLAINED` |
+
+Production's Lasso boxes stack the image above the title with the badge at top left; Local's Lasso and Affibloom
+both draw them side by side (Local's Lasso display settings differ from production's). A migration from production
+carries production's settings, so the suite compares Local with Local.
+
+## Task 29B: every guide, whole, at 1280 and 390 px (2026-11-23)
+
+The suite captures Lasso's pages from this site with Lasso on, before converting (`PARITY_CAPTURE=pages`; the
+2026-11-12 capture was older than the site's content since), and compares each converted page signed out, lazy
+images loaded, at `maxDiffPixelRatio` 0.01 (roadmap, 2026-11-12). **65 of 68 pages match.** The other 3 are not
+compared (a page of another height fails whatever the tolerance) and are noted on the test, each box measured:
+
+| Page | Box | Why |
+|---|---|---|
+| best-weighted-volleyballs, 1280 | Tachikara TB-18 “The Setter” 431 → 469 px | The title keeps its quotes and wraps to two lines (deviation 162) |
+| best-weighted-volleyballs, 390 | the same box | The same title (deviation 162) |
+| best-volleyball-shoes-for-setters, 390 | ASICS Gel-Rocket 12 771 → 755 px | Its shortcode has `title_type="Best Lightweight"`; Lasso prints it as a `<best lightweight>` tag around the title, whose margin adds 16 px. Affibloom takes only heading tags (R79) |
+
+## Task 29C: every link, the cloaked addresses, and no call to Lasso (2026-11-23)
+
+The suite captures, with Lasso on (`PARITY_CAPTURE=links`), every `<a href>` of each guide's article and each
+own-site address's redirect (`tests/fixtures/baselines/links-all.json`: 2,302 links in 34 guides; 93 own-site
+addresses: 87 pages, 4 cloaked redirects, 2 already 404), then compares with Lasso off. **Every link goes where it went,
+the 4 cloaked addresses redirect as before, and no page requests anything from `codedrink.com`, `lasso.link` or
+`getlasso.co`** (requests are logged even where the tracker block aborts them).
+
+72 links (36 pairs) reach the same place spelled another way; the suite compares destinations (an Amazon link by its
+store, ASIN and tracking ID; a cloaked address by its redirect; any other without a trailing slash) and lists these on
+the test:
+
+| Spelling | Why |
+|---|---|
+| `/dp/ASIN?tag=` against `/dp/ASIN/?tag=` (64), a long against a short Amazon URL (4) | A product's box link and a link in the text to the same product trade spellings: Lasso 370 on Local prints a box's second button as the linked product's URL and leaves the text's link as its scan wrote it; Affibloom prints the button as stored (as Lasso did on the live site, 2026-11-12) and a tied link as its product's link (F21 R40) |
+| a cloaked address against its target (4) | The same trade for a product with cloaking on (Mizuno Wave Neo Jump): the box and the text's link swap the cloaked address and the merchant's |
