@@ -39,6 +39,9 @@ final class ProductBoxBlock implements Module {
 	/** The block's name. */
 	public const NAME = 'affibloom/product-box';
 
+	/** The shortcode that carries a drawn box past wptexturize (Task 29A). */
+	public const RAW = 'affibloom_box_html';
+
 	/**
 	 * Builds the block.
 	 *
@@ -76,10 +79,35 @@ final class ProductBoxBlock implements Module {
 	}
 
 	/**
+	 * The drawn box, back from its wrapper as it was drawn (Task 29A).
+	 *
+	 * @param mixed $attributes Unused.
+	 * @param mixed $content    The box's HTML.
+	 */
+	public static function raw( mixed $attributes, mixed $content = '' ): string {
+		unset( $attributes );
+
+		return is_string( $content ) ? $content : '';
+	}
+
+	/**
+	 * The wrapper's content is left as drawn by wptexturize, as a shortcode's output is.
+	 *
+	 * @param mixed $shortcodes The shortcodes wptexturize skips.
+	 * @return list<string>|mixed
+	 */
+	public static function untextured( mixed $shortcodes ): mixed {
+		return is_array( $shortcodes ) ? array_merge( $shortcodes, array( self::RAW ) ) : $shortcodes;
+	}
+
+	/**
 	 * Registers the block type with its server-side render.
 	 */
 	public function register_block(): void {
 		register_block_type( $this->block_dir, array( 'render_callback' => array( $this, 'render' ) ) );
+		// What carries a drawn box past wptexturize (Task 29A).
+		add_shortcode( self::RAW, array( self::class, 'raw' ) );
+		add_filter( 'no_texturize_shortcodes', array( self::class, 'untextured' ) );
 	}
 
 	/**
@@ -88,6 +116,31 @@ final class ProductBoxBlock implements Module {
 	 * @param array<string, mixed> $attributes The block's attributes.
 	 */
 	public function render( array $attributes ): string {
+		return self::past_texturize( $this->draw( $attributes ) );
+	}
+
+	/**
+	 * A drawn box as the content should carry it. Lasso's block drew its box through its shortcode, after WordPress's
+	 * wptexturize (the_content 10), so its quotes and dashes stayed as typed; a block draws at do_blocks (9), before it.
+	 * Inside the_content, with do_shortcode (11) still to come, the box goes through a shortcode wptexturize skips and
+	 * do_shortcode unwraps (Task 29A); anywhere else (the editor's preview, REST) it is returned as drawn.
+	 *
+	 * @param string $html The drawn box.
+	 */
+	public static function past_texturize( string $html ): string {
+		if ( '' === $html || ! doing_filter( 'the_content' ) || 11 > (int) has_filter( 'the_content', 'do_shortcode' ) ) {
+			return $html;
+		}
+
+		return '[' . self::RAW . ']' . $html . '[/' . self::RAW . ']';
+	}
+
+	/**
+	 * The box's HTML as drawn.
+	 *
+	 * @param array<string, mixed> $attributes The block's attributes.
+	 */
+	private function draw( array $attributes ): string {
 		$group   = is_numeric( $attributes['groupId'] ?? null ) ? $this->groups->get( (int) $attributes['groupId'] ) : null;
 		$request = DisplayRequest::from_block( $attributes, null === $group ? '' : $group->slug );
 		if ( null !== $request && ( DisplayKind::Single !== $request->kind || '' !== ( $attributes['type'] ?? '' ) ) ) {

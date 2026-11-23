@@ -166,6 +166,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 158. Task 24G added (the user, 2026-11-23): an icon picker for badge and button texts in Customize Display and the Elementor widget; stored with single quotes.
 - 159. A Lasso box Affibloom's block cannot hold becomes [affibloom] in a Shortcode block (the user, 2026-11-23); F10 D16 changed.
 - 160. Task LM6A added (the user, 2026-11-23): the blocks Lasso's scan rewrote (GenerateBlocks `rel`, some images) fail the editor's check once LM6 removes the stamps; repaired apart from LM6.
+- 161. 26B changed (the user, 2026-11-23): `--update --force` gives a product adopted from the one-time import Lasso's values, its Amazon price kept (Task 29A).
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3051,3 +3052,14 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     makes a stamped block save as stored, so the mismatch shows only without stamps; with Lasso off it shows either
     way. The repair changes bytes beyond the stamps and needs each block's save rules, so it is its own task (LM6A,
     Batch M.14a); LM6 keeps "every other byte unchanged". Migrator `60ddcf4`.
+
+161. **26B changed: `--update --force` gives an adopted product Lasso's values (the user, 2026-11-23: "Restore Lasso's
+    values").** The one-time import (deviation 87) made products with its own rules (a missing toggle read as off, so
+    New Window off; Prime from the cached row; a short URL kept), and 26A adopted them as they were; 26B never touched
+    them while Lasso's record did not change. On Local that was ~790 of 973 parity differences (29A); staging ran the same
+    import. Now the mark keeps `adopted` (a mark written before says it when the one-time import ran and did not skip the
+    record, from its `affibloom_lasso_import`, the migrator's key); with `--update --force` an adopted product takes
+    Lasso's values where they differ, Affibloom's Amazon price (`price`, `show_price`) kept, once: its mark then says it
+    is not adopted. Without `--force` nothing changes. A person's edit since the adoption cannot be told from an Amazon
+    refresh on an older mark, so `--force` takes Lasso's side there, as it does for an edit on both sides. Local: 254
+    products restored (New Window 252, Prime 30, URL 13, a few names, images, one description, disclosure, theme).

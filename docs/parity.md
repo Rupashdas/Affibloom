@@ -37,3 +37,35 @@ so Button 1, the title and the image open in the same tab with `rel="nofollow"` 
 change). Production has no one-time import: there the products family creates every product from Lasso's values, as
 the `fresh` mode shows. Whether `--force` should also put Lasso's values back on adopted products (Local, and staging if
 the one-time import ran there) is open: a change to 26B's rule, for the user to decide.
+
+**Settled 2026-11-23 (the user, deviation 161):** `--update --force` gives an adopted product Lasso's values, its Amazon
+price kept. Local ran it: 254 products restored (New Window 252, Prime 30, URL 13, a few names, images, one
+description, disclosure, theme); a second run changes nothing. Staging needs the same run (its one-time import, deviation
+87).
+
+## Task 29A: every box on every guide, Lasso off (2026-11-23)
+
+`npx playwright test tests/Visual/parity.spec.ts` migrates, converts the content (LM3-LM7), switches Lasso and the
+migrator off, and reads every box of the 34 guides in the browser against `tests/fixtures/baselines/boxes.json` (title,
+badge, description, image, rating, Prime, disclosure, each link's href, text, rel and target); afterwards it puts the
+site back (every conversion reverted, Lasso on).
+
+| Run | Differences |
+|---|---|
+| First, Local's products as adopted | 973: 728 New Window (`target`), 182 quotes and dashes, 27 `rel`, 21 links, 6 Prime and rating, 9 titles |
+| After the fix below and the restore (deviation 161) | 7, all the titles above whose quotes the baseline dropped (listed in the spec's `EXPLAINED`) |
+
+### Fixed at the cause
+
+| Difference | Cause | Fix |
+|---|---|---|
+| "Women’s", "adidas’" and other curly quotes and dashes in 182 descriptions, button texts and a badge | A block draws at `do_blocks` (the_content 9), before WordPress's `wptexturize` (10); Lasso's block drew its box through its shortcode, after it (11), so its text stayed as typed | `ProductBoxBlock::past_texturize()`: inside the_content the drawn box goes through the `[affibloom_box_html]` shortcode, which `wptexturize` skips (`no_texturize_shortcodes`) and `do_shortcode` unwraps; elsewhere it is returned as drawn. Test: `ProductBoxBlockTextureTest` |
+
+### Explained, not differences of Affibloom
+
+| Difference | Why |
+|---|---|
+| `rel="nofollow sponsored noopener"` on two boxes | Rank Math's link attributes (the_content 11, on `wp`) add `noopener` to an external link without it: with the adopted New Window off the box printed `nofollow sponsored`; with Lasso's New Window on it prints `nofollow noopener sponsored` and Rank Math leaves it |
+| Rating 4.5 missing on ASICS Sky Elite FF 3 (two guides) | Local only: the product had no field values while Lasso's record has a Primary Rating of 4.5; the fields family keeps Affibloom's differing values without `--update` (26E). `migrate --only=fields --update` gave it and two other products theirs |
+| Rating 3.5 on adidas Court Stabil (two guides), Lasso none | Local only: the product has a rating Lasso's record does not have, set on this copy; a migration gives a product only Lasso's field values. In the spec's `EXPLAINED` |
+| Titles: "Men’s", "“The Setter”" (5 boxes, title and link text) | The baseline's capture dropped curly quotes (above). In the spec's `EXPLAINED` |

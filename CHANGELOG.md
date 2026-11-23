@@ -21,6 +21,7 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 - Extension API: `link_issue()`, `import_link_issue()`, `issue_dismissed_until()` and `dismiss_issue()` (Task 26K).
 - Extension API: `table()` and `put_table()` (Task 26I).
 - Extension API: `opportunity_dismissed()` and `dismiss_opportunity()` (Task 26N).
+- Fixed: the Product box block's texts kept as typed, as Lasso's box and Affibloom's shortcode print them: WordPress's wptexturize no longer turns their quotes, apostrophes and dashes curly (Task 29A).
 
 ## [1.0.0-rc.1] - 2026-11-22
 

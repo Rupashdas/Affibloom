@@ -20,6 +20,8 @@ final class DataInventoryCoverageTest extends TestCase {
 
 	/** Names that are not stored data and that the line rules above do not recognise. */
 	private const NOT_STORED = array(
+		// A shortcode tag that carries a drawn box past wptexturize while a page renders (ProductBoxBlock, Task 29A).
+		'affibloom_box_html',
 		// Error codes in arrays of codes (ProductsController, AmazonController, OpportunitiesController).
 		'affibloom_amazon_missing',
 		'affibloom_group_in_use',
