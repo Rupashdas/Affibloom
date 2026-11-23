@@ -1635,6 +1635,24 @@ The phase is done when all of these hold on the local copy (then staging, Task 4
 Sign-off: the user has seen the migration report, the conversion report, LM9's check and the parity result, and signs
 the phase off. Phase 9 does not start before that.
 
+**Run 2026-11-24 on Local (the user: "run the exit check"), all passing:**
+
+- **Data:** `F10.spec.ts` and `LM.spec.ts` 21 passed (AC2 is the parity suite); three tests brought up to date (AC3 calls
+  the migrator's `convert`, deviation 146; AC20 takes any number of unchanged views; AC6's "writes nothing" leaves out
+  core's `_encloseme`/`_pingme`, deleted by the due-jobs fallback while the page is open) and AC6's click waits 60 s (the
+  page reads the dry run, the plan and the check: ~6 s on Local). `compare-migration.php fresh`: 250 boxes, 238 equal,
+  the 12 of `parity.md`. Lasso's fingerprint equal before and after everything.
+- **Content:** 314 items in 51 places converted with Lasso off, 0 blocked; LM9 finds nothing; reverted, 4,046 places
+  byte-equal. Parity `converted` 3/3 (a first run found no boxes at all, not reproduced by hand or on the rerun),
+  `reverted` 3/3, `lasso` 3/3; `finished` 3/3 in LM10.
+- **Rollback and removal:** the drill passes (both fingerprints equal); Finish and removal as LM10.
+- **Review:** `docs/reviews/security.md` (Phase M section): no finding; signed out 401, an Author 403. Lint, analyse and
+  unit green in both plugins (1,255; 148). The release zips (Affibloom from HEAD, the migrator from
+  `tools/build-zip.sh`) install and activate on the empty site volleyballvault-testing; without Lasso's data the page
+  says so and the menu hides it.
+- **Local's data:** tonight's export restored first; the user's bulk delete of ~500 products kept, the 26 the guides
+  show republished at the user's word; the 841 test posts deleted again.
+
 ## Coverage
 
 "(Phase n)" marks an Affibloom feature outside this phase.

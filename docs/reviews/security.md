@@ -106,3 +106,30 @@ No nonce or capability finding. Plugin Check was installed for the run and delet
   requests in a row and Local's PHP workers stopped answering (nginx "no live upstreams"); the user restarted the site.
   The walk now sends ~300 and gives each request 30 s (Local's slow worker, `environment.md`).
 - Unit: `PostTypeCapabilitiesTest`, `ElementorDisplayWidgetTest`, `WpPageFetcherTest`, `LinkIndexCronTest`.
+
+## Phase M exit check: Affibloom Lasso Migrator (2026-11-24)
+
+The same items over the migrator's entry points: four REST routes (`affibloom-lasso-migrator/v1/run`, `/convert`,
+`/convert/revert`, `/finish`), one admin-post download (`affibloom_lasso_migration_report`), the WP-CLI commands
+(`migrate`, `convert`, `stamps`, `blocks`, `css`, `verify`, `finish`: shell access only) and its writes. No finding.
+
+1. **Capability and nonce.** Each route's `permission_callback` asks Affibloom's settings capability
+   (`Api::capability()`); the REST nonce guards them. The download checks the capability and `check_admin_referer()`.
+   Checked on Local: signed out, each route answers 401; as an Author, 403 (`rest_do_request`); the download has no
+   `nopriv` handler.
+2. **Public routes.** None.
+3. **Input.** `backup_confirmed`, `confirmed` and `update` are booleans; `place` matches `^(site|post:\d+)$`. Nothing
+   else comes from a request: every other input is Lasso's own data, read from the database.
+4. **Output.** The templates escape every value (phpcs' escaping rules pass with no `phpcs:ignore` for them); the
+   report CSV is streamed to `php://output`.
+5. **SQL.** Every query with a value is `prepare()`d; the interpolated parts are placeholder lists or fragments
+   already prepared; the unprepared ones read Lasso's tables by `$wpdb->prefix` with no input, and the one table name
+   from `SHOW TABLES` is backquoted.
+6. **Stored HTML.** The conversion writes Affibloom's block comments (`json_encode`d attributes) and `[affibloom]`
+   shortcodes in place of Lasso's, keeps a copy of every place it writes and reverts byte-equal; only a user with the
+   capability, or WP-CLI, runs it.
+7. **Outbound requests.** None (no `wp_remote_*`).
+8. **Secrets.** Lasso's Amazon credentials and licence are never read (26L, 25B: "(secret: not read)").
+9. **Cron jobs.** None; every run is a request or a command, under a lock.
+10. **Files.** The report is streamed; `--report=<file.csv>` writes only the file named on the command line.
+11. **Without the capability, 403.** Item 1.
