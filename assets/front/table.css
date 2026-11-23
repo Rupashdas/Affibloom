@@ -129,7 +129,7 @@ div.affibloom-display-table .description-content ul li{text-align:left}
 .table-vertical-desktop:not(.table-vertical-scroll) .affibloom-table td{overflow-wrap:anywhere}
 .table-vertical-desktop:not(.table-vertical-scroll) .affibloom-table .btn{white-space:normal !important;max-width:100%}
 .affibloom-display-table .table-vertical table td{padding:0 !important}
-.affibloom-display-table .table-vertical .cell{height:100%}
+.affibloom-display-table .table-vertical .cell{height:100%;box-sizing:border-box}
 .affibloom-display-table .table-vertical .cell .cell-content{padding:6px 15px}
 .affibloom-display-table .table-vertical table tr td .cell.has-badge-text{border-left:2px solid var(--affibloom-main);border-right:2px solid var(--affibloom-main)}
 .affibloom-display-table .table-vertical table tr td:first-child .cell{border-left:0}
