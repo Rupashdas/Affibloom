@@ -38,13 +38,18 @@ type Box = {
 /**
  * Task 29D (F10 AC31): `converted` (the default) checks the site converted, Lasso and the migrator off; `reverted`
  * converts, reverts every place, switches Lasso back on and checks the same things: Lasso's own boxes, pages and links,
- * exactly. `lasso` changes nothing and checks the site as it is with Lasso on (Task 29E's rollback, Affibloom off). The
- * explanations below are for the converted site only.
+ * exactly. `lasso` changes nothing and checks the site as it is with Lasso on (Task 29E's rollback, Affibloom off).
+ * `finished` changes nothing either and checks the site Affibloom alone runs after Task LM10's Finish, the migrator
+ * deleted, as `converted`. The explanations below are for the site Affibloom draws (`converted`, `finished`) only.
  */
-const MODE = [ 'reverted', 'lasso' ].includes( process.env.PARITY_MODE ?? '' )
-	? ( process.env.PARITY_MODE as 'reverted' | 'lasso' )
+const MODE = [ 'reverted', 'lasso', 'finished' ].includes(
+	process.env.PARITY_MODE ?? ''
+)
+	? ( process.env.PARITY_MODE as 'reverted' | 'lasso' | 'finished' )
 	: 'converted';
-const PREFIX = 'converted' === MODE ? 'affibloom' : 'lasso';
+/** Whether Affibloom draws the boxes in this mode. */
+const AFFIBLOOM = 'converted' === MODE || 'finished' === MODE;
+const PREFIX = AFFIBLOOM ? 'affibloom' : 'lasso';
 
 const baselines: Box[] = JSON.parse(
 	readFileSync(
@@ -340,7 +345,7 @@ function differences(
 		if (
 			plain( lasso ) !== plain( mine ) &&
 			! (
-				'converted' === MODE &&
+				AFFIBLOOM &&
 				EXPLAINED[ `${ want.guide }#${ want.index } ${ field }` ]
 			)
 		) {
@@ -377,12 +382,12 @@ function differences(
 	return out;
 }
 
-test.describe( `Tasks 29A-29D parity, ${ MODE }`, () => {
+test.describe( `Tasks 29A-29D and LM10 parity, ${ MODE }`, () => {
 	test.describe.configure( { mode: 'serial' } );
 
 	test.beforeAll( async ( { browser } ) => {
 		test.setTimeout( 1_800_000 );
-		if ( 'lasso' === MODE ) {
+		if ( 'lasso' === MODE || 'finished' === MODE ) {
 			return; // The site as it is: nothing migrated, converted or reverted.
 		}
 		wp( 'plugin', 'activate', 'affibloom-lasso-migrator' );
@@ -483,8 +488,7 @@ test.describe( `Tasks 29A-29D parity, ${ MODE }`, () => {
 			for ( const guide of guides ) {
 				await test.step( `${ guide } ${ name }`, async () => {
 					const explained =
-						'converted' === MODE &&
-						EXPLAINED_PAGES[ `${ guide }-${ name }` ];
+						AFFIBLOOM && EXPLAINED_PAGES[ `${ guide }-${ name }` ];
 					if ( explained ) {
 						test.info().annotations.push( {
 							type: 'explained',

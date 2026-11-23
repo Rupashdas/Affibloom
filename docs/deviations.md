@@ -168,6 +168,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 160. Task LM6A added (the user, 2026-11-23): the blocks Lasso's scan rewrote (GenerateBlocks `rel`, some images) fail the editor's check once LM6 removes the stamps; repaired apart from LM6.
 - 161. 26B changed (the user, 2026-11-23): `--update --force` gives a product adopted from the one-time import Lasso's values, its Amazon price kept (Task 29A).
 - 162. Affibloom's box prints the stored title, not Lasso's cleaned one ("Men’s", not "Men s"; the user, 2026-11-23; Tasks 29A, 29B).
+- 163. Task LM10 (the user, 2026-11-23): no tag for the migrator's release, as 154; Finish keeps one mark, `affibloom_lasso_finished`, until uninstall, so nothing runs again.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3071,3 +3072,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     "Mizuno Wave Momentum Men s Volleyball Shoes", "Tachikara TB-18 The Setter". Affibloom prints "Men’s" and
     "“The Setter”". 5 boxes on 3 guides differ (Task 29A's values, 29B's pages); written in `docs/parity.md`, listed in
     the parity suite's `EXPLAINED` and `EXPLAINED_PAGES`.
+
+163. **Task LM10: no release tag, and Finish keeps one mark (the user, 2026-11-23: "Go, as recommended").** The plan's
+    Step 4 tags the migrator's release; as Phase 8 had none (deviation 154), none is made. Finish erases every option and
+    meta the migrator wrote but sets `affibloom_lasso_finished`: without the ID map a second migration would duplicate
+    every product, so once finished the page only says to delete the plugin and the routes and commands (but `finish`)
+    are not started. Uninstall removes the mark too. On Local the plugin is removed with
+    `wp plugin uninstall affibloom-lasso-migrator --deactivate --skip-delete`, as deleting it would delete its repository.

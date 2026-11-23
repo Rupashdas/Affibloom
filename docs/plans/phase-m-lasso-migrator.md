@@ -141,7 +141,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 29C: Parity — every link, and no call to Lasso (from Phase 7)
 - [x] Task 29D: Parity — converted, and reverted
 - [x] Task 29E: Rollback drill
-- [ ] Task LM10: Finish the migration and remove the plugin
+- [x] Task LM10: Finish the migration and remove the plugin
 
 ## Cross-phase notes
 
@@ -1580,7 +1580,7 @@ equal; `lasso` mode passes once two answers the links baseline took from Affiblo
 
 ---
 
-### Task LM10: Finish the migration and remove the plugin
+### Task LM10: Finish the migration and remove the plugin ✅
 
 **Feature:** F10 (the user's rule of 2026-11-17: the helper can be safely removed)
 
@@ -1604,10 +1604,16 @@ Uninstall removes anything left. Lasso's own data is not touched (Task 42 handle
 **Files:** the above; integration test (nothing of the migrator left in options or meta); E2E: after Finish and
 deletion, `PARITY_MODE=converted` passes with Affibloom alone.
 
-- [ ] **Step 1: Failing tests.**
-- [ ] **Step 2: Finish and uninstall.**
-- [ ] **Step 3: Run and look.** On Local: Finish, delete the plugin, three guides and the Dashboard at 1280 px.
-- [ ] **Step 4: Commit** — "Finish the migration and leave nothing behind"; tag the migrator's release.
+- [x] **Step 1: Failing tests.**
+- [x] **Step 2: Finish and uninstall.**
+- [x] **Step 3: Run and look.** On Local: Finish, delete the plugin, three guides and the Dashboard at 1280 px.
+- [x] **Step 4: Commit** — "Finish the migration and leave nothing behind"; tag the migrator's release.
+
+*Note:* the integration test is a unit drift test (`WpMigratorDataTest`: every stored name in the code is erased; the
+migrator has no WordPress test suite) and a look at the database on Local. Finish keeps `affibloom_lasso_finished` until
+uninstall, so nothing runs again; no tag (deviation 163). On Local: export, convert, 841 test posts deleted at the user's
+word (the check's 901 findings), Finish from the page, `wp plugin uninstall … --skip-delete`: no option or meta of the
+migrator left; `PARITY_MODE=finished` (new) passes 3 of 3 with Affibloom alone.
 
 ---
 

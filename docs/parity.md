@@ -127,3 +127,9 @@ Affibloom's:
 | `/mizuno-neo-jump-unisex-volleyball-shoe-for-sale/` | a product Lasso deleted and repointed: 302 to the home page | 302 to the product it was repointed to |
 
 Both are Lasso's data as it was (the fingerprint is unchanged); the spec names them (`LASSO_ALONE`) for `lasso` mode.
+
+## Task LM10: Affibloom alone, after Finish (2026-11-24)
+
+On Local the migration was finished from the page and the migrator uninstalled; `PARITY_MODE=finished` checks the site as
+it is, without setting anything up or putting anything back. **The boxes, the 68 pages and the 2,302 links pass**, with
+the converted site's differences above.
