@@ -136,7 +136,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 
 **F10 — parity, the rollback drill and removal**
 
-- [ ] Task 29A: Parity — every box on every guide
+- [x] Task 29A: Parity — every box on every guide
 - [ ] Task 29B: Parity — whole pages
 - [ ] Task 29C: Parity — every link, and no call to Lasso (from Phase 7)
 - [ ] Task 29D: Parity — converted, and reverted
@@ -1401,7 +1401,7 @@ written (deviation 131, as LM3-LM8).
 
 ## Tasks: F10 — parity, the rollback drill and removal
 
-### Task 29A: Parity — every box on every guide
+### Task 29A: Parity — every box on every guide ✅
 
 > **Changed 2026-11-17 (deviation 146):** compares Lasso's baselines with the site after the migration **and the content
 > conversion** (LM3-LM7), with Lasso off and this plugin deactivated, so Affibloom alone draws every box. Depends on
@@ -1425,10 +1425,19 @@ each button's href, text, rel, target), in page order.
 
 **Files:** `tests/Visual/parity.spec.ts` (the values part), `docs/parity.md`.
 
-- [ ] **Step 1: The suite, red.** `tests/Visual/parity.spec.ts` (values part): reset Local, migrate, Lasso off, the 34 guides against `baselines/boxes.json`.
-- [ ] **Step 2: Fix causes.** A test for each cause, or the difference written in `docs/parity.md`.
-- [ ] **Step 3: Run and look.** `npm run test:e2e -- parity`: all 34 guides pass; open one guide beside its baseline.
-- [ ] **Step 4: Commit** — "Prove every box matches Lasso with Lasso off".
+- [x] **Step 1: The suite, red.** `tests/Visual/parity.spec.ts` (values part): reset Local, migrate, Lasso off, the 34 guides against `baselines/boxes.json`.
+- [x] **Step 2: Fix causes.** A test for each cause, or the difference written in `docs/parity.md`.
+- [x] **Step 3: Run and look.** `npm run test:e2e -- parity`: all 34 guides pass; open one guide beside its baseline.
+- [x] **Step 4: Commit** — "Prove every box matches Lasso with Lasso off".
+
+*Note:* Affibloom `5cb2cd8`, migrator `5df30fb`. No reset (deviation 129): the suite migrates, converts (LM3-LM7), turns
+Lasso and the migrator off, reads every box in the browser, and puts the site back. One test with a soft check per guide.
+First run: 973 differences. Fixed at the cause: the block's texts were texturized (182; `past_texturize()`, test).
+Local's adopted products (~790: New Window, Prime, links, `rel`): deviation 161, `--update --force` restored 254;
+Sky Elite's rating: `--only=fields --update`. Left, in `EXPLAINED` and `docs/parity.md`: 5 titles whose quotes the
+baseline dropped, and Court Stabil's Local-only rating. Then 34/34 pass (5.2 min). Beside production the values match,
+but the layout does not (Lasso's box stacks the image above the title, badge top left; Affibloom's is side by side, as its
+migrated Display says): for 29B.
 
 ---
 
