@@ -59,6 +59,32 @@ final class LinkAttributesFilterTest extends TestCase {
 	}
 
 	/**
+	 * Task 29D: a link a helper names through `affibloom_leave_link` (another plugin's display) is left as drawn and not
+	 * counted, so the same URL in the text keeps its own row.
+	 */
+	public function test_a_link_a_helper_names_is_left_as_drawn_and_not_counted(): void {
+		\Brain\Monkey\Filters\expectApplied( 'affibloom_leave_link' )->andReturnUsing( static fn ( bool $leave, array $names ): bool => in_array( 'data-other-display', $names, true ) );
+		Functions\when( 'get_the_ID' )->justReturn( 5 );
+		Functions\when( 'home_url' )->justReturn( 'https://site.test' );
+		Functions\when( 'wp_has_noncharacters' )->justReturn( false );
+		Functions\when( 'esc_attr' )->alias( 'htmlspecialchars' );
+		Functions\when( 'wp_kses_uri_attributes' )->justReturn( array( 'href', 'src' ) );
+		Functions\when( 'esc_url' )->returnArg();
+		$products = new InMemoryProductRepository();
+		$shoe     = $products->save( Product::draft( 'Shoe', AffiliateUrl::from_string( 'https://www.example.com/shoe' ), Settings::from_array( array() ) ) );
+		$url      = 'https://old.example/shoe';
+		$rows     = new InMemoryLinkLocations();
+		$rows->replace_host( 5, array( self::row( 'content', $url, 1, (int) $shoe->id ) ) );
+		$filter = new LinkAttributesFilter( new RenderedLinks( $rows, $products ), new PublicLinks( new InMemorySettingsRepository() ) );
+		$other  = '<a class="other-button" href="' . $url . '" target="_blank" rel="nofollow noopener" data-other-display="true">Buy</a>';
+
+		$html = $filter->content( '<div class="other-box">' . $other . '</div><p><a href="' . $url . '">In text</a></p>' );
+
+		self::assertStringContainsString( $other, $html, "The other display's link is left as drawn." );
+		self::assertMatchesRegularExpression( '#<a [^>]*data-affibloom-id="' . $shoe->id . '"[^>]*>In text</a>#', $html, 'The text link keeps occurrence 1.' );
+	}
+
+	/**
 	 * A link turned back to its original URL (F22 N3, E17; Task GF6) prints that URL and none of the product's marks.
 	 */
 	public function test_a_link_turned_back_prints_its_original_url(): void {

@@ -139,7 +139,7 @@ Decided 2026-11-12; reasons in `docs/decisions/task-6-decisions.md` in the plugi
 - [x] Task 29A: Parity — every box on every guide
 - [x] Task 29B: Parity — whole pages
 - [x] Task 29C: Parity — every link, and no call to Lasso (from Phase 7)
-- [ ] Task 29D: Parity — converted, and reverted
+- [x] Task 29D: Parity — converted, and reverted
 - [ ] Task 29E: Rollback drill
 - [ ] Task LM10: Finish the migration and remove the plugin
 
@@ -1508,10 +1508,12 @@ another way (a trailing slash, a long or short Amazon URL, a cloaked address or 
 the same product trade spellings, because Local's Lasso 370 prints a second button as the linked product's URL and keeps
 a text link as scanned, while Affibloom prints them as stored and as F21 R40 says. The suite compares destinations and
 lists these; recorded in `docs/parity.md`. The whole suite ran in parts (boxes, pages, links), not twice end to end.
+*Corrected in 29D:* the 72 were Affibloom rewriting Lasso's box links during the capture (both plugins on); none
+remain.
 
 ---
 
-### Task 29D: Parity — converted, and reverted
+### Task 29D: Parity — converted, and reverted ✅
 
 > **Restored 2026-11-17 (deviation 146):** the conversion is built again (LM3-LM7), so its proof is too.
 
@@ -1533,10 +1535,14 @@ the baselines, or only the differences accepted in `docs/parity.md`.
 
 **Files:** `tests/Visual/parity.spec.ts`, `docs/parity.md`.
 
-- [ ] **Step 1: The two modes, red.**
-- [ ] **Step 2: Fix causes, or record the difference in `docs/parity.md`.**
-- [ ] **Step 3: Run and look.** Both modes pass on Local.
-- [ ] **Step 4: Commit** — "Prove parity survives conversion and revert".
+- [x] **Step 1: The two modes, red.**
+- [x] **Step 2: Fix causes, or record the difference in `docs/parity.md`.**
+- [x] **Step 3: Run and look.** Both modes pass on Local.
+- [x] **Step 4: Commit** — "Prove parity survives conversion and revert".
+
+*Note:* the `reverted` mode first showed 143 differences: with both plugins on, Affibloom rewrote the links of Lasso's
+boxes. Fixed by the generic filter `affibloom_leave_link`, answered by the migrator for `data-lasso-box-trackable`; the
+links baseline captured again. Both modes pass; `lasso` mode added for 29E (`docs/parity.md`, 29D).
 
 ---
 

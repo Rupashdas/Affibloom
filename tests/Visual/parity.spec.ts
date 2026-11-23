@@ -35,6 +35,17 @@ type Box = {
 	image_link: Link | null;
 };
 
+/**
+ * Task 29D (F10 AC31): `converted` (the default) checks the site converted, Lasso and the migrator off; `reverted`
+ * converts, reverts every place, switches Lasso back on and checks the same things: Lasso's own boxes, pages and links,
+ * exactly. `lasso` changes nothing and checks the site as it is with Lasso on (Task 29E's rollback, Affibloom off). The
+ * explanations below are for the converted site only.
+ */
+const MODE = [ 'reverted', 'lasso' ].includes( process.env.PARITY_MODE ?? '' )
+	? ( process.env.PARITY_MODE as 'reverted' | 'lasso' )
+	: 'converted';
+const PREFIX = 'converted' === MODE ? 'affibloom' : 'lasso';
+
 const baselines: Box[] = JSON.parse(
 	readFileSync(
 		path.join( __dirname, '../fixtures/baselines/boxes.json' ),
@@ -48,6 +59,14 @@ const guides = [ ...new Set( baselines.map( ( box ) => box.guide ) ) ];
  */
 const DROPPED_QUOTES =
 	"Lasso's box replaces curly quotes and apostrophes with spaces (remove_unexpected_characters_from_post_title); Affibloom prints the stored title (the user, 2026-11-23; docs/parity.md)";
+/** Puts every converted place back, in the conversion's reverse order, and switches Lasso on again. */
+function revertAll(): void {
+	for ( const step of [ 'blocks', 'stamps', 'convert', 'css' ] ) {
+		wp( 'affibloom-lasso', step, '--revert' );
+	}
+	wp( 'plugin', 'activate', 'lasso' );
+}
+
 /**
  * Pages not compared, each for a box drawn differently on purpose: it changes the page's height, and a screenshot of
  * another height fails whatever the tolerance. Each is noted on the test (an annotation) and in docs/parity.md, with
@@ -226,15 +245,15 @@ const plain = ( text: string | null | undefined ): string =>
 	( text ?? '' ).replace( /\s+/g, ' ' ).trim();
 
 /**
- * The values every Affibloom box in the guide's content shows, in page order, in the baseline's keys.
+ * The values every box in the guide's content shows, in page order, in the baseline's keys: Affibloom's, or Lasso's
+ * once reverted (the same markup under `lasso-` names).
  * @param page The guide's page.
  */
 async function boxes(
 	page: Page
 ): Promise< Omit< Box, 'guide' | 'index' | 'lasso_id' >[] > {
-	return page
-		.locator( '.entry-content .affibloom-display' )
-		.evaluateAll( ( found ) =>
+	return page.locator( `.entry-content .${ PREFIX }-display` ).evaluateAll(
+		( found, p ) =>
 			found.map( ( box ) => {
 				const text = ( selector: string ): string =>
 					( box.querySelector( selector )?.textContent ?? '' )
@@ -255,30 +274,31 @@ async function boxes(
 							}
 						: null;
 				};
-				const stars =
-					box.querySelector< HTMLElement >( '.affibloom-stars' );
+				const stars = box.querySelector< HTMLElement >(
+					`.${ p }-stars`
+				);
 				const rating = /--rating:\s*([\d.]+)/.exec(
 					stars?.getAttribute( 'style' ) ?? ''
 				);
 				return {
-					title: text( '.affibloom-title' ),
-					badge: text( '.affibloom-badge-text' ),
-					description: text( '.affibloom-description' ),
+					title: text( `.${ p }-title` ),
+					badge: text( `.${ p }-badge-text` ),
+					description: text( `.${ p }-description` ),
 					image:
 						box
-							.querySelector( 'a.affibloom-image img' )
+							.querySelector( `a.${ p }-image img` )
 							?.getAttribute( 'src' ) ?? '',
 					rating: rating ? rating[ 1 ] : '',
-					prime:
-						null !== box.querySelector( '.affibloom-amazon-prime' ),
-					disclosure: text( '.affibloom-disclosure' ),
-					button1: link( 'affibloom-button-1' ),
-					button2: link( 'affibloom-button-2' ),
-					title_link: link( 'affibloom-title' ),
-					image_link: link( 'affibloom-image' ),
+					prime: null !== box.querySelector( `.${ p }-amazon-prime` ),
+					disclosure: text( `.${ p }-disclosure` ),
+					button1: link( `${ p }-button-1` ),
+					button2: link( `${ p }-button-2` ),
+					title_link: link( `${ p }-title` ),
+					image_link: link( `${ p }-image` ),
 				};
-			} )
-		);
+			} ),
+		PREFIX
+	);
 }
 
 /**
@@ -297,7 +317,10 @@ function differences(
 	const compare = ( field: string, lasso: string, mine: string ) => {
 		if (
 			plain( lasso ) !== plain( mine ) &&
-			! EXPLAINED[ `${ want.guide }#${ want.index } ${ field }` ]
+			! (
+				'converted' === MODE &&
+				EXPLAINED[ `${ want.guide }#${ want.index } ${ field }` ]
+			)
 		) {
 			out.push(
 				`${ field }: Lasso "${ plain( lasso ) }" / ours "${ plain( mine ) }"`
@@ -332,11 +355,14 @@ function differences(
 	return out;
 }
 
-test.describe( 'Task 29A parity: every box on every guide, with Lasso off', () => {
+test.describe( `Tasks 29A-29D parity, ${ MODE }`, () => {
 	test.describe.configure( { mode: 'serial' } );
 
 	test.beforeAll( async ( { browser } ) => {
 		test.setTimeout( 1_800_000 );
+		if ( 'lasso' === MODE ) {
+			return; // The site as it is: nothing migrated, converted or reverted.
+		}
 		wp( 'plugin', 'activate', 'affibloom-lasso-migrator' );
 		wp( 'affibloom-lasso', 'migrate' );
 		// Task 29B: Lasso's pages, from this site as it is now, before anything is converted.
@@ -380,16 +406,19 @@ test.describe( 'Task 29A parity: every box on every guide, with Lasso off', () =
 		for ( const step of [ 'convert', 'stamps', 'blocks', 'css' ] ) {
 			wp( 'affibloom-lasso', step );
 		}
+		if ( 'reverted' === MODE ) {
+			revertAll();
+			return;
+		}
 		wp( 'plugin', 'deactivate', 'affibloom-lasso-migrator' );
 	} );
 
 	test.afterAll( async () => {
 		test.setTimeout( 600_000 );
-		wp( 'plugin', 'activate', 'affibloom-lasso-migrator' );
-		for ( const step of [ 'blocks', 'stamps', 'convert', 'css' ] ) {
-			wp( 'affibloom-lasso', step, '--revert' );
+		if ( 'converted' === MODE ) {
+			wp( 'plugin', 'activate', 'affibloom-lasso-migrator' );
+			revertAll();
 		}
-		wp( 'plugin', 'activate', 'lasso' );
 	} );
 
 	// One test with a soft check per guide, so every guide reports (in serial mode a failed test skips the rest).
@@ -431,7 +460,9 @@ test.describe( 'Task 29A parity: every box on every guide, with Lasso off', () =
 			const { context, page } = await reader( browser, width );
 			for ( const guide of guides ) {
 				await test.step( `${ guide } ${ name }`, async () => {
-					const explained = EXPLAINED_PAGES[ `${ guide }-${ name }` ];
+					const explained =
+						'converted' === MODE &&
+						EXPLAINED_PAGES[ `${ guide }-${ name }` ];
 					if ( explained ) {
 						test.info().annotations.push( {
 							type: 'explained',

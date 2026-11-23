@@ -95,11 +95,20 @@ addresses: 87 pages, 4 cloaked redirects, 2 already 404), then compares with Las
 the 4 cloaked addresses redirect as before, and no page requests anything from `codedrink.com`, `lasso.link` or
 `getlasso.co`** (requests are logged even where the tracker block aborts them).
 
-72 links (36 pairs) reach the same place spelled another way; the suite compares destinations (an Amazon link by its
-store, ASIN and tracking ID; a cloaked address by its redirect; any other without a trailing slash) and lists these on
-the test:
+The suite also compares destinations (an Amazon link by its store, ASIN and tracking ID; a cloaked address by its
+redirect; any other without a trailing slash) and notes on the test any link that reaches the same place spelled
+another way. **None does since Task 29D.** The 72 first noted (36 pairs: `/dp/ASIN?tag=` against `/dp/ASIN/?tag=`, long
+against short Amazon URLs, a cloaked address against its target) were not Lasso's: the capture ran with Affibloom on
+beside Lasso, and Affibloom's render-time link rules rewrote the links Lasso's boxes draw. 29D fixed that and the
+baseline was captured again.
 
-| Spelling | Why |
-|---|---|
-| `/dp/ASIN?tag=` against `/dp/ASIN/?tag=` (64), a long against a short Amazon URL (4) | A product's box link and a link in the text to the same product trade spellings: Lasso 370 on Local prints a box's second button as the linked product's URL and leaves the text's link as its scan wrote it; Affibloom prints the button as stored (as Lasso did on the live site, 2026-11-12) and a tied link as its product's link (F21 R40) |
-| a cloaked address against its target (4) | The same trade for a product with cloaking on (Mizuno Wave Neo Jump): the box and the text's link swap the cloaked address and the merchant's |
+## Task 29D: parity survives conversion and revert (2026-11-23)
+
+`PARITY_MODE` switches the suite: `converted` (migrate, convert, Lasso and the migrator off) and `reverted` (the same
+conversion, then every place reverted in reverse order and Lasso on again, Affibloom still on). **Both pass on Local**:
+the boxes, the 68 pages and the 2,302 links, with only the differences above (`converted`) and none at all (`reverted`).
+
+- **Fixed at the cause:** with both plugins on, Affibloom rewrote the links of Lasso's own boxes (143 differences in
+  `reverted`). Affibloom now asks the filter `affibloom_leave_link` about each link (it names no plugin); the migrator
+  answers yes for a link carrying `data-lasso-box-trackable`, so Lasso's boxes are left as Lasso draws them and are not
+  counted against the text's links.

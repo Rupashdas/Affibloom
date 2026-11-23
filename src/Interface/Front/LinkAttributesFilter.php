@@ -22,7 +22,8 @@ use WP_HTML_Tag_Processor;
  * writes nothing (D13-D15; Task 35H). Each anchor is matched to its index row as the scan keyed it (the host, the
  * source, the URL and its occurrence among the same URL's links, D4): a tied one takes its product's public link, New
  * Window, rel and the click attributes; any other `_blank` link gets noopener. Affibloom's own displays (anchors that
- * already carry `data-affibloom-id`) are left as they are drawn.
+ * already carry `data-affibloom-id`), and the links a helper names through the filter `affibloom_leave_link` (another
+ * plugin's display, Task 29D), are left as they are drawn.
  *
  * Where: `the_content` after blocks and shortcodes (20), which also prints Thrive's copy and the recipes and Create
  * cards a post shows; Elementor's content; the chosen ACF fields (`acf/format_value`, source `acf:<meta key>`);
@@ -108,7 +109,9 @@ final class LinkAttributesFilter implements Module {
 		$moved  = false;
 		while ( $tags->next_tag( array( 'tag_name' => 'a' ) ) ) {
 			$href = $tags->get_attribute( 'href' );
-			if ( ! is_string( $href ) || null !== $tags->get_attribute( 'data-affibloom-id' ) ) {
+			// Displays draw their own links: Affibloom's (they carry data-affibloom-id), and any a helper names through
+			// `affibloom_leave_link` (Task 29D). They are left as drawn and not counted, so the text keeps its rows.
+			if ( ! is_string( $href ) || null !== $tags->get_attribute( 'data-affibloom-id' ) || self::left( $tags ) ) {
 				continue;
 			}
 			$md5  = LocationKey::md5( $href );
@@ -148,6 +151,16 @@ final class LinkAttributesFilter implements Module {
 		}
 
 		return $moved ? $tags->get_updated_html() : $html;
+	}
+
+	/**
+	 * Whether a helper wants a link left as drawn: the filter `affibloom_leave_link` gets false and the link's attribute
+	 * names (Task 29D: the migrator names its source plugin's display links while that plugin is on).
+	 *
+	 * @param WP_HTML_Tag_Processor $tags The processor, at the link.
+	 */
+	private static function left( WP_HTML_Tag_Processor $tags ): bool {
+		return true === apply_filters( 'affibloom_leave_link', false, $tags->get_attribute_names_with_prefix( '' ) ?? array() );
 	}
 
 	/**

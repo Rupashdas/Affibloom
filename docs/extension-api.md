@@ -97,5 +97,6 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | Filter | Use |
 |---|---|
 | `affibloom_setup_wanted` | Return `false` so the setup wizard does not open by itself, for example on a site whose data the helper brings in. |
+| `affibloom_leave_link` | Gets `false` and a link's attribute names; return `true` to have Affibloom's render-time link rules leave that link as drawn and not count it, for example a link another plugin's display draws while that plugin is on (Task 29D). |
 
 The other hooks Affibloom fires are listed in [`developer.md`](developer.md), section 3.
