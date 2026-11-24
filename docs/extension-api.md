@@ -54,9 +54,9 @@ plugin's header, so WordPress will not activate the helper without Affibloom.
 | `save_view( int $user, array $view ): void` | 26M | Saves a view in the shape `views()` gives, replacing the one with its ID; a filter value Affibloom does not know falls back to its default. Throws `InvalidArgumentException` when the name or the count (30) is refused. |
 | `tour_done(): bool` | 26M | Whether the Dashboard's first-visit tour was ended for every user. |
 | `finish_tour(): void` | 26M | Ends the Dashboard's first-visit tour for every user, as its Skip does. |
-| `product_address( int $id ): ?array` | 26G | A product's cloaked address `{ slug, old_slugs, cloak }`, or null. |
+| `product_address( int $id ): ?array` | 26G (`retired` 2026-11-24) | A published or retired product's cloaked address `{ slug, old_slugs, cloak, retired }`, or null: a retired product's address still answers. |
 | `product_at_slug( string $slug ): int` | 26G | The product that answers at a slug, as its slug or an old one; 0 when none. |
-| `set_product_address( int $id, string $slug, array $old_slugs, bool $cloak ): void` | 26G | Sets a product's slug, the old slugs that keep answering and its cloaking switch. A slug another product answers at, as its slug or an old one, is refused (`InvalidArgumentException`, "slug: taken (…)"). |
+| `set_product_address( int $id, string $slug, array $old_slugs, bool $cloak ): void` | 26G (retired 2026-11-24) | Sets a published or retired product's slug (a retired one stays retired), the old slugs that keep answering and its cloaking switch. A slug another product answers at, as its slug or an old one, is refused (`InvalidArgumentException`, "slug: taken (…)"). |
 | `product_variants( int $id ): ?array` | 26H | A published product's URL variants, each `{ name, key, kind }` (`permalink` or `amazon_tag`), or null. |
 | `set_product_variants( int $id, array $rows ): void` | 26H | Makes a product's variants this list of `{ name, key }` through the Variants tab's rules; every row takes the product's kind. Throws `InvalidArgumentException` at the first row refused ("0.key: taken_by_post"). |
 | `link_issue( int $id ): ?array` | 26K | A product's link-health row `{ issue_type, checked_url, detection_date, resolved, resolved_at, last_checked_at }` (UTC, '' for none), or null. |

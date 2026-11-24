@@ -81,6 +81,7 @@ final class ProductAccessTest extends TestCase {
 				'slug'      => 'amzn-one-long',
 				'old_slugs' => array( 'one', 'old-one' ),
 				'cloak'     => false,
+				'retired'   => false,
 			),
 			$this->access->address( $one )
 		);
@@ -90,6 +91,29 @@ final class ProductAccessTest extends TestCase {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->access->set_address( $two, 'two', array( 'old-one' ), true );
+	}
+
+	/**
+	 * The cutover rehearsal's F2: a retired product's address still answers, so a helper reads and moves it like a
+	 * published one's, and the product stays retired.
+	 */
+	public function test_a_retired_product_s_address_is_read_and_moved_and_it_stays_retired(): void {
+		Functions\when( 'sanitize_title' )->alias( static fn ( string $title ): string => trim( (string) preg_replace( '/[^a-z0-9_]+/', '-', strtolower( $title ) ), '-' ) );
+		$live = $this->access->import( array( 'name' => 'Neo Jump', 'url' => 'https://a.example/' ), '', '' );
+		$old  = $this->access->import( array( 'name' => 'Neo Jump old', 'url' => 'https://b.example/' ), '', '' );
+		$this->access->set_address( $old, 'neo-jump-2', array(), true );
+		$this->access->retire( $old, $live );
+
+		self::assertSame( $old, $this->access->holder( 'neo-jump-2' ), 'A retired product answers at its slug.' );
+		self::assertTrue( $this->access->address( $old )['retired'] );
+
+		$this->access->set_address( $old, 'neo-jump-gone', array( 'neo-jump-old' ), true );
+
+		self::assertSame( 'neo-jump-gone', $this->access->address( $old )['slug'] );
+		self::assertSame( array( 'neo-jump-old' ), $this->access->address( $old )['old_slugs'] );
+		self::assertSame( $live, $this->products->repointed_to( $old ), 'Still retired, pointing at the live product.' );
+		self::assertNull( $this->products->get( $old ), 'Not published again.' );
+		self::assertSame( 0, $this->access->holder( 'neo-jump-2' ), 'Its old address is free for the live record.' );
 	}
 
 	public function test_a_product_is_retired_pointing_at_another_or_trashed(): void {

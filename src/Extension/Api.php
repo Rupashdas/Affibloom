@@ -346,10 +346,11 @@ final class Api {
 	}
 
 	/**
-	 * A product's cloaked address, `{ slug, old_slugs, cloak }`, or null when there is no such product (Task 26G).
+	 * A published or retired product's cloaked address, `{ slug, old_slugs, cloak, retired }`, or null when there is no
+	 * such product (Task 26G; a retired product's address still answers, the cutover rehearsal's F2).
 	 *
 	 * @param int $id The product.
-	 * @return array{slug: string, old_slugs: list<string>, cloak: bool}|null
+	 * @return array{slug: string, old_slugs: list<string>, cloak: bool, retired: bool}|null
 	 */
 	public function product_address( int $id ): ?array {
 		return $this->products->address( $id );
@@ -365,7 +366,8 @@ final class Api {
 	}
 
 	/**
-	 * Sets a product's slug, the old slugs that keep answering and its cloaking switch (Task 26G).
+	 * Sets a published or retired product's slug, the old slugs that keep answering and its cloaking switch; a retired
+	 * product stays retired (Task 26G; the cutover rehearsal's F2).
 	 *
 	 * @param int          $id        The product.
 	 * @param string       $slug      Its slug.

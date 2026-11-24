@@ -195,6 +195,25 @@ interface ProductRepository {
 	public function find_by_slug( string $slug ): ?Product;
 
 	/**
+	 * The published or retired product with this ID, or null: a retired product's cloaked address still answers (F24
+	 * D3), so a helper that moves addresses reads it too (Task 26G; the cutover rehearsal's F2).
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function answering( int $id ): ?Product;
+
+	/**
+	 * Sets a published or retired product's slug, old slugs and cloaking switch, and nothing else: its status stays.
+	 * False when there is no such product or WordPress refused it.
+	 *
+	 * @param int          $id        Post ID.
+	 * @param string       $slug      The slug, in WordPress's form.
+	 * @param list<string> $old_slugs The old slugs that keep answering.
+	 * @param bool         $cloak     The cloaking switch.
+	 */
+	public function move_address( int $id, string $slug, array $old_slugs, bool $cloak ): bool;
+
+	/**
 	 * The published or retired product that had this slug before, or null (F24 N1: old slugs keep answering; Task CL10).
 	 * The one changed last wins when two had it.
 	 *

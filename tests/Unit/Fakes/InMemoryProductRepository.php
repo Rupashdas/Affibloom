@@ -278,9 +278,41 @@ final class InMemoryProductRepository implements ProductRepository {
 		return null;
 	}
 
-	/** Every saved product counts as published; retired ones are in $retired and still found. */
+	/** Published or retired, as the real repository's statuses. */
+	public function answering( int $id ): ?Product {
+		return $this->get( $id ) ?? ( isset( $this->retired[ $id ] ) ? ( $this->gone[ $id ] ?? null ) : null );
+	}
+
+	/** The address only: a retired product stays retired. */
+	public function move_address( int $id, string $slug, array $old_slugs, bool $cloak ): bool {
+		$product = $this->answering( $id );
+		if ( null === $product ) {
+			return false;
+		}
+		$moved = $product->with(
+			array(
+				'slug'      => $slug,
+				'old_slugs' => $old_slugs,
+				'cloak'     => $cloak,
+			)
+		);
+		if ( isset( $this->retired[ $id ] ) ) {
+			$this->gone[ $id ] = $moved;
+		} else {
+			$this->saved = array_map( static fn( Product $saved ): Product => $saved->id === $id ? $moved : $saved, $this->saved );
+		}
+
+		return true;
+	}
+
+	/** The saved products, then the retired ones: both answer at their slugs, as in WordPress. @return list<Product> */
+	private function answering_all(): array {
+		return array_merge( $this->saved, array_values( array_intersect_key( $this->gone, $this->retired ) ) );
+	}
+
+	/** Every saved product counts as published; retired ones answer too. */
 	public function find_by_slug( string $slug ): ?Product {
-		foreach ( $this->saved as $product ) {
+		foreach ( $this->answering_all() as $product ) {
 			if ( '' !== $slug && $slug === $product->slug ) {
 				return $product;
 			}
@@ -289,7 +321,7 @@ final class InMemoryProductRepository implements ProductRepository {
 	}
 
 	public function find_by_old_slug( string $slug ): ?Product {
-		foreach ( array_reverse( $this->saved ) as $product ) {
+		foreach ( array_reverse( $this->answering_all() ) as $product ) {
 			if ( in_array( $slug, $product->old_slugs, true ) ) {
 				return $product;
 			}

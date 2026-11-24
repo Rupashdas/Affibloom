@@ -81,19 +81,21 @@ final class ProductAccess {
 	}
 
 	/**
-	 * A product's cloaked address: its slug, the old slugs that still answer (F24 N1) and its cloaking switch; null
-	 * when there is no such product (Task 26G).
+	 * A product's cloaked address: its slug, the old slugs that still answer (F24 N1), its cloaking switch, and
+	 * whether it is retired (its address still answers, F24 D3); null when there is no published or retired product
+	 * with this ID (Task 26G; the cutover rehearsal's F2).
 	 *
 	 * @param int $id The product.
-	 * @return array{slug: string, old_slugs: list<string>, cloak: bool}|null
+	 * @return array{slug: string, old_slugs: list<string>, cloak: bool, retired: bool}|null
 	 */
 	public function address( int $id ): ?array {
-		$product = $this->products->get( $id );
+		$product = $this->products->answering( $id );
 
 		return null === $product ? null : array(
 			'slug'      => $product->slug,
 			'old_slugs' => $product->old_slugs,
 			'cloak'     => $product->cloak,
+			'retired'   => null === $this->products->get( $id ),
 		);
 	}
 
@@ -112,9 +114,10 @@ final class ProductAccess {
 	}
 
 	/**
-	 * Sets a product's slug, its old slugs and its cloaking switch (Task 26G). Slugs are taken in WordPress's form
-	 * (sanitize_title(): another plugin's post slugs, underscores and full length kept); one another product answers
-	 * at, as its slug or an old one, is refused, so no address changes hands.
+	 * Sets a published or retired product's slug, its old slugs and its cloaking switch (Task 26G); a retired product
+	 * stays retired (the cutover rehearsal's F2). Slugs are taken in WordPress's form (sanitize_title(): another
+	 * plugin's post slugs, underscores and full length kept); one another product answers at, as its slug or an old
+	 * one, is refused, so no address changes hands.
 	 *
 	 * @param int          $id        The product.
 	 * @param string       $slug      Its slug.
@@ -123,7 +126,7 @@ final class ProductAccess {
 	 * @throws InvalidArgumentException When there is no such product, or a slug is not one or is another product's.
 	 */
 	public function set_address( int $id, string $slug, array $old_slugs, bool $cloak ): void {
-		$product = $this->products->get( $id );
+		$product = $this->products->answering( $id );
 		if ( null === $product ) {
 			throw new InvalidArgumentException( esc_html( "No product $id." ) );
 		}
@@ -142,15 +145,24 @@ final class ProductAccess {
 				$old[] = $clean;
 			}
 		}
-		$saved = $this->products->save(
-			$product->with(
-				array(
-					'slug'      => $slug,
-					'old_slugs' => array_values( array_unique( $old ) ),
-					'cloak'     => $cloak,
+		$old = array_values( array_unique( $old ) );
+		if ( null === $this->products->get( $id ) ) {
+			// Retired: save() would publish it, so only its address is written.
+			if ( ! $this->products->move_address( $id, $slug, $old, $cloak ) ) {
+				throw new InvalidArgumentException( esc_html( "No product $id." ) );
+			}
+			$saved = $this->products->answering( $id ) ?? $product;
+		} else {
+			$saved = $this->products->save(
+				$product->with(
+					array(
+						'slug'      => $slug,
+						'old_slugs' => $old,
+						'cloak'     => $cloak,
+					)
 				)
-			)
-		);
+			);
+		}
 		if ( $saved->slug !== $slug ) {
 			throw new InvalidArgumentException( esc_html( "slug: taken ($slug, saved as {$saved->slug})" ) );
 		}

@@ -596,6 +596,47 @@ final class PostTypeProductRepository implements ProductRepository {
 	}
 
 	/**
+	 * The published or retired product with this ID, or null (Task 26G; the cutover rehearsal's F2).
+	 *
+	 * @param int $id Post ID.
+	 */
+	public function answering( int $id ): ?Product {
+		$post = get_post( $id );
+		if ( ! $post instanceof WP_Post || ProductPostType::NAME !== $post->post_type || ! in_array( $post->post_status, array( 'publish', ProductPostType::RETIRED ), true ) ) {
+			return null;
+		}
+
+		return $this->hydrate( $post );
+	}
+
+	/**
+	 * Sets a published or retired product's address only: wp_update_post() with no status keeps the post's own, so a
+	 * retired product stays retired (save() publishes).
+	 *
+	 * @param int          $id        Post ID.
+	 * @param string       $slug      The slug, in WordPress's form.
+	 * @param list<string> $old_slugs The old slugs that keep answering.
+	 * @param bool         $cloak     The cloaking switch.
+	 */
+	public function move_address( int $id, string $slug, array $old_slugs, bool $cloak ): bool {
+		if ( null === $this->answering( $id ) || is_wp_error(
+			wp_update_post(
+				array(
+					'ID'        => $id,
+					'post_name' => $slug,
+				),
+				true
+			)
+		) ) {
+			return false;
+		}
+		update_post_meta( $id, '_affibloom_old_slugs', $old_slugs );
+		update_post_meta( $id, '_affibloom_cloak', self::flag( $cloak ) );
+
+		return true;
+	}
+
+	/**
 	 * The published or retired product with this slug, or null (F24 D3: a cloaked address answers for both).
 	 *
 	 * @param string $slug A slug.
