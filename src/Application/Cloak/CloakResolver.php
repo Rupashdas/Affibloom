@@ -39,6 +39,19 @@ final class CloakResolver {
 	}
 
 	/**
+	 * The product whose link an address sends readers to (F24 D3, the user's decision of 2026-11-24; deviation 165): a
+	 * retired product that points at a published one sends them there, as Lasso's repoint does for its boxes; any other
+	 * product, or one whose target is gone, sends them to its own link.
+	 *
+	 * @param Product $product The product at the address.
+	 */
+	public function sends_to( Product $product ): Product {
+		$target = (int) $this->products->repointed_to( (int) $product->id );
+
+		return $target > 0 && $target !== $product->id ? ( $this->products->get( $target ) ?? $product ) : $product;
+	}
+
+	/**
 	 * The product a permalink variant's key belongs to, or null (F27 R18).
 	 *
 	 * @param string $key The path's last part.

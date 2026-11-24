@@ -31,6 +31,10 @@ test.describe( 'F24 Link cloaking', () => {
 		// A retired product still answers (post 4375's case); a trashed one does not.
 		wp( 'post', 'update', String( id ), '--post_status=affibloom_retired' );
 		expect( ( await hit( request, `/${ slug }/` ) ).status() ).toBe( 302 );
+		// Repointed to a published product, it sends readers there (the user, 2026-11-24; deviation 165).
+		const target = cloaked( unique( 'f24-target' ), 'https://www.example.com/target' );
+		wp( 'post', 'meta', 'update', String( id ), '_affibloom_repointed_to', String( target ) );
+		expect( ( await hit( request, `/${ slug }/` ) ).headers().location ).toBe( 'https://www.example.com/target' );
 		wp( 'eval', `wp_trash_post( ${ id } );` );
 		expect( ( await hit( request, `/${ slug }/` ) ).status() ).toBe( 404 );
 	} );

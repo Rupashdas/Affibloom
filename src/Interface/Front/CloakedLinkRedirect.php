@@ -25,7 +25,8 @@ use Affibloom\Module;
  * to its destination, before any template, with `X-Redirect-By: Affibloom`, `X-Robots-Tag: noindex, nofollow` when
  * the product has NoFollow or Link Cloaking on, and `Cache-Control: private, no-store, no-cache, must-revalidate`; an
  * empty destination goes to the home page. Like Lasso's, it does not look at the cloaking flag (an Amazon product's
- * slug answers too). A post or page with the slug wins; requests in the admin are never redirected. WordPress's
+ * slug answers too). A retired product repointed to a published one answers with that one (the user, 2026-11-24;
+ * deviation 165). A post or page with the slug wins; requests in the admin are never redirected. WordPress's
  * canonical guess for a product's path is cancelled, and Rank Math's redirections step aside for it.
  * `affibloom_before_link_redirect( product ID, referrer )` runs first. The request's query passes through by Lasso's
  * rules (RedirectQuery; Task CL2).
@@ -127,6 +128,8 @@ final class CloakedLinkRedirect implements Module {
 		if ( null === $product ) {
 			return null;
 		}
+		// A retired product repointed to a published one sends readers there (deviation 165).
+		$product = $this->resolver->sends_to( $product );
 
 		return array(
 			'product'     => (int) $product->id,

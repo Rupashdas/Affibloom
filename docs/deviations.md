@@ -170,6 +170,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 162. Affibloom's box prints the stored title, not Lasso's cleaned one ("Men’s", not "Men s"; the user, 2026-11-23; Tasks 29A, 29B).
 - 163. Task LM10 (the user, 2026-11-23): no tag for the migrator's release, as 154; Finish keeps one mark, `affibloom_lasso_finished`, until uninstall, so nothing runs again.
 - 164. A cutover rehearsal on a copy of the live site before Task 40 (the user, 2026-11-24); `docs/cutover/rehearsal-log.md`, F1-F5.
+- 165. F24 D3 changed (the user, 2026-11-24: "Follow the repoint"): a retired product repointed to a published one answers its address with that product's link.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3087,3 +3088,11 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     another Local site. Findings F1-F5 in `docs/cutover/rehearsal-log.md`: F2 (slugs swap on a migration from zero) and
     F3 (field values skipped on a migration from zero) are migrator bugs to fix before Task 42; F1 and F5 change Task
     40's steps 1 and 2; F4 is a difference to explain.
+
+165. **A retired product's address follows its repoint (the user, 2026-11-24: "Follow the repoint").** F24 D3 had a
+    retired product answer its cloaked address with its own link. The rehearsal (deviation 164) showed the Mizuno case:
+    Lasso deleted record 14771 and repointed it to 14770 (an Amazon product), and 6 links in the guides use its address;
+    Lasso alone sends them to the home page, Affibloom sent them to the old merchant page without a tracking code. Now a
+    retired product that points at a published one answers with that product (its link, its NoFollow and cloaking
+    headers, its ID for `affibloom_before_link_redirect`); with no pointer, or a target no longer published, its own.
+    `CloakResolver::sends_to()`; the link index's ties are unchanged.
