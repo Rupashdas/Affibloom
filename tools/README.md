@@ -4,7 +4,7 @@ Developer scripts. They run against the Local copy of the site and are never shi
 
 | File | What it does |
 |---|---|
-| `local-wp.sh` | Runs Local's bundled WP-CLI from any terminal: `bash tools/local-wp.sh <command>` (Task 2) |
+| `local-wp.sh` | Runs Local's bundled WP-CLI from any terminal: `bash tools/local-wp.sh <command>` (Task 2); another Local site with `LOCAL_SITE_ID` and `LOCAL_SITE_ROOT` (its public folder) set together (deviation 164) |
 | `reset-local.sh` | Returns the Local copy to the cleaned snapshot `.local/snapshot.sql` (`npm run reset-local`, Task 2) |
 | `local-deactivate.txt` | Plugins `reset-local.sh` switches off after an import |
 | `local-icon-links.php` | Repoints the two button icon links the snapshot's CSS breaks (Full review, YouTube; F28 D4), with `youtube-icon.svg`; `reset-local.sh` runs it after each reset, and it does nothing once the links are right |

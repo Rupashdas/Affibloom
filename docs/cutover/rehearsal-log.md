@@ -1,0 +1,54 @@
+# Cutover rehearsal on a copy of the live site (2026-11-24)
+
+Before Task 40 on staging, the user put a backup of volleyballvault.com on the empty Local site
+`volleyballvault-testing` (All-in-One WP Migration), and Task 40's runbook was run there (the user: "Rehearse on test
+site"; deviation 164). Unlike the main Local copy, Affibloom had no data: the migration ran from zero, as on production.
+WP-CLI reaches the copy with `LOCAL_SITE_ID=oqiw3j1Op LOCAL_SITE_ROOT=".../volleyballvault-testing/app/public"
+bash tools/local-wp.sh …`, the specs with `WP_BASE_URL=http://volleyballvault-testing.local` as well. The copy's
+fixtures were kept in `.local/rehearsal/` and Local's put back afterwards.
+
+## Steps
+
+| Step (Task 40) | Result | Time |
+|---|---|---|
+| 1. Make safe | `wp-config.php`: `WP_HTTP_BLOCK_EXTERNAL`, `DISABLE_WP_CRON`, empty `SENTRY_DSN` and `LASSO_POSTHOG_API_KEY` (Task 2's lines), added before the first page load; no mail plugin active (Mailpit); the address rewritten by the import; Lasso v369, licence status 0 | – |
+| 2. Inventory | 263 published records (233 Amazon, 21 other, 9 with no link), 676 tied links in 39 posts, 250 boxes, 33 `.lasso-*` rules in the Additional CSS: as the Local copy | 3 s |
+| 2. Lasso's boxes captured | 250 boxes, equal to Local's but for the host name (after F1) | 17 min |
+| 3. Install beside Lasso | Affibloom 1.0.0-rc.1 and the migrator from the exit check's zips; the boxes and links of three guides unchanged; the setup wizard stays shut | 5 s |
+| 4. Migrate (dry run, then every family) | 254 products created, 1 retired, 1 trashed, 9 records skipped (no link); 226 Amazon rows; 254 link alerts; 3 tables; 12 settings and 11 display keys; 1 field created; 1 slug error (F2); field values skipped (F3) | 2 s + 52 s |
+| 5. Link index | 2,793 links in 182 posts, 693 tied to 178 products; original links then 178 of 388 set | 13 s + 3 s |
+| 6. Convert (Lasso off) | 253 items in 35 places, 0 blocked; 180 posts' stamps; 690 buttons; 32 CSS rules. LM9: nothing of Lasso left | 61 s + 2 s |
+| 7. Parity (`converted`, baselines captured from the copy with Lasso on) | Boxes 250/250 and pages 68 pass (after F3's values were filled); links: 2 differ (F4); no request to Lasso's hosts | 15 min |
+| 8. Go back | Revert in reverse order (72 + 180 + 35 + 1 places, 0 kept), Lasso on, Affibloom and the migrator off | 58 s + 3 s |
+| 8. Fingerprints | Content: every place that existed before is unchanged (the 259 new entries are Affibloom's own products). Lasso: its tables, posts, meta and terms equal; its options group differs (F5) | – |
+
+## Findings
+
+- **F1. Mediavine and LiteSpeed Cache.** The live site has both on. Mediavine's ads keep loading, so the baseline
+  capture waited for an idle page for its whole hour and wrote nothing; LiteSpeed would serve cached pages. Local's
+  import switches both off (`tools/local-deactivate.txt`). **Task 40, step 1:** switch them off on staging before the
+  captures (and on again at the end).
+- **F2. Slugs swap on a migration from zero (must be fixed before Task 42).** Lasso records 14771 (deleted, repointed to
+  14770) and 14798 (live) share a title. Their products were made from the title, so the live record's product took
+  `mizuno-neo-jump-unisex-volleyball-shoe-for-sale` and the deleted one's `…-for-sale-2`. The slugs family should swap
+  them, but a retired product has no address through the extension API (`product_address()` reads published products
+  only), so it cannot be moved and the live product cannot take `-2`: "collision: product 15381 answers at …-2". On
+  Local the products were adopted from the one-time import with the right slugs, so it never showed.
+- **F3. Field values on a migration from zero (must be fixed before Task 42).** The fields family runs before the
+  products (definitions first), so on a site without products every value is "no product yet"; a later run then takes
+  the empty values as Affibloom's own and keeps them ("--update takes Lasso's"). Here 5 products lost their Primary
+  Rating; 3 guide boxes showed no stars until `migrate --only=fields --update`.
+- **F4. A repeated tracking ID.** One Amazon search link in best-mens-volleyball-shoes (links 7 and 47) carries
+  `&tag=vbvault-20` twice; Lasso prints it so, Affibloom without the repeat. Same page, same tag; the suite matches
+  Amazon links by ASIN and a search link has none. To be explained in `docs/parity.md` with Task 40's run.
+- **F5. Lasso's options changed once.** The fingerprint's options group (`lasso_settings`,
+  `lasso_amazon_tracking_id_blacklist`) differs after the rehearsal. Neither Affibloom nor the migrator writes either
+  option (searched); switching Lasso off and on now leaves it unchanged, so it was a one-time write, most likely Lasso's
+  own on its first switch after the import. Only checksums were kept, so the key is not known. **Task 40, step 2:** keep
+  both options' values beside the fingerprint, and switch Lasso off and on once before taking it.
+
+## Left on the copy
+
+Lasso active; Affibloom and the migrator inactive with their data (products, settings) in place; content as imported;
+the safety lines in `wp-config.php` (its earlier copy is `../wp-config.before-rehearsal.php`); Mediavine and LiteSpeed
+off.

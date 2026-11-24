@@ -169,6 +169,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 161. 26B changed (the user, 2026-11-23): `--update --force` gives a product adopted from the one-time import Lasso's values, its Amazon price kept (Task 29A).
 - 162. Affibloom's box prints the stored title, not Lasso's cleaned one ("Men’s", not "Men s"; the user, 2026-11-23; Tasks 29A, 29B).
 - 163. Task LM10 (the user, 2026-11-23): no tag for the migrator's release, as 154; Finish keeps one mark, `affibloom_lasso_finished`, until uninstall, so nothing runs again.
+- 164. A cutover rehearsal on a copy of the live site before Task 40 (the user, 2026-11-24); `docs/cutover/rehearsal-log.md`, F1-F5.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3079,3 +3080,10 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     every product, so once finished the page only says to delete the plugin and the routes and commands (but `finish`)
     are not started. Uninstall removes the mark too. On Local the plugin is removed with
     `wp plugin uninstall affibloom-lasso-migrator --deactivate --skip-delete`, as deleting it would delete its repository.
+
+164. **A cutover rehearsal before Task 40 (the user, 2026-11-24: "Rehearse on test site").** The user put a backup of
+    the live site on the empty Local site volleyballvault-testing, and Task 40's runbook ran there first, the
+    migration from zero as on production. `tools/local-wp.sh` takes `LOCAL_SITE_ROOT` beside `LOCAL_SITE_ID` for
+    another Local site. Findings F1-F5 in `docs/cutover/rehearsal-log.md`: F2 (slugs swap on a migration from zero) and
+    F3 (field values skipped on a migration from zero) are migrator bugs to fix before Task 42; F1 and F5 change Task
+    40's steps 1 and 2; F4 is a difference to explain.

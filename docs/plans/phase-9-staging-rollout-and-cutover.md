@@ -71,6 +71,11 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
 
 ### Task 40: Staging rehearsal
 
+> **Rehearsed 2026-11-24 on a copy of the live site (deviation 164):** read `docs/cutover/rehearsal-log.md` first.
+> Step 1 also switches off Mediavine and LiteSpeed Cache for the captures (F1); step 2 keeps `lasso_settings` and
+> `lasso_amazon_tracking_id_blacklist` as values beside the fingerprint, after switching Lasso off and on once (F5);
+> F2 and F3 are fixed before this task runs.
+
 **Feature:** all · **Depends on:** Phase 8 and Phase M done and signed off; the release candidates (39, LM10); the user's answers in `open-decisions.md` · **Files:** `docs/cutover/staging-log.md` (new), refreshed `tests/fixtures/inventory/` and `tests/fixtures/baselines/`; commit: "Record the staging rehearsal".
 
 **Roadmap:** 9.1-9.2 · **Why:** every step of the cutover is done once on a copy of production, timed and undone, so

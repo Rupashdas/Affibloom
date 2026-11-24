@@ -26,7 +26,9 @@ if [ -z "${LOCAL_MYSQL_PORT:-}" ]; then
 fi
 
 # The WordPress root is four levels up from this file: wp-content/plugins/affibloom/tools.
-SITE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+# Another Local site (the cutover rehearsal on volleyballvault-testing): set LOCAL_SITE_ID and LOCAL_SITE_ROOT, its
+# public folder, together.
+SITE_ROOT="${LOCAL_SITE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)}"
 
 export PHPRC="$LOCAL_DATA/run/$LOCAL_SITE_ID/conf/php"
 # PHP's folder and its ImageMagick folder hold the DLLs that php_imagick.dll needs. Without
