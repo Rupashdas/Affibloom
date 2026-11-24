@@ -152,6 +152,8 @@ Everything **not** listed here was settled from Lasso's source and the project r
 | Phase 4 at once (2026-11-17) | **Every Phase 4 batch in one run** ("complete all batches at once in phase 4"); `@wordpress/scripts` installed, and Classic Editor, Elementor and AMP installed on Local for ED1, ED2 and ED4 (left inactive). |
 | Phase 4 sign-off (2026-11-17) | **Signed off** after the exit check passed (F4 22/22, admin-design 6/6, F5 AC1 7/7). |
 | Standalone Affibloom (2026-11-17) | **The Lasso migration is a separate plugin, not core** ("Affibloom is a standalone affiliate plugin. no need other plugin's compatibilities"); it converts every `[lasso]` shortcode and legacy block to Affibloom's format, leaves nothing of Lasso behind and is then removed. Reverses A1 and A2; drops F33 and F31's competitors' shortcodes. Deviation 146; Phase M. Defaults taken: name "Affibloom Lasso Migrator" (`affibloom-lasso-migrator`), its own private repository (created at LM1 with the user's OK). |
+| Staging for Task 40 (2026-11-24) | **The existing staging copy is used, not a fresh import** (the user: "Already the staging the live site data"); the old Affibloom 0.1.0's leftovers were cleared with Affibloom's own uninstall. `cutover/staging-log.md`. |
+| No WP-CLI on staging (2026-11-24) | **WP-CLI-only checks run on the testing copy** (inventory, Lasso's baselines, fingerprints; same live data); staging gets the admin steps, parity over HTTPS and the editors' acceptance. Phase 9's runbook stays on admin screens (F3). |
 
 ## Open (the user's call)
 
