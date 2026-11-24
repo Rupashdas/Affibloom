@@ -68,7 +68,8 @@ fingerprint and its two options' values kept, and the migration run from zero ag
 product); 6 links in the guides use it. Lasso alone sends it to the home page (Task 29E); Affibloom answers a retired
 product's address with the product's own link (F24 D3), here `usa.mizuno.com/volleyball-mizuno-neo-jump`, a merchant
 page without a tracking code. Following the repoint instead (14770's Amazon link) would keep a commission: a choice
-for the user, not part of F2.
+for the user, not part of F2. **Decided 2026-11-24: follow the repoint** (deviation 165): the address now answers
+302 to `https://www.amazon.com/dp/B0FPHNH4P8?tag=vbvault-20`, checked on the copy.
 
 ## Left on the copy
 

@@ -149,7 +149,7 @@ Settled from Lasso and the records:
   once. `redirect_canonical` is filtered as R24; Rank Math's pre-search as R25. R26's main-query swap is not needed:
   the redirect exits before WordPress's 404 template.
 - **D3 Which products answer:** published and retired (`affibloom_retired`, Lasso's `lasso_delete`: post 4375 links to
-  one). Trash does not (its slug carries `__trashed`, so its published path already fails in Lasso); Affibloom has no
+  one; one repointed to a published product answers with that one's link: the user, 2026-11-24, deviation 165). Trash does not (its slug carries `__trashed`, so its published path already fails in Lasso); Affibloom has no
   drafts (Lasso always publishes).
 - **D4 Matching** is R16-R17 exactly for `/<slug>/` and `/<prefix>/<slug>/`, with the post/page, tag and category
   guards and the subdirectory rule (N6 for longer paths).
