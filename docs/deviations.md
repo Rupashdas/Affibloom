@@ -171,6 +171,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 163. Task LM10 (the user, 2026-11-23): no tag for the migrator's release, as 154; Finish keeps one mark, `affibloom_lasso_finished`, until uninstall, so nothing runs again.
 - 164. A cutover rehearsal on a copy of the live site before Task 40 (the user, 2026-11-24); `docs/cutover/rehearsal-log.md`, F1-F5.
 - 165. F24 D3 changed (the user, 2026-11-24: "Follow the repoint"): a retired product repointed to a published one answers its address with that product's link.
+- 166. Tasks 41-42 (the user, 2026-11-24): the user migrates the live site by hand; Claude writes the runbook and the monitoring record and checks production read only.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3096,3 +3097,15 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     retired product that points at a published one answers with that product (its link, its NoFollow and cloaking
     headers, its ID for `affibloom_before_link_redirect`); with no pointer, or a target no longer published, its own.
     `CloakResolver::sends_to()`; the link index's ties are unchanged.
+
+166. **The live site is migrated by the user, by hand (the user, 2026-11-24: "Don't make any changes to the live site.
+    We'll handle the necessary migration on the live site manually. Just proceed with the remaining tasks.").** Claude
+    makes no change to production in Tasks 41 and 42. Claude writes `docs/cutover/production-runbook.md` (Task 41's
+    steps as rehearsed twice, with each figure to expect and the way back), `docs/cutover/monitoring.md` (Task 42's
+    daily record, Finish and removal), and, on the user's word after the cutover, checks production read only (the
+    parity suite in `finished` mode over HTTPS: no write, no click counted, GA and Mediavine blocked). Their steps are
+    ticked as the user reports them. The runbook takes what staging taught: Lasso off before Convert (the Content card's
+    rule; Task 41 step 5 had it after); the index rebuild only once activation's own run has ended (409 otherwise); no
+    link-check button exists (the save checks and the 03:00 run do it); the LiteSpeed exclusion is not needed (37D C1);
+    the parity suite blocks Mediavine's loader and counts a parameter repeated with the same value once (F4). The
+    `/recommends/` redirect (E13) waits for the client.

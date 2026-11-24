@@ -154,6 +154,13 @@ All on its Content card (every post back byte for byte), activate Lasso, purge c
 stays installed and harmless beside Lasso; its products are kept for the next attempt. Lasso's data was never changed
 (ADR-2), so reactivating it restores the old state.
 
+*Note (2026-11-24, deviation 166):* the user runs this task on the live site by hand; Claude changes nothing there. The
+steps, in the order staging proved (Lasso off before Convert; the index rebuilt once activation's run has ended; no
+link-check button) and with the figures to expect, are in `docs/cutover/production-runbook.md`, which is also the log.
+Step 6's parity runs read only on the user's word, against baselines captured from a copy of that day's backup; the
+suite blocks Mediavine and counts a repeated identical parameter once (F4). The `/recommends/` redirect waits for the
+client (E13). Steps are ticked as the user reports them.
+
 ---
 
 ### Task 42: Monitoring and Lasso removal
@@ -176,6 +183,10 @@ stays installed and harmless beside Lasso; its products are kept for the next at
   staging first), delete the `lasso-urls` posts and their meta and the `lasso_*` options. Record each step. Nothing in Affibloom reads them (deviation 146).
 - [ ] 4. **Finish.** The client cancels the Lasso subscription. Tick Phase 9 in the roadmap and record the completion
   date.
+
+*Note (2026-11-24, deviation 166):* run by the user on the live site; `docs/cutover/monitoring.md` is written (the
+daily table, Finish and removal, the 90-day SQL) and waits for the cutover date. Steps are ticked as the user reports
+them; the two weeks and the 90 days cannot run sooner.
 
 ## Exit check
 
