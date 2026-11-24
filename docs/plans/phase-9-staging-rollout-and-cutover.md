@@ -53,7 +53,7 @@ Lasso to Affibloom on staging, then on production, with a proven way back. Produ
 
 ## Tasks in this phase
 
-- [ ] Task 40: Staging rehearsal
+- [x] Task 40: Staging rehearsal
 - [ ] Task 41: Production cutover
 - [ ] Task 42: Monitoring and Lasso removal
 
@@ -106,13 +106,13 @@ cutover day holds no surprises and the way back is proven.
 - [x] 7. **Switch Lasso off.** Deactivate Lasso and the migrator, purge the cache. Parity suite against staging in
   `converted` mode (29A, 29B), every link (29C: cloaked addresses answer, Amazon links carry the right tag, no request
   to Lasso's hosts), clicks counted (33A), GA events (C3B) with a stub or the site's tag.
-- [ ] 8. **Editor acceptance.** The client's editors on staging: add an Amazon product and an Impact product, edit one,
+- [x] 8. **Editor acceptance.** The client's editors on staging: add an Amazon product and an Impact product, edit one,
   put a box in a draft guide with a badge, find a broken link, read a product's Locations, use Groups and a table.
   Record remarks; fix what blocks the release, build the next RC.
 - [x] 9. **Rehearse the way back.** Activate the migrator, Revert All on its Content card, reactivate Lasso, purge.
   Parity against Lasso's baselines with Lasso on: as before migration (29D `reverted`, 29E rollback drill). Then run
   steps 6-7 again, so staging ends in the post-cutover state.
-- [ ] 10. **Sign-off.** The user and the client sign off in `docs/cutover/staging-log.md`; set the cutover date in a
+- [x] 10. **Sign-off.** The user and the client sign off in `docs/cutover/staging-log.md`; set the cutover date in a
   low-traffic window from the analytics.
 
 *Note (2026-11-24):* run on the existing staging copy (the user: it holds the live data; 0.1.0's leftovers cleared
@@ -120,7 +120,7 @@ with Affibloom's own uninstall). No WP-CLI there: step 2's inventory and Lasso b
 live data; the committed fixtures stay Local's), the 26P comparison and page parity (29B) are not run on staging; box
 and link parity ran over HTTPS (`finished` and `lasso` modes). Step 6 ran with Lasso off (the Content card's rule).
 Two fixes came out of it: S1, the CPU guard stalled the link index on this host (Affibloom `31676cd`), and S2,
-converted guides showed the conversion day as "Updated on" (migrator `04ecf8d`). Steps 8 and 10 wait for the client.
+converted guides showed the conversion day as "Updated on" (migrator `04ecf8d`). **Signed off by the user 2026-11-24** without step 8 (the editors did not try staging); the cutover date is set in Task 41 step 1.
 Details in `docs/cutover/staging-log.md`.
 
 ---
