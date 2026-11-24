@@ -47,8 +47,31 @@ fixtures were kept in `.local/rehearsal/` and Local's put back afterwards.
   own on its first switch after the import. Only checksums were kept, so the key is not known. **Task 40, step 2:** keep
   both options' values beside the fingerprint, and switch Lasso off and on once before taking it.
 
+## F2 and F3 fixed, and the migration from zero again (2026-11-24)
+
+The user: "Fix both now". Affibloom `b491f8a` (the extension API reads and moves a retired product's address; it stays
+retired), migrator `36187ca` (F3: the products before their field values; a later run gives values to a product the
+family never gave any) and `e63b225` (F2: a retired product gives up a live record's address, takes its own record's
+after the live ones, or stays where it is). Then on the copy: both plugins uninstalled with "delete data on uninstall"
+on (nothing of either left: posts, options, meta, tables), zips built from those commits installed, Lasso's
+fingerprint and its two options' values kept, and the migration run from zero again.
+
+| Check | Result |
+|---|---|
+| Migration | 51 s, **0 errors**: slugs 244 updated, 11 unchanged, 11 skipped; fields 6 created (DETAILS and the 5 products' values), 0 skipped |
+| Mizuno | the live record's product answers at `…-for-sale-2` (its Lasso address), the retired one at `…-for-sale`, still retired |
+| Parity, boxes | 250/250 on the first run, the ratings included |
+| Parity, links | F4's two links; and `…-for-sale/` now goes to the retired product's own link (below) |
+| Fingerprints | Lasso's equal, its options' values equal (F5 did not recur); every post that existed before unchanged |
+
+**Note (for the user):** `…-for-sale/` is the address of the record Lasso deleted and repointed to 14770 (an Amazon
+product); 6 links in the guides use it. Lasso alone sends it to the home page (Task 29E); Affibloom answers a retired
+product's address with the product's own link (F24 D3), here `usa.mizuno.com/volleyball-mizuno-neo-jump`, a merchant
+page without a tracking code. Following the repoint instead (14770's Amazon link) would keep a commission: a choice
+for the user, not part of F2.
+
 ## Left on the copy
 
-Lasso active; Affibloom and the migrator inactive with their data (products, settings) in place; content as imported;
+Lasso, Affibloom and the migrator active (the second migration's data in place, the content reverted, as imported);
 the safety lines in `wp-config.php` (its earlier copy is `../wp-config.before-rehearsal.php`); Mediavine and LiteSpeed
 off.
