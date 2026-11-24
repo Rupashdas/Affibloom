@@ -106,13 +106,15 @@ const EXPLAINED: Record< string, string > = {
  * Task 29E: the links baseline was taken with Affibloom on beside Lasso (29C), and in two places Affibloom answered, not
  * Lasso. Lasso alone (`lasso` mode, rolled back) gives its own answer there, by "guide link n" or redirected address
  * (docs/parity.md, 29E): it prints a text link's href as written, space and all, and sends the slug of a product it
- * deleted and repointed to the home page.
+ * deleted and repointed to the home page. A redirected address is named by its path, so the list holds on any site
+ * (Local, the testing copy, staging, production).
  */
 const LASSO_ALONE: Record< string, string > = {
 	'best-shoes-for-grass-volleyball link 67':
 		'https://www.amazon.com/dp/B0DPLMZ1G1%20?tag=vbvault-20',
-	'http://volleyballvault.local/mizuno-neo-jump-unisex-volleyball-shoe-for-sale/':
-		'302 http://volleyballvault.local',
+	'/mizuno-neo-jump-unisex-volleyball-shoe-for-sale/': `302 ${ (
+		process.env.WP_BASE_URL ?? 'http://volleyballvault.local'
+	).replace( /\/+$/, '' ) }`,
 };
 
 /**
@@ -121,7 +123,11 @@ const LASSO_ALONE: Record< string, string > = {
  * @param was The baseline's value.
  */
 function expected( key: string, was: string ): string {
-	return 'lasso' === MODE ? ( LASSO_ALONE[ key ] ?? was ) : was;
+	if ( 'lasso' !== MODE ) {
+		return was;
+	}
+	const path = /^https?:\/\//.test( key ) ? new URL( key ).pathname : key;
+	return LASSO_ALONE[ key ] ?? LASSO_ALONE[ path ] ?? was;
 }
 
 /** The two widths each guide is compared at, as tools/baselines.spec.ts captured them. */
@@ -261,7 +267,15 @@ function destination(
 	if ( /(^|\.)amazon\./.test( url.hostname ) && asin ) {
 		return `${ url.hostname }/dp/${ asin[ 1 ].toUpperCase() }?tag=${ url.searchParams.get( 'tag' ) ?? '' }`;
 	}
-	return `${ url.origin }${ url.pathname.replace( /\/+$/, '' ) }${ url.search }`;
+	// A parameter repeated with the same value leads to the same page: Lasso printed one Amazon search link with its
+	// `tag` twice while Affibloom was on beside it (the rehearsal's F4, docs/parity.md).
+	const seen = new Set< string >();
+	const query = url.search
+		.slice( 1 )
+		.split( '&' )
+		.filter( ( pair ) => '' !== pair && ! seen.has( pair ) && !! seen.add( pair ) )
+		.join( '&' );
+	return `${ url.origin }${ url.pathname.replace( /\/+$/, '' ) }${ '' === query ? '' : `?${ query }` }`;
 }
 
 /**

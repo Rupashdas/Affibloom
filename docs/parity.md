@@ -102,6 +102,12 @@ against short Amazon URLs, a cloaked address against its target) were not Lasso'
 beside Lasso, and Affibloom's render-time link rules rewrote the links Lasso's boxes draw. 29D fixed that and the
 baseline was captured again.
 
+**A parameter repeated with the same value counts once (2026-11-24, deviation 166).** The rehearsal's F4: one Amazon
+search link in best-mens-volleyball-shoes (links 7 and 47) carried `&tag=vbvault-20` twice in a baseline captured with
+both plugins on; Lasso alone and Affibloom alone each print it once (staging, Task 40). The same page and the same
+commission: the comparison now drops the repeat. The suite also blocks Mediavine's loader (`scripts.mediavine.com`), so
+a live guide settles (rehearsal F1), and names Lasso-alone exceptions by path, so they hold on any site.
+
 ## Task 29D: parity survives conversion and revert (2026-11-23)
 
 `PARITY_MODE` switches the suite: `converted` (migrate, convert, Lasso and the migrator off) and `reverted` (the same

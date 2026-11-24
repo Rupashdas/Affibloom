@@ -41,10 +41,13 @@ export function wp( ...args: string[] ): string {
 	return execFileSync( bash, [ 'tools/local-wp.sh', ...args ], { stdio: 'pipe' } ).toString().trim();
 }
 
-/** Stops page loads from reaching the site's Google Analytics or Lasso's cloud (see tools/README.md). */
+/**
+ * Stops page loads from reaching the site's Google Analytics or Lasso's cloud (see tools/README.md), and Mediavine's
+ * ads: on the live site its loader keeps a guide busy for good, so a page never settles (rehearsal F1; Task 41).
+ */
 export async function blockTrackers( context: BrowserContext ): Promise< void > {
 	await context.route(
-		/^https?:\/\/([^/]+\.)?(codedrink\.com|getlasso\.co|googletagmanager\.com|google-analytics\.com|analytics\.google\.com|posthog\.com|sentry\.io)\//,
+		/^https?:\/\/([^/]+\.)?(codedrink\.com|getlasso\.co|googletagmanager\.com|google-analytics\.com|analytics\.google\.com|posthog\.com|sentry\.io|mediavine\.com)\//,
 		( route ) => route.abort()
 	);
 }
