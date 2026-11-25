@@ -10,10 +10,11 @@ watches the site.
 
 ## What you need
 
-- **The releases** (the builds staging runs): Affibloom 1.0.0-rc.1 from commit `31676cd`
-  (`wp-content/plugins/affibloom/.local/affibloom-staging-31676cd.zip`) and the migrator from `04ecf8d`
-  (`.local/affibloom-lasso-migrator-staging-04ecf8d.zip`). Both carry the two fixes staging found: the link index on
-  this host (S1) and the posts' "Updated on" dates (S2). Do not use an older zip.
+- **The releases:** Affibloom **1.0.0-rc.2** (`wp-content/plugins/affibloom/.local/affibloom-1.0.0-rc.2-7d1942e.zip`)
+  and the migrator **0.2.0** (`.local/affibloom-lasso-migrator-0.2.0-cf16cea.zip`), built 2026-11-26 from the current
+  code and rehearsed on a copy of the live site that day ([`rehearsal-log.md`](rehearsal-log.md), third run). They
+  carry staging's two fixes (S1 the link index on this host, S2 the posts' "Updated on" dates) and the dead settings
+  removed on 2026-11-25 (deviations 167, 168). Do not use an older zip: staging's rc.1 builds lack the last of these.
 - **A low-traffic window** of about two hours (the analytics' quietest hours).
 - **Nothing from staging:** staging's snippet "Staging only: no mail, no Lasso cloud" must not be copied to the live
   site, and "Discourage search engines" stays off there.
@@ -49,13 +50,13 @@ watches the site.
    ~200"). Let it run; it is rebuilt in step 4.
 4. Open three guides signed out (a private window): `best-colorful-volleyball-shoes`,
    `best-volleyball-training-equipment`, `best-basketball-shoes-for-volleyball`. **Expect:** Lasso's boxes (17, 13, 11),
-   nothing changed to the eye. (Invisible and expected: a body class `affibloom-v1.0.0-rc.1`, a second Font Awesome
+   nothing changed to the eye. (Invisible and expected: a body class `affibloom-v1.0.0-rc.2`, a second Font Awesome
    line, `noreferrer` dropped from links opening in a new tab.)
 
 ### 3. Migrate
 
 1. The migration page opens with a **dry run** (it can take a minute on this host). **Expect** about: 266 records,
-   255 to create, 9 skipped (no link), 1 to retire, 1 to trash; settings 12 to import, display 11, fields 1, groups 2,
+   255 to create, 9 skipped (no link), 1 to retire, 1 to trash; settings 13 to import, display 11, fields 1, groups 2,
    tables 3, Amazon 226. The Content card: about 253 boxes in about 174 places, 0 blocked. Compare the records with the
    inventory of "The day before" step 3: a product added since shows as one more.
 2. Tick **I have a backup of this site's database** → **Run migration**. It runs family by family ("Display done: 2 of

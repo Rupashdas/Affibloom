@@ -76,3 +76,29 @@ for the user, not part of F2. **Decided 2026-11-24: follow the repoint** (deviat
 Lasso, Affibloom and the migrator active (the second migration's data in place, the content reverted, as imported);
 the safety lines in `wp-config.php` (its earlier copy is `../wp-config.before-rehearsal.php`); Mediavine and LiteSpeed
 off.
+
+## Third run: the cutover builds, 1.0.0-rc.2 and 0.2.0 (2026-11-26)
+
+The user chose to cut over with a build of the current code rather than staging's rc.1 ("Build rc.2"), as the dead
+settings removed on 2026-11-25 (deviations 167, 168) were in neither staging's zips nor any run on live data. Affibloom
+1.0.0-rc.2 (`7d1942e`) and the migrator 0.2.0 were built and rehearsed on the same copy, from zero again: both old
+builds uninstalled with "delete data on uninstall" on (no table, option, post or meta of either left), the copy's
+content then equal to the first run's "before", Lasso's fingerprint equal to it too.
+
+| Check | Result |
+|---|---|
+| Install beside Lasso | both zips by `wp plugin install --activate`; Lasso 369 stays active |
+| Migration from zero | 35 s, **0 errors**: 254 products created, 1 retired, 1 trashed, 9 skipped; slugs 244 updated; fields 6; tables 3; Amazon 226; settings 13 imported, 38 left (the removed settings among them), display 11 |
+| Link index | 6 s: 200 posts, 2,790 links, 691 tied to 176 products; original links 178 given (as the second run) |
+| Parity, `converted` (Lasso's pages captured from the copy first) | boxes 250/250; 34 guides at 1280 and 390 px pass; links: only `…-for-sale/`, which now follows the repoint to Amazon (deviation 165, as decided); no request to Lasso's hosts. 33 min |
+| Going back (the suite's revert, Lasso on) | Lasso's fingerprint and `lasso_settings` equal; all 1,954 content entries that existed before unchanged (259 new: Affibloom's own) |
+
+**Finding R3-1 (fixed, migrator `cf16cea`):** the settings summary said "2 kept" on a migration from zero: the two
+notification switches removed on 2026-11-25 had reasons starting "Affibloom has", the summary's marker for a value
+Affibloom kept. Only the count was wrong. Reworded as the other removed settings ("not in Affibloom: …"), a unit test
+on the summary; the rebuilt 0.2.0 installed on the copy reports "0 kept, 38 left", 0 errors.
+
+**The releases for Task 41:** `.local/affibloom-1.0.0-rc.2-7d1942e.zip` and
+`.local/affibloom-lasso-migrator-0.2.0-cf16cea.zip` (the runbook names them). The copy's captures are in
+`.local/rehearsal-3/` (not in git). Left on the copy: Lasso, Affibloom rc.2 and the migrator 0.2.0 active, the data
+migrated, the content as imported.
