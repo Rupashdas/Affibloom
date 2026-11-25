@@ -4,7 +4,7 @@ Tags: affiliate, amazon, product box, comparison table, affiliate links
 Requires at least: 7.1.4
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0-rc.1
+Stable tag: 1.0.0-rc.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ No. Amazon links, your tracking ID, boxes, clicks and the link index work withou
 Nothing is deleted unless you switch on Settings → General → Uninstall → "Delete all Affibloom data when the plugin is deleted". Export your products from the Dashboard first.
 
 == Changelog ==
+
+= 1.0.0-rc.2 =
+* Second release candidate: the build for the live cutover. Settings that only worked through Lasso's cloud, or that nothing read, are removed with their stored values; the extension API the Affibloom Lasso Migrator uses.
 
 = 1.0.0-rc.1 =
 * First release candidate.

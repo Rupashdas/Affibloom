@@ -4,6 +4,10 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+## [1.0.0-rc.2] - 2026-11-26
+
+The second release candidate, the build for the live cutover (Task 41): what staging and the cutover rehearsal found, and the dead settings removed.
+
 ### Removed
 
 - Settings → Amazon: Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store. They worked only through Lasso's cloud and had no effect; an upgrade step deletes their stored values (decision B4 reversed, 2026-11-25).
