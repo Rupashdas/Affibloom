@@ -172,6 +172,8 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 164. A cutover rehearsal on a copy of the live site before Task 40 (the user, 2026-11-24); `docs/cutover/rehearsal-log.md`, F1-F5.
 - 165. F24 D3 changed (the user, 2026-11-24: "Follow the repoint"): a retired product repointed to a published one answers its address with that product's link.
 - 166. Tasks 41-42 (the user, 2026-11-24): the user migrates the live site by hand; Claude writes the runbook and the monitoring record and checks production read only.
+- 167. Decision B4 reversed (the user, 2026-11-25): Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store removed, with their stored values (schema step 13).
+- 168. Dead settings and leftovers removed (the user, 2026-11-25): seven settings read by nothing or narrower than said, the brag override and CSS, the tour's commissions line, the migrator's WaitingStep (schema step 14).
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3109,3 +3111,26 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     link-check button exists (the save checks and the 03:00 run do it); the LiteSpeed exclusion is not needed (37D C1);
     the parity suite blocks Mediavine's loader and counts a parameter repeated with the same value once (F4). The
     `/recommends/` redirect (E13) waits for the client.
+
+167. **Decision B4 reversed: the three cloud-only switches are removed (the user, 2026-11-25: "dead features should
+    not appear in the UI at all").** B4 had kept Commission Upgrades, Mobile Deep Linking and Send Readers to Their
+    Local Store on Settings → Amazon, marked "no effect" (C1L, AC18). They are gone from the screen, `Settings::DEFAULTS`,
+    the Amazon tab's sanitizer and the .pot; schema step 13 (`OptionSettingsRepository::remove_retired()`) takes
+    `commission_upgrades`, `mobile_deep_linking` and `international_click` out of `affibloom_settings` once, on the next
+    admin page load. The migrator leaves Lasso's `auto_upgrade_eligible_links`, `amazon_mobile_deep_linking` and
+    `international_click` behind with a reason instead of writing them. `uninstall.php` never named them (it erases
+    the whole option). AC18 now checks they are absent. Checks: unit (both plugins), lint, analyse, Settings → Amazon
+    in Brave, saved.
+
+168. **Dead settings and leftovers removed (the user, 2026-11-25: "Remove all 1-11", after the dead-feature report of
+    deviation 167's session).** Read by nothing: Restrict Prefix, Disable AAWP Description (support view), Disable
+    Configure Amazon Notification and Disable Import Notifications. Performance Mode: the mode was stored but read by
+    nothing; the card keeps the CPU level (`PerformanceMode` and its script removed). Disclosure in Lists & Tables
+    becomes Disclosure in Tables on `show_disclosure_table` (a list shows each card's own disclosure, F30 R21), and the
+    List type loses its mirrored Disclosure row. Force changes from link details: it only stopped the tracking-ID
+    whitelist from learning, not what its help said; the whitelist now always learns (Local had it off). The `brag`
+    override (decision B9) and its CSS; the tour's "higher commissions" (Lasso's cloud). Schema step 14 deletes the
+    seven keys (`OptionSettingsRepository::RETIRED`). Migrator: the ten Lasso keys are left with a reason; `WaitingStep`
+    and `Action::Waiting` removed (every family has its step). The .pot regenerated; the admin guide's screenshots of
+    Settings → General and Display predate this. Checks: unit (1,260 and 156), lint, analyse, the screens in Brave and
+    their saves, the migrator's settings dry run (0 errors).

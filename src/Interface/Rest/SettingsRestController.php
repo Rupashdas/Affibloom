@@ -221,10 +221,6 @@ final class SettingsRestController implements Module {
 		// The setup wizard's Customize step (Task ON6) sends only its own switches, saved through its own tab so the
 		// Display screen's other switches are not turned off.
 		$tab = 'setup_display' === $request->get_param( 'tab' ) ? 'setup_display' : 'display';
-		if ( 'display' === $tab ) {
-			// Lasso's one "Disclosure in Lists & Tables" toggle writes both keys (display.php 676-677).
-			$flat['show_disclosure_table'] = $flat['show_disclosure_list'] ?? null;
-		}
 
 		// The screen holds every type and sends those it showed (`display[<type>][…]`), as Lasso saves them all at
 		// once (deviation 144). Each value is cleaned by type in DisplaySettingsService and SettingsService.

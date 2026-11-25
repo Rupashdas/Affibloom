@@ -6,7 +6,6 @@
  * - Google Analytics: Click Tracking needs a Tracking ID, Pageview and IP Anonymization need Click Tracking; Pageview
  *   asks first; the disabled Click Tracking explains itself (9F).
  * - Cloaked Link Prefix: what is typed becomes its slug form, and the example line follows (9G).
- * - Performance Mode: choosing a preset sets its numbers; only Custom shows the CPU level (9H).
  * - Rebuild Database: "Ready to rebuild?", then the link index is rebuilt in the background (F21 R52, Task 35G).
  * - Link Index: the card's figures, redrawn every 5 seconds (F21 R57, Task 9J).
  *
@@ -256,36 +255,6 @@
 	}
 
 	/**
-	 * Performance Mode (F9 R22-R23): a preset sets the CPU level and, where the support view is on the page, the cron
-	 * interval and the process limit; Custom keeps what is there and shows the CPU level. Loading never changes a value.
-	 */
-	function performance() {
-		var select = document.querySelector( '[data-performance-mode]' );
-		var cpuField = document.querySelector( '[data-cpu-field]' );
-		if ( ! select || ! cpuField ) {
-			return;
-		}
-		var set = function ( name, value ) {
-			var input = document.getElementById( 'affibloom-setting-' + name );
-			if ( input ) {
-				input.value = value;
-			}
-		};
-
-		select.addEventListener( 'change', function () {
-			var option = select.options[ select.selectedIndex ];
-			var custom = undefined === option.dataset.cpu;
-			cpuField.hidden = ! custom;
-			if ( ! custom ) {
-				set( 'cpu_threshold', option.dataset.cpu );
-				set( 'cron_interval', option.dataset.interval );
-				set( 'manual_process_limit', option.dataset.limit );
-			}
-			changed( select );
-		} );
-	}
-
-	/**
 	 * "Disable Help Tooltips" (F9): the server adds the body class on the next load (HelpTips); a save that stays on the
 	 * page (settings-save.js) sets it at once.
 	 */
@@ -303,7 +272,6 @@
 		linkDefaults();
 		analytics();
 		prefix();
-		performance();
 		helpTips();
 		rebuild();
 		linkIndex();

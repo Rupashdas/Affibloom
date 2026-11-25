@@ -4,6 +4,17 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+### Removed
+
+- Settings → Amazon: Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store. They worked only through Lasso's cloud and had no effect; an upgrade step deletes their stored values (decision B4 reversed, 2026-11-25).
+- Settings → General: Performance Mode (the CPU level stays), Restrict Prefix, Disable AAWP Description, Disable Configure Amazon Notification and Disable Import Notifications, which nothing read; Settings → Amazon: Force changes from link details (a tag found in a post now always joins the whitelist while Allow Multiple Tracking IDs is on). An upgrade step deletes their stored values (2026-11-25).
+- Customize Display: the Brag field, which nothing read, and the box's brag styles.
+
+### Changed
+
+- Settings → Display: Disclosure in Lists & Tables is Disclosure in Tables (a list shows each product's own disclosure); the List type has no Disclosure row.
+- The Dashboard tour's Opportunities step no longer speaks of higher commissions.
+
 ### Added
 
 - An extension API for helper plugins: the action `affibloom_ready` with `Affibloom\Extension\Api` (Affibloom's version and one page in Affibloom's menu); `docs/extension-api.md`.

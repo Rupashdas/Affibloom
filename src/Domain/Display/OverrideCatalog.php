@@ -18,12 +18,12 @@ namespace Affibloom\Domain\Display;
  */
 final class OverrideCatalog {
 
-	/** The fields of each type, in Lasso's order (R36-R38). */
+	/** The fields of each type, in Lasso's order (R36-R38), without Lasso's Brag (decision B9; removed 2026-11-25). */
 	private const FIELDS = array(
-		'single'  => array( 'title', 'title_url', 'title_type', 'description', 'badge', 'brag', 'price', 'field', 'rating', 'theme', 'primary_url', 'primary_text', 'secondary_url', 'secondary_text', 'image_url', 'disclosure_text', 'anchor_id' ),
+		'single'  => array( 'title', 'title_url', 'title_type', 'description', 'badge', 'price', 'field', 'rating', 'theme', 'primary_url', 'primary_text', 'secondary_url', 'secondary_text', 'image_url', 'disclosure_text', 'anchor_id' ),
 		'button'  => array( 'theme', 'button_type', 'primary_url', 'primary_text', 'anchor_id' ),
 		'image'   => array( 'image_url', 'anchor_id' ),
-		'grid'    => array( 'columns', 'compact', 'limit', 'title', 'description', 'badge', 'brag', 'price', 'field', 'rating', 'theme', 'title_type', 'anchor_id', 'disclosure' ),
+		'grid'    => array( 'columns', 'compact', 'limit', 'title', 'description', 'badge', 'price', 'field', 'rating', 'theme', 'title_type', 'anchor_id', 'disclosure' ),
 		'list'    => array( 'bullets', 'description', 'price', 'field', 'rating', 'theme', 'title_type', 'anchor_id' ),
 		'gallery' => array( 'columns', 'limit', 'anchor_id' ),
 		'table'   => array( 'anchor_id', 'data_nosnippet' ),

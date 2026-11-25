@@ -400,8 +400,7 @@ a.affibloom-button-2:hover {
 .affibloom-grid-row .affibloom-box-1,
 .affibloom-grid-row .affibloom-box-2 { padding: 0px !important; }
 .affibloom-grid-row .affibloom-badge { left: 5px; }
-.affibloom-grid-row .affibloom-disclosure,
-.affibloom-grid-row .affibloom-brag { display: none !important; }
+.affibloom-grid-row .affibloom-disclosure { display: none !important; }
 .affibloom-grid-row .affibloom-date,
 .affibloom-grid-row .affibloom-description { text-align: left !important; }
 .affibloom-grid-2 .affibloom-box { flex: 0 0 50%; max-width: 50%; }

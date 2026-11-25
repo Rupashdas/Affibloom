@@ -764,24 +764,17 @@ test.describe( 'C1 Amazon product data', () => {
 		}
 	} );
 
-	test( 'AC18 the three switches that needed an outside cloud say they have no effect, and keep their values (C1L)', async ( { page } ) => {
-		const before = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
-		try {
-			setSettings( { mobile_deep_linking: true, international_click: false, commission_upgrades: true } );
-			await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
-			for ( const [ label, on ] of [ [ 'Mobile Deep Linking', true ], [ 'Send Readers to Their Local Store', false ], [ 'Commission Upgrades', true ] ] as const ) {
-				const toggle = page.getByRole( 'switch', { name: label, exact: true } );
-				await expect( toggle ).toHaveAccessibleDescription( /has no effect in Affibloom/ );
-				await expect( toggle ).toBeChecked( { checked: on } );
-			}
-			await expect( page.getByText( /has no effect in Affibloom/ ) ).toHaveCount( 3 );
-			await expect( page.getByText( /Lasso/ ) ).toHaveCount( 0 );
-		} finally {
-			setSettings( {
-				mobile_deep_linking: before.mobile_deep_linking ?? false,
-				international_click: before.international_click ?? false,
-				commission_upgrades: before.commission_upgrades ?? false,
-			} );
+	test( 'AC18 the three switches that needed an outside cloud are gone, and so are their stored values (decision B4 reversed)', async ( { page } ) => {
+		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=amazon' );
+		for ( const label of [ 'Mobile Deep Linking', 'Send Readers to Their Local Store', 'Commission Upgrades' ] ) {
+			await expect( page.getByRole( 'switch', { name: label, exact: true } ) ).toHaveCount( 0 );
+		}
+		await expect( page.getByText( /has no effect in Affibloom/ ) ).toHaveCount( 0 );
+		await expect( page.getByText( /Lasso/ ) ).toHaveCount( 0 );
+		// Schema step 13 ran on that admin page load.
+		const stored = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
+		for ( const key of [ 'mobile_deep_linking', 'international_click', 'commission_upgrades' ] ) {
+			expect( stored ).not.toHaveProperty( key );
 		}
 	} );
 

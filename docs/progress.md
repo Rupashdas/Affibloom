@@ -67,5 +67,9 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    credentials (seen 2026-11-15; deviation 112's "empty" is past): tests that need none remove and restore them.
 5. Standing rules: Affibloom works with no Lasso dependency and no Lasso branding (2026-11-14); one batch per session
    (2026-11-15). Lasso 370 is active on Local since 2026-11-16 (copied from staging by the user for 18D).
-6. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
+6. **Decision B4 reversed 2026-11-25 (deviation 167):** Commission Upgrades, Mobile Deep Linking and Send Readers to
+   Their Local Store removed with their stored values (schema step 13; the migrator leaves them). A report of other
+   dead or cloud-only code was approved ("Remove all 1-11"): deviation 168, schema step 14. Not committed yet (the user's
+   word).
+7. Pending, no action unless the user brings it up: CI has never run (deviation 10); the integration suite has never
    run (no wp-env).

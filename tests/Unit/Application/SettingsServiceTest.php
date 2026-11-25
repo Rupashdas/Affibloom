@@ -156,7 +156,6 @@ final class SettingsServiceTest extends TestCase {
 		self::assertTrue( $settings->bool( 'multiple_tracking_ids' ) );
 		self::assertFalse( $settings->bool( 'auto_monetize_amazon' ) );
 		self::assertTrue( $settings->bool( 'update_pricing_daily' ) );
-		self::assertTrue( $settings->bool( 'commission_upgrades' ) );
 		self::assertFalse( $settings->bool( 'scan_sitestripe_in_post_content' ) );
 		self::assertSame( array(), $settings->list( 'tracking_id_whitelist' ) );
 	}
@@ -304,43 +303,26 @@ final class SettingsServiceTest extends TestCase {
 		self::assertFalse( $repo->get()->bool( 'smart_css' ) );
 	}
 
-	public function test_the_performance_mode_and_cpu_level_are_checked(): void {
+	public function test_the_cpu_level_is_checked(): void {
 		$repo    = $this->repository();
 		$service = new SettingsService( $repo );
 
-		self::assertSame( 'balanced', $repo->get()->string( 'performance_mode' ) );
 		self::assertSame( 65, $repo->get()->int( 'cpu_threshold' ) );
 
-		$service->update_tab(
-			'general',
-			array(
-				'performance_mode' => 'custom',
-				'cpu_threshold'    => '42',
-			)
-		);
-		self::assertSame( 'custom', $repo->get()->string( 'performance_mode' ) );
+		$service->update_tab( 'general', array( 'cpu_threshold' => '42' ) );
 		self::assertSame( 42, $repo->get()->int( 'cpu_threshold' ) );
 
-		$refused = $service->update_tab(
-			'general',
-			array(
-				'performance_mode' => 'turbo',
-				'cpu_threshold'    => '101',
-			)
-		);
-		self::assertEqualsCanonicalizing( array( 'performance_mode', 'cpu_threshold' ), $refused );
-		self::assertSame( 'custom', $repo->get()->string( 'performance_mode' ) );
+		self::assertSame( array( 'cpu_threshold' ), $service->update_tab( 'general', array( 'cpu_threshold' => '101' ) ) );
 		self::assertSame( 42, $repo->get()->int( 'cpu_threshold' ) );
 	}
 
 	public function test_saving_another_field_never_rewrites_a_stored_cpu_level(): void {
-		// This site: Balanced with 80 (Lasso never rewrites it on load or on an unrelated save).
+		// This site: 80 (Lasso never rewrites it on load or on an unrelated save).
 		$repo         = $this->repository();
 		$repo->stored = $repo->stored->with( array( 'cpu_threshold' => 80 ) );
 
 		( new SettingsService( $repo ) )->update_tab( 'general', array( 'new_tab' => '1' ) );
 
-		self::assertSame( 'balanced', $repo->get()->string( 'performance_mode' ) );
 		self::assertSame( 80, $repo->get()->int( 'cpu_threshold' ) );
 	}
 
@@ -374,13 +356,11 @@ final class SettingsServiceTest extends TestCase {
 		self::assertSame( array( 'scan_post_types' ), $refused );
 	}
 
-	public function test_the_notification_switches_are_saved(): void {
+	public function test_the_help_tips_switch_is_saved(): void {
 		$repo = $this->repository();
 		( new SettingsService( $repo ) )->update_tab( 'general', array( 'disable_help_tips' => '1' ) );
 
 		self::assertTrue( $repo->get()->bool( 'disable_help_tips' ) );
-		self::assertFalse( $repo->get()->bool( 'disable_amazon_notice' ) );
-		self::assertFalse( $repo->get()->bool( 'disable_import_notice' ) );
 	}
 
 	public function test_the_support_fields_are_saved_only_when_the_support_view_posted_them(): void {
@@ -389,17 +369,17 @@ final class SettingsServiceTest extends TestCase {
 		$service->update_tab(
 			'general',
 			array(
-				'_support'        => '1',
-				'restrict_prefix' => '1',
-				'cron_interval'   => '2',
+				'_support'      => '1',
+				'process_limit' => '1',
+				'cron_interval' => '2',
 			)
 		);
-		self::assertTrue( $repo->get()->bool( 'restrict_prefix' ) );
+		self::assertTrue( $repo->get()->bool( 'process_limit' ) );
 		self::assertSame( 2, $repo->get()->int( 'cron_interval' ) );
 
 		// A save from the ordinary view has none of them: nothing is switched off.
 		$service->update_tab( 'general', array( 'new_tab' => '1' ) );
-		self::assertTrue( $repo->get()->bool( 'restrict_prefix' ) );
+		self::assertTrue( $repo->get()->bool( 'process_limit' ) );
 		self::assertSame( 2, $repo->get()->int( 'cron_interval' ) );
 	}
 

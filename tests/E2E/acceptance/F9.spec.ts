@@ -153,12 +153,12 @@ test.describe( 'F9 Link settings', () => {
 
 		// Save Changes saves and then goes.
 		await page.goto( GENERAL );
-		await page.getByLabel( 'Disable Import Notifications' ).setChecked( true );
+		await page.getByLabel( 'Disable Help Tooltips' ).setChecked( true );
 		await dashboard.click();
 		await page.getByRole( 'dialog', { name: 'Unsaved Changes' } ).getByRole( 'button', { name: 'Save Changes' } ).click();
 		await page.waitForURL( /page=affibloom(&|$)/ );
-		expect( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) ).disable_import_notice ).toBe( true );
-		setSettings( { disable_import_notice: false } );
+		expect( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) ).disable_help_tips ).toBe( true );
+		setSettings( { disable_help_tips: false } );
 	} );
 
 	test( 'AC9 Google Analytics switches follow the Tracking ID', async ( { page } ) => {
@@ -202,21 +202,17 @@ test.describe( 'F9 Link settings', () => {
 		setSettings( { link_prefix: '' } );
 	} );
 
-	test( 'AC11 performance presets set the CPU level and only Custom shows it', async ( { page } ) => {
-		setSettings( { performance_mode: 'balanced', cpu_threshold: 80 } );
+	// Lasso's Performance Mode presets are gone (2026-11-25): the stored mode was read by nothing; the CPU level stays.
+	test( 'AC11 the Performance card shows the CPU level and saves it', async ( { page } ) => {
+		setSettings( { cpu_threshold: 80 } );
 		await page.goto( GENERAL );
-		// Loading rewrites nothing: Balanced with 80 stays.
-		await expect( page.locator( '#affibloom-setting-cpu_threshold' ) ).toHaveValue( '80' );
-		await expect( page.locator( '#affibloom-setting-cpu_threshold' ) ).toBeHidden();
-
-		const mode = page.getByLabel( 'Performance Mode:' );
-		await mode.selectOption( 'light' );
-		await expect( page.locator( '#affibloom-setting-cpu_threshold' ) ).toHaveValue( '50' );
-		await mode.selectOption( 'custom' );
-		await expect( page.locator( '#affibloom-setting-cpu_threshold' ) ).toBeVisible();
-		await mode.selectOption( 'balanced' );
-		await expect( page.locator( '#affibloom-setting-cpu_threshold' ) ).toHaveValue( '65' );
-		setSettings( { performance_mode: 'balanced', cpu_threshold: 80 } );
+		await expect( page.getByLabel( 'Performance Mode:' ) ).toHaveCount( 0 );
+		const cpu = page.getByLabel( 'CPU level', { exact: true } );
+		await expect( cpu ).toHaveValue( '80' );
+		await cpu.fill( '42' );
+		await saveSettings( page );
+		expect( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) ).cpu_threshold ).toBe( 42 );
+		setSettings( { cpu_threshold: 80 } );
 	} );
 
 	test( 'AC13 the Link Index card shows the last build, the progress of a running one, and Rebuild Database in the support view', async ( { page } ) => {
@@ -269,7 +265,6 @@ test.describe( 'F9 Link settings', () => {
 			await saveSettings( page );
 			await expect( page.locator( 'body.affibloom-no-tips' ) ).toHaveCount( 1 );
 			await expect( page.locator( '.affibloom-help' ).first() ).toBeHidden();
-			await expect( page.getByLabel( 'Disable Configure Amazon Notification' ) ).toBeVisible();
 		} finally {
 			setSettings( { disable_help_tips: false } );
 		}
@@ -284,12 +279,12 @@ test.describe( 'F9 Link settings', () => {
 			await expect( page.getByRole( 'heading', { name: title, exact: true } ) ).toBeVisible();
 		}
 		await page.getByLabel( 'Time interval (hours)' ).fill( '2' );
-		await page.getByLabel( 'Restrict Prefix' ).setChecked( true );
+		await page.getByLabel( 'Processes Execute Limit' ).setChecked( true );
 		await page.getByLabel( 'Domains' ).fill( 'https://example.com/\nnodots' );
 		await saveSettings( page );
 		await expect( page.getByLabel( 'Time interval (hours)' ) ).toHaveValue( '2' );
 		await expect( page.getByLabel( 'Domains' ) ).toHaveValue( 'example.com/' );
-		setSettings( { cron_interval: 0, restrict_prefix: false, keep_original_domains: [] } );
+		setSettings( { cron_interval: 0, process_limit: false, keep_original_domains: [] } );
 	} );
 
 	// Lasso's save (R41, settings.js 2379-2464): the form goes by AJAX behind "Updating Your Site", then the same
@@ -297,7 +292,7 @@ test.describe( 'F9 Link settings', () => {
 	// Every tab stays on the page after its save (the user, 2026-11-16, deviations 141 and 143), where Lasso reloads.
 	test( 'AC17 Save Changes saves behind Updating Your Site and stays on the same address', async ( { page } ) => {
 		const tabs: Array<{ tab: string; change: () => Promise<void> }> = [
-			{ tab: 'general', change: async () => page.getByLabel( 'Disable Import Notifications' ).setChecked( true ) },
+			{ tab: 'general', change: async () => page.getByLabel( 'Enable Smart CSS Loading' ).setChecked( ! ( await page.getByLabel( 'Enable Smart CSS Loading' ).isChecked() ) ) },
 			{ tab: 'amazon', change: async () => page.getByLabel( 'Show Prime Logo In Displays' ).setChecked( ! ( await page.getByLabel( 'Show Prime Logo In Displays' ).isChecked() ) ) },
 			// The Colors panel, so the reload must also come back to that panel.
 			{ tab: 'display&panel=colors', change: async () => page.getByLabel( 'Primary button text', { exact: true } ).fill( unique( 'F9 AC17' ) ) },

@@ -1,7 +1,8 @@
 <?php
 /**
- * Settings → General, Notifications (F9 R51-R54; Task 9K): three switches that turn off notices and the "?" help tips.
- * The tips go through a body class from HelpTips; the two notices are read by Phase 8's notices (F38).
+ * Settings → General, Notifications (F9 R51-R54; Task 9K): the switch that turns off the "?" help tips, through a body
+ * class from HelpTips. Lasso's Configure Amazon and Import notification switches are not here: no notice read them
+ * (removed 2026-11-25).
  *
  * @package Affibloom
  * @var array{settings: \Affibloom\Domain\Settings\Settings} $view
@@ -10,9 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $rows = array(
-	'disable_amazon_notice' => __( 'Disable Configure Amazon Notification', 'affibloom' ),
-	'disable_help_tips'     => __( 'Disable Help Tooltips', 'affibloom' ),
-	'disable_import_notice' => __( 'Disable Import Notifications', 'affibloom' ),
+	'disable_help_tips' => __( 'Disable Help Tooltips', 'affibloom' ),
 );
 ?>
 <div class="affibloom-card" id="affibloom-card-notifications">

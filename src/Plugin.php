@@ -497,6 +497,16 @@ final class Plugin {
 			12 => static function (): void {
 				( new Table( TableLinkLocationRepository::TABLE, TableLinkLocationRepository::COLUMNS ) )->create();
 			},
+			// Decision B4 reversed (2026-11-25): the three switches that worked only through Lasso's cloud are gone, and
+			// so are their stored values.
+			13 => static function (): void {
+				OptionSettingsRepository::remove_retired();
+			},
+			// Deviation 168 (2026-11-25): the settings that were read by nothing, Performance Mode, the list disclosure and
+			// Force changes from link details are gone; their stored values too.
+			14 => static function (): void {
+				OptionSettingsRepository::remove_retired();
+			},
 		);
 	}
 

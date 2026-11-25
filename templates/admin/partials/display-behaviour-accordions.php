@@ -19,8 +19,9 @@ $toggles  = array(
 	'show_price'              => array( __( 'Show Price', 'affibloom' ), __( 'Turn this on to show the price in Displays by default. You can override this per display.', 'affibloom' ) ),
 	'show_disclosure'         => array( __( 'Disclosure in Single Display', 'affibloom' ), $per_type ),
 	'show_disclosure_grid'    => array( __( 'Disclosure in Grids', 'affibloom' ), $per_type ),
-	// One toggle for two keys, as in Lasso; the controller copies it into show_disclosure_table.
-	'show_disclosure_list'    => array( __( 'Disclosure in Lists & Tables', 'affibloom' ), __( 'Turn this on to show the disclosure in List and Table displays by default. You can override this per display.', 'affibloom' ) ),
+	// Lasso's "Disclosure in Lists & Tables" wrote a list key and this one; lists show each card's own disclosure, so
+	// only the tables' key is left (2026-11-25).
+	'show_disclosure_table'   => array( __( 'Disclosure in Tables', 'affibloom' ), __( 'Turn this on to show the disclosure in comparison tables by default.', 'affibloom' ) ),
 	'link_from_display_title' => array( __( 'Link from Display Title', 'affibloom' ), __( 'When enabled, your Display titles will be your clickable link. Toggle this off to have Display titles only appear as text.', 'affibloom' ) ),
 	'keep_site_stripe_ui'     => array( __( 'Keep Site Stripe UI', 'affibloom' ), __( 'When enabled, Amazon SiteStripe-style displays use the SiteStripe iframe layout on the front end.', 'affibloom' ) ),
 );

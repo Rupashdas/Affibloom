@@ -14,7 +14,7 @@ namespace Affibloom\Domain\Box;
  * mapping, used by the block, `[affibloom]` 18S2 and `[lasso]` 27A). A text field is '' when the box does not set it
  * and `hide` (Lasso's word) when the box hides it. Task 20A holds the texts and the image, 20B the theme, buttons,
  * tracking ID, disclosure, anchor and phone layout, 20C the price, Prime, rating, Pros & Cons and fields. Lasso's `ga`
- * and `brag` are read nowhere (R87).
+ * and `brag` are read nowhere (R87); Customize Display no longer offers `brag` (decision B9).
  */
 final class BoxOverrides {
 

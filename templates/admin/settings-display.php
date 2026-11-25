@@ -27,11 +27,12 @@ $type_labels = array(
 	'grid'   => __( 'Grid', 'affibloom' ),
 	'list'   => __( 'List', 'affibloom' ),
 );
-// The Disclosure element row writes the scope setting of its type (requirements B5).
+// The Disclosure element row writes the scope setting of its type (requirements B5). A list has none: each card shows
+// its own disclosure, so the List type has no Disclosure row.
 $disclosure_keys = array(
 	'single' => 'show_disclosure',
 	'grid'   => 'show_disclosure_grid',
-	'list'   => 'show_disclosure_list',
+	'list'   => '',
 );
 
 /*
@@ -156,8 +157,8 @@ $regions  = static function ( string $region, string $partial, callable $data ) 
 											'type'       => $display_type,
 											'name'       => $name,
 											'columns'    => $view['columns'],
-											'disclosure' => $settings->bool( $disclosure_keys[ $display_type->key() ] ),
-											'mirror'     => 'affibloom-setting-' . $disclosure_keys[ $display_type->key() ],
+											'disclosure' => '' !== $disclosure_keys[ $display_type->key() ] && $settings->bool( $disclosure_keys[ $display_type->key() ] ),
+											'mirror'     => '' === $disclosure_keys[ $display_type->key() ] ? '' : 'affibloom-setting-' . $disclosure_keys[ $display_type->key() ],
 										)
 									);
 									?>

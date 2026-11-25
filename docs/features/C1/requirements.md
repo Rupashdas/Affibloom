@@ -66,9 +66,9 @@ New criteria:
   When URL Is Replaced" is off or the name is a placeholder. (C1O)
 - **AC17** With "Keep Geni.us Formatting" off, a pasted or saved `geni.us` link is stored as its destination and the
   geni.us link kept as the product's old link; on, it is stored as pasted. (C1K)
-- **AC18** "Mobile Deep Linking", "Send Readers to Their Local Store" and "Commission Upgrades" show their stored value
-  and a plain note that they did their work in Lasso's cloud and have no effect in Affibloom (per the user's answer,
-  section 4). (C1L)
+- **AC18** "Mobile Deep Linking", "Send Readers to Their Local Store" and "Commission Upgrades" are not on Settings →
+  Amazon, and `affibloom_settings` holds none of their keys after schema step 13 (decision B4 reversed by the user
+  2026-11-25, deviation 167; first built in C1L as switches marked "no effect").
 - **AC19** The "Migrating from Amazon SiteStripe?" notice shows while Auto-Monetization is off until dismissed, and its
   × keeps it dismissed for the site. (C1N)
 - **AC20** Turning "Keep Geni.us Formatting" off and saving queues the job that re-saves every product whose link is a

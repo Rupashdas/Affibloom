@@ -14,7 +14,6 @@ test.describe( 'F16 Display system', () => {
 		show_price: true,
 		show_disclosure: true,
 		show_disclosure_grid: false,
-		show_disclosure_list: true,
 		show_disclosure_table: true,
 		link_from_display_title: true,
 		keep_site_stripe_ui: false,
@@ -307,7 +306,7 @@ test.describe( 'F16 Display system', () => {
 		await page.goto( `${ displayTab( 'grid' ) }&panel=colors` );
 		await page.getByLabel( 'Disclosure text', { exact: true } ).fill( 'We may earn a commission.' );
 		await page.getByLabel( 'Disclosure in Grids', { exact: true } ).check();
-		await page.getByLabel( 'Disclosure in Lists & Tables', { exact: true } ).uncheck();
+		await page.getByLabel( 'Disclosure in Tables', { exact: true } ).uncheck();
 		await page.getByLabel( 'Show Price', { exact: true } ).uncheck();
 
 		// The Elements panel's Disclosure row is the Grid scope while Grid is being edited.
@@ -319,9 +318,14 @@ test.describe( 'F16 Display system', () => {
 		const flat = storedSettings();
 		expect( flat.disclosure_text ).toBe( 'We may earn a commission.' );
 		expect( flat.show_disclosure_grid ).toBe( true );
-		expect( flat.show_disclosure_list ).toBe( false );
-		expect( flat.show_disclosure_table ).toBe( false ); // one toggle, both keys, as in Lasso
+		expect( flat.show_disclosure_table ).toBe( false );
+		expect( flat ).not.toHaveProperty( 'show_disclosure_list' ); // a list shows each card's own disclosure (2026-11-25)
 		expect( flat.show_price ).toBe( false );
+
+		// The List type has no Disclosure row.
+		await page.goto( displayTab( 'list' ) );
+		await openAccordion( page, 'elements' );
+		await expect( page.getByLabel( 'Disclosure', { exact: true } ) ).toHaveCount( 0 );
 	} );
 
 	test.fixme( 'AC9 the box prints the saved disclosure text', async () => {

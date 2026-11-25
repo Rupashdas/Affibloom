@@ -40,8 +40,7 @@ final class Settings {
 		// Earlier prefixes, which keep answering (F24 N2; Task CL5). Kept by the save, not a field.
 		'cloak_prefix_history'            => array(),
 		'smart_css'                       => true,
-		// General: Performance (Task 9H). Lasso's default mode is Balanced, whose CPU level is 65.
-		'performance_mode'                => 'balanced',
+		// General: Performance (Task 9H): the CPU level, Lasso's Balanced mode's 65.
 		// General → Permissions (F37 R31-R35; Task TL6): the lowest role that may use Affibloom; administrators by default.
 		'permission'                      => 'administrator',
 		'cpu_threshold'                   => 65,
@@ -49,23 +48,19 @@ final class Settings {
 		'scan_post_types'                 => array(),
 		'scan_custom_fields'              => array(),
 		// General: Notifications (Task 9K).
-		'disable_amazon_notice'           => false,
 		'disable_help_tips'               => false,
 		// General → Uninstall (Task 38): deleting the plugin removes its data only when this is on.
 		'delete_data_on_uninstall'        => false,
 		// The Logs page's Enable Logs (F37 R2; Task TL3): off, only forced lines are written.
 		'enable_logs'                     => false,
-		'disable_import_notice'           => false,
 		// The intro boxes closed for good (F22 D8; F38 ON5 reuses the key): their names. Kept by the save, not a field.
 		'education_hidden'                => array(),
 		// General, support view only (`&support=1`, Task 9L).
 		'keep_original_domains'           => array(),
 		'cron_interval'                   => 0,
 		'manual_process_limit'            => 2,
-		'restrict_prefix'                 => false,
 		'process_limit'                   => false,
 		'fontawesome_svg'                 => false,
-		'no_feature_description'          => false,
 		// Display, site-wide. The per-type theme, colours and labels live in the display model
 		// (Domain\Display\DisplaySettings), because Lasso keeps one set per display type.
 		'disclosure_text'                 => 'We earn a commission if you make a purchase, at no additional cost to you.',
@@ -73,7 +68,6 @@ final class Settings {
 		// Lasso's factory defaults (admin/lasso-constant.php 171-176, 236-240).
 		'show_price'                      => true,
 		'show_disclosure_grid'            => false,
-		'show_disclosure_list'            => true,
 		'show_disclosure_table'           => true,
 		'keep_site_stripe_ui'             => false,
 		'custom_css'                      => '',
@@ -88,14 +82,10 @@ final class Settings {
 		'auto_monetize_amazon'            => false,
 		'show_prime'                      => true,
 		'show_discount_pricing'           => false,
-		'commission_upgrades'             => true,
 		'update_pricing_daily'            => true,
 		'pricing_locations_only'          => true,
-		'force_change_from_link_details'  => false,
 		'keep_title_when_url_replaced'    => true,
 		'shorten_amazon_links'            => true,
-		'mobile_deep_linking'             => true,
-		'international_click'             => true,
 		'keep_genius_formatting'          => true,
 		'scan_sitestripe_in_post_content' => false,
 		'days_before_out_of_stock_alerts' => 0,

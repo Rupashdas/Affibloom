@@ -14,25 +14,20 @@ defined( 'ABSPATH' ) || exit;
 $settings      = $view['settings'];
 $tracking_rule = '^[a-zA-Z0-9\-_.]+-[0-9]{2,3}$';
 
-// Lasso's Amazon Preferences, in Lasso's order, with Lasso's help texts (product name removed).
+// Lasso's Amazon Preferences, in Lasso's order, with Lasso's help texts (product name removed). Commission Upgrades,
+// Mobile Deep Linking and Send Readers to Their Local Store are left out: they worked only through Lasso's cloud
+// (deviation 52; decision B4 reversed 2026-11-25).
+// Force changes from link details is left out too: it did not do what its help text said (2026-11-25).
 $preferences = array(
 	'show_prime'                      => array( __( 'Show Prime Logo In Displays', 'affibloom' ), __( 'Show the blue Prime logo beside the price for all eligible Amazon products in your Displays.', 'affibloom' ) ),
 	'show_discount_pricing'           => array( __( 'Show Discount Pricing', 'affibloom' ), __( 'Show the base Amazon price as strikethrough text, followed by the discounted price in bold.', 'affibloom' ) ),
-	'commission_upgrades'             => array( __( 'Commission Upgrades', 'affibloom' ), __( 'Site-wide: when a brand raises commission on products you already link to, clicks are routed to the higher payout at click time.', 'affibloom' ) ),
 	'update_pricing_daily'            => array( __( 'Update Amazon pricing daily', 'affibloom' ), __( 'Scan and update all of your Amazon links for the latest price.', 'affibloom' ) ),
 	'pricing_locations_only'          => array( __( 'Only update products with Locations', 'affibloom' ), __( 'When enabled, Amazon pricing and link status checks only run for links that appear in Locations. Turn off to include your full catalog.', 'affibloom' ) ),
-	'force_change_from_link_details'  => array( __( 'Force changes from link details', 'affibloom' ), __( "When enabled, the tracking ID in posts is updated to the ID from the product's link details page.", 'affibloom' ) ),
 	'keep_title_when_url_replaced'    => array( __( 'Keep Title When URL Is Replaced', 'affibloom' ), __( 'When enabled, replacing the Primary Destination URL will keep the current title. Disable to automatically update the title based on the new destination.', 'affibloom' ) ),
 	'shorten_amazon_links'            => array( __( 'Shorten Amazon affiliate links', 'affibloom' ), __( 'Remove unnecessary attributes from long Amazon affiliate links for a cleaner reader experience.', 'affibloom' ) ),
-	'mobile_deep_linking'             => array( __( 'Mobile Deep Linking', 'affibloom' ), __( 'Open clicks in the Amazon app.', 'affibloom' ) ),
-	'international_click'             => array( __( 'Send Readers to Their Local Store', 'affibloom' ), __( 'Readers will be redirected to the Amazon store closest to their detected country.', 'affibloom' ) ),
 	'keep_genius_formatting'          => array( __( 'Keep Geni.us Formatting', 'affibloom' ), __( 'Turn this off to remove geni.us cloaking from all links.', 'affibloom' ) ),
 	'scan_sitestripe_in_post_content' => array( __( 'Scan SiteStripe in post content', 'affibloom' ), __( 'When enabled, post content is scanned for SiteStripe images, iframes, and page-builder data during link detection. Disable for faster scans if you do not use SiteStripe embeds.', 'affibloom' ) ),
 );
-
-// The three switches that worked only through an outside cloud service: kept with their values, labelled (C1L, decision B4).
-$cloud_only = array( 'commission_upgrades', 'mobile_deep_linking', 'international_click' );
-$cloud_note = __( 'This worked only through an outside cloud service and has no effect in Affibloom. Your choice is kept.', 'affibloom' );
 ?>
 <div class="wrap affibloom-admin">
 	<?php $this->render( 'admin/partials/header' ); ?>
@@ -131,7 +126,6 @@ $cloud_note = __( 'This worked only through an outside cloud service and has no 
 											'label'   => $label,
 											'checked' => $settings->bool( $key ),
 											'help'    => $help,
-											'note'    => in_array( $key, $cloud_only, true ) ? $cloud_note : '',
 										)
 									);
 								}

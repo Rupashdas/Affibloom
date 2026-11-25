@@ -130,7 +130,7 @@ recommendation, which the user accepted for every item without an answer.
 - **Decided (the user accepted the recommendation, 2026-11-14):** WordPress's footer version (F38 N6, recommended: blank it on Affibloom's pages only; ON1
   prints "Version <x.y.z>" in Affibloom's own footer).
 - **Decided (the user accepted the recommendation, 2026-11-14):** the wizard's "Commission Upgrades" step (F38 N7, recommended: omit, as C1 N1).
-- **Decided (the user, 2026-11-14), B4:** the three switches are kept as stored values, labelled "no effect"; nothing is built behind them (Task C1L).
+- **Decided (the user, 2026-11-14), B4:** the three switches are kept as stored values, labelled "no effect"; nothing is built behind them (Task C1L). **Reversed by the user 2026-11-25** (deviation 167): the switches and their stored values are removed.
 - **Decided (the user, 2026-11-14), C4:** Lasso's Prime rule: the logo on every Amazon product while the site setting is on; the per-product switch is an opt-out defaulting on (Task C1G is in Phase 3).
 - **Decided (the user accepted the recommendation, 2026-11-14):** Amazon prices after cutover without credentials (C1 N3, recommended: show a price only from
   an API row younger than 24 hours; Task C1F is in Phase 3).

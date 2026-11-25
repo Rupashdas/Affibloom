@@ -269,8 +269,8 @@ Each tab saves over the page without reloading; leaving with unsaved changes ask
 - **Cloaked Link Prefix:** the folder of cloaked links; most sites leave it empty.
 - **Custom Link Detection:** which post types and custom fields the link index reads.
 - **Smart CSS Loading:** the box's styles only on pages with a box.
-- **Performance:** Performance Mode and the maximum CPU level background work may use.
-- **Notifications:** turn off the Amazon set-up notice, the import notices or the help tooltips.
+- **Performance:** the maximum CPU level background work may use.
+- **Notifications:** turn off the help tooltips.
 - **Permissions:** the minimum role that can use Affibloom (only administrators can change this).
 - **Uninstall:** whether deleting the plugin deletes its data (section 12), and the posts that still use Affibloom.
 
@@ -280,7 +280,8 @@ Each tab saves over the page without reloading; leaving with unsaved changes ask
 
 The defaults for each display type: **Single**, **Grid** and **List** switch in place, one save stores them all. Per
 type: the theme, colours, which elements show (price, disclosure, badge, rating, features), the disclosure text, **Link
-from Display Title**, **Keep Site Stripe UI** and custom CSS. The preview shows the result at desktop (1280 px) and
+from Display Title**, **Keep Site Stripe UI** and custom CSS. **Disclosure in Tables** sets the comparison tables'
+disclosure; a list shows each product's own. The preview shows the result at desktop (1280 px) and
 phone (390 px) width. **Reset Settings** returns to the defaults.
 
 ![Settings → Display](images/admin-guide/settings-display.png)
@@ -294,8 +295,8 @@ phone (390 px) width. **Reset Settings** returns to the defaults.
 - **Amazon Preferences:** Show Prime Logo, discount pricing, Update Amazon pricing daily (and only for products used
   in content), how a link change affects the product, Days before out of stock alerts.
 
-Three switches are kept only for their stored value and say "This worked only through an outside cloud service and has
-no effect in Affibloom": Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store (section 15).
+Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store are not here: they worked only through
+Lasso's cloud (section 15).
 
 ![Settings → Amazon](images/admin-guide/settings-amazon.png)
 
@@ -353,13 +354,14 @@ Each of these depended on Lasso's company, cloud or third parties; Affibloom wor
 | The cloud syncs: content statistics, link issues, link locations, links, authors, plugin list, settings and cron health, the click-count sync | they sent site data to Lasso or pulled Lasso's figures | Link health, Locations and clicks are worked out on the site. |
 | Lasso's historical click figures and its "Lasso …" GA events | Lasso's cloud data and names | Clicks and GA start from zero under Affibloom's names (section 9). |
 | The affiliate-programs catalogue and Program Opportunities | filled from Lasso's cloud | Opportunities finds links and domains from your own content (section 10). |
-| Commission Upgrades, auto-upgrade of eligible links | Lasso's brand deals | none; the switches keep their stored value and say they have no effect |
-| Mobile Deep Linking, Send Readers to Their Local Store | worked only through Lasso's link service and script | Readers go straight to Amazon with your tracking ID. |
+| Commission Upgrades, auto-upgrade of eligible links | Lasso's brand deals | none; the switch is removed and its stored value deleted |
+| Mobile Deep Linking, Send Readers to Their Local Store | worked only through Lasso's link service and script | Removed, with their stored values. Readers go straight to Amazon with your tracking ID. |
 | The JS-domain and snippet downloads | code fetched from Lasso | none needed |
 | The cloud parts of the redirect (posting click IDs to Lasso) | Lasso's cloud | The local sub-ID rewrite for networks is kept. |
 | Intercom chat, Segment, PostHog, Sentry | third parties receiving site data | none |
 | The Help menu, Support item and "Learn" links | Lasso's help site | This guide. The help tooltips stay. |
 | The review card | asks for a review of Lasso | none |
+| Performance Mode presets, Restrict Prefix, Disable AAWP Description, the Configure Amazon and Import notification switches, the list half of Disclosure in Lists & Tables, Force changes from link details, Customize Display's Brag field | nothing in Affibloom read them, or they did less than their help said | Removed with their stored values (2026-11-25). The CPU level, Disclosure in Tables and the tracking-ID whitelist stay. |
 | Brag mode | Lasso's logo and sign-up link | A neutral "Brag" icon in the icon library. |
 | AI text generation | Lasso's cloud service | AI Text displays show text already stored; nothing new is generated. |
 | "Uninstall Lasso" (rewrote posts) | it changed content | The opt-in data removal of section 12. |

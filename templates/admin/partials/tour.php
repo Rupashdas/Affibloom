@@ -16,7 +16,7 @@ $tour_steps = array(
 	array( '#affibloom-search', __( 'Search by link name or URL. Use the keyboard shortcut shown next to the box for a faster jump.', 'affibloom' ), false ),
 	array( '.affibloom-filters__toggle', __( 'Open Filters to narrow links by group, type, placements, and comparison tables. Changes apply as you toggle.', 'affibloom' ), true ),
 	array( '#affibloom-filters-panel', __( 'Pick group, link type, placements, or a comparison table here. Save a view when you find a filter set you reuse.', 'affibloom' ), true ),
-	array( '.affibloom-header__nav a[href$="page=affibloom-opportunities"]', __( "Opportunities identify links that aren't monetized yet or could be earning higher commissions.", 'affibloom' ), false ),
+	array( '.affibloom-header__nav a[href$="page=affibloom-opportunities"]', __( "Opportunities identify links and domains in your content that aren't monetized yet.", 'affibloom' ), false ),
 	array( '.affibloom-header__nav a[href$="page=affibloom-tables"]', __( 'Tables are comparison layouts you can embed on posts. Build once, reuse across your site.', 'affibloom' ), false ),
 	array( '.affibloom-header__nav a[href$="page=affibloom-groups"]', __( 'Create Groups to organize related links so you can manage and display them together.', 'affibloom' ), false ),
 );

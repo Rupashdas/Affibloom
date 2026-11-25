@@ -186,7 +186,7 @@ test.describe( 'F11 Link health', () => {
 		// The open page's WP-Cron fallback (AC17) would run the batches below itself; this test runs them.
 		await page.route( ( url ) => decodeURIComponent( url.href ).includes( 'jobs/run-due' ), ( route ) => route.fulfill( { json: { status: true, message: 'Cron is working well.' } } ) );
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general' );
-		await expect( page.getByText( 'Performance Mode:' ) ).toBeVisible();
+		await expect( page.getByLabel( 'CPU level', { exact: true } ) ).toBeVisible();
 		await expect( page.getByText( 'Time interval (hours)' ) ).toHaveCount( 0 );
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings&tab=general&support' );
 		await expect( page.getByText( 'Time interval (hours)' ) ).toBeVisible();

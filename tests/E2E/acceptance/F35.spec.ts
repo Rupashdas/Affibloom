@@ -172,7 +172,7 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		const whitelist = () => wp( 'eval', '$s = (array) get_option( "affibloom_settings", array() ); echo implode( ",", (array) ( $s["tracking_id_whitelist"] ?? array() ) );' ).split( ',' );
 		const tag = () => `p${ unique( 't' ).replace( /[^a-z0-9]/gi, '' ).slice( -8 ).toLowerCase() }-21`;
 		const post = ( code: string ) => newPostWith( `<p><a href="https://www.amazon.com/dp/${ asin() }?tag=${ code }">x</a></p>` );
-		setSettings( { multiple_tracking_ids: true, force_change_from_link_details: false, tracking_id_blacklist: [], tracking_id: 'vbvault-20' } );
+		setSettings( { multiple_tracking_ids: true, tracking_id_blacklist: [], tracking_id: 'vbvault-20' } );
 
 		const joins = tag();
 		post( joins );
@@ -183,13 +183,8 @@ test.describe( 'F35 Amazon auto-monetization', () => {
 		post( off );
 		expect( whitelist() ).not.toContain( off );
 
-		const forced = tag();
-		setSettings( { multiple_tracking_ids: true, force_change_from_link_details: true } );
-		post( forced );
-		expect( whitelist() ).not.toContain( forced );
-
 		const removed = tag();
-		setSettings( { force_change_from_link_details: false, tracking_id_blacklist: [ removed ] } );
+		setSettings( { multiple_tracking_ids: true, tracking_id_blacklist: [ removed ] } );
 		post( removed );
 		expect( whitelist() ).not.toContain( removed );
 		setSettings( { tracking_id_blacklist: [] } );

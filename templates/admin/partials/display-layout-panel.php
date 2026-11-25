@@ -102,15 +102,16 @@ $groups         = array(
 	<p class="affibloom-rail-hint affibloom-density__hint" data-density-hint><?php echo esc_html( $hints[ $preset ] ?? $hints['custom'] ); ?></p>
 </fieldset>
 
+<?php $total = count( Elements::KEYS ) + ( '' === $view['mirror'] ? 0 : 1 ); // A type without a Disclosure row has a mirror of ''. ?>
 <details class="affibloom-accordion" data-accordion="elements">
 	<summary class="affibloom-accordion__toggle">
 		<span><?php esc_html_e( 'Elements', 'affibloom' ); ?></span>
-		<span class="affibloom-accordion__summary" data-elements-summary data-total="<?php echo esc_attr( (string) ( count( Elements::KEYS ) + 1 ) ); ?>"
+		<span class="affibloom-accordion__summary" data-elements-summary data-total="<?php echo esc_attr( (string) $total ); ?>"
 			<?php /* translators: 1: visible element count, 2: total element count. */ ?>
 			data-format="<?php echo esc_attr( __( '%1$d of %2$d visible', 'affibloom' ) ); ?>">
 			<?php
 			/* translators: 1: visible element count, 2: total element count. */
-			echo esc_html( sprintf( __( '%1$d of %2$d visible', 'affibloom' ), $elements->shown() + ( $view['disclosure'] ? 1 : 0 ), count( Elements::KEYS ) + 1 ) );
+			echo esc_html( sprintf( __( '%1$d of %2$d visible', 'affibloom' ), $elements->shown() + ( $view['disclosure'] ? 1 : 0 ), $total ) );
 			?>
 		</span>
 	</summary>
@@ -118,7 +119,7 @@ $groups         = array(
 		<input type="hidden" name="<?php echo esc_attr( $view['name'] ); ?>[elements_present]" value="1">
 		<?php foreach ( Elements::KEYS as $element ) : ?>
 			<?php $element_id = 'affibloom-display-element-' . $element; ?>
-			<?php if ( 'timestamp' === $element ) : ?>
+			<?php if ( 'timestamp' === $element && '' !== $view['mirror'] ) : ?>
 				<?php
 				// Lasso's eleventh row, between Secondary button and Timestamp. It is not an element flag: it shows
 				// and changes the disclosure setting of this type, which the Disclosure & behavior toggle posts. The

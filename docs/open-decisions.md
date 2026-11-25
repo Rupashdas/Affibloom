@@ -33,7 +33,7 @@ Everything **not** listed here was settled from Lasso's source and the project r
 | B1 | Licence key, account, Analytics, Marketplace items, update checker, Advanced Click Tracking, Segment/PostHog/Sentry/Intercom, Stop Lasso Analytics | Omit | F9 N1, F38 N2, N5 |
 | B2 | Help menu, Support item, the 29 "Learn" links to Lasso's help site | Omit (boxes keep their text) | F38 N3, F23 D9 |
 | B3 | The review card asking for a WordPress.org review of Lasso | Omit | F38 N4 |
-| B4 | Commission Upgrades, Mobile Deep Linking, Send Readers to Their Local Store (worked only through `lasso.to`) | Keep the stored values, label "no effect", build nothing | C1 N1, N7 (F38) |
+| B4 | Commission Upgrades, Mobile Deep Linking, Send Readers to Their Local Store (worked only through `lasso.to`) | ~~Keep the stored values, label "no effect", build nothing~~ **Reversed 2026-11-25:** removed (deviation 167) | C1 N1, N7 (F38) |
 | B5 | AI Text displays and `[lasso prompt]` (Lasso's `lasso.link/chat`) | Render only text already stored; no generator unless you choose a provider and key | F30 N2, F31 N1, F4 N4 |
 | B6 | Program Opportunities (a table filled from `lasso.link/data-sync`) | Not built | F22 N4 |
 | B7 | Lasso's per-customer `SUPPORT_SITES` fixes | Not built | F37 N4 |
@@ -118,7 +118,7 @@ Everything **not** listed here was settled from Lasso's source and the project r
 | C2 | **Restore Lasso's "Choose a Display Type"** (U1 withdrawn). |
 | C4 | **Lasso's Prime rule:** the logo on every Amazon product while the site setting is on; the per-product switch is an opt-out defaulting on. |
 | B1, B2, B3, B10 | **Leave out** every Lasso cloud, licence, account and marketing item, the Help menu and the 29 Learn links, the review card and the tour's Chat step. |
-| B4 | **Keep the three switches, labelled "no effect"**; nothing built behind them. |
+| B4 | ~~Keep the three switches, labelled "no effect"; nothing built behind them.~~ **Reversed by the user 2026-11-25 (deviation 167):** the three switches, their settings and their stored values are removed; the migrator no longer carries them. |
 | B5 | **Show stored AI text only** (DT9); DT10 is not built. |
 | B9 | **Leave brag mode out.** The Enable Brag Mode and Brag URL controls built in 10E are removed (new correction task); F5 22D is dropped. |
 | C3 | **Build Lasso's Permissions role select** (TL6), default Administrator, fixing Lasso's Contributor/Subscriber swap; decision 1 becomes the default. |

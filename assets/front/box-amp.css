@@ -219,46 +219,6 @@ a.affibloom-button-2:hover {
 	line-height: 1.2rem;
 	margin: 0;
 }
-.affibloom-single-brag {
-	position: absolute;
-	width: 100%;
-	left: 0;
-	bottom: 0;
-	padding: 0 10px 10px 0;
-}
-.affibloom-brag {
-	display: block;
-	text-align: right;
-	bottom: 15px;
-	right: 15px;
-	width: 100%;
-	height: 30px;
-	z-index: 500;
-}
-.affibloom-brag img {
-	width: 30px;
-	height: 30px;
-	box-shadow: none;
-	border: 0;
-}
-.affibloom-brag-grid {
-	display: block;
-	text-decoration: none;
-	font-size: 15px;
-	font-style: italic;
-	color: #aaa;
-	font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
-	font-weight: normal;
-	text-align: center;
-	margin: -10px 0 20px 0;
-}
-.affibloom-brag-grid img {
-	vertical-align: middle;
-	width: 30px;
-	height: 30px;
-	box-shadow: none;
-	border: 0;
-}
 .affibloom-list .ls-list-title,
 .affibloom-list li {
 	max-width: inherit;
@@ -512,8 +472,7 @@ a.affibloom-button-2:hover {
 .affibloom-grid-row .affibloom-badge {
 	left: -10px;
 }
-.affibloom-grid-row .affibloom-disclosure,
-.affibloom-grid-row .affibloom-brag {
+.affibloom-grid-row .affibloom-disclosure {
 	display: none;
 }
 .affibloom-grid-row .affibloom-date,

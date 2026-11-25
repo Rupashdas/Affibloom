@@ -14,7 +14,7 @@ use Affibloom\Domain\Display\OverrideCatalog;
 /**
  * Lasso's labels and help texts for Customize Display (F4 R35-R38; lasso-constant.php 388-713), minus its name: its
  * examples on its own site read example.com, "Lasso Links" read "products", and the reference-guide notice and the
- * brag field's affiliate link are left out (D5, deviation 52). The help texts keep Lasso's `<code>`, `<i>` and `<br/>`.
+ * brag field are left out (D5, deviation 52; decision B9). The help texts keep Lasso's `<code>`, `<i>` and `<br/>`.
  */
 final class OverrideTexts {
 
@@ -60,7 +60,6 @@ final class OverrideTexts {
 			'title_type'      => array( __( 'Title tag', 'affibloom' ), __( 'Set the title tag. Common values are: <i>H1, H2, H3, H4</i>', 'affibloom' ) ),
 			'description'     => array( __( 'Product description', 'affibloom' ), $group ? __( 'Hide the product description by <code>hide</code> value.', 'affibloom' ) : __( 'Override the product description<br/>Hide the product description by <code>hide</code> value.', 'affibloom' ) ),
 			'badge'           => array( __( 'Badge', 'affibloom' ), $group ? __( 'Hide the badge by <code>hide</code> value.', 'affibloom' ) : __( 'Override the display badge.<br/>Hide the badge by <code>hide</code> value.', 'affibloom' ) ),
-			'brag'            => array( __( 'Brag', 'affibloom' ), __( 'Show the brag line on your display by <code>true</code> value.', 'affibloom' ) ),
 			'price'           => array( __( 'Show/Hide the price', 'affibloom' ), '' ),
 			'field'           => array( __( 'Show/Hide all Fields', 'affibloom' ), '' ),
 			'rating'          => array( __( 'Show/Hide the Primary Rating', 'affibloom' ), '' ),

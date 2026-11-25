@@ -15,11 +15,10 @@ final class TrackingIdsLearnTest extends TestCase {
 	private static function settings( array $changes = array() ): Settings {
 		return Settings::from_array(
 			$changes + array(
-				'tracking_id'                    => 'vbvault-20',
-				'multiple_tracking_ids'          => true,
-				'force_change_from_link_details' => false,
-				'tracking_id_whitelist'          => array( 'vbvault-20' ),
-				'tracking_id_blacklist'          => array(),
+				'tracking_id'           => 'vbvault-20',
+				'multiple_tracking_ids' => true,
+				'tracking_id_whitelist' => array( 'vbvault-20' ),
+				'tracking_id_blacklist' => array(),
 			)
 		);
 	}
@@ -28,9 +27,8 @@ final class TrackingIdsLearnTest extends TestCase {
 		self::assertSame( array( 'vbvault-20', 'partner-21' ), TrackingIds::learn( 'partner-21', self::settings() ) );
 	}
 
-	public function test_nothing_changes_under_each_of_the_five_conditions(): void {
+	public function test_nothing_changes_under_each_condition(): void {
 		self::assertNull( TrackingIds::learn( 'partner-21', self::settings( array( 'multiple_tracking_ids' => false ) ) ), 'Multiple IDs off' );
-		self::assertNull( TrackingIds::learn( 'partner-21', self::settings( array( 'force_change_from_link_details' => true ) ) ), 'Force changes on' );
 		self::assertNull( TrackingIds::learn( 'partner-21', self::settings( array( 'tracking_id_blacklist' => array( 'partner-21' ) ) ) ), 'removed by hand' );
 		self::assertNull( TrackingIds::learn( 'vbvault-20', self::settings( array( 'tracking_id_whitelist' => array() ) ) ), "the site's own" );
 		self::assertNull( TrackingIds::learn( 'vbvault-20', self::settings() ), 'already whitelisted' );

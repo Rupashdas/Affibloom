@@ -3,7 +3,8 @@
  * Settings → General, the support view's cards (`&support=1`; F9 R55-R62, Task 9L): Keep Original URL, Cron, Cronjob
  * Manually and Optional Settings. They are maintenance settings that other features read (F18/F1, F11, F24, F28, C1);
  * the page marks that it showed them (`_support`) so a save from the ordinary view never switches them off. Segment
- * Analytics is Lasso's own cloud and is not built. Rebuild Database is in the Link Index card's support view (Task 35G).
+ * Analytics is Lasso's own cloud and is not built; Restrict Prefix and Disable AAWP Description were read by nothing
+ * (removed 2026-11-25). Rebuild Database is in the Link Index card's support view (Task 35G).
  *
  * @package Affibloom
  * @var array{settings: \Affibloom\Domain\Settings\Settings} $view
@@ -13,10 +14,8 @@ defined( 'ABSPATH' ) || exit;
 
 $settings = $view['settings'];
 $optional = array(
-	'restrict_prefix'        => array( __( 'Restrict Prefix', 'affibloom' ), __( 'When enabled, cloaked links can only be reached through their prefix.', 'affibloom' ) ),
-	'process_limit'          => array( __( 'Processes Execute Limit', 'affibloom' ), __( 'When enabled, a background job waits in the queue while too many are running.', 'affibloom' ) ),
-	'fontawesome_svg'        => array( __( 'Font Awesome JS Render SVG', 'affibloom' ), __( 'Render Font Awesome icons as SVG on the front end.', 'affibloom' ) ),
-	'no_feature_description' => array( __( 'Disable AAWP Description', 'affibloom' ), __( "Don't use an Amazon product's feature list as an empty description.", 'affibloom' ) ),
+	'process_limit'   => array( __( 'Processes Execute Limit', 'affibloom' ), __( 'When enabled, a background job waits in the queue while too many are running.', 'affibloom' ) ),
+	'fontawesome_svg' => array( __( 'Font Awesome JS Render SVG', 'affibloom' ), __( 'Render Font Awesome icons as SVG on the front end.', 'affibloom' ) ),
 );
 ?>
 <input type="hidden" name="settings[_support]" value="1">

@@ -16,7 +16,6 @@ use Affibloom\Application\Opportunities\IntroBoxes;
 use Affibloom\Domain\Cloak\CloakPrefix;
 use Affibloom\Domain\Amazon\Marketplace;
 use Affibloom\Domain\Settings\CustomCss;
-use Affibloom\Domain\Settings\PerformanceMode;
 use Affibloom\Domain\Settings\Permission;
 use Affibloom\Domain\Settings\Settings;
 use Affibloom\Domain\Settings\SettingsRepository;
@@ -44,30 +43,24 @@ final class SettingsService {
 			'click_tracking'           => 'bool',
 			'link_prefix'              => 'slug',
 			'smart_css'                => 'bool',
-			'performance_mode'         => 'performance_mode',
 			'permission'               => 'permission',
 			'cpu_threshold'            => 'percent',
 			'scan_post_types'          => 'post_types',
 			'scan_custom_fields'       => 'custom_fields',
-			'disable_amazon_notice'    => 'bool',
 			'disable_help_tips'        => 'bool',
 			'delete_data_on_uninstall' => 'bool',
-			'disable_import_notice'    => 'bool',
 			// The support view's fields (`&support=1`); they are saved only when that view posted them.
 			'keep_original_domains'    => 'domains',
 			'cron_interval'            => 'cron_interval',
 			'manual_process_limit'     => 'process_limit',
-			'restrict_prefix'          => 'bool',
 			'process_limit'            => 'bool',
 			'fontawesome_svg'          => 'bool',
-			'no_feature_description'   => 'bool',
 		),
 		'display'         => array(
 			'disclosure_text'         => 'text',
 			'show_price'              => 'bool',
 			'show_disclosure'         => 'bool',
 			'show_disclosure_grid'    => 'bool',
-			'show_disclosure_list'    => 'bool',
 			'show_disclosure_table'   => 'bool',
 			'link_from_display_title' => 'bool',
 			'keep_site_stripe_ui'     => 'bool',
@@ -80,14 +73,10 @@ final class SettingsService {
 			'auto_monetize_amazon'            => 'bool',
 			'show_prime'                      => 'bool',
 			'show_discount_pricing'           => 'bool',
-			'commission_upgrades'             => 'bool',
 			'update_pricing_daily'            => 'bool',
 			'pricing_locations_only'          => 'bool',
-			'force_change_from_link_details'  => 'bool',
 			'keep_title_when_url_replaced'    => 'bool',
 			'shorten_amazon_links'            => 'bool',
-			'mobile_deep_linking'             => 'bool',
-			'international_click'             => 'bool',
 			'keep_genius_formatting'          => 'bool',
 			'scan_sitestripe_in_post_content' => 'bool',
 			'days_before_out_of_stock_alerts' => 'days',
@@ -139,10 +128,8 @@ final class SettingsService {
 		'keep_original_domains',
 		'cron_interval',
 		'manual_process_limit',
-		'restrict_prefix',
 		'process_limit',
 		'fontawesome_svg',
-		'no_feature_description',
 	);
 
 	/** The form field that says the support fields were on the page. */
@@ -548,7 +535,6 @@ final class SettingsService {
 			'country'      => is_string( $raw ) && Marketplace::is_country( $raw ) ? $raw : null,
 			'ga_ids'           => is_string( $raw ) && strlen( $raw ) <= 200 ? trim( sanitize_text_field( $raw ) ) : null,
 			'slug'             => self::clean_slug( $raw ),
-			'performance_mode' => is_string( $raw ) && PerformanceMode::is_mode( $raw ) ? $raw : null,
 			'permission'       => is_string( $raw ) && null !== Permission::tryFrom( $raw ) ? $raw : null,
 			// Lasso stores anything and reads abs( int ); a whole number from 1 to 100 is the only sensible CPU level (edge case 2).
 			'percent'          => self::clean_range( $raw, 1, 100 ),
