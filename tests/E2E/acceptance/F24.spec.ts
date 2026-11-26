@@ -55,13 +55,15 @@ test.describe( 'F24 Link cloaking', () => {
 	test( 'AC3 with a prefix only /<prefix>/<slug>/ answers; tag and category paths are never taken', async ( { request } ) => {
 		const slug = unique( 'f24-pre' );
 		cloaked( slug, 'https://www.example.com/prefixed' );
+		// No old prefixes: a prefix changed on the General tab before keeps its addresses answering (F24 N2, Task CL5).
+		const history = ( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown > ).cloak_prefix_history ?? [];
 		try {
-			setSettings( { link_prefix: 'go' } );
+			setSettings( { link_prefix: 'go', cloak_prefix_history: [] } );
 			expect( ( await hit( request, `/go/${ slug }/` ) ).status() ).toBe( 302 );
 			expect( ( await hit( request, `/${ slug }/` ) ).status() ).toBe( 404 );
 			expect( ( await hit( request, `/other/${ slug }/` ) ).status() ).toBe( 404 );
 		} finally {
-			setSettings( { link_prefix: '' } );
+			setSettings( { link_prefix: '', cloak_prefix_history: history } );
 		}
 		expect( ( await hit( request, '/category/uncategorized/' ) ).status() ).not.toBe( 302 );
 	} );

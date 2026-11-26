@@ -25,7 +25,9 @@ test.describe( 'F17 Amazon settings', () => {
 	test( 'AC1 every control shows its value and saves', async ( { page } ) => {
 		await page.goto( amazonTab );
 		await page.getByLabel( 'Tracking ID for This Site' ).fill( 'vbvault-20' );
-		await page.getByLabel( 'Enable Amazon Auto-Monetization' ).check();
+		// A click, not check(): the switch stays off until Lasso's confirmation is answered (F35 AC5).
+		await page.getByLabel( 'Enable Amazon Auto-Monetization' ).click( { force: true } );
+		await page.getByRole( 'dialog', { name: 'Enable Auto-Amazon' } ).getByRole( 'button', { name: 'Enable' } ).click();
 		await page.getByLabel( 'Show Discount Pricing' ).check();
 		await page.getByLabel( 'Days before out of stock alerts' ).fill( '5' );
 		await save( page );
@@ -36,6 +38,9 @@ test.describe( 'F17 Amazon settings', () => {
 		expect( flat.tracking_id ).toBe( 'vbvault-20' );
 		expect( flat.auto_monetize_amazon ).toBe( true );
 		expect( flat.days_before_out_of_stock_alerts ).toBe( 5 );
+		// Off again at once: the save started the Amazon import (F35 AC5), which would scan every post while the next
+		// tests load their pages on Local's two PHP workers.
+		setSettings( { auto_monetize_amazon: false } );
 	} );
 
 	test( 'AC2 an invalid tracking ID is refused and Lasso\'s valid forms are accepted', async ( { page } ) => {

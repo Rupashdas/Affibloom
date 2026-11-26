@@ -61,6 +61,8 @@ test.describe( 'F6 Second button', () => {
 	} );
 
 	test( "AC4 an empty text takes the Single type's secondary label; with none, no href or target", async ( { page } ) => {
+		// Lasso's defaults: an earlier spec may have left the Display settings it drew with (F5 stores the site's).
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3 } ), '--format=json' );
 		const id = createProduct( { name: 'F6 AC4', url2: 'https://www.example.com/c', button_text2: '' } );
 		const path = newPostWith( boxBlock( id ) );
 		await page.goto( path );

@@ -34,7 +34,7 @@ test.describe( 'F18 Adding links', () => {
 	async function opened( page: Page, shown: string ) {
 		await page.waitForURL( /page=affibloom-product&id=\d+/, { timeout: 20_000 } );
 		await expect( page.locator( '#affibloom-url' ) ).toHaveValue( new RegExp( shown ) );
-		await expect( page.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' ) /* the Bulk Amazon sync banner (C1I) is not the add's notice */ ).toHaveCount( 0 );
+		await expect( page.locator( '.affibloom-page__body .affibloom-notice, #affibloom-notices .affibloom-notice:has([data-notice-icon])' ) /* the page's own notice or a script's (admin.js); the site's, such as broken links, are not the add's */ ).toHaveCount( 0 );
 	}
 
 	/** IDs of the products whose primary link is exactly this one. */
@@ -82,7 +82,7 @@ test.describe( 'F18 Adding links', () => {
 
 		// Lasso opens the existing product's page with its warning (Task 14A).
 		await page.waitForURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
-		await expect( page.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' ) /* the Bulk Amazon sync banner (C1I) is not the add's notice */ ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
+		await expect( page.locator( '.affibloom-page__body .affibloom-notice, #affibloom-notices .affibloom-notice:has([data-notice-icon])' ) /* the page's own notice or a script's (admin.js); the site's, such as broken links, are not the add's */ ).toContainText( 'This product already exists. Please update the Primary URL or add a new link.' );
 		expect( productsWithLink( link ) ).toHaveLength( 1 );
 	} );
 
@@ -94,7 +94,7 @@ test.describe( 'F18 Adding links', () => {
 		await add( page, variant );
 
 		await page.waitForURL( /page=affibloom-product&id=\d+&is_duplicate=1/ );
-		await expect( page.locator( '.affibloom-notice:not(.affibloom-bulk-sync)' ) /* the Bulk Amazon sync banner (C1I) is not the add's notice */ ).toContainText( 'This product already exists.' );
+		await expect( page.locator( '.affibloom-page__body .affibloom-notice, #affibloom-notices .affibloom-notice:has([data-notice-icon])' ) /* the page's own notice or a script's (admin.js); the site's, such as broken links, are not the add's */ ).toContainText( 'This product already exists.' );
 		expect( productsWithLink( variant ) ).toHaveLength( 0 );
 	} );
 

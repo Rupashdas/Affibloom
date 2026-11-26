@@ -8,6 +8,23 @@ const boxes = JSON.parse(
 ) as Array< { post_id: number; source: string } >;
 
 test.describe( 'F10 Existing content', () => {
+	// The migrator's commands run only while it is active; the rest of the suite expects it as it was (LM.spec.ts), so
+	// it is switched on for these tests and back off after them when it was off.
+	let migratorWasActive = true;
+	test.beforeAll( () => {
+		try {
+			wp( 'plugin', 'is-active', 'affibloom-lasso-migrator' );
+		} catch {
+			migratorWasActive = false; // WP-CLI's is-active exits 1.
+			wp( 'plugin', 'activate', 'affibloom-lasso-migrator' );
+		}
+	} );
+	test.afterAll( () => {
+		if ( ! migratorWasActive ) {
+			wp( 'plugin', 'deactivate', 'affibloom-lasso-migrator' );
+		}
+	} );
+
 	// Task 25A: the migrator's dry run (Phase M), every lasso-urls post with a line, the 263 published among them.
 	test( '@local AC1 the migration report accounts for all 263 records', () => {
 		const report = wp(
@@ -661,7 +678,8 @@ test.describe( 'F10 Existing content', () => {
 			.toBe( 'false' );
 	} );
 
-	test.fixme( '@local AC2 with Lasso off, all 34 guides match their baselines and every button href matches (written in Task 29)', () => {} );
+	// AC2 (with Lasso off, all 34 guides match their baselines and every button href matches) is tests/Visual/parity.spec.ts
+	// (Tasks 29A-29C), which builds its own state (migrate, convert, Lasso off) and puts the site back.
 
 	// Deviation 146: the conversion is the migrator's (LM3), not Affibloom's.
 	test( '@local AC3 legacy blocks convert, and can be reverted', () => {

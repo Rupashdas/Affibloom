@@ -121,10 +121,17 @@ test.describe( 'F30 Display types', () => {
 			const id = createProduct( { name: 'F30 AC14' } );
 			const slug = createGroup( `F30 AC14 ${ Date.now() }`, [ id ] );
 			const sheets = () => page.locator( 'link[rel="stylesheet"]' ).evaluateAll( ( links ) => links.map( ( l ) => ( l as HTMLLinkElement ).href ) );
-			await page.goto( newPostWith( `[affibloom group="${ slug }"]` ) );
-			expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
-			await page.goto( newPostWith( 'No display here.' ) );
-			expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( false );
+			// Smart CSS on (the default): with it off the stylesheet loads on every page, as Lasso's does (BoxAssets).
+			const smart = ( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown > ).smart_css;
+			setSettings( { smart_css: true } );
+			try {
+				await page.goto( newPostWith( `[affibloom group="${ slug }"]` ) );
+				expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( true );
+				await page.goto( newPostWith( 'No display here.' ) );
+				expect( ( await sheets() ).some( ( href ) => href.includes( 'affibloom/assets/front/box.css' ) ) ).toBe( false );
+			} finally {
+				setSettings( { smart_css: false !== smart } );
+			}
 		} );
 
 		// AC5 (Task DT3): with default Display settings (classic) the grid is rows of `columns` (1-5, 2 without) and

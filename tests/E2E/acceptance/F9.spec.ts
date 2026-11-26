@@ -24,13 +24,29 @@ test.describe( 'F9 Link settings', () => {
 		setSettings( { new_tab: true } ); // the site's value again
 	} );
 
-	// The box is Phase 3 (Task 18); the phase 2 exit check moves AC2 there.
-	test.fixme( 'AC2 box links carry rel and target by the Lasso rules', async ( { page } ) => {
-		const id = createProduct( { name: 'F9 AC2', nofollow: '1', new_tab: '1', sponsored: '1' } );
-		await page.goto( newPostWith( boxBlock( id ) ) );
-		const button = page.locator( '.affibloom-box .affibloom-button-1' );
-		await expect( button ).toHaveAttribute( 'rel', 'nofollow noopener sponsored' );
-		await expect( button ).toHaveAttribute( 'target', '_blank' );
+	// AC2 (R33, Lasso's class-lasso-affiliate-link): rel is nofollow (if on) + noopener (if New Window) + sponsored (if
+	// on), in that order; target is _blank or _self. Button 1 and the title take the product's switches; the second
+	// button its own New Window and NoFollow, and Sponsored only together with its NoFollow.
+	test( 'AC2 box links carry rel and target by the Lasso rules', async ( { page } ) => {
+		const on = createProduct( { name: 'F9 AC2 on', nofollow: '1', new_tab: '1', sponsored: '1', url2: 'https://www.example.com/f9-ac2-second', button_text2: 'Second', new_tab2: '1', nofollow2: '0' } );
+		const off = createProduct( { name: 'F9 AC2 off', nofollow: '0', new_tab: '0', sponsored: '0', url2: 'https://www.example.com/f9-ac2-second-off', button_text2: 'Second', new_tab2: '0', nofollow2: '1' } );
+		await page.goto( newPostWith( boxBlock( on ) + boxBlock( off ) ) );
+		const boxes = page.locator( '.entry-content .affibloom-display' );
+		// Rank Math adds `noopener` to every external link in the content on this site (F6's relOf): on a link that does
+		// not open a new tab it is Rank Math's, and is left out.
+		const link = async ( box: number, css: string ) => {
+			const a = boxes.nth( box ).locator( `a.${ css }` ).first();
+			const target = ( await a.getAttribute( 'target' ) ) ?? '';
+			const rel = ( ( await a.getAttribute( 'rel' ) ) ?? '' ).split( /\s+/ ).filter( ( word ) => '' !== word && ( '_blank' === target || 'noopener' !== word ) );
+			return { rel: rel.join( ' ' ), target };
+		};
+
+		for ( const css of [ 'affibloom-button-1', 'affibloom-title' ] ) {
+			expect( await link( 0, css ), css ).toEqual( { rel: 'nofollow noopener sponsored', target: '_blank' } );
+			expect( await link( 1, css ), css ).toEqual( { rel: '', target: '_self' } );
+		}
+		expect( await link( 0, 'affibloom-button-2' ) ).toEqual( { rel: 'noopener', target: '_blank' } );
+		expect( await link( 1, 'affibloom-button-2' ) ).toEqual( { rel: 'nofollow', target: '_self' } );
 	} );
 
 	test( 'AC3 settings save and show again', async ( { page } ) => {
@@ -123,7 +139,7 @@ test.describe( 'F9 Link settings', () => {
 		const dashboard = page.locator( '#affibloom-header-nav' ).getByRole( 'link', { name: 'Dashboard' } );
 		await page.goto( GENERAL );
 		// Nothing changed: nothing asked.
-		await page.getByRole( 'link', { name: 'Amazon' } ).click();
+		await page.getByRole( 'link', { name: 'Amazon', exact: true } ).click();
 		await page.waitForURL( /tab=amazon/ );
 
 		for ( const tab of [ 'general', 'display', 'amazon' ] ) {

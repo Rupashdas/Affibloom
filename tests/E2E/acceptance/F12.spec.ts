@@ -139,6 +139,10 @@ test.describe( 'F12 Clicks and where used', () => {
 	test( 'AC9 Page and Link-Level Tracking off: no clicks.js and nothing counted; on: counting resumes', async ( { page, request } ) => {
 		const id = createProduct( { name: unique( 'F12 AC9' ) } );
 		const path = newPostWith( boxBlock( id ) );
+		// GA Click Tracking prints clicks.js too (C3 D6), and the site may have it on (Lasso's value, migrated): off here,
+		// before the General tab loads, whose Save sends the switch as shown.
+		const ga = ( JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown > ).ga_click_tracking;
+		setSettings( { ga_click_tracking: false } );
 		await page.goto( '/wp-admin/admin.php?page=affibloom-settings' );
 		const toggle = page.getByLabel( 'Page and Link-Level Tracking' );
 		await expect( page.getByRole( 'heading', { name: 'Advanced Click Tracking' } ) ).toBeVisible();
@@ -153,7 +157,7 @@ test.describe( 'F12 Clicks and where used', () => {
 			await clickOnce( request, { p: id, h: 0, l: 0, b: '1' } );
 			expect( stored( id ) ).toBe( 0 );
 		} finally {
-			setSettings( { click_tracking: true } );
+			setSettings( { click_tracking: true, ga_click_tracking: true === ga } );
 		}
 		await page.goto( path );
 		await expect( page.locator( 'script[src*="assets/front/clicks.js"]' ) ).toHaveCount( 1 );

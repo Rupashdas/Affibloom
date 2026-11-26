@@ -619,7 +619,9 @@ test.describe( 'F1 Product library', () => {
 		await expect( page.locator( '#affibloom-theme option' ).first() ).toHaveText( /^Default \((Cactus|Cutter|Flow|Geek|Lab|Llama|Money|Splash)\)$/ );
 		await expect( page.getByLabel( 'Product Image' ) ).toHaveValue( 'https://www.example.com/f1-ac5.jpg' );
 		await expect( page.locator( '.affibloom-image-frame img' ) ).toHaveAttribute( 'src', 'https://www.example.com/f1-ac5.jpg' );
-		await expect( page.getByRole( 'button', { name: 'Update Image' } ) ).toBeVisible();
+		// "Update Image" is in the frame; once the live preview has drawn the box (Task 14E) it hides and a click on the
+		// box's picture opens the media library instead, so whether it is visible depends on how fast the preview drew.
+		await expect( page.locator( '[data-image-choose]' ) ).toContainText( 'Update Image' );
 		await expect( page.locator( '#affibloom-badge' ) ).toHaveValue( '<span class="medal-icon"></span> Best Overall' );
 		await expect( page.getByRole( 'button', { name: 'Icon for Badge Text: Medal' } ) ).toBeVisible();
 		await expect( page.locator( 'textarea[name="price"]' ) ).toHaveValue( '$29.99' );
@@ -629,8 +631,9 @@ test.describe( 'F1 Product library', () => {
 		await expect( page.locator( '#affibloom-disclosure' ) ).not.toHaveAttribute( 'placeholder', '' );
 		await expect( page.locator( '#affibloom-sponsored' ) ).toBeChecked();
 		await expect( page.locator( '#affibloom-show-disclosure' ) ).not.toBeChecked();
-		await expect( page.locator( '#affibloom-cloaking' ) ).toBeDisabled();
-		await expect( page.locator( '#affibloom-opportunities' ) ).toBeDisabled();
+		// Placeholders when this test was written (Task 14B); editable since Link Cloaking and Detect Opportunities were built (F24, F22).
+		await expect( page.locator( '#affibloom-cloaking' ) ).toBeEnabled();
+		await expect( page.locator( '#affibloom-opportunities' ) ).toBeEnabled();
 		await expect( page.locator( '#affibloom-prime' ) ).toHaveCount( 0 );
 	} );
 

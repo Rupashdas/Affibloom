@@ -117,7 +117,7 @@ test( 'the Dashboard uses the Affibloom design system', async ( { page } ) => {
 
 	// A script's notice is a white card with a hairline border in the page's column, under the header (MD2).
 	await page.evaluate( () => ( window as unknown as { affibloomNotice: ( tone: string, text: string ) => void } ).affibloomNotice( 'success', 'Test' ) );
-	const notice = page.locator( '#affibloom-notices .affibloom-notice' ).filter( { hasText: 'Test' } );
+	const notice = page.locator( '#affibloom-notices .affibloom-notice' ).filter( { has: page.locator( '.affibloom-notice__text', { hasText: /^Test$/ } ) } );
 	await expect( notice ).toBeVisible();
 	expect( await css( notice, 'background-color' ) ).toBe( WHITE );
 	expect( await css( notice, 'border-left-width' ) ).toBe( '1px' );

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { blockTrackers, boxBlock, createProduct, newPostWith, setSettings, wp } from '../utils';
+import { blockTrackers, boxBlock, createGroup, createProduct, newPostWith, setSettings, wp } from '../utils';
 import { saveSettings } from '../settings';
 import { copyFileSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
@@ -328,8 +328,39 @@ test.describe( 'F16 Display system', () => {
 		await expect( page.getByLabel( 'Disclosure', { exact: true } ) ).toHaveCount( 0 );
 	} );
 
-	test.fixme( 'AC9 the box prints the saved disclosure text', async () => {
-		// Needs the product box, which Phase 3 builds (Task 18x).
+	// AC9 (R13-R18): the site-wide Display settings reach what readers get. A product without its own Show Price follows
+	// the site's; Disclosure in Grids and Disclosure in Tables (deviation 168: a list shows each card's own) print the
+	// site's text once, a grid's after its cards and a table's under it, with customised Display settings (advanced).
+	test( 'AC9 Disclosure text, Show Price, the disclosure scopes and Link from Display Title reach the box', async ( { page } ) => {
+		const text = `F16 AC9 disclosure ${ Date.now() }.`;
+		const id = createProduct( { name: 'F16 AC9', price: '$12.34', show_disclosure: '1' } );
+		const slug = createGroup( `F16 AC9 ${ Date.now() }`, [ id ] );
+		const table = Number( wp( 'eval-file', 'tests/E2E/fixtures/create-table.php', JSON.stringify( { title: `F16 AC9 ${ Date.now() }`, style: 'column', theme: 'Cactus', products: [ id ] } ) ) );
+		const content = `${ boxBlock( id ) }[affibloom type="grid" group="${ slug }"][affibloom type="table" id="${ table }"]`;
+		wp( 'option', 'update', 'affibloom_display', JSON.stringify( { columns: 3, grid: { density: { preset: 'spacious', values: {} } } } ), '--format=json' );
+		try {
+			setSettings( { disclosure_text: text, show_price: true, link_from_display_title: true, show_disclosure_grid: true, show_disclosure_table: true } );
+			await page.goto( newPostWith( content ) );
+			const box = page.locator( '.entry-content .affibloom-display' ).first();
+			await expect( box.locator( '.affibloom-disclosure' ) ).toHaveText( text );
+			await expect( box.locator( '.affibloom-price-value' ) ).toContainText( '$12.34' );
+			await expect( box.locator( 'a.affibloom-title' ) ).toHaveCount( 1 );
+			await expect( page.locator( '.affibloom-grid-wrap > .affibloom-disclosure' ) ).toHaveText( text );
+			await expect( page.locator( '.affibloom-display-table ~ .affibloom-disclosure' ) ).toHaveText( text );
+
+			setSettings( { show_price: false, link_from_display_title: false, show_disclosure_grid: false, show_disclosure_table: false } );
+			await page.reload();
+			await expect( box.locator( '.affibloom-price-value' ) ).toHaveCount( 0 );
+			await expect( box.locator( 'a.affibloom-title' ) ).toHaveCount( 0 );
+			await expect( box.locator( '.affibloom-title' ) ).toHaveCount( 1 );
+			await expect( page.locator( '.affibloom-grid-wrap > .affibloom-disclosure' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.affibloom-display-table ~ .affibloom-disclosure' ) ).toHaveCount( 0 );
+			// The single box's disclosure is the product's own switch (Show Disclosure), not a site-wide scope.
+			await expect( box.locator( '.affibloom-disclosure' ) ).toHaveText( text );
+		} finally {
+			wp( 'option', 'delete', 'affibloom_display' );
+			setSettings( SITE_WIDE_DEFAULTS );
+		}
 	} );
 
 	test( 'AC10 Custom CSS is kept, and cannot carry markup', async ( { page } ) => {

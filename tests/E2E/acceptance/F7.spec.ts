@@ -30,9 +30,10 @@ test.describe( 'F7 Per-box text', () => {
 		await expect( page.locator( '.affibloom-description' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.affibloom-display' ) ).toHaveAttribute( 'data-hide-desc', '1' );
 
-		// A box's description forces the block on, and Lasso's line break code becomes <br> (R67).
+		// A box's description forces the block on, and the line break code becomes <br> (R67): Affibloom's `-br-`, which the
+		// migrator writes for Lasso's `lasso-br-code` (deviation 146).
 		const off = createProduct( { name: 'F7 AC2 off', description: '', show_description: '0' } );
-		await page.goto( newPostWith( boxBlock( off, { description: 'One.lasso-br-codeTwo.' } ) ) );
+		await page.goto( newPostWith( boxBlock( off, { description: 'One.-br-Two.' } ) ) );
 		await expect( page.locator( '.affibloom-box .affibloom-description br' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.affibloom-box .affibloom-description' ) ).toHaveText( 'One.Two.' );
 	} );

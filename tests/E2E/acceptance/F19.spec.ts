@@ -187,9 +187,9 @@ test.describe( 'F19 Dashboard list', () => {
 
 		const row = page.locator( `tr[data-product-id="${ id }"]` );
 		await expect( row.locator( 'img' ) ).toHaveAttribute( 'src', image );
-		// Edit opens the quick edit since Task 16A (F1 AC17); Shortcode waits for Task 18S.
+		// Edit opens the quick edit since Task 16A (F1 AC17); Shortcode copies the shortcode since Task 18S (db785cb).
 		await expect( row.getByRole( 'button', { name: 'Edit' } ) ).toBeEnabled();
-		await expect( row.getByRole( 'button', { name: 'Shortcode' } ) ).toBeDisabled();
+		await expect( row.getByRole( 'button', { name: 'Shortcode' } ) ).toBeEnabled();
 
 		// Lasso's selection bar appears with the first tick, in Lasso's words (Task 17B, F1 D36).
 		await row.getByRole( 'checkbox' ).check();

@@ -22,10 +22,13 @@ test.describe( 'F21 The content link index', () => {
 	test( 'AC1 the rebuild indexes every anchor of a post, skips what Lasso skips and leaves the post unchanged', () => {
 		const url = `https://www.example.com/${ unique( 'f21' ) }`;
 		const product = createProduct( { name: unique( 'F21 product' ), url } );
+		// An ASIN and a Skimlinks path of their own each run: a product made from an earlier run's post (Auto Amazon, an
+		// opportunity added) would take the link.
+		const asin = `B0F21${ Math.random().toString( 36 ).slice( 2, 7 ).toUpperCase().padEnd( 5, 'X' ) }`;
 		const content = [
 			`<!-- wp:paragraph --><p><a href="${ url }/" rel="nofollow" target="_blank">The product</a></p><!-- /wp:paragraph -->`,
-			'<!-- wp:paragraph --><p><a href="https://www.amazon.com/dp/B0F21TEST1?tag=site-20" rel="nofollow noopener" target="_blank"><img src="https://example.com/i.jpg" alt=""></a></p><!-- /wp:paragraph -->',
-			'<!-- wp:paragraph --><p><a href="http://volleyballvault.local/about/">About</a> <a href="https://go.skimresources.com/?id=1">Skim</a> <a href="https://www.example.org/x">One</a> <a href="https://www.example.org/x">Two</a></p><!-- /wp:paragraph -->',
+			`<!-- wp:paragraph --><p><a href="https://www.amazon.com/dp/${ asin }?tag=site-20" rel="nofollow noopener" target="_blank"><img src="https://example.com/i.jpg" alt=""></a></p><!-- /wp:paragraph -->`,
+			`<!-- wp:paragraph --><p><a href="http://volleyballvault.local/about/">About</a> <a href="https://go.skimresources.com/${ asin }/?id=1">Skim</a> <a href="https://www.example.org/x">One</a> <a href="https://www.example.org/x">Two</a></p><!-- /wp:paragraph -->`,
 			'<!-- wp:paragraph --><p><a href="#top">Top</a> <a href="mailto:a@b.c">Mail</a> <a href="tel:1">Call</a> <a href="[x]">Code</a> <a>None</a> <a class="affibloom-scan-ignore" href="https://www.example.org/ignored">Ignored</a></p><!-- /wp:paragraph -->',
 			'<!-- wp:rank-math/faq-block --><div><a href="https://www.example.org/faq">FAQ</a></div><!-- /wp:rank-math/faq-block -->',
 			'<!-- wp:html --><div class="schema-faq-section"><p><a href="https://www.example.org/faq2">FAQ 2</a></p></div><!-- /wp:html -->',
@@ -48,7 +51,7 @@ test.describe( 'F21 The content link index', () => {
 			[ 'external', 'Text' ],
 		] );
 		expect( found[ 0 ] ).toMatchObject( { product_id: String( product ), anchor_text: 'The product', domain: null, no_follow: '1', new_window: '1' } );
-		expect( found[ 1 ] ).toMatchObject( { asin: 'B0F21TEST1', tracking_id: 'site-20', country: 'us', domain: 'amazon.com', anchor_text: null, no_follow: '0', new_window: '1' } );
+		expect( found[ 1 ] ).toMatchObject( { asin, tracking_id: 'site-20', country: 'us', domain: 'amazon.com', anchor_text: null, no_follow: '0', new_window: '1' } );
 		expect( found[ 3 ] ).toMatchObject( { affiliate_platform: 'skimlinks' } );
 		expect( [ found[ 4 ].occurrence, found[ 5 ].occurrence ] ).toEqual( [ '1', '2' ] );
 		expect( ( found[ 6 ].anchor_text ?? '' ).length ).toBeLessThanOrEqual( 1500 );

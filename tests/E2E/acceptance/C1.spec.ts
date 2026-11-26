@@ -770,7 +770,8 @@ test.describe( 'C1 Amazon product data', () => {
 			await expect( page.getByRole( 'switch', { name: label, exact: true } ) ).toHaveCount( 0 );
 		}
 		await expect( page.getByText( /has no effect in Affibloom/ ) ).toHaveCount( 0 );
-		await expect( page.getByText( /Lasso/ ) ).toHaveCount( 0 );
+		// Affibloom's page only: WordPress's menu names the Lasso plugin and the migrator while they are installed.
+		await expect( page.locator( '#wpbody-content' ).getByText( /Lasso/ ) ).toHaveCount( 0 );
 		// Schema step 13 ran on that admin page load.
 		const stored = JSON.parse( wp( 'option', 'get', 'affibloom_settings', '--format=json' ) || '{}' ) as Record< string, unknown >;
 		for ( const key of [ 'mobile_deep_linking', 'international_click', 'commission_upgrades' ] ) {
@@ -872,6 +873,8 @@ test.describe( 'C1 Amazon product data', () => {
 				// Not dismissed.
 			}
 		};
+		// Whether the notice was dismissed before: put back at the end, so the later tests' pages show it only as before.
+		const dismissedBefore = wp( 'eval', 'echo get_option( "affibloom_sitestripe_notice", "1" );' ) === '0';
 		const notice = page.locator( '#affibloom-notices .affibloom-notice' ).filter( { hasText: 'Migrating from Amazon SiteStripe?' } );
 		try {
 			reset();
@@ -895,6 +898,9 @@ test.describe( 'C1 Amazon product data', () => {
 			expect( wp( 'option', 'get', 'affibloom_sitestripe_notice' ) ).toBe( '0' );
 		} finally {
 			reset();
+			if ( dismissedBefore ) {
+				wp( 'option', 'update', 'affibloom_sitestripe_notice', '0' );
+			}
 			setSettings( { auto_monetize_amazon: settings.auto_monetize_amazon ?? false } );
 		}
 	} );

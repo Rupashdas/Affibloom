@@ -648,11 +648,10 @@ test.describe( 'F4 Displays in the editor', () => {
 
 		await add.click();
 		await expect( dialog ).toBeVisible();
-		// Lasso's two rows of four, AI Text left out (B5): seven tiles. Table waits for the Tables area (F25).
+		// Lasso's two rows of four, AI Text left out (B5): seven tiles, Table among them since the Tables area (F25).
 		const tiles = dialog.locator( '.affibloom-type-tile' );
 		await expect( tiles ).toHaveText( [ /Single/, /Grid/, /List/, /Table/, /Button/, /Image/, /Gallery/ ] );
-		await expect( dialog.getByRole( 'button', { name: 'Table' } ) ).toHaveAttribute( 'aria-disabled', 'true' );
-		await expect( tiles.filter( { hasText: 'Table' } ) ).toContainText( 'Soon' );
+		await expect( tiles.filter( { hasText: 'Soon' } ) ).toHaveCount( 0 );
 		// Keyboard: the first tile has the focus; Tab moves along the tiles.
 		await expect( dialog.getByRole( 'button', { name: 'Single' } ) ).toBeFocused();
 		await page.keyboard.press( 'Tab' );
