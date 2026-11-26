@@ -43,11 +43,12 @@ export function wp( ...args: string[] ): string {
 
 /**
  * Stops page loads from reaching the site's Google Analytics or Lasso's cloud (see tools/README.md), and Mediavine's
- * ads: on the live site its loader keeps a guide busy for good, so a page never settles (rehearsal F1; Task 41).
+ * ads: on the live site its loader keeps a guide busy for good, so a page never settles (rehearsal F1; Task 41). And
+ * Gravatar, whose admin-bar avatar can take 20 s or more from this machine and holds a page's load event (2026-11-26).
  */
 export async function blockTrackers( context: BrowserContext ): Promise< void > {
 	await context.route(
-		/^https?:\/\/([^/]+\.)?(codedrink\.com|getlasso\.co|googletagmanager\.com|google-analytics\.com|analytics\.google\.com|posthog\.com|sentry\.io|mediavine\.com)\//,
+		/^https?:\/\/([^/]+\.)?(codedrink\.com|getlasso\.co|googletagmanager\.com|google-analytics\.com|analytics\.google\.com|posthog\.com|sentry\.io|mediavine\.com|gravatar\.com)\//,
 		( route ) => route.abort()
 	);
 }

@@ -1,2 +1,3 @@
 mediavine-control-panel
 litespeed-cache
+shortpixel-image-optimiser
