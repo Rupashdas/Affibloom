@@ -4,6 +4,14 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-26
+
+The first stable release: 1.0.0-rc.2 after the whole browser suite ran against it.
+
+### Fixed
+
+- A product's Locations tab: the post links in a group's rows are at least 24 px tall, the smallest target WCAG 2.5.8 allows; they were 20 px and side by side.
+
 ## [1.0.0-rc.2] - 2026-11-26
 
 The second release candidate, the build for the live cutover (Task 41): what staging and the cutover rehearsal found, and the dead settings removed.
