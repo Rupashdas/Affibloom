@@ -3134,7 +3134,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-table--locations .affibloom-col-clicks { width: 92px; text-align: center; }
 .affibloom-table--locations th .affibloom-help { margin-left: 4px; vertical-align: middle; }
 .affibloom-location__title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--affibloom-ink-900); font: 600 14px/20px var(--affibloom-font); }
-.affibloom-admin .affibloom-location__title a { color: inherit; text-decoration: none; }
+/* At least 24px tall (WCAG 2.5.8): a group's rows put the post links of a few lines' height next to each other. */
+.affibloom-admin .affibloom-location__title a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: none; }
 .affibloom-admin .affibloom-location__title a:hover { color: var(--affibloom-brand-700); text-decoration: underline; }
 .affibloom-location__status { padding: 1px 8px; border-radius: var(--affibloom-radius-chip); background: var(--affibloom-warning-50); color: var(--affibloom-warning-700); font: 600 12px/18px var(--affibloom-font); }
 .affibloom-admin .affibloom-location__permalink { display: block; max-width: 100%; overflow: hidden; color: var(--affibloom-ink-500); font: 400 13px/18px var(--affibloom-font); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
