@@ -82,6 +82,32 @@ final class AdminMenu implements Module {
 	}
 
 	/**
+	 * Affibloom's flower in the admin menu, in place of WordPress's shopping cart (2026-11-28, the user). The menu
+	 * shows it through a mask filled with the link's own colour, so it dims, lights up and follows every admin colour
+	 * scheme exactly as WordPress's own icons do, which a picture could not. `add_menu_page()` is told 'none', so
+	 * WordPress leaves the icon to this rule (`menu-header.php`).
+	 */
+	public function menu_icon(): void {
+		$petal  = '<ellipse cy="-7.4" rx="4.7" ry="7.4"%s/>';
+		$petals = sprintf( $petal, '' );
+		foreach ( array( 72, 144, 216, 288 ) as $turn ) {
+			$petals .= sprintf( $petal, ' transform="rotate(' . $turn . ')"' );
+		}
+		/*
+		 * Meadow's logo mark (partials/logo.php) in one colour, petal for petal. Its own mask paints the five petals,
+		 * clears the ring the mark leaves white, and paints the dot inside it, so the shape that reaches the menu is
+		 * the mark itself and not a flower-shaped blob.
+		 */
+		$flower = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+			. '<mask id="a"><g fill="#fff" transform="translate(16 16)">' . $petals . '</g>'
+			. '<circle cx="16" cy="16" r="3.6" fill="#000"/><circle cx="16" cy="16" r="1.5" fill="#fff"/></mask>'
+			. '<rect width="32" height="32" fill="#000" mask="url(#a)"/></svg>';
+		$mask   = 'url("data:image/svg+xml,' . rawurlencode( $flower ) . '") no-repeat center / 20px 20px';
+		$css    = '#adminmenu #toplevel_page_' . self::SLUG . ' .wp-menu-image::before{content:"";display:block;width:20px;height:20px;margin:7px auto 0;padding:0;line-height:1;background-color:currentColor;-webkit-mask:' . $mask . ';mask:' . $mask . ';}';
+		wp_add_inline_style( 'admin-menu', $css );
+	}
+
+	/**
 	 * The admin page being shown, '' outside one (`?page=`, which WordPress also reads to pick the page).
 	 */
 	public static function requested_page(): string {
@@ -94,6 +120,8 @@ final class AdminMenu implements Module {
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'add_pages' ) );
 		add_action( 'admin_head', array( $this, 'hide_detail_pages' ) );
+		// The menu's own icon, on every admin page: the menu is drawn everywhere, not only on Affibloom's screens.
+		add_action( 'admin_enqueue_scripts', array( $this, 'menu_icon' ) );
 		add_filter( 'parent_file', array( $this, 'parent_file' ) );
 		add_filter( 'submenu_file', array( $this, 'submenu_file' ) );
 		// After core_update_footer (priority 10), which prints WordPress's version.
@@ -111,7 +139,8 @@ final class AdminMenu implements Module {
 			Capabilities::PRODUCTS,
 			self::SLUG,
 			$this->screens[ self::SLUG ],
-			'dashicons-cart',
+			// The icon is Affibloom's flower, drawn by menu_icon() so it takes the admin's own colours.
+			'none',
 			self::POSITION
 		);
 		// A helper's page (Task LM1) joins on plugins_loaded, after this menu was built.

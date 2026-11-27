@@ -362,6 +362,10 @@ Every task in this phase starts only after you have approved Task 6 (gate 4 for 
 
 ### Task 8: Admin shell — Affibloom → Dashboard
 
+*Note (2026-11-28, the user):* the menu item carries Affibloom's flower, not `dashicons-cart`. `add_menu_page()` is
+given `'none'` and `AdminMenu::menu_icon()` adds one rule to `admin-menu`: the mark of `partials/logo.php` as a mask
+filled with `currentColor`, so it dims, lights up and follows every admin colour scheme as WordPress's own icons do.
+
 **Roadmap:** 2.0 (admin shell and UI kit)
 
 **Why:** every admin screen sits inside the same Lasso-style header bar and uses the same colours and type. They are built once here, around the first screen that needs them.
