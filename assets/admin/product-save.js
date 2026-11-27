@@ -429,10 +429,60 @@
 		} );
 	}
 
+	/**
+	 * The editor's Quick Detail (Task 23G) shows this page in a frame. WordPress isolates the block editor's page
+	 * (`Document-Isolation-Policy`, core 7.1, for the media processing that needs a SharedArrayBuffer), and an isolated
+	 * page may not reach into the documents it frames. So the dialog's + Add asks for the save by message and this page
+	 * answers with what happened; Escape here closes the dialog, as it does on its own page.
+	 *
+	 * @param {HTMLFormElement} form The product form.
+	 */
+	function framedBridge( form ) {
+		if ( window.parent === window ) {
+			return;
+		}
+		// The page that framed this one. Without a referrer the message goes to any origin: it carries one product's ID,
+		// which that page gave us in this page's own address.
+		var parentOrigin = '*';
+		if ( document.referrer ) {
+			try {
+				parentOrigin = new URL( document.referrer ).origin;
+			} catch ( problem ) {
+				parentOrigin = '*';
+			}
+		}
+		var tell = function ( name, product ) {
+			window.parent.postMessage( { affibloom: name, product: product }, parentOrigin );
+		};
+		window.addEventListener( 'message', function ( event ) {
+			if ( event.source !== window.parent || ! event.data || 'affibloom:quick-save' !== event.data.affibloom ) {
+				return;
+			}
+			var save = document.getElementById( 'affibloom-save' );
+			if ( save ) {
+				form.requestSubmit( save );
+			}
+		} );
+		form.addEventListener( 'affibloom:product-saved', function ( event ) {
+			tell( 'affibloom:quick-saved', event.detail.id );
+		} );
+		form.addEventListener( 'affibloom:product-save-failed', function () {
+			tell( 'affibloom:quick-failed', 0 );
+		} );
+		document.addEventListener( 'keydown', function ( event ) {
+			if ( 'Escape' === event.key && ! document.querySelector( '.affibloom-modal:not([hidden])' ) ) {
+				tell( 'affibloom:quick-close', 0 );
+			}
+		} );
+		// The dialog waits for this before it asks the page to save itself.
+		tell( 'affibloom:quick-ready', 0 );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var form = document.getElementById( 'affibloom-product-form' );
 		if ( form && document.querySelector( '[data-save-modal]' ) && document.querySelector( '[data-unsaved-modal]' ) && window.affibloomModal ) {
 			productForm( form );
+			framedBridge( form );
 		}
 	} );
 

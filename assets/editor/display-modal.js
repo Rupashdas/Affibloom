@@ -772,6 +772,9 @@
 		const error = element.querySelector( '[data-quick-error]' );
 		let frame = null;
 		let done = null;
+		// The framed page said it is listening (its bridge in product-save.js), and whether this open is over.
+		let bridged = false;
+		let settled = false;
 		const dialog = stacked( element, function () {
 			busy( add, false );
 			if ( frame ) {
@@ -784,6 +787,49 @@
 			error.textContent = text;
 			error.hidden = '' === text;
 		};
+
+		/**
+		 * The product is saved: the dialog closes and hands it on, once, whichever way the page told us (R26).
+		 *
+		 * @param {number} product The product's ID.
+		 */
+		const finish = function ( product ) {
+			if ( settled ) {
+				return;
+			}
+			settled = true;
+			const next = done;
+			dialog.hide();
+			if ( next ) {
+				next( product );
+			}
+		};
+
+		/*
+		 * What the framed page says. WordPress isolates the block editor's page (`Document-Isolation-Policy`, core 7.1),
+		 * and an isolated page may not read the documents it frames, so on such a site this is the only way in and out of
+		 * the frame. The sender is the frame itself, which no other page can pretend to be; its origin is of no use here,
+		 * as an isolated frame has none to compare.
+		 */
+		window.addEventListener( 'message', function ( event ) {
+			if (
+				! frame ||
+				event.source !== frame.contentWindow ||
+				! event.data
+			) {
+				return;
+			}
+			if ( 'affibloom:quick-ready' === event.data.affibloom ) {
+				bridged = true;
+			} else if ( 'affibloom:quick-saved' === event.data.affibloom ) {
+				finish( event.data.product );
+			} else if ( 'affibloom:quick-failed' === event.data.affibloom ) {
+				// The page shows why, as always; + Add can be pressed again.
+				busy( add, false );
+			} else if ( 'affibloom:quick-close' === event.data.affibloom ) {
+				dialog.hide();
+			}
+		} );
 
 		/**
 		 * The form inside the frame, or null: a frame that did not load, or one the browser keeps from this script
@@ -812,19 +858,32 @@
 			const save =
 				product &&
 				product.ownerDocument.getElementById( 'affibloom-save' );
-			if ( ! product || ! save ) {
-				// R26: + Add saves the page in the frame, so with no page to save it says so instead of doing nothing.
-				refuse( element.getAttribute( 'data-frame-failed' ) );
+			if ( product && save ) {
+				refuse( '' );
+				busy( add, true );
+				product.requestSubmit( save );
 				return;
 			}
-			refuse( '' );
-			busy( add, true );
-			product.requestSubmit( save );
+			if ( bridged && frame && frame.contentWindow ) {
+				// The page is there but out of reach, so it is asked to save itself. It carries no data, and an isolated
+				// frame has no origin to address, so the message goes to the frame as it is.
+				refuse( '' );
+				busy( add, true );
+				frame.contentWindow.postMessage(
+					{ affibloom: 'affibloom:quick-save' },
+					'*'
+				);
+				return;
+			}
+			// R26: + Add saves the page in the frame, so with no page to save it says so instead of doing nothing.
+			refuse( element.getAttribute( 'data-frame-failed' ) );
 		} );
 
 		return {
 			open( product, from, then ) {
 				done = then;
+				bridged = false;
+				settled = false;
 				refuse( '' );
 				holder.innerHTML = '';
 				frame = document.createElement( 'iframe' );
@@ -865,18 +924,13 @@
 					} );
 					const saved = productForm();
 					if ( ! saved ) {
-						// Not the product's page: WordPress sent the frame somewhere else (signed out, or the ID is gone).
-						refuse( element.getAttribute( 'data-frame-failed' ) );
+						// Out of reach, or not the product's page: the page's own message says which, and + Add says so.
 						return;
 					}
 					saved.addEventListener(
 						'affibloom:product-saved',
 						function ( event ) {
-							const next = done;
-							dialog.hide();
-							if ( next ) {
-								next( event.detail.id );
-							}
+							finish( event.detail.id );
 						}
 					);
 					saved.addEventListener(

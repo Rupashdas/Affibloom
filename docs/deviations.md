@@ -174,6 +174,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 166. Tasks 41-42 (the user, 2026-11-24): the user migrates the live site by hand; Claude writes the runbook and the monitoring record and checks production read only.
 - 167. Decision B4 reversed (the user, 2026-11-25): Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store removed, with their stored values (schema step 13).
 - 168. Dead settings and leftovers removed (the user, 2026-11-25): seven settings read by nothing or narrower than said, the brag override and CSS, the tour's commissions line, the migrator's WaitingStep (schema step 14).
+- 169. Task 23G changed (2026-11-27): the Quick Detail's + Add reaches the framed product page by message, because WordPress isolates the block editor's page (core 7.1 `Document-Isolation-Policy`).
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3134,3 +3135,16 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     and `Action::Waiting` removed (every family has its step). The .pot regenerated; the admin guide's screenshots of
     Settings → General and Display predate this. Checks: unit (1,260 and 156), lint, analyse, the screens in Brave and
     their saves, the migrator's settings dry run (0 errors).
+
+169. **The Quick Detail's + Add talks to its frame by message (2026-11-27, the user: "the Add button ... does nothing in
+    staging").** Task 23G had the dialog reach into the framed product page (`frame.contentDocument`) to submit its form.
+    WordPress 7.1 turns on cross-origin isolation for the block editor's page (`wp_set_up_cross_origin_isolation()`,
+    `Document-Isolation-Policy: isolate-and-credentialless`, Chromium 137+, only where client-side media processing is
+    on), and an isolated page may not read the documents it frames — core's own comment says DIP "would block same-origin
+    iframe access that these editors rely on". So + Add found no form and, having nothing to say, did nothing; staging
+    (HTTPS) had it, Local did not. The dialog now asks the page to save itself (`affibloom:quick-save`) and the framed
+    page answers (`quick-ready`, `quick-saved`, `quick-failed`, `quick-close`, the bridge in `product-save.js`); the
+    direct way is kept for where it still works, and one open can only finish once. A frame that answers neither way now
+    shows the dialog's error line, which until now was printed and never used. Checks: the flow in Brave on Local both
+    ways (the message path forced by making the direct one fail), the failure reproduced on staging and traced to the
+    header; lint, phpcs, unit 1,260.
