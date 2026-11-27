@@ -93,6 +93,7 @@ final class AdminMenu implements Module {
 		foreach ( array( 72, 144, 216, 288 ) as $turn ) {
 			$petals .= sprintf( $petal, ' transform="rotate(' . $turn . ')"' );
 		}
+
 		/*
 		 * Meadow's logo mark (partials/logo.php) in one colour, petal for petal. Its own mask paints the five petals,
 		 * clears the ring the mark leaves white, and paints the dot inside it, so the shape that reaches the menu is

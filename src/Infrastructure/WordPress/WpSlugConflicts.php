@@ -33,7 +33,7 @@ final class WpSlugConflicts {
 				'post_status'      => array( 'publish', 'draft', 'pending', 'private', 'future' ),
 				'posts_per_page'   => 5,
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 			)
 		);
 		foreach ( $posts as $post ) {

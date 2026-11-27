@@ -10,7 +10,7 @@ watches the site.
 
 ## What you need
 
-- **The releases:** Affibloom **1.0.2** (`wp-content/plugins/affibloom/.local/affibloom-1.0.2.zip`)
+- **The releases:** Affibloom **1.0.3** (`wp-content/plugins/affibloom/.local/affibloom-1.0.3.zip`)
   and the migrator **1.0.0** (`.local/affibloom-lasso-migrator-1.0.0-add8193.zip`). The migrator and the boxes are
   2026-11-26's, rehearsed on a copy of the live site that day ([`rehearsal-log.md`](rehearsal-log.md), third run); 1.0.2
   adds the editor fixes of 2026-11-27 and 2026-11-28 (the block named Affibloom, the Quick Detail's layout, its live title and image,
@@ -52,7 +52,7 @@ watches the site.
    ~200"). Let it run; it is rebuilt in step 4.
 4. Open three guides signed out (a private window): `best-colorful-volleyball-shoes`,
    `best-volleyball-training-equipment`, `best-basketball-shoes-for-volleyball`. **Expect:** Lasso's boxes (17, 13, 11),
-   nothing changed to the eye. (Invisible and expected: a body class `affibloom-v1.0.2`, a second Font Awesome
+   nothing changed to the eye. (Invisible and expected: a body class `affibloom-v1.0.3`, a second Font Awesome
    line, `noreferrer` dropped from links opening in a new tab.)
 
 ### 3. Migrate

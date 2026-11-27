@@ -1,10 +1,12 @@
 {
 	"name": "affibloom",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"private": true,
 	"license": "GPL-2.0-or-later",
 	"files": [
 		"affibloom.php",
+		"blocks",
+		"webpack.config.js",
 		"uninstall.php",
 		"readme.txt",
 		"src",

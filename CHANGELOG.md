@@ -4,6 +4,26 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-28
+
+Ready for the WordPress.org directory, and the last of the user's editor notes.
+
+### Added
+
+- The readme names every external service (the Amazon Product Advertising API, Google Analytics, and the link check's requests to the sites you link to), with what is sent and when.
+- The block's sources (`blocks/`, `webpack.config.js`) ship beside the built files, so nothing is minified without its source.
+- A custom field's switches carry their words, **Show name** and **Show by default**, with Affibloom's own help tip in place of the browser's tooltip.
+
+### Changed
+
+- The admin menu carries Affibloom's flower instead of WordPress's shopping cart, in the menu's own colours.
+- The fields that hold a web address say so: a button's destination, the picture's url, a Hyperlink or Image field, and the url in Add A New Link, the editor's Create a Link and the quick edit.
+- WordPress loads the translations itself; the plugin no longer asks (core 4.6 and 6.7).
+
+### Fixed
+
+- Plugin Check: a script whose name matched one of WordPress's libraries, the data file's direct-access guard, and the WordPress version named twice in two forms. `docs/reviews/plugin-check.md` records what remains and why.
+
 ## [1.0.2] - 2026-11-28
 
 What the user found in the editor, and a layout pass over every screen.

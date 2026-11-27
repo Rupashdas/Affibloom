@@ -543,7 +543,7 @@ final class SettingsService {
 			'domains'          => self::clean_domains( $raw ),
 			'post_types'       => self::clean_choices( $raw, null === $this->choices ? array() : array_keys( $this->choices->post_types() ) ),
 			'custom_fields'    => self::clean_choices( $raw, null === $this->choices ? array() : array_keys( $this->choices->custom_fields() ) ),
-			default      => throw new LogicException( "No cleaner for type $type." ),
+			default      => throw new LogicException( esc_html( "No cleaner for type $type." ) ),
 		};
 	}
 }

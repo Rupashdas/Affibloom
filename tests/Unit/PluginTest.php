@@ -31,12 +31,6 @@ final class PluginTest extends TestCase {
 		self::assertNotFalse( has_action( 'plugins_loaded', 'Affibloom\Extension\ReadyAction->fire()' ) );
 	}
 
-	public function test_boot_loads_translations_on_init(): void {
-		Plugin::boot( '/plugins/affibloom/affibloom.php' );
-
-		self::assertNotFalse( has_action( 'init', 'Affibloom\Plugin->load_textdomain()' ) );
-	}
-
 	public function test_boot_registers_the_admin_menu_and_its_assets(): void {
 		Plugin::boot( '/plugins/affibloom/affibloom.php' );
 

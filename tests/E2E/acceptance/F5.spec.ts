@@ -865,7 +865,7 @@ test.describe( 'F5 Box design', () => {
 			await expect( field.locator( '.affibloom-copy-clipboard-value' ) ).toHaveText( 'VBVAULT10' );
 			const button = field.getByRole( 'button', { name: 'Copy to clipboard' } );
 			await expect( button ).toHaveAttribute( 'data-copy-value', 'VBVAULT10' );
-			await expect( page.locator( 'script[src*="assets/front/copy-clipboard.js"]' ) ).toHaveCount( 1 );
+			await expect( page.locator( 'script[src*="assets/front/copy-field.js"]' ) ).toHaveCount( 1 );
 
 			await page.evaluate( () => {
 				const real = document.execCommand.bind( document );

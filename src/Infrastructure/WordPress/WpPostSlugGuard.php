@@ -29,7 +29,7 @@ final class WpPostSlugGuard {
 				'posts_per_page'   => 1,
 				'fields'           => 'ids',
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 			)
 		);
 

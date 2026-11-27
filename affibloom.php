@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name:       Affibloom
- * Description:       Affiliate product library and product boxes for VolleyballVault.
- * Version:           1.0.2
- * Requires at least: 7.1.4
+ * Description:       An affiliate product library: product boxes, buttons, grids, lists and comparison tables, with link checks and click counts.
+ * Version:           1.0.3
+ * Requires at least: 7.1
  * Requires PHP:      8.3
  * Author:            Devrupash
  * Author URI:        https://devrupash.com
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AFFIBLOOM_VERSION', '1.0.2' );
+define( 'AFFIBLOOM_VERSION', '1.0.3' );
 define( 'AFFIBLOOM_FILE', __FILE__ );
 
 /**

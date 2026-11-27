@@ -13,8 +13,8 @@
  * @package Affibloom
  */
 
-// Loaded by the plugin (ABSPATH) or by the unit tests (AFFIBLOOM_VERSION, tests/Unit/bootstrap.php); never directly.
-defined( 'ABSPATH' ) || defined( 'AFFIBLOOM_VERSION' ) || exit;
+// Loaded by the plugin, or by the unit tests, which define ABSPATH too (tests/Unit/bootstrap.php); never directly.
+defined( 'ABSPATH' ) || exit;
 
 return array(
 	'networks'     => array(

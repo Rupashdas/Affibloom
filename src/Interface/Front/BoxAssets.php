@@ -251,7 +251,7 @@ final class BoxAssets implements Module {
 		// F25 R52 (Task T12): the comparison tables' stylesheet, with the box's, as Lasso loads its own.
 		wp_enqueue_style( self::TABLE_STYLE, $this->url . 'assets/front/table.css', array( self::STYLE ), $this->file_version( 'assets/front/table.css' ) );
 		// R36 (deviation 136): the Copy to Clipboard button's script, in the footer, wherever a box is.
-		wp_enqueue_script( self::COPY_JS, $this->url . 'assets/front/copy-clipboard.js', array(), $this->file_version( 'assets/front/copy-clipboard.js' ), true );
+		wp_enqueue_script( self::COPY_JS, $this->url . 'assets/front/copy-field.js', array(), $this->file_version( 'assets/front/copy-field.js' ), true );
 		// R64: the classic box loads neither the advanced stylesheet nor the phone-layout script.
 		if ( ! $this->display->current()->advanced() ) {
 			return;

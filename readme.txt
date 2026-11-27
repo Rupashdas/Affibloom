@@ -1,10 +1,10 @@
 === Affibloom ===
 Contributors: devrupash
 Tags: affiliate, amazon, product box, comparison table, affiliate links
-Requires at least: 7.1.4
+Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,13 +22,29 @@ Affibloom keeps your affiliate products in one library and draws them in your po
 * **Amazon:** your tracking ID in every Amazon link, automatic products for Amazon links in your content, and product data, prices and stock through the Amazon Creators API (credentials from your Associates account).
 * **Cloaked links** on your own domain, groups, URL variants, saved Dashboard views and a Ctrl+Shift+L product search.
 
-No account is needed and nothing is sent to an outside service, except Amazon and Google Analytics when you set them up.
+No account is needed. Affibloom itself has no cloud: nothing is sent to its author, and the services below are only the ones you ask for.
+
+== External services ==
+
+Affibloom talks to a service only after you have set it up, and only for what that feature needs.
+
+**Amazon Product Advertising API (Creators API)** — used for Amazon product data: the title, picture, price, Prime status, availability and search results. When you add or refresh an Amazon product, run a bulk sync, or search Amazon from the Dashboard, Affibloom sends the product's ASIN (or your search words), the store's country and your tracking ID, signed with the Associates API credentials you entered under Settings → Amazon. Nothing is sent until you enter those credentials. Service terms: https://affiliate-program.amazon.com/help/operating/agreement ; API licence: https://webservices.amazon.com/paapi5/documentation/license-agreement.html ; privacy: https://www.amazon.com/gp/help/customer/display.html?nodeId=468496
+
+**Google Analytics (gtag.js)** — used only when you enter a Measurement ID under Settings → Analytics. The page then loads Google's gtag.js from googletagmanager.com and sends an event when a reader clicks one of your affiliate links (the product's name and the link's place). With no Measurement ID, nothing is loaded and nothing is sent. Terms: https://marketingplatform.google.com/about/analytics/terms/us/ ; privacy: https://policies.google.com/privacy
+
+**The sites you link to** — the daily link check, and the check when you save a product, request your own affiliate links from the merchants you chose (for example amazon.com or an advertiser's site), to see whether the page still answers. Only the address you stored is requested; no data about your readers is sent. Amazon short links (amzn.to) are resolved the same way, once each.
 
 == Installation ==
 
 1. Upload the plugin through Plugins → Add New → Upload Plugin, or copy the `affibloom` folder into `wp-content/plugins`.
 2. Activate it. The setup wizard opens on the first Affibloom page: pick a theme, your colours, your Amazon tracking ID and your Google Analytics ID.
 3. Add your first product with **Add New Link** on the Dashboard, then place it in a post with the Product box block.
+
+== Source code ==
+
+The editor's block and the Elementor script are written as ES modules under `blocks/` and `assets/editor/`, and built
+into `build/` with `@wordpress/scripts` (`npm install && npm run build`; the build is configured in `webpack.config.js`).
+Both the sources and the built files are in this plugin, so nothing here is minified without its source beside it.
 
 == Frequently Asked Questions ==
 
@@ -41,6 +57,9 @@ No. Amazon links, your tracking ID, boxes, clicks and the link index work withou
 Nothing is deleted unless you switch on Settings → General → Uninstall → "Delete all Affibloom data when the plugin is deleted". Export your products from the Dashboard first.
 
 == Changelog ==
+
+= 1.0.3 =
+* Ready for the WordPress.org directory: the external services are named, the block's source ships beside its build, and what Plugin Check found is fixed. The product page's url fields ask for an address, a custom field's switches say what they do, and the admin menu carries Affibloom's flower.
 
 = 1.0.2 =
 * The editor's panel gives each setting the control it deserves (Theme, Title tag, Columns, Button type and Bullet are dropdowns, Limit takes a number, Compact is a toggle); the box preview has room for its badge; the Quick Detail is wider; the Dashboard's Filters panel stays on screen on a phone.

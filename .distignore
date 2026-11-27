@@ -4,7 +4,6 @@
 /.local
 /.wp-env.json
 /.wp-env.override.json
-/blocks
 /docs
 /node_modules
 /playwright-report
@@ -25,5 +24,4 @@
 /phpunit.xml.dist
 /phpunit-integration.xml.dist
 /playwright.config.ts
-/webpack.config.js
 /affibloom.zip

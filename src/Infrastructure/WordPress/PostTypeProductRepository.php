@@ -181,7 +181,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'posts_per_page'   => -1,
 				'fields'           => 'ids',
 				'meta_key'         => '_affibloom_buttons', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- once, at an upgrade.
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 			)
 		);
 		foreach ( $ids as $id ) {
@@ -653,7 +653,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'post_status'      => array( 'publish', ProductPostType::RETIRED ),
 				'posts_per_page'   => 1,
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 			)
 		);
 
@@ -678,7 +678,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'posts_per_page'   => 1,
 				'orderby'          => 'modified',
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- only for an address no post or product answers.
 				'meta_query'       => array(
 					array(
@@ -711,7 +711,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'posts_per_page'   => 1,
 				'fields'           => 'ids',
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 			)
 		);
 
@@ -1107,7 +1107,7 @@ final class PostTypeProductRepository implements ProductRepository {
 				'orderby'          => 'ID',
 				'order'            => array( 'publish' ) === $statuses ? 'ASC' : 'DESC',
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the store as it is: a filter that hides a post would let two addresses answer as one.
 				'meta_query'       => array_merge( array( 'relation' => 'AND' ), $clauses ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- see above.
 			)
 		);

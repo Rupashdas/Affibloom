@@ -578,7 +578,6 @@ final class Plugin {
 	 * Hooks the plugin into WordPress.
 	 */
 	private function register(): void {
-		add_action( 'init', array( $this, 'load_textdomain' ) );
 
 		foreach ( $this->modules() as $module ) {
 			$module->register();
@@ -1075,12 +1074,5 @@ final class Plugin {
 		}
 
 		return $this->navigation;
-	}
-
-	/**
-	 * Loads translations from /languages.
-	 */
-	public function load_textdomain(): void {
-		load_plugin_textdomain( 'affibloom', false, dirname( plugin_basename( $this->file ) ) . '/languages' );
 	}
 }
