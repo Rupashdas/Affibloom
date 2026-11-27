@@ -687,12 +687,16 @@
 	color: var(--affibloom-ink-900);
 }
 .affibloom-admin .affibloom-input:disabled,
-.affibloom-admin .affibloom-select:disabled {
+.affibloom-admin .affibloom-select:disabled,
+.affibloom-admin .affibloom-input[readonly] {
 	border-color: var(--affibloom-control-line);
 	background-color: var(--affibloom-subtle);
 	color: var(--affibloom-ink-600);
 	cursor: not-allowed;
 }
+/* A read-only field is not edited, so it does not answer to hover or focus as an editable one does. */
+.affibloom-admin .affibloom-input[readonly]:hover { border-color: var(--affibloom-control-line); color: var(--affibloom-ink-600); }
+.affibloom-admin .affibloom-input[readonly]:focus { border-color: var(--affibloom-control-line); color: var(--affibloom-ink-600); box-shadow: 0 0 0 3px var(--affibloom-line); }
 .affibloom-admin .affibloom-input::placeholder { color: var(--affibloom-ink-500); }
 .affibloom-admin .affibloom-color {
 	width: 72px;
