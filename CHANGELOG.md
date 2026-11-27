@@ -4,6 +4,20 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-28
+
+What the user found in the editor, and a layout pass over every screen.
+
+### Changed
+
+- **Customize Display** gives each field the control its values ask for: Theme, Title tag, Columns, Button type and Bullet are dropdowns of what the renderer reads, Limit takes a number, the url fields take an address, and Compact is a toggle. The Elementor widget follows (deviation 170).
+- The Quick Detail's panel may grow to 1440px, so the preview and the form both have room.
+
+### Fixed
+
+- The box preview cut off the badge's ribbon, which hangs above and to the left of the box; every preview now has the room for it.
+- The Dashboard's Filters panel fell 2px off the left of a 375px window; its width now gives way to the window first.
+
 ## [1.0.1] - 2026-11-27
 
 Fixes for the editor, from the user's own run of it.

@@ -4,7 +4,7 @@ Tags: affiliate, amazon, product box, comparison table, affiliate links
 Requires at least: 7.1.4
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ No. Amazon links, your tracking ID, boxes, clicks and the link index work withou
 Nothing is deleted unless you switch on Settings → General → Uninstall → "Delete all Affibloom data when the plugin is deleted". Export your products from the Dashboard first.
 
 == Changelog ==
+
+= 1.0.2 =
+* The editor's panel gives each setting the control it deserves (Theme, Title tag, Columns, Button type and Bullet are dropdowns, Limit takes a number, Compact is a toggle); the box preview has room for its badge; the Quick Detail is wider; the Dashboard's Filters panel stays on screen on a phone.
 
 = 1.0.1 =
 * The editor's Quick Detail saves again where WordPress isolates the editor's page, its preview is the wider half and its title and image follow the form; the block is called Affibloom; fields you cannot edit look it.
