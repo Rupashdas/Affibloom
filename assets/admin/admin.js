@@ -1337,7 +1337,9 @@
 		};
 		frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' +
 			links + '<style>' + answer.root + '</style>' +
-			'<style>body{margin:0;padding:24px 16px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e1e1e}' +
+			// The padding holds the badge's ribbon, which hangs 18px above the box and 20px to its left (box.css): with less
+			// the frame cut it off, and it read as a badge out of place (the user, 2026-11-28).
+			'<style>body{margin:0;padding:32px 28px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e1e1e}' +
 			( onImage ? '.affibloom-image{cursor:pointer}' : '' ) + '</style>' +
 			'</head><body>' + answer.html + '<script src="' + answer.script + '"><\/script></body></html>';
 	}
