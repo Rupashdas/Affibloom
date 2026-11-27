@@ -3050,6 +3050,8 @@ body.affibloom-framed #wpcontent { margin-left: 0; padding-left: 0; }
 .affibloom-framed .affibloom-page__body { padding-bottom: 24px; }
 .affibloom-framed .affibloom-product__aside { top: 16px; max-height: calc(100vh - 32px); }
 .affibloom-framed .affibloom-admin .affibloom-toast { bottom: 24px; }
+/* In the dialog the preview is what the editor is judging, so it takes the wider column (42% / 58%, the page's ratio turned around). */
+.affibloom-framed .affibloom-product__grid { grid-template-columns: minmax(0, 42fr) minmax(0, 58fr); }
 
 /*
  * 14. A product's URL variants (F27, Task V1; docs/ui/design-system.md, "Variants table"): the list's card and table with

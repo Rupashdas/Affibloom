@@ -187,11 +187,47 @@
 		}
 	}
 
+	/**
+	 * The head follows the form while it is edited (the editor's Quick Detail, Task 23G): the name as it is typed and the
+	 * picture as it is chosen reach the title and the image tile at once, as they reach the live preview. A save still
+	 * writes the stored values over them (product-save.js).
+	 *
+	 * @param {HTMLFormElement} form The product form.
+	 */
+	function headEcho( form ) {
+		var title = document.getElementById( 'affibloom-product-title' );
+		var name = document.getElementById( 'affibloom-name' );
+		var image = document.querySelector( '[data-head-image]' );
+		var none = document.querySelector( '[data-head-image-none]' );
+		var link = document.querySelector( '[data-image-url]' );
+
+		if ( title && name ) {
+			name.addEventListener( 'input', function () {
+				var typed = name.value.trim();
+				title.textContent = '' !== typed ? typed : form.dataset.emptyName;
+				title.title = title.textContent; // The head cuts a long name to two lines (MD5).
+			} );
+		}
+
+		// Every way to change the picture (Apply, the media library, Amazon's Refresh) ends in this event.
+		if ( image && none && link ) {
+			document.addEventListener( 'affibloom:image-changed', function () {
+				var src = link.value.trim();
+				image.hidden = '' === src;
+				none.hidden = '' !== src;
+				if ( '' !== src ) {
+					image.src = src;
+				}
+			} );
+		}
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		var features = document.querySelector( '[data-features]' );
 		var productForm = document.getElementById( 'affibloom-product-form' );
 		if ( productForm ) {
 			permalink( productForm );
+			headEcho( productForm );
 		}
 		if ( features ) {
 			featureList( features );
