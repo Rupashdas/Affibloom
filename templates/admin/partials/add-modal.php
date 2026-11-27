@@ -67,7 +67,7 @@ $add_count = __( 'Add %d Links', 'affibloom' );
 
 				<div id="affibloom-add-panel-url" role="tabpanel" aria-labelledby="affibloom-add-tab-url">
 					<label class="screen-reader-text" for="affibloom-add-url"><?php esc_html_e( 'URL', 'affibloom' ); ?></label>
-					<input type="text" id="affibloom-add-url" class="affibloom-input" name="url" autocomplete="off" spellcheck="false"
+					<input type="url" inputmode="url" id="affibloom-add-url" class="affibloom-input" name="url" autocomplete="off" spellcheck="false"
 						placeholder="https://www.example.com/affiliate-id" aria-describedby="affibloom-add-error affibloom-add-hint">
 
 					<label class="screen-reader-text" for="affibloom-add-urls"><?php esc_html_e( 'Links, one per line', 'affibloom' ); ?></label>

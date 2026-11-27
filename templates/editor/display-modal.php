@@ -291,7 +291,7 @@ if ( ! $view['can_manage'] ) {
 		<form class="affibloom-modal__body affibloom-modal-form" id="affibloom-create-link-form" novalidate>
 			<div class="affibloom-field">
 				<label class="screen-reader-text" for="affibloom-create-link-url"><?php esc_html_e( 'Destination URL', 'affibloom' ); ?></label>
-				<input type="text" class="affibloom-input" id="affibloom-create-link-url" name="url" autocomplete="off" spellcheck="false"
+				<input type="url" inputmode="url" class="affibloom-input" id="affibloom-create-link-url" name="url" autocomplete="off" spellcheck="false"
 					placeholder="https://www.example.com/affiliate-id" aria-describedby="affibloom-create-link-error">
 				<p class="affibloom-field__error" id="affibloom-create-link-error" data-url-error role="alert" hidden></p>
 			</div>

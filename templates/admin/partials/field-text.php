@@ -5,12 +5,14 @@
  * aria-describedby. With "choices" (button and badge texts) the field has the icon picker (F28, Task 14G).
  *
  * @package Affibloom
- * @var array{id: string, name: string, label: string, value: string, help: string, placeholder?: string, choices?: \Affibloom\Interface\Admin\IconChoices} $view
+ * @var array{id: string, name: string, label: string, value: string, help: string, placeholder?: string, type?: string, choices?: \Affibloom\Interface\Admin\IconChoices} $view
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $help_id = $view['id'] . '-help';
+// A field that holds a web address says so, so a phone offers the right keys and the browser its own addresses
+// (2026-11-28, the user). The form is novalidate, so a value the server still accepts is never blocked here.
 ?>
 <div class="affibloom-field">
 	<div class="affibloom-field__head">
@@ -29,8 +31,8 @@ $help_id = $view['id'] . '-help';
 	<?php if ( isset( $view['choices'] ) ) : ?>
 		<?php $this->render( 'admin/partials/icon-text-field', $view['choices']->field( $view['id'], $view['name'], $view['label'], $view['value'], $view['placeholder'] ?? '', $help_id ) ); ?>
 	<?php else : ?>
-		<input type="text" class="affibloom-input" id="<?php echo esc_attr( $view['id'] ); ?>" name="<?php echo esc_attr( $view['name'] ); ?>"
-			value="<?php echo esc_attr( $view['value'] ); ?>" placeholder="<?php echo esc_attr( $view['placeholder'] ?? '' ); ?>"
+		<input type="<?php echo 'url' === ( $view['type'] ?? '' ) ? 'url' : 'text'; ?>" class="affibloom-input" id="<?php echo esc_attr( $view['id'] ); ?>" name="<?php echo esc_attr( $view['name'] ); ?>"
+			value="<?php echo esc_attr( $view['value'] ); ?>" placeholder="<?php echo esc_attr( $view['placeholder'] ?? '' ); ?>"<?php echo 'url' === ( $view['type'] ?? '' ) ? ' inputmode="url" spellcheck="false"' : ''; ?>
 			aria-describedby="<?php echo esc_attr( $help_id ); ?>">
 	<?php endif; ?>
 </div>

@@ -2318,7 +2318,10 @@
 	box-shadow: var(--affibloom-shadow-segment);
 }
 .affibloom-field-row__head { display: flex; align-items: center; gap: 6px; }
-.affibloom-field-row__switches { display: flex; gap: 8px; margin-left: auto; }
+.affibloom-field-row__switches { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-left: auto; }
+/* Each switch with the words for what it does (2026-11-28), small enough to sit in the row's head. */
+.affibloom-field-row__switch { display: inline-flex; align-items: center; gap: 6px; }
+.affibloom-admin .affibloom-field-row__switch-label { color: var(--affibloom-ink-600); font: 500 12px/16px var(--affibloom-font); cursor: pointer; }
 .affibloom-field-row__value { display: flex; align-items: flex-start; gap: 8px; }
 .affibloom-field-row__value .affibloom-input { flex: 1 1 auto; min-width: 0; }
 .affibloom-admin .affibloom-input--rating { flex: 0 0 76px; }

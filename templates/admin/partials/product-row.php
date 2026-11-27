@@ -133,7 +133,7 @@ $quick_label = sprintf( __( 'Quick Edit: %s', 'affibloom' ), $product->name );
 						</div>
 						<div class="affibloom-field">
 							<label class="affibloom-label affibloom-quick__label" for="<?php echo esc_attr( $quick_id ); ?>-url"><?php esc_html_e( 'Primary Destination URL', 'affibloom' ); ?></label>
-							<input type="text" class="affibloom-input" id="<?php echo esc_attr( $quick_id ); ?>-url" name="url"
+							<input type="url" inputmode="url" spellcheck="false" class="affibloom-input" id="<?php echo esc_attr( $quick_id ); ?>-url" name="url"
 								value="<?php echo esc_attr( $product->url->value() ); ?>" placeholder="https://www.example.com/affiliate-id">
 						</div>
 						<?php // Lasso's Groups select (several, new names added), as the group picker (Task G5; F23 R21). ?>

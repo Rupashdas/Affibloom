@@ -103,7 +103,7 @@ endif;
 				?>
 			</div>
 			<span class="affibloom-image-field">
-				<input type="text" class="affibloom-input" id="affibloom-image-url" name="image_url" value="<?php echo esc_attr( $image ); ?>"
+				<input type="url" inputmode="url" spellcheck="false" class="affibloom-input" id="affibloom-image-url" name="image_url" value="<?php echo esc_attr( $image ); ?>"
 					aria-describedby="affibloom-image-url-help affibloom-image-url-error" data-image-url>
 				<span class="affibloom-image-field__actions">
 				<button type="button" class="affibloom-button affibloom-button--secondary" data-image-apply

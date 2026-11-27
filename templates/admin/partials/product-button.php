@@ -33,6 +33,7 @@ $fields  = array(
 			? __( 'The actual URL you want people to go to when they click a link', 'affibloom' )
 			: __( 'Another URL you want people to go to when they click an extra button in displays', 'affibloom' ),
 		'placeholder' => $main ? 'https://www.example.com/affiliate-id' : 'https://www.example.com/affiliate-id2',
+		'type'        => 'url',
 	),
 	array(
 		'id'          => $ids[1],

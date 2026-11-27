@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-27T18:46:00+00:00\n"
+"POT-Creation-Date: 2026-11-27T19:14:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: affibloom\n"
@@ -1350,7 +1350,7 @@ msgstr ""
 #: templates/admin/partials/field-modal.php:143
 #: templates/admin/partials/group-member-row.php:46
 #: templates/admin/partials/icon-set-item.php:35
-#: templates/admin/partials/product-button.php:66
+#: templates/admin/partials/product-button.php:67
 #: templates/admin/partials/table-inspector.php:118
 #: templates/admin/partials/variant-rows.php:40
 #: templates/admin/product-variants.php:147
@@ -2727,7 +2727,7 @@ msgstr ""
 #. translators: %s: a field's name.
 #: templates/admin/partials/feature-row.php:17
 #: templates/admin/partials/field-row.php:35
-#: templates/admin/partials/product-button.php:56
+#: templates/admin/partials/product-button.php:57
 msgid "Drag to reorder, or press Arrow Up or Arrow Down"
 msgstr ""
 
@@ -2953,12 +2953,18 @@ msgstr ""
 msgid "Reorder %s"
 msgstr ""
 
-#: templates/admin/partials/field-row.php:54
-#: templates/admin/partials/field-row.php:56
-msgid "Show field name in your display."
+#: templates/admin/partials/field-row.php:60
+msgid "Show name"
 msgstr ""
 
 #: templates/admin/partials/field-row.php:60
+msgid "Show field name in your display."
+msgstr ""
+
+#: templates/admin/partials/field-row.php:62
+msgid "Show by default"
+msgstr ""
+
 #: templates/admin/partials/field-row.php:62
 msgid "Show this field in your display by default."
 msgstr ""
@@ -3714,45 +3720,45 @@ msgstr ""
 msgid "Another URL you want people to go to when they click an extra button in displays"
 msgstr ""
 
-#: templates/admin/partials/product-button.php:40
+#: templates/admin/partials/product-button.php:41
 #: templates/admin/partials/table-inspector.php:93
 #: templates/admin/partials/table-inspector.php:94
 msgid "Button Text"
 msgstr ""
 
-#: templates/admin/partials/product-button.php:43
+#: templates/admin/partials/product-button.php:44
 msgid "This text will appear in the primary button"
 msgstr ""
 
-#: templates/admin/partials/product-button.php:44
+#: templates/admin/partials/product-button.php:45
 msgid "This text will appear in this extra button"
 msgstr ""
 
-#: templates/admin/partials/product-button.php:50
+#: templates/admin/partials/product-button.php:51
 #: templates/admin/partials/settings-general-link-defaults.php:18
 msgid "New Window / Tab"
 msgstr ""
 
-#: templates/admin/partials/product-button.php:50
+#: templates/admin/partials/product-button.php:51
 #: templates/admin/partials/settings-general-link-defaults.php:18
 msgid "When enabled, users who click this link will have it loaded in a new tab."
 msgstr ""
 
-#: templates/admin/partials/product-button.php:51
+#: templates/admin/partials/product-button.php:52
 #: templates/admin/partials/settings-general-link-defaults.php:19
 msgid "NoFollow / NoIndex"
 msgstr ""
 
-#: templates/admin/partials/product-button.php:51
+#: templates/admin/partials/product-button.php:52
 #: templates/admin/partials/settings-general-link-defaults.php:19
 msgid "When enabled, this link will be set to nofollow. This indicates to Google that it's an affiliate link."
 msgstr ""
 
-#: templates/admin/partials/product-button.php:62
+#: templates/admin/partials/product-button.php:63
 msgid "This button's link is the product's main link. The first button in the list is the box's primary button."
 msgstr ""
 
-#: templates/admin/partials/product-button.php:62
+#: templates/admin/partials/product-button.php:63
 msgid "Main link"
 msgstr ""
 
