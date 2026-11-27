@@ -175,6 +175,7 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
 - 167. Decision B4 reversed (the user, 2026-11-25): Commission Upgrades, Mobile Deep Linking and Send Readers to Their Local Store removed, with their stored values (schema step 13).
 - 168. Dead settings and leftovers removed (the user, 2026-11-25): seven settings read by nothing or narrower than said, the brag override and CSS, the tour's commissions line, the migrator's WaitingStep (schema step 14).
 - 169. Task 23G changed (2026-11-27): the Quick Detail's + Add reaches the framed product page by message, because WordPress isolates the block editor's page (core 7.1 `Document-Isolation-Policy`).
+- 170. Task 24A changed (2026-11-28): Customize Display's fields take the control their values ask for (dropdowns, a number, addresses, a Compact toggle), in the block and in Elementor.
 
 ## Deviations from the plan text (keep these in mind in later tasks)
 
@@ -3148,3 +3149,17 @@ Moved verbatim from `progress.md` on 2026-11-15. Add a new deviation at the end,
     shows the dialog's error line, which until now was printed and never used. Checks: the flow in Brave on Local both
     ways (the message path forced by making the direct one fail), the failure reproduced on staging and traced to the
     header; lint, phpcs, unit 1,260.
+
+170. **Customize Display's fields take the control their values ask for (2026-11-28, the user: "all fields in the
+    settings are input fields ... the Theme option could be a select dropdown").** Task 24A followed Lasso, whose panel
+    is lines of text whose help names the values. Now the catalogue says how each field is shown: Theme
+    (`Theme::NAMES`), Title tag (`BoxOverrides::TITLE_TAGS`), Columns (`GroupAttributes::COLUMNS`), Button type and
+    Bullet (`ListBullets`) are dropdowns of what the renderer reads, with the display's own setting as the first
+    choice; Limit asks for a number and the four url fields for an address; Compact is a toggle, as its help text
+    described. The toggles' stored value (`hide` or `enable`) is now the catalogue's, so the block's panel and the
+    Elementor widget read it from one place instead of each knowing it. A compact box converted from Lasso keeps its
+    cards: every value `GroupAttributes::COMPACT` reads is stored as `hide`, which it reads too. A value from elsewhere
+    that is not in a list stays in the dropdown until it is changed. The help texts that only listed the values are
+    shortened, since the control shows them (the theme one also listed six of the eight themes). Checks: unit 1,262
+    (two new), lint, analyse, and in Brave the single box (Theme → Lab redraws the preview and stores `theme`) and a
+    grid's panel (Columns, Compact, Limit).
