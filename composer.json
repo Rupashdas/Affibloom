@@ -1,6 +1,6 @@
 {
-  "name": "volleyballvault/affibloom",
-  "description": "Affiliate product library and product boxes for VolleyballVault.",
+  "name": "deferstudio/affibloom",
+  "description": "An affiliate product library: product boxes, buttons, grids, lists and comparison tables, with link checks and click counts.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {

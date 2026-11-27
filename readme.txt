@@ -1,5 +1,5 @@
 === Affibloom ===
-Contributors: devrupash
+Contributors: rupash
 Tags: affiliate, amazon, product box, comparison table, affiliate links
 Requires at least: 7.1
 Tested up to: 7.1

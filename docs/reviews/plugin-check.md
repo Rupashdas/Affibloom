@@ -61,8 +61,10 @@ These are the user's to decide or do; none is code:
 
 1. **The plugin becomes public.** Affibloom is written for one site today (its migrator from Lasso is a separate,
    private plugin and must stay out of the directory). A release means supporting it for everyone.
-2. **The slug** `affibloom` must be free on WordPress.org, and the **Contributors** line (`devrupash`) must be a real
-   WordPress.org account.
+2. **The slug** `affibloom` must be free on WordPress.org. The plugin is uploaded from
+   https://profiles.wordpress.org/deferstudio/ and credits https://profiles.wordpress.org/rupash/ in the readme's
+   `Contributors` line (the user, 2026-11-28); the uploading account gets commit access whether or not it is listed
+   there, so add `deferstudio` to that line only to have it shown on the plugin's page.
 3. **Tested up to** must name the WordPress version current on the day of submission.
 4. The directory's assets — icon, banner and screenshots — live in the SVN `assets/` folder, not in the zip.
 5. **Trademarks:** the readme's `amazon` tag and the Amazon feature names describe an integration, which the

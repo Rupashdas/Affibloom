@@ -11,7 +11,7 @@ It works on its own, with no outside service apart from the optional Amazon Crea
 
 ## Requirements
 
-WordPress 7.1.4 or later, PHP 8.3 or later.
+WordPress 7.1 or later, PHP 8.3 or later.
 
 ## Install
 
