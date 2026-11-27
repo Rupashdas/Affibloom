@@ -56,6 +56,14 @@ No. Amazon links, your tracking ID, boxes, clicks and the link index work withou
 
 Nothing is deleted unless you switch on Settings → General → Uninstall → "Delete all Affibloom data when the plugin is deleted". Export your products from the Dashboard first.
 
+== Screenshots ==
+
+1. The Dashboard: every affiliate product, where it is used, how it is doing, and the links that need attention.
+2. A product's page: its links and buttons, its picture, badge, price and fields, with the box drawn beside the form as you edit it.
+3. Settings → Display: the theme, spacing, elements and colours of the box, with the live preview beside them.
+4. The Affibloom block in the editor: pick a display, and customise it from the block's own panel.
+5. What the reader sees: the product box in a post, with its badge, price, description and buttons.
+
 == Changelog ==
 
 = 1.0.3 =
