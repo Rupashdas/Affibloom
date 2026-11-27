@@ -10,9 +10,11 @@ watches the site.
 
 ## What you need
 
-- **The releases:** Affibloom **1.0.0** (`wp-content/plugins/affibloom/.local/affibloom-1.0.0-e7ab08f.zip`)
-  and the migrator **1.0.0** (`.local/affibloom-lasso-migrator-1.0.0-add8193.zip`), built 2026-11-26. They are the
-  rc.2 and 0.2.0 rehearsed on a copy of the live site that day, plus one admin style fix (the Locations tab's links) ([`rehearsal-log.md`](rehearsal-log.md), third run). They
+- **The releases:** Affibloom **1.0.1** (`wp-content/plugins/affibloom/.local/affibloom-1.0.1-6fc4254.zip`)
+  and the migrator **1.0.0** (`.local/affibloom-lasso-migrator-1.0.0-add8193.zip`). The migrator and the boxes are
+  2026-11-26's, rehearsed on a copy of the live site that day ([`rehearsal-log.md`](rehearsal-log.md), third run); 1.0.1
+  adds the editor fixes of 2026-11-27 (the block named Affibloom, the Quick Detail's layout, its live title and image,
+  + Add where WordPress isolates the editor's page, deviation 169, and the read-only fields' look). They
   carry staging's two fixes (S1 the link index on this host, S2 the posts' "Updated on" dates) and the dead settings
   removed on 2026-11-25 (deviations 167, 168). Do not use an older zip: staging's rc.1 builds lack the last of these.
 - **A low-traffic window** of about two hours (the analytics' quietest hours).
@@ -50,7 +52,7 @@ watches the site.
    ~200"). Let it run; it is rebuilt in step 4.
 4. Open three guides signed out (a private window): `best-colorful-volleyball-shoes`,
    `best-volleyball-training-equipment`, `best-basketball-shoes-for-volleyball`. **Expect:** Lasso's boxes (17, 13, 11),
-   nothing changed to the eye. (Invisible and expected: a body class `affibloom-v1.0.0`, a second Font Awesome
+   nothing changed to the eye. (Invisible and expected: a body class `affibloom-v1.0.1`, a second Font Awesome
    line, `noreferrer` dropped from links opening in a new tab.)
 
 ### 3. Migrate
