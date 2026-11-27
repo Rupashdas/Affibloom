@@ -5,8 +5,8 @@
  * Version:           1.0.3
  * Requires at least: 7.1
  * Requires PHP:      8.3
- * Author:            Devrupash
- * Author URI:        https://devrupash.com
+ * Author:            Defer Studio
+ * Author URI:        https://profiles.wordpress.org/deferstudio/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       affibloom
