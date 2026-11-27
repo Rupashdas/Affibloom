@@ -4,6 +4,20 @@ All notable changes to this plugin are recorded here. Versions follow semantic v
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-27
+
+Fixes for the editor, from the user's own run of it.
+
+### Fixed
+
+- The Quick Detail's **+ Add** saved nothing on a site where WordPress isolates the block editor's page (`Document-Isolation-Policy`, core 7.1 with Chromium 137+): the dialog could not reach the product page in its frame. The dialog and that page now talk by message, and a frame that answers neither way says so instead of staying silent.
+- A read-only field (an Amazon product's price, a group's slug, the Logs box) looks unavailable, as Lasso's do, instead of looking editable.
+
+### Changed
+
+- The block is called **Affibloom** in the inserter and the block panel, as Lasso's carried its own name; "product box" still finds it.
+- The Quick Detail gives the preview the wider column (58% to the form's 42%), and its title and image tile follow the form as it is edited, as the live preview already did.
+
 ## [1.0.0] - 2026-11-26
 
 The first stable release: 1.0.0-rc.2 after the whole browser suite ran against it.
