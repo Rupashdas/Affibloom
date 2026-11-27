@@ -224,6 +224,7 @@ if ( ! $view['can_manage'] ) {
 	data-empty="<?php esc_attr_e( 'No links found.', 'affibloom' ); ?>"
 	data-failed="<?php esc_attr_e( 'Could not add link to this group. Please try again.', 'affibloom' ); ?>"
 	data-added="<?php esc_attr_e( 'Added', 'affibloom' ); ?>"
+	data-group-failed="<?php esc_attr_e( 'The link was saved but could not be added to the group. Please try again.', 'affibloom' ); ?>"
 	data-page-label="<?php /* translators: %d: a page number. */ esc_attr_e( 'Page %d', 'affibloom' ); ?>">
 	<div class="affibloom-modal__backdrop" data-modal-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-add-to-group-title" aria-describedby="affibloom-add-to-group-name">
@@ -309,7 +310,7 @@ if ( ! $view['can_manage'] ) {
 <div id="affibloom-quick-detail-modal" class="affibloom-admin affibloom-modal affibloom-block-modal affibloom-sub-modal affibloom-quick-detail" hidden data-quick-detail-modal
 	data-product-page="<?php echo esc_url( add_query_arg( array( 'affibloom_frame' => '1' ), \Affibloom\Interface\Admin\ProductScreen::url( 0 ) ) ); ?>"
 	data-frame-title="<?php esc_attr_e( 'The new product', 'affibloom' ); ?>"
-	data-group-failed="<?php esc_attr_e( 'The link was saved but could not be added to the group. Please try again.', 'affibloom' ); ?>">
+	data-frame-failed="<?php esc_attr_e( "This link's page could not be opened here. Open it from the Affibloom dashboard to finish it.", 'affibloom' ); ?>">
 	<div class="affibloom-modal__backdrop" data-modal-close></div>
 	<div class="affibloom-modal__panel" role="dialog" aria-modal="true" aria-labelledby="affibloom-quick-detail-title">
 		<button type="button" class="affibloom-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'affibloom' ); ?>">

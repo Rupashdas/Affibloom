@@ -769,6 +769,7 @@
 	const quickDetailDialog = function ( element ) {
 		const holder = element.querySelector( '[data-quick-frame]' );
 		const add = element.querySelector( '[data-quick-add]' );
+		const error = element.querySelector( '[data-quick-error]' );
 		let frame = null;
 		let done = null;
 		const dialog = stacked( element, function () {
@@ -779,8 +780,24 @@
 			}
 		} );
 
+		const refuse = function ( text ) {
+			error.textContent = text;
+			error.hidden = '' === text;
+		};
+
+		/**
+		 * The form inside the frame, or null: a frame that did not load, or one the browser keeps from this script
+		 * because its page came from another origin, has no document to read.
+		 *
+		 * @return {HTMLFormElement|null} The product form.
+		 */
 		const productForm = function () {
-			const page = frame && frame.contentDocument;
+			let page = null;
+			try {
+				page = frame && frame.contentDocument;
+			} catch {
+				page = null; // Another origin: the browser refuses the document.
+			}
 			return page
 				? page.getElementById( 'affibloom-product-form' )
 				: null;
@@ -796,8 +813,11 @@
 				product &&
 				product.ownerDocument.getElementById( 'affibloom-save' );
 			if ( ! product || ! save ) {
+				// R26: + Add saves the page in the frame, so with no page to save it says so instead of doing nothing.
+				refuse( element.getAttribute( 'data-frame-failed' ) );
 				return;
 			}
+			refuse( '' );
 			busy( add, true );
 			product.requestSubmit( save );
 		} );
@@ -805,13 +825,24 @@
 		return {
 			open( product, from, then ) {
 				done = then;
+				refuse( '' );
 				holder.innerHTML = '';
 				frame = document.createElement( 'iframe' );
 				frame.className = 'affibloom-quick-detail__page';
 				frame.title = element.getAttribute( 'data-frame-title' );
-				const address = new URL(
+				const stored = new URL(
 					element.getAttribute( 'data-product-page' ),
 					window.location.href
+				);
+				/*
+				 * The dialog reads and saves the form inside the frame, so the page must come from the origin this
+				 * editor was opened from. A site whose stored admin address differs from it in scheme or host (a copy
+				 * made for staging) would otherwise frame another origin, which this script may not touch: + Add then
+				 * found no form. The path and the query are the stored ones; only the origin is this page's.
+				 */
+				const address = new URL(
+					stored.pathname + stored.search,
+					window.location.origin
 				);
 				address.searchParams.set( 'id', String( product ) );
 				frame.src = address.toString();
@@ -834,6 +865,8 @@
 					} );
 					const saved = productForm();
 					if ( ! saved ) {
+						// Not the product's page: WordPress sent the frame somewhere else (signed out, or the ID is gone).
+						refuse( element.getAttribute( 'data-frame-failed' ) );
 						return;
 					}
 					saved.addEventListener(

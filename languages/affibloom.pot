@@ -5696,6 +5696,10 @@ msgid "The new product"
 msgstr ""
 
 #: templates/editor/display-modal.php:312
+msgid "This link's page could not be opened here. Open it from the Affibloom dashboard to finish it."
+msgstr ""
+
+#: templates/editor/display-modal.php:227
 msgid "The link was saved but could not be added to the group. Please try again."
 msgstr ""
 
