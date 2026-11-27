@@ -21,7 +21,7 @@ final class OverrideTexts {
 	/**
 	 * The panel's fields per type, with their label, help text and kind, for the editor.
 	 *
-	 * @return array<string, list<array{name: string, label: string, help: string, kind: string, on: bool, icon: bool}>>
+	 * @return array<string, list<array{name: string, label: string, help: string, kind: string, on: bool, value: string, icon: bool, choices: list<array{value: string, label: string}>}>>
 	 */
 	public static function catalog(): array {
 		$catalog = array();
@@ -29,18 +29,76 @@ final class OverrideTexts {
 			foreach ( $fields as $field ) {
 				[ $label, $help ]   = self::words( $type, $field );
 				$catalog[ $type ][] = array(
-					'name'  => $field,
-					'label' => $label,
-					'help'  => $help,
-					'kind'  => OverrideCatalog::kind( $field ),
-					'on'    => OverrideCatalog::on_by_default( $field ),
+					'name'    => $field,
+					'label'   => $label,
+					'help'    => $help,
+					'kind'    => OverrideCatalog::kind( $field ),
+					'on'      => OverrideCatalog::on_by_default( $field ),
+					// What a toggle stores when it is not at its default ('' for every other kind).
+					'value'   => OverrideCatalog::stored_value( $field ),
 					// Task 24G: a badge or button text with an icon picker.
-					'icon'  => OverrideCatalog::icon_text( $type, $field ),
+					'icon'    => OverrideCatalog::icon_text( $type, $field ),
+					// A closed list of values, the default first (2026-11-28, the user).
+					'choices' => self::choices( $field ),
 				);
 			}
 		}
 
 		return $catalog;
+	}
+
+	/**
+	 * What a field's control offers, the default first: its empty value stores no override, so it reads as the
+	 * display's own setting. The values are the renderer's (OverrideCatalog::choices()); only the words are here.
+	 *
+	 * @param string $field The shortcode attribute.
+	 * @return list<array{value: string, label: string}>
+	 */
+	private static function choices( string $field ): array {
+		$values = OverrideCatalog::choices( $field );
+		if ( array() === $values ) {
+			return array();
+		}
+		$first = 'button_type' === $field ? __( 'Primary button', 'affibloom' ) : __( 'Default', 'affibloom' );
+		$list  = array(
+			array(
+				'value' => '',
+				'label' => $first,
+			),
+		);
+		foreach ( $values as $value ) {
+			$list[] = array(
+				'value' => $value,
+				'label' => self::choice_label( $field, $value ),
+			);
+		}
+
+		return $list;
+	}
+
+	/**
+	 * One choice's words: a theme and a count read as they are, a tag in capitals, and the rest say what they do.
+	 *
+	 * @param string $field The shortcode attribute.
+	 * @param string $value One of the renderer's values.
+	 */
+	private static function choice_label( string $field, string $value ): string {
+		if ( 'bullets' === $field ) {
+			return match ( $value ) {
+				'decimal' => __( 'Numbers (1, 2, 3)', 'affibloom' ),
+				'alpha'   => __( 'Letters (a, b, c)', 'affibloom' ),
+				'roman'   => __( 'Roman numerals (i, ii, iii)', 'affibloom' ),
+				'square'  => __( 'Squares', 'affibloom' ),
+				'circle'  => __( 'Circles', 'affibloom' ),
+				'hide'    => __( 'No bullets', 'affibloom' ),
+				default   => $value,
+			};
+		}
+		if ( 'button_type' === $field ) {
+			return __( 'Secondary button', 'affibloom' );
+		}
+
+		return 'title_type' === $field ? strtoupper( $value ) : $value;
 	}
 
 	/**
@@ -52,12 +110,12 @@ final class OverrideTexts {
 	 */
 	private static function words( string $type, string $field ): array {
 		$group  = in_array( $type, array( 'grid', 'list' ), true );
-		$themes = __( 'Override the theme. Supported theme values are: <i>Cactus, Cutter, Lab, Llama, Money, Splash</i>', 'affibloom' );
+		$themes = __( 'Override the theme of this display.', 'affibloom' );
 
 		return match ( $field ) {
 			'title'           => array( __( 'Product title', 'affibloom' ), $group ? __( 'Hide the product title by <code>hide</code> value.', 'affibloom' ) : __( 'Override the product title.<br/>Hide the product title by <code>hide</code> value.', 'affibloom' ) ),
 			'title_url'       => array( __( 'Title url', 'affibloom' ), __( 'Customize the title link destination. Leave blank for the default.<br/>Example: https://example.com', 'affibloom' ) ),
-			'title_type'      => array( __( 'Title tag', 'affibloom' ), __( 'Set the title tag. Common values are: <i>H1, H2, H3, H4</i>', 'affibloom' ) ),
+			'title_type'      => array( __( 'Title tag', 'affibloom' ), __( 'Set the tag the title is wrapped in.', 'affibloom' ) ),
 			'description'     => array( __( 'Product description', 'affibloom' ), $group ? __( 'Hide the product description by <code>hide</code> value.', 'affibloom' ) : __( 'Override the product description<br/>Hide the product description by <code>hide</code> value.', 'affibloom' ) ),
 			'badge'           => array( __( 'Badge', 'affibloom' ), $group ? __( 'Hide the badge by <code>hide</code> value.', 'affibloom' ) : __( 'Override the display badge.<br/>Hide the badge by <code>hide</code> value.', 'affibloom' ) ),
 			'price'           => array( __( 'Show/Hide the price', 'affibloom' ), '' ),
@@ -75,16 +133,16 @@ final class OverrideTexts {
 			'image_url'       => array( __( 'Image url', 'affibloom' ), __( 'Override the image url.<br/>Example: https://example.com/image.png', 'affibloom' ) ),
 			'disclosure_text' => array( __( 'Disclosure text', 'affibloom' ), __( 'Override the disclosure text.', 'affibloom' ) ),
 			'anchor_id'       => array( __( 'Anchor id', 'affibloom' ), __( 'Override the anchor id.<br/>Example: the-anchor-link-id', 'affibloom' ) ),
-			'button_type'     => array( __( 'Button type', 'affibloom' ), __( 'Set this value to show either the Secondary(secondary) or Primary(primary) button. This defaults to "primary".', 'affibloom' ) ),
+			'button_type'     => array( __( 'Button type', 'affibloom' ), __( 'Show the primary or the secondary button.', 'affibloom' ) ),
 			'columns'         => array(
 				__( 'Columns', 'affibloom' ),
 				'gallery' === $type
-					? __( 'Sets the Gallery to display five products per row. Ideal for wide layouts. This can also be set 2, 3, 4, and 5.', 'affibloom' )
-					: __( 'Sets the Grid to display three products per row. Ideal for wide layouts. This can also be set to 1 for a single display per-row and the limit can be set is 5.', 'affibloom' ),
+					? __( 'How many products a row of the gallery holds.', 'affibloom' )
+					: __( 'How many products a row of the grid holds.', 'affibloom' ),
 			),
-			'compact'         => array( __( 'Compact', 'affibloom' ), __( 'This will hide the description and all fields giving you a much more compact display by <code>hide</code> value.', 'affibloom' ) ),
+			'compact'         => array( __( 'Compact', 'affibloom' ), __( 'This will hide the description and all fields giving you a much more compact display.', 'affibloom' ) ),
 			'limit'           => array( __( 'Limit', 'affibloom' ), __( 'Show just the top X products in a group.', 'affibloom' ) ),
-			'bullets'         => array( __( 'Bullet', 'affibloom' ), __( 'Override the bullet type. To hide the bullet use <code>hide</code>. All supported values are: <i>decimal, alpha, roman, square, circle, hide</i>', 'affibloom' ) ),
+			'bullets'         => array( __( 'Bullet', 'affibloom' ), __( 'Override the bullet type of this list.', 'affibloom' ) ),
 			'disclosure'      => array( __( 'Show/Hide the Disclosure', 'affibloom' ), '' ),
 			'data_nosnippet'  => array( __( 'data-nosnippet HTML attribute', 'affibloom' ), __( 'Keeps the display out of search result snippets.', 'affibloom' ) ),
 			default           => array( $field, '' ),

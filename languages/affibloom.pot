@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-27T17:55:25+00:00\n"
+"POT-Creation-Date: 2026-11-27T18:29:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: affibloom\n"
@@ -361,81 +361,119 @@ msgstr ""
 msgid "Icon for %s"
 msgstr ""
 
-#: src/Interface/Editor/ElementorDisplayWidget.php:188
+#: src/Interface/Editor/ElementorDisplayWidget.php:211
 #: blocks/product-box/edit.js:140
 #: build/product-box/index.js:1
 msgid "Select a New Display"
 msgstr ""
 
-#: src/Interface/Editor/ElementorDisplayWidget.php:188
+#: src/Interface/Editor/ElementorDisplayWidget.php:211
 #: blocks/product-box/edit.js:141
 #: build/product-box/index.js:1
 msgid "Add a Display"
 msgstr ""
 
-#: src/Interface/Editor/ElementorDisplayWidget.php:194
+#: src/Interface/Editor/ElementorDisplayWidget.php:217
 #: blocks/product-box/edit.js:217
 #: build/product-box/index.js:1
 msgid "Choose a Link to display."
 msgstr ""
 
-#: src/Interface/Editor/ElementorDisplayWidget.php:198
+#: src/Interface/Editor/ElementorDisplayWidget.php:221
 #: blocks/product-box/edit.js:241
 #: build/product-box/index.js:1
 msgid "Update Display"
 msgstr ""
 
-#: src/Interface/Editor/ElementorDisplayWidget.php:199
+#: src/Interface/Editor/ElementorDisplayWidget.php:222
 #: blocks/product-box/edit.js:251
 #: build/product-box/index.js:1
 msgid "Edit Display"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:55
-msgid "Override the theme. Supported theme values are: <i>Cactus, Cutter, Lab, Llama, Money, Splash</i>"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:58
-msgid "Product title"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:58
-msgid "Hide the product title by <code>hide</code> value."
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:58
-msgid "Override the product title.<br/>Hide the product title by <code>hide</code> value."
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:59
-msgid "Title url"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:59
-msgid "Customize the title link destination. Leave blank for the default.<br/>Example: https://example.com"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:60
-msgid "Title tag"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:60
-msgid "Set the title tag. Common values are: <i>H1, H2, H3, H4</i>"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:61
-msgid "Product description"
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:61
-msgid "Hide the product description by <code>hide</code> value."
-msgstr ""
-
-#: src/Interface/Editor/OverrideTexts.php:61
-msgid "Override the product description<br/>Hide the product description by <code>hide</code> value."
+#: src/Interface/Editor/OverrideTexts.php:62
+#: templates/admin/partials/display-layout-panel.php:41
+msgid "Primary button"
 msgstr ""
 
 #: src/Interface/Editor/OverrideTexts.php:62
+msgid "Default"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:88
+msgid "Numbers (1, 2, 3)"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:89
+msgid "Letters (a, b, c)"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:90
+msgid "Roman numerals (i, ii, iii)"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:91
+msgid "Squares"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:92
+msgid "Circles"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:93
+msgid "No bullets"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:98
+#: templates/admin/partials/display-layout-panel.php:42
+msgid "Secondary button"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:113
+msgid "Override the theme of this display."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:116
+msgid "Product title"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:116
+msgid "Hide the product title by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:116
+msgid "Override the product title.<br/>Hide the product title by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:117
+msgid "Title url"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:117
+msgid "Customize the title link destination. Leave blank for the default.<br/>Example: https://example.com"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:118
+msgid "Title tag"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:118
+msgid "Set the tag the title is wrapped in."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:119
+msgid "Product description"
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:119
+msgid "Hide the product description by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:119
+msgid "Override the product description<br/>Hide the product description by <code>hide</code> value."
+msgstr ""
+
+#: src/Interface/Editor/OverrideTexts.php:120
 #: templates/admin/partials/display-colors-accordion.php:14
 #: templates/admin/partials/display-layout-panel.php:34
 #: templates/admin/partials/table-builder.php:132
@@ -445,27 +483,27 @@ msgstr ""
 msgid "Badge"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:62
+#: src/Interface/Editor/OverrideTexts.php:120
 msgid "Hide the badge by <code>hide</code> value."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:62
+#: src/Interface/Editor/OverrideTexts.php:120
 msgid "Override the display badge.<br/>Hide the badge by <code>hide</code> value."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:63
+#: src/Interface/Editor/OverrideTexts.php:121
 msgid "Show/Hide the price"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:64
+#: src/Interface/Editor/OverrideTexts.php:122
 msgid "Show/Hide all Fields"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:65
+#: src/Interface/Editor/OverrideTexts.php:123
 msgid "Show/Hide the Primary Rating"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:66
+#: src/Interface/Editor/OverrideTexts.php:124
 #: templates/admin/partials/display-theme-row.php:14
 #: templates/admin/partials/display-theme-row.php:21
 #: templates/admin/partials/tables-list.php:32
@@ -474,136 +512,136 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:68
+#: src/Interface/Editor/OverrideTexts.php:126
 msgid "Button url"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:68
+#: src/Interface/Editor/OverrideTexts.php:126
 msgid "Override the button url.<br/>Example: https://example.com"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:69
+#: src/Interface/Editor/OverrideTexts.php:127
 msgid "First button url"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:69
+#: src/Interface/Editor/OverrideTexts.php:127
 msgid "Override the first button url.<br/>Example: https://example.com"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:71
+#: src/Interface/Editor/OverrideTexts.php:129
 msgid "Button text"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:71
+#: src/Interface/Editor/OverrideTexts.php:129
 msgid "Override the button text."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:72
+#: src/Interface/Editor/OverrideTexts.php:130
 msgid "First button text"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:72
+#: src/Interface/Editor/OverrideTexts.php:130
 msgid "Override the first button text."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:73
+#: src/Interface/Editor/OverrideTexts.php:131
 msgid "Second button url"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:73
+#: src/Interface/Editor/OverrideTexts.php:131
 msgid "Override the second button url."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:74
+#: src/Interface/Editor/OverrideTexts.php:132
 msgid "Second button text"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:74
+#: src/Interface/Editor/OverrideTexts.php:132
 msgid "Override the second button text."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:75
+#: src/Interface/Editor/OverrideTexts.php:133
 msgid "Image url"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:75
+#: src/Interface/Editor/OverrideTexts.php:133
 msgid "Override the image url.<br/>Example: https://example.com/image.png"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:76
+#: src/Interface/Editor/OverrideTexts.php:134
 #: templates/admin/partials/display-behaviour-accordions.php:34
 #: templates/admin/partials/display-behaviour-accordions.php:41
 #: templates/admin/setup.php:107
 msgid "Disclosure text"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:76
+#: src/Interface/Editor/OverrideTexts.php:134
 msgid "Override the disclosure text."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:77
+#: src/Interface/Editor/OverrideTexts.php:135
 msgid "Anchor id"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:77
+#: src/Interface/Editor/OverrideTexts.php:135
 msgid "Override the anchor id.<br/>Example: the-anchor-link-id"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:78
+#: src/Interface/Editor/OverrideTexts.php:136
 msgid "Button type"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:78
-msgid "Set this value to show either the Secondary(secondary) or Primary(primary) button. This defaults to \"primary\"."
+#: src/Interface/Editor/OverrideTexts.php:136
+msgid "Show the primary or the secondary button."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:80
+#: src/Interface/Editor/OverrideTexts.php:138
 #: templates/admin/partials/display-layout-accordion.php:124
 msgid "Columns"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:82
-msgid "Sets the Gallery to display five products per row. Ideal for wide layouts. This can also be set 2, 3, 4, and 5."
+#: src/Interface/Editor/OverrideTexts.php:140
+msgid "How many products a row of the gallery holds."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:83
-msgid "Sets the Grid to display three products per row. Ideal for wide layouts. This can also be set to 1 for a single display per-row and the limit can be set is 5."
+#: src/Interface/Editor/OverrideTexts.php:141
+msgid "How many products a row of the grid holds."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:85
+#: src/Interface/Editor/OverrideTexts.php:143
 #: templates/admin/partials/display-layout-panel.php:29
 msgid "Compact"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:85
-msgid "This will hide the description and all fields giving you a much more compact display by <code>hide</code> value."
+#: src/Interface/Editor/OverrideTexts.php:143
+msgid "This will hide the description and all fields giving you a much more compact display."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:86
+#: src/Interface/Editor/OverrideTexts.php:144
 msgid "Limit"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:86
+#: src/Interface/Editor/OverrideTexts.php:144
 msgid "Show just the top X products in a group."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:87
+#: src/Interface/Editor/OverrideTexts.php:145
 msgid "Bullet"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:87
-msgid "Override the bullet type. To hide the bullet use <code>hide</code>. All supported values are: <i>decimal, alpha, roman, square, circle, hide</i>"
+#: src/Interface/Editor/OverrideTexts.php:145
+msgid "Override the bullet type of this list."
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:88
+#: src/Interface/Editor/OverrideTexts.php:146
 msgid "Show/Hide the Disclosure"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:89
+#: src/Interface/Editor/OverrideTexts.php:147
 msgid "data-nosnippet HTML attribute"
 msgstr ""
 
-#: src/Interface/Editor/OverrideTexts.php:89
+#: src/Interface/Editor/OverrideTexts.php:147
 msgid "Keeps the display out of search result snippets."
 msgstr ""
 
@@ -2557,14 +2595,6 @@ msgstr ""
 
 #: templates/admin/partials/display-layout-panel.php:40
 msgid "Pros & cons"
-msgstr ""
-
-#: templates/admin/partials/display-layout-panel.php:41
-msgid "Primary button"
-msgstr ""
-
-#: templates/admin/partials/display-layout-panel.php:42
-msgid "Secondary button"
 msgstr ""
 
 #: templates/admin/partials/display-layout-panel.php:43
@@ -5735,7 +5765,7 @@ msgstr ""
 msgid "Moved to position %1$d of %2$d."
 msgstr ""
 
-#: blocks/product-box/customize.js:218
+#: blocks/product-box/customize.js:254
 #: build/product-box/index.js:1
 msgid "Customize Display"
 msgstr ""

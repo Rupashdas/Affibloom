@@ -25,7 +25,10 @@ final class GroupAttributes {
 	 * The `compact` values that hide the cards' description, fields and disclosure: PHP's boolean filter's true
 	 * values, as Lasso reads it (R13), and `hide`, which its help text names (N1).
 	 */
-	private const COMPACT = array( '1', 'true', 'yes', 'on', 'hide' );
+	public const COMPACT = array( '1', 'true', 'yes', 'on', 'hide' );
+
+	/** The grid's columns (R14); anything else is none. */
+	public const COLUMNS = array( '1', '2', '3', '4', '5' );
 
 	/**
 	 * Builds the attributes.
@@ -83,7 +86,7 @@ final class GroupAttributes {
 			'true' === $latest,
 			strtolower( trim( $attributes['disclosure'] ?? '' ) ),
 			// R14: 1 to 5, anything else none.
-			in_array( $column, array( '1', '2', '3', '4', '5' ), true ) ? (int) $column : null,
+			in_array( $column, self::COLUMNS, true ) ? (int) $column : null,
 			in_array( strtolower( trim( $attributes['compact'] ?? '' ) ), self::COMPACT, true ),
 			trim( $attributes['bullets'] ?? '' )
 		);

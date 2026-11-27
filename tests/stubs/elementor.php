@@ -18,6 +18,7 @@ class Controls_Manager {
 	const SWITCHER    = 'switcher';
 	const HIDDEN      = 'hidden';
 	const SELECT      = 'select';
+	const NUMBER      = 'number';
 }
 
 abstract class Widget_Base {

@@ -10,6 +10,7 @@ import { InspectorControls } from '@wordpress/block-editor';
 import {
 	BaseControl,
 	PanelBody,
+	SelectControl,
 	TextControl,
 	TextareaControl,
 	ToggleControl,
@@ -68,12 +69,16 @@ function TextOverride( { field, value, onStore } ) {
 		}
 	};
 	const Control = 'textarea' === field.kind ? TextareaControl : TextControl;
+	// A field whose value is an address or a count says so, so the browser helps with it (2026-11-28, the user).
+	const type = { url: 'url', number: 'number' }[ field.kind ];
 	return (
 		<Control
 			__nextHasNoMarginBottom
 			__next40pxDefaultSize
 			label={ field.label }
 			help={ field.help ? <RawHTML>{ field.help }</RawHTML> : undefined }
+			type={ type }
+			min={ 'number' === field.kind ? 0 : undefined }
 			value={ draft }
 			onChange={ setDraft }
 			onBlur={ store }
@@ -83,6 +88,37 @@ function TextOverride( { field, value, onStore } ) {
 					store();
 				}
 			} }
+		/>
+	);
+}
+
+/**
+ * A field whose values are a closed list (2026-11-28, the user): the choices the renderer reads, the display's own
+ * setting first. Chosen is stored at once, as a toggle is.
+ *
+ * @param {Object}                  props         The field.
+ * @param {Object}                  props.field   Its catalogue entry, with its choices.
+ * @param {string}                  props.value   The stored value.
+ * @param {(value: string) => void} props.onStore Stores a value.
+ */
+function SelectOverride( { field, value, onStore } ) {
+	// A value from elsewhere (a converted box, or another editor) stays in the list until it is changed.
+	const known = field.choices.some( ( choice ) => choice.value === value );
+	const choices = known
+		? field.choices
+		: [ ...field.choices, { value, label: value } ];
+	return (
+		<SelectControl
+			__nextHasNoMarginBottom
+			__next40pxDefaultSize
+			label={ field.label }
+			help={ field.help ? <RawHTML>{ field.help }</RawHTML> : undefined }
+			value={ value }
+			options={ choices.map( ( choice ) => ( {
+				value: choice.value,
+				label: choice.label,
+			} ) ) }
+			onChange={ ( chosen ) => onStore( chosen ) }
 		/>
 	);
 }
@@ -221,22 +257,38 @@ export default function CustomizeDisplay( { attributes, setAttributes } ) {
 				{ fields.map( ( field ) => {
 					const value = overrides[ field.name ] || '';
 					if ( 'toggle' === field.kind ) {
+						// field.value is what this toggle stores away from its default: `hide`, or `enable`.
 						const checked = field.on
-							? 'hide' !== value
-							: 'enable' === value;
+							? field.value !== value
+							: field.value === value;
 						return (
 							<ToggleControl
 								__nextHasNoMarginBottom
 								key={ field.name }
 								label={ field.label }
+								help={
+									field.help ? (
+										<RawHTML>{ field.help }</RawHTML>
+									) : undefined
+								}
 								checked={ checked }
 								onChange={ ( on ) => {
-									let stored = on ? 'enable' : '';
-									if ( field.on ) {
-										stored = on ? '' : 'hide';
-									}
+									const stored =
+										field.on === on ? '' : field.value;
 									store( field.name, stored );
 								} }
+							/>
+						);
+					}
+					if ( 'select' === field.kind && field.choices.length ) {
+						return (
+							<SelectOverride
+								key={ field.name }
+								field={ field }
+								value={ value }
+								onStore={ ( stored ) =>
+									store( field.name, stored )
+								}
 							/>
 						);
 					}

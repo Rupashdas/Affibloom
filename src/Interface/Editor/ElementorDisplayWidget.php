@@ -142,22 +142,45 @@ final class ElementorDisplayWidget extends Widget_Base {
 						)
 					);
 				}
-				$this->add_control(
-					$field['name'] . '_' . $type,
-					array(
-						'label'       => $field['label'],
-						'type'        => $toggle ? Controls_Manager::SWITCHER : ( 'textarea' === $field['kind'] ? Controls_Manager::TEXTAREA : Controls_Manager::TEXT ),
-						'default'     => $toggle && $field['on'] ? 'yes' : '',
-						'description' => $field['help'],
-						'condition'   => array( self::TYPE => $type ),
-						// The canvas shows the shortcode's display: elementor.js rewrites the shortcode, which redraws it.
-						'render_type' => 'none',
-					)
+				$control = array(
+					'label'       => $field['label'],
+					'type'        => self::control_type( $field['kind'] ),
+					'default'     => $toggle && $field['on'] ? 'yes' : '',
+					'description' => $field['help'],
+					'condition'   => array( self::TYPE => $type ),
+					// The canvas shows the shortcode's display: elementor.js rewrites the shortcode, which redraws it.
+					'render_type' => 'none',
 				);
+				// A closed list of values is a dropdown here too (2026-11-28, the user), with the same words.
+				if ( 'select' === $field['kind'] ) {
+					$options = array();
+					foreach ( $field['choices'] as $choice ) {
+						$options[ $choice['value'] ] = $choice['label'];
+					}
+					$control['options'] = $options;
+				}
+				$this->add_control( $field['name'] . '_' . $type, $control );
 			}
 		}
 
 		$this->end_controls_section();
+	}
+
+	/**
+	 * Elementor's control for one of the catalogue's kinds (OverrideCatalog::kind()): a switcher, a text area, a
+	 * dropdown, a number, or a line of text. An address stays a line of text: Elementor's URL control stores a
+	 * structure, and the shortcode wants the address itself.
+	 *
+	 * @param string $kind The field's kind.
+	 */
+	private static function control_type( string $kind ): string {
+		return match ( $kind ) {
+			'toggle'   => Controls_Manager::SWITCHER,
+			'textarea' => Controls_Manager::TEXTAREA,
+			'select'   => Controls_Manager::SELECT,
+			'number'   => Controls_Manager::NUMBER,
+			default    => Controls_Manager::TEXT,
+		};
 	}
 
 	/**

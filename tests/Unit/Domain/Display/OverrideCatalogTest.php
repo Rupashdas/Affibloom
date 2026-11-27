@@ -1,7 +1,10 @@
 <?php
 namespace Affibloom\Tests\Unit\Domain\Display;
 
+use Affibloom\Domain\Box\BoxOverrides;
 use Affibloom\Domain\Display\OverrideCatalog;
+use Affibloom\Domain\Display\Theme;
+use Affibloom\Domain\Shortcode\GroupAttributes;
 use Affibloom\Tests\Unit\TestCase;
 
 /**
@@ -62,6 +65,41 @@ final class OverrideCatalogTest extends TestCase {
 		);
 		self::assertSame( 'textarea', OverrideCatalog::kind( 'description' ) );
 		self::assertSame( 'text', OverrideCatalog::kind( 'badge' ) );
+	}
+
+	/**
+	 * A field whose values are known gets its own control (2026-11-28, the user): the choices are the renderer's own
+	 * lists, so nothing can be chosen that the box would drop.
+	 */
+	public function test_a_closed_list_of_values_is_a_dropdown_of_what_the_renderer_reads(): void {
+		self::assertSame( 'select', OverrideCatalog::kind( 'theme' ) );
+		self::assertSame( Theme::NAMES, OverrideCatalog::choices( 'theme' ) );
+		self::assertSame( BoxOverrides::TITLE_TAGS, OverrideCatalog::choices( 'title_type' ) );
+		self::assertSame( GroupAttributes::COLUMNS, OverrideCatalog::choices( 'columns' ) );
+		self::assertSame( array( 'decimal', 'alpha', 'roman', 'square', 'circle', 'hide' ), OverrideCatalog::choices( 'bullets' ) );
+		self::assertSame( array( 'secondary' ), OverrideCatalog::choices( 'button_type' ) );
+		self::assertSame( 'number', OverrideCatalog::kind( 'limit' ) );
+		self::assertSame( 'url', OverrideCatalog::kind( 'image_url' ) );
+		self::assertSame( 'text', OverrideCatalog::kind( 'anchor_id' ) );
+		self::assertSame( array(), OverrideCatalog::choices( 'anchor_id' ) );
+	}
+
+	/**
+	 * Compact became a toggle (2026-11-28, the user). It stores `hide`, and a box converted from Lasso keeps its
+	 * compact cards: every value GroupAttributes reads still arrives as `hide`, which it reads too.
+	 */
+	public function test_compact_is_a_toggle_that_keeps_every_value_lasso_could_store(): void {
+		self::assertSame( 'toggle', OverrideCatalog::kind( 'compact' ) );
+		self::assertFalse( OverrideCatalog::on_by_default( 'compact' ) );
+		self::assertSame( 'hide', OverrideCatalog::stored_value( 'compact' ) );
+		self::assertSame( 'hide', OverrideCatalog::stored_value( 'price' ) );
+		self::assertSame( 'enable', OverrideCatalog::stored_value( 'disclosure' ) );
+		self::assertSame( '', OverrideCatalog::stored_value( 'theme' ) );
+
+		foreach ( GroupAttributes::COMPACT as $value ) {
+			self::assertSame( array( 'compact' => 'hide' ), OverrideCatalog::overrides( 'grid', array( 'compact' => $value ) ) );
+		}
+		self::assertSame( array(), OverrideCatalog::overrides( 'grid', array( 'compact' => 'no' ) ) );
 	}
 
 	/** Task 24G: the badge and button texts take an icon, except a grid's badge, which only hides (its help text). */

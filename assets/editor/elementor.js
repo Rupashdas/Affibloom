@@ -324,10 +324,8 @@ function override( field, value ) {
 	if ( 'toggle' !== field.kind ) {
 		return value || '';
 	}
-	if ( field.on ) {
-		return 'yes' === value ? '' : 'hide';
-	}
-	return 'yes' === value ? 'enable' : '';
+	// field.value is what this toggle stores away from its default: `hide`, or `enable`.
+	return ( 'yes' === value ) === field.on ? '' : field.value;
 }
 
 /**

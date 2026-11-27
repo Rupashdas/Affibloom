@@ -35,7 +35,8 @@ final class BoxOverrides {
 	 *
 	 * @var list<string>
 	 */
-	private const TITLE_TAGS = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span', 'strong' );
+	/** The tags a title may be wrapped in (R79); the editor's Title tag offers these (OverrideCatalog::choices()). */
+	public const TITLE_TAGS = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span', 'strong' );
 
 	/**
 	 * Use from_block() or from_shortcode().

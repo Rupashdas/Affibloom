@@ -16,6 +16,12 @@ namespace Affibloom\Domain\Display;
  */
 final class ListBullets {
 
+	/** The numbered styles, which draw an `ol`. */
+	public const ORDERED = array( 'decimal', 'alpha', 'roman' );
+
+	/** The unnumbered styles, which draw a `ul`; `hide` draws no marks. */
+	public const UNORDERED = array( 'square', 'circle', 'hide' );
+
 	/**
 	 * Builds the bullets.
 	 *
@@ -30,10 +36,10 @@ final class ListBullets {
 	 * @param string $bullets The shortcode's `bullets`; '' none.
 	 */
 	public static function of( string $bullets ): self {
-		if ( in_array( $bullets, array( 'decimal', 'alpha', 'roman' ), true ) ) {
+		if ( in_array( $bullets, self::ORDERED, true ) ) {
 			return new self( 'ol', 'affibloom-list affibloom-list-style-' . $bullets );
 		}
-		if ( in_array( $bullets, array( 'square', 'circle', 'hide' ), true ) ) {
+		if ( in_array( $bullets, self::UNORDERED, true ) ) {
 			return new self( 'ul', 'affibloom-list affibloom-list-style-' . $bullets );
 		}
 
