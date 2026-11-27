@@ -1690,8 +1690,8 @@
 	z-index: 20;
 	top: calc(100% + 8px);
 	right: 0;
-	width: 340px;
-	max-width: calc(100vw - 32px);
+	/* Hung from the button's right edge, so on a phone its own width is what keeps its left edge on the screen. */
+	width: min(340px, calc(100vw - 48px));
 	border-radius: var(--affibloom-radius-card);
 	background: var(--affibloom-white);
 	box-shadow: var(--affibloom-shadow-toast);
