@@ -148,8 +148,8 @@ test.describe( 'Task 37C: accessibility of every screen', () => {
 		await page.waitForFunction( () => ( window as unknown as { wp?: { data?: { dispatch: ( store: string ) => unknown } } } ).wp?.data?.dispatch( 'core/preferences' ) );
 		await page.evaluate( () => ( window as unknown as { wp: { data: { dispatch: ( store: string ) => { set: ( scope: string, name: string, value: boolean ) => void } } } } ).wp.data.dispatch( 'core/preferences' ).set( 'core/edit-post', 'welcomeGuide', false ) );
 		await page.getByRole( 'button', { name: /block inserter/i } ).click();
-		await page.getByRole( 'searchbox', { name: /search/i } ).fill( 'Product box' );
-		await page.getByRole( 'option', { name: 'Product box', exact: true } ).click();
+		await page.getByRole( 'searchbox', { name: /search/i } ).fill( 'Affibloom' );
+		await page.getByRole( 'option', { name: 'Affibloom', exact: true } ).click();
 		await page.frameLocator( 'iframe[name="editor-canvas"]' ).locator( '.affibloom-block' ).last().getByRole( 'button', { name: 'Add a Display' } ).click();
 		await expect( page.locator( '#affibloom-display-modal' ) ).toBeVisible();
 		await check( 'editor display modal', '#affibloom-display-modal' );

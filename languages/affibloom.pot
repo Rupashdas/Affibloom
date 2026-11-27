@@ -5756,12 +5756,17 @@ msgstr ""
 
 #: blocks/product-box/block.json
 msgctxt "block title"
-msgid "Product box"
+msgid "Affibloom"
 msgstr ""
 
 #: blocks/product-box/block.json
 msgctxt "block description"
 msgid "Shows a product, a group or a table as a display in your post."
+msgstr ""
+
+#: blocks/product-box/block.json
+msgctxt "block keyword"
+msgid "product box"
 msgstr ""
 
 #: blocks/product-box/block.json

@@ -2,11 +2,12 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "affibloom/product-box",
-	"title": "Product box",
+	"title": "Affibloom",
 	"category": "widgets",
 	"description": "Shows a product, a group or a table as a display in your post.",
 	"textdomain": "affibloom",
 	"keywords": [
+		"product box",
 		"link",
 		"affiliate",
 		"product",

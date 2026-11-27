@@ -146,8 +146,7 @@ variant stops its address.
 
 ## 6. Placing a box in a post
 
-In the block editor, add the **Product box** block (type `/product box`; the site's own saved patterns with similar
-names are listed too, Affibloom's has the flower icon), click **Add a Display**, choose the display type, search with
+In the block editor, add the **Affibloom** block (type `/affibloom`; it carries the flower icon), click **Add a Display**, choose the display type, search with
 **Search URLs** and press Enter, then **Add** the product (or pick the group or table). The sidebar sets the theme and the per-box texts. In the classic editor, the **Add A Display**
 button does the same; in Elementor, the **Affibloom** widget. Each places the same box.
 

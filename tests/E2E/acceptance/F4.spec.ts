@@ -10,16 +10,16 @@ const expect = baseExpect.configure( { timeout: 15_000 } );
 test.use( { actionTimeout: 20_000 } );
 test.describe.configure( { timeout: 120_000 } );
 
-/** A new post with the "Product box" block inserted from the inserter. */
+/** A new post with the "Affibloom" block inserted from the inserter. */
 async function insertProductBox( page: Page ) {
 	await page.goto( '/wp-admin/post-new.php' );
 	// A user's first visit opens "Welcome to the editor" a moment after load; it is turned off, which also closes it.
 	await page.waitForFunction( () => ( window as unknown as { wp?: { data?: { dispatch: ( store: string ) => unknown } } } ).wp?.data?.dispatch( 'core/preferences' ) );
 	await page.evaluate( () => ( window as unknown as { wp: { data: { dispatch: ( store: string ) => { set: ( scope: string, name: string, value: boolean ) => void } } } } ).wp.data.dispatch( 'core/preferences' ).set( 'core/edit-post', 'welcomeGuide', false ) );
 	await page.getByRole( 'button', { name: /block inserter/i } ).click();
-	await page.getByRole( 'searchbox', { name: /search/i } ).fill( 'Product box' );
-	// Exact: the site has synced patterns such as "Product Box (Not Tested)" that a substring match would hit.
-	await page.getByRole( 'option', { name: 'Product box', exact: true } ).click();
+	await page.getByRole( 'searchbox', { name: /search/i } ).fill( 'Affibloom' );
+	// Exact: the site has synced patterns whose names hold "Affibloom" that a substring match would hit.
+	await page.getByRole( 'option', { name: 'Affibloom', exact: true } ).click();
 	return page.frameLocator( 'iframe[name="editor-canvas"]' ).locator( '.affibloom-block' ).last();
 }
 
