@@ -67,7 +67,10 @@ Every phase is planned in full; **gate 4 was given for the whole plan on 2026-11
    named twice, the discouraged textdomain call and the eight `suppress_filters` fixed or documented; the readme
    names the external services and the block's source ships with its build; what remains is three sniffs that
    cannot follow the code, with the reasons recorded. **Affibloom 1.0.3** built (`.local/affibloom-1.0.3.zip`).
-   **Next: the user's cutover; before it, on the user's word, fresh baselines from that day's backup on the testing site; after it, the read-only parity check of production.** Still needed for it: the client's approval of the `/recommends/` redirect (E13), a production backup with a restore tested by the host, Lasso edits frozen, a fresh copy of production for the baselines; the user asked for all of Phase 8 (2026-11-22); the Dashboard's slow Locations sort was fixed in 37B,
+   **Submitted to WordPress.org 2026-11-28** (the user: "Yes, submit it"): Affibloom 1.0.3 from the deferstudio
+   account, contributor rupash; the automated scan passed, the slug `affibloom` is held, the review is pending
+   (`docs/reviews/plugin-check.md`). The directory's assets (an animated icon, the banner, five screenshots) are
+   in `D:\Plugin Devffibloom-assets`, for SVN once it is approved. **Next: the user's cutover; before it, on the user's word, fresh baselines from that day's backup on the testing site; after it, the read-only parity check of production.** Still needed for it: the client's approval of the `/recommends/` redirect (E13), a production backup with a restore tested by the host, Lasso edits frozen, a fresh copy of production for the baselines; the user asked for all of Phase 8 (2026-11-22); the Dashboard's slow Locations sort was fixed in 37B,
    one batch per session (`plans/batches.md`). The non-affiliate integrations stay (the user, 2026-11-18). The block and the Elementor script build into `build/` (`npm run build`,
    webpack.config.js; a release zip needs a fresh build, Task 39).
 2. **Lean method from 2026-11-15 (deviations 129-131):** few records (phase-file ticks and *Notes*); per task only

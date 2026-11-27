@@ -72,3 +72,23 @@ These are the user's to decide or do; none is code:
    guidelines allow, but the reviewer may still ask for the tag to go. The plugin's own name and slug carry no
    trademark.
 6. A support page or email for the directory listing.
+
+## Submitted (2026-11-28)
+
+Affibloom 1.0.3 was uploaded to the WordPress.org directory from the **deferstudio** account at the user's word, with
+a note to the review team naming the external services, where the block's sources are, and why the three sniffs above
+report what they do. The directory answered:
+
+- **Results of Automated Plugin Scanning: Pass.** It listed the `ExceptionNotEscaped` lines and said of them: "The
+  above may contain false-positives. If you believe an error or warning is incorrect or a false-positive, please do
+  not work around it. A reviewer will manually confirm this during the review process."
+- **Initial slug: `affibloom`** — subject to the review, and changeable from the submission page until it is approved;
+  after approval it cannot be renamed.
+- **Status: Awaiting Review**, submitted 27 November 2026. The review email goes to the account's address with the
+  subject "[WordPress Plugin Directory] Review in Progress: Affibloom". 419 plugins were awaiting a first review, and
+  submissions received before 17 November 2026 had had an initial response.
+- No second plugin may be submitted from the account until this one is reviewed.
+
+A corrected build, if the review asks for one, goes up through "Upload updated 'Affibloom' plugin for review" on the
+same page; the directory's assets (icon, banner, screenshots) go into the SVN `assets/` folder once the plugin is
+approved, never into the zip. They are ready in `D:\Plugin Devffibloom-assets`.
